@@ -22,13 +22,16 @@ changed binaries always require a new version.
 
 | Channel | Purpose | Feed |
 | --- | --- | --- |
-| Stable | Validated releases | [stable.json](https://valhallab.github.io/playervox-overcrow-releases/channels/stable.json) |
-| Beta | Opt-in tester releases | [beta.json](https://valhallab.github.io/playervox-overcrow-releases/channels/beta.json) |
+| Stable | Validated releases | [stable.json](https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/docs/channels/stable.json) |
+| Beta | Opt-in tester releases | [beta.json](https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/docs/channels/beta.json) |
 
 The feeds describe published downloads. They are not Tauri updater manifests and
 do not enable automatic installation by themselves. SHA-256 checksums detect
 content changes; they are not publisher signatures. Compatible Control Center
 builds need their own supported verification and installation path.
+
+Downloads are hosted directly in GitHub Releases. The Control Center currently
+checks GitHub's stable-release API; no GitHub Pages website is required.
 
 Windows installers and Linux packages share these channels, while installation
 and restart behavior remain specific to each platform.
