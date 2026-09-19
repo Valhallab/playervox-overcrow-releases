@@ -38,5 +38,3 @@ and restart behavior remain specific to each platform.
 OverCrow is proprietary software. Refer to the license and third-party notices
 included with each package. The automatically generated GitHub "Source code"
 archives contain this distribution repository, not the application source.
-
-Maintainers: see [Publishing](PUBLISHING.md) for the release procedure.
