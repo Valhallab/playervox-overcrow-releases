@@ -1,0 +1,20 @@
+# Packages are attached to GitHub Releases, not committed to Git.
+*.exe
+*.dll
+*.msi
+*.zip
+*.tar
+*.tar.*
+*.deb
+*.rpm
+*.ocpkg
+
+# Build directories and private signing material never belong here.
+target/
+node_modules/
+*.key
+*.pem
+*.pfx
+*.p12
+.env
+.env.*
