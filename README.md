@@ -7,7 +7,7 @@ documentation; installers and packages belong in GitHub Release assets.
 
 ## Downloads
 
-[Published releases](https://github.com/Valhallab/overcrow-releases/releases)
+[Published releases](https://github.com/Valhallab/playervox-overcrow-releases/releases)
 
 No builds have been published in this repository yet. The update channels are
 initialized but do not currently advertise an installable version. Compatible
@@ -17,8 +17,8 @@ Control Center builds will need to be connected to this distribution service.
 
 | Channel | Purpose | Feed |
 | --- | --- | --- |
-| Stable | Validated releases | [stable.json](https://valhallab.github.io/overcrow-releases/channels/stable.json) |
-| Beta | Opt-in tester releases | [beta.json](https://valhallab.github.io/overcrow-releases/channels/beta.json) |
+| Stable | Validated releases | [stable.json](https://valhallab.github.io/playervox-overcrow-releases/channels/stable.json) |
+| Beta | Opt-in tester releases | [beta.json](https://valhallab.github.io/playervox-overcrow-releases/channels/beta.json) |
 
 The current bootstrap documents use `release: null` to indicate that no version
 is available. They are channel placeholders, not Tauri updater manifests.

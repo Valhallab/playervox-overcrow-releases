@@ -41,4 +41,4 @@ credentials and no automated release publication workflow.
 GitHub Releases hosts the binary assets. GitHub Pages publishes only `docs/`
 from the `main` branch. The site is served over HTTPS at:
 
-https://valhallab.github.io/overcrow-releases/
+https://valhallab.github.io/playervox-overcrow-releases/
