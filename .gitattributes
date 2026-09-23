@@ -1,0 +1,13 @@
+# SDK sources retain exact bytes across Windows and Linux checkouts.
+/content/sdk/*.js text eol=lf
+/content/sdk/*.ts text eol=lf
+/content/sdk/LICENSE text eol=lf
+/content/templates/** text=auto eol=lf
+/tools/creator-kit/** text=auto eol=lf
+# Manifest ledgers describe exact package bytes on every operating system.
+/widgets/** -text
+/fixtures/hello-web/** -text
+/published/docs/downloads/*.zip binary
+# Generated Vite assets retain exact bytes on every host.
+/published/assets/*.js binary
+/published/assets/*.css binary

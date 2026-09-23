@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "com.playervox.examples.blank",
+  "version": "1.0.0",
+  "apiVersion": "1",
+  "entrypoints": {
+    "view": "index.html"
+  },
+  "permissions": {
+    "network": [],
+    "gameEvents": [],
+    "storage": false,
+    "clipboardWrite": false
+  },
+  "localization": {
+    "defaultLocale": "en",
+    "availableLocales": ["en", "fr"]
+  }
+}
