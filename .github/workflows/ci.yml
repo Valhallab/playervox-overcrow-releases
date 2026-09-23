@@ -1,0 +1,296 @@
+name: marketplace-ci
+
+on:
+  pull_request_target:
+    branches: [main, candidate]
+  push:
+    branches: [main, candidate]
+
+permissions: {}
+
+concurrency:
+  group: marketplace-ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pending:
+    if: ${{ github.event_name == 'pull_request_target' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    permissions:
+      statuses: write
+    steps:
+      - name: Mark head admission pending
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if test "${#HEAD_SHA}" -ne 40; then
+            printf '%s\n' 'error: pull-request head is malformed' >&2
+            exit 1
+          fi
+          case "$HEAD_SHA" in
+            *[!0-9a-f]*)
+              printf '%s\n' 'error: pull-request head is malformed' >&2
+              exit 1
+              ;;
+          esac
+          case "$BASE_REF" in
+            candidate) status_context=overcrow/marketplace-admission/candidate ;;
+            main) status_context=overcrow/marketplace-admission/main ;;
+            *)
+              printf '%s\n' 'error: pull-request base is not trusted' >&2
+              exit 1
+              ;;
+          esac
+          payload="{\"state\":\"pending\",\"description\":\"Static admission is running\",\"context\":\"$status_context\"}"
+          /usr/bin/curl --fail-with-body --silent --show-error \
+            --max-time 30 --retry 0 -X POST \
+            -H 'Accept: application/vnd.github+json' \
+            -H "Authorization: Bearer ${GITHUB_TOKEN:?}" \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/Valhallab/playervox-overcrow-releases/statuses/$HEAD_SHA" \
+            --data-binary "$payload" --output /dev/null
+  verify:
+    needs: pending
+    if: ${{ always() && (github.event_name == 'push' || needs.pending.result == 'success') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Reject invalid paths before toolchain setup
+        if: ${{ github.event_name == 'pull_request_target' }}
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          case "$BASE_REF" in
+            main | candidate) ;;
+            *)
+              printf '%s\n' 'error: pull-request base is not trusted' >&2
+              exit 1
+              ;;
+          esac
+          if test "$(git rev-parse --verify 'HEAD^{commit}' 2>/dev/null)" \
+                  != "$BASE_SHA"; then
+            printf '%s\n' 'error: reviewed base checkout is unavailable' >&2
+            exit 1
+          fi
+          review_ref="refs/overcrow-review/$HEAD_SHA"
+          git -c credential.helper= -c protocol.file.allow=never \
+            -c protocol.ext.allow=never \
+            fetch --no-tags --no-write-fetch-head --force --depth=1 \
+            https://github.com/Valhallab/playervox-overcrow-releases.git \
+            "refs/pull/$PR_NUMBER/head:$review_ref"
+          if test "$(git rev-parse --verify "$review_ref^{commit}" 2>/dev/null)" \
+                  != "$HEAD_SHA"; then
+            printf '%s\n' 'error: pull-request revision is unavailable' >&2
+            exit 1
+          fi
+          # This coarse short-circuit saves setup time. The materialized-base
+          # admission below remains the authoritative policy gate.
+          if ! git -c diff.external= diff --quiet --no-ext-diff \
+              "$BASE_SHA" "$HEAD_SHA" -- .github scripts tests tools; then
+            printf '%s\n' 'error: pull-request trusted-path policy rejected' >&2
+            exit 1
+          fi
+          if test "$BASE_REF" = candidate \
+              && ! git -c diff.external= diff --quiet --no-ext-diff \
+                "$BASE_SHA" "$HEAD_SHA" -- published; then
+            printf '%s\n' 'error: pull-request publication policy rejected' >&2
+            exit 1
+          fi
+      - name: Install trusted system Node
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes nodejs
+          sh scripts/resolve-system-node.sh
+      - name: Install pinned admission toolchain
+        run: |
+          rustup toolchain install 1.98.0 --profile minimal
+          rustup default 1.98.0
+      - name: Restore trusted dependency cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: ~/.cargo/registry
+          key: marketplace-admission-${{ runner.os }}-${{ runner.arch }}-rust-1.98-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            marketplace-admission-${{ runner.os }}-${{ runner.arch }}-rust-1.98-
+      - name: Admit through the reviewed base
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          PUSH_REF: ${{ github.ref_name }}
+          PUSH_SHA: ${{ github.sha }}
+        run: |
+          case "$EVENT_NAME" in
+            pull_request_target)
+              CI_EVENT=pull_request
+              TRUST_SHA=$BASE_SHA
+              REVIEW_SHA=$HEAD_SHA
+              ;;
+            push)
+              CI_EVENT=push
+              TRUST_SHA=$PUSH_SHA
+              REVIEW_SHA=$PUSH_SHA
+              BASE_REF=$PUSH_REF
+              HEAD_REF=$PUSH_REF
+              HEAD_REPOSITORY=$REPOSITORY
+              ;;
+            *)
+              printf '%s\n' 'error: CI event metadata is missing' >&2
+              exit 1
+              ;;
+          esac
+          case "$BASE_REF" in
+            main | candidate) ;;
+            *)
+              printf '%s\n' 'error: CI base branch is not trusted' >&2
+              exit 1
+              ;;
+          esac
+          for revision in "$TRUST_SHA" "$REVIEW_SHA"; do
+            if test "${#revision}" -ne 40; then
+              printf '%s\n' 'error: CI commit metadata is missing' >&2
+              exit 1
+            fi
+            case "$revision" in
+              *[!0-9a-f]*)
+                printf '%s\n' 'error: CI commit metadata is malformed' >&2
+                exit 1
+                ;;
+            esac
+          done
+          ci_git() {
+            /usr/bin/env -i PATH=/usr/bin:/bin LC_ALL=C \
+              GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null \
+              GIT_OPTIONAL_LOCKS=0 GIT_TERMINAL_PROMPT=0 \
+              /usr/bin/timeout --signal=TERM --kill-after=5 60 \
+              /usr/bin/prlimit --cpu=30 --as=1073741824 --nofile=128 \
+                --fsize=67108864 -- \
+              /usr/bin/git --no-replace-objects \
+                -c core.fsmonitor=false -c core.hooksPath=/dev/null \
+                -c core.attributesFile=/dev/null -c core.excludesFile=/dev/null \
+                -c credential.helper= -c protocol.file.allow=never \
+                -c protocol.ext.allow=never -C "$PWD" "$@"
+          }
+          if test "$CI_EVENT" = pull_request; then
+            case "$PR_NUMBER" in
+              ''|*[!0-9]*)
+                printf '%s\n' 'error: pull-request metadata is malformed' >&2
+                exit 1
+                ;;
+            esac
+            if test "${#PR_NUMBER}" -gt 20; then
+              printf '%s\n' 'error: pull-request metadata is malformed' >&2
+              exit 1
+            fi
+            ci_git fetch --no-tags --no-write-fetch-head --force --depth=1 \
+              https://github.com/Valhallab/playervox-overcrow-releases.git \
+              "refs/pull/$PR_NUMBER/head:refs/overcrow-review/$REVIEW_SHA"
+            fetched_revision=$(ci_git rev-parse --verify \
+              "refs/overcrow-review/$REVIEW_SHA^{commit}" 2>/dev/null) \
+              || fetched_revision=''
+            if test "$fetched_revision" != "$REVIEW_SHA"; then
+              printf '%s\n' 'error: pull-request revision is unavailable' >&2
+              exit 1
+            fi
+          fi
+          private_root=$(/usr/bin/mktemp -d "${RUNNER_TEMP:?}/marketplace-ci.XXXXXXXXXX")
+          cleanup() {
+            /usr/bin/rm -rf -- "$private_root"
+          }
+          trap cleanup EXIT HUP INT TERM
+          bootstrap="$private_root/materialize-git-snapshot.sh"
+          ci_git show "$TRUST_SHA:scripts/materialize-git-snapshot.sh" >"$bootstrap"
+          /usr/bin/chmod 0700 "$bootstrap"
+          trusted_root="$private_root/trusted"
+          sh "$bootstrap" --bootstrap "$PWD" "$TRUST_SHA" "$trusted_root"
+          # A fresh runner has no Cargo registry cache. Populate it only from
+          # the reviewed snapshot; all candidate-facing builds remain offline.
+          (
+            CDPATH='' cd -- "$trusted_root"
+            /usr/bin/timeout --signal=TERM --kill-after=5 300 \
+              cargo fetch --locked \
+                --manifest-path tools/marketplace-tool/Cargo.toml
+          )
+          if test ! -f "$trusted_root/scripts/ci-verify.sh" \
+              || test -L "$trusted_root/scripts/ci-verify.sh"; then
+            printf '%s\n' 'error: reviewed CI driver is unavailable' >&2
+            exit 1
+          fi
+          sh "$trusted_root/scripts/ci-verify.sh" \
+            "$PWD" "$TRUST_SHA" "$REVIEW_SHA" "$CI_EVENT" \
+            "$REPOSITORY" "$BASE_REF" "$HEAD_REPOSITORY" "$HEAD_REF" \
+            "$private_root" admission
+
+      - name: Exercise exact-revision admission boundary
+        if: ${{ github.event_name == 'push' }}
+        run: tests/ci-admission-smoke.sh
+
+  report:
+    needs: [pending, verify]
+    if: ${{ always() && github.event_name == 'pull_request_target' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    permissions:
+      statuses: write
+    steps:
+      - name: Publish head admission status
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          ADMISSION_OUTCOME: ${{ needs.verify.result }}
+        run: |
+          if test "${#HEAD_SHA}" -ne 40; then
+            printf '%s\n' 'error: pull-request head is malformed' >&2
+            exit 1
+          fi
+          case "$HEAD_SHA" in
+            *[!0-9a-f]*)
+              printf '%s\n' 'error: pull-request head is malformed' >&2
+              exit 1
+              ;;
+          esac
+          case "$BASE_REF" in
+            candidate) status_context=overcrow/marketplace-admission/candidate ;;
+            main) status_context=overcrow/marketplace-admission/main ;;
+            *)
+              printf '%s\n' 'error: pull-request base is not trusted' >&2
+              exit 1
+              ;;
+          esac
+          case "$ADMISSION_OUTCOME" in
+            success)
+              status_state=success
+              status_description='Static admission passed'
+              ;;
+            *)
+              status_state=failure
+              status_description='Static admission failed'
+              ;;
+          esac
+          payload="{\"state\":\"$status_state\",\"description\":\"$status_description\",\"context\":\"$status_context\"}"
+          /usr/bin/curl --fail-with-body --silent --show-error \
+            --max-time 30 --retry 0 -X POST \
+            -H 'Accept: application/vnd.github+json' \
+            -H "Authorization: Bearer ${GITHUB_TOKEN:?}" \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/Valhallab/playervox-overcrow-releases/statuses/$HEAD_SHA" \
+            --data-binary "$payload" --output /dev/null

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title data-i18n="title"></title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="module" src="./view.js"></script>
+  </head>
+  <body>
+    <main>
+      <h1 id="title" data-i18n="title"></h1>
+      <output id="count" aria-live="polite">0</output>
+      <div class="actions">
+        <button id="increment">+1</button>
+        <button id="reset" data-i18n="reset"></button>
+      </div>
+      <p id="status"></p>
+    </main>
+  </body>
+</html>

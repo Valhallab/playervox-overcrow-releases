@@ -1,0 +1,55 @@
+:root {
+  color-scheme: dark;
+  font:
+    16px/1.5 system-ui,
+    sans-serif;
+  color: #fafafa;
+  background: transparent;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: transparent;
+}
+main {
+  padding: 18px;
+  min-width: 0;
+}
+h1 {
+  font-size: 18px;
+  margin: 0 0 12px;
+}
+output {
+  font-size: 38px;
+  color: #a3e635;
+}
+button {
+  font: inherit;
+  cursor: pointer;
+  padding: 8px 12px;
+  border: 1px solid #84cc16;
+  border-radius: 8px;
+  background: #18181b;
+  color: #a3e635;
+}
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+p {
+  font-size: 12px;
+  color: #a1a1aa;
+}
+:focus-visible {
+  outline: 2px solid #a3e635;
+  outline-offset: 3px;
+}
+
+/* Passive mode keeps content readable and removes editing controls. */
+body[data-mode="passive"] .actions {
+  display: none;
+}

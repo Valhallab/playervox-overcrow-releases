@@ -1,0 +1,18 @@
+{
+  "author": "PlayerVox",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/warframe-market",
+  "defaultLocale": "en",
+  "localizations": [
+    {
+      "locale": "en",
+      "name": "Warframe Market",
+      "description": "Searches public PC items from a versioned IndexedDB catalog, shows bounded buy and sell orders, and copies an explicit trade whisper on request."
+    },
+    {
+      "locale": "fr",
+      "name": "March\u00e9 Warframe",
+      "description": "Recherche les objets publics PC depuis un catalogue IndexedDB versionn\u00e9, affiche les meilleures offres d\u2019achat et de vente born\u00e9es, et copie un message d\u2019\u00e9change uniquement sur demande."
+    }
+  ]
+}

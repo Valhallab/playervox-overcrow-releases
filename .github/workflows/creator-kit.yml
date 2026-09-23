@@ -1,0 +1,43 @@
+name: creator-kit
+
+on:
+  push:
+    branches: [main, candidate]
+  pull_request:
+    branches: [main, candidate]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: creator-kit-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  portable:
+    name: creator-kit (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2022]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Build the downloadable creator kit
+        run: python scripts/package-docs-examples.py published/docs/downloads
+      - name: Exercise public creator workflow
+        run: >-
+          node --test
+          tests/creator-kit/kit.test.mjs
+          tests/creator-kit/simulation.test.mjs
+          tests/creator-kit/chrome.test.mjs
+          tests/creator-kit/distribution.test.mjs
+          tests/creator-kit/native-cli.test.mjs
+          tests/creator-kit/native-linux.test.mjs
+          tests/creator-kit/native-windows.test.mjs

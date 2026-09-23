@@ -1,0 +1,19 @@
+{
+  "name": "playervox-overcrow-creators",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "build": "python3 scripts/package-docs-examples.py published/docs/downloads",
+    "test": "node --test tests/creator-kit/*.test.mjs tests/warframe-market/*.test.mjs",
+    "check:templates": "prettier --check \"content/templates/**/*.{html,css,js,mjs,json}\""
+  },
+  "devDependencies": {
+    "lucide-static": "1.47.0",
+    "prettier": "3.9.8"
+  }
+}

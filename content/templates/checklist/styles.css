@@ -1,0 +1,101 @@
+:root {
+  font:
+    15px/1.5 system-ui,
+    sans-serif;
+  color-scheme: dark;
+  color: #fafafa;
+  background: transparent;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: transparent;
+}
+main {
+  padding: 16px;
+}
+h1 {
+  font-size: 19px;
+  margin: 0 0 16px;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+  margin: 6px 0 16px;
+  flex-wrap: wrap;
+}
+input[type="text"],
+#task {
+  flex: 1;
+  min-width: 100px;
+  background: #18181b;
+  border: 1px solid #3f3f46;
+  border-radius: 6px;
+  padding: 9px;
+  color: #fafafa;
+  font: inherit;
+}
+button {
+  cursor: pointer;
+  font: inherit;
+  background: #18181b;
+  color: #a3e635;
+  border: 1px solid #3f3f46;
+  padding: 7px 11px;
+  border-radius: 6px;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+ul {
+  list-style: none;
+  padding: 0;
+}
+li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #ffffff20;
+}
+li label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+li span {
+  overflow-wrap: anywhere;
+}
+input[type="checkbox"] {
+  accent-color: #a3e635;
+}
+li button {
+  font-size: 12px;
+}
+p {
+  font-size: 12px;
+  color: #a1a1aa;
+}
+:focus-visible {
+  outline: 2px solid #a3e635;
+  outline-offset: 3px;
+}
+
+/* Passive mode keeps content readable and removes editing controls. */
+body[data-mode="passive"] form,
+body[data-mode="passive"] li button,
+body[data-mode="passive"] #status {
+  display: none;
+}
+body[data-mode="passive"] input[type="checkbox"] {
+  pointer-events: none;
+}
+
+body[data-mode="passive"] li:last-child {
+  border-bottom: 0;
+}
