@@ -847,6 +847,85 @@ mod tests {
     const VIEW: &[u8] = b"<!doctype html><p>hello</p>";
 
     #[test]
+    fn package_rejects_invalid_critical_png_chunks_after_pixel_data() {
+        let png = crate::test_png::png(2, 1);
+        let mut accepted = Vec::new();
+        for kind in [
+            "unknown-critical",
+            "duplicate-header",
+            "late-palette",
+            "duplicate-palette",
+            "separated-data",
+        ] {
+            let trailer = match kind {
+                "unknown-critical" => crate::test_png::chunk(b"EVIL", b""),
+                "duplicate-header" => crate::test_png::chunk(b"IHDR", &png[16..29]),
+                "late-palette" | "duplicate-palette" => {
+                    crate::test_png::chunk(b"PLTE", &[255, 0, 0])
+                }
+                _ => [
+                    crate::test_png::chunk(b"tEXt", b"Comment\0tail"),
+                    crate::test_png::chunk(b"IDAT", b""),
+                ]
+                .concat(),
+            };
+            let mut malformed = png.clone();
+            if kind == "duplicate-palette" {
+                malformed.splice(33..33, crate::test_png::chunk(b"PLTE", &[255, 0, 0]));
+            }
+            malformed.splice(malformed.len() - 12..malformed.len() - 12, trailer);
+            let source = fixture(&[("index.html", VIEW), ("preview.png", &malformed)]);
+            set_preview(source.path(), "preview.png");
+            let output = tempfile::tempdir().unwrap();
+            let archive = output.path().join("rejected.ocpkg");
+            if write_package(source.path(), &archive).is_ok() {
+                accepted.push(kind);
+            } else {
+                assert!(!archive.exists(), "{kind}");
+            }
+        }
+        assert!(
+            accepted.is_empty(),
+            "malformed PNGs were accepted: {accepted:?}"
+        );
+    }
+
+    #[test]
+    fn package_preserves_valid_ancillary_png_chunks_after_pixel_data() {
+        for kind in [b"tEXt", b"paDd"] {
+            let mut png = crate::test_png::png(2, 1);
+            png.splice(
+                png.len() - 12..png.len() - 12,
+                crate::test_png::chunk(kind, b"Comment\0tail"),
+            );
+            let source = fixture(&[("index.html", VIEW), ("preview.png", &png)]);
+            set_preview(source.path(), "preview.png");
+            let output = tempfile::tempdir().unwrap();
+            let archive = output.path().join("valid.ocpkg");
+            write_package(source.path(), &archive).expect("valid ancillary tail");
+            assert_eq!(
+                parse_stored_zip(&fs::read(archive).unwrap()).unwrap()["preview.png"],
+                png
+            );
+        }
+    }
+
+    #[test]
+    fn package_accepts_legal_palette_and_consecutive_png_data_chunks() {
+        let mut png = crate::test_png::png(2, 1);
+        png.splice(33..33, crate::test_png::chunk(b"PLTE", &[255, 0, 0]));
+        png.splice(
+            png.len() - 12..png.len() - 12,
+            crate::test_png::chunk(b"IDAT", b""),
+        );
+        let source = fixture(&[("index.html", VIEW), ("preview.png", &png)]);
+        set_preview(source.path(), "preview.png");
+        let output = tempfile::tempdir().unwrap();
+        write_package(source.path(), &output.path().join("valid.ocpkg"))
+            .expect("optional palette before consecutive image data");
+    }
+
+    #[test]
     fn package_rejects_missing_undeclared_and_invalid_preview_content() {
         let png = crate::test_png::png(2, 1);
         for kind in [

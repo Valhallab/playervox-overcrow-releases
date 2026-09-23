@@ -419,7 +419,14 @@ mod tests {
 
     #[test]
     fn ingestion_validates_selected_preview_before_committing_a_receipt() {
-        for kind in ["missing", "malformed", "oversize", "wide", "valid"] {
+        for kind in [
+            "missing",
+            "malformed",
+            "oversize",
+            "wide",
+            "critical-tail",
+            "valid",
+        ] {
             let scratch = private_tempdir();
             let store = private_subdirectory(scratch.path(), "accepted");
             let mut input = admission_inputs(
@@ -433,6 +440,14 @@ mod tests {
                 "malformed" => b"not a PNG".to_vec(),
                 "oversize" => vec![0; 256 * 1024 + 1],
                 "wide" => crate::test_png::png(1025, 1),
+                "critical-tail" => {
+                    let mut png = crate::test_png::png(2, 1);
+                    png.splice(
+                        png.len() - 12..png.len() - 12,
+                        crate::test_png::chunk(b"EVIL", b""),
+                    );
+                    png
+                }
                 _ => crate::test_png::png(2, 1),
             };
             select_preview(

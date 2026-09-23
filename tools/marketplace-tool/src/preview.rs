@@ -145,9 +145,13 @@ pub(crate) fn validate_png(bytes: &[u8]) -> Result<(), PreviewError> {
     if bytes.len() as u64 > MAX_BYTES || !bytes.starts_with(b"\x89PNG\r\n\x1a\n") {
         return Err(PreviewError);
     }
-    // Check the entire container: decoders may stop after the default image and
-    // otherwise overlook a truncated trailer, appended animation, or bad CRC.
+    // Pixel decoding stops before the tail. Check the full critical-chunk sequence
+    // as well as CRCs: even png::Reader::finish permits a palette after image data.
     let mut remaining = &bytes[8..];
+    let mut header_seen = false;
+    let mut palette_seen = false;
+    let mut data_seen = false;
+    let mut data_ended = false;
     loop {
         let header = remaining.get(..8).ok_or(PreviewError)?;
         let length = u32::from_be_bytes(header[..4].try_into().map_err(|_| PreviewError)?) as usize;
@@ -156,16 +160,33 @@ pub(crate) fn validate_png(bytes: &[u8]) -> Result<(), PreviewError> {
         let kind = &header[4..];
         let checksum = u32::from_be_bytes(chunk[end - 4..].try_into().map_err(|_| PreviewError)?);
         if crc32fast::hash(&chunk[4..end - 4]) != checksum
+            || !kind.iter().all(u8::is_ascii_alphabetic)
+            || !kind[2].is_ascii_uppercase()
             || matches!(kind, b"acTL" | b"fcTL" | b"fdAT")
+            || (!header_seen && kind != b"IHDR")
         {
             return Err(PreviewError);
         }
         remaining = &remaining[end..];
-        if kind == b"IEND" {
-            if length != 0 || !remaining.is_empty() {
-                return Err(PreviewError);
+        match kind {
+            b"IHDR" if !header_seen && length == 13 => header_seen = true,
+            b"PLTE"
+                if !palette_seen
+                    && !data_seen
+                    && (3..=768).contains(&length)
+                    && length.is_multiple_of(3) =>
+            {
+                palette_seen = true;
             }
-            break;
+            b"IDAT" if !data_ended => data_seen = true,
+            b"IEND" if data_seen && length == 0 && remaining.is_empty() => break,
+            b"IHDR" | b"PLTE" | b"IDAT" | b"IEND" => return Err(PreviewError),
+            _ => {
+                if kind[0].is_ascii_uppercase() {
+                    return Err(PreviewError);
+                }
+                data_ended |= data_seen;
+            }
         }
     }
     let mut limits = Limits::default();
