@@ -2,8 +2,12 @@ mod admission;
 mod catalog;
 mod catalog_production;
 mod package;
+mod preview;
 mod private_fs;
 mod snapshot;
+
+#[cfg(test)]
+mod test_png;
 
 use std::{env, path::Path, process::ExitCode};
 

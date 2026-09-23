@@ -70,3 +70,37 @@ is served as `application/octet-stream` with content sniffing disabled, so a
 framework may ship opaque data without creating a new executable file class.
 Page code may read those verified same-bundle files with browser APIs; external
 HTTP(S) remains available only through `overcrow.fetch` and exact grants.
+
+## Marketplace screenshot
+
+Put a static PNG inside the widget before preparing the file ledger, for example
+`widget/preview.png`. In the separately reviewed root `listing.json`, add:
+
+```json
+"preview": "preview.png"
+```
+
+The path is relative to the packaged widget, can include a folder such as
+`images/screenshot.png`, and must identify an asset in `manifest.files`. There is
+no automatic filename discovery: omit `preview` if no screenshot is available.
+Use at most 256 KiB and 1024 pixels on either axis. A 960 × 600 landscape capture
+fits cards well. The publisher fully decodes the PNG with bounded memory and
+rejects malformed or animated PNGs, URLs, path traversal, links, and undeclared
+files. Other image formats are not supported.
+
+Admission binds the image path to the listing receipt and the PNG bytes to the
+package digest and manifest ledger. Staging copies those exact bytes to
+`previews/<id>/<version>/<sha256>.png`; the signed target's `preview` records
+`url`, `mediaType`, `size`, and `sha256`. The runtime manifest schema stays
+unchanged, and the source-only preview path does not enter the catalog listing.
+The website displays this image on discovery cards and the detail page, with a
+neutral fallback when it is absent or unavailable. A published version and its
+image are immutable; prepare a new version and signed publication for changes.
+
+## Official creator downloads
+
+The [creator kit](../published/docs/downloads/creator-kit.zip) and example archives
+are built and checked in this public repository. The website imports these exact
+archives and links to the GitHub revision used by its documentation. Its legacy
+`/docs/downloads/` URLs are compatibility mirrors, not a separate build. Creator
+archives do not use desktop GitHub Releases or affect the application updater.

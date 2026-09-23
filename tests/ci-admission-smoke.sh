@@ -36,7 +36,12 @@ JS
 for relative in Cargo.lock Cargo.toml tools/marketplace-tool/Cargo.toml \
         tools/marketplace-tool/src/admission.rs \
         tools/marketplace-tool/src/catalog.rs \
+        tools/marketplace-tool/src/catalog_production.rs \
+        tools/marketplace-tool/src/catalog_production_tests.rs \
+        tools/marketplace-tool/src/catalog_preview_tests.rs \
         tools/marketplace-tool/src/main.rs tools/marketplace-tool/src/package.rs \
+        tools/marketplace-tool/src/preview.rs \
+        tools/marketplace-tool/src/test_png.rs \
         tools/marketplace-tool/src/private_fs.rs \
         tools/marketplace-tool/src/snapshot.rs; do
     /usr/bin/install -D -m 0644 -- "$repo_root/$relative" \
@@ -46,7 +51,12 @@ done
     scripts/ci-verify.sh tools/marketplace-tool/Cargo.toml \
     tools/marketplace-tool/src/admission.rs \
     tools/marketplace-tool/src/catalog.rs \
+    tools/marketplace-tool/src/catalog_production.rs \
+    tools/marketplace-tool/src/catalog_production_tests.rs \
+    tools/marketplace-tool/src/catalog_preview_tests.rs \
     tools/marketplace-tool/src/main.rs tools/marketplace-tool/src/package.rs \
+    tools/marketplace-tool/src/preview.rs \
+    tools/marketplace-tool/src/test_png.rs \
     tools/marketplace-tool/src/private_fs.rs \
     tools/marketplace-tool/src/snapshot.rs
 /usr/bin/git -C "$repository" commit --quiet --allow-empty \

@@ -222,14 +222,15 @@ cargo run -p marketplace-tool --locked -- prepare-production-catalog \
 For every subsequent release, append
 `--previous-output "$previous_finalized_output"`. It must contain a completed
 production-signed Web API v1 catalog from this tool, with the fixed origin,
-90-day lifetime and `preview: null`, plus its exact package inventory. An expired
-previous catalog may be used as authenticated history, but a new preparation
+90-day lifetime, optional authenticated PNG previews, and its exact package and
+preview inventory. An expired previous catalog may be used as authenticated history, but a new preparation
 must have a current validity window. Its envelope digest must match the last
 signature recorded in publication state. The tool does not accept native-era
 or arbitrary third-party catalog layouts through this option.
 
 Preparation verifies the admitted receipt, listings and archives, then writes
-`payload.json` and `packages/<id>/<version>/<sha256>.ocpkg`; it commits
+`payload.json`, `packages/<id>/<version>/<sha256>.ocpkg`, and any declared
+`previews/<id>/<version>/<sha256>.png`; it commits
 `preparation.json` last. Review the exact payload and its SHA-256, including
 sequence, times, identities, versions, permissions, licenses and statuses.
 Do not reformat or edit prepared bytes.
@@ -291,10 +292,10 @@ cargo run -p marketplace-tool --locked -- finalize-production-catalog \
 
 Finalization checks the reservation, prepared marker, canonical payload, current
 expiry, exact package bytes and detached signature against the compiled
-production public key. It copies the archives, persists the verified envelope
+production public key. It copies the archives and PNGs, persists the verified envelope
 digest in publication state, and commits `catalog.json` last. Output contains
-only `catalog.json` and its complete content-addressed package tree. Successful
-finalization prepares a deployable artifact; it does not deploy or grant approval
+only `catalog.json` and its complete content-addressed package and preview trees.
+Successful finalization prepares a deployable artifact; it does not deploy or grant approval
 to deploy it. Review and authorize that external action separately.
 
 ### State, concurrency, and recovery
@@ -325,8 +326,10 @@ once its 90-day validity has expired, a new request may reserve the next sequenc
 using the last completed predecessor. Expired signatures remain unusable.
 
 The tool bounds a request to 128 KiB, payload to 700 KiB, envelope to 1 MiB,
-catalog to 500 version entries, and each archive to 128 MiB. Inventory traversal
-is limited to 2,004 entries and four levels. Archives are validated and copied
+catalog to 500 version entries, and each archive to 128 MiB. Each optional static
+PNG preview is limited to 256 KiB, 1024 pixels per axis, and 4 MiB of decoded
+pixels. Inventory traversal is limited to 3,004 entries across both
+content-addressed trees and four levels. Archives are validated and copied
 one at a time, never accumulated in memory. Retention can consume up to
 62.5 GiB on disk per complete tree at the archive/count limits; allow space for
 both prepared and finalized copies. Reaching a retention limit stops publication.

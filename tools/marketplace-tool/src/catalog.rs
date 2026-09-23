@@ -6,7 +6,7 @@ use ring::signature::{Ed25519KeyPair, KeyPair as _};
 use serde::Serialize;
 use sha2::{Digest as _, Sha256};
 
-use crate::{admission, package, private_fs};
+use crate::{admission, package, preview, private_fs};
 
 const SCHEMA_VERSION: u32 = 1;
 const DEVELOPMENT_KEY_ID: &str = "overcrow-development-2026";
@@ -61,7 +61,7 @@ struct CatalogTarget<'a> {
     package_size: u64,
     package_sha256: &'a str,
     status: &'static str,
-    preview: Option<()>,
+    preview: Option<preview::Descriptor>,
 }
 
 #[derive(Serialize)]
@@ -109,7 +109,9 @@ pub fn stage_development(
             package_size: artifact.package_size,
             package_sha256: &artifact.package_sha256,
             status: "verified",
-            preview: None,
+            preview: artifact.preview.as_ref().map(|preview| {
+                preview.descriptor(DEVELOPMENT_BASE_URL, &artifact.id, &artifact.version)
+            }),
         })
         .collect();
     let payload = serde_json::to_vec(&CatalogPayload {
@@ -161,6 +163,21 @@ pub fn stage_development(
         let destination = version.join(format!("{}.ocpkg", artifact.package_sha256));
         private_fs::commit_file(options.output, &destination, &bytes)
             .map_err(|_| CatalogStageError)?;
+        if let Some(preview) = &artifact.preview {
+            let descriptor =
+                preview.descriptor(DEVELOPMENT_BASE_URL, &artifact.id, &artifact.version);
+            let png = preview::packaged_bytes(&bytes, &artifact.manifest, &descriptor)
+                .map_err(|_| CatalogStageError)?;
+            descriptor
+                .commit(
+                    options.output,
+                    DEVELOPMENT_BASE_URL,
+                    &artifact.id,
+                    &artifact.version,
+                    &png,
+                )
+                .map_err(|_| CatalogStageError)?;
+        }
     }
     private_fs::commit_file(
         options.output,

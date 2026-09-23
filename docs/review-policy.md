@@ -15,6 +15,10 @@ operator may explicitly ingest those exact packages into a private store.
   known UI formats and serves unknown formats as non-sniffed opaque bytes;
   native suffixes and executable signatures remain rejected.
 - Confirm the manifest file ledger matches the packaged bytes.
+- When `listing.json` selects a `preview`, require a declared static PNG within
+  the screenshot limits. Admission binds the selected path to its listing receipt
+  and the image bytes to the package ledger; publication signs its fixed URL,
+  size, media type, and SHA-256 alongside the widget version.
 - Confirm listing locales, declared license, and source URL are exact and
   non-executable. Check that required license notices are packaged. Metadata
   validity does not approve a license for publication. PlayerVox widgets use
