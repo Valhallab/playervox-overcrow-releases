@@ -18,13 +18,15 @@ class Element extends EventTarget {
   setPointerCapture(){}
   releasePointerCapture(){}
 }
-function setup(onModeChange, options) {
+function setup(onModeChange, options, configure = () => {}) {
   const document=new EventTarget();document.defaultView=new EventTarget();
   Object.assign(document.defaultView,{innerWidth:1200,innerHeight:900});
   const nodes=new Map();
   document.querySelector=selector=>{if(!nodes.has(selector))nodes.set(selector,new Element(document));return nodes.get(selector);};
   const el=selector=>document.querySelector(selector);
   const frameDocument=new EventTarget();el('#view').contentDocument=frameDocument;el('#view').src='view/index.html';
+  el('#widget-toolbar').rect={left:492,right:580,top:266,bottom:294,width:88,height:28};
+  configure(el);
   const chrome=createWidgetChrome(document,'fr',onModeChange,options);
   const fire=(target,type,properties={})=>{const event=new Event(type,{cancelable:true});Object.assign(event,properties);target.dispatchEvent(event);return event;};
   return {document,el,chrome,fire,frameDocument};
@@ -155,6 +157,51 @@ test('widget moves by its native top strip and stays inside the preview surface'
   fire(move,'pointerup',{pointerId:4});
   fire(move,'keydown',{key:'ArrowLeft'});
   assert.equal(host.style.left,'319px');assert.equal(host.style.top,'380px');
+});
+
+for(const {name,widget,left,top,bridgeTop,bridgeHeight} of [
+  {name:'prefers above when both sides fit',widget:{left:200,top:300,width:480,height:160},left:392,top:-34,bridgeTop:-34,bridgeHeight:34},
+  {name:'fits exactly against the top stage boundary',widget:{left:200,top:134,width:480,height:160},left:392,top:-34,bridgeTop:-34,bridgeHeight:34},
+  {name:'moves below when above is one pixel too short',widget:{left:200,top:133,width:480,height:160},left:392,top:166,bridgeTop:160,bridgeHeight:34},
+  {name:'moves below a widget flush with the top edge',widget:{left:200,top:100,width:480,height:160},left:392,top:166,bridgeTop:160,bridgeHeight:34},
+  {name:'stays above a widget flush with the bottom edge',widget:{left:200,top:540,width:480,height:160},left:392,top:-34,bridgeTop:-34,bridgeHeight:34},
+  {name:'moves inside a widget spanning the stage height',widget:{left:200,top:100,width:480,height:600},left:392,top:6,bridgeTop:6,bridgeHeight:28},
+  {name:'shifts right for a narrow widget at the left edge',widget:{left:50,top:300,width:40,height:160},left:0,top:-34,bridgeTop:-34,bridgeHeight:34},
+  {name:'stays inside the right edge for a narrow widget',widget:{left:810,top:300,width:40,height:160},left:-48,top:-34,bridgeTop:-34,bridgeHeight:34},
+]) {
+  test(`toolbar ${name}`,()=>{
+    const {el,chrome}=setup(undefined,undefined,el=>{
+      el('#stage-surface').rect={left:50,right:850,top:100,bottom:700,width:800,height:600};
+      el('#widget-host').rect={...widget,right:widget.left+widget.width,bottom:widget.top+widget.height};
+    });
+    chrome.fitToStage();
+    const style=el('#widget-host').style;
+    assert.equal(style['--widget-toolbar-left'],`${left}px`);
+    assert.equal(style['--widget-toolbar-top'],`${top}px`);
+    assert.equal(style['--widget-toolbar-bridge-top'],`${bridgeTop}px`);
+    assert.equal(style['--widget-toolbar-bridge-height'],`${bridgeHeight}px`);
+  });
+}
+
+test('toolbar is bounded on first render and follows a changing stage without moving open appearance controls',()=>{
+  const {document,el,fire,chrome}=setup(undefined,undefined,el=>{
+    el('#stage-surface').rect={left:50,right:850,top:100,bottom:700,width:800,height:600};
+    el('#widget-host').rect={left:200,right:680,top:100,bottom:260,width:480,height:160};
+  });
+  const host=el('#widget-host');
+  assert.equal(host.style['--widget-toolbar-top'],'166px');
+  fire(el('#widget-options'),'click');fire(el('#option-scale'),'click');
+  const controls=[el('#options-menu'),el('#option-editor')];
+  const positions=controls.map(control=>({left:control.style.left,top:control.style.top}));
+  el('#widget-options').rect={left:620,right:648,top:266,bottom:294,width:28,height:28};
+  el('#stage-surface').rect={left:50,right:850,top:50,bottom:650,width:800,height:600};
+  chrome.fitToStage();
+  assert.equal(host.style['--widget-toolbar-top'],'-34px');
+  assert.deepEqual(controls.map(control=>({left:control.style.left,top:control.style.top})),positions);
+  assert.equal(el('#option-editor').hidden,false);
+  el('#stage-surface').rect={left:50,right:850,top:100,bottom:300,width:800,height:200};
+  fire(document.defaultView,'resize');
+  assert.equal(host.style['--widget-toolbar-top'],'166px');
 });
 
 test('widget display controls dismiss the appearance submenu without closing their menu',()=>{
