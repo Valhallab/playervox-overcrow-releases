@@ -11,12 +11,12 @@ OverCrow Marketplace admits Web API v1 extensions only: a web directory,
 from `marketplace-tool package`. WIT, Wasmtime, native widgets, and
 provider graphs are retired.
 
-`published/` is the tracked production site served by Coolify. Its
-`marketplace/v1/` subtree contains the signed Web API v1 catalog with Warframe
+`published/marketplace/v1/` contains the signed Web API v1 catalog with Warframe
 Market 2.0.5 under MIT. Superseded packages and native-era previews are no longer
 published. Further retirement requires explicit authorization after the
 replacement catalog has been verified. Website-only updates preserve that
-subtree byte-for-byte and do not rotate keys.
+subtree byte-for-byte and do not rotate keys. The private web repository mirrors
+these bytes and owns the complete `published/` website served by Coolify.
 
 ## 2. Preconditions and role separation
 
@@ -42,9 +42,9 @@ is never republished as a rollback.
 
 ## 3. Repository visibility and GitHub rulesets
 
-The repository must remain public for public static hosting, but treat the
-repository and every pull request as untrusted publication inputs. Verify that
-invariant through the GitHub interface; stop if it cannot be established.
+This repository remains public for creator access and static admission's public
+Git fetches. The website is hosted independently from its private repository.
+Treat this repository and every pull request as untrusted publication inputs.
 Keep the existing technical and human-review rulesets on `candidate` and
 `main`. `candidate` must not change `published/`.
 
@@ -58,7 +58,6 @@ tests/ci-admission-smoke.sh
 tests/catalog-stage-smoke.sh
 cargo test -p marketplace-tool --locked
 node --test tests/warframe-market/market.test.mjs
-node --test tests/catalog-policy.test.mjs
 cargo run -p marketplace-tool --locked -- package widgets/warframe-market /tmp/warframe-market.ocpkg
 cargo run -p marketplace-tool --locked -- inspect /tmp/warframe-market.ocpkg
 ```
