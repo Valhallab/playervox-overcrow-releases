@@ -16,8 +16,8 @@ button{color:#a3e635;cursor:pointer}code{color:#d9f99d;font-size:14px}#status{co
 .widget-host{position:relative;width:480px;height:320px;max-width:100%;font:13px/1.4 'OverCrow UI',sans-serif;color:#f7f7f8}
 .widget-move{position:absolute;z-index:2;top:0;left:0;width:100%;height:22px;border:0;border-radius:10px 10px 0 0;padding:0;background:transparent;cursor:move;touch-action:none}.widget-move:hover,.widget-move:focus-visible{background:linear-gradient(#a3e63518,transparent)}
 /* Hover bridge keeps the toolbar reachable across the native six-pixel gap. */
-.widget-host::before{content:'';position:absolute;top:-34px;left:var(--widget-toolbar-left,auto);right:0;width:88px;height:34px}
-.widget-toolbar{position:absolute;left:var(--widget-toolbar-left,auto);right:0;top:-34px;display:flex;gap:2px;width:88px;height:28px;opacity:0;pointer-events:none}
+.widget-host::before{content:'';position:absolute;top:var(--widget-toolbar-bridge-top,-34px);left:var(--widget-toolbar-left,auto);right:0;width:88px;height:var(--widget-toolbar-bridge-height,34px)}
+.widget-toolbar{position:absolute;z-index:3;left:var(--widget-toolbar-left,auto);right:0;top:var(--widget-toolbar-top,-34px);display:flex;gap:2px;width:88px;height:28px;opacity:0;pointer-events:none}
 .widget-host:hover .widget-toolbar,.widget-host:focus-within .widget-toolbar,.widget-host[data-options-open] .widget-toolbar{opacity:1;pointer-events:auto}
 .chrome-button{display:grid;place-items:center;width:28px;height:28px;padding:6px;border-radius:8px;border:1px solid #ffffff18;background:#1e1e22e0;color:#d4d4d8}
 .chrome-button svg,.widget-resize svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}

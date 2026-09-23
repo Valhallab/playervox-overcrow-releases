@@ -274,6 +274,7 @@ export function createWidgetChrome(
     };
   });
   listen(window, "resize", () => {
+    positionToolbar();
     if (!menu.hidden) position();
   });
   listen(
@@ -372,13 +373,32 @@ export function createWidgetChrome(
   function positionToolbar() {
     const bounds = host.getBoundingClientRect(),
       area = stage.getBoundingClientRect(),
-      width = toolbar.getBoundingClientRect().width;
+      { width, height } = toolbar.getBoundingClientRect(),
+      gap = 6;
     const left = clamp(
       bounds.right - width,
       area.left,
       Math.max(area.left, area.right - width),
     );
+    const above = bounds.top - height - gap,
+      below = bounds.bottom + gap;
+    let top;
+    if (above >= area.top && above + height <= area.bottom) top = above;
+    else if (below >= area.top && below + height <= area.bottom) top = below;
+    else
+      top = clamp(
+        bounds.top + gap,
+        area.top,
+        Math.max(area.top, area.bottom - height),
+      );
+    top -= bounds.top;
+    // Cover the toolbar and its gap without extending across the widget content.
+    const bridgeTop = Math.min(top, bounds.height),
+      bridgeHeight = Math.max(top + height, 0) - bridgeTop;
     host.style.setProperty("--widget-toolbar-left", `${left - bounds.left}px`);
+    host.style.setProperty("--widget-toolbar-top", `${top}px`);
+    host.style.setProperty("--widget-toolbar-bridge-top", `${bridgeTop}px`);
+    host.style.setProperty("--widget-toolbar-bridge-height", `${bridgeHeight}px`);
   }
   function setPosition(x, y) {
     anchorPosition();
@@ -487,6 +507,7 @@ export function createWidgetChrome(
   paint();
   setMode("interactive");
   modeSelect.disabled = false;
+  positionToolbar();
   return {
     get mode() {
       return mode;
