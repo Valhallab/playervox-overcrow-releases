@@ -70,6 +70,7 @@ pub(crate) struct AdmittedArtifact {
     pub(crate) package_path: std::path::PathBuf,
     pub(crate) manifest: serde_json::Value,
     pub(crate) listing: package::Listing,
+    pub(crate) preview: Option<crate::preview::Asset>,
 }
 
 fn parse_receipt(
@@ -208,7 +209,9 @@ pub fn ingest(
         validate_package_bytes(&package_bytes, artifact)?;
         let listing_source = artifacts_root.join(format!("{}.listing.json", index + 1));
         let listing_bytes = read_regular_file(&listing_source, artifact.listing_bytes)?;
-        validate_listing_bytes(&listing_bytes, artifact)?;
+        let listing = validate_listing_bytes(&listing_bytes, artifact)?;
+        crate::preview::selected(&package_bytes, listing.preview.as_deref())
+            .map_err(|_| AdmissionError)?;
         let identity_root = ensure_private_directory(&packages_root.join(&artifact.id))?;
         let version_root = ensure_private_directory(&identity_root.join(&artifact.version))?;
         let destination = version_root.join(format!("{}.ocpkg", artifact.digest));
@@ -262,6 +265,8 @@ pub(crate) fn load_verified(
             .join(format!("{}.json", artifact.listing_digest));
         let listing_bytes = read_regular_file(&listing_path, artifact.listing_bytes)?;
         let listing = validate_listing_bytes(&listing_bytes, &artifact)?;
+        let preview = crate::preview::selected(&package_bytes, listing.preview.as_deref())
+            .map_err(|_| AdmissionError)?;
         artifacts.push(AdmittedArtifact {
             id: artifact.id,
             version: artifact.version,
@@ -269,7 +274,8 @@ pub(crate) fn load_verified(
             package_size: artifact.bytes,
             package_path,
             manifest: manifest.catalog_value,
-            listing,
+            listing: listing.into_catalog_listing(),
+            preview,
         });
     }
     Ok(VerifiedAdmission { artifacts })
@@ -358,7 +364,7 @@ fn validate_package_bytes(
 fn validate_listing_bytes(
     bytes: &[u8],
     artifact: &Artifact,
-) -> Result<package::Listing, AdmissionError> {
+) -> Result<package::SourceListing, AdmissionError> {
     if u64::try_from(bytes.len()).ok() != Some(artifact.listing_bytes)
         || hex_digest(bytes) != artifact.listing_digest
     {
@@ -410,6 +416,201 @@ mod tests {
     const REVIEW_SHA: &str = "2222222222222222222222222222222222222222";
     const REVIEW_TREE: &str = "3333333333333333333333333333333333333333";
     const SECOND_TREE: &str = "4444444444444444444444444444444444444444";
+
+    #[test]
+    fn ingestion_validates_selected_preview_before_committing_a_receipt() {
+        for kind in [
+            "missing",
+            "malformed",
+            "oversize",
+            "wide",
+            "critical-tail",
+            "valid",
+        ] {
+            let scratch = private_tempdir();
+            let store = private_subdirectory(scratch.path(), "accepted");
+            let mut input = admission_inputs(
+                scratch.path(),
+                "input",
+                REVIEW_TREE,
+                "1.0.0",
+                b"<p>preview</p>",
+            );
+            let png = match kind {
+                "malformed" => b"not a PNG".to_vec(),
+                "oversize" => vec![0; 256 * 1024 + 1],
+                "wide" => crate::test_png::png(1025, 1),
+                "critical-tail" => {
+                    let mut png = crate::test_png::png(2, 1);
+                    png.splice(
+                        png.len() - 12..png.len() - 12,
+                        crate::test_png::chunk(b"EVIL", b""),
+                    );
+                    png
+                }
+                _ => crate::test_png::png(2, 1),
+            };
+            select_preview(
+                &mut input,
+                "images/preview.png",
+                (kind != "missing").then_some(png.as_slice()),
+                REVIEW_TREE,
+            );
+            let result = ingest(
+                &input.receipt,
+                &input.artifacts,
+                &store,
+                &expected_for(REVIEW_TREE),
+            );
+            let receipt = store.join("admissions").join(format!("{REVIEW_TREE}.tsv"));
+            if kind == "valid" {
+                result.expect("admission accepts the hash-bound selected PNG");
+                verify(&store, REVIEW_TREE).unwrap();
+                assert_eq!(
+                    fs::read(&receipt).unwrap(),
+                    fs::read(&input.receipt).unwrap()
+                );
+                assert_eq!(
+                    fs::read(
+                        store
+                            .join("listings/com.playervox.overcrow.hello/1.0.0")
+                            .join(format!("{}.json", input.listing_digest))
+                    )
+                    .unwrap(),
+                    input.listing_bytes
+                );
+            } else {
+                assert!(result.is_err(), "{kind}");
+                assert!(!receipt.exists(), "{kind}");
+            }
+        }
+    }
+
+    #[test]
+    fn verification_revalidates_a_selected_preview_after_store_corruption() {
+        let scratch = private_tempdir();
+        let store = private_subdirectory(scratch.path(), "accepted");
+        let mut input = admission_inputs(
+            scratch.path(),
+            "input",
+            REVIEW_TREE,
+            "1.0.0",
+            b"<p>preview</p>",
+        );
+        select_preview(
+            &mut input,
+            "preview.png",
+            Some(&crate::test_png::png(1, 1)),
+            REVIEW_TREE,
+        );
+        ingest(
+            &input.receipt,
+            &input.artifacts,
+            &store,
+            &expected_for(REVIEW_TREE),
+        )
+        .unwrap();
+        select_preview(&mut input, "preview.png", Some(b"not a PNG"), REVIEW_TREE);
+        fs::write(
+            store
+                .join("packages/com.playervox.overcrow.hello/1.0.0")
+                .join(format!("{}.ocpkg", input.digest)),
+            &input.bytes,
+        )
+        .unwrap();
+        fs::write(
+            store.join("admissions").join(format!("{REVIEW_TREE}.tsv")),
+            fs::read(&input.receipt).unwrap(),
+        )
+        .unwrap();
+        assert!(verify(&store, REVIEW_TREE).is_err());
+    }
+
+    #[test]
+    fn same_version_cannot_select_another_preview_path_even_with_identical_package_bytes() {
+        let scratch = private_tempdir();
+        let store = private_subdirectory(scratch.path(), "accepted");
+        let png = crate::test_png::png(1, 1);
+        let mut first = admission_inputs(
+            scratch.path(),
+            "first",
+            REVIEW_TREE,
+            "1.0.0",
+            b"<p>preview</p>",
+        );
+        let mut second = admission_inputs(
+            scratch.path(),
+            "second",
+            SECOND_TREE,
+            "1.0.0",
+            b"<p>preview</p>",
+        );
+        for (input, tree) in [(&mut first, REVIEW_TREE), (&mut second, SECOND_TREE)] {
+            select_preview(input, "images/a.png", Some(&png), tree);
+            select_preview(input, "images/b.png", Some(&png), tree);
+        }
+        select_preview(&mut first, "images/a.png", None, REVIEW_TREE);
+        assert_eq!(first.bytes, second.bytes);
+        ingest(
+            &first.receipt,
+            &first.artifacts,
+            &store,
+            &expected_for(REVIEW_TREE),
+        )
+        .unwrap();
+        assert!(
+            ingest(
+                &second.receipt,
+                &second.artifacts,
+                &store,
+                &expected_for(SECOND_TREE)
+            )
+            .is_err()
+        );
+        assert!(
+            !store
+                .join("admissions")
+                .join(format!("{SECOND_TREE}.tsv"))
+                .exists()
+        );
+    }
+
+    fn select_preview(input: &mut AdmissionInput, path: &str, bytes: Option<&[u8]>, tree: &str) {
+        let source = input.artifacts.parent().unwrap().join("source");
+        if let Some(bytes) = bytes {
+            fs::create_dir_all(source.join(path).parent().unwrap()).unwrap();
+            fs::write(source.join(path), bytes).unwrap();
+            let mut manifest: serde_json::Value =
+                serde_json::from_slice(&fs::read(source.join("manifest.json")).unwrap()).unwrap();
+            manifest["files"][path] =
+                serde_json::json!({"sha256": super::hex_digest(bytes), "bytes": bytes.len()});
+            fs::write(
+                source.join("manifest.json"),
+                serde_json::to_vec(&manifest).unwrap(),
+            )
+            .unwrap();
+        }
+        let written = package::write_package(&source, &input.package).unwrap();
+        input.bytes = fs::read(&input.package).unwrap();
+        input.digest = package::sha256_hex(&written.digest);
+        let mut listing: serde_json::Value = serde_json::from_slice(&input.listing_bytes).unwrap();
+        listing["preview"] = serde_json::json!(path);
+        input.listing_bytes = serde_json::to_vec(&listing).unwrap();
+        input.listing_digest = super::hex_digest(&input.listing_bytes);
+        fs::write(input.artifacts.join("1.listing.json"), &input.listing_bytes).unwrap();
+        fs::write(
+            &input.receipt,
+            receipt_for(
+                tree,
+                "1.0.0",
+                &input.digest,
+                input.bytes.len(),
+                &input.listing_digest,
+                input.listing_bytes.len(),
+            ),
+        )
+        .unwrap();
+    }
 
     #[test]
     fn concurrent_ingestion_cannot_accept_same_version_replacement() {

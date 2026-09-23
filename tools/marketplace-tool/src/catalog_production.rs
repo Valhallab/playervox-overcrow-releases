@@ -1,4 +1,4 @@
-use crate::{admission, package, private_fs};
+use crate::{admission, package, preview, private_fs};
 use base64::{Engine as _, engine::general_purpose::URL_SAFE_NO_PAD};
 use chrono::{DateTime, SecondsFormat, TimeDelta, Utc};
 use ring::signature::{ED25519, UnparsedPublicKey};
@@ -19,7 +19,9 @@ const MAX_PAYLOAD: u64 = 700 * 1024;
 const MAX_ENVELOPE: u64 = 1024 * 1024;
 const MAX_TARGETS: usize = 500;
 const MAX_REQUEST: u64 = 128 * 1024;
-const MAX_TREE_ENTRIES: usize = MAX_TARGETS * 4 + 4;
+// Each target may add identity/version/file entries to both content trees,
+// plus their two roots and the two preparation metadata files.
+const MAX_TREE_ENTRIES: usize = MAX_TARGETS * 6 + 4;
 
 pub struct PrepareOptions<'a> {
     pub store: &'a Path,
@@ -100,7 +102,12 @@ struct Target {
     package_size: u64,
     package_sha256: String,
     status: Status,
-    preview: Option<()>,
+    preview: Option<preview::Descriptor>,
+}
+
+struct TargetSource {
+    package: PathBuf,
+    preview: Option<PathBuf>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -263,7 +270,13 @@ fn prepare_inner(
         verify_inventory(root, &inventory(&payload, &["catalog.json"])?, false)?;
         for target in payload.targets {
             let identity = identity(&target)?;
-            sources.insert(identity.clone(), root.join(relative_package(&target)?));
+            sources.insert(
+                identity.clone(),
+                TargetSource {
+                    package: root.join(relative_package(&target)?),
+                    preview: relative_preview(&target)?.map(|relative| root.join(relative)),
+                },
+            );
             targets.insert(identity, target);
         }
     }
@@ -283,7 +296,10 @@ fn prepare_inner(
             package_size: artifact.package_size,
             package_sha256: artifact.package_sha256,
             status: Status::Verified,
-            preview: None,
+            preview: artifact
+                .preview
+                .as_ref()
+                .map(|preview| preview.descriptor(BASE_URL, &artifact.id, &artifact.version)),
         };
         if let Some(existing) = targets.get(&identity) {
             if !same_artifact(existing, &candidate)? {
@@ -298,7 +314,13 @@ fn prepare_inner(
             }
             targets.insert(identity.clone(), candidate);
         }
-        sources.insert(identity, artifact.package_path);
+        sources
+            .entry(identity)
+            .and_modify(|source| source.package = artifact.package_path.clone())
+            .or_insert(TargetSource {
+                package: artifact.package_path,
+                preview: None,
+            });
     }
     let mut changed = BTreeSet::new();
     for change in request.statuses {
@@ -459,7 +481,10 @@ fn finalize_inner(
     verify_inventory(options.output, &expected_inventory, true)?;
     for target in &payload.targets {
         copy_target(
-            &options.prepared.join(relative_package(target)?),
+            &TargetSource {
+                package: options.prepared.join(relative_package(target)?),
+                preview: relative_preview(target)?.map(|relative| options.prepared.join(relative)),
+            },
             options.output,
             target,
         )?;
@@ -584,7 +609,6 @@ fn validate_payload(payload: &Payload) -> Result<(), ProductionError> {
     let mut identities = BTreeSet::new();
     for target in &payload.targets {
         if !identities.insert(identity(target)?)
-            || target.preview.is_some()
             || target.package_size == 0
             || target.package_size > package::MAX_PACKAGE_BYTES as u64
             || !valid_hash(&target.package_sha256)
@@ -592,6 +616,7 @@ fn validate_payload(payload: &Payload) -> Result<(), ProductionError> {
             return Err(ProductionError);
         }
         relative_package(target)?;
+        relative_preview(target)?;
         let listing = serde_json::to_vec(&target.listing).map_err(|_| ProductionError)?;
         package::parse_listing_bytes(&listing).map_err(|_| ProductionError)?;
     }
@@ -631,12 +656,30 @@ fn same_artifact(left: &Target, right: &Target) -> Result<bool, ProductionError>
     Ok(left.package_size == right.package_size
         && left.package_sha256 == right.package_sha256
         && left.manifest == right.manifest
+        && left.preview == right.preview
         && serde_json::to_vec(&left.listing).map_err(|_| ProductionError)?
             == serde_json::to_vec(&right.listing).map_err(|_| ProductionError)?)
 }
 
-fn copy_target(source: &Path, output: &Path, target: &Target) -> Result<(), ProductionError> {
-    let bytes = private_fs::read_regular_file(source, target.package_size)?;
+fn relative_preview(target: &Target) -> Result<Option<String>, ProductionError> {
+    let (id, version) = identity(target)?;
+    target
+        .preview
+        .as_ref()
+        .map(|preview| {
+            preview
+                .relative_path(BASE_URL, &id, &version)
+                .map_err(|_| ProductionError)
+        })
+        .transpose()
+}
+
+fn copy_target(
+    source: &TargetSource,
+    output: &Path,
+    target: &Target,
+) -> Result<(), ProductionError> {
+    let bytes = private_fs::read_regular_file(&source.package, target.package_size)?;
     if bytes.len() as u64 != target.package_size || hash(&bytes) != target.package_sha256 {
         return Err(ProductionError);
     }
@@ -645,6 +688,18 @@ fn copy_target(source: &Path, output: &Path, target: &Target) -> Result<(), Prod
         return Err(ProductionError);
     }
     let (id, version) = identity(target)?;
+    if let Some(preview) = &target.preview {
+        let png = preview::packaged_bytes(&bytes, &manifest.catalog_value, preview)
+            .map_err(|_| ProductionError)?;
+        if let Some(source) = &source.preview
+            && private_fs::read_regular_file(source, preview::MAX_BYTES)? != png
+        {
+            return Err(ProductionError);
+        }
+        preview
+            .commit(output, BASE_URL, &id, &version, &png)
+            .map_err(|_| ProductionError)?;
+    }
     let packages = private_fs::ensure_private_directory(&output.join("packages"))?;
     let identity = private_fs::ensure_private_directory(&packages.join(id))?;
     private_fs::ensure_private_directory(&identity.join(version))?;
@@ -659,6 +714,9 @@ fn inventory(payload: &Payload, files: &[&str]) -> Result<BTreeSet<String>, Prod
         .collect::<BTreeSet<_>>();
     for target in &payload.targets {
         expected.insert(relative_package(target)?);
+        if let Some(preview) = relative_preview(target)? {
+            expected.insert(preview);
+        }
     }
     Ok(expected)
 }
