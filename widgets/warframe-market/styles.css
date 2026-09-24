@@ -113,6 +113,8 @@ h2 { font-size: 12px; font-weight: 600; }
 .order-labels { color: var(--muted); font-size: 9px; padding: 4px 8px; }
 .order-row { padding: 7px 8px; border-top: 1px solid var(--border); }
 .order-row:hover { background: #18181b; }
+.order-variant { grid-column: 1 / -1; font-size: 11px; color: var(--muted); overflow-wrap: anywhere; }
+.variant-hint { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
 .order-price { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .order-trader { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .order-presence { color: var(--muted); font-size: 10px; white-space: nowrap; }

@@ -8,12 +8,13 @@ import {collect,packageProject,noLinks,diagnostic} from './lib/bundle.mjs';
 import {fail,validId} from './lib/manifest.mjs';
 import {startPreview} from './lib/preview.mjs';
 import {nativeAvailability,startNativeDevelopment} from './lib/native.mjs';
+import {TEMPLATES,REFERENCE_TEMPLATES} from './lib/templates.mjs';
 const kit=fileURLToPath(new URL('./',import.meta.url));
 const args=process.argv.slice(2),command=args.shift();
 const json=args.includes('--json');
 const usage=`OverCrow Creator Kit 1.0.0 — Node.js 22+ — Windows / Linux
 
-  node overcrow.mjs init mon-widget [--template blank|counter|checklist] [--id com.example.widget]
+  node overcrow.mjs init mon-widget [--template ${TEMPLATES.join('|')}] [--id com.example.widget]
   node overcrow.mjs check [projet] [--json]
   node overcrow.mjs dev [projet] [--port 4175]
   node overcrow.mjs dev [projet] --native [--host /chemin/absolu] [--replay chemin/events.json] [--devtools]
@@ -39,7 +40,7 @@ function parse(allowed,booleans=['--json']) {
 async function init(destination,options) {
   if(!destination)fail('cli.destination','Indiquez un nouveau dossier.','Exemple : init mon-widget');
   const template=options['--template']??'counter';
-  if(!['blank','counter','checklist'].includes(template))fail('template.unknown','Template inconnu.','Choisissez blank, counter ou checklist.');
+  if(!TEMPLATES.includes(template))fail('template.unknown','Template inconnu.',`Choisissez ${TEMPLATES.join(', ')}.`);
   const absolute=path.resolve(destination);await noLinks(path.dirname(absolute));
   const id=options['--id']??`com.example.widget-${randomUUID().slice(0,8)}`;
   if(!validId(id))fail('manifest.id','Identifiant invalide.','Exemple : --id com.example.mon-widget');
@@ -50,7 +51,11 @@ async function init(destination,options) {
     const packaged=await fs.stat(path.join(kit,'templates')).then(()=>true,()=>false);
     const templates=packaged?path.join(kit,'templates'):path.resolve(kit,'../../content/templates');
     const sdk=packaged?path.join(kit,'sdk'):path.resolve(kit,'../../content/sdk');
-    await fs.cp(path.join(templates,template),path.join(absolute,'widget'),{recursive:true});
+    if(REFERENCE_TEMPLATES.includes(template)) {
+      const references=packaged?path.join(kit,'references'):path.resolve(kit,'../../content/references');
+      await fs.cp(path.join(references,'common'),path.join(absolute,'widget'),{recursive:true});
+      await fs.cp(path.join(references,template),path.join(absolute,'widget'),{recursive:true});
+    } else await fs.cp(path.join(templates,template),path.join(absolute,'widget'),{recursive:true});
     for(const name of ['overcrow.js','overcrow.d.ts','LICENSE'])await fs.copyFile(path.join(sdk,name),path.join(absolute,'widget',name));
     const manifestPath=path.join(absolute,'widget/manifest.json');
     const manifest=JSON.parse(await fs.readFile(manifestPath,'utf8'));manifest.id=id;delete manifest.files;

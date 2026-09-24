@@ -11,6 +11,17 @@ use sha2::{Digest, Sha256};
 
 use crate::private_fs::{open_regular_file, read_bounded_file};
 
+#[path = "package_manifest.rs"]
+mod manifest_contract;
+#[path = "package_network.rs"]
+mod network_contract;
+
+use network_contract::WireNetworkPermission;
+
+#[cfg(test)]
+#[path = "package_network_tests.rs"]
+mod network_tests;
+
 const UTF8_FLAG: u16 = 1 << 11;
 const DOS_DATE_1980_01_01: u16 = 33;
 const REGULAR_MODE: u32 = 0o100644;
@@ -60,6 +71,9 @@ struct WireManifest {
     api_version: String,
     entrypoints: WireEntrypoints,
     permissions: WirePermissions,
+    localization: Option<WireLocalization>,
+    #[serde(default, deserialize_with = "deserialize_present")]
+    presentation: Option<manifest_contract::WirePresentation>,
     #[serde(deserialize_with = "deserialize_unique_file_map")]
     files: BTreeMap<String, WireFile>,
 }
@@ -82,28 +96,23 @@ struct WirePermissions {
     storage: bool,
     #[serde(default)]
     clipboard_write: bool,
+    #[serde(default)]
+    capabilities: Vec<String>,
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct WireNetworkPermission {
-    origin: String,
-    method: NetworkMethod,
-    path_prefix: String,
+struct WireLocalization {
+    default_locale: String,
+    available_locales: Vec<String>,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd)]
-enum NetworkMethod {
-    #[serde(rename = "GET")]
-    Get,
-    #[serde(rename = "POST")]
-    Post,
-    #[serde(rename = "PUT")]
-    Put,
-    #[serde(rename = "PATCH")]
-    Patch,
-    #[serde(rename = "DELETE")]
-    Delete,
+fn deserialize_present<'de, D, T>(deserializer: D) -> Result<Option<T>, D::Error>
+where
+    D: Deserializer<'de>,
+    T: Deserialize<'de>,
+{
+    T::deserialize(deserializer).map(Some)
 }
 
 #[derive(Deserialize)]
@@ -121,6 +130,30 @@ pub(crate) struct Listing {
     pub(crate) source_url: String,
     pub(crate) default_locale: String,
     pub(crate) localizations: Vec<ListingLocalization>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(crate) struct SourceListing {
+    author: String,
+    spdx_license: String,
+    source_url: String,
+    default_locale: String,
+    localizations: Vec<ListingLocalization>,
+    pub(crate) preview: Option<String>,
+}
+
+impl SourceListing {
+    // Publication-only fields must never enter the native catalog listing schema.
+    pub(crate) fn into_catalog_listing(self) -> Listing {
+        Listing {
+            author: self.author,
+            spdx_license: self.spdx_license,
+            source_url: self.source_url,
+            default_locale: self.default_locale,
+            localizations: self.localizations,
+        }
+    }
 }
 
 #[derive(Clone, Deserialize, Serialize)]
@@ -148,6 +181,31 @@ pub fn inspect(path: &Path) -> Result<InspectedManifest, PackageError> {
 }
 
 pub fn inspect_bytes(archive: &[u8]) -> Result<InspectedManifest, PackageError> {
+    validated_archive(archive).map(|(manifest, _)| manifest)
+}
+
+// Returns only a bounded asset from a fully validated package; never extracts paths.
+pub(crate) fn validated_asset_bytes(
+    archive: &[u8],
+    path: &str,
+    maximum: u64,
+) -> Result<Vec<u8>, PackageError> {
+    if !valid_entry_path(path) || path == "manifest.json" {
+        return Err(error("invalid asset path"));
+    }
+    let (_, mut files) = validated_archive(archive)?;
+    let bytes = files
+        .remove(path)
+        .ok_or_else(|| error("missing declared asset"))?;
+    if bytes.len() as u64 > maximum {
+        return Err(error("asset too large"));
+    }
+    Ok(bytes)
+}
+
+fn validated_archive(
+    archive: &[u8],
+) -> Result<(InspectedManifest, BTreeMap<String, Vec<u8>>), PackageError> {
     if archive.len() > MAX_PACKAGE_BYTES {
         return Err(error("package too large"));
     }
@@ -161,12 +219,13 @@ pub fn inspect_bytes(archive: &[u8]) -> Result<InspectedManifest, PackageError> 
     let manifest: WireManifest =
         serde_json::from_slice(manifest_bytes).map_err(|_| error("invalid manifest"))?;
     validate_manifest(&manifest, &files)?;
-    Ok(InspectedManifest {
+    let inspected = InspectedManifest {
         id: manifest.id,
         version: manifest.version,
         catalog_value: serde_json::from_slice(manifest_bytes)
             .map_err(|_| error("invalid manifest"))?,
-    })
+    };
+    Ok((inspected, files))
 }
 
 fn collect_entries(source: &Path) -> Result<BTreeMap<String, Vec<u8>>, PackageError> {
@@ -178,7 +237,7 @@ fn collect_entries(source: &Path) -> Result<BTreeMap<String, Vec<u8>>, PackageEr
     let manifest: WireManifest =
         serde_json::from_slice(&manifest_bytes).map_err(|_| error("invalid manifest"))?;
     validate_declared_size(&manifest)?;
-    validate_listing_source(source)?;
+    let listing = validate_listing_source(source)?;
     let mut actual = BTreeSet::new();
     collect_paths(source, "", &mut actual)?;
     let mut expected = BTreeSet::from(["manifest.json".to_owned()]);
@@ -205,6 +264,12 @@ fn collect_entries(source: &Path) -> Result<BTreeMap<String, Vec<u8>>, PackageEr
     }
     entries.insert("manifest.json".to_owned(), manifest_bytes);
     validate_manifest(&manifest, &entries)?;
+    if let Some(path) = listing.preview {
+        let bytes = entries
+            .get(&path)
+            .ok_or_else(|| error("missing declared preview"))?;
+        crate::preview::validate_png(bytes).map_err(|_| error("invalid preview PNG"))?;
+    }
     Ok(entries)
 }
 
@@ -217,26 +282,31 @@ fn read_bounded_source(
     read_bounded_file(file, maximum as u64).map_err(|_| error(message))
 }
 
-fn validate_listing_source(source: &Path) -> Result<(), PackageError> {
+fn validate_listing_source(source: &Path) -> Result<SourceListing, PackageError> {
     let bytes = read_bounded_source(
         &source.join("listing.json"),
         MAX_LISTING_BYTES,
         "invalid listing",
     )?;
-    parse_listing_bytes(&bytes).map(|_| ())
+    parse_listing_bytes(&bytes)
 }
 
-pub(crate) fn parse_listing_bytes(bytes: &[u8]) -> Result<Listing, PackageError> {
+pub(crate) fn parse_listing_bytes(bytes: &[u8]) -> Result<SourceListing, PackageError> {
     if bytes.is_empty() || bytes.len() > MAX_LISTING_BYTES {
         return Err(error("invalid listing"));
     }
-    let listing: Listing = serde_json::from_slice(bytes).map_err(|_| error("invalid listing"))?;
+    let listing: SourceListing =
+        serde_json::from_slice(bytes).map_err(|_| error("invalid listing"))?;
     if !valid_plain_text(&listing.author, 128)
         || !valid_spdx_license(&listing.spdx_license)
         || !valid_source_url(&listing.source_url)
         || !valid_locale(&listing.default_locale)
         || listing.localizations.is_empty()
         || listing.localizations.len() > 16
+        || listing
+            .preview
+            .as_ref()
+            .is_some_and(|path| !crate::preview::valid_source_path(path))
     {
         return Err(error("invalid listing"));
     }
@@ -328,6 +398,26 @@ fn validate_manifest(
         return Err(error("invalid manifest"));
     }
     validate_permissions(&manifest.permissions)?;
+    if manifest
+        .presentation
+        .as_ref()
+        .is_some_and(|presentation| !presentation.is_valid())
+    {
+        return Err(error("invalid presentation"));
+    }
+    if let Some(localization) = &manifest.localization {
+        let locales = localization
+            .available_locales
+            .iter()
+            .collect::<BTreeSet<_>>();
+        if !(1..=16).contains(&locales.len())
+            || locales.len() != localization.available_locales.len()
+            || !locales.contains(&localization.default_locale)
+            || locales.iter().any(|locale| !valid_locale(locale))
+        {
+            return Err(error("invalid localization"));
+        }
+    }
     validate_declared_size(manifest)?;
     let mut declared = BTreeSet::from(["manifest.json".to_owned()]);
     declared.extend(manifest.files.keys().cloned());
@@ -369,7 +459,7 @@ fn native_file(path: &str, contents: &[u8]) -> bool {
         || contents.starts_with(b"MZ")
 }
 
-fn valid_entry_path(path: &str) -> bool {
+pub(crate) fn valid_entry_path(path: &str) -> bool {
     !path.is_empty()
         && path.len() <= MAX_FILE_PATH_BYTES
         && path.is_ascii()
@@ -408,15 +498,19 @@ pub(crate) fn canonical_semver(value: &str) -> bool {
 }
 
 fn validate_permissions(permissions: &WirePermissions) -> Result<(), PackageError> {
+    if permissions.network.len() > 32
+        || !manifest_contract::valid_capabilities(
+            &permissions.capabilities,
+            !permissions.network.is_empty() || permissions.clipboard_write,
+        )
+    {
+        return Err(error("invalid permissions"));
+    }
     let mut network = BTreeSet::new();
     for permission in &permissions.network {
         if !valid_https_origin(&permission.origin)
-            || !valid_network_path_prefix(&permission.path_prefix)
-            || !network.insert((
-                permission.origin.as_str(),
-                permission.method,
-                permission.path_prefix.as_str(),
-            ))
+            || !permission.is_valid()
+            || !network.insert(permission)
         {
             return Err(error("invalid permissions"));
         }
@@ -448,7 +542,14 @@ fn valid_https_origin(value: &str) -> bool {
         Some((host, port)) => (host, Some(port)),
         None => (authority, None),
     };
-    if !valid_dns_host(host) {
+    // URL parsers interpret a numeric final label as an IPv4 address, including
+    // shortened, octal, and hexadecimal forms. Only DNS origins are admitted.
+    let last_label = host.rsplit('.').next().unwrap_or_default();
+    let numeric_host = last_label.bytes().all(|byte| byte.is_ascii_digit())
+        || last_label
+            .strip_prefix("0x")
+            .is_some_and(|digits| digits.bytes().all(|byte| byte.is_ascii_hexdigit()));
+    if !valid_dns_host(host) || numeric_host {
         return false;
     }
     port.is_none_or(|port| {
@@ -474,25 +575,6 @@ fn valid_dns_host(host: &str) -> bool {
                     .bytes()
                     .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'-')
         })
-}
-
-fn valid_network_path_prefix(value: &str) -> bool {
-    value != "/"
-        && value.starts_with('/')
-        && value.is_ascii()
-        && !value.contains("//")
-        && !value.contains('\\')
-        && value
-            .split('/')
-            .skip(1)
-            .filter(|segment| !segment.is_empty())
-            .all(|segment| {
-                segment != "."
-                    && segment != ".."
-                    && segment.bytes().all(|byte| {
-                        byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'_' | b'-' | b'~')
-                    })
-            })
 }
 
 fn valid_game_event_id(value: &str) -> bool {
@@ -786,6 +868,234 @@ mod tests {
     const VIEW: &[u8] = b"<!doctype html><p>hello</p>";
 
     #[test]
+    fn package_rejects_invalid_critical_png_chunks_after_pixel_data() {
+        let png = crate::test_png::png(2, 1);
+        let mut accepted = Vec::new();
+        for kind in [
+            "unknown-critical",
+            "duplicate-header",
+            "late-palette",
+            "duplicate-palette",
+            "separated-data",
+        ] {
+            let trailer = match kind {
+                "unknown-critical" => crate::test_png::chunk(b"EVIL", b""),
+                "duplicate-header" => crate::test_png::chunk(b"IHDR", &png[16..29]),
+                "late-palette" | "duplicate-palette" => {
+                    crate::test_png::chunk(b"PLTE", &[255, 0, 0])
+                }
+                _ => [
+                    crate::test_png::chunk(b"tEXt", b"Comment\0tail"),
+                    crate::test_png::chunk(b"IDAT", b""),
+                ]
+                .concat(),
+            };
+            let mut malformed = png.clone();
+            if kind == "duplicate-palette" {
+                malformed.splice(33..33, crate::test_png::chunk(b"PLTE", &[255, 0, 0]));
+            }
+            malformed.splice(malformed.len() - 12..malformed.len() - 12, trailer);
+            let source = fixture(&[("index.html", VIEW), ("preview.png", &malformed)]);
+            set_preview(source.path(), "preview.png");
+            let output = tempfile::tempdir().unwrap();
+            let archive = output.path().join("rejected.ocpkg");
+            if write_package(source.path(), &archive).is_ok() {
+                accepted.push(kind);
+            } else {
+                assert!(!archive.exists(), "{kind}");
+            }
+        }
+        assert!(
+            accepted.is_empty(),
+            "malformed PNGs were accepted: {accepted:?}"
+        );
+    }
+
+    #[test]
+    fn package_preserves_valid_ancillary_png_chunks_after_pixel_data() {
+        for kind in [b"tEXt", b"paDd"] {
+            let mut png = crate::test_png::png(2, 1);
+            png.splice(
+                png.len() - 12..png.len() - 12,
+                crate::test_png::chunk(kind, b"Comment\0tail"),
+            );
+            let source = fixture(&[("index.html", VIEW), ("preview.png", &png)]);
+            set_preview(source.path(), "preview.png");
+            let output = tempfile::tempdir().unwrap();
+            let archive = output.path().join("valid.ocpkg");
+            write_package(source.path(), &archive).expect("valid ancillary tail");
+            assert_eq!(
+                parse_stored_zip(&fs::read(archive).unwrap()).unwrap()["preview.png"],
+                png
+            );
+        }
+    }
+
+    #[test]
+    fn package_accepts_legal_palette_and_consecutive_png_data_chunks() {
+        let mut png = crate::test_png::png(2, 1);
+        png.splice(33..33, crate::test_png::chunk(b"PLTE", &[255, 0, 0]));
+        png.splice(
+            png.len() - 12..png.len() - 12,
+            crate::test_png::chunk(b"IDAT", b""),
+        );
+        let source = fixture(&[("index.html", VIEW), ("preview.png", &png)]);
+        set_preview(source.path(), "preview.png");
+        let output = tempfile::tempdir().unwrap();
+        write_package(source.path(), &output.path().join("valid.ocpkg"))
+            .expect("optional palette before consecutive image data");
+    }
+
+    #[test]
+    fn package_rejects_missing_undeclared_and_invalid_preview_content() {
+        let png = crate::test_png::png(2, 1);
+        for kind in [
+            "missing",
+            "undeclared",
+            "malformed",
+            "svg",
+            "oversize",
+            "wide",
+            "tall",
+            "truncated",
+            "crc",
+            "animated",
+            "decode",
+        ] {
+            let mut contents = png.clone();
+            match kind {
+                "malformed" => contents = b"not a PNG".to_vec(),
+                "svg" => contents = b"<svg xmlns='http://www.w3.org/2000/svg'/>".to_vec(),
+                "oversize" => contents.resize(256 * 1024 + 1, 0),
+                "wide" => contents = crate::test_png::png(1025, 1),
+                "tall" => contents = crate::test_png::png(1, 1025),
+                "truncated" => {
+                    contents.truncate(contents.len() - 12);
+                }
+                "crc" => contents[29] ^= 1,
+                "animated" => {
+                    contents.splice(
+                        33..33,
+                        crate::test_png::chunk(b"acTL", &[0, 0, 0, 1, 0, 0, 0, 0]),
+                    );
+                }
+                "decode" => {
+                    contents.truncate(33);
+                    contents.extend(crate::test_png::chunk(
+                        b"IDAT",
+                        b"invalid compressed pixels",
+                    ));
+                    contents.extend(crate::test_png::chunk(b"IEND", b""));
+                }
+                _ => {}
+            }
+            let source = if matches!(kind, "missing" | "undeclared") {
+                fixture(&[("index.html", VIEW)])
+            } else {
+                fixture(&[("index.html", VIEW), ("preview.png", &contents)])
+            };
+            if kind == "undeclared" {
+                fs::write(source.path().join("preview.png"), &contents).unwrap();
+            }
+            set_preview(source.path(), "preview.png");
+            let output = tempfile::tempdir().unwrap();
+            let archive = output.path().join("rejected.ocpkg");
+            assert!(write_package(source.path(), &archive).is_err(), "{kind}");
+            assert!(!archive.exists(), "{kind}");
+        }
+    }
+
+    #[test]
+    fn package_rejects_unsafe_preview_paths_and_symlinks() {
+        for path in [
+            "../preview.png",
+            "/preview.png",
+            "images/../preview.png",
+            "images\\preview.png",
+            "https://example.test/a.png",
+            "preview.svg",
+            "images//preview.png",
+            "preview.png?x=1",
+        ] {
+            let source = fixture(&[("index.html", VIEW)]);
+            set_preview(source.path(), path);
+            let output = tempfile::tempdir().unwrap();
+            assert!(
+                write_package(source.path(), &output.path().join("x.ocpkg")).is_err(),
+                "{path}"
+            );
+        }
+        let png = crate::test_png::png(1, 1);
+        let source = fixture(&[("index.html", VIEW), ("preview.png", &png)]);
+        set_preview(source.path(), "preview.png");
+        let external = tempfile::NamedTempFile::new().unwrap();
+        fs::write(external.path(), png).unwrap();
+        fs::remove_file(source.path().join("preview.png")).unwrap();
+        std::os::unix::fs::symlink(external.path(), source.path().join("preview.png")).unwrap();
+        let output = tempfile::tempdir().unwrap();
+        assert!(write_package(source.path(), &output.path().join("x.ocpkg")).is_err());
+    }
+
+    #[test]
+    fn package_accepts_maximum_preview_dimensions_and_does_not_infer_preview_names() {
+        let png = crate::test_png::png(1024, 1024);
+        let source = fixture(&[("index.html", VIEW), ("preview.png", &png)]);
+        set_preview(source.path(), "preview.png");
+        let output = tempfile::tempdir().unwrap();
+        write_package(source.path(), &output.path().join("max.ocpkg")).unwrap();
+        let unselected = fixture(&[
+            ("index.html", VIEW),
+            ("preview.png", b"opaque unused asset"),
+        ]);
+        write_package(unselected.path(), &output.path().join("unselected.ocpkg")).unwrap();
+    }
+
+    #[test]
+    fn package_accepts_a_png_at_the_exact_encoded_byte_limit() {
+        let mut png = crate::test_png::png(1, 1);
+        let padding = vec![b'x'; 256 * 1024 - png.len() - 12];
+        png.splice(
+            png.len() - 12..png.len() - 12,
+            crate::test_png::chunk(b"paDd", &padding),
+        );
+        assert_eq!(png.len(), 262144);
+        let source = fixture(&[("index.html", VIEW), ("preview.png", &png)]);
+        set_preview(source.path(), "preview.png");
+        let output = tempfile::tempdir().unwrap();
+        write_package(source.path(), &output.path().join("limit.ocpkg")).unwrap();
+    }
+
+    fn set_preview(source: &Path, preview: &str) {
+        let path = source.join("listing.json");
+        let mut listing: serde_json::Value =
+            serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
+        listing["preview"] = serde_json::json!(preview);
+        fs::write(path, serde_json::to_vec(&listing).unwrap()).unwrap();
+    }
+
+    #[test]
+    fn package_accepts_explicit_root_and_nested_png_previews_without_packaging_the_listing() {
+        use base64::Engine as _;
+        let png = base64::engine::general_purpose::STANDARD.decode("iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAYAAAD0In+KAAAADklEQVR4nGP4z8DwHwQBEPgD/U6VwW8AAAAASUVORK5CYII=").unwrap();
+        for path in ["preview.png", "images/screenshot.png"] {
+            let source = fixture(&[("index.html", VIEW), (path, &png)]);
+            let listing_path = source.path().join("listing.json");
+            let mut listing: serde_json::Value =
+                serde_json::from_slice(&fs::read(&listing_path).unwrap()).unwrap();
+            listing["preview"] = serde_json::json!(path);
+            fs::write(&listing_path, serde_json::to_vec(&listing).unwrap()).unwrap();
+            let output = tempfile::tempdir().unwrap();
+            let archive = output.path().join("preview.ocpkg");
+            write_package(source.path(), &archive).expect("explicit, declared PNG preview");
+            let files = parse_stored_zip(&fs::read(&archive).unwrap()).unwrap();
+            assert_eq!(files[path], png);
+            assert!(!files.contains_key("listing.json"));
+            let manifest = inspect(&archive).unwrap();
+            assert!(manifest.catalog_value.get("preview").is_none());
+        }
+    }
+
+    #[test]
     fn package_rejects_oversized_ledger_before_reading_assets() {
         let source = fixture(&[("index.html", VIEW), ("extra.bin", b"asset")]);
         mutate_manifest(source.path(), |manifest| {
@@ -881,6 +1191,166 @@ mod tests {
     }
 
     #[test]
+    fn package_roundtrips_capabilities_and_native_presentation() {
+        let source = fixture(&[("index.html", VIEW)]);
+        mutate_manifest(source.path(), |manifest| {
+            manifest["apiVersion"] = serde_json::json!("1");
+            manifest["permissions"] =
+                serde_json::json!({"capabilities":["media.read"],"storage":true});
+            manifest["presentation"] = native_presentation();
+            manifest["localization"] =
+                serde_json::json!({"defaultLocale":"en","availableLocales":["en","fr"]});
+        });
+        let output = tempfile::tempdir().unwrap();
+        let archive = output.path().join("services.ocpkg");
+        write_package(source.path(), &archive).expect("widget package with bounded presentation");
+        let inspected = inspect(&archive).expect("widget package inspection");
+        assert_eq!(inspected.catalog_value["apiVersion"], "1");
+        assert_eq!(
+            inspected.catalog_value["presentation"],
+            native_presentation()
+        );
+        assert_eq!(
+            inspected.catalog_value["permissions"]["capabilities"],
+            serde_json::json!(["media.read"])
+        );
+    }
+
+    fn native_presentation() -> serde_json::Value {
+        serde_json::json!({"sizing":{"mode":"autoHeight","preferred":{"width":360,"height":240},"min":{"width":80,"height":24},"max":{"width":1600,"height":1200}},"options":[
+            {"id":"showArtist","type":"boolean","label":{"en":"Show artist","fr":"Afficher l’artiste"},"default":true},
+            {"id":"theme","type":"enum","label":{"en":"Theme","fr":"Thème"},"default":"dark","choices":[{"value":"dark","label":{"en":"Dark","fr":"Sombre"}},{"value":"light","label":{"en":"Light","fr":"Clair"}}]},
+            {"id":"fontSize","type":"number","label":{"en":"Font size","fr":"Taille du texte"},"default":14.5,"min":8,"max":48,"step":0.5}
+        ]})
+    }
+
+    fn service_manifest() -> serde_json::Value {
+        serde_json::json!({
+            "schemaVersion":1,"id":"com.example.services","version":"1.0.0","apiVersion":"1",
+            "entrypoints":{"view":"index.html"},"permissions":{},
+            "files":{"index.html":{"sha256":file_sha256_hex(VIEW),"bytes":VIEW.len()}}
+        })
+    }
+
+    fn accepts_manifest(value: &serde_json::Value) -> bool {
+        let bytes = serde_json::to_vec(value).unwrap();
+        let Ok(manifest) = serde_json::from_slice::<WireManifest>(&bytes) else {
+            return false;
+        };
+        validate_manifest(
+            &manifest,
+            &BTreeMap::from([
+                ("manifest.json".to_owned(), bytes),
+                ("index.html".to_owned(), VIEW.to_vec()),
+            ]),
+        )
+        .is_ok()
+    }
+
+    #[test]
+    fn package_capabilities_reject_unknown_duplicate_and_sensitive_egress() {
+        for capability in ["telemetry.read", "fps.read", "media.read", "media.control"] {
+            let mut value = service_manifest();
+            value["permissions"]["capabilities"] = serde_json::json!([capability]);
+            assert!(
+                accepts_manifest(&value),
+                "supported capability {capability}"
+            );
+            let sensitive = !["telemetry.read", "fps.read"].contains(&capability);
+            value["permissions"]["network"] = serde_json::json!([{"origin":"https://api.example.test","method":"GET","path":"/v2/items"}]);
+            assert_eq!(
+                accepts_manifest(&value),
+                !sensitive,
+                "network with {capability}"
+            );
+            value["permissions"]["network"] = serde_json::json!([]);
+            value["permissions"]["clipboardWrite"] = serde_json::json!(true);
+            assert_eq!(
+                accepts_manifest(&value),
+                !sensitive,
+                "clipboard with {capability}"
+            );
+        }
+        for capabilities in [
+            serde_json::json!(["native.shell"]),
+            serde_json::json!(["media.read", "media.read"]),
+            serde_json::json!(null),
+        ] {
+            let mut value = service_manifest();
+            value["permissions"]["capabilities"] = capabilities;
+            assert!(!accepts_manifest(&value));
+        }
+        for api_version in [
+            serde_json::json!("2"),
+            serde_json::json!("3"),
+            serde_json::json!(1),
+            serde_json::json!(null),
+        ] {
+            let mut value = service_manifest();
+            value["apiVersion"] = api_version;
+            assert!(!accepts_manifest(&value));
+        }
+    }
+
+    #[test]
+    fn package_presentation_rejects_unsafe_and_unbounded_fields() {
+        for mode in ["intrinsic", "autoHeight", "manual"] {
+            let mut value = service_manifest();
+            value["presentation"] = native_presentation();
+            value["presentation"]["sizing"]["mode"] = serde_json::json!(mode);
+            assert!(accepts_manifest(&value));
+        }
+        for (pointer, replacement) in [
+            ("/presentation", serde_json::json!(null)),
+            ("/presentation/sizing/mode", serde_json::json!("free")),
+            ("/presentation/sizing/min/width", serde_json::json!(361)),
+            (
+                "/presentation/sizing/preferred/height",
+                serde_json::json!(0),
+            ),
+            ("/presentation/sizing/max/width", serde_json::json!(4097)),
+            ("/presentation/options/0/id", serde_json::json!("__proto__")),
+            ("/presentation/options/0/label/en", serde_json::json!(" ")),
+            (
+                "/presentation/options/0/label/fr",
+                serde_json::json!("x".repeat(81)),
+            ),
+            ("/presentation/options/0/default", serde_json::json!(1)),
+            (
+                "/presentation/options/1/default",
+                serde_json::json!("missing"),
+            ),
+            (
+                "/presentation/options/1/choices/1/value",
+                serde_json::json!("dark"),
+            ),
+            ("/presentation/options/2/default", serde_json::json!(49)),
+            ("/presentation/options/2/min", serde_json::json!(-1_000_001)),
+            ("/presentation/options/2/max", serde_json::json!(1_000_001)),
+            ("/presentation/options/2/step", serde_json::json!(0)),
+            ("/presentation/options/2/step", serde_json::json!(41)),
+        ] {
+            let mut value = service_manifest();
+            value["presentation"] = native_presentation();
+            *value.pointer_mut(pointer).unwrap() = replacement;
+            assert!(!accepts_manifest(&value), "accepted {pointer}");
+        }
+        for pointer in [
+            "/presentation",
+            "/presentation/sizing",
+            "/presentation/sizing/min",
+            "/presentation/options/0",
+            "/presentation/options/0/label",
+            "/presentation/options/1/choices/0",
+        ] {
+            let mut value = service_manifest();
+            value["presentation"] = native_presentation();
+            value.pointer_mut(pointer).unwrap()["setValue"] = serde_json::json!(true);
+            assert!(!accepts_manifest(&value), "unknown field at {pointer}");
+        }
+    }
+
+    #[test]
     fn package_rejects_manifest_shapes_the_runtime_would_reject() {
         let mutations: [fn(&mut serde_json::Value); 4] = [
             |manifest: &mut serde_json::Value| manifest["version"] = serde_json::json!("latest"),
@@ -892,7 +1362,7 @@ mod tests {
                     "network": [{
                         "origin": "http://api.example.test",
                         "method": "GET",
-                        "pathPrefix": "/"
+                        "path": "/"
                     }]
                 });
             },

@@ -129,6 +129,7 @@ for required in Cargo.lock Cargo.toml rust-toolchain.toml \
         tools/marketplace-tool/src/catalog.rs \
         tools/marketplace-tool/src/main.rs \
         tools/marketplace-tool/src/package.rs \
+        tools/marketplace-tool/src/preview.rs \
         tools/marketplace-tool/src/private_fs.rs \
         tools/marketplace-tool/src/snapshot.rs; do
     if test ! -f "$trusted_root/$required" \

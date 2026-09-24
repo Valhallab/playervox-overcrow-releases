@@ -20,7 +20,7 @@ function bridge(enabled,id='com.example.one',shared=storage()) {
   return {context,messages,events,parent,operations};
 }
 test('simulation uses declared permissions and fixtures without external requests',()=>{
-  const permissions={network:[{origin:'https://api.example.com',method:'GET',pathPrefix:'/v2/'}]};
+  const permissions={network:['items','broken','missing'].map(name=>({origin:'https://api.example.com',method:'GET',path:'/v2/'+name}))};
   const fixtures=[{url:'https://api.example.com/v2/items',status:200,json:{data:[{name:'example'}]}},{url:'https://api.example.com/v2/broken',status:503,text:'Unavailable'}];
   const success=simulateFetch(permissions,fixtures,{url:fixtures[0].url,method:'GET'});
   assert.equal(success.metadata.status,200);assert.deepEqual(JSON.parse(new TextDecoder().decode(success.body)),fixtures[0].json);
@@ -28,11 +28,12 @@ test('simulation uses declared permissions and fixtures without external request
   assert.equal(simulateFetch(permissions,fixtures,{url:'https://api.example.com/v2/missing',method:'GET'}).metadata.error.code,'fixture_missing');
   for(const url of ['http://api.example.com/v2/items','https://user:secret@api.example.com/v2/items','https://api.example.com/v2/%2fsecret','https://api.example.com/v3/items'])assert.equal(simulateFetch(permissions,fixtures,{url,method:'GET'}).metadata.error.code,'capability_denied');
   assert.equal(simulateFetch(permissions,fixtures,{url:fixtures[0].url,method:'POST'}).metadata.error.code,'capability_denied');
-  const exact={network:[{origin:'https://api.example.com',method:'GET',pathPrefix:'/v2/items'}]};
+  const exact={network:[{origin:'https://api.example.com',method:'GET',path:'/v2/items'}]};
   assert.equal(simulateFetch(exact,fixtures,{url:fixtures[0].url,method:'GET'}).metadata.status,200);
   assert.equal(simulateFetch(exact,fixtures,{url:'https://api.example.com/v2/items/other',method:'GET'}).metadata.error.code,'capability_denied');
 });
 test('browser storage simulation is permission gated and namespaced per widget',async()=>{
+  for (const enabled of [true, false]) assert.deepEqual({...bridge(enabled).context.__overcrowNative.storage},{mode:'temporary',backend:'memory'});
   const denied=bridge(false);assert.throws(()=>denied.context.localStorage.getItem('test'),e=>e.name==='SecurityError');
   assert.throws(()=>denied.context.indexedDB,e=>e.name==='SecurityError');
   const shared=storage(),first=bridge(true,'com.example.one',shared),second=bridge(true,'com.example.two',shared);
@@ -52,5 +53,17 @@ test('preview bridge accepts only its parent, correlates requests and removes su
   deliver({type:'event',event:{type:'gameSnapshot',payload:{running:false}}});off();deliver({type:'event',event:{type:'visibility',visible:true}});assert.equal(received.length,1);
   const promise=native.request({type:'gameSnapshot'},new ArrayBuffer(0));const request=messages.at(-1);
   const response={metadata:{ok:true,value:{running:false}},body:new ArrayBuffer(0)};
-  deliver({type:'reply',id:request.id,response});assert.equal(await promise,response);
+  deliver({type:'reply',id:request.id,bridgeId:request.bridgeId,response});assert.equal(await promise,response);
+});
+
+test('preview page disposal clears listeners and pending requests; old document replies are ignored',async()=>{
+  const {context,messages,events,parent}=bridge(false),native=context.__overcrowNative;
+  const promise=native.request({type:'gameSnapshot'},new ArrayBuffer(0));const request=messages.at(-1);
+  events.get('message')({source:parent,origin:context.location.origin,data:{source:'overcrow-creator',type:'reply',bridgeId:'old-document',id:request.id,response:{metadata:{ok:true,value:{private:'old'}},body:new ArrayBuffer(0)}}});
+  const seen=[];native.subscribe(value=>seen.push(value));
+  assert.equal(typeof events.get('pagehide'),'function');events.get('pagehide')();
+  assert.equal((await promise).metadata.error.code,'stale_context');
+  assert.equal((await native.request({type:'gameSnapshot'},new ArrayBuffer(0))).metadata.error.code,'stale_context');
+  events.get('message')({source:parent,origin:context.location.origin,data:{source:'overcrow-creator',type:'event',event:{type:'gameSnapshot',payload:{running:true}}}});
+  assert.equal(seen.length,0);
 });

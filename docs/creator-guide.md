@@ -21,7 +21,7 @@ assets in the manifest ledger. See [licensing scope](../LICENSING.md).
    ```sh
    mkdir -m 700 /absolute/path/to/widget-output
    overcrow-widget prepare /absolute/path/to/static-build /absolute/path/to/widget-output/build-1
-   overcrow-widget dev /absolute/path/to/widget-output/build-1
+   overcrow-widget dev --watch /absolute/path/to/widget-output/build-1
    ```
 
    `prepare` copies the static assets and computes their SHA-256 and byte
@@ -70,3 +70,44 @@ is served as `application/octet-stream` with content sniffing disabled, so a
 framework may ship opaque data without creating a new executable file class.
 Page code may read those verified same-bundle files with browser APIs; external
 HTTP(S) remains available only through `overcrow.fetch` and exact grants.
+
+Every manifest declares `"apiVersion": "1"`. The host service capabilities are
+`telemetry.read`, `fps.read`, `media.read` and `media.control`. Game context,
+locale, messages, presentation, network, clipboard and isolated widget storage
+have their own SDK methods. Built-in notes, stopwatch state, journals and connected
+accounts are private to OverCrow. Implement your own editors and timers with
+JavaScript and `overcrow.storage`; see the [SDK guides](https://overcrow.playervox.com/docs/en/).
+
+## Marketplace screenshot
+
+Put a static PNG inside the widget before preparing the file ledger, for example
+`widget/preview.png`. In the separately reviewed root `listing.json`, add:
+
+```json
+"preview": "preview.png"
+```
+
+The path is relative to the packaged widget, can include a folder such as
+`images/screenshot.png`, and must identify an asset in `manifest.files`. There is
+no automatic filename discovery: omit `preview` if no screenshot is available.
+Use at most 256 KiB and 1024 pixels on either axis. A 960 × 600 landscape capture
+fits cards well. The publisher fully decodes the PNG with bounded memory and
+rejects malformed or animated PNGs, URLs, path traversal, links, and undeclared
+files. Other image formats are not supported.
+
+Admission binds the image path to the listing receipt and the PNG bytes to the
+package digest and manifest ledger. Staging copies those exact bytes to
+`previews/<id>/<version>/<sha256>.png`; the signed target's `preview` records
+`url`, `mediaType`, `size`, and `sha256`. The runtime manifest schema stays
+unchanged, and the source-only preview path does not enter the catalog listing.
+The website displays this image on discovery cards and the detail page, with a
+neutral fallback when it is absent or unavailable. A published version and its
+image are immutable; prepare a new version and signed publication for changes.
+
+## Official creator downloads
+
+The [creator kit](../published/docs/downloads/creator-kit.zip) and example archives
+are built and checked in this public repository. The website imports these exact
+archives and links to the GitHub revision used by its documentation. The
+`/docs/downloads/` URLs serve byte-identical copies. Creator
+archives do not use desktop GitHub Releases or affect the application updater.

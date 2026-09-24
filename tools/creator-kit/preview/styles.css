@@ -16,8 +16,8 @@ button{color:#a3e635;cursor:pointer}code{color:#d9f99d;font-size:14px}#status{co
 .widget-host{position:relative;width:480px;height:320px;max-width:100%;font:13px/1.4 'OverCrow UI',sans-serif;color:#f7f7f8}
 .widget-move{position:absolute;z-index:2;top:0;left:0;width:100%;height:22px;border:0;border-radius:10px 10px 0 0;padding:0;background:transparent;cursor:move;touch-action:none}.widget-move:hover,.widget-move:focus-visible{background:linear-gradient(#a3e63518,transparent)}
 /* Hover bridge keeps the toolbar reachable across the native six-pixel gap. */
-.widget-host::before{content:'';position:absolute;top:-34px;left:var(--widget-toolbar-left,auto);right:0;width:88px;height:34px}
-.widget-toolbar{position:absolute;left:var(--widget-toolbar-left,auto);right:0;top:-34px;display:flex;gap:2px;width:88px;height:28px;opacity:0;pointer-events:none}
+.widget-host::before{content:'';position:absolute;top:var(--widget-toolbar-bridge-top,-34px);left:var(--widget-toolbar-left,auto);right:0;width:88px;height:var(--widget-toolbar-bridge-height,34px)}
+.widget-toolbar{position:absolute;z-index:3;left:var(--widget-toolbar-left,auto);right:0;top:var(--widget-toolbar-top,-34px);display:flex;gap:2px;width:88px;height:28px;opacity:0;pointer-events:none}
 .widget-host:hover .widget-toolbar,.widget-host:focus-within .widget-toolbar,.widget-host[data-options-open] .widget-toolbar{opacity:1;pointer-events:auto}
 .chrome-button{display:grid;place-items:center;width:28px;height:28px;padding:6px;border-radius:8px;border:1px solid #ffffff18;background:#1e1e22e0;color:#d4d4d8}
 .chrome-button svg,.widget-resize svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -30,6 +30,7 @@ iframe{border:0;display:block}#view{position:relative;width:100%;height:100%;tra
 .widget-host:hover .widget-resize,.widget-host:focus-within .widget-resize{opacity:1}.widget-resize:hover{color:#a3e635}
 .options-menu,.option-editor{position:fixed;z-index:10;padding:6px;background:#18181c;border:1px solid #ffffff2a;border-radius:6px;box-shadow:0 8px 24px #0006;max-width:calc(100vw - 16px)}
 .options-menu{width:224px;display:grid;gap:2px}
+.native-widget-options{display:grid;gap:6px;max-height:320px;overflow:auto;padding:6px 0;border-top:1px solid #ffffff2a}.native-widget-options label{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px}.native-widget-options input[type=number],.native-widget-options select{max-width:110px;background:#18181c;color:#f7f7f8;border:1px solid #ffffff2a;border-radius:3px}
 .options-menu button{display:flex;align-items:center;gap:6px;min-height:24px;width:100%;padding:3px 6px;border:0;border-radius:3px;font:inherit;font-size:12px;color:#f7f7f8;background:transparent;text-align:left;white-space:nowrap}
 .options-menu button span:first-child{flex:1}.options-menu button span:nth-child(2){color:#a1a1aa;font-size:11px;font-variant-numeric:tabular-nums}
 .options-menu button svg{width:12px;height:12px;flex:0 0 12px;fill:none;stroke:#a1a1aa;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
