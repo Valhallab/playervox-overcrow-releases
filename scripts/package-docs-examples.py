@@ -12,7 +12,7 @@ references = ('session', 'clock', 'performance', 'fps', 'stopwatch', 'media', 'n
 examples = ('blank', 'counter', 'checklist', 'warframe-market') + references
 for name in examples:
     source = root / ('widgets/warframe-market' if name == 'warframe-market' else f'content/references/{name}' if name in references else f'content/templates/{name}')
-    manifest = json.loads((source / 'manifest.json').read_text())
+    manifest = json.loads((source / 'manifest.json').read_text(encoding='utf-8'))
     if name == 'warframe-market':
         files = {path: (source / path).read_bytes() for path in manifest['files']}
     else:
