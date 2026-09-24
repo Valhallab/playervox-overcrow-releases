@@ -24,12 +24,7 @@
 
 // MIT licensed; see ../LICENSE.
 const SERVICE_CAPABILITIES = Object.freeze([
-  'telemetry.read', 'fps.read', 'stopwatch.read', 'stopwatch.control',
-  'media.read', 'media.control', 'notes.read', 'notes.write',
-  'playervox.score.read', 'playervox.rating.read', 'playervox.rating.write',
-  'playervox.reviews.read', 'playervox.followed.read', 'journal.local.read',
-  'journal.cloud.read', 'journal.notes.read', 'journal.notes.write',
-  'journal.delete', 'twitch.chat.read', 'twitch.chat.compose',
+  'telemetry.read', 'fps.read', 'media.read', 'media.control',
 ]);
 
 // MIT licensed; see ../LICENSE.
@@ -68,37 +63,12 @@ function createServiceValidation(ErrorClass, clone) {
     object(value);
     return Object.fromEntries(Object.entries(fields).map(([key, check]) => [key, check(value[key])]));
   };
-  const list = (check, max, uniqueKey) => value => {
-    if (!Array.isArray(value) || value.length > max) invalid();
-    const items = value.map(check);
-    if (uniqueKey && new Set(items.map(item => item[uniqueKey])).size !== items.length) invalid();
-    return items;
-  };
   const id = text(128, 1);
-  const noteId = text(64, 1);
   const revision = integer();
-  const score = number(0, 100);
-  const timestamp = value => {
-    text(64, 1)(value);
-    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/.test(value)
-        || !Number.isFinite(Date.parse(value))) invalid();
-    return value;
-  };
   const handle = value => {
     if (typeof value !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(value)) invalid();
     return value;
   };
-  const shortChatText = value => {
-    text(2000)(value);
-    if ([...value].length > 500) invalid();
-    return value;
-  };
-  const displayName = value => {
-    text(512, 1)(value);
-    if ([...value].length > 128) invalid();
-    return value;
-  };
-  const ratingFields = {gameplayScore: score, artScore: score, techScore: score, averageScore: score, review: nullable(text(32768))};
   const checks = {
     telemetry: shape({
       normalizedCpuPercentHundredths: nullable(integer(0, 10000)),
@@ -107,42 +77,10 @@ function createServiceValidation(ErrorClass, clone) {
       gpuTemperatureMillicelsius: nullable(integer(-273150, 1000000)),
     }),
     fps: shape({value: nullable(number(0, 10000)), sampleAgeMs: nullable(integer()), stale: bool}),
-    stopwatch: shape({elapsedMs: integer(), running: bool}),
     media: shape({
       title: nullable(text(4096)), artist: nullable(text(4096)),
       playbackState: choice(['playing', 'paused', 'stopped']),
       artworkHandle: nullable(handle), actions: shape({previous: bool, playPause: bool, next: bool}),
-    }),
-    notes: shape({
-      documentRevision: revision, activeNoteId: nullable(noteId),
-      saveState: choice(['accepted', 'saving', 'persisted', 'conflict', 'failed']),
-      notes: list(shape({id: noteId, title: text(96), body: text(8192),
-        items: list(shape({id: noteId, text: text(256), checked: bool}), 64, 'id')}), 8, 'id'),
-    }),
-    'playervox.score': shape({name: text(1024, 1), score: nullable(score), ratingsCount: integer(),
-      criteria: shape({gameplay: nullable(score), art: nullable(score), tech: nullable(score)})}),
-    'playervox.rating': shape({rating: nullable(shape(ratingFields))}),
-    'playervox.reviews': shape({page: integer(1, 1000), totalPages: integer(), ratingsCount: integer(),
-      followedOnly: bool, reviews: list(shape({id, displayName, ...ratingFields,
-        originalReview: nullable(text(32768)), translated: bool, createdAt: timestamp, hidden: bool}), 3, 'id')}),
-    journal: shape({page: integer(1), hasMore: bool, nextCursor: nullable(text(2048, 1)),
-      previousCursor: nullable(text(2048, 1)), sessions: list(shape({id, source: choice(['local', 'cloud']),
-        startedAt: timestamp, endedAt: nullable(timestamp), durationMs: integer(), interrupted: bool,
-        note: nullable(text(8192))}), 5, 'id')}),
-    'twitch.chat': shape({
-      connection: choice(['inert', 'disconnected', 'authorizing', 'connecting', 'joined', 'reconnecting', 'failed']),
-      channelDisplayName: nullable(displayName), messages: list(shape({id, displayName, text: shortChatText,
-        color: nullable(value => {
-          if (typeof value !== 'string' || !/^#[0-9A-Fa-f]{6}$/.test(value)) invalid();
-          return value;
-        }),
-        fragments: list(value => {
-          object(value);
-          if (value.type === 'text') return shape({type: choice(['text']), text: shortChatText})(value);
-          return shape({type: choice(['emote']), text: shortChatText, assetHandle: handle})(value);
-        }, 500),
-        reply: nullable(shape({messageId: id, displayName, text: shortChatText})),
-      }), 200, 'id'),
     }),
     presentation: shape({sizingMode: choice(['intrinsic', 'autoHeight', 'manual']),
       width: integer(1, 4096), height: integer(1, 4096), options: value => {
@@ -192,9 +130,7 @@ function createServiceValidation(ErrorClass, clone) {
   }
 
   function actionResult(value) {
-    const result = shape({status: choice(['accepted', 'cancelled', 'persisted', 'conflict', 'failed'])})(value);
-    if (Object.hasOwn(value, 'revision')) result.revision = revision(value.revision);
-    return result;
+    return shape({status: choice(['accepted'])})(value);
   }
 
   function asset(value) {
@@ -231,37 +167,17 @@ function createServiceActions(ErrorClass) {
     if (!/^[A-Za-z0-9_-]+$/.test(value)) invalid();
     return value;
   };
-  const bool = value => { if (typeof value !== 'boolean') invalid(); return value; };
   const size = integer(1, 4096);
-  const revision = integer(0);
-  const note = {noteId: id(64), expectedRevision: revision};
-  const session = {sessionId: id(128), expectedRevision: revision};
   const definitions = {
-    'stopwatch.start': [{}, ['stopwatch.control']],
-    'stopwatch.pause': [{}, ['stopwatch.control']],
-    'stopwatch.reset': [{}, ['stopwatch.control']],
     'media.previous': [{}, ['media.control']],
     'media.playPause': [{}, ['media.control']],
     'media.next': [{}, ['media.control']],
-    'notes.requestCreate': [{expectedRevision: revision}, ['notes.write']],
-    'notes.requestEdit': [note, ['notes.write']],
-    'notes.requestDelete': [note, ['notes.write']],
-    'notes.select': [note, ['notes.read']],
-    'notes.setChecked': [{...note, itemId: id(64), checked: bool}, ['notes.write']],
-    'playervox.requestConnect': [{}, []],
-    'playervox.rating.requestEdit': [{expectedRevision: revision}, ['playervox.rating.write']],
-    'playervox.reviews.page': [{page: integer(1, 1000), followedOnly: value => value === undefined ? false : bool(value)}, ['playervox.reviews.read']],
-    'journal.page': [{cursor: value => value === null ? null : text(2048)(value)}, ['journal.local.read', 'journal.cloud.read']],
-    'journal.requestEditNote': [session, ['journal.notes.write']],
-    'journal.requestDelete': [session, ['journal.delete']],
-    'twitch.chat.requestConnect': [{}, ['twitch.chat.read']],
-    'twitch.chat.requestChooseChannel': [{}, ['twitch.chat.read']],
-    'twitch.chat.requestCompose': [{replyTo: value => value === undefined ? undefined : id(128)(value)}, ['twitch.chat.compose']],
     'presentation.reportSize': [{width: size, height: size}, []],
     'assets.read': [{handle: id(128)}, []],
   };
 
   return (action, parameters) => {
+    if (!Object.hasOwn(definitions, action)) invalid();
     const [fields, capabilities] = definitions[action];
     if (!parameters || typeof parameters !== 'object' || Array.isArray(parameters)
         || (Object.getPrototypeOf(parameters) !== Object.prototype && Object.getPrototypeOf(parameters) !== null)
@@ -287,7 +203,7 @@ function createServices({native, role, ErrorClass, clone}) {
   const nativeErrorCodes = new Set([
     'capability_denied', 'permission_denied', 'not_connected', 'stale_context',
     'unavailable', 'unsupported', 'unsupported_operation', 'rate_limited', 'offline', 'invalid_response',
-    'invalid_request', 'role_denied', 'conflict', 'cancelled', 'expired', 'refused',
+    'invalid_request', 'role_denied', 'expired', 'refused',
     'storage_unavailable', 'busy', 'browser_unavailable', 'revocation_pending',
     'queue_full', 'forbidden', 'gesture_required', 'native_failure',
   ]);
@@ -419,17 +335,11 @@ function createServices({native, role, ErrorClass, clone}) {
     try {
       const frame = await readCurrent();
       requireAccess(frame, capabilities);
-      if (name === 'playervox.reviews.page' && parameters.followedOnly) {
-        requireAccess(frame, ['playervox.followed.read']);
-      }
       const result = await request({type: 'serviceAction', action: name, contextId: frame.contextId, parameters});
       if (!current || current.contextId !== frame.contextId) {
         fail('stale_context', 'Native service context changed');
       }
       requireAccess(current, capabilities);
-      if (name === 'playervox.reviews.page' && parameters.followedOnly) {
-        requireAccess(current, ['playervox.followed.read']);
-      }
       return name === 'assets.read' ? validation.asset(result) : validation.actionResult(result);
     } finally { pendingActions -= 1; }
   }
@@ -445,16 +355,7 @@ function createServices({native, role, ErrorClass, clone}) {
     host: Object.freeze({async capabilities() { return clone((await readCurrent()).capabilities); }}),
     telemetry: module('telemetry'),
     fps: module('fps'),
-    stopwatch: module('stopwatch', {start: noArgs('stopwatch.start'), pause: noArgs('stopwatch.pause'), reset: noArgs('stopwatch.reset')}),
     media: module('media', {previous: noArgs('media.previous'), playPause: noArgs('media.playPause'), next: noArgs('media.next')}),
-    notes: module('notes', {requestCreate: call('notes.requestCreate'), requestEdit: call('notes.requestEdit'),
-      requestDelete: call('notes.requestDelete'), select: call('notes.select'), setChecked: call('notes.setChecked')}),
-    playervox: Object.freeze({requestConnect: noArgs('playervox.requestConnect'),
-      score: module('playervox.score'), rating: module('playervox.rating', {requestEdit: call('playervox.rating.requestEdit')}),
-      reviews: module('playervox.reviews', {page: call('playervox.reviews.page')})}),
-    journal: module('journal', {page: call('journal.page'), requestEditNote: call('journal.requestEditNote'), requestDelete: call('journal.requestDelete')}),
-    twitch: Object.freeze({chat: module('twitch.chat', {requestConnect: noArgs('twitch.chat.requestConnect'),
-      requestChooseChannel: noArgs('twitch.chat.requestChooseChannel'), requestCompose: call('twitch.chat.requestCompose')})}),
     presentation: module('presentation', {reportSize: call('presentation.reportSize')}),
     assets: Object.freeze({read: handle => action('assets.read', {handle})}),
   };

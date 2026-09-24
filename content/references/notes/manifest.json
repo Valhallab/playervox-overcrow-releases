@@ -9,9 +9,9 @@
   "permissions": {
     "network": [],
     "gameEvents": [],
-    "storage": false,
+    "storage": true,
     "clipboardWrite": false,
-    "capabilities": ["notes.read", "notes.write"]
+    "capabilities": []
   },
   "localization": {
     "defaultLocale": "en",

@@ -10,14 +10,9 @@ export const fail=(code,message,action,pointer)=>{throw new CreatorError(code,me
 export const MAX_BYTES=128*1024*1024;
 export const MAX_FILES=4096;
 export const WEB_CAPABILITIES=Object.freeze([
-  'telemetry.read','fps.read','stopwatch.read','stopwatch.control',
-  'media.read','media.control','notes.read','notes.write','playervox.score.read',
-  'playervox.rating.read','playervox.rating.write','playervox.reviews.read','playervox.followed.read',
-  'journal.local.read','journal.cloud.read','journal.notes.read','journal.notes.write','journal.delete',
-  'twitch.chat.read','twitch.chat.compose',
+  'telemetry.read','fps.read','media.read','media.control',
 ]);
-export const SENSITIVE_WEB_CAPABILITIES=Object.freeze(WEB_CAPABILITIES.filter(capability=>
-  !['telemetry.read','fps.read','stopwatch.read','stopwatch.control','playervox.score.read'].includes(capability)));
+export const SENSITIVE_WEB_CAPABILITIES=Object.freeze(['media.read','media.control']);
 export function parseJson(source,maximum=1024*1024) {
   if(new TextEncoder().encode(source).length>maximum) fail('json.size','JSON trop volumineux.','Réduisez le fichier.');
   // JSON.parse accepts duplicate keys; reject them before interpreting permissions.

@@ -9,15 +9,9 @@
   "permissions": {
     "network": [],
     "gameEvents": [],
-    "storage": false,
+    "storage": true,
     "clipboardWrite": false,
-    "capabilities": [
-      "journal.local.read",
-      "journal.cloud.read",
-      "journal.notes.read",
-      "journal.notes.write",
-      "journal.delete"
-    ]
+    "capabilities": []
   },
   "localization": {
     "defaultLocale": "en",

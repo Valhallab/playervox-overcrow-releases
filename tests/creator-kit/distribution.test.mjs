@@ -39,9 +39,9 @@ test('the actual downloadable archive can initialize, validate and export withou
   assert.equal((await fetch(preview.url+'NotoSansUI-Regular.ttf')).status,200);
   assert.equal((await fetch(preview.url+'services.mjs')).status,200);
   assert.equal((await fetch(preview.url+'service-fixtures.mjs')).status,200);
-  const reference=path.join(temporary,'Native notes reference');
+  const reference=path.join(temporary,'Isolated notes reference');
   result=run(['init',reference,'--template','notes','--json']);assert.equal(result.status,0,result.stdout+result.stderr);
   result=run(['package',reference,'--json']);assert.equal(result.status,0,result.stdout+result.stderr);
   const nativeManifest=JSON.parse(await readFile(path.join(reference,'widget/manifest.json'),'utf8'));
-  assert.equal(nativeManifest.apiVersion,'2');assert.deepEqual(nativeManifest.permissions.capabilities,['notes.read','notes.write']);
+  assert.equal(nativeManifest.apiVersion,'2');assert.deepEqual(nativeManifest.permissions.capabilities,[]);assert.equal(nativeManifest.permissions.storage,true);
 });

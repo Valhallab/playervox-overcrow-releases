@@ -32,6 +32,40 @@ const request = (
     options,
   );
 
+test("direct requests cannot reach retired built-in services", () => {
+  const sim = createServiceSimulator({ manifest: manifest() });
+  for (const action of [
+    "stopwatch.start",
+    "notes.requestCreate",
+    "playervox.requestConnect",
+    "journal.page",
+    "twitch.chat.requestConnect",
+  ]) {
+    assert.equal(
+      request(
+        sim,
+        action,
+        action === "notes.requestCreate"
+          ? { expectedRevision: 1 }
+          : action === "journal.page"
+            ? { cursor: null }
+            : {},
+      ).metadata.error?.code,
+      "invalid_request",
+      action,
+    );
+  }
+  for (const name of [
+    "stopwatch",
+    "notes",
+    "playervox.score",
+    "journal",
+    "twitch.chat",
+  ]) {
+    assert.equal(sim.snapshot().services.snapshots[name], undefined, name);
+  }
+});
+
 test("simulator returns explicit fake v2 DTOs, capability grants and honest unavailable FPS", () => {
   const sim = createServiceSimulator({
     manifest: manifest(["telemetry.read"]),
@@ -47,8 +81,8 @@ test("simulator returns explicit fake v2 DTOs, capability grants and honest unav
     snapshot.services.snapshots.telemetry.data.normalizedCpuPercentHundredths,
     1250,
   );
-  assert.equal(snapshot.services.snapshots.notes.status, "permissionDenied");
-  assert.equal(snapshot.services.snapshots.notes.data, null);
+  assert.equal(snapshot.services.snapshots.media.status, "permissionDenied");
+  assert.equal(snapshot.services.snapshots.media.data, null);
   assert.equal(snapshot.services.snapshots.fps.status, "permissionDenied");
   const withFps = createServiceSimulator({ manifest: manifest(["fps.read"]) });
   assert.deepEqual(withFps.snapshot().services.snapshots.fps, {
@@ -83,19 +117,7 @@ test("the shipped SDK consumes every simulator DTO and rejects ungranted actions
   };
   const { overcrow } =
     await import("../../content/sdk/overcrow.js?simulator-contract");
-  for (const name of [
-    "telemetry",
-    "fps",
-    "stopwatch",
-    "media",
-    "notes",
-    "playervox.score",
-    "playervox.rating",
-    "playervox.reviews",
-    "journal",
-    "twitch.chat",
-    "presentation",
-  ]) {
+  for (const name of ["telemetry", "fps", "media", "presentation"]) {
     const service = name
       .split(".")
       .reduce((object, key) => object[key], overcrow);
@@ -103,79 +125,37 @@ test("the shipped SDK consumes every simulator DTO and rejects ungranted actions
     const snapshot = await service.snapshot();
     assert.equal(snapshot.contextId, sim.snapshot().services.contextId);
   }
-  assert.deepEqual(await overcrow.twitch.chat.requestCompose(), {
-    status: "cancelled",
+  assert.deepEqual(await overcrow.media.playPause(), {
+    status: "accepted",
   });
   delete globalThis.__overcrowNative;
 });
 
-test("safe fake state changes publish revisions while native UI stays cancelled", () => {
-  let time = 0;
+test("media simulation publishes a revision after an authorized command", () => {
   const events = [];
   const sim = createServiceSimulator({
     manifest: manifest(),
-    now: () => time,
-    onSnapshot: (snapshot) => events.push(snapshot),
+    onSnapshot: (value) => events.push(value),
   });
   const before = sim.snapshot().services.revision;
   assert.equal(
-    request(sim, "stopwatch.start").metadata.value.status,
-    "accepted",
-  );
-  time = 1500;
-  assert.equal(
-    request(sim, "stopwatch.pause").metadata.value.status,
+    request(sim, "media.playPause").metadata.value.status,
     "accepted",
   );
   assert.equal(
-    sim.snapshot().services.snapshots.stopwatch.data.elapsedMs,
-    1500,
+    sim.snapshot().services.snapshots.media.data.playbackState,
+    "playing",
   );
-  assert.equal(
-    request(sim, "stopwatch.reset").metadata.value.status,
-    "accepted",
-  );
-  assert.equal(sim.snapshot().services.snapshots.stopwatch.data.elapsedMs, 0);
-  assert.ok(events.length >= 3);
+  assert.equal(events.length, 1);
   assert.ok(events[0].services.revision > before);
-  const note = sim.snapshot().services.snapshots.notes.data;
-  assert.equal(
-    request(sim, "notes.setChecked", {
-      noteId: "note-1",
-      itemId: "item-1",
-      checked: true,
-      expectedRevision: note.documentRevision,
-    }).metadata.value.status,
-    "persisted",
-  );
-  assert.equal(
-    sim.snapshot().services.snapshots.notes.data.notes[0].items[0].checked,
-    true,
-  );
-  assert.equal(
-    request(sim, "notes.setChecked", {
-      noteId: "note-1",
-      itemId: "item-1",
-      checked: false,
-      expectedRevision: note.documentRevision,
-    }).metadata.value.status,
-    "conflict",
-  );
-  for (const action of [
-    "playervox.requestConnect",
-    "twitch.chat.requestConnect",
-    "twitch.chat.requestChooseChannel",
-    "twitch.chat.requestCompose",
-  ])
-    assert.equal(request(sim, action).metadata.value.status, "cancelled");
 });
 
 test("simulator rejects denied grants, forged bodies, stale contexts, passive mutations and unsafe args", () => {
   const sim = createServiceSimulator({
-    manifest: manifest(["stopwatch.read"]),
+    manifest: manifest(["media.read"]),
   });
   assert.equal(
-    request(sim, "stopwatch.start").metadata.error.code,
+    request(sim, "media.playPause").metadata.error.code,
     "capability_denied",
   );
   const all = createServiceSimulator({ manifest: manifest() });
@@ -192,7 +172,7 @@ test("simulator rejects denied grants, forged bodies, stale contexts, passive mu
       "invalid_request",
     );
   assert.equal(
-    request(all, "stopwatch.start", {}, { role: "view", interactive: false })
+    request(all, "media.playPause", {}, { role: "view", interactive: false })
       .metadata.error.code,
     "permission_denied",
   );
@@ -213,7 +193,7 @@ test("simulator rejects denied grants, forged bodies, stale contexts, passive mu
     all.request(
       {
         type: "serviceAction",
-        action: "stopwatch.start",
+        action: "media.playPause",
         contextId: old.contextId,
         parameters: {},
       },
@@ -223,37 +203,34 @@ test("simulator rejects denied grants, forged bodies, stale contexts, passive mu
   );
   all.dispose();
   assert.equal(
-    request(all, "stopwatch.start").metadata.error.code,
+    request(all, "media.playPause").metadata.error.code,
     "stale_context",
   );
-  assert.equal(all.snapshot().services.snapshots.notes.data, null);
+  assert.equal(all.snapshot().services.snapshots.media.data, null);
 });
 
-test("sensitive fixture payloads are filtered by grant and relationship/note access", () => {
-  const sim = createServiceSimulator({
-    manifest: manifest(["journal.local.read", "playervox.reviews.read"]),
-  });
-  const frame = sim.snapshot().services;
-  assert.equal(
-    frame.snapshots.journal.data.sessions.every(
-      (session) => session.source === "local" && session.note === null,
-    ),
-    true,
-  );
-  assert.equal(
-    request(sim, "playervox.reviews.page", { page: 1, followedOnly: true })
-      .metadata.error.code,
-    "capability_denied",
-  );
-  const unsafe = manifest(["notes.read"]);
-  unsafe.permissions.network = [
-    { origin: "https://example.test", method: "GET", pathPrefix: "/" },
-  ];
-  assert.equal(
-    createServiceSimulator({ manifest: unsafe }).snapshot().services
-      .capabilities["notes.read"].granted,
-    false,
-  );
+test("sensitive media fixtures cannot escape through network or clipboard", () => {
+  for (const egress of [
+    {
+      network: [
+        { origin: "https://example.test", method: "GET", pathPrefix: "/" },
+      ],
+    },
+    { clipboardWrite: true },
+  ]) {
+    const unsafe = manifest(["media.read", "media.control"]);
+    Object.assign(unsafe.permissions, egress);
+    const sim = createServiceSimulator({ manifest: unsafe });
+    assert.equal(
+      sim.snapshot().services.capabilities["media.read"].granted,
+      false,
+    );
+    assert.equal(sim.snapshot().services.snapshots.media.data, null);
+    assert.equal(
+      request(sim, "media.playPause").metadata.error.code,
+      "capability_denied",
+    );
+  }
 });
 
 test("host-only options and content hints use raw layout units and notify the wrapper", () => {
@@ -285,28 +262,13 @@ test("inactive sessions hide fake private data and deny controls until a new con
   const sim = createServiceSimulator({ manifest: manifest() });
   sim.snapshot({ running: false, selectedActive: false });
   sim.setContext();
-  assert.deepEqual(sim.snapshot().services.snapshots.notes, {
+  assert.deepEqual(sim.snapshot().services.snapshots.media, {
     status: "unavailable",
     data: null,
   });
   assert.equal(
-    request(sim, "stopwatch.start").metadata.error.code,
+    request(sim, "media.playPause").metadata.error.code,
     "unavailable",
   );
   assert.equal(sim.snapshot().services.snapshots.presentation.status, "ready");
-});
-
-test("running stopwatch reads advance revision when elapsed data changes", () => {
-  let time = 0;
-  const sim = createServiceSimulator({ manifest: manifest(), now: () => time });
-  request(sim, "stopwatch.start");
-  time = 100;
-  const first = sim.snapshot().services;
-  time = 200;
-  const next = sim.snapshot().services;
-  assert.equal(next.snapshots.stopwatch.data.elapsedMs, 200);
-  assert.ok(next.revision > first.revision);
-  request(sim, "stopwatch.start");
-  time = 300;
-  assert.equal(sim.snapshot().services.snapshots.stopwatch.data.elapsedMs, 300);
 });

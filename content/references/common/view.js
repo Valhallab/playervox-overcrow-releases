@@ -11,13 +11,20 @@ let locale = "en",
   frame = null,
   game = {},
   options = { details: true, seconds: true, zone: "local" },
-  observedAt = performance.now(),
   closed = false;
 let artworkHandle = null,
   artworkUrl = null,
   sizeQueued = false,
   lastSize = "",
-  lastFollowed = false;
+  elapsedMs = 0,
+  startedAt = null,
+  loaded = false,
+  saving = false,
+  entries = [],
+  scoreGame = null,
+  scorePending = false,
+  scoreRequest = 0;
+const editor = $("entry");
 const stops = [];
 const text = (en, fr) => (locale === "fr" ? fr : en);
 const duration = (milliseconds) => {
@@ -47,13 +54,7 @@ function button(label, callback, parent = actions) {
     try {
       const result = await callback();
       if (closed) return;
-      status.textContent =
-        result.status === "cancelled" && game.fixture
-          ? text(
-              "Native UI is not available in the browser preview.",
-              "L’interface native n’est pas disponible dans cet aperçu.",
-            )
-          : result.status;
+      status.textContent = result?.status ?? text("Saved", "Enregistré");
     } catch (error) {
       if (!closed)
         status.textContent = error.code ?? text("Unavailable", "Indisponible");
@@ -62,6 +63,7 @@ function button(label, callback, parent = actions) {
     }
   });
   parent.append(element);
+  return element;
 }
 function timing() {
   if (kind === "clock") {
@@ -74,10 +76,9 @@ function timing() {
     primary.textContent = new Intl.DateTimeFormat(locale, settings).format(
       new Date(),
     );
-  } else if (kind === "stopwatch" && frame?.data) {
+  } else if (kind === "stopwatch") {
     primary.textContent = duration(
-      frame.data.elapsedMs +
-        (frame.data.running ? Math.max(0, performance.now() - observedAt) : 0),
+      elapsedMs + (startedAt === null ? 0 : performance.now() - startedAt),
     );
   }
 }
@@ -130,25 +131,80 @@ function render() {
     reportSize();
     return;
   }
+  if (kind === "stopwatch") {
+    timing();
+    button(text("Start / pause", "Démarrer / pause"), () => {
+      if (startedAt === null) startedAt = performance.now();
+      else {
+        elapsedMs += performance.now() - startedAt;
+        startedAt = null;
+      }
+      timing();
+    });
+    button(text("Reset", "Réinitialiser"), () => {
+      elapsedMs = 0;
+      startedAt = null;
+      timing();
+    });
+    reportSize();
+    return;
+  }
+  if (kind === "notes" || kind === "journal") {
+    primary.textContent = text(
+      "Your widget's data",
+      "Les données de votre widget",
+    );
+    $("editor-label").hidden = false;
+    $("editor-title").textContent = text("Write here", "Écrivez ici");
+    editor.disabled = !loaded || saving || !interactive();
+    editor.maxLength = kind === "notes" ? 8000 : 500;
+    if (kind === "journal") for (const entry of entries) paragraph(entry);
+    if (loaded) {
+      const save = button(text("Save", "Enregistrer"), async () => {
+        if (saving) return;
+        const value = editor.value;
+        const next =
+          kind === "notes"
+            ? value
+            : [...entries, value.trim()].filter(Boolean).slice(-20);
+        saving = true;
+        render();
+        try {
+          await overcrow.storage.set(kind + ".v1", next);
+          if (closed) return;
+          if (kind === "journal") {
+            entries = next;
+            editor.value = "";
+          }
+        } finally {
+          saving = false;
+          if (!closed) render();
+        }
+      });
+      save.disabled = saving || !interactive();
+    }
+    reportSize();
+    return;
+  }
   if (!frame?.data) {
-    primary.textContent = frame?.status ?? text("Loading…", "Chargement…");
-    status.textContent = frame?.retryAfterMs
-      ? text(
-          `Retry in ${frame.retryAfterMs} ms`,
-          `Réessayer dans ${frame.retryAfterMs} ms`,
-        )
-      : "";
+    primary.textContent =
+      kind === "score" && scorePending
+        ? text("Loading…", "Chargement…")
+        : (frame?.status ?? text("Loading…", "Chargement…"));
     if (
-      ["rating", "reviews", "journal"].includes(kind) &&
-      frame?.status === "notConnected"
-    )
-      button(text("Connect PlayerVox", "Connexion PlayerVox"), () =>
-        overcrow.playervox.requestConnect(),
-      );
-    if (kind === "twitch" && frame?.status === "notConnected")
-      button(text("Connect Twitch", "Connexion Twitch"), () =>
-        overcrow.twitch.chat.requestConnect(),
-      );
+      kind === "score" &&
+      !scorePending &&
+      !game.fixture &&
+      game.selectedActive &&
+      Number.isInteger(game.steamAppId) &&
+      game.steamAppId > 0
+    ) {
+      const retry = node("button", text("Retry", "Réessayer"));
+      retry.type = "button";
+      retry.disabled = !interactive();
+      retry.addEventListener("click", () => void refreshScore(true));
+      actions.append(retry);
+    }
     void artwork(null);
     reportSize();
     return;
@@ -184,14 +240,6 @@ function render() {
     paragraph(
       `${data.stale ? text("Stale", "Ancien") : text("Sample", "Échantillon")} · ${data.sampleAgeMs ?? "—"} ms`,
     );
-  } else if (kind === "stopwatch") {
-    timing();
-    paragraph(
-      data.running ? text("Running", "En cours") : text("Paused", "En pause"),
-    );
-    button(text("Start", "Démarrer"), () => overcrow.stopwatch.start());
-    button(text("Pause", "Pause"), () => overcrow.stopwatch.pause());
-    button(text("Reset", "Réinitialiser"), () => overcrow.stopwatch.reset());
   } else if (kind === "media") {
     primary.textContent = data.title ?? text("No media title", "Aucun titre");
     paragraph(`${data.artist ?? ""} · ${data.playbackState}`);
@@ -203,62 +251,6 @@ function render() {
       if (data.actions[action])
         button(text(en, fr), () => overcrow.media[action]());
     void artwork(data.artworkHandle);
-  } else if (kind === "notes") {
-    const active = data.notes.find((note) => note.id === data.activeNoteId);
-    primary.textContent = active?.title ?? text("No note", "Aucune note");
-    for (const note of data.notes)
-      button(note.title, () =>
-        overcrow.notes.select({
-          noteId: note.id,
-          expectedRevision: data.documentRevision,
-        }),
-      );
-    if (active) {
-      paragraph(active.body);
-      for (const item of active.items) {
-        const label = document.createElement("label"),
-          check = document.createElement("input");
-        check.type = "checkbox";
-        check.checked = item.checked;
-        check.disabled = !interactive();
-        check.addEventListener("change", async () => {
-          check.disabled = true;
-          try {
-            const outcome = await overcrow.notes.setChecked({
-              noteId: active.id,
-              itemId: item.id,
-              checked: check.checked,
-              expectedRevision: data.documentRevision,
-            });
-            status.textContent = outcome.status;
-            if (outcome.status !== "persisted") check.checked = item.checked;
-          } catch (error) {
-            check.checked = item.checked;
-            status.textContent = error.code ?? "unavailable";
-          } finally {
-            check.disabled = !interactive();
-          }
-        });
-        label.append(check, document.createTextNode(item.text));
-        details.append(label);
-      }
-      button(text("Edit in OverCrow", "Modifier dans OverCrow"), () =>
-        overcrow.notes.requestEdit({
-          noteId: active.id,
-          expectedRevision: data.documentRevision,
-        }),
-      );
-      button(text("Delete in OverCrow", "Supprimer dans OverCrow"), () =>
-        overcrow.notes.requestDelete({
-          noteId: active.id,
-          expectedRevision: data.documentRevision,
-        }),
-      );
-    }
-    button(text("New native note", "Nouvelle note native"), () =>
-      overcrow.notes.requestCreate({ expectedRevision: data.documentRevision }),
-    );
-    paragraph(data.saveState);
   } else if (kind === "score") {
     primary.textContent =
       data.score === null ? "—" : `${data.score.toFixed(1)} / 100`;
@@ -269,130 +261,6 @@ function render() {
       Object.entries(data.criteria)
         .map(([key, value]) => `${key}: ${value ?? "—"}`)
         .join(" · "),
-    );
-  } else if (kind === "rating") {
-    primary.textContent = data.rating
-      ? `${data.rating.averageScore.toFixed(1)} / 100`
-      : text("No rating", "Aucune note");
-    if (data.rating) {
-      paragraph(data.rating.review ?? "");
-      paragraph(
-        `${data.rating.gameplayScore} · ${data.rating.artScore} · ${data.rating.techScore}`,
-      );
-    }
-    button(text("Edit in OverCrow", "Modifier dans OverCrow"), () =>
-      overcrow.playervox.rating.requestEdit({
-        expectedRevision: frame.revision,
-      }),
-    );
-    button(text("Connect PlayerVox", "Connexion PlayerVox"), () =>
-      overcrow.playervox.requestConnect(),
-    );
-  } else if (kind === "reviews") {
-    primary.textContent = `${data.page} / ${data.totalPages}`;
-    for (const review of data.reviews) {
-      const article = document.createElement("article");
-      article.append(
-        node("strong", `${review.displayName} · ${review.averageScore}/100`),
-        node(
-          "p",
-          review.hidden
-            ? text("Hidden by moderation", "Masqué par la modération")
-            : (review.review ?? ""),
-        ),
-      );
-      if (!review.hidden && review.translated && review.originalReview)
-        article.append(node("p", review.originalReview));
-      details.append(article);
-    }
-    if (data.page > 1)
-      button(text("Previous", "Précédent"), () =>
-        overcrow.playervox.reviews.page({
-          page: data.page - 1,
-          followedOnly: data.followedOnly,
-        }),
-      );
-    if (data.page < Math.min(data.totalPages, 1000))
-      button(text("Next", "Suivant"), () =>
-        overcrow.playervox.reviews.page({
-          page: data.page + 1,
-          followedOnly: data.followedOnly,
-        }),
-      );
-    button(text("Connect PlayerVox", "Connexion PlayerVox"), () =>
-      overcrow.playervox.requestConnect(),
-    );
-  } else if (kind === "journal") {
-    primary.textContent = `${data.sessions.length} ${text("sessions", "sessions")}`;
-    for (const session of data.sessions) {
-      const article = document.createElement("article");
-      article.append(
-        node(
-          "strong",
-          `${new Date(session.startedAt).toLocaleDateString(locale)} · ${duration(session.durationMs)}`,
-        ),
-        node(
-          "p",
-          `${session.source}${session.interrupted ? " · " + text("Interrupted", "Interrompue") : ""}`,
-        ),
-      );
-      if (session.note) article.append(node("p", session.note));
-      button(
-        text("Edit native note", "Modifier la note native"),
-        () =>
-          overcrow.journal.requestEditNote({
-            sessionId: session.id,
-            expectedRevision: frame.revision,
-          }),
-        article,
-      );
-      button(
-        text("Delete in OverCrow", "Supprimer dans OverCrow"),
-        () =>
-          overcrow.journal.requestDelete({
-            sessionId: session.id,
-            expectedRevision: frame.revision,
-          }),
-        article,
-      );
-      details.append(article);
-    }
-    if (data.previousCursor)
-      button(text("Previous", "Précédent"), () =>
-        overcrow.journal.page({ cursor: data.previousCursor }),
-      );
-    if (data.nextCursor)
-      button(text("Next", "Suivant"), () =>
-        overcrow.journal.page({ cursor: data.nextCursor }),
-      );
-  } else if (kind === "twitch") {
-    primary.textContent =
-      data.channelDisplayName ?? text("No channel", "Aucune chaîne");
-    paragraph(data.connection);
-    for (const message of data.messages) {
-      const article = document.createElement("article"),
-        name = node("strong", message.displayName);
-      if (message.color) name.style.color = message.color;
-      article.append(name, node("p", message.text));
-      if (message.reply)
-        article.append(
-          node("p", `↳ ${message.reply.displayName}: ${message.reply.text}`),
-        );
-      button(
-        text("Reply in OverCrow", "Répondre dans OverCrow"),
-        () => overcrow.twitch.chat.requestCompose({ replyTo: message.id }),
-        article,
-      );
-      details.append(article);
-    }
-    button(text("Connect Twitch", "Connexion Twitch"), () =>
-      overcrow.twitch.chat.requestConnect(),
-    );
-    button(text("Choose channel", "Choisir la chaîne"), () =>
-      overcrow.twitch.chat.requestChooseChannel(),
-    );
-    button(text("Compose in OverCrow", "Écrire dans OverCrow"), () =>
-      overcrow.twitch.chat.requestCompose(),
     );
   }
   reportSize();
@@ -412,6 +280,96 @@ function reportSize() {
     void overcrow.presentation.reportSize({ width, height }).catch(() => {});
   });
 }
+if (kind === "notes" || kind === "journal") {
+  void overcrow.storage
+    .get(kind + ".v1")
+    .then((value) => {
+      if (closed) return;
+      if (kind === "notes") {
+        if (
+          value !== undefined &&
+          (typeof value !== "string" || value.length > 8000)
+        )
+          throw new Error("invalid_storage_value");
+        editor.value = value ?? "";
+      } else {
+        if (
+          value !== undefined &&
+          (!Array.isArray(value) ||
+            value.length > 20 ||
+            value.some((item) => typeof item !== "string" || item.length > 500))
+        )
+          throw new Error("invalid_storage_value");
+        entries = value ?? [];
+      }
+      loaded = true;
+      render();
+    })
+    .catch((error) => {
+      if (!closed) status.textContent = error.code ?? error.message;
+    });
+}
+async function refreshScore(retry = false) {
+  if (kind !== "score") return;
+  const appId = game.selectedActive ? game.steamAppId : null;
+  const key = game.fixture ? "fixture" : (appId ?? "inactive");
+  if (scoreGame === key && (!retry || scorePending)) return;
+  const request = ++scoreRequest;
+  scoreGame = key;
+  scorePending = false;
+  frame = { status: "unavailable", data: null };
+  if (game.fixture) {
+    frame = {
+      status: "ready",
+      data: {
+        name: "Preview game",
+        score: 84,
+        ratingsCount: 12,
+        criteria: { gameplay: 88, art: 84, tech: 80 },
+      },
+    };
+  } else if (Number.isInteger(appId) && appId > 0) {
+    scorePending = true;
+    render();
+    try {
+      const response = await overcrow.fetch(
+        `https://api.playervox.com/api/v1/overcrow/games/steam/${appId}/score`,
+      );
+      if (!response.ok) throw new Error("unavailable");
+      const data = await response.json();
+      if (
+        data.score !== null &&
+        (typeof data.score !== "number" ||
+          !Number.isFinite(data.score) ||
+          data.score < 0 ||
+          data.score > 100)
+      )
+        throw new Error("invalid_response");
+      if (
+        typeof data.game?.name !== "string" ||
+        !Number.isSafeInteger(data.ratings_count) ||
+        data.ratings_count < 0
+      )
+        throw new Error("invalid_response");
+      if (closed || scoreRequest !== request) return;
+      frame = {
+        status: "ready",
+        data: {
+          name: data.game.name,
+          score: data.score,
+          ratingsCount: data.ratings_count,
+          criteria: data.criteria ?? {},
+        },
+      };
+    } catch {
+      if (!closed && scoreRequest === request)
+        frame = { status: "unavailable", data: null };
+    } finally {
+      if (scoreRequest === request) scorePending = false;
+    }
+  }
+  if (!closed && scoreRequest === request) render();
+}
 document.body.classList.toggle(
   "compact",
   ["session", "clock", "performance", "fps", "stopwatch", "score"].includes(
@@ -421,6 +379,7 @@ document.body.classList.toggle(
 stops.push(
   overcrow.game.onSnapshot((value) => {
     game = value;
+    refreshScore();
     render();
   }),
 );
@@ -429,6 +388,7 @@ void overcrow.game
   .then((value) => {
     if (!closed) {
       game = value;
+      refreshScore();
       render();
     }
   })
@@ -454,17 +414,6 @@ stops.push(
   overcrow.presentation.onSnapshot((value) => {
     if (value.data) {
       options = value.data.options;
-      if (
-        kind === "reviews" &&
-        Boolean(options.followedOnly) !== lastFollowed
-      ) {
-        lastFollowed = Boolean(options.followedOnly);
-        void overcrow.playervox.reviews
-          .page({ page: 1, followedOnly: lastFollowed })
-          .catch((error) => {
-            status.textContent = error.code;
-          });
-      }
     }
     render();
   }),
@@ -472,20 +421,12 @@ stops.push(
 const service = {
   performance: overcrow.telemetry,
   fps: overcrow.fps,
-  stopwatch: overcrow.stopwatch,
   media: overcrow.media,
-  notes: overcrow.notes,
-  score: overcrow.playervox.score,
-  rating: overcrow.playervox.rating,
-  reviews: overcrow.playervox.reviews,
-  journal: overcrow.journal,
-  twitch: overcrow.twitch.chat,
 }[kind];
 if (service)
   stops.push(
     service.onSnapshot((value) => {
       frame = value;
-      observedAt = performance.now();
       render();
     }),
   );

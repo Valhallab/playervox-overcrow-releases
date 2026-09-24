@@ -8,7 +8,7 @@ import zipfile
 root = Path(__file__).resolve().parents[1]
 output = Path(sys.argv[1])
 output.mkdir(parents=True, exist_ok=True)
-references = ('session', 'clock', 'performance', 'fps', 'stopwatch', 'media', 'notes', 'score', 'rating', 'reviews', 'journal', 'twitch')
+references = ('session', 'clock', 'performance', 'fps', 'stopwatch', 'media', 'notes', 'score', 'journal')
 examples = ('blank', 'counter', 'checklist', 'warframe-market') + references
 for name in examples:
     source = root / ('widgets/warframe-market' if name == 'warframe-market' else f'content/references/{name}' if name in references else f'content/templates/{name}')

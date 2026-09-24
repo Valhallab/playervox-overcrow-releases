@@ -7,11 +7,17 @@
     "view": "index.html"
   },
   "permissions": {
-    "network": [],
+    "network": [
+      {
+        "origin": "https://api.playervox.com",
+        "method": "GET",
+        "pathPrefix": "/api/v1/overcrow/games/steam/"
+      }
+    ],
     "gameEvents": [],
     "storage": false,
     "clipboardWrite": false,
-    "capabilities": ["playervox.score.read"]
+    "capabilities": []
   },
   "localization": {
     "defaultLocale": "en",

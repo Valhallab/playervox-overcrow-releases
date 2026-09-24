@@ -11,7 +11,7 @@
     "gameEvents": [],
     "storage": false,
     "clipboardWrite": false,
-    "capabilities": ["stopwatch.read", "stopwatch.control"]
+    "capabilities": []
   },
   "localization": {
     "defaultLocale": "en",

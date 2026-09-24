@@ -2,30 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { validateManifest } from "../../tools/creator-kit/lib/manifest.mjs";
 
-const publicCapabilities = [
-  "telemetry.read",
-  "fps.read",
-  "stopwatch.read",
-  "stopwatch.control",
-  "playervox.score.read",
-];
-const sensitiveCapabilities = [
-  "media.read",
-  "media.control",
-  "notes.read",
-  "notes.write",
-  "playervox.rating.read",
-  "playervox.rating.write",
-  "playervox.reviews.read",
-  "playervox.followed.read",
-  "journal.local.read",
-  "journal.cloud.read",
-  "journal.notes.read",
-  "journal.notes.write",
-  "journal.delete",
-  "twitch.chat.read",
-  "twitch.chat.compose",
-];
+const publicCapabilities = ["telemetry.read", "fps.read"];
+const sensitiveCapabilities = ["media.read", "media.control"];
 const network = [
   { origin: "https://api.example.test", method: "GET", pathPrefix: "/v2/" },
 ];
@@ -74,6 +52,31 @@ const fixture = () => ({
 });
 const validate = (value) => validateManifest(value, new Set(["index.html"]));
 
+test("retired built-in permissions cannot enter a public widget package", () => {
+  for (const capability of [
+    "stopwatch.read",
+    "stopwatch.control",
+    "notes.read",
+    "notes.write",
+    "playervox.score.read",
+    "playervox.rating.read",
+    "playervox.rating.write",
+    "playervox.reviews.read",
+    "playervox.followed.read",
+    "journal.local.read",
+    "journal.cloud.read",
+    "journal.notes.read",
+    "journal.notes.write",
+    "journal.delete",
+    "twitch.chat.read",
+    "twitch.chat.compose",
+  ]) {
+    const manifest = fixture();
+    manifest.permissions.capabilities = [capability];
+    assert.throws(() => validate(manifest), capability);
+  }
+});
+
 test("v2 accepts the closed capability set and refuses private-data egress", () => {
   for (const capability of [...publicCapabilities, ...sensitiveCapabilities]) {
     const manifest = fixture();
@@ -87,7 +90,7 @@ test("v2 accepts the closed capability set and refuses private-data egress", () 
     }
   }
   for (const capabilities of [
-    ["notes.read", "notes.read"],
+    ["media.read", "media.read"],
     ["native.shell"],
     ["Notes.Read"],
     null,

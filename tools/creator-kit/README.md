@@ -67,25 +67,29 @@ The preview supplies native snapshot, locale, visibility and controller/view rel
 contracts, but does not generate arbitrary named game events or simulate all host
 failure modes. Browser devtools remain available for inspecting your widget.
 
-## SDK service references
+## Widget references
 
-Use `--template session`, `clock`, `performance`, `fps`, `stopwatch`, `media`,
-`notes`, `score`, `rating`, `reviews`, `journal`, or `twitch` for an API v2
-reference. Each uses the public SDK only, declares its exact capabilities,
-includes EN/FR labels and native options, respects passive mode, and reports
-unscaled preferred content dimensions. Blank, Counter and Checklist retain API v1.
+Use `--template session`, `clock`, `performance`, `fps`, `media`, `stopwatch`,
+`notes`, `journal`, or `score` for a complete reference with English/French labels
+and API v2 presentation settings. Session reads the game context; Clock uses
+JavaScript time. Performance, FPS and Media use the host services. Stopwatch uses JavaScript time without persistence.
+Notes and Journal keep their own data in isolated `overcrow.storage`. Score uses anonymous `overcrow.fetch` to read the public
+PlayerVox score API. Blank, Counter and Checklist retain API v1.
 
 ```sh
 node overcrow.mjs init my-notes --template notes
 ```
 
-The browser preview labels fictional data and never contacts device services,
-private PlayerVox endpoints, or Twitch. Stopwatch/media/checklist controls only
-change in-memory fixtures. Native connection, editor, delete and composer intents
-return `cancelled`; actual native UI and permissions need OverCrow testing. FPS
-defaults to `unsupported`. Inactive sessions hide service data. Context changes
-and page disposal invalidate old replies. This is a contract simulator, not proof
-of native coverage or security. Native support may still be unavailable.
+Public widgets cannot access built-in notes, stopwatch state, journal history or
+connected PlayerVox/Twitch accounts. The SDK has no native login, rating editor,
+review browser or Twitch composer. Rating, Reviews and Twitch reference templates
+are no longer distributed.
+
+The browser preview uses fictional telemetry, FPS and media data. Media controls
+change only the fixture; independent widgets update their own temporary storage.
+The Score example displays a fictional score in preview and never calls the
+public API there. FPS defaults to `unsupported`. Test actual host support, gestures and
+permissions in OverCrow before distributing a widget.
 
 Add optional service fixtures outside `widget/` in `preview.json`:
 
@@ -102,16 +106,14 @@ Add optional service fixtures outside `widget/` in `preview.json`:
 ```
 
 Fixtures cannot grant a capability absent from the manifest. Set `granted:false`
-or a service's `permissionDenied`, `notConnected`, `unavailable`, `unsupported`
-or `rateLimited` status with `data:null` to exercise fallback UI. The simulator
-owns context IDs and monotonic revisions. Never put real credentials or private
-content in fixtures. Native sensitive grants cannot be combined with outbound
-network or raw clipboard access; the authoring checks reject that combination.
-
-Twitch `requestCompose({replyTo?})` opens only the native composer. A widget
-cannot supply message text. Notes, rating and journal intent results distinguish
-queued acceptance from persistence; see the EN/FR API services guide and shipped
-TypeScript declarations for DTOs, units, revisions and action signatures.
+or a service's `permissionDenied`, `unavailable`, `unsupported` or `rateLimited`
+status with `data:null` to exercise fallback UI. The simulator owns context IDs
+and monotonic revisions. Never put real credentials or private content in
+fixtures. Media permissions are sensitive: they cannot be combined with outbound
+network or clipboard writes, and they force temporary storage even when
+`storage: true` is declared. Artwork is read through `overcrow.assets.read(handle)`
+using a media-service handle. See the EN/FR host-services guide and shipped
+TypeScript declarations for fields, units and action signatures.
 
 Use `npm run dev -- --native` to run the same project in OverCrow's installed
 engine in an offscreen development session. Use `npm run dev` for a visual preview;
@@ -165,7 +167,7 @@ be checked on Linux by extracting an exported archive and running
 `overcrow-widget package` against it: output bytes must match exactly. This is
 an offline validation, not an application install or native overlay session.
 
-Native sensitive grants force ephemeral browser storage even with `storage` declared.
-Runtime/session/account changes discard browser data; native notes and option
-preferences remain native. The browser simulator keeps only fictional fixture data
-and does not reproduce OS credential stores or the native browser sandbox.
+Media grants force temporary browser storage even with `storage` declared.
+Runtime/session/account changes discard temporary browser data. Widget storage is
+isolated from built-in application data. The browser simulator keeps only fictional
+fixtures and does not reproduce the native browser sandbox.

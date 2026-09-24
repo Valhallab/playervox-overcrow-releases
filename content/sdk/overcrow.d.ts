@@ -104,13 +104,7 @@ declare global {
 }
 
 // MIT licensed; see ../LICENSE.
-export type Capability =
-  | 'telemetry.read' | 'fps.read' | 'stopwatch.read' | 'stopwatch.control'
-  | 'media.read' | 'media.control' | 'notes.read' | 'notes.write'
-  | 'playervox.score.read' | 'playervox.rating.read' | 'playervox.rating.write'
-  | 'playervox.reviews.read' | 'playervox.followed.read'
-  | 'journal.local.read' | 'journal.cloud.read' | 'journal.notes.read'
-  | 'journal.notes.write' | 'journal.delete' | 'twitch.chat.read' | 'twitch.chat.compose';
+export type Capability = 'telemetry.read' | 'fps.read' | 'media.read' | 'media.control';
 
 export interface CapabilityAccess {
   readonly supported: boolean;
@@ -143,20 +137,9 @@ export interface SnapshotService<T> {
 }
 
 export interface ActionResult {
-  /** accepted means opened/queued, never a durable write or completed publication. */
-  readonly status: 'accepted' | 'cancelled' | 'persisted' | 'conflict' | 'failed';
-  readonly revision?: number;
+  /** accepted means queued; the next media snapshot reports the resulting state. */
+  readonly status: 'accepted';
 }
-
-export interface ExpectedRevision {
-  readonly expectedRevision: number;
-}
-export interface NoteTarget extends ExpectedRevision { readonly noteId: string; }
-export interface ChecklistTarget extends NoteTarget {
-  readonly itemId: string;
-  readonly checked: boolean;
-}
-export interface SessionTarget extends ExpectedRevision { readonly sessionId: string; }
 
 export interface TelemetryData {
   /** Hundredths of total-machine CPU capacity, from 0 to 10000. */
@@ -171,10 +154,6 @@ export interface FpsData {
   readonly sampleAgeMs: number | null;
   readonly stale: boolean;
 }
-export interface StopwatchData {
-  readonly elapsedMs: number;
-  readonly running: boolean;
-}
 export interface MediaData {
   readonly title: string | null;
   readonly artist: string | null;
@@ -182,87 +161,6 @@ export interface MediaData {
   /** Opaque handle for assets.read(); never a URL. */
   readonly artworkHandle: string | null;
   readonly actions: {readonly previous: boolean; readonly playPause: boolean; readonly next: boolean};
-}
-export interface ChecklistItem {
-  readonly id: string;
-  readonly text: string;
-  readonly checked: boolean;
-}
-export interface Note {
-  readonly id: string;
-  readonly title: string;
-  readonly body: string;
-  readonly items: readonly ChecklistItem[];
-}
-export interface NotesData {
-  /** Use this revision for notes actions, not the envelope revision. */
-  readonly documentRevision: number;
-  readonly activeNoteId: string | null;
-  readonly saveState: 'accepted' | 'saving' | 'persisted' | 'conflict' | 'failed';
-  readonly notes: readonly Note[];
-}
-export interface ScoreData {
-  readonly name: string;
-  /** All scores use a 0–100 scale. */
-  readonly score: number | null;
-  readonly ratingsCount: number;
-  readonly criteria: {readonly gameplay: number | null; readonly art: number | null; readonly tech: number | null};
-}
-export interface Rating {
-  readonly gameplayScore: number;
-  readonly artScore: number;
-  readonly techScore: number;
-  readonly averageScore: number;
-  readonly review: string | null;
-}
-export interface RatingData { readonly rating: Rating | null; }
-export interface Review extends Rating {
-  readonly id: string;
-  readonly displayName: string;
-  readonly originalReview: string | null;
-  readonly translated: boolean;
-  readonly createdAt: string;
-  /** Moderation display flag; callers must preserve its meaning when rendering. */
-  readonly hidden: boolean;
-}
-export interface ReviewsData {
-  readonly page: number;
-  readonly totalPages: number;
-  readonly ratingsCount: number;
-  readonly followedOnly: boolean;
-  readonly reviews: readonly Review[];
-}
-export interface JournalSession {
-  readonly id: string;
-  readonly source: 'local' | 'cloud';
-  readonly startedAt: string;
-  readonly endedAt: string | null;
-  readonly durationMs: number;
-  readonly interrupted: boolean;
-  readonly note: string | null;
-}
-export interface JournalData {
-  readonly page: number;
-  readonly hasMore: boolean;
-  readonly nextCursor: string | null;
-  readonly previousCursor: string | null;
-  readonly sessions: readonly JournalSession[];
-}
-export type TwitchFragment = {readonly type: 'text'; readonly text: string}
-  | {readonly type: 'emote'; readonly text: string; readonly assetHandle: string};
-export interface TwitchMessage {
-  readonly id: string;
-  readonly displayName: string;
-  /** Plain text, never HTML. */
-  readonly text: string;
-  readonly color: string | null;
-  readonly fragments: readonly TwitchFragment[];
-  readonly reply: {readonly messageId: string; readonly displayName: string; readonly text: string} | null;
-}
-export interface TwitchChatData {
-  readonly connection: 'inert' | 'disconnected' | 'authorizing' | 'connecting' | 'joined' | 'reconnecting' | 'failed';
-  readonly channelDisplayName: string | null;
-  readonly messages: readonly TwitchMessage[];
 }
 export interface PresentationData {
   readonly sizingMode: 'intrinsic' | 'autoHeight' | 'manual';
@@ -276,47 +174,11 @@ export interface OvercrowServices {
   readonly host: {capabilities(): Promise<CapabilityMap>};
   readonly telemetry: SnapshotService<TelemetryData>;
   readonly fps: SnapshotService<FpsData>;
-  readonly stopwatch: SnapshotService<StopwatchData> & {
-    start(): Promise<ActionResult>;
-    pause(): Promise<ActionResult>;
-    reset(): Promise<ActionResult>;
-  };
   readonly media: SnapshotService<MediaData> & {
     previous(): Promise<ActionResult>;
     playPause(): Promise<ActionResult>;
     next(): Promise<ActionResult>;
   };
-  readonly notes: SnapshotService<NotesData> & {
-    requestCreate(parameters: ExpectedRevision): Promise<ActionResult>;
-    requestEdit(parameters: NoteTarget): Promise<ActionResult>;
-    requestDelete(parameters: NoteTarget): Promise<ActionResult>;
-    select(parameters: NoteTarget): Promise<ActionResult>;
-    setChecked(parameters: ChecklistTarget): Promise<ActionResult>;
-  };
-  readonly playervox: {
-    requestConnect(): Promise<ActionResult>;
-    readonly score: SnapshotService<ScoreData>;
-    readonly rating: SnapshotService<RatingData> & {
-      /** Use the current rating snapshot's envelope revision. */
-      requestEdit(parameters: ExpectedRevision): Promise<ActionResult>;
-    };
-    readonly reviews: SnapshotService<ReviewsData> & {
-      /** Page 1–1000, up to three reviews. followedOnly requires its own grant. */
-      page(parameters: {readonly page: number; readonly followedOnly?: boolean}): Promise<ActionResult>;
-    };
-  };
-  readonly journal: SnapshotService<JournalData> & {
-    /** Opaque native cursor, or null for the first five-session page. */
-    page(parameters: {readonly cursor: string | null}): Promise<ActionResult>;
-    requestEditNote(parameters: SessionTarget): Promise<ActionResult>;
-    requestDelete(parameters: SessionTarget): Promise<ActionResult>;
-  };
-  readonly twitch: {readonly chat: SnapshotService<TwitchChatData> & {
-    requestConnect(): Promise<ActionResult>;
-    requestChooseChannel(): Promise<ActionResult>;
-    /** Opens a native composer. The user enters and confirms all message text there. */
-    requestCompose(parameters?: {readonly replyTo?: string}): Promise<ActionResult>;
-  }};
   readonly presentation: SnapshotService<PresentationData> & {
     /** View only. Integer logical dimensions 1–4096; native retains geometry authority. */
     reportSize(parameters: {readonly width: number; readonly height: number}): Promise<ActionResult>;

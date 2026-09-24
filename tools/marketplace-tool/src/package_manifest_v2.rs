@@ -4,30 +4,44 @@ use std::collections::BTreeSet;
 
 use serde::Deserialize;
 
+#[cfg(test)]
+mod boundary_tests {
+    use super::valid_capabilities;
+
+    #[test]
+    fn packages_cannot_request_built_in_widget_access() {
+        for capability in [
+            "stopwatch.read",
+            "stopwatch.control",
+            "notes.read",
+            "notes.write",
+            "playervox.score.read",
+            "playervox.rating.read",
+            "playervox.rating.write",
+            "playervox.reviews.read",
+            "playervox.followed.read",
+            "journal.local.read",
+            "journal.cloud.read",
+            "journal.notes.read",
+            "journal.notes.write",
+            "journal.delete",
+            "twitch.chat.read",
+            "twitch.chat.compose",
+        ] {
+            assert!(
+                !valid_capabilities(&[capability.to_owned()], false),
+                "{capability}"
+            );
+        }
+    }
+}
+
 pub(super) fn valid_capabilities(capabilities: &[String], egress: bool) -> bool {
     let mut unique = BTreeSet::new();
     capabilities.iter().all(|capability| {
         let sensitive = match capability.as_str() {
-            "telemetry.read"
-            | "fps.read"
-            | "stopwatch.read"
-            | "stopwatch.control"
-            | "playervox.score.read" => false,
-            "media.read"
-            | "media.control"
-            | "notes.read"
-            | "notes.write"
-            | "playervox.rating.read"
-            | "playervox.rating.write"
-            | "playervox.reviews.read"
-            | "playervox.followed.read"
-            | "journal.local.read"
-            | "journal.cloud.read"
-            | "journal.notes.read"
-            | "journal.notes.write"
-            | "journal.delete"
-            | "twitch.chat.read"
-            | "twitch.chat.compose" => true,
+            "telemetry.read" | "fps.read" => false,
+            "media.read" | "media.control" => true,
             _ => return false,
         };
         unique.insert(capability) && !(sensitive && egress)

@@ -1282,42 +1282,14 @@ mod tests {
 
     #[test]
     fn package_v2_capabilities_reject_unknown_duplicate_and_sensitive_egress() {
-        for capability in [
-            "telemetry.read",
-            "fps.read",
-            "stopwatch.read",
-            "stopwatch.control",
-            "playervox.score.read",
-            "media.read",
-            "media.control",
-            "notes.read",
-            "notes.write",
-            "playervox.rating.read",
-            "playervox.rating.write",
-            "playervox.reviews.read",
-            "playervox.followed.read",
-            "journal.local.read",
-            "journal.cloud.read",
-            "journal.notes.read",
-            "journal.notes.write",
-            "journal.delete",
-            "twitch.chat.read",
-            "twitch.chat.compose",
-        ] {
+        for capability in ["telemetry.read", "fps.read", "media.read", "media.control"] {
             let mut value = v2_manifest();
             value["permissions"]["capabilities"] = serde_json::json!([capability]);
             assert!(
                 accepts_manifest(&value),
                 "supported capability {capability}"
             );
-            let sensitive = ![
-                "telemetry.read",
-                "fps.read",
-                "stopwatch.read",
-                "stopwatch.control",
-                "playervox.score.read",
-            ]
-            .contains(&capability);
+            let sensitive = !["telemetry.read", "fps.read"].contains(&capability);
             value["permissions"]["network"] = serde_json::json!([{"origin":"https://api.example.test","method":"GET","pathPrefix":"/v2/"}]);
             assert_eq!(
                 accepts_manifest(&value),
@@ -1334,7 +1306,7 @@ mod tests {
         }
         for capabilities in [
             serde_json::json!(["native.shell"]),
-            serde_json::json!(["notes.read", "notes.read"]),
+            serde_json::json!(["media.read", "media.read"]),
             serde_json::json!(null),
         ] {
             let mut value = v2_manifest();
