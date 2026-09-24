@@ -11,8 +11,8 @@ use sha2::{Digest, Sha256};
 
 use crate::private_fs::{open_regular_file, read_bounded_file};
 
-#[path = "package_manifest_v2.rs"]
-mod manifest_v2;
+#[path = "package_manifest.rs"]
+mod manifest_contract;
 
 const UTF8_FLAG: u16 = 1 << 11;
 const DOS_DATE_1980_01_01: u16 = 33;
@@ -65,7 +65,7 @@ struct WireManifest {
     permissions: WirePermissions,
     localization: Option<WireLocalization>,
     #[serde(default, deserialize_with = "deserialize_present")]
-    presentation: Option<manifest_v2::WirePresentation>,
+    presentation: Option<manifest_contract::WirePresentation>,
     #[serde(deserialize_with = "deserialize_unique_file_map")]
     files: BTreeMap<String, WireFile>,
 }
@@ -88,8 +88,8 @@ struct WirePermissions {
     storage: bool,
     #[serde(default)]
     clipboard_write: bool,
-    #[serde(default, deserialize_with = "deserialize_present")]
-    capabilities: Option<Vec<String>>,
+    #[serde(default)]
+    capabilities: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -393,9 +393,7 @@ fn validate_manifest(
     files: &BTreeMap<String, Vec<u8>>,
 ) -> Result<(), PackageError> {
     if manifest.schema_version != 1
-        || !matches!(manifest.api_version.as_str(), "1" | "2")
-        || (manifest.api_version == "1"
-            && (manifest.permissions.capabilities.is_some() || manifest.presentation.is_some()))
+        || manifest.api_version != "1"
         || !valid_extension_id(&manifest.id)
         || !canonical_semver(&manifest.version)
         || manifest.files.is_empty()
@@ -514,16 +512,10 @@ pub(crate) fn canonical_semver(value: &str) -> bool {
 }
 
 fn validate_permissions(permissions: &WirePermissions) -> Result<(), PackageError> {
-    if permissions
-        .capabilities
-        .as_ref()
-        .is_some_and(|capabilities| {
-            !manifest_v2::valid_capabilities(
-                capabilities,
-                !permissions.network.is_empty() || permissions.clipboard_write,
-            )
-        })
-    {
+    if !manifest_contract::valid_capabilities(
+        &permissions.capabilities,
+        !permissions.network.is_empty() || permissions.clipboard_write,
+    ) {
         return Err(error("invalid permissions"));
     }
     let mut network = BTreeSet::new();
@@ -1227,29 +1219,32 @@ mod tests {
     }
 
     #[test]
-    fn package_v2_roundtrips_capabilities_and_native_presentation() {
+    fn package_roundtrips_capabilities_and_native_presentation() {
         let source = fixture(&[("index.html", VIEW)]);
         mutate_manifest(source.path(), |manifest| {
-            manifest["apiVersion"] = serde_json::json!("2");
+            manifest["apiVersion"] = serde_json::json!("1");
             manifest["permissions"] =
                 serde_json::json!({"capabilities":["media.read"],"storage":true});
-            manifest["presentation"] = v2_presentation();
+            manifest["presentation"] = native_presentation();
             manifest["localization"] =
                 serde_json::json!({"defaultLocale":"en","availableLocales":["en","fr"]});
         });
         let output = tempfile::tempdir().unwrap();
-        let archive = output.path().join("v2.ocpkg");
-        write_package(source.path(), &archive).expect("v2 package with bounded presentation");
-        let inspected = inspect(&archive).expect("v2 package inspection");
-        assert_eq!(inspected.catalog_value["apiVersion"], "2");
-        assert_eq!(inspected.catalog_value["presentation"], v2_presentation());
+        let archive = output.path().join("services.ocpkg");
+        write_package(source.path(), &archive).expect("widget package with bounded presentation");
+        let inspected = inspect(&archive).expect("widget package inspection");
+        assert_eq!(inspected.catalog_value["apiVersion"], "1");
+        assert_eq!(
+            inspected.catalog_value["presentation"],
+            native_presentation()
+        );
         assert_eq!(
             inspected.catalog_value["permissions"]["capabilities"],
             serde_json::json!(["media.read"])
         );
     }
 
-    fn v2_presentation() -> serde_json::Value {
+    fn native_presentation() -> serde_json::Value {
         serde_json::json!({"sizing":{"mode":"autoHeight","preferred":{"width":360,"height":240},"min":{"width":80,"height":24},"max":{"width":1600,"height":1200}},"options":[
             {"id":"showArtist","type":"boolean","label":{"en":"Show artist","fr":"Afficher l’artiste"},"default":true},
             {"id":"theme","type":"enum","label":{"en":"Theme","fr":"Thème"},"default":"dark","choices":[{"value":"dark","label":{"en":"Dark","fr":"Sombre"}},{"value":"light","label":{"en":"Light","fr":"Clair"}}]},
@@ -1257,9 +1252,9 @@ mod tests {
         ]})
     }
 
-    fn v2_manifest() -> serde_json::Value {
+    fn service_manifest() -> serde_json::Value {
         serde_json::json!({
-            "schemaVersion":1,"id":"com.example.v2","version":"1.0.0","apiVersion":"2",
+            "schemaVersion":1,"id":"com.example.services","version":"1.0.0","apiVersion":"1",
             "entrypoints":{"view":"index.html"},"permissions":{},
             "files":{"index.html":{"sha256":file_sha256_hex(VIEW),"bytes":VIEW.len()}}
         })
@@ -1281,9 +1276,9 @@ mod tests {
     }
 
     #[test]
-    fn package_v2_capabilities_reject_unknown_duplicate_and_sensitive_egress() {
+    fn package_capabilities_reject_unknown_duplicate_and_sensitive_egress() {
         for capability in ["telemetry.read", "fps.read", "media.read", "media.control"] {
-            let mut value = v2_manifest();
+            let mut value = service_manifest();
             value["permissions"]["capabilities"] = serde_json::json!([capability]);
             assert!(
                 accepts_manifest(&value),
@@ -1309,27 +1304,27 @@ mod tests {
             serde_json::json!(["media.read", "media.read"]),
             serde_json::json!(null),
         ] {
-            let mut value = v2_manifest();
+            let mut value = service_manifest();
             value["permissions"]["capabilities"] = capabilities;
             assert!(!accepts_manifest(&value));
         }
-        for capabilities in [
-            serde_json::json!([]),
-            serde_json::json!(["fps.read"]),
+        for api_version in [
+            serde_json::json!("2"),
+            serde_json::json!("3"),
+            serde_json::json!(1),
             serde_json::json!(null),
         ] {
-            let mut value = v2_manifest();
-            value["apiVersion"] = serde_json::json!("1");
-            value["permissions"]["capabilities"] = capabilities;
+            let mut value = service_manifest();
+            value["apiVersion"] = api_version;
             assert!(!accepts_manifest(&value));
         }
     }
 
     #[test]
-    fn package_v2_presentation_rejects_unsafe_and_unbounded_fields() {
+    fn package_presentation_rejects_unsafe_and_unbounded_fields() {
         for mode in ["intrinsic", "autoHeight", "manual"] {
-            let mut value = v2_manifest();
-            value["presentation"] = v2_presentation();
+            let mut value = service_manifest();
+            value["presentation"] = native_presentation();
             value["presentation"]["sizing"]["mode"] = serde_json::json!(mode);
             assert!(accepts_manifest(&value));
         }
@@ -1363,8 +1358,8 @@ mod tests {
             ("/presentation/options/2/step", serde_json::json!(0)),
             ("/presentation/options/2/step", serde_json::json!(41)),
         ] {
-            let mut value = v2_manifest();
-            value["presentation"] = v2_presentation();
+            let mut value = service_manifest();
+            value["presentation"] = native_presentation();
             *value.pointer_mut(pointer).unwrap() = replacement;
             assert!(!accepts_manifest(&value), "accepted {pointer}");
         }
@@ -1376,8 +1371,8 @@ mod tests {
             "/presentation/options/0/label",
             "/presentation/options/1/choices/0",
         ] {
-            let mut value = v2_manifest();
-            value["presentation"] = v2_presentation();
+            let mut value = service_manifest();
+            value["presentation"] = native_presentation();
             value.pointer_mut(pointer).unwrap()["setValue"] = serde_json::json!(true);
             assert!(!accepts_manifest(&value), "unknown field at {pointer}");
         }

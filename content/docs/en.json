@@ -33,7 +33,7 @@
       },
       {
         "kind": "html",
-        "html": "<p>Add the corresponding network permission in your manifest. <a href=\"/docs/en/api-reseau/\">See the complete example</a>.</p>\n<h2 id=\"plateformes\">Windows and Linux</h2>\n<p>The creator kit uses the same commands on Windows and Linux. See <a href=\"/docs/en/installation/\">installation and system requirements</a>.</p>\n<aside class=\"note note-info\"><strong>SDK 1.3.0</strong><p>These guides cover Web API v1 and v2. <a href=\"/docs/en/api-services/\">Explore host services</a>.</p></aside>"
+        "html": "<p>Add the corresponding network permission in your manifest. <a href=\"/docs/en/api-reseau/\">See the complete example</a>.</p>\n<h2 id=\"plateformes\">Windows and Linux</h2>\n<p>The creator kit uses the same commands on Windows and Linux. See <a href=\"/docs/en/installation/\">installation and system requirements</a>.</p>\n<aside class=\"note note-info\"><strong>SDK 1.3.0</strong><p>All widgets use Web API v1. <a href=\"/docs/en/api-services/\">Explore host services</a>.</p></aside>"
       }
     ]
   },
@@ -73,7 +73,7 @@
     "blocks": [
       {
         "kind": "html",
-        "html": "<h2 id=\"prerequis\">1. Download the kit</h2>\n<p>Install <a href=\"https://nodejs.org/en/download\" rel=\"noreferrer\">Node.js 22 or later</a>, then download and extract the kit. Open a terminal in the extracted <code>overcrow-creator-kit</code>.</p>\n<p><a class=\"button-primary\" href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/creator-kit.zip\" download>Download the creator kit ↓</a></p>\n<p>Prefer to edit online? <a href=\"/studio/en/\">Use the Studio</a> and download your project or package when ready.</p>\n<h2 id=\"creer\">2. Create a counter</h2>"
+        "html": "<h2 id=\"prerequis\">1. Download the kit</h2>\n<p>Install <a href=\"https://nodejs.org/en/download\" rel=\"noreferrer\">Node.js 22 or later</a>, then download and extract the kit. Open a terminal in the extracted <code>overcrow-creator-kit</code>.</p>\n<p><a class=\"button-primary\" href=\"/docs/downloads/creator-kit.zip\" download>Download the creator kit ↓</a></p>\n<p>Prefer to edit online? <a href=\"/studio/en/\">Use the Studio</a> and download your project or package when ready.</p>\n<h2 id=\"creer\">2. Create a counter</h2>"
       },
       {
         "kind": "code",
@@ -143,7 +143,7 @@
     "blocks": [
       {
         "kind": "html",
-        "html": "<h2 id=\"kit\">Start with the kit</h2>\n<p>The <a href=\"/docs/en/kit-createur/\">creator kit</a> includes the SDK, templates and local tools. Install Node.js 22+ and follow <a href=\"/docs/en/premier-widget/\">Your first widget</a>.</p>\n<h2 id=\"telechargements\">Download the SDK</h2>\n<p>For an existing project, download <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/content/sdk/overcrow.js\" download>overcrow.js</a>, <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/content/sdk/overcrow.d.ts\" download>the TypeScript declarations</a> and <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/content/sdk/LICENSE\" download>the MIT license</a>. The <a href=\"/docs/en/exemples/\">example archives</a> already include them.</p>\n<p>Write JavaScript directly or compile TypeScript with your own tools. Ship the resulting static files; the .d.ts file supplies editor types.</p>\n<h2 id=\"matrice\">System requirements</h2>\n<div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Task, Linux, Windows\"><table><thead><tr><th>Task</th><th>Linux</th><th>Windows</th></tr></thead><tbody><tr><td>Create, preview and package</td><td>Node.js 22+</td><td>Node.js 22+</td></tr><tr><td>Run a package in the overlay</td><td>Import in Control Center</td><td>Import in Control Center</td></tr><tr><td>Native development and devtools</td><td>Installed CLI and Control Center for the same user</td><td>Compatible OverCrow installation</td></tr><tr><td>Native development display</td><td>Offscreen; import a package to test in game</td><td>Same behavior</td></tr></tbody></table></div>\n<p><strong>Linux :</strong> Hyprland 0.55+ Wayland, Plasma 6 Wayland, GNOME 46–50 Wayland or X11/EWMH.<br/><strong>Windows :</strong> Windows 10 1809+ or Windows 11 x64, with WebView2 and the application’s graphics prerequisites.</p>\n<p>Use windowed or borderless games. Exclusive fullscreen is unsupported.</p>\n<h2 id=\"obtenir-overcrow\">Install OverCrow</h2>\n<p><a href=\"https://github.com/Valhallab/playervox-overcrow-releases/releases\" rel=\"noreferrer\">Download an official release</a>. On Linux, check that the native CLI is available:</p>"
+        "html": "<h2 id=\"kit\">Start with the kit</h2>\n<p>The <a href=\"/docs/en/kit-createur/\">creator kit</a> includes the SDK, templates and local tools. Install Node.js 22+ and follow <a href=\"/docs/en/premier-widget/\">Your first widget</a>.</p>\n<h2 id=\"telechargements\">Download the SDK</h2>\n<p>For an existing project, download <a href=\"/docs/downloads/overcrow.js\" download>overcrow.js</a>, <a href=\"/docs/downloads/overcrow.d.ts\" download>the TypeScript declarations</a> and <a href=\"/docs/downloads/LICENSE\" download>the MIT license</a>. The <a href=\"/docs/en/exemples/\">example archives</a> already include them.</p>\n<p>Write JavaScript directly or compile TypeScript with your own tools. Ship the resulting static files; the .d.ts file supplies editor types.</p>\n<h2 id=\"matrice\">System requirements</h2>\n<div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Task, Linux, Windows\"><table><thead><tr><th>Task</th><th>Linux</th><th>Windows</th></tr></thead><tbody><tr><td>Create, preview and package</td><td>Node.js 22+</td><td>Node.js 22+</td></tr><tr><td>Run a package in the overlay</td><td>Import in Control Center</td><td>Import in Control Center</td></tr><tr><td>Native development and devtools</td><td>Installed CLI and Control Center for the same user</td><td>Compatible OverCrow installation</td></tr><tr><td>Native development display</td><td>Offscreen; import a package to test in game</td><td>Same behavior</td></tr></tbody></table></div>\n<p><strong>Linux :</strong> Hyprland 0.55+ Wayland, Plasma 6 Wayland, GNOME 46–50 Wayland or X11/EWMH.<br/><strong>Windows :</strong> Windows 10 1809+ or Windows 11 x64, with WebView2 and the application’s graphics prerequisites.</p>\n<p>Use windowed or borderless games. Exclusive fullscreen is unsupported.</p>\n<h2 id=\"obtenir-overcrow\">Install OverCrow</h2>\n<p><a href=\"https://github.com/Valhallab/playervox-overcrow-releases/releases\" rel=\"noreferrer\">Download an official release</a>. On Linux, check that the native CLI is available:</p>"
       },
       {
         "kind": "code",
@@ -269,7 +269,7 @@
     "blocks": [
       {
         "kind": "html",
-        "html": "<p>Install Node.js 22+, then extract the kit. <a href=\"https://github.com/Valhallab/playervox-overcrow-releases/tree/main/tools/creator-kit\" rel=\"noreferrer\">The source</a> is available on GitHub; the download is pinned to this documentation revision.</p>\n<p><a class=\"button-primary\" href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/creator-kit.zip\" download>Download the creator kit ↓</a> &nbsp; <a href=\"/studio/en/\">Or use the online Studio →</a></p>\n<h2 id=\"creer\">Create a project</h2>"
+        "html": "<p>Install Node.js 22+, then extract the kit. <a href=\"https://github.com/Valhallab/playervox-overcrow-releases/tree/main/tools/creator-kit\" rel=\"noreferrer\">The source</a> is available on GitHub; the download is pinned to this documentation revision.</p>\n<p><a class=\"button-primary\" href=\"/docs/downloads/creator-kit.zip\" download>Download the creator kit ↓</a> &nbsp; <a href=\"/studio/en/\">Or use the online Studio →</a></p>\n<h2 id=\"creer\">Create a project</h2>"
       },
       {
         "kind": "code",
@@ -289,7 +289,7 @@
       },
       {
         "kind": "html",
-        "html": "<p>Keep API keys, personal fixtures and build tools outside <code>widget/</code>. Place your framework’s compiled static output there.</p>\n<p>Edit Counter/Checklist labels in <code>widget/locales/en.mjs</code> and <code>fr.mjs</code>. <code>i18n.mjs</code> updates <code>data-i18n</code> elements and the page language; edit interactions in <code>view.js</code>.</p>\n<p>In Studio, select/reset templates in the header and manage files in the explorer. Update imports after renaming. Download the project to keep browser drafts elsewhere; the ZIP preserves empty folders.</p>\n<h2 id=\"commandes\">Commands</h2>\n<div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Command, Result\"><table><thead><tr><th>Command</th><th>Result</th></tr></thead><tbody><tr><td>npm run dev</td><td>Browser preview; reloads valid edits.</td></tr><tr><td>npm run check</td><td>Validate sources and manifest without changes.</td></tr><tr><td>npm run package</td><td>Calculate hashes and export to .overcrow-output/.</td></tr><tr><td>npm run dev -- --native</td><td>Native session; keeps the controller during view reloads.</td></tr><tr><td>npm run doctor</td><td>Report Node, OS and native host availability.</td></tr></tbody></table></div>\n<p>Ctrl+C stops a session. For another preview port: <code>npm run dev -- --port 4176</code>.</p>\n<h2 id=\"apercu\">Browser preview</h2>\n<p>Open the printed 127.0.0.1 URL. Simulate the session, language and overlay mode. Invalid edits keep the last valid view; permission changes require a restart.</p>\n<ul><li>The three-dot menu adjusts content scale (50–175%) and frame opacity (0–100%); starters use 100%. Use sliders or enter a percentage. Widget CSS backgrounds stay independent.</li>\n<li>Drag the 22-pixel top strip to move. The starter’s lower-right handle resizes from its fixed upper-left corner. Arrow keys work when focused; Shift increases the step.</li>\n<li>The eye controls passive visibility. Passive mode hides frame controls and updates SDK visibility and <code>overlayMode</code>. Close is illustrative. Escape or an outside click closes options.</li>\n<li>Frame settings survive widget reloads until page refresh. OverCrow supplies this frame; keep it outside your widget.</li></ul>\n<p>Reload restarts view and controller. Legacy browser storage is separated by widget ID; use <code>getItem/setItem</code> instead of <code>localStorage.myKey</code>. <a href=\"/docs/en/api-stockage/\">SDK storage behavior</a>.</p>\n<h2 id=\"fixtures\">Simulate data</h2>"
+        "html": "<p>Keep API keys, personal fixtures and build tools outside <code>widget/</code>. Place your framework’s compiled static output there.</p>\n<p>Edit Counter/Checklist labels in <code>widget/locales/en.mjs</code> and <code>fr.mjs</code>. <code>i18n.mjs</code> updates <code>data-i18n</code> elements and the page language; edit interactions in <code>view.js</code>.</p>\n<p>In Studio, select/reset templates in the header and manage files in the explorer. Update imports after renaming. Download the project to keep browser drafts elsewhere; the ZIP preserves empty folders.</p>\n<h2 id=\"commandes\">Commands</h2>\n<div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Command, Result\"><table><thead><tr><th>Command</th><th>Result</th></tr></thead><tbody><tr><td>npm run dev</td><td>Browser preview; reloads valid edits.</td></tr><tr><td>npm run check</td><td>Validate sources and manifest without changes.</td></tr><tr><td>npm run package</td><td>Calculate hashes and export to .overcrow-output/.</td></tr><tr><td>npm run dev -- --native</td><td>Native session; keeps the controller during view reloads.</td></tr><tr><td>npm run doctor</td><td>Report Node, OS and native host availability.</td></tr></tbody></table></div>\n<p>Ctrl+C stops a session. For another preview port: <code>npm run dev -- --port 4176</code>.</p>\n<h2 id=\"apercu\">Browser preview</h2>\n<p>Open the printed 127.0.0.1 URL. Simulate the session, language and overlay mode. Invalid edits keep the last valid view; permission changes require a restart.</p>\n<ul><li>The three-dot menu adjusts content scale (50–175%) and frame opacity (0–100%); starters use 100%. Use sliders or enter a percentage. Widget CSS backgrounds stay independent.</li>\n<li>Drag the 22-pixel top strip to move. The starter’s lower-right handle resizes from its fixed upper-left corner. Arrow keys work when focused; Shift increases the step.</li>\n<li>The eye controls passive visibility. Passive mode hides frame controls and updates SDK visibility and <code>overlayMode</code>. Close is illustrative. Escape or an outside click closes options.</li>\n<li>Frame settings survive widget reloads until page refresh. OverCrow supplies this frame; keep it outside your widget.</li></ul>\n<p>Reload restarts view and controller. The simulator keeps widget data in temporary memory. <a href=\"/docs/en/api-stockage/\">SDK storage behavior</a>.</p>\n<h2 id=\"fixtures\">Simulate data</h2>"
       },
       {
         "kind": "code",
@@ -375,7 +375,7 @@
       },
       {
         "kind": "html",
-        "html": "<p>Keep <code>id</code> stable across updates: it identifies the widget’s installation and storage.</p>\n<h2 id=\"champs\">Fields</h2>\n<div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Field, Meaning\"><table><thead><tr><th>Field</th><th>Meaning</th></tr></thead><tbody><tr><td>schemaVersion</td><td>The number 1.</td></tr><tr><td>apiVersion</td><td>The string \"1\", or \"2\" for host services and presentation.</td></tr><tr><td>id</td><td>Stable lowercase reverse-domain ID, such as com.example.my-widget.</td></tr><tr><td>version</td><td>Widget SemVer, such as 1.0.0; increase it for updates.</td></tr><tr><td>entrypoints.view</td><td>Local HTML page to display.</td></tr><tr><td>entrypoints.controller</td><td>Optional local HTML controller.</td></tr><tr><td>permissions</td><td>The network, events, storage, clipboard or native capabilities you need.</td></tr><tr><td>localization</td><td>Languages you ship and the default locale.</td></tr><tr><td>presentation</td><td>API v2 sizing and native options.</td></tr><tr><td>files</td><td>Generated file sizes and SHA-256 hashes.</td></tr></tbody></table></div>\n<p><a href=\"/docs/en/api-services/\">See API v2 host services</a> and <a href=\"/docs/en/api-langue/\">language declarations</a>.</p>\n<h2 id=\"reseau\">Allow an HTTPS request</h2>"
+        "html": "<p>Keep <code>id</code> stable across updates: it identifies the widget’s installation and storage.</p>\n<h2 id=\"champs\">Fields</h2>\n<div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Field, Meaning\"><table><thead><tr><th>Field</th><th>Meaning</th></tr></thead><tbody><tr><td>schemaVersion</td><td>The number 1.</td></tr><tr><td>apiVersion</td><td>The string \"1\". Required for every widget.</td></tr><tr><td>id</td><td>Stable lowercase reverse-domain ID, such as com.example.my-widget.</td></tr><tr><td>version</td><td>Widget SemVer, such as 1.0.0; increase it for updates.</td></tr><tr><td>entrypoints.view</td><td>Local HTML page to display.</td></tr><tr><td>entrypoints.controller</td><td>Optional local HTML controller.</td></tr><tr><td>permissions</td><td>The network, events, storage, clipboard or native capabilities you need.</td></tr><tr><td>localization</td><td>Languages you ship and the default locale.</td></tr><tr><td>presentation</td><td>API v1 sizing and native options.</td></tr><tr><td>files</td><td>Generated file sizes and SHA-256 hashes.</td></tr></tbody></table></div>\n<p><a href=\"/docs/en/api-services/\">See API v1 host services</a> and <a href=\"/docs/en/api-langue/\">language declarations</a>.</p>\n<h2 id=\"reseau\">Allow an HTTPS request</h2>"
       },
       {
         "kind": "code",
@@ -418,28 +418,28 @@
         "title": "Use a source archive"
       },
       {
-        "id": "references-v2",
+        "id": "references",
         "title": "More widget examples"
       }
     ],
     "blocks": [
       {
         "kind": "html",
-        "html": "<h2 id=\"blank\">Blank · empty view</h2><p>HTML, CSS, JavaScript and manifest, with the SDK and license. Add your own interface.</p><p><a class=\"button-primary\" href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/blank.zip\" download>Download sources ↓</a> &nbsp; <a href=\"/studio/en/\">Edit in Studio →</a></p><h2 id=\"compteur\">Counter · first widget</h2><p>A counter with two buttons. Learn layout and packaging with a view that uses no network or storage.</p><p><a class=\"button-primary\" href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/counter.zip\" download>Download sources ↓</a> &nbsp; <a href=\"/studio/en/\">Edit in Studio →</a></p><h2 id=\"checklist\">Checklist · saved tasks</h2><p>Add, check and remove tasks. Data is versioned and validated; invalid data is reported and preserved. Requests <code>storage: true</code>.</p><p><a class=\"button-primary\" href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/checklist.zip\" download>Download sources ↓</a> &nbsp; <a href=\"/studio/en/\">Edit in Studio →</a></p><h2 id=\"marche\">Warframe Market · API and cache</h2><p>Search a catalog, list buy/sell offers and copy a message. A controller manages requests and an IndexedDB cache. Permissions: GET to <code>https://api.warframe.market/v2/</code>, storage and clipboard writes.</p><p><a class=\"button-primary\" href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/warframe-market.zip\" download>Download sources ↓</a></p><p>Warframe Market is reference bundle 2.0.5, including its bundled SDK. <a href=\"https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/warframe-market\" rel=\"noreferrer\">Source history ↗</a>.</p>\n<h2 id=\"utilisation\">Use a source archive</h2>\n<p>Create a <a href=\"/docs/en/kit-createur/\">creator-kit project</a>, then copy the extracted files into its <code>widget/</code>. Choose your own ID and version, and keep MIT notices. You can also use the <a href=\"/docs/en/developpement/\">Linux native CLI</a>.</p>\n<p>These archives are sources. Package and import them to test rendering and interaction in OverCrow. Counter and Checklist are starter projects, not marketplace listings.</p>"
+        "html": "<h2 id=\"blank\">Blank · empty view</h2><p>HTML, CSS, JavaScript and manifest, with the SDK and license. Add your own interface.</p><p><a class=\"button-primary\" href=\"/docs/downloads/blank.zip\" download>Download sources ↓</a> &nbsp; <a href=\"/studio/en/\">Edit in Studio →</a></p><h2 id=\"compteur\">Counter · first widget</h2><p>A counter with two buttons. Learn layout and packaging with a view that uses no network or storage.</p><p><a class=\"button-primary\" href=\"/docs/downloads/counter.zip\" download>Download sources ↓</a> &nbsp; <a href=\"/studio/en/\">Edit in Studio →</a></p><h2 id=\"checklist\">Checklist · saved tasks</h2><p>Add, check and remove tasks. Data is versioned and validated; invalid data is reported and preserved. Requests <code>storage: true</code>.</p><p><a class=\"button-primary\" href=\"/docs/downloads/checklist.zip\" download>Download sources ↓</a> &nbsp; <a href=\"/studio/en/\">Edit in Studio →</a></p><h2 id=\"marche\">Warframe Market · API and cache</h2><p>Search a catalog, list buy/sell offers and copy a message. A controller manages requests and an IndexedDB cache. Permissions: GET to <code>https://api.warframe.market/v2/</code>, storage and clipboard writes.</p><p><a class=\"button-primary\" href=\"/docs/downloads/warframe-market.zip\" download>Download sources ↓</a></p><p>Warframe Market is reference bundle 2.0.6, including its bundled SDK. <a href=\"https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/warframe-market\" rel=\"noreferrer\">Source history ↗</a>.</p>\n<h2 id=\"utilisation\">Use a source archive</h2>\n<p>Create a <a href=\"/docs/en/kit-createur/\">creator-kit project</a>, then copy the extracted files into its <code>widget/</code>. Choose your own ID and version, and keep MIT notices. You can also use the <a href=\"/docs/en/developpement/\">Linux native CLI</a>.</p>\n<p>These archives are sources. Package and import them to test rendering and interaction in OverCrow. Counter and Checklist are starter projects, not marketplace listings.</p>"
       },
       {
         "kind": "html",
-        "html": "<h2 id=\"references-v2\">More widget examples</h2><p>The examples include English and French labels. Session and Clock use the game context and JavaScript time; Performance, FPS and Media use <a href=\"/docs/en/api-services/\">host services</a>. Notes, Stopwatch and Journal own their data in <a href=\"/docs/en/api-stockage/\">widget storage</a>. Score calls the <a href=\"/docs/en/api-playervox/\">public PlayerVox API</a>.</p>"
+        "html": "<h2 id=\"references\">More widget examples</h2><p>The examples include English and French labels. Session and Clock use the game context and JavaScript time; Performance, FPS and Media use <a href=\"/docs/en/api-services/\">host services</a>. Notes, Stopwatch and Journal own their data in <a href=\"/docs/en/api-stockage/\">widget storage</a>. Score calls the <a href=\"/docs/en/playervox-score/\">public PlayerVox API</a>.</p>"
       },
       {
         "kind": "html",
-        "html": "<p><a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/session.zip\">session</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/clock.zip\">clock</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/performance.zip\">performance</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/fps.zip\">fps</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/media.zip\">media</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/stopwatch.zip\">stopwatch</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/notes.zip\">notes</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/journal.zip\">journal</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/score.zip\">score</a></p>"
+        "html": "<p><a href=\"/docs/downloads/session.zip\">session</a> · <a href=\"/docs/downloads/clock.zip\">clock</a> · <a href=\"/docs/downloads/performance.zip\">performance</a> · <a href=\"/docs/downloads/fps.zip\">fps</a> · <a href=\"/docs/downloads/media.zip\">media</a> · <a href=\"/docs/downloads/stopwatch.zip\">stopwatch</a> · <a href=\"/docs/downloads/notes.zip\">notes</a> · <a href=\"/docs/downloads/journal.zip\">journal</a> · <a href=\"/docs/downloads/score.zip\">score</a></p>"
       }
     ]
   },
   {
     "key": "stopwatch",
-    "slug": "api-stopwatch",
+    "slug": "stopwatch",
     "group": "build",
     "label": "Stopwatch",
     "title": "Make a stopwatch",
@@ -447,7 +447,7 @@
     "headings": [
       {
         "id": "permissions",
-        "title": "Storage permission"
+        "title": "Permissions"
       },
       {
         "id": "example",
@@ -458,8 +458,8 @@
         "title": "How it works"
       },
       {
-        "id": "data-and-controls",
-        "title": "Saving and migration"
+        "id": "next-steps",
+        "title": "Going further"
       }
     ],
     "blocks": [
@@ -485,13 +485,13 @@
       },
       {
         "kind": "html",
-        "html": "<h2 id=\"control\">How it works</h2><p><code>performance.now()</code> measures elapsed time. The interval only refreshes the display; reloading resets the timer.</p><h2 id=\"data-and-controls\">Going further</h2><p>For persistence, use <a href=\"/docs/en/api-stockage/\">your widget’s storage</a>. For the active game’s duration, read <a href=\"/docs/en/api-jeu/\">sessionElapsedMs</a>. The built-in stopwatch remains private; remove old stopwatch capabilities and SDK calls.</p>"
+        "html": "<h2 id=\"control\">How it works</h2><p><code>performance.now()</code> measures elapsed time. The interval only refreshes the display; reloading resets the timer.</p><h2 id=\"next-steps\">Going further</h2><p>For persistence, use <a href=\"/docs/en/api-stockage/\">your widget’s storage</a>. For the active game’s duration, read <a href=\"/docs/en/api-jeu/\">sessionElapsedMs</a>.</p>"
       }
     ]
   },
   {
     "key": "notes",
-    "slug": "api-notes",
+    "slug": "notes",
     "group": "build",
     "label": "Notes",
     "title": "Save a note",
@@ -506,8 +506,8 @@
         "title": "Minimal editor"
       },
       {
-        "id": "actions-and-saving",
-        "title": "Saving and migration"
+        "id": "saving",
+        "title": "Saving"
       }
     ],
     "blocks": [
@@ -539,13 +539,13 @@
       },
       {
         "kind": "html",
-        "html": "<h2 id=\"actions-and-saving\">Saving and migration</h2><p>The button saves only this widget’s text. A failed write leaves it in the editor. Check <code>overcrow.storage.getInfo()</code> to distinguish <code>persistent</code> from <code>temporary</code>; see the <a href=\"/docs/en/api-stockage/\">storage guide</a> for limits and error handling.</p><p>For a checklist, save an array of your own items. The <a href=\"/docs/en/exemples/#checklist\">Checklist starter</a> provides a complete example. Remove the old notes capabilities and calls from existing manifests and code; there is no SDK access to the built-in note list or editor.</p>"
+        "html": "<h2 id=\"saving\">Saving</h2><p>The button saves only this widget’s text. A failed write leaves it in the editor. Check <code>overcrow.storage.getInfo()</code> to distinguish <code>persistent</code> from <code>temporary</code>; see the <a href=\"/docs/en/api-stockage/\">storage guide</a> for limits and error handling.</p><p>For a checklist, save an array of your own items. The <a href=\"/docs/en/exemples/#checklist\">Checklist starter</a> provides a complete example. Widget storage is separate from the built-in note list and editor.</p>"
       }
     ]
   },
   {
     "key": "playervox",
-    "slug": "api-playervox",
+    "slug": "playervox-score",
     "group": "build",
     "label": "Public score",
     "title": "Read a public PlayerVox score",
@@ -560,8 +560,8 @@
         "title": "Show the Portal 2 score"
       },
       {
-        "id": "ratings-and-reviews",
-        "title": "Accounts and migration"
+        "id": "public-data",
+        "title": "Public data"
       }
     ],
     "blocks": [
@@ -587,13 +587,13 @@
       },
       {
         "kind": "html",
-        "html": "<p>The score uses a 0–100 scale; <code>null</code> means no rating is available. To show another game, change both the URL and its manifest permission. The browser preview needs a matching response fixture. See the <a href=\"/docs/en/api-reseau/\">network guide</a> for HTTP errors and request limits.</p><h2 id=\"ratings-and-reviews\">Accounts and migration</h2><p>Remove the old PlayerVox capabilities and SDK calls. Public widgets cannot use OverCrow’s PlayerVox login, personal ratings, followed players, reviews or native editors. The public score request reads no connected-account state.</p>"
+        "html": "<p>The score uses a 0–100 scale; <code>null</code> means no rating is available. To show another game, change both the URL and its manifest permission. The browser preview needs a matching response fixture. See the <a href=\"/docs/en/api-reseau/\">network guide</a> for HTTP errors and request limits.</p><h2 id=\"public-data\">Public data</h2><p>Public widgets cannot use OverCrow’s PlayerVox login, personal ratings, followed players, reviews or native editors. The public score request reads no connected-account state.</p>"
       }
     ]
   },
   {
     "key": "journal",
-    "slug": "api-journal",
+    "slug": "journal",
     "group": "build",
     "label": "Session log",
     "title": "Keep a session log",
@@ -608,8 +608,8 @@
         "title": "Save the current session"
       },
       {
-        "id": "pages-and-actions",
-        "title": "History and migration"
+        "id": "history",
+        "title": "Your history"
       }
     ],
     "blocks": [
@@ -637,11 +637,11 @@
         "kind": "code",
         "language": "javascript",
         "title": "view.js",
-        "source": "import overcrow from './overcrow.js';\nconst save = document.querySelector('#save');\nconst output = document.querySelector('#entries');\nconst status = document.querySelector('#status');\nsave.onclick = async () => {\n  save.disabled = true;\n  try {\n    const game = await overcrow.game.snapshot();\n    if (!game.selectedActive || game.sessionElapsedMs == null) throw new Error('No session');\n    const entries = await overcrow.storage.get('sessions') ?? [];\n    if (!Array.isArray(entries) || entries.length > 20 || entries.some(x => typeof x !== 'string')) {\n      throw new Error('Invalid session log');\n    }\n    const entry = `${new Date().toISOString()} · ${Math.floor(game.sessionElapsedMs / 60000)} min`;\n    const next = [...entries, entry].slice(-20);\n    await overcrow.storage.set('sessions', next);\n    output.textContent = next.join('\\n');\n    status.textContent = 'Saved';\n  } catch { status.textContent = 'Could not save this session.'; }\n  finally { save.disabled = false; }\n};"
+        "source": "import overcrow from './overcrow.js';\nconst save = document.querySelector('#save');\nconst output = document.querySelector('#entries');\nconst status = document.querySelector('#status');\nsave.onclick = async () => {\n  save.disabled = true;\n  try {\n    const game = await overcrow.game.snapshot();\n    if (!game.selectedActive || game.sessionElapsedMs == null) throw new Error('No session');\n    const stored = await overcrow.storage.get('sessions');\n    const entries = stored === undefined ? [] : stored;\n    if (!Array.isArray(entries) || entries.length > 20 || entries.some(x => typeof x !== 'string')) {\n      throw new Error('Invalid session log');\n    }\n    const entry = `${new Date().toISOString()} · ${Math.floor(game.sessionElapsedMs / 60000)} min`;\n    const next = [...entries, entry].slice(-20);\n    await overcrow.storage.set('sessions', next);\n    output.textContent = next.join('\\n');\n    status.textContent = 'Saved';\n  } catch { status.textContent = 'Could not save this session.'; }\n  finally { save.disabled = false; }\n};"
       },
       {
         "kind": "html",
-        "html": "<h2 id=\"pages-and-actions\">History and migration</h2><p>This is a log of button clicks, not an automatic record of completed games. Add your own fields, pagination or delete controls as needed. Only overwrite stored data after validating its shape; keep the last displayed entries if a write fails.</p><p>Remove the old journal capabilities and calls. No native history or account data is copied into widget storage. The <a href=\"/docs/en/api-jeu/\">game context</a> supplies only the current session; the <a href=\"/docs/en/api-stockage/\">storage guide</a> covers limits and persistence.</p>"
+        "html": "<h2 id=\"history\">Your history</h2><p>This is a log of button clicks, not an automatic record of completed games. Add your own fields, pagination or delete controls as needed. Only overwrite stored data after validating its shape; keep the last displayed entries if a write fails.</p><p>No native history or account data is copied into widget storage. The <a href=\"/docs/en/api-jeu/\">game context</a> supplies only the current session; the <a href=\"/docs/en/api-stockage/\">storage guide</a> covers limits and persistence.</p>"
       }
     ]
   },
@@ -755,7 +755,7 @@
       },
       {
         "kind": "html",
-        "html": "<p>A snapshot contains the session data available from OverCrow. A missing game or sensor can leave values unavailable. Check the type before formatting; zero is a valid measurement.</p>\n<h2 id=\"champs\">Snapshot fields</h2>\n<div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Field, Type / unit\"><table><thead><tr><th>Field</th><th>Type / unit</th></tr></thead><tbody><tr><td>running / selectedActive</td><td>Game/session activity booleans. A minimal snapshot may contain only running.</td></tr><tr><td>steamAppId</td><td>Number or null; no title or artwork.</td></tr><tr><td>sessionElapsedMs</td><td>Session duration in milliseconds, or null.</td></tr><tr><td>overlayMode</td><td>\"passive\" or \"interactive\".</td></tr><tr><td>cpuPercentHundredths</td><td>Process CPU in hundredths of a percent, or null.</td></tr><tr><td>residentBytes</td><td>Resident memory in bytes, or null.</td></tr><tr><td>cpuTemperatureMillicelsius / gpuTemperatureMillicelsius</td><td>Thousandths of a Celsius degree, or null.</td></tr></tbody></table></div>\n<p><code>GameSnapshot</code> describes these optional fields. Extra JSON fields are preserved; an invalid type in a known field rejects with <code>invalid_response</code>.</p>\n<p>This snapshot has no FPS, inventory, health or player-position field. <a href=\"/docs/en/api-services/\">Use host services</a> for features such as FPS, subject to host support.</p>\n<h2 id=\"abonnement\">Follow changes</h2>"
+        "html": "<p>A snapshot contains the current game session context. Check values before formatting; a missing duration is unavailable, while zero is valid.</p>\n<h2 id=\"champs\">Snapshot fields</h2>\n<div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Field, Type / unit\"><table><thead><tr><th>Field</th><th>Type / unit</th></tr></thead><tbody><tr><td>running / selectedActive</td><td>Game/session activity booleans.</td></tr><tr><td>steamAppId</td><td>Number or null; no title or artwork.</td></tr><tr><td>sessionElapsedMs</td><td>Session duration in milliseconds, or null.</td></tr><tr><td>overlayMode</td><td>\"passive\" or \"interactive\".</td></tr></tbody></table></div>\n<p><code>GameSnapshot</code> validates these fields and projects only the documented context. An invalid type rejects with <code>invalid_response</code>. The simulator may add <code>fixture: true</code> to identify fictional data.</p>\n<p>CPU, memory and temperatures require <code>telemetry.read</code>; FPS requires <code>fps.read</code>. See the <a href=\"/docs/en/api-performance/\">performance guide</a>. Game context contains no inventory, health or player position.</p>\n<h2 id=\"abonnement\">Follow changes</h2>\n"
       },
       {
         "kind": "code",
@@ -775,7 +775,7 @@
       },
       {
         "kind": "html",
-        "html": "<p>The host or fixture must actually emit this name. Native snapshot changes use <code>onSnapshot</code>. A replay field such as <code>elapsedMs</code> is separate from the native <code>sessionElapsedMs</code>.</p>\n<h2 id=\"replay\">Test with a fixture</h2>\n<p><a href=\"/docs/en/developpement/\">Replay ordered events</a> to test your handlers without a game. Use OverCrow for actual game and sensor availability.</p>"
+        "html": "<p>The host or fixture must actually emit this name. Native snapshot changes use <code>onSnapshot</code>. A replay field such as <code>elapsedMs</code> is separate from the native <code>sessionElapsedMs</code>.</p>\n<h2 id=\"replay\">Test with a fixture</h2>\n<p><a href=\"/docs/en/developpement/\">Replay ordered events</a> to test your handlers without a game. Use OverCrow to verify the actual game context.</p>"
       },
       {
         "kind": "html",
@@ -824,20 +824,20 @@
         "title": "Try an example"
       },
       {
-        "id": "migration",
-        "title": "Update an existing widget"
+        "id": "widget-features",
+        "title": "Build your own features"
       }
     ],
     "blocks": [
       {
         "kind": "html",
-        "html": "<p>The host supplies <a href=\"/docs/en/api-performance/\">telemetry and FPS</a>, <a href=\"/docs/en/api-media/\">media information and playback controls</a>, and presentation settings. Your widget implements its own interface and features.</p><p>Other runtime tools cover <a href=\"/docs/en/api-jeu/\">current game context</a>, <a href=\"/docs/en/api-stockage/\">storage guide</a>, <a href=\"/docs/en/api-reseau/\">network guide</a>, <a href=\"/docs/en/api-presse-papiers/\">clipboard writes</a> and <a href=\"/docs/en/api-runtime/\">lifecycle and messages</a>.</p><h2 id=\"permissions\">1. Declare permissions</h2><p>Use <code>apiVersion: \"2\"</code> for host services. The available capabilities are <code>telemetry.read</code>, <code>fps.read</code>, <code>media.read</code> and <code>media.control</code>. Merge only the ones you need into your manifest:</p>"
+        "html": "<p>The host supplies <a href=\"/docs/en/api-performance/\">telemetry and FPS</a>, <a href=\"/docs/en/api-media/\">media information and playback controls</a>, and presentation settings. Your widget implements its own interface and features.</p><p>Other runtime tools cover <a href=\"/docs/en/api-jeu/\">current game context</a>, <a href=\"/docs/en/api-stockage/\">storage guide</a>, <a href=\"/docs/en/api-reseau/\">network guide</a>, <a href=\"/docs/en/api-presse-papiers/\">clipboard writes</a> and <a href=\"/docs/en/api-runtime/\">lifecycle and messages</a>.</p><h2 id=\"permissions\">1. Declare permissions</h2><p>Use <code>apiVersion: \"1\"</code> for host services. The available capabilities are <code>telemetry.read</code>, <code>fps.read</code>, <code>media.read</code> and <code>media.control</code>. Merge only the ones you need into your manifest:</p>"
       },
       {
         "kind": "code",
         "language": "json",
         "title": "manifest.json · fields to merge",
-        "source": "{\n  \"apiVersion\": \"2\",\n  \"permissions\": { \"capabilities\": [\"fps.read\"] }\n}"
+        "source": "{\n  \"apiVersion\": \"1\",\n  \"permissions\": { \"capabilities\": [\"fps.read\"] }\n}"
       },
       {
         "kind": "html",
@@ -851,7 +851,7 @@
       },
       {
         "kind": "html",
-        "html": "<h2 id=\"disponibilite\">Handle unavailable data</h2><p>A service snapshot contains <code>{ status, data, contextId, revision }</code>. Only <code>ready</code> and <code>stale</code> can include data; individual measurements may still be <code>null</code>.</p><table><thead><tr><th>Status</th><th>What to show</th></tr></thead><tbody><tr><td><code>ready</code></td><td>Current data.</td></tr><tr><td><code>stale</code></td><td>Older data and its age, <code>sampleAgeMs</code>.</td></tr><tr><td><code>unavailable</code> / <code>notConnected</code></td><td>A placeholder for a missing source.</td></tr><tr><td><code>unsupported</code></td><td>This host or platform lacks the feature.</td></tr><tr><td><code>permissionDenied</code></td><td>A missing permission notice.</td></tr><tr><td><code>rateLimited</code></td><td>Wait before retrying; use <code>retryAfterMs</code> when supplied.</td></tr></tbody></table><p>For a one-off read, use <code>snapshot()</code> and catch errors. <code>overcrow.host.capabilities()</code> reports <code>supported</code> and <code>granted</code>. Without a host or simulator, a read rejects with <code>bridge_unavailable</code>; an initial subscription failure reports <code>unavailable</code>.</p><p>Keep at most 128 active subscriptions and 32 pending actions. Unsubscribe when the view is disposed. Ignore replies from an old context.</p><h2 id=\"donnees\">Find fields and units</h2><p>The service pages describe fields, units and limits; the <a href=\"/docs/downloads/overcrow.d.ts\" download>TypeScript definitions</a> give the complete types. Treat missing measurements as unavailable.</p><h2 id=\"actions\">Media controls</h2><p>Call <code>overcrow.media.previous()</code>, <code>playPause()</code> or <code>next()</code> directly from a click in an interactive view. The host checks the permission and a short-lived, single-use user gesture. A result of <code>accepted</code> means queued; follow media snapshots for the resulting playback state.</p><p>Handle errors such as <code>permission_denied</code>, <code>unsupported_operation</code>, <code>stale_context</code> and <code>rate_limited</code>. Let the user retry after refreshing the state.</p><h2 id=\"presentation\">Size and display options</h2><table><thead><tr><th><code>presentation.sizing.mode</code></th><th>Behavior</th></tr></thead><tbody><tr><td><code>intrinsic</code></td><td>Fits the content.</td></tr><tr><td><code>autoHeight</code></td><td>Automatic height, adjustable width.</td></tr><tr><td><code>manual</code></td><td>Both dimensions can be resized.</td></tr></tbody></table><p>Declare integer <code>preferred</code>, <code>min</code> and <code>max</code> dimensions in the manifest. Up to 16 <code>boolean</code>, <code>enum</code> or bounded <code>number</code> options can appear in the host menu, with English and French labels. Read values through <code>overcrow.presentation.onSnapshot()</code>, in <code>data.options</code>.</p><p>From a view, report your content’s preferred unscaled CSS size, with integers from 1 to 4096. For example, a 240 × 80 widget:</p>"
+        "html": "<h2 id=\"disponibilite\">Handle unavailable data</h2><p>A service snapshot contains <code>{ status, data, contextId, revision }</code>. Only <code>ready</code> and <code>stale</code> can include data; individual measurements may still be <code>null</code>.</p><table><thead><tr><th>Status</th><th>What to show</th></tr></thead><tbody><tr><td><code>ready</code></td><td>Current data.</td></tr><tr><td><code>stale</code></td><td>Older data and its age, <code>sampleAgeMs</code>.</td></tr><tr><td><code>unavailable</code></td><td>A placeholder for a missing source.</td></tr><tr><td><code>unsupported</code></td><td>This host or platform lacks the feature.</td></tr><tr><td><code>permissionDenied</code></td><td>A missing permission notice.</td></tr></tbody></table><p>For a one-off read, use <code>snapshot()</code> and catch errors. <code>overcrow.host.capabilities()</code> reports <code>supported</code> and <code>granted</code>. Without a host or simulator, a read rejects with <code>bridge_unavailable</code>; an initial subscription failure reports <code>unavailable</code>.</p><p>Keep at most 128 active subscriptions and 32 pending actions. Unsubscribe when the view is disposed. Ignore replies from an old context.</p><h2 id=\"donnees\">Find fields and units</h2><p>The service pages describe fields, units and limits; the <a href=\"/docs/downloads/overcrow.d.ts\" download>TypeScript definitions</a> give the complete types. Treat missing measurements as unavailable.</p><h2 id=\"actions\">Media controls</h2><p>Call <code>overcrow.media.previous()</code>, <code>playPause()</code> or <code>next()</code> directly from a click in an interactive view. The host checks the permission and a short-lived, single-use user gesture. A result of <code>accepted</code> means queued; follow media snapshots for the resulting playback state.</p><p>Handle errors such as <code>permission_denied</code>, <code>unsupported_operation</code>, <code>stale_context</code> and <code>rate_limited</code>. Let the user retry after refreshing the state.</p><h2 id=\"presentation\">Size and display options</h2><table><thead><tr><th><code>presentation.sizing.mode</code></th><th>Behavior</th></tr></thead><tbody><tr><td><code>intrinsic</code></td><td>Fits the content.</td></tr><tr><td><code>autoHeight</code></td><td>Automatic height, adjustable width.</td></tr><tr><td><code>manual</code></td><td>Both dimensions can be resized.</td></tr></tbody></table><p>Declare integer <code>preferred</code>, <code>min</code> and <code>max</code> dimensions in the manifest. Up to 16 <code>boolean</code>, <code>enum</code> or bounded <code>number</code> options can appear in the host menu, with English and French labels. Read values through <code>overcrow.presentation.onSnapshot()</code>, in <code>data.options</code>.</p><p>From a view, report your content’s preferred unscaled CSS size, with integers from 1 to 4096. For example, a 240 × 80 widget:</p>"
       },
       {
         "kind": "code",
@@ -861,7 +861,7 @@
       },
       {
         "kind": "html",
-        "html": "<p><code>reportSize()</code> and media controls return <code>{ status: \"accepted\" }</code> on success; failures reject. Size reporting is available only to views.</p><p>Group repeated size changes before reporting them. OverCrow owns frame position, resize, opacity, scale and passive visibility. See the <a href=\"/docs/en/exemples/#references-v2\">reference manifests</a> for complete options.</p><h2 id=\"confidentialite\">Widget and application data</h2><p>Widget storage is isolated from other widgets and built-in application data. The SDK exposes no built-in notes, stopwatch state, session history or connected PlayerVox/Twitch accounts.</p><p>Media permissions are sensitive: they cannot be combined with outbound network or clipboard writes, and they force temporary storage even with <code>storage: true</code>. Artwork is available only through <code>overcrow.assets.read(handle)</code> for a handle supplied by the media service. See the <a href=\"/docs/en/api-media/\">media guide</a> and <a href=\"/docs/en/api-stockage/\">storage guide</a>.</p><h2 id=\"simulation\">Try an example</h2><p>The <a href=\"/docs/en/exemples/#references-v2\">reference widgets</a> include performance, FPS and media displays. Browser previews use fictional service data; media controls change only that data. FPS defaults to <code>unsupported</code>. Test actual availability and permissions in OverCrow.</p><h2 id=\"migration\">Update an existing widget</h2><p>Replace <code>overcrow.js</code> and <code>overcrow.d.ts</code> together. API v1 remains supported; use <code>apiVersion: \"2\"</code> for capabilities or presentation. <code>game.onSnapshot()</code> still emits future updates only, and its original CPU units remain unchanged.</p><p>Remove withdrawn built-in service capabilities and calls from older API v2 widgets. Implement <a href=\"/docs/en/api-notes/\">notes</a>, a <a href=\"/docs/en/api-stopwatch/\">stopwatch</a> or a <a href=\"/docs/en/api-journal/\">session log</a> with JavaScript and widget storage. Read a <a href=\"/docs/en/api-playervox/\">public PlayerVox score</a> through the network API. The <a href=\"/docs/en/api-twitch/\">Twitch migration note</a> explains the removed integration.</p>"
+        "html": "<p><code>reportSize()</code> and media controls return <code>{ status: \"accepted\" }</code> on success; failures reject. Size reporting is available only to views.</p><p>Group repeated size changes before reporting them. OverCrow owns frame position, resize, opacity, scale and passive visibility. See the <a href=\"/docs/en/exemples/#references\">reference manifests</a> for complete options.</p><h2 id=\"confidentialite\">Widget and application data</h2><p>Widget storage is isolated from other widgets and built-in application data. The SDK exposes no built-in notes, stopwatch state, session history or connected PlayerVox/Twitch accounts.</p><p>Media permissions are sensitive: they cannot be combined with outbound network or clipboard writes, and they force temporary storage even with <code>storage: true</code>. Artwork is available only through <code>overcrow.assets.read(handle)</code> for a handle supplied by the media service. See the <a href=\"/docs/en/api-media/\">media guide</a> and <a href=\"/docs/en/api-stockage/\">storage guide</a>.</p><h2 id=\"simulation\">Try an example</h2><p>The <a href=\"/docs/en/exemples/#references\">reference widgets</a> include performance, FPS and media displays. Browser previews use fictional service data; media controls change only that data. FPS defaults to <code>unsupported</code>. Test actual availability and permissions in OverCrow.</p><h2 id=\"widget-features\">Build your own features</h2><p>Create <a href=\"/docs/en/notes/\">notes</a>, a <a href=\"/docs/en/stopwatch/\">stopwatch</a> or a <a href=\"/docs/en/journal/\">session log</a> with JavaScript and widget storage. Read a <a href=\"/docs/en/playervox-score/\">public PlayerVox score</a> through the network API.</p>"
       }
     ]
   },
@@ -895,7 +895,7 @@
         "kind": "code",
         "language": "json",
         "title": "manifest.json (fragment)",
-        "source": "{\n  \"apiVersion\": \"2\",\n  \"permissions\": {\n    \"network\": [],\n    \"clipboardWrite\": false,\n    \"capabilities\": [\n      \"telemetry.read\",\n      \"fps.read\"\n    ]\n  }\n}"
+        "source": "{\n  \"apiVersion\": \"1\",\n  \"permissions\": {\n    \"network\": [],\n    \"clipboardWrite\": false,\n    \"capabilities\": [\n      \"telemetry.read\",\n      \"fps.read\"\n    ]\n  }\n}"
       },
       {
         "kind": "html",
@@ -909,7 +909,7 @@
       },
       {
         "kind": "html",
-        "html": "<h2 id=\"data-and-limits\">Units and availability</h2><table><thead><tr><th>Field</th><th>Meaning</th></tr></thead><tbody><tr><td><code>normalizedCpuPercentHundredths</code></td><td>0–10000; divide by 100 for total-machine CPU percent.</td></tr><tr><td><code>residentBytes</code></td><td>Bytes; divide by 1048576 for MiB.</td></tr><tr><td><code>cpuTemperatureMillicelsius</code>, <code>gpuTemperatureMillicelsius</code></td><td>Host sensor temperatures; divide by 1000 for °C.</td></tr><tr><td>FPS <code>value</code>, <code>sampleAgeMs</code>, <code>stale</code></td><td>Frame rate, measurement age in milliseconds, and freshness.</td></tr></tbody></table><p>Every measurement can be null, even when the service is <code>ready</code>. Keep a stale label and its age when showing old data; an absent age is unknown. A service marked <code>unsupported</code> has no provider on that host.</p><p>Linux CPU and memory cover the selected Steam process group or manually selected process descendants. Windows uses the validated target process. Temperatures describe host sensors, not the game process. Windows CPU temperature is unavailable; Windows FPS needs the validated capture service. Native Wayland currently has no FPS source.</p><p>The API v1 <code>game.cpuPercentHundredths</code> field keeps its original meaning; do not treat it as normalized CPU. Browser preview measurements are fictional and FPS defaults to unsupported.</p><p>Continue with <a href=\"/docs/en/api-services/#donnees\">shared service rules</a>, the <a href=\"/docs/downloads/overcrow.d.ts\">complete TypeScript definitions</a> and the <a href=\"/docs/en/exemples/#references-v2\">working reference widgets</a>.</p>"
+        "html": "<h2 id=\"data-and-limits\">Units and availability</h2><table><thead><tr><th>Field</th><th>Meaning</th></tr></thead><tbody><tr><td><code>normalizedCpuPercentHundredths</code></td><td>0–10000; divide by 100 for total-machine CPU percent.</td></tr><tr><td><code>residentBytes</code></td><td>Bytes; divide by 1048576 for MiB.</td></tr><tr><td><code>cpuTemperatureMillicelsius</code>, <code>gpuTemperatureMillicelsius</code></td><td>Host sensor temperatures; divide by 1000 for °C.</td></tr><tr><td>FPS <code>value</code>, <code>sampleAgeMs</code>, <code>stale</code></td><td>Frame rate, measurement age in milliseconds, and freshness.</td></tr></tbody></table><p>Every measurement can be null, even when the service is <code>ready</code>. Keep a stale label and its age when showing old data; an absent age is unknown. A service marked <code>unsupported</code> has no provider on that host.</p><p>Linux CPU and memory cover the selected Steam process group or manually selected process descendants. Windows uses the validated target process. Temperatures describe host sensors, not the game process. Windows CPU temperature is unavailable; Windows FPS needs the validated capture service. Native Wayland currently has no FPS source.</p><p>System measurements require <code>telemetry.read</code>; the game snapshot contains session context only. Browser preview measurements are fictional and FPS is unsupported by default.</p><p>Continue with <a href=\"/docs/en/api-services/#donnees\">shared service rules</a>, the <a href=\"/docs/downloads/overcrow.d.ts\">complete TypeScript definitions</a> and the <a href=\"/docs/en/exemples/#references\">working reference widgets</a>.</p>"
       }
     ]
   },
@@ -930,7 +930,7 @@
         "title": "Minimal example"
       },
       {
-        "id": "data-and-controls",
+        "id": "next-steps",
         "title": "Track information and controls"
       }
     ],
@@ -943,7 +943,7 @@
         "kind": "code",
         "language": "json",
         "title": "manifest.json (fragment)",
-        "source": "{\n  \"apiVersion\": \"2\",\n  \"permissions\": {\n    \"network\": [],\n    \"clipboardWrite\": false,\n    \"capabilities\": [\n      \"media.read\",\n      \"media.control\"\n    ]\n  }\n}"
+        "source": "{\n  \"apiVersion\": \"1\",\n  \"permissions\": {\n    \"network\": [],\n    \"clipboardWrite\": false,\n    \"capabilities\": [\n      \"media.read\",\n      \"media.control\"\n    ]\n  }\n}"
       },
       {
         "kind": "html",
@@ -957,7 +957,7 @@
       },
       {
         "kind": "html",
-        "html": "<h2 id=\"data-and-controls\">Track information and controls</h2><p><code>title</code>, <code>artist</code> and <code>artworkHandle</code> can be null. <code>playbackState</code> is playing, paused or stopped. Show text with <code>textContent</code> and clear the old track when data becomes unavailable.</p><p><code>actions.previous</code>, <code>actions.playPause</code> and <code>actions.next</code> describe the player’s available controls. Call <code>previous()</code>, <code>playPause()</code> or <code>next()</code> from a user interaction. An available player action still needs the widget’s control permission. Handle errors and use subsequent snapshots for the resulting playback state; <code>accepted</code> only means queued.</p><p>An artwork handle is an opaque identifier, not an image URL. <code>await overcrow.assets.read(handle)</code> returns a local PNG Blob, at most 512 KiB. Create an object URL to display it, revoke that URL when replaced or closed, and discard a late image response if the track or context changed. Never replace the handle with an external URL.</p><p>Sensitive permissions force temporary browser data even when storage is requested. Native session/account changes discard that browser data. Preview playback controls affect fictional data only.</p><p>Continue with <a href=\"/docs/en/api-services/#confidentialite\">shared service rules</a>, the <a href=\"/docs/downloads/overcrow.d.ts\">complete TypeScript definitions</a> and the <a href=\"/docs/en/exemples/#references-v2\">working reference widgets</a>.</p>"
+        "html": "<h2 id=\"next-steps\">Track information and controls</h2><p><code>title</code>, <code>artist</code> and <code>artworkHandle</code> can be null. <code>playbackState</code> is playing, paused or stopped. Show text with <code>textContent</code> and clear the old track when data becomes unavailable.</p><p><code>actions.previous</code>, <code>actions.playPause</code> and <code>actions.next</code> describe the player’s available controls. Call <code>previous()</code>, <code>playPause()</code> or <code>next()</code> from a user interaction. An available player action still needs the widget’s control permission. Handle errors and use subsequent snapshots for the resulting playback state; <code>accepted</code> only means queued.</p><p>An artwork handle is an opaque identifier, not an image URL. <code>await overcrow.assets.read(handle)</code> returns a local PNG Blob, at most 512 KiB. Create an object URL to display it, revoke that URL when replaced or closed, and discard a late image response if the track or context changed. Never replace the handle with an external URL.</p><p>Sensitive permissions force temporary browser data even when storage is requested. Runtime or game-session changes discard that browser data. Preview playback controls affect fictional data only.</p><p>Continue with <a href=\"/docs/en/api-services/#confidentialite\">shared service rules</a>, the <a href=\"/docs/downloads/overcrow.d.ts\">complete TypeScript definitions</a> and the <a href=\"/docs/en/exemples/#references\">working reference widgets</a>.</p>"
       }
     ]
   },
@@ -1067,7 +1067,7 @@
     "blocks": [
       {
         "kind": "html",
-        "html": "<h2 id=\"permission\">Keep data between sessions</h2><p>Use <code>overcrow.storage</code> to save JSON locally. Since SDK 1.3, this API provides an isolated JSON store for each widget. It never reads or changes built-in notes, history, preferences or accounts. Native OverCrow uses IndexedDB. To request persistence, add this to <code>permissions</code> in your manifest:</p>"
+        "html": "<h2 id=\"permission\">Keep data between sessions</h2><p>Use <code>overcrow.storage</code> to save JSON locally. This API provides an isolated JSON store for each widget. It never reads or changes built-in notes, history, preferences or accounts. Native OverCrow uses IndexedDB. To request persistence, add this to <code>permissions</code> in your manifest:</p>"
       },
       {
         "kind": "code",
@@ -1097,7 +1097,7 @@
       },
       {
         "kind": "html",
-        "html": "<h2 id=\"cache\">Limits and errors</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Widget storage\"><table><thead><tr><th>Item</th><th>Limit</th></tr></thead><tbody><tr><td>Keys</td><td>256 keys; 1–128 UTF-8 bytes each.</td></tr><tr><td>Values</td><td>JSON only; 64 KiB per value, 64 nesting levels.</td></tr><tr><td>Operations</td><td>32 pending requests; opening and each transaction time out after 5 seconds.</td></tr></tbody></table></div><p>Catch errors around awaited calls. On <code>storage_quota_exceeded</code> or <code>storage_unavailable</code>, keep the displayed data and report the failure. <code>invalid_storage_key</code> and <code>invalid_storage_value</code> indicate invalid inputs. Other codes are <code>busy</code>, <code>invalid_response</code>, <code>stale_context</code> and <code>bridge_unavailable</code>. An older host without this API returns <code>unsupported</code>; update OverCrow.</p><h2 id=\"recuperation\">Protect saved work</h2><ul><li>Keep the widget ID stable. Validate and version stored documents; preserve unreadable data for recovery.</li><li>A separate <code>get()</code> then <code>set()</code> is not atomic. Centralize concurrent writes in the controller.</li><li>Persistence is not a backup. SDK data is not included in exported packages or Studio project drafts.</li></ul><p>Existing localStorage/IndexedDB data is not migrated or deleted. Advanced IndexedDB use remains subject to the native policy; use a separate database, never <code>overcrow.sdk.storage</code>. Raw IndexedDB is unavailable in the online Studio. Never store credentials.</p>"
+        "html": "<h2 id=\"cache\">Limits and errors</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Widget storage\"><table><thead><tr><th>Item</th><th>Limit</th></tr></thead><tbody><tr><td>Keys</td><td>256 keys; 1–128 UTF-8 bytes each.</td></tr><tr><td>Values</td><td>JSON only; 64 KiB per value, 64 nesting levels.</td></tr><tr><td>Operations</td><td>32 pending requests; opening and each transaction time out after 5 seconds.</td></tr></tbody></table></div><p>Catch errors around awaited calls. On <code>storage_quota_exceeded</code> or <code>storage_unavailable</code>, keep the displayed data and report the failure. <code>invalid_storage_key</code> and <code>invalid_storage_value</code> indicate invalid inputs. Other codes are <code>busy</code>, <code>invalid_response</code>, <code>stale_context</code> and <code>bridge_unavailable</code>.</p><h2 id=\"recuperation\">Protect saved work</h2><ul><li>Keep the widget ID stable. Validate and version stored documents; preserve unreadable data for recovery.</li><li>A separate <code>get()</code> then <code>set()</code> is not atomic. Centralize concurrent writes in the controller.</li><li>Persistence is not a backup. SDK data is not included in exported packages or Studio project drafts.</li></ul><p>Advanced IndexedDB use remains subject to the native policy; use a separate database, never <code>overcrow.sdk.storage</code>. Raw IndexedDB is unavailable in the online Studio. Never store credentials.</p>"
       }
     ]
   },
@@ -1350,38 +1350,6 @@
       {
         "kind": "html",
         "html": "\n<p>The command validates manifest and files and creates a deterministic stored ZIP with the .ocpkg extension. It neither signs nor installs nor publishes. Changes to bytes require re-preparation, and each new published widget version needs a new version number.</p>\n<h2 id=\"fiche\">Prepare a listing</h2><p><code>listing.json</code> describes the author, license, source and catalog translations. It is separate from runtime files. Listing translations do not declare languages actually supplied by the widget.</p>\n<p><a href=\"https://github.com/Valhallab/playervox-overcrow-releases/blob/main/docs/creator-guide.md\" rel=\"noreferrer\">Read the marketplace creator guide ↗</a> and <a href=\"https://github.com/Valhallab/playervox-overcrow-releases/blob/main/docs/review-policy.md\" rel=\"noreferrer\">review policy ↗</a>.</p>\n<p><strong>Marketplace screenshot.</strong> Add a PNG to your widget, for example <code>widget/preview.png</code>, before preparing its package. In the publication sidecar <code>listing.json</code>, set <code>\"preview\": \"preview.png\"</code> or another relative path such as <code>\"preview\": \"images/screenshot.png\"</code>. The image must appear in the generated <code>manifest.files</code> ledger. Use a static PNG of at most 256 KiB and 1,024 × 1,024 pixels; 960 × 600 is a useful landscape format. URLs, SVGs, animated images and paths outside the widget are rejected.</p><p>The marketplace displays the admitted image on cards and detail pages, with a neutral placeholder if it is absent. Changing a published screenshot requires a new widget version and signed publication.</p>\n<h2 id=\"admission\">Review and installation</h2><p>Review and publication use the validated listing, manifest and exact package bytes. The signed catalog and installation consent are separate from local development. “Open in OverCrow” opens a listing in Control Center; it does not install or activate a widget automatically.</p>\n<h2 id=\"licences\">Licenses</h2><p>The SDK and examples here are MIT-licensed; keep their notices. They do not force you to license your own widget under MIT. The public policy for admitting third-party licenses is still pending; successful format validation alone does not authorize publication.</p>"
-      }
-    ]
-  },
-  {
-    "key": "twitch",
-    "slug": "api-twitch",
-    "group": "troubleshooting",
-    "label": "Twitch migration",
-    "title": "Twitch integration removed",
-    "description": "The public SDK no longer shares OverCrow’s built-in Twitch connection.",
-    "headings": [
-      {
-        "id": "permissions",
-        "title": "Remove old permissions"
-      },
-      {
-        "id": "example",
-        "title": "Remove old SDK calls"
-      },
-      {
-        "id": "write-and-reply",
-        "title": "Messages and replies"
-      },
-      {
-        "id": "connection-and-messages",
-        "title": "Connected accounts"
-      }
-    ],
-    "blocks": [
-      {
-        "kind": "html",
-        "html": "<p class=\"lead\">The public SDK has no Twitch integration. Widgets cannot access the built-in Twitch account, chat state or native connection.</p><h2 id=\"permissions\">Remove old permissions</h2><p>Remove <code>twitch.chat.read</code> and <code>twitch.chat.compose</code> from existing manifests.</p><h2 id=\"example\">Remove old SDK calls</h2><p>Remove <code>overcrow.twitch</code> calls. The Twitch reference template and download are no longer distributed.</p><h2 id=\"write-and-reply\">Messages and replies</h2><p>The SDK provides no shared chat, native composer or reply action.</p><h2 id=\"connection-and-messages\">Connected accounts</h2><p>OverCrow’s built-in Twitch login and tokens remain private to the application. There is no replacement public SDK API in this release. See the <a href=\"/docs/en/api-services/\">available host services</a>.</p>"
       }
     ]
   },

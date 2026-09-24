@@ -28,9 +28,9 @@ async function fixtures(project) {
     if(services.snapshots!==undefined) {
       if(!object(services.snapshots))invalid();
       for(const [name,envelope] of Object.entries(services.snapshots)) {
-        if(!Object.hasOwn(READ_CAPABILITIES,name)||!object(envelope)||Object.keys(envelope).some(key=>!['status','data','sampleAgeMs','retryAfterMs'].includes(key))||!['ready','stale','unavailable','unsupported','permissionDenied','notConnected','rateLimited'].includes(envelope.status))invalid();
+        if(!Object.hasOwn(READ_CAPABILITIES,name)||!object(envelope)||Object.keys(envelope).some(key=>!['status','data','sampleAgeMs'].includes(key))||!['ready','stale','unavailable','unsupported','permissionDenied'].includes(envelope.status))invalid();
         if(envelope.status==='ready'?!object(envelope.data):envelope.status==='stale'?envelope.data!==null&&!object(envelope.data):envelope.data!==null)invalid();
-        for(const key of ['sampleAgeMs','retryAfterMs'])if(Object.hasOwn(envelope,key)&&(!Number.isSafeInteger(envelope[key])||envelope[key]<0))invalid();
+        for(const key of ['sampleAgeMs'])if(Object.hasOwn(envelope,key)&&(!Number.isSafeInteger(envelope[key])||envelope[key]<0))invalid();
       }
     }
   }

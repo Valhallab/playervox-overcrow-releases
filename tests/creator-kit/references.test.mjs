@@ -33,7 +33,7 @@ test("every SDK-only reference initializes, validates and exports the shipped SD
     );
     assert.equal(result.status, 0, `${name}: ${result.stdout}${result.stderr}`);
     const bundle = await collect(project);
-    assert.equal(bundle.manifest.apiVersion, "2");
+    assert.equal(bundle.manifest.apiVersion, "1");
     assert.equal(
       bundle.manifest.permissions.network.length,
       name === "score" ? 1 : 0,

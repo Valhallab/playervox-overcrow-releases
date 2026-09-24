@@ -95,35 +95,30 @@ function createServiceValidation(ErrorClass, clone) {
       }}),
   };
 
-  function emptyCapabilities() {
-    return Object.fromEntries(SERVICE_CAPABILITIES.map(name => [name, {supported: false, granted: false}]));
-  }
-
   function services(raw) {
-    if (raw === undefined) return {contextId: null, revision: 0, capabilities: emptyCapabilities(), snapshots: {}};
     let value;
     try { value = clone(raw); } catch (_) { invalid(); }
     object(value);
-    if (value.apiVersion !== 2) invalid();
-    const result = {contextId: id(value.contextId), revision: revision(value.revision), capabilities: emptyCapabilities(), snapshots: {}};
+    if (value.apiVersion !== 1) invalid();
+    const result = {contextId: id(value.contextId), revision: revision(value.revision), capabilities: {}, snapshots: {}};
     if (/[\u0000-\u001f\u007f-\u009f]/u.test(result.contextId)) invalid();
     object(value.capabilities);
+    if (Object.keys(value.capabilities).length !== SERVICE_CAPABILITIES.length) invalid();
     for (const [name, access] of Object.entries(value.capabilities)) {
       if (!SERVICE_CAPABILITIES.includes(name)) invalid();
       result.capabilities[name] = shape({supported: bool, granted: bool})(access);
       if (access.granted && !access.supported) invalid();
     }
     object(value.snapshots);
+    if (Object.keys(value.snapshots).length !== Object.keys(checks).length) invalid();
     for (const [name, envelope] of Object.entries(value.snapshots)) {
       if (!Object.hasOwn(checks, name)) invalid();
       object(envelope);
-      const status = choice(['ready', 'stale', 'unavailable', 'unsupported', 'permissionDenied', 'notConnected', 'rateLimited'])(envelope.status);
+      const status = choice(['ready', 'stale', 'unavailable', 'unsupported', 'permissionDenied'])(envelope.status);
       if (status !== 'ready' && status !== 'stale' && envelope.data !== null) invalid();
       const data = envelope.data === null && status !== 'ready' ? null : checks[name](envelope.data);
       const snapshot = {status, data};
-      for (const key of ['sampleAgeMs', 'retryAfterMs']) {
-        if (Object.hasOwn(envelope, key)) snapshot[key] = integer()(envelope[key]);
-      }
+      if (Object.hasOwn(envelope, 'sampleAgeMs')) snapshot.sampleAgeMs = integer()(envelope.sampleAgeMs);
       result.snapshots[name] = snapshot;
     }
     return result;
@@ -195,17 +190,12 @@ function createServices({native, role, ErrorClass, clone}) {
   const validateAction = createServiceActions(ErrorClass);
   const subscribers = new Set();
   let current = null;
-  let newestRevision = -1;
   let readPending = null;
-  let eventSequence = 0;
   let pendingActions = 0;
   const fail = (code, message) => { throw new ErrorClass(code, message); };
   const nativeErrorCodes = new Set([
-    'capability_denied', 'permission_denied', 'not_connected', 'stale_context',
-    'unavailable', 'unsupported', 'unsupported_operation', 'rate_limited', 'offline', 'invalid_response',
-    'invalid_request', 'role_denied', 'expired', 'refused',
-    'storage_unavailable', 'busy', 'browser_unavailable', 'revocation_pending',
-    'queue_full', 'forbidden', 'gesture_required', 'native_failure',
+    'capability_denied', 'permission_denied', 'stale_context', 'unavailable',
+    'unsupported_operation', 'invalid_request', 'role_denied', 'busy',
   ]);
 
   async function request(metadata) {
@@ -221,18 +211,12 @@ function createServices({native, role, ErrorClass, clone}) {
     if (!checked || typeof checked !== 'object' || Array.isArray(checked)) {
       fail('invalid_response', 'Native service response is invalid');
     }
-    if (Object.hasOwn(checked, 'error')) {
-      const code = typeof checked.error === 'string' ? checked.error : checked.error?.code;
+    if (checked.ok === false) {
+      const code = checked.error?.code;
       if (!nativeErrorCodes.has(code)) fail('invalid_response', 'Native service rejection is invalid');
-      const error = new ErrorClass(code, `OverCrow service request failed (${code})`);
-      const retry = checked.error?.retryAfterMs ?? checked.retryAfterMs;
-      if (retry !== undefined) {
-        if (!Number.isSafeInteger(retry) || retry < 0) fail('invalid_response', 'Native service retry delay is invalid');
-        error.retryAfterMs = retry;
-      }
-      throw error;
+      fail(code, `OverCrow service request failed (${code})`);
     }
-    if ((Object.hasOwn(checked, 'ok') && checked.ok !== true) || !Object.hasOwn(checked, 'value')) {
+    if (checked.ok !== true || Object.hasOwn(checked, 'error') || !Object.hasOwn(checked, 'value')) {
       fail('invalid_response', 'Native service response is invalid');
     }
     return checked.value;
@@ -240,7 +224,7 @@ function createServices({native, role, ErrorClass, clone}) {
 
   function envelope(frame, name) {
     return clone({contextId: frame.contextId, revision: frame.revision,
-      ...(frame.snapshots[name] ?? {status: 'unsupported', data: null})});
+      ...frame.snapshots[name]});
   }
 
   function schedule(subscriber, value) {
@@ -262,9 +246,7 @@ function createServices({native, role, ErrorClass, clone}) {
   }
 
   function accept(frame) {
-    // Keep the watermark after context loss so late private data stays retired.
-    if (frame.contextId !== null && frame.revision <= newestRevision) return current;
-    if (frame.contextId !== null) newestRevision = frame.revision;
+    if (current && frame.revision <= current.revision) return current;
     current = frame;
     for (const subscriber of subscribers) schedule(subscriber, envelope(frame, subscriber.name));
     return frame;
@@ -273,22 +255,17 @@ function createServices({native, role, ErrorClass, clone}) {
   function receiveSnapshot(snapshot) {
     let frame;
     try { frame = validation.services(snapshot.services); } catch (_) { return; }
-    eventSequence += 1;
     accept(frame);
   }
 
   function readCurrent() {
     if (readPending) return readPending;
-    const startedAtEvent = eventSequence;
     readPending = (async () => {
       const snapshot = await request({type: 'gameSnapshot'});
       if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
         fail('invalid_response', 'Native game snapshot is invalid');
       }
       const frame = validation.services(snapshot.services);
-      // An old-host initial response cannot erase an event that established v2.
-      if (startedAtEvent !== eventSequence && current
-          && (frame.contextId === null || current.contextId === null)) return current;
       return accept(frame);
     })();
     const pending = readPending;
@@ -315,7 +292,6 @@ function createServices({native, role, ErrorClass, clone}) {
   }
 
   function requireAccess(frame, capabilities) {
-    if (frame.contextId === null) fail('unsupported', 'Native service API is unsupported');
     if (capabilities.length === 0) return;
     if (!capabilities.some(name => frame.capabilities[name].supported)) {
       fail('unsupported', 'Native service capability is unsupported');
@@ -659,17 +635,17 @@ function checkedSnapshot(value) {
   const snapshot = checkedJson(value);
   const invalid = () => { throw new OvercrowError('invalid_response', 'Native game snapshot is invalid'); };
   if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) invalid();
-  for (const key of ['running', 'selectedActive']) {
+  for (const key of ['running', 'selectedActive', 'fixture']) {
     if (Object.hasOwn(snapshot, key) && typeof snapshot[key] !== 'boolean') invalid();
   }
   if (Object.hasOwn(snapshot, 'overlayMode') && !['passive', 'interactive'].includes(snapshot.overlayMode)) invalid();
-  for (const key of ['steamAppId', 'sessionElapsedMs', 'cpuPercentHundredths', 'residentBytes', 'cpuTemperatureMillicelsius', 'gpuTemperatureMillicelsius']) {
+  for (const key of ['steamAppId', 'sessionElapsedMs']) {
     if (!Object.hasOwn(snapshot, key) || snapshot[key] === null) continue;
     const number = snapshot[key];
-    if (!Number.isSafeInteger(number) || (!key.endsWith('TemperatureMillicelsius') && number < 0)) invalid();
+    if (!Number.isSafeInteger(number) || number < 0) invalid();
   }
-  // Keep missing and extension fields intact for older hosts and replay fixtures.
-  return snapshot;
+  return Object.fromEntries(['running', 'selectedActive', 'steamAppId', 'sessionElapsedMs', 'overlayMode', 'fixture']
+    .filter(key => Object.hasOwn(snapshot, key)).map(key => [key, snapshot[key]]));
 }
 
 async function invoke(metadata, body = EMPTY_BODY) {
@@ -733,7 +709,7 @@ if (nativeAtLoad) {
     } else if (event.type === 'gameSnapshot') {
       let snapshot;
       try { snapshot = checkedSnapshot(event.payload); } catch (_) { return; }
-      services.receiveSnapshot(snapshot);
+      services.receiveSnapshot(event.payload);
       for (const listener of [...snapshotListeners]) listener(checkedJson(snapshot));
     } else if (event.type === 'gameEvent' && typeof event.event === 'string') {
       for (const listener of [...(gameListeners.get(event.event) ?? [])]) listener(event.payload);

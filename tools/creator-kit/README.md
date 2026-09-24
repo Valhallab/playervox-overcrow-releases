@@ -1,7 +1,7 @@
 # OverCrow Creator Kit 1.0.0
 
 Public, dependency-free authoring tools for **Node.js 22+**, Windows and Linux.
-SDK **1.3.0**, Web API v1 and v2. The code is MIT-licensed. No application source, Rust
+SDK **1.3.0**, Web API v1. The code is MIT-licensed. No application source, Rust
 compiler, Python, D-Bus or package installation is required by the downloaded kit.
 
 ```sh
@@ -32,7 +32,11 @@ initially 100% for the starter templates) affects the host background and border
 or type a percentage and press Enter or leave the field. Backgrounds painted by
 the widget itself remain unchanged. The eye chooses whether the widget stays visible in passive mode. The Mode selector switches the whole overlay and sends the corresponding SDK snapshot and visibility events; only close is illustrative.
 Move the widget
-from its 22-pixel top strip. API v1 keeps its manual frame and bottom-right resize handle. API v2 supports intrinsic size without a handle, autoHeight with a horizontal-only handle, and manual dimensions. Content-size reports use unscaled CSS layout pixels; the wrapper applies scale once. The upper-left corner stays fixed while resizing, within the canvas bounds. Wrapper controls are hidden in passive mode; use the Mode selector to return to interactive mode. Focus
+from its 22-pixel top strip. Presentation supports intrinsic size without a handle,
+autoHeight with a horizontal-only handle, and manual dimensions with a bottom-right
+handle. Content-size reports use unscaled CSS layout pixels; the wrapper applies
+scale once. The upper-left corner stays fixed while resizing, within the canvas
+bounds. Wrapper controls are hidden in passive mode; use the Mode selector to return to interactive mode. Focus
 either control and use arrow keys
 (Shift for 10-pixel steps). Appearance and frame size survive widget reloads until the preview page itself is refreshed. This wrapper belongs to the
 host: do not implement it in widget/; it is never included in an exported package.
@@ -40,8 +44,8 @@ host: do not implement it in widget/; it is never included in an exported packag
 regardless of the persistence permission. Its data resets on preview reload or
 a simulated game session change and is never packaged. Native mode uses the
 actual OverCrow IndexedDB partition and effective persistence policy.
-The simulator restarts both documents on reload; legacy persistent browser storage is
-namespaced by widget ID but remains separate from OverCrow's native storage.
+The simulator restarts both documents on reload. Browser storage is scoped to the
+widget and remains separate from OverCrow's native storage.
 The preview refresh and drag icons are from Lucide; its license is included in
 `preview/lucide-LICENSE.txt` (or `tooling/preview/` inside a project).
 Its Storage facade supports getItem/setItem/removeItem/clear/key/length; property
@@ -71,10 +75,11 @@ failure modes. Browser devtools remain available for inspecting your widget.
 
 Use `--template session`, `clock`, `performance`, `fps`, `media`, `stopwatch`,
 `notes`, `journal`, or `score` for a complete reference with English/French labels
-and API v2 presentation settings. Session reads the game context; Clock uses
+and presentation settings. Every template declares `"apiVersion": "1"`.
+Session reads the game context; Clock uses
 JavaScript time. Performance, FPS and Media use the host services. Stopwatch uses JavaScript time without persistence.
 Notes and Journal keep their own data in isolated `overcrow.storage`. Score uses anonymous `overcrow.fetch` to read the public
-PlayerVox score API. Blank, Counter and Checklist retain API v1.
+PlayerVox score API.
 
 ```sh
 node overcrow.mjs init my-notes --template notes
@@ -82,8 +87,8 @@ node overcrow.mjs init my-notes --template notes
 
 Public widgets cannot access built-in notes, stopwatch state, journal history or
 connected PlayerVox/Twitch accounts. The SDK has no native login, rating editor,
-review browser or Twitch composer. Rating, Reviews and Twitch reference templates
-are no longer distributed.
+review browser or Twitch integration. Its four service capabilities are
+`telemetry.read`, `fps.read`, `media.read` and `media.control`.
 
 The browser preview uses fictional telemetry, FPS and media data. Media controls
 change only the fixture; independent widgets update their own temporary storage.
@@ -106,8 +111,9 @@ Add optional service fixtures outside `widget/` in `preview.json`:
 ```
 
 Fixtures cannot grant a capability absent from the manifest. Set `granted:false`
-or a service's `permissionDenied`, `unavailable`, `unsupported` or `rateLimited`
-status with `data:null` to exercise fallback UI. The simulator owns context IDs
+or a service's `permissionDenied`, `unavailable` or `unsupported` status with
+`data:null` to exercise fallback UI. `ready` supplies current data; `stale` marks
+older data. The simulator owns context IDs
 and monotonic revisions. Never put real credentials or private content in
 fixtures. Media permissions are sensitive: they cannot be combined with outbound
 network or clipboard writes, and they force temporary storage even when
@@ -168,6 +174,6 @@ be checked on Linux by extracting an exported archive and running
 an offline validation, not an application install or native overlay session.
 
 Media grants force temporary browser storage even with `storage` declared.
-Runtime/session/account changes discard temporary browser data. Widget storage is
+Runtime or game-session changes discard temporary browser data. Widget storage is
 isolated from built-in application data. The browser simulator keeps only fictional
 fixtures and does not reproduce the native browser sandbox.

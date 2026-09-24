@@ -4,7 +4,7 @@ import { createServiceSimulator } from "../../tools/creator-kit/preview/services
 import { WEB_CAPABILITIES } from "../../tools/creator-kit/lib/manifest.mjs";
 
 const manifest = (capabilities = WEB_CAPABILITIES) => ({
-  apiVersion: "2",
+  apiVersion: "1",
   permissions: { capabilities, network: [], clipboardWrite: false },
   presentation: {
     sizing: {
@@ -66,13 +66,15 @@ test("direct requests cannot reach retired built-in services", () => {
   }
 });
 
-test("simulator returns explicit fake v2 DTOs, capability grants and honest unavailable FPS", () => {
+test("simulator returns explicit fake service DTOs, capability grants and honest unavailable FPS", () => {
   const sim = createServiceSimulator({
     manifest: manifest(["telemetry.read"]),
   });
-  const snapshot = sim.snapshot({ running: true });
+  const snapshot = sim.snapshot({ running: true, residentBytes: 123, notes: ["private"] });
   assert.equal(snapshot.fixture, true);
-  assert.equal(snapshot.services.apiVersion, 2);
+  assert.equal(snapshot.residentBytes, undefined);
+  assert.equal(snapshot.notes, undefined);
+  assert.equal(snapshot.services.apiVersion, 1);
   assert.deepEqual(snapshot.services.capabilities["telemetry.read"], {
     supported: true,
     granted: true,
@@ -89,12 +91,6 @@ test("simulator returns explicit fake v2 DTOs, capability grants and honest unav
     status: "unsupported",
     data: null,
   });
-  assert.equal(
-    createServiceSimulator({
-      manifest: { apiVersion: "1", permissions: {} },
-    }).snapshot().services,
-    undefined,
-  );
 });
 
 test("the shipped SDK consumes every simulator DTO and rejects ungranted actions", async () => {

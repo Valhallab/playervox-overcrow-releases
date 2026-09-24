@@ -59,10 +59,7 @@ export function createServiceSimulator({
         if (Object.hasOwn(supplied, name))
           snapshots[name] = copy(supplied[name]);
       }
-    const declared =
-      manifest.apiVersion === "2"
-        ? (manifest.permissions?.capabilities ?? [])
-        : [];
+    const declared = manifest.permissions?.capabilities ?? [];
     const outbound = Boolean(
       manifest.permissions?.network?.length ||
       manifest.permissions?.clipboardWrite,
@@ -89,11 +86,13 @@ export function createServiceSimulator({
     names.length === 0 || names.some((name) => capabilities[name]?.granted);
   function snapshot(nextBase) {
     if (nextBase !== undefined) {
-      base = copy(nextBase);
-      delete base.services;
+      base = Object.fromEntries(
+        ["running", "selectedActive", "steamAppId", "sessionElapsedMs", "overlayMode"]
+          .filter((key) => Object.hasOwn(nextBase, key))
+          .map((key) => [key, copy(nextBase[key])]),
+      );
     }
     const result = { ...copy(base), fixture: true };
-    if (manifest.apiVersion !== "2") return result;
     const visible = {};
     for (const [name, required] of Object.entries(READ_CAPABILITIES)) {
       if (!granted(required)) {
@@ -112,7 +111,7 @@ export function createServiceSimulator({
       visible[name] = copy(snapshots[name]);
     }
     result.services = {
-      apiVersion: 2,
+      apiVersion: 1,
       contextId,
       revision: frameRevision,
       capabilities: copy(capabilities),
@@ -127,7 +126,6 @@ export function createServiceSimulator({
   function request(metadata, { role, interactive } = {}) {
     if (disposed || metadata?.contextId !== contextId)
       return failure("stale_context");
-    if (manifest.apiVersion !== "2") return failure("unsupported_operation");
     const definition = Object.hasOwn(definitions, metadata?.action)
         ? definitions[metadata.action]
         : null,

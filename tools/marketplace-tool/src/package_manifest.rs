@@ -1,5 +1,5 @@
 // MIT License. Copyright (c) 2026 Valhallab SASU.
-// Public package validation mirrors the closed Web API v2 manifest contract.
+// Public package validation mirrors the closed Web API v1 manifest contract.
 use std::collections::BTreeSet;
 
 use serde::Deserialize;

@@ -55,7 +55,7 @@ export function validateManifest(manifest,names) {
   fields(manifest,['schemaVersion','id','version','apiVersion','entrypoints','permissions','localization','presentation','files'],'');
   const require=(condition,pointer,message,action='Corrigez ce champ dans widget/manifest.json.')=>{if(!condition)fail('manifest.invalid',message,action,pointer);};
   require(manifest.schemaVersion===1,'/schemaVersion','schemaVersion doit être le nombre 1.');
-  require(['1','2'].includes(manifest.apiVersion),'/apiVersion','apiVersion doit être la chaîne "1" ou "2".');
+  require(manifest.apiVersion==='1','/apiVersion','apiVersion doit être la chaîne "1".');
   require(validId(manifest.id),'/id','Identifiant attendu : domaine inversé en minuscules, par exemple com.example.counter.');
   const version=manifest.version;
   const match=typeof version==='string'&&version.match(/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/);
@@ -67,7 +67,6 @@ export function validateManifest(manifest,names) {
     require(names.has(file),`/entrypoints/${role}`,`Fichier absent : ${file}.`,'Ajoutez le fichier ou corrigez le chemin.');
   }
   fields(manifest.permissions,['network','gameEvents','storage','clipboardWrite','capabilities'],'/permissions');
-  require(manifest.apiVersion==='2'||(!Object.hasOwn(manifest.permissions,'capabilities')&&!Object.hasOwn(manifest,'presentation')),'/apiVersion','Les capacités et la présentation native nécessitent apiVersion "2".');
   for(const key of ['storage','clipboardWrite']) if(Object.hasOwn(manifest.permissions,key)) require(typeof manifest.permissions[key]==='boolean',`/permissions/${key}`,'Valeur booléenne attendue.');
   const network=manifest.permissions.network??[];
   require(Array.isArray(network),'/permissions/network','Liste attendue.');

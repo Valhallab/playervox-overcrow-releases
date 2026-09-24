@@ -74,6 +74,12 @@ SDK vulnerabilities through this repository's private vulnerability reporting
 entry point, identifying the affected component. Never include widget drafts,
 account data, signing keys, or credentials in a report.
 
+The SDK exposes only four host capabilities: `telemetry.read`, `fps.read`,
+`media.read` and `media.control`. Widget storage is isolated from other widgets
+and built-in application data. Notes, stopwatch state, journals and connected
+accounts have no public service bridge. Media grants cannot coexist with network
+or raw clipboard writes and require temporary browser storage.
+
 If a listed package is suspected of compromise, maintainers may publish a
 signed suspension or revocation in a newer monotonic catalog. Clients must
 reject that package for new installation or update, immediately disable an

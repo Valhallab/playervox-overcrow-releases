@@ -50,6 +50,10 @@ Start with the [SDK documentation](https://overcrow.playervox.com/docs/en/),
 [portable creator kit](https://overcrow.playervox.com/docs/downloads/creator-kit.zip).
 The Studio runs without an account; export your work locally.
 
+SDK 1.3.0 uses Web API v1. Host services expose telemetry, FPS and system media.
+Widgets keep their own data in isolated storage and cannot access built-in notes,
+stopwatch state, journals or connected accounts.
+
 | Source | Purpose |
 | --- | --- |
 | `content/sdk/` | Public JavaScript SDK and TypeScript definitions |

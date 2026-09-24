@@ -43,5 +43,5 @@ test('the actual downloadable archive can initialize, validate and export withou
   result=run(['init',reference,'--template','notes','--json']);assert.equal(result.status,0,result.stdout+result.stderr);
   result=run(['package',reference,'--json']);assert.equal(result.status,0,result.stdout+result.stderr);
   const nativeManifest=JSON.parse(await readFile(path.join(reference,'widget/manifest.json'),'utf8'));
-  assert.equal(nativeManifest.apiVersion,'2');assert.deepEqual(nativeManifest.permissions.capabilities,[]);assert.equal(nativeManifest.permissions.storage,true);
+  assert.equal(nativeManifest.apiVersion,'1');assert.deepEqual(nativeManifest.permissions.capabilities,[]);assert.equal(nativeManifest.permissions.storage,true);
 });

@@ -33,9 +33,7 @@ export interface FetchOptions {
   body?: string | ArrayBuffer | ArrayBufferView | null;
 }
 
-/** Known native fields. Minimal development/older host snapshots omit fields.
- * Missing or null measurements are unavailable, never an implied zero.
- */
+/** Current game context. Fields can be absent before a session is available. */
 export type GameSnapshot = {
   readonly running?: boolean;
   readonly selectedActive?: boolean;
@@ -43,12 +41,9 @@ export type GameSnapshot = {
   /** Session duration in milliseconds. */
   readonly sessionElapsedMs?: number | null;
   readonly overlayMode?: 'passive' | 'interactive';
-  /** Process CPU in hundredths of a percent. */
-  readonly cpuPercentHundredths?: number | null;
-  readonly residentBytes?: number | null;
-  readonly cpuTemperatureMillicelsius?: number | null;
-  readonly gpuTemperatureMillicelsius?: number | null;
-} & {readonly [field: string]: CloneableJson};
+  /** True for fictional browser-preview data. */
+  readonly fixture?: boolean;
+};
 
 export interface OvercrowResponse {
   readonly status: number;
@@ -62,7 +57,6 @@ export interface OvercrowResponse {
 
 export class OvercrowError extends Error {
   readonly code: string;
-  readonly retryAfterMs?: number;
   constructor(code: string, message: string);
 }
 
@@ -113,15 +107,14 @@ export interface CapabilityAccess {
 
 export type CapabilityMap = Readonly<Record<Capability, CapabilityAccess>>;
 export type ServiceStatus = 'ready' | 'stale' | 'unavailable' | 'unsupported'
-  | 'permissionDenied' | 'notConnected' | 'rateLimited';
+  | 'permissionDenied';
 
 export type ServiceSnapshot<T> = {
-  /** Opaque native authority; null on older hosts or an unavailable bridge. */
+  /** Opaque native authority; null when the initial subscription read fails. */
   readonly contextId: string | null;
   /** Nonnegative, globally monotonic, JavaScript-safe native revision. */
   readonly revision: number;
   readonly sampleAgeMs?: number;
-  readonly retryAfterMs?: number;
 } & (
   | {readonly status: 'ready'; readonly data: T}
   | {readonly status: 'stale'; readonly data: T | null}
@@ -197,7 +190,7 @@ export interface StorageInfo {
 }
 
 export interface OvercrowStorage {
-  /** Older hosts without storage metadata reject with unsupported. */
+  /** Rejects when the host does not provide a valid storage policy. */
   getInfo(): Promise<StorageInfo>;
   /** Missing keys return undefined. Validate your application's schema after reading. */
   get(key: string): Promise<CloneableJson | undefined>;

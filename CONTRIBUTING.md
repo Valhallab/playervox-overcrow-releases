@@ -11,6 +11,11 @@ files, a complete `manifest.json` ledger, and `listing.json`; never commit secre
 native executable code, or production signing material. Package validation and
 human review are required. Acceptance does not publish anything.
 
+Keep SDK guides and examples on the current API v1 contract. The four host
+capabilities are `telemetry.read`, `fps.read`, `media.read` and `media.control`.
+Public widgets use their own storage; built-in widget data and connected accounts
+are outside the SDK. Update both documentation languages together.
+
 ```sh
 python3 scripts/package-docs-examples.py published/docs/downloads
 node --test tests/creator-kit/*.test.mjs tests/warframe-market/*.test.mjs

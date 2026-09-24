@@ -44,9 +44,9 @@ const presentation = () => ({
 });
 const fixture = () => ({
   schemaVersion: 1,
-  id: "com.example.v2",
+  id: "com.example.services",
   version: "1.0.0",
-  apiVersion: "2",
+  apiVersion: "1",
   entrypoints: { view: "index.html" },
   permissions: {},
 });
@@ -77,7 +77,7 @@ test("retired built-in permissions cannot enter a public widget package", () => 
   }
 });
 
-test("v2 accepts the closed capability set and refuses private-data egress", () => {
+test("manifest accepts the closed capability set and refuses private-data egress", () => {
   for (const capability of [...publicCapabilities, ...sensitiveCapabilities]) {
     const manifest = fixture();
     manifest.permissions = { capabilities: [capability], storage: true };
@@ -103,21 +103,15 @@ test("v2 accepts the closed capability set and refuses private-data egress", () 
   }
 });
 
-test("v1 retains its existing shape and rejects even empty v2 declarations", () => {
-  const manifest = fixture();
-  manifest.apiVersion = "1";
-  manifest.permissions = { network, clipboardWrite: true };
-  assert.doesNotThrow(() => validate(manifest));
-  for (const capabilities of [[], ["fps.read"], null]) {
-    const changed = structuredClone(manifest);
-    changed.permissions.capabilities = capabilities;
-    assert.throws(() => validate(changed));
+test("only the current API version is accepted, including permission-free widgets", () => {
+  for (const apiVersion of ["2", "3", "01", 1, null, undefined]) {
+    const manifest = fixture();
+    manifest.apiVersion = apiVersion;
+    assert.throws(() => validate(manifest), String(apiVersion));
   }
-  manifest.presentation = presentation();
-  assert.throws(() => validate(manifest));
 });
 
-test("v2 validates all native sizing modes and typed bilingual options", () => {
+test("manifest validates all native sizing modes and typed bilingual options", () => {
   for (const mode of ["intrinsic", "autoHeight", "manual"]) {
     const manifest = fixture();
     manifest.presentation = presentation();
@@ -130,7 +124,7 @@ test("v2 validates all native sizing modes and typed bilingual options", () => {
   assert.doesNotThrow(() => validate(manifest));
 });
 
-test("v2 refuses malformed dimensions, native option writers, and unbounded options", () => {
+test("manifest refuses malformed dimensions, native option writers, and unbounded options", () => {
   const invalid = [
     (value) => (value.sizing.mode = "free"),
     (value) => (value.sizing.preferred.width = 0),

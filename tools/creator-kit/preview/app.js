@@ -22,7 +22,7 @@ function publish(next) {
   for(const frame of [view,controller])send(frame,{type:'gameSnapshot',payload:snapshot});
 }
 function message(text,error=false){status.textContent=text;status.classList.toggle('error',error);}
-function sessionSnapshot(active){return {running:active,selectedActive:active,steamAppId:active?230410:null,sessionElapsedMs:active?300000:null,overlayMode:chrome.mode,cpuPercentHundredths:active?325:null,residentBytes:active?104857600:null,cpuTemperatureMillicelsius:null,gpuTemperatureMillicelsius:null};}
+function sessionSnapshot(active){return {running:active,selectedActive:active,steamAppId:active?230410:null,sessionElapsedMs:active?300000:null,overlayMode:chrome.mode};}
 async function load() {
   const request=++loading;
   const response=await fetch(base+'state.json');if(!response.ok)throw new Error('Aperçu indisponible.');
