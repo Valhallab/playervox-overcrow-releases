@@ -193,6 +193,32 @@ test('session loads orders through overcrow.fetch and never calls global fetch',
   }
 });
 
+// Keep the clock controlled without depending on experimental MockTimers APIs
+// that differ between the creator-kit and the trusted system Node runtimes.
+function mockClock(context) {
+  let now = 1000;
+  let nextId = 0;
+  const pending = new Map();
+  context.mock.method(Date, 'now', () => now);
+  context.mock.method(globalThis, 'setTimeout', (callback, delay = 0) => {
+    const id = ++nextId;
+    pending.set(id, { callback, at: now + delay });
+    return id;
+  });
+  context.mock.method(globalThis, 'clearTimeout', (id) => pending.delete(id));
+  return {
+    tick(milliseconds) {
+      now += milliseconds;
+      for (const [id, timer] of pending) {
+        if (timer.at <= now) {
+          pending.delete(id);
+          timer.callback();
+        }
+      }
+    },
+  };
+}
+
 function deferred() {
   let resolve;
   let reject;
@@ -391,14 +417,14 @@ test('IndexedDB rejects an abort after request success and closes the connection
 });
 
 test('IndexedDB rejects blocked and stalled opens and closes a late connection', async (context) => {
-  context.mock.timers.enable({ apis: ['setTimeout'] });
+  const clock = mockClock(context);
   for (const blocked of [true, false]) {
     const opening = {};
     let closed = 0;
     await withIndexedDb({ indexedDB: { open: () => opening } }, async () => {
       const rejected = assert.rejects(createIndexedDbStore().get('state'), /storage unavailable/);
       if (blocked) opening.onblocked?.();
-      else context.mock.timers.tick(5000);
+      else clock.tick(5000);
       await rejected;
       let aborted = false;
       opening.transaction = { abort() { aborted = true; } };
@@ -412,14 +438,14 @@ test('IndexedDB rejects blocked and stalled opens and closes a late connection',
 });
 
 test('IndexedDB aborts a stalled transaction and closes its connection', async (context) => {
-  context.mock.timers.enable({ apis: ['setTimeout'] });
+  const clock = mockClock(context);
   const harness = indexedDbHarness();
   await withIndexedDb(harness, async () => {
     const rejected = assert.rejects(createIndexedDbStore().set('state', { query: 'flow' }), /storage unavailable/);
     await new Promise((resolve) => setImmediate(resolve));
     let aborted = false;
     harness.transactions[0].abort = () => { aborted = true; throw new Error('already committed'); };
-    context.mock.timers.tick(5000);
+    clock.tick(5000);
     await rejected;
     assert.equal(aborted, true);
     assert.equal(harness.closed(), 1);
@@ -634,7 +660,7 @@ test('view derives displayed offer metrics and gives search focus back after cle
 
 
 test('requests share active reads, retain only the latest queued read and respect provider cadence', async (context) => {
-  context.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 1000 });
+  const clock = mockClock(context);
   const starts = [];
   let complete;
   const request = createPacedFetch(async (url) => {
@@ -649,9 +675,9 @@ test('requests share active reads, retain only the latest queued read and respec
   complete('catalog');
   assert.equal(await first, 'catalog');
   await discarded;
-  context.mock.timers.tick(399);
+  clock.tick(399);
   assert.equal(starts.length, 1);
-  context.mock.timers.tick(1);
+  clock.tick(1);
   await Promise.resolve();
   assert.deepEqual(starts, [['items', 1000], ['latest-selection', 1400]]);
   complete('orders');
@@ -659,14 +685,14 @@ test('requests share active reads, retain only the latest queued read and respec
 });
 
 test('failed requests release the queue without bypassing its cadence', async (context) => {
-  context.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 1000 });
+  const clock = mockClock(context);
   const request = createPacedFetch(async (url) => {
     if (url === 'failed') throw new Error('offline');
     return url;
   });
   await assert.rejects(request('failed'), /offline/);
   const next = request('recovery');
-  context.mock.timers.tick(400);
+  clock.tick(400);
   assert.equal(await next, 'recovery');
 });
 
