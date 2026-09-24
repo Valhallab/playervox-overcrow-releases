@@ -1,6 +1,6 @@
 import pages from "./en.json" with { type: "json" };
 
-/** Public slugs intentionally retain the original French URLs in both languages. */
+/** Existing slugs retain their public URLs; both languages use the same slugs. */
 export function getDocumentationRoutes() {
   return ["fr", "en"].flatMap((locale) =>
     pages.map(

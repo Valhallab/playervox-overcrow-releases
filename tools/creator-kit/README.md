@@ -1,7 +1,7 @@
 # OverCrow Creator Kit 1.0.0
 
 Public, dependency-free authoring tools for **Node.js 22+**, Windows and Linux.
-SDK **1.2.0**, Web API v1 and v2. The code is MIT-licensed. No application source, Rust
+SDK **1.3.0**, Web API v1 and v2. The code is MIT-licensed. No application source, Rust
 compiler, Python, D-Bus or package installation is required by the downloaded kit.
 
 ```sh
