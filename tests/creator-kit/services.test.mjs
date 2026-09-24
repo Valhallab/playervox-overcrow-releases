@@ -209,7 +209,7 @@ test("sensitive media fixtures cannot escape through network or clipboard", () =
   for (const egress of [
     {
       network: [
-        { origin: "https://example.test", method: "GET", pathPrefix: "/" },
+        { origin: "https://example.test", method: "GET", path: "/items" },
       ],
     },
     { clipboardWrite: true },

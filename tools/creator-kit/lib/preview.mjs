@@ -8,9 +8,11 @@ import {fileURLToPath} from 'node:url';
 import {collect,readRegular,diagnostic} from './bundle.mjs';
 import {parseJson,fail} from './manifest.mjs';
 import {CAPABILITIES,READ_CAPABILITIES} from '../preview/service-fixtures.mjs';
+import {canonicalNetworkRules} from '../preview/network-policy.mjs';
 const assets=fileURLToPath(new URL('../preview/',import.meta.url));
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp','.ttf':'font/ttf','.woff2':'font/woff2','.wasm':'application/wasm'};
 const csp="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src 'self'; media-src 'none'; object-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'";
+const permissionKey=permissions=>JSON.stringify({...permissions,network:canonicalNetworkRules(permissions.network??[])});
 async function fixtures(project) {
   let raw;
   try{raw=await readRegular(path.join(project,'preview.json'),1024*1024);}catch(error){if(error.code==='ENOENT')return {};throw error;}
@@ -47,10 +49,10 @@ async function fixtures(project) {
 export async function startPreview(project,port=4175) {
   project=path.resolve(project);
   let bundle=await collect(project),config=await fixtures(project),generation=1,closed=false,timer,building=false,dirty=false;
-  const permissions=JSON.stringify(bundle.manifest.permissions);
+  const permissions=permissionKey(bundle.manifest.permissions);
   const base=`/${randomBytes(16).toString('hex')}/`;
   const clients=new Set(),staticFiles=new Map();
-  for(const name of ['index.html','app.js','bridge.js','network.mjs','services.mjs','storage.mjs','service-fixtures.mjs','chrome.mjs','chrome-messages.mjs','styles.css','NotoSansUI-Regular.ttf'])staticFiles.set(name,await readFile(path.join(assets,name)));
+  for(const name of ['index.html','app.js','bridge.js','network.mjs','network-policy.mjs','services.mjs','storage.mjs','service-fixtures.mjs','chrome.mjs','chrome-messages.mjs','styles.css','NotoSansUI-Regular.ttf'])staticFiles.set(name,await readFile(path.join(assets,name)));
   const publish=value=>{for(const client of clients){if(!client.write(`data: ${JSON.stringify(value)}\n\n`)){clients.delete(client);client.end();}}};
   const state=()=>({manifest:bundle.manifest,config,generation});
   const server=createServer((request,response)=>{
@@ -94,7 +96,7 @@ export async function startPreview(project,port=4175) {
     try {
       const next=await collect(project),nextConfig=await fixtures(project);
       if(closed)return;
-      if(JSON.stringify(next.manifest.permissions)!==permissions)fail('preview.permissions','Les permissions ont changé.','Examinez-les puis redémarrez npm run dev. Le dernier aperçu accepté est conservé.');
+      if(permissionKey(next.manifest.permissions)!==permissions)fail('preview.permissions','Les permissions ont changé.','Examinez-les puis redémarrez npm run dev. Le dernier aperçu accepté est conservé.');
       if(next.digest!==bundle.digest||JSON.stringify(config)!==JSON.stringify(nextConfig)) {
         bundle=next;config=nextConfig;generation++;publish({generation});
       } else publish({generation,ok:true});

@@ -11,7 +11,10 @@
       {
         "origin": "https://api.playervox.com",
         "method": "GET",
-        "pathPrefix": "/api/v1/overcrow/games/steam/"
+        "path": "/api/v1/overcrow/games/steam/{steamAppId}/score",
+        "pathParams": {
+          "steamAppId": { "type": "integer", "min": 1, "max": 4294967295 }
+        }
       }
     ],
     "gameEvents": [],

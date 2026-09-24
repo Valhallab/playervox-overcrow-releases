@@ -20,7 +20,7 @@ function bridge(enabled,id='com.example.one',shared=storage()) {
   return {context,messages,events,parent,operations};
 }
 test('simulation uses declared permissions and fixtures without external requests',()=>{
-  const permissions={network:[{origin:'https://api.example.com',method:'GET',pathPrefix:'/v2/'}]};
+  const permissions={network:['items','broken','missing'].map(name=>({origin:'https://api.example.com',method:'GET',path:'/v2/'+name}))};
   const fixtures=[{url:'https://api.example.com/v2/items',status:200,json:{data:[{name:'example'}]}},{url:'https://api.example.com/v2/broken',status:503,text:'Unavailable'}];
   const success=simulateFetch(permissions,fixtures,{url:fixtures[0].url,method:'GET'});
   assert.equal(success.metadata.status,200);assert.deepEqual(JSON.parse(new TextDecoder().decode(success.body)),fixtures[0].json);
@@ -28,7 +28,7 @@ test('simulation uses declared permissions and fixtures without external request
   assert.equal(simulateFetch(permissions,fixtures,{url:'https://api.example.com/v2/missing',method:'GET'}).metadata.error.code,'fixture_missing');
   for(const url of ['http://api.example.com/v2/items','https://user:secret@api.example.com/v2/items','https://api.example.com/v2/%2fsecret','https://api.example.com/v3/items'])assert.equal(simulateFetch(permissions,fixtures,{url,method:'GET'}).metadata.error.code,'capability_denied');
   assert.equal(simulateFetch(permissions,fixtures,{url:fixtures[0].url,method:'POST'}).metadata.error.code,'capability_denied');
-  const exact={network:[{origin:'https://api.example.com',method:'GET',pathPrefix:'/v2/items'}]};
+  const exact={network:[{origin:'https://api.example.com',method:'GET',path:'/v2/items'}]};
   assert.equal(simulateFetch(exact,fixtures,{url:fixtures[0].url,method:'GET'}).metadata.status,200);
   assert.equal(simulateFetch(exact,fixtures,{url:'https://api.example.com/v2/items/other',method:'GET'}).metadata.error.code,'capability_denied');
 });

@@ -381,11 +381,11 @@
         "kind": "code",
         "language": "json",
         "title": "Inside permissions",
-        "source": "\"network\": [{\n  \"origin\": \"https://api.example.com\",\n  \"method\": \"GET\",\n  \"pathPrefix\": \"/v2/\"\n}]"
+        "source": "\"network\": [{\n  \"origin\": \"https://api.warframe.market\",\n  \"method\": \"GET\",\n  \"path\": \"/v2/items\"\n}]"
       },
       {
         "kind": "html",
-        "html": "<p>Call <code>overcrow.fetch</code> with the declared origin, method and path. A trailing slash permits the path’s subtree; without it, only the exact path is allowed. Host wildcards, redirects and local destinations are rejected. <a href=\"/docs/en/api-reseau/\">Network reference</a>.</p>\n<h2 id=\"fichiers\">Include your files</h2>\n<p>Put HTML, CSS, JavaScript, images, fonts, translations and licenses in <code>widget/</code>. Use relative ASCII paths, with no <code>..</code>, links or case collisions. Keep build tools outside this folder.</p>\n<p>The generated <code>files</code> must match every packaged file; the manifest excludes its own hash. The native CLI requires this ledger for <code>dev</code> and <code>package</code>. Unknown fields are rejected.</p>\n<p>Review added permissions and restart development to accept them. Preparation never infers permissions from your code.</p>\n<h2 id=\"limites\">Limits</h2>\n<div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Item, Limit\"><table><thead><tr><th>Item</th><th>Limit</th></tr></thead><tbody><tr><td>Package</td><td>128 MiB; 4,096 entries including the manifest</td></tr><tr><td>Manifest</td><td>1 MiB</td></tr><tr><td>Paths</td><td>192 ASCII bytes</td></tr></tbody></table></div>\n<p>See the relevant API pages for <a href=\"/docs/en/api-reseau/\">request limits</a>, <a href=\"/docs/en/api-runtime/\">messages</a> and <a href=\"/docs/en/api-langue/\">languages</a>.</p>"
+        "html": "<p>This permission allows only <code>GET /v2/items</code>. Every route is exact, even with a trailing slash. Declare variable values with <code>pathParams</code> and URL parameters with <code>queryParams</code>. <a href=\"/docs/en/api-reseau/\">Network reference</a>.</p>\n<h2 id=\"fichiers\">Include your files</h2>\n<p>Put HTML, CSS, JavaScript, images, fonts, translations and licenses in <code>widget/</code>. Use relative ASCII paths, with no <code>..</code>, links or case collisions. Keep build tools outside this folder.</p>\n<p>The generated <code>files</code> must match every packaged file; the manifest excludes its own hash. The native CLI requires this ledger for <code>dev</code> and <code>package</code>. Unknown fields are rejected.</p>\n<p>Review added permissions and restart development to accept them. Preparation never infers permissions from your code.</p>\n<h2 id=\"limites\">Limits</h2>\n<div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Item, Limit\"><table><thead><tr><th>Item</th><th>Limit</th></tr></thead><tbody><tr><td>Package</td><td>128 MiB; 4,096 entries including the manifest</td></tr><tr><td>Manifest</td><td>1 MiB</td></tr><tr><td>Paths</td><td>192 ASCII bytes</td></tr></tbody></table></div>\n<p>See the relevant API pages for <a href=\"/docs/en/api-reseau/\">request limits</a>, <a href=\"/docs/en/api-runtime/\">messages</a> and <a href=\"/docs/en/api-langue/\">languages</a>.</p>"
       }
     ]
   },
@@ -567,13 +567,13 @@
     "blocks": [
       {
         "kind": "html",
-        "html": "<p class=\"lead\">The public PlayerVox score endpoint accepts an anonymous GET request. Use <code>overcrow.fetch</code> as with any supported HTTPS API; no PlayerVox account or token is required.</p><h2 id=\"permissions\">Network permission</h2><p>Merge this permission into your manifest. The trailing slash authorizes GET requests under this path for any Steam app ID. It allows every subpath, not only URLs ending in <code>/score</code>; the origin and HTTP method stay fixed.</p>"
+        "html": "<p class=\"lead\">The public PlayerVox score endpoint accepts an anonymous GET request. Use <code>overcrow.fetch</code> as with any supported HTTPS API; no PlayerVox account or token is required.</p><h2 id=\"permissions\">Network permission</h2><p>Merge this permission into your manifest. Only the Steam ID varies: an integer from 1 to 4,294,967,295. The path must end in <code>/score</code>; no other route or URL parameter is allowed.</p>"
       },
       {
         "kind": "code",
         "language": "json",
         "title": "manifest.json · fields to merge",
-        "source": "{\n  \"permissions\": {\n    \"network\": [{\n      \"origin\": \"https://api.playervox.com\",\n      \"method\": \"GET\",\n      \"pathPrefix\": \"/api/v1/overcrow/games/steam/\"\n    }]\n  }\n}"
+        "source": "{\n  \"permissions\": {\n    \"network\": [{\n      \"origin\": \"https://api.playervox.com\",\n      \"method\": \"GET\",\n      \"path\": \"/api/v1/overcrow/games/steam/{steamAppId}/score\",\n      \"pathParams\": {\n        \"steamAppId\": { \"type\": \"integer\", \"min\": 1, \"max\": 4294967295 }\n      }\n    }]\n  }\n}"
       },
       {
         "kind": "html",
@@ -658,6 +658,14 @@
         "title": "Call overcrow.fetch"
       },
       {
+        "id": "routes",
+        "title": "Variable IDs"
+      },
+      {
+        "id": "query",
+        "title": "URL parameters"
+      },
+      {
         "id": "exemple",
         "title": "Read a JSON response"
       },
@@ -687,7 +695,27 @@
       },
       {
         "kind": "html",
-        "html": "<p>Declare the HTTPS origin, method and path prefix in <a href=\"/docs/en/manifeste/\">the manifest</a>.</p><p><code>pathPrefix: \"/v2/items/\"</code> allows variable IDs such as <code>/v2/items/123</code>. A trailing slash allows every subpath; without it, only the exact path is allowed. Wildcards such as <code>*</code> or <code>:id</code> are not supported. Build the URL in JavaScript within the declared origin, method and path.</p>\n<h2 id=\"exemple\">Read a JSON response</h2><p>Add this markup to your view’s <code>index.html</code> before loading the module:</p>"
+        "html": "<p>Declare each HTTPS origin, method and exact route in <a href=\"/docs/en/manifeste/\">the manifest</a>. <code>/api/</code> allows only that exact path, never its descendants. Network wildcards and prefixes are unsupported.</p><h2 id=\"routes\">Variable IDs</h2><p>A variable occupies one complete path segment. Declare its type and bound; here, <code>/v2/orders/item/rhino_prime_set/top</code> is allowed, but <code>/v2/orders/item/rhino_prime_set/history</code> is denied.</p>"
+      },
+      {
+        "kind": "code",
+        "language": "json",
+        "title": "permissions.network",
+        "source": "\"network\": [{\n  \"origin\": \"https://api.warframe.market\",\n  \"method\": \"GET\",\n  \"path\": \"/v2/orders/item/{slug}/top\",\n  \"pathParams\": { \"slug\": { \"type\": \"slug\", \"maxLength\": 96 } }\n}]"
+      },
+      {
+        "kind": "html",
+        "html": "<p>Declare each variable exactly once. Build the URL in JavaScript; the host validates the value on every request. See the <a href=\"/docs/en/playervox-score/\">example using the active game’s Steam ID</a>.</p><ul><li><code>integer</code>: required <code>min</code> and <code>max</code>, from 0 to 9,007,199,254,740,991. Decimal digits only, without leading zeroes.</li><li><code>slug</code>: ASCII letters, digits, <code>_</code> and <code>-</code>; <code>maxLength</code> from 1 to 128.</li><li><code>enum</code>: <code>values</code> lists 1–32 distinct unreserved ASCII strings (<code>A–Z a–z 0–9 . _ ~ -</code>), each 1–128 characters, except <code>.</code> and <code>..</code>.</li><li><code>string</code>: query strings only; <code>maxLength</code> from 1 to 256 UTF-8 bytes, with no control characters.</li></ul><h2 id=\"query\">URL parameters</h2><p>Without <code>queryParams</code>, any query string is denied. Declare each allowed key with the same value types. Keys are optional unless <code>required: true</code>. This example allows <code>?page=2&amp;sort=name</code>, but rejects <code>?page=2&amp;debug=true</code>.</p>"
+      },
+      {
+        "kind": "code",
+        "language": "json",
+        "title": "permissions.network · pagination example",
+        "source": "\"network\": [{\n  \"origin\": \"https://api.example.com\",\n  \"method\": \"GET\",\n  \"path\": \"/items\",\n  \"queryParams\": {\n    \"page\": { \"type\": \"integer\", \"min\": 1, \"max\": 100, \"required\": true },\n    \"sort\": { \"type\": \"enum\", \"values\": [\"name\", \"date\"] }\n  }\n}]"
+      },
+      {
+        "kind": "html",
+        "html": "<p>Use <code>URLSearchParams</code> to encode values. Repeated, unknown or encoded keys are denied, as are empty values and invalid encodings. Parameter names start with an ASCII letter followed by letters, digits or <code>_</code>, up to 32 characters.</p><p>Limits per widget: 32 routes. Per route: a 1,024-byte path, 8 path variables and 16 query keys. The complete URL must fit within 2,048 bytes.</p><h2 id=\"exemple\">Read a JSON response</h2><p>For this example, declare <code>GET https://api.warframe.market/v2/items</code>, with no parameters. Add this output to your view:</p>"
       },
       {
         "kind": "code",
@@ -698,7 +726,7 @@
       {
         "kind": "code",
         "language": "javascript",
-        "title": "view.js · requires GET /v2/ permission",
+        "title": "view.js · GET /v2/items",
         "source": "import overcrow from './overcrow.js';\nconst status = document.querySelector('#status');\ntry {\n  status.textContent = 'Loading…';\n  const response = await overcrow.fetch('https://api.warframe.market/v2/items');\n  if (!response.ok) throw new Error('HTTP ' + response.status);\n  const payload = await response.json();\n  if (!Array.isArray(payload?.data)) throw new Error('Invalid catalog');\n  status.textContent = payload.data.length + ' items available';\n} catch (error) {\n  status.textContent = 'Catalog unavailable. Try again.';\n  console.error(error.code ?? error.message);\n}"
       },
       {

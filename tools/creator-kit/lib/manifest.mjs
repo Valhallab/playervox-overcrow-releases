@@ -1,5 +1,6 @@
 // MIT License. Copyright (c) 2026 Valhallab SASU.
 // Authoring diagnostics only. OverCrow remains the installation authority.
+import {canonicalNetworkRules,NetworkPolicyError} from '../preview/network-policy.mjs';
 export class CreatorError extends Error {
   constructor(code, message, action, pointer = '') {
     super(message); this.code=code; this.action=action; this.pointer=pointer;
@@ -68,16 +69,10 @@ export function validateManifest(manifest,names) {
   }
   fields(manifest.permissions,['network','gameEvents','storage','clipboardWrite','capabilities'],'/permissions');
   for(const key of ['storage','clipboardWrite']) if(Object.hasOwn(manifest.permissions,key)) require(typeof manifest.permissions[key]==='boolean',`/permissions/${key}`,'Valeur booléenne attendue.');
-  const network=manifest.permissions.network??[];
-  require(Array.isArray(network),'/permissions/network','Liste attendue.');
-  const seen=new Set();
-  for(const [index,rule] of network.entries()) {
-    const pointer=`/permissions/network/${index}`;fields(rule,['origin','method','pathPrefix'],pointer);
-    let url;try{url=new URL(rule.origin);}catch{require(false,pointer+'/origin','Origine HTTPS invalide.');}
-    require(url.protocol==='https:'&&url.origin===rule.origin&&url.hostname.includes('.')&&!/^\d+(?:\.\d+){3}$/.test(url.hostname)&&url.hostname.length<=253&&url.hostname.split('.').every(s=>s.length<=63&&/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(s)),pointer+'/origin','Origine HTTPS canonique attendue, sans chemin ni identifiants.');
-    require(['GET','POST','PUT','PATCH','DELETE'].includes(rule.method),pointer+'/method','Méthode réseau non prise en charge.');
-    require(typeof rule.pathPrefix==='string'&&rule.pathPrefix.startsWith('/')&&rule.pathPrefix!=='/'&&!rule.pathPrefix.includes('//')&&rule.pathPrefix.slice(1).split('/').every(s=>s!=='.'&&s!=='..'&&/^[a-zA-Z0-9._~-]*$/.test(s)),pointer+'/pathPrefix','Préfixe explicite attendu, par exemple /v2/.');
-    const identity=JSON.stringify([rule.origin,rule.method,rule.pathPrefix]);require(!seen.has(identity),pointer,'Permission réseau dupliquée.');seen.add(identity);
+  const network=Object.hasOwn(manifest.permissions,'network')?manifest.permissions.network:[];
+  try{canonicalNetworkRules(network);}catch(error){
+    if(!(error instanceof NetworkPolicyError))throw error;
+    fail('manifest.invalid',error.message,'Declare exact routes and bounded parameters in permissions.network.',error.pointer);
   }
   const events=manifest.permissions.gameEvents??[];
   require(Array.isArray(events),'/permissions/gameEvents','Liste attendue.');

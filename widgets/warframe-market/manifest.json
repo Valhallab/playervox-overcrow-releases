@@ -12,7 +12,20 @@
       {
         "origin": "https://api.warframe.market",
         "method": "GET",
-        "pathPrefix": "/v2/"
+        "path": "/v2/items"
+      },
+      {
+        "origin": "https://api.warframe.market",
+        "method": "GET",
+        "path": "/v2/versions"
+      },
+      {
+        "origin": "https://api.warframe.market",
+        "method": "GET",
+        "path": "/v2/orders/item/{slug}/top",
+        "pathParams": {
+          "slug": { "type": "slug", "maxLength": 96 }
+        }
       }
     ],
     "storage": true,

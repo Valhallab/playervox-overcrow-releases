@@ -13,6 +13,14 @@ use crate::private_fs::{open_regular_file, read_bounded_file};
 
 #[path = "package_manifest.rs"]
 mod manifest_contract;
+#[path = "package_network.rs"]
+mod network_contract;
+
+use network_contract::WireNetworkPermission;
+
+#[cfg(test)]
+#[path = "package_network_tests.rs"]
+mod network_tests;
 
 const UTF8_FLAG: u16 = 1 << 11;
 const DOS_DATE_1980_01_01: u16 = 33;
@@ -105,28 +113,6 @@ where
     T: Deserialize<'de>,
 {
     T::deserialize(deserializer).map(Some)
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct WireNetworkPermission {
-    origin: String,
-    method: NetworkMethod,
-    path_prefix: String,
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd)]
-enum NetworkMethod {
-    #[serde(rename = "GET")]
-    Get,
-    #[serde(rename = "POST")]
-    Post,
-    #[serde(rename = "PUT")]
-    Put,
-    #[serde(rename = "PATCH")]
-    Patch,
-    #[serde(rename = "DELETE")]
-    Delete,
 }
 
 #[derive(Deserialize)]
@@ -512,21 +498,19 @@ pub(crate) fn canonical_semver(value: &str) -> bool {
 }
 
 fn validate_permissions(permissions: &WirePermissions) -> Result<(), PackageError> {
-    if !manifest_contract::valid_capabilities(
-        &permissions.capabilities,
-        !permissions.network.is_empty() || permissions.clipboard_write,
-    ) {
+    if permissions.network.len() > 32
+        || !manifest_contract::valid_capabilities(
+            &permissions.capabilities,
+            !permissions.network.is_empty() || permissions.clipboard_write,
+        )
+    {
         return Err(error("invalid permissions"));
     }
     let mut network = BTreeSet::new();
     for permission in &permissions.network {
         if !valid_https_origin(&permission.origin)
-            || !valid_network_path_prefix(&permission.path_prefix)
-            || !network.insert((
-                permission.origin.as_str(),
-                permission.method,
-                permission.path_prefix.as_str(),
-            ))
+            || !permission.is_valid()
+            || !network.insert(permission)
         {
             return Err(error("invalid permissions"));
         }
@@ -558,7 +542,14 @@ fn valid_https_origin(value: &str) -> bool {
         Some((host, port)) => (host, Some(port)),
         None => (authority, None),
     };
-    if !valid_dns_host(host) {
+    // URL parsers interpret a numeric final label as an IPv4 address, including
+    // shortened, octal, and hexadecimal forms. Only DNS origins are admitted.
+    let last_label = host.rsplit('.').next().unwrap_or_default();
+    let numeric_host = last_label.bytes().all(|byte| byte.is_ascii_digit())
+        || last_label
+            .strip_prefix("0x")
+            .is_some_and(|digits| digits.bytes().all(|byte| byte.is_ascii_hexdigit()));
+    if !valid_dns_host(host) || numeric_host {
         return false;
     }
     port.is_none_or(|port| {
@@ -584,25 +575,6 @@ fn valid_dns_host(host: &str) -> bool {
                     .bytes()
                     .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'-')
         })
-}
-
-fn valid_network_path_prefix(value: &str) -> bool {
-    value != "/"
-        && value.starts_with('/')
-        && value.is_ascii()
-        && !value.contains("//")
-        && !value.contains('\\')
-        && value
-            .split('/')
-            .skip(1)
-            .filter(|segment| !segment.is_empty())
-            .all(|segment| {
-                segment != "."
-                    && segment != ".."
-                    && segment.bytes().all(|byte| {
-                        byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'_' | b'-' | b'~')
-                    })
-            })
 }
 
 fn valid_game_event_id(value: &str) -> bool {
@@ -1285,7 +1257,7 @@ mod tests {
                 "supported capability {capability}"
             );
             let sensitive = !["telemetry.read", "fps.read"].contains(&capability);
-            value["permissions"]["network"] = serde_json::json!([{"origin":"https://api.example.test","method":"GET","pathPrefix":"/v2/"}]);
+            value["permissions"]["network"] = serde_json::json!([{"origin":"https://api.example.test","method":"GET","path":"/v2/items"}]);
             assert_eq!(
                 accepts_manifest(&value),
                 !sensitive,
@@ -1390,7 +1362,7 @@ mod tests {
                     "network": [{
                         "origin": "http://api.example.test",
                         "method": "GET",
-                        "pathPrefix": "/"
+                        "path": "/"
                     }]
                 });
             },

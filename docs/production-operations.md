@@ -19,6 +19,17 @@ been verified. Website-only updates preserve that subtree byte-for-byte and do
 not rotate keys. The private web repository mirrors these bytes and owns the
 complete `published/` website served by Coolify.
 
+The current SDK contract requires exact network `path` rules and bounded
+`pathParams` / `queryParams`; `pathPrefix` is rejected. The signed 2.0.5 package
+uses the former contract. Before deploying this SDK and website, admit the
+updated Warframe 2.0.6 source and prepare a new signed catalog with an explicit
+`removeVersions` entry for 2.0.5. Review and authorize that retirement as part of
+publication. The existing immutable 2.0.5 URL and archive remain unchanged.
+Do not deploy the new clients against the old catalog: they reject its manifest;
+the website displays an unavailable catalog and offers no installation action.
+The API version remains `"1"`; unsupported permissions are never translated or
+silently widened. Revoked or suspended versions still cannot be retired.
+
 ## 2. Preconditions and role separation
 
 Use separate clean worktrees and roles: contributors submit candidate PRs;

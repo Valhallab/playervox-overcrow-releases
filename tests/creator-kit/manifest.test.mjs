@@ -5,7 +5,7 @@ import { validateManifest } from "../../tools/creator-kit/lib/manifest.mjs";
 const publicCapabilities = ["telemetry.read", "fps.read"];
 const sensitiveCapabilities = ["media.read", "media.control"];
 const network = [
-  { origin: "https://api.example.test", method: "GET", pathPrefix: "/v2/" },
+  { origin: "https://api.example.test", method: "GET", path: "/v2/items" },
 ];
 const presentation = () => ({
   sizing: {
