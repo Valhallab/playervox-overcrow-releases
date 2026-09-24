@@ -549,7 +549,7 @@
     "group": "build",
     "label": "Score public",
     "title": "Lire un score public PlayerVox",
-    "description": "Lisez un score communautaire avec overcrow.fetch, sans compte ni intégration native.",
+    "description": "Récupérez l’identifiant Steam du jeu en cours et lisez son score public PlayerVox.",
     "headings": [
       {
         "id": "permissions",
@@ -557,7 +557,7 @@
       },
       {
         "id": "example",
-        "title": "Afficher le score de Portal 2"
+        "title": "Afficher le score du jeu en cours"
       },
       {
         "id": "public-data",
@@ -567,27 +567,27 @@
     "blocks": [
       {
         "kind": "html",
-        "html": "<p class=\"lead\">L’API publique de score PlayerVox accepte une requête GET anonyme. Utilisez <code>overcrow.fetch</code> comme pour toute API HTTPS compatible ; aucun compte PlayerVox, jeton ou service natif du SDK n’intervient.</p><h2 id=\"permissions\">Permission réseau</h2><p>Fusionnez cette permission avec votre manifeste. Elle autorise uniquement l’URL du score de l’application Steam 620 (Portal 2).</p>"
+        "html": "<p class=\"lead\">L’API publique de score PlayerVox accepte une requête GET anonyme. Utilisez <code>overcrow.fetch</code> comme pour toute API HTTPS compatible ; aucun compte PlayerVox ni jeton n’est nécessaire.</p><h2 id=\"permissions\">Permission réseau</h2><p>Fusionnez cette permission avec votre manifeste. Le slash final autorise les requêtes GET sous ce chemin pour tout identifiant d’application Steam. Tous les sous-chemins sont autorisés, pas seulement ceux se terminant par <code>/score</code> ; l’origine et la méthode HTTP restent fixes.</p>"
       },
       {
         "kind": "code",
         "language": "json",
         "title": "manifest.json · champs à fusionner",
-        "source": "{\n  \"permissions\": {\n    \"network\": [{\n      \"origin\": \"https://api.playervox.com\",\n      \"method\": \"GET\",\n      \"pathPrefix\": \"/api/v1/overcrow/games/steam/620/score\"\n    }]\n  }\n}"
+        "source": "{\n  \"permissions\": {\n    \"network\": [{\n      \"origin\": \"https://api.playervox.com\",\n      \"method\": \"GET\",\n      \"pathPrefix\": \"/api/v1/overcrow/games/steam/\"\n    }]\n  }\n}"
       },
       {
         "kind": "html",
-        "html": "<h2 id=\"example\">Afficher le score de Portal 2</h2><p>Chargez ce module depuis votre vue avec <code>&lt;script type=\"module\" src=\"./view.js\"&gt;&lt;/script&gt;</code> et placez <code>overcrow.js</code> à côté. Le module crée son propre élément de texte.</p>"
+        "html": "<h2 id=\"example\">Afficher le score du jeu en cours</h2><p>Lisez <code>steamAppId</code> avec <code>overcrow.game.snapshot()</code>, puis insérez-le dans l’URL. Aucune requête n’est envoyée sans jeu sélectionné actif et sans identifiant Steam connu. Chargez ce module depuis votre vue avec <code>&lt;script type=\"module\" src=\"./view.js\"&gt;&lt;/script&gt;</code> et placez <code>overcrow.js</code> à côté. Le module crée son propre élément de texte.</p>"
       },
       {
         "kind": "code",
         "language": "javascript",
         "title": "view.js",
-        "source": "import overcrow from './overcrow.js';\n\nconst output = document.createElement('p');\noutput.textContent = 'Loading…';\ndocument.body.append(output);\ntry {\n  const response = await overcrow.fetch(\n    'https://api.playervox.com/api/v1/overcrow/games/steam/620/score'\n  );\n  if (!response.ok) throw new Error(`HTTP ${response.status}`);\n  const data = await response.json();\n  if (typeof data?.game?.name !== 'string' ||\n      (data.score !== null && (!Number.isFinite(data.score) || data.score < 0 || data.score > 100))) {\n    throw new Error('Invalid score');\n  }\n  output.textContent = data.score === null\n    ? `${data.game.name} · No ratings yet`\n    : `${data.game.name} · ${data.score.toFixed(1)}/100`;\n} catch {\n  output.textContent = 'Score unavailable. Try again later.';\n}"
+        "source": "import overcrow from './overcrow.js';\nconst output = document.createElement('p');\noutput.textContent = 'Loading…';\ndocument.body.append(output);\ntry {\n  const game = await overcrow.game.snapshot();\n  const id = game.selectedActive ? game.steamAppId : null;\n  if (!Number.isSafeInteger(id) || id <= 0) {\n    output.textContent = 'No active Steam game.';\n  } else {\n    const response = await overcrow.fetch(\n      `https://api.playervox.com/api/v1/overcrow/games/steam/${id}/score`\n    );\n    if (!response.ok) throw new Error(`HTTP ${response.status}`);\n    const data = await response.json();\n    if (typeof data?.game?.name !== 'string' ||\n        (data.score !== null && (!Number.isFinite(data.score) || data.score < 0 || data.score > 100))) {\n      throw new Error('Invalid score');\n    }\n    output.textContent = data.score === null\n      ? `${data.game.name} · No ratings yet`\n      : `${data.game.name} · ${data.score.toFixed(1)}/100`;\n  }\n} catch {\n  output.textContent = 'Score unavailable. Try again later.';\n}"
       },
       {
         "kind": "html",
-        "html": "<p>Le score va de 0 à 100 ; <code>null</code> indique qu’aucune note n’est disponible. Pour afficher un autre jeu, modifiez l’URL et sa permission dans le manifeste. L’aperçu navigateur nécessite une réponse simulée correspondante. Consultez le <a href=\"/docs/api-reseau/\">guide réseau</a> pour les erreurs HTTP et les limites.</p><h2 id=\"public-data\">Données publiques</h2><p>Les widgets publics ne peuvent pas utiliser la connexion PlayerVox d’OverCrow, les notes personnelles, les joueurs suivis, les avis ou les éditeurs natifs. La requête de score public ne lit aucun état de compte connecté.</p>"
+        "html": "<p>Le score va de 0 à 100 ; <code>null</code> indique qu’aucune note n’est disponible. Cet exemple lit le jeu une seule fois. Pour suivre les changements, utilisez <a href=\"/docs/api-jeu/#abonnement\"><code>overcrow.game.onSnapshot()</code></a>, ne rechargez que lorsque l’identifiant Steam change et ignorez les réponses obsolètes. L’<a href=\"/docs/downloads/score.zip\">exemple Score complet</a> le fait et propose un bouton de nouvelle tentative. Les aperçus navigateur utilisent un jeu fictif et nécessitent une réponse correspondante dans <code>preview.json</code>. Consultez le <a href=\"/docs/api-reseau/\">guide réseau</a> pour les erreurs HTTP et les limites.</p><h2 id=\"public-data\">Données publiques</h2><p>Les widgets publics ne peuvent pas utiliser la connexion PlayerVox d’OverCrow, les notes personnelles, les joueurs suivis, les avis ou les éditeurs natifs. La requête de score public ne lit aucun état de compte connecté.</p>"
       }
     ]
   },
@@ -687,7 +687,7 @@
       },
       {
         "kind": "html",
-        "html": "<p>Déclarez l’origine HTTPS, la méthode et le préfixe de chemin dans <a href=\"/docs/manifeste/\">le manifeste</a>.</p>\n<h2 id=\"exemple\">Lire une réponse JSON</h2><p>Ajoutez ce contenu dans le <code>index.html</code> de la vue avant de charger le module :</p>"
+        "html": "<p>Déclarez l’origine HTTPS, la méthode et le préfixe de chemin dans <a href=\"/docs/manifeste/\">le manifeste</a>.</p><p><code>pathPrefix: \"/v2/items/\"</code> autorise des identifiants variables comme <code>/v2/items/123</code>. Le slash final autorise tous les sous-chemins ; sans lui, seul le chemin exact est accepté. Les motifs comme <code>*</code> ou <code>:id</code> ne sont pas pris en charge. Construisez l’URL en JavaScript dans les limites de l’origine, de la méthode et du chemin déclarés.</p>\n<h2 id=\"exemple\">Lire une réponse JSON</h2><p>Ajoutez ce contenu dans le <code>index.html</code> de la vue avant de charger le module :</p>"
       },
       {
         "kind": "code",
@@ -755,7 +755,7 @@
       },
       {
         "kind": "html",
-        "html": "<p>Un snapshot contient le contexte de la session de jeu courante. Vérifiez les valeurs avant de les formater ; une durée absente est indisponible, tandis que zéro est valide.</p>\n<h2 id=\"champs\">Champs du snapshot</h2>\n<div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Champ, Type / unité\"><table><thead><tr><th>Champ</th><th>Type / unité</th></tr></thead><tbody><tr><td>running / selectedActive</td><td>Booléens d’activité du jeu et de la session.</td></tr><tr><td>steamAppId</td><td>Nombre ou null ; sans titre ni image.</td></tr><tr><td>sessionElapsedMs</td><td>Durée de session en millisecondes, ou null.</td></tr><tr><td>overlayMode</td><td>\"passive\" ou \"interactive\".</td></tr></tbody></table></div>\n<p><code>GameSnapshot</code> valide ces champs et expose uniquement le contexte documenté. Un type invalide rejette avec <code>invalid_response</code>. Le simulateur peut ajouter <code>fixture: true</code> pour identifier les données fictives.</p>\n<p>CPU, mémoire et températures nécessitent <code>telemetry.read</code> ; les FPS nécessitent <code>fps.read</code>. Consultez le <a href=\"/docs/api-performance/\">guide des performances</a>. Le contexte de jeu ne contient ni inventaire, ni santé, ni position du joueur.</p>\n<h2 id=\"abonnement\">Suivre les changements</h2>\n"
+        "html": "<p>Un snapshot contient le contexte de la session de jeu courante. Vérifiez les valeurs avant de les formater ; une durée absente est indisponible, tandis que zéro est valide.</p>\n<h2 id=\"champs\">Champs du snapshot</h2>\n<div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Champ, Type / unité\"><table><thead><tr><th>Champ</th><th>Type / unité</th></tr></thead><tbody><tr><td>running / selectedActive</td><td>Booléens d’activité du jeu et de la session.</td></tr><tr><td>steamAppId</td><td>Identifiant Steam du jeu sélectionné actif, ou null s’il est indisponible ; sans titre ni image.</td></tr><tr><td>sessionElapsedMs</td><td>Durée de session en millisecondes, ou null.</td></tr><tr><td>overlayMode</td><td>\"passive\" ou \"interactive\".</td></tr></tbody></table></div><p><code>steamAppId</code> identifie le jeu, pas l’utilisateur Steam. La lecture de ce contexte ne nécessite aucune capacité supplémentaire. Un jeu peut ne pas avoir d’identifiant Steam connu ; vérifiez <code>selectedActive</code> et l’identifiant avant de l’utiliser. L’<a href=\"/docs/playervox-score/\">exemple de score public</a> construit une URL d’API à partir de cet identifiant.</p>\n<p><code>GameSnapshot</code> valide ces champs et expose uniquement le contexte documenté. Un type invalide rejette avec <code>invalid_response</code>. Le simulateur peut ajouter <code>fixture: true</code> pour identifier les données fictives.</p>\n<p>CPU, mémoire et températures nécessitent <code>telemetry.read</code> ; les FPS nécessitent <code>fps.read</code>. Consultez le <a href=\"/docs/api-performance/\">guide des performances</a>. Le contexte de jeu ne contient ni inventaire, ni santé, ni position du joueur.</p>\n<h2 id=\"abonnement\">Suivre les changements</h2>\n"
       },
       {
         "kind": "code",
