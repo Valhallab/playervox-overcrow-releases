@@ -438,6 +438,214 @@
     ]
   },
   {
+    "key": "stopwatch",
+    "slug": "api-stopwatch",
+    "group": "build",
+    "label": "Chronomètre",
+    "title": "Créer un chronomètre",
+    "description": "Créez un chronomètre en JavaScript, sans capacité native.",
+    "headings": [
+      {
+        "id": "permissions",
+        "title": "Permission de stockage"
+      },
+      {
+        "id": "example",
+        "title": "Démarrer et mettre en pause"
+      },
+      {
+        "id": "control",
+        "title": "Fonctionnement"
+      },
+      {
+        "id": "data-and-controls",
+        "title": "Sauvegarde et migration"
+      }
+    ],
+    "blocks": [
+      {
+        "kind": "html",
+        "html": "<p class=\"lead\">Un chronomètre a seulement besoin de JavaScript. Son état appartient à votre widget.</p><h2 id=\"permissions\">Permissions</h2><p>Cet exemple ne demande aucun droit du SDK.</p>"
+      },
+      {
+        "kind": "html",
+        "html": "<h2 id=\"example\">Démarrer et mettre en pause</h2><p>Créez ces deux fichiers dans votre widget.</p>"
+      },
+      {
+        "kind": "code",
+        "language": "html",
+        "title": "index.html",
+        "source": "<output id=\"time\">0.0 s</output>\n<button id=\"toggle\" type=\"button\">Start</button>\n<script type=\"module\" src=\"./view.js\"></script>"
+      },
+      {
+        "kind": "code",
+        "language": "javascript",
+        "title": "view.js",
+        "source": "const time = document.querySelector('#time');\nconst toggle = document.querySelector('#toggle');\nlet elapsedMs = 0, startedAt = null;\ntoggle.onclick = () => {\n  if (startedAt === null) startedAt = performance.now();\n  else {\n    elapsedMs += performance.now() - startedAt;\n    startedAt = null;\n  }\n  toggle.textContent = startedAt === null ? 'Start' : 'Pause';\n};\nconst timer = setInterval(() => {\n  const current = elapsedMs + (startedAt === null ? 0 : performance.now() - startedAt);\n  time.textContent = `${(current / 1000).toFixed(1)} s`;\n}, 100);\nwindow.addEventListener('pagehide', () => clearInterval(timer), { once: true });"
+      },
+      {
+        "kind": "html",
+        "html": "<h2 id=\"control\">Fonctionnement</h2><p><code>performance.now()</code> mesure le temps écoulé. L’intervalle actualise seulement l’affichage ; recharger la vue remet le chrono à zéro.</p><h2 id=\"data-and-controls\">Pour aller plus loin</h2><p>Pour conserver la durée, utilisez <a href=\"/docs/api-stockage/\">le stockage de votre widget</a>. Pour la partie active, lisez <a href=\"/docs/api-jeu/\">sessionElapsedMs</a>. Le chronomètre intégré reste privé : retirez les anciens droits et appels du SDK.</p>"
+      }
+    ]
+  },
+  {
+    "key": "notes",
+    "slug": "api-notes",
+    "group": "build",
+    "label": "Notes",
+    "title": "Enregistrer une note",
+    "description": "Créez un petit éditeur et enregistrez son texte dans le stockage isolé du widget.",
+    "headings": [
+      {
+        "id": "permissions",
+        "title": "Permission de stockage"
+      },
+      {
+        "id": "example",
+        "title": "Éditeur minimal"
+      },
+      {
+        "id": "actions-and-saving",
+        "title": "Sauvegarde et migration"
+      }
+    ],
+    "blocks": [
+      {
+        "kind": "html",
+        "html": "<p class=\"lead\">Une note tient dans une zone de texte, un bouton Enregistrer et une valeur dans <code>overcrow.storage</code>. Ce widget possède sa note ; les notes intégrées à OverCrow ne sont pas exposées.</p><h2 id=\"permissions\">Permission de stockage</h2><p>Fusionnez ce champ avec votre manifeste existant. Il demande un stockage persistant propre au widget ; l’aperçu navigateur utilise toujours une mémoire temporaire.</p>"
+      },
+      {
+        "kind": "code",
+        "language": "json",
+        "title": "manifest.json · champs à fusionner",
+        "source": "{\n  \"permissions\": { \"storage\": true }\n}"
+      },
+      {
+        "kind": "html",
+        "html": "<h2 id=\"example\">Éditeur minimal</h2><p>Placez <code>overcrow.js</code> et <code>view.js</code> à côté de <code>index.html</code>. Utilisez ce HTML, puis le JavaScript ci-dessous.</p>"
+      },
+      {
+        "kind": "code",
+        "language": "html",
+        "title": "index.html",
+        "source": "<textarea id=\"note\" aria-label=\"Note\" maxlength=\"8000\" disabled></textarea>\n<button id=\"save\" type=\"button\" disabled>Save</button>\n<p id=\"status\" role=\"status\"></p>\n<script type=\"module\" src=\"./view.js\"></script>"
+      },
+      {
+        "kind": "code",
+        "language": "javascript",
+        "title": "view.js",
+        "source": "import overcrow from './overcrow.js';\nconst note = document.querySelector('#note');\nconst save = document.querySelector('#save');\nconst status = document.querySelector('#status');\ntry {\n  const stored = await overcrow.storage.get('note');\n  if (stored !== undefined && typeof stored !== 'string') throw new Error('Invalid note');\n  note.value = stored ?? '';\n  note.disabled = save.disabled = false;\n} catch { status.textContent = 'Could not load the note.'; }\nsave.onclick = async () => {\n  note.disabled = save.disabled = true;\n  try {\n    await overcrow.storage.set('note', note.value);\n    status.textContent = 'Saved';\n  } catch { status.textContent = 'Save failed. Your text is still here.'; }\n  finally { note.disabled = save.disabled = false; }\n};"
+      },
+      {
+        "kind": "html",
+        "html": "<h2 id=\"actions-and-saving\">Sauvegarde et migration</h2><p>Le bouton enregistre seulement le texte de ce widget. Un échec d’écriture le laisse dans l’éditeur. Vérifiez <code>overcrow.storage.getInfo()</code> pour distinguer <code>persistent</code> de <code>temporary</code> ; le <a href=\"/docs/api-stockage/\">guide du stockage</a> décrit les limites et les erreurs.</p><p>Pour une checklist, enregistrez un tableau contenant vos propres éléments. Le <a href=\"/docs/exemples/#checklist\">modèle Checklist</a> fournit un exemple complet. Retirez les anciens droits et appels de notes du manifeste et du code ; le SDK ne donne accès ni aux notes intégrées ni à leur éditeur.</p>"
+      }
+    ]
+  },
+  {
+    "key": "playervox",
+    "slug": "api-playervox",
+    "group": "build",
+    "label": "Score public",
+    "title": "Lire un score public PlayerVox",
+    "description": "Lisez un score communautaire avec overcrow.fetch, sans compte ni intégration native.",
+    "headings": [
+      {
+        "id": "permissions",
+        "title": "Permission réseau"
+      },
+      {
+        "id": "example",
+        "title": "Afficher le score de Portal 2"
+      },
+      {
+        "id": "ratings-and-reviews",
+        "title": "Comptes et migration"
+      }
+    ],
+    "blocks": [
+      {
+        "kind": "html",
+        "html": "<p class=\"lead\">L’API publique de score PlayerVox accepte une requête GET anonyme. Utilisez <code>overcrow.fetch</code> comme pour toute API HTTPS compatible ; aucun compte PlayerVox, jeton ou service natif du SDK n’intervient.</p><h2 id=\"permissions\">Permission réseau</h2><p>Fusionnez cette permission avec votre manifeste. Elle autorise uniquement l’URL du score de l’application Steam 620 (Portal 2).</p>"
+      },
+      {
+        "kind": "code",
+        "language": "json",
+        "title": "manifest.json · champs à fusionner",
+        "source": "{\n  \"permissions\": {\n    \"network\": [{\n      \"origin\": \"https://api.playervox.com\",\n      \"method\": \"GET\",\n      \"pathPrefix\": \"/api/v1/overcrow/games/steam/620/score\"\n    }]\n  }\n}"
+      },
+      {
+        "kind": "html",
+        "html": "<h2 id=\"example\">Afficher le score de Portal 2</h2><p>Chargez ce module depuis votre vue avec <code>&lt;script type=\"module\" src=\"./view.js\"&gt;&lt;/script&gt;</code> et placez <code>overcrow.js</code> à côté. Le module crée son propre élément de texte.</p>"
+      },
+      {
+        "kind": "code",
+        "language": "javascript",
+        "title": "view.js",
+        "source": "import overcrow from './overcrow.js';\n\nconst output = document.createElement('p');\noutput.textContent = 'Loading…';\ndocument.body.append(output);\ntry {\n  const response = await overcrow.fetch(\n    'https://api.playervox.com/api/v1/overcrow/games/steam/620/score'\n  );\n  if (!response.ok) throw new Error(`HTTP ${response.status}`);\n  const data = await response.json();\n  if (typeof data?.game?.name !== 'string' ||\n      (data.score !== null && (!Number.isFinite(data.score) || data.score < 0 || data.score > 100))) {\n    throw new Error('Invalid score');\n  }\n  output.textContent = data.score === null\n    ? `${data.game.name} · No ratings yet`\n    : `${data.game.name} · ${data.score.toFixed(1)}/100`;\n} catch {\n  output.textContent = 'Score unavailable. Try again later.';\n}"
+      },
+      {
+        "kind": "html",
+        "html": "<p>Le score va de 0 à 100 ; <code>null</code> indique qu’aucune note n’est disponible. Pour afficher un autre jeu, modifiez l’URL et sa permission dans le manifeste. L’aperçu navigateur nécessite une réponse simulée correspondante. Consultez le <a href=\"/docs/api-reseau/\">guide réseau</a> pour les erreurs HTTP et les limites.</p><h2 id=\"ratings-and-reviews\">Comptes et migration</h2><p>Retirez les anciens droits et appels SDK PlayerVox. Les widgets publics ne peuvent pas utiliser la connexion PlayerVox d’OverCrow, les notes personnelles, les joueurs suivis, les avis ou les éditeurs natifs. La requête de score public ne lit aucun état de compte connecté.</p>"
+      }
+    ]
+  },
+  {
+    "key": "journal",
+    "slug": "api-journal",
+    "group": "build",
+    "label": "Historique",
+    "title": "Créer un historique de sessions",
+    "description": "Enregistrez un petit historique à partir de la partie courante dans le stockage du widget.",
+    "headings": [
+      {
+        "id": "permissions",
+        "title": "Permission de stockage"
+      },
+      {
+        "id": "example",
+        "title": "Enregistrer la session courante"
+      },
+      {
+        "id": "pages-and-actions",
+        "title": "Historique et migration"
+      }
+    ],
+    "blocks": [
+      {
+        "kind": "html",
+        "html": "<p class=\"lead\">Un widget peut enregistrer le contexte de la partie courante dans son propre stockage. Il ne peut ni lire, ni modifier, ni supprimer le journal local ou cloud intégré à OverCrow.</p><h2 id=\"permissions\">Permission de stockage</h2><p>Fusionnez ce champ avec votre manifeste existant. Il demande un stockage persistant propre au widget ; l’aperçu navigateur utilise toujours une mémoire temporaire.</p>"
+      },
+      {
+        "kind": "code",
+        "language": "json",
+        "title": "manifest.json · champs à fusionner",
+        "source": "{\n  \"permissions\": { \"storage\": true }\n}"
+      },
+      {
+        "kind": "html",
+        "html": "<h2 id=\"example\">Enregistrer la session courante</h2><p>Placez <code>overcrow.js</code> et <code>view.js</code> à côté de <code>index.html</code>. Utilisez ce HTML, puis le JavaScript ci-dessous.</p><p>Chaque clic enregistre la date et la durée écoulée en minutes. Cet exemple conserve les 20 dernières entrées.</p>"
+      },
+      {
+        "kind": "code",
+        "language": "html",
+        "title": "index.html",
+        "source": "<button id=\"save\" type=\"button\">Save current session</button>\n<pre id=\"entries\"></pre>\n<p id=\"status\" role=\"status\"></p>\n<script type=\"module\" src=\"./view.js\"></script>"
+      },
+      {
+        "kind": "code",
+        "language": "javascript",
+        "title": "view.js",
+        "source": "import overcrow from './overcrow.js';\nconst save = document.querySelector('#save');\nconst output = document.querySelector('#entries');\nconst status = document.querySelector('#status');\nsave.onclick = async () => {\n  save.disabled = true;\n  try {\n    const game = await overcrow.game.snapshot();\n    if (!game.selectedActive || game.sessionElapsedMs == null) throw new Error('No session');\n    const entries = await overcrow.storage.get('sessions') ?? [];\n    if (!Array.isArray(entries) || entries.length > 20 || entries.some(x => typeof x !== 'string')) {\n      throw new Error('Invalid session log');\n    }\n    const entry = `${new Date().toISOString()} · ${Math.floor(game.sessionElapsedMs / 60000)} min`;\n    const next = [...entries, entry].slice(-20);\n    await overcrow.storage.set('sessions', next);\n    output.textContent = next.join('\\n');\n    status.textContent = 'Saved';\n  } catch { status.textContent = 'Could not save this session.'; }\n  finally { save.disabled = false; }\n};"
+      },
+      {
+        "kind": "html",
+        "html": "<h2 id=\"pages-and-actions\">Historique et migration</h2><p>Ce journal garde la trace des clics, pas automatiquement celle des parties terminées. Ajoutez vos propres champs, pages ou commandes de suppression. Vérifiez la structure des données avant de les remplacer ; conservez les dernières entrées affichées si une écriture échoue.</p><p>Retirez les anciens droits et appels du journal. Aucun historique natif ni aucune donnée de compte ne sont copiés dans le stockage du widget. Le <a href=\"/docs/api-jeu/\">contexte de jeu</a> fournit seulement la session courante ; le <a href=\"/docs/api-stockage/\">guide du stockage</a> décrit les limites et la persistance.</p>"
+      }
+    ]
+  },
+  {
     "key": "network",
     "slug": "api-reseau",
     "group": "sdk-reference",
@@ -706,58 +914,6 @@
     ]
   },
   {
-    "key": "stopwatch",
-    "slug": "api-stopwatch",
-    "group": "build",
-    "label": "Chronomètre",
-    "title": "Créer un chronomètre",
-    "description": "Créez un chronomètre en JavaScript, sans capacité native.",
-    "headings": [
-      {
-        "id": "permissions",
-        "title": "Permission de stockage"
-      },
-      {
-        "id": "example",
-        "title": "Démarrer et mettre en pause"
-      },
-      {
-        "id": "control",
-        "title": "Fonctionnement"
-      },
-      {
-        "id": "data-and-controls",
-        "title": "Sauvegarde et migration"
-      }
-    ],
-    "blocks": [
-      {
-        "kind": "html",
-        "html": "<p class=\"lead\">Un chronomètre a seulement besoin de JavaScript. Son état appartient à votre widget.</p><h2 id=\"permissions\">Permissions</h2><p>Cet exemple ne demande aucun droit du SDK.</p>"
-      },
-      {
-        "kind": "html",
-        "html": "<h2 id=\"example\">Démarrer et mettre en pause</h2><p>Créez ces deux fichiers dans votre widget.</p>"
-      },
-      {
-        "kind": "code",
-        "language": "html",
-        "title": "index.html",
-        "source": "<output id=\"time\">0.0 s</output>\n<button id=\"toggle\" type=\"button\">Start</button>\n<script type=\"module\" src=\"./view.js\"></script>"
-      },
-      {
-        "kind": "code",
-        "language": "javascript",
-        "title": "view.js",
-        "source": "const time = document.querySelector('#time');\nconst toggle = document.querySelector('#toggle');\nlet elapsedMs = 0, startedAt = null;\ntoggle.onclick = () => {\n  if (startedAt === null) startedAt = performance.now();\n  else {\n    elapsedMs += performance.now() - startedAt;\n    startedAt = null;\n  }\n  toggle.textContent = startedAt === null ? 'Start' : 'Pause';\n};\nconst timer = setInterval(() => {\n  const current = elapsedMs + (startedAt === null ? 0 : performance.now() - startedAt);\n  time.textContent = `${(current / 1000).toFixed(1)} s`;\n}, 100);\nwindow.addEventListener('pagehide', () => clearInterval(timer), { once: true });"
-      },
-      {
-        "kind": "html",
-        "html": "<h2 id=\"control\">Fonctionnement</h2><p><code>performance.now()</code> mesure le temps écoulé. L’intervalle actualise seulement l’affichage ; recharger la vue remet le chrono à zéro.</p><h2 id=\"data-and-controls\">Pour aller plus loin</h2><p>Pour conserver la durée, utilisez <a href=\"/docs/api-stockage/\">le stockage de votre widget</a>. Pour la partie active, lisez <a href=\"/docs/api-jeu/\">sessionElapsedMs</a>. Le chronomètre intégré reste privé : retirez les anciens droits et appels du SDK.</p>"
-      }
-    ]
-  },
-  {
     "key": "media",
     "slug": "api-media",
     "group": "sdk-reference",
@@ -802,194 +958,6 @@
       {
         "kind": "html",
         "html": "<h2 id=\"data-and-controls\">Informations et commandes</h2><p><code>title</code>, <code>artist</code> et <code>artworkHandle</code> peuvent être null. <code>playbackState</code> vaut playing, paused ou stopped. Affichez les textes avec <code>textContent</code> et effacez l’ancien morceau lorsque les données deviennent indisponibles.</p><p><code>actions.previous</code>, <code>actions.playPause</code> et <code>actions.next</code> indiquent les commandes proposées par le lecteur. Appelez <code>previous()</code>, <code>playPause()</code> ou <code>next()</code> lors d’une interaction utilisateur. Une commande disponible nécessite aussi l’autorisation de contrôle du widget. Gérez les erreurs et affichez l’état reçu dans les snapshots suivants ; <code>accepted</code> signifie seulement que la commande est en attente.</p><p>Un identifiant d’illustration n’est pas une URL. <code>await overcrow.assets.read(handle)</code> renvoie un Blob PNG local de 512 Kio maximum. Créez une URL objet pour l’afficher, révoquez-la au remplacement ou à la fermeture, et ignorez une réponse tardive si le morceau ou le contexte a changé. Ne remplacez jamais cet identifiant par une URL externe.</p><p>Les autorisations sensibles imposent des données navigateur temporaires, même si le stockage est demandé. Les changements de session ou de compte natifs les effacent. Les commandes de l’aperçu ne modifient que des données fictives.</p><p>Consultez les <a href=\"/docs/api-services/#confidentialite\">règles communes aux services</a>, les <a href=\"/docs/downloads/overcrow.d.ts\">définitions TypeScript complètes</a> et les <a href=\"/docs/exemples/#references-v2\">widgets de référence complets</a>.</p>"
-      }
-    ]
-  },
-  {
-    "key": "notes",
-    "slug": "api-notes",
-    "group": "build",
-    "label": "Notes",
-    "title": "Enregistrer une note",
-    "description": "Créez un petit éditeur et enregistrez son texte dans le stockage isolé du widget.",
-    "headings": [
-      {
-        "id": "permissions",
-        "title": "Permission de stockage"
-      },
-      {
-        "id": "example",
-        "title": "Éditeur minimal"
-      },
-      {
-        "id": "actions-and-saving",
-        "title": "Sauvegarde et migration"
-      }
-    ],
-    "blocks": [
-      {
-        "kind": "html",
-        "html": "<p class=\"lead\">Une note tient dans une zone de texte, un bouton Enregistrer et une valeur dans <code>overcrow.storage</code>. Ce widget possède sa note ; les notes intégrées à OverCrow ne sont pas exposées.</p><h2 id=\"permissions\">Permission de stockage</h2><p>Fusionnez ce champ avec votre manifeste existant. Il demande un stockage persistant propre au widget ; l’aperçu navigateur utilise toujours une mémoire temporaire.</p>"
-      },
-      {
-        "kind": "code",
-        "language": "json",
-        "title": "manifest.json · champs à fusionner",
-        "source": "{\n  \"permissions\": { \"storage\": true }\n}"
-      },
-      {
-        "kind": "html",
-        "html": "<h2 id=\"example\">Éditeur minimal</h2><p>Placez <code>overcrow.js</code> et <code>view.js</code> à côté de <code>index.html</code>. Utilisez ce HTML, puis le JavaScript ci-dessous.</p>"
-      },
-      {
-        "kind": "code",
-        "language": "html",
-        "title": "index.html",
-        "source": "<textarea id=\"note\" aria-label=\"Note\" maxlength=\"8000\" disabled></textarea>\n<button id=\"save\" type=\"button\" disabled>Save</button>\n<p id=\"status\" role=\"status\"></p>\n<script type=\"module\" src=\"./view.js\"></script>"
-      },
-      {
-        "kind": "code",
-        "language": "javascript",
-        "title": "view.js",
-        "source": "import overcrow from './overcrow.js';\nconst note = document.querySelector('#note');\nconst save = document.querySelector('#save');\nconst status = document.querySelector('#status');\ntry {\n  const stored = await overcrow.storage.get('note');\n  if (stored !== undefined && typeof stored !== 'string') throw new Error('Invalid note');\n  note.value = stored ?? '';\n  note.disabled = save.disabled = false;\n} catch { status.textContent = 'Could not load the note.'; }\nsave.onclick = async () => {\n  note.disabled = save.disabled = true;\n  try {\n    await overcrow.storage.set('note', note.value);\n    status.textContent = 'Saved';\n  } catch { status.textContent = 'Save failed. Your text is still here.'; }\n  finally { note.disabled = save.disabled = false; }\n};"
-      },
-      {
-        "kind": "html",
-        "html": "<h2 id=\"actions-and-saving\">Sauvegarde et migration</h2><p>Le bouton enregistre seulement le texte de ce widget. Un échec d’écriture le laisse dans l’éditeur. Vérifiez <code>overcrow.storage.getInfo()</code> pour distinguer <code>persistent</code> de <code>temporary</code> ; le <a href=\"/docs/api-stockage/\">guide du stockage</a> décrit les limites et les erreurs.</p><p>Pour une checklist, enregistrez un tableau contenant vos propres éléments. Le <a href=\"/docs/exemples/#checklist\">modèle Checklist</a> fournit un exemple complet. Retirez les anciens droits et appels de notes du manifeste et du code ; le SDK ne donne accès ni aux notes intégrées ni à leur éditeur.</p>"
-      }
-    ]
-  },
-  {
-    "key": "playervox",
-    "slug": "api-playervox",
-    "group": "build",
-    "label": "Score public",
-    "title": "Lire un score public PlayerVox",
-    "description": "Lisez un score communautaire avec overcrow.fetch, sans compte ni intégration native.",
-    "headings": [
-      {
-        "id": "permissions",
-        "title": "Permission réseau"
-      },
-      {
-        "id": "example",
-        "title": "Afficher le score de Portal 2"
-      },
-      {
-        "id": "ratings-and-reviews",
-        "title": "Comptes et migration"
-      }
-    ],
-    "blocks": [
-      {
-        "kind": "html",
-        "html": "<p class=\"lead\">L’API publique de score PlayerVox accepte une requête GET anonyme. Utilisez <code>overcrow.fetch</code> comme pour toute API HTTPS compatible ; aucun compte PlayerVox, jeton ou service natif du SDK n’intervient.</p><h2 id=\"permissions\">Permission réseau</h2><p>Fusionnez cette permission avec votre manifeste. Elle autorise uniquement l’URL du score de l’application Steam 620 (Portal 2).</p>"
-      },
-      {
-        "kind": "code",
-        "language": "json",
-        "title": "manifest.json · champs à fusionner",
-        "source": "{\n  \"permissions\": {\n    \"network\": [{\n      \"origin\": \"https://api.playervox.com\",\n      \"method\": \"GET\",\n      \"pathPrefix\": \"/api/v1/overcrow/games/steam/620/score\"\n    }]\n  }\n}"
-      },
-      {
-        "kind": "html",
-        "html": "<h2 id=\"example\">Afficher le score de Portal 2</h2><p>Chargez ce module depuis votre vue avec <code>&lt;script type=\"module\" src=\"./view.js\"&gt;&lt;/script&gt;</code> et placez <code>overcrow.js</code> à côté. Le module crée son propre élément de texte.</p>"
-      },
-      {
-        "kind": "code",
-        "language": "javascript",
-        "title": "view.js",
-        "source": "import overcrow from './overcrow.js';\n\nconst output = document.createElement('p');\noutput.textContent = 'Loading…';\ndocument.body.append(output);\ntry {\n  const response = await overcrow.fetch(\n    'https://api.playervox.com/api/v1/overcrow/games/steam/620/score'\n  );\n  if (!response.ok) throw new Error(`HTTP ${response.status}`);\n  const data = await response.json();\n  if (typeof data?.game?.name !== 'string' ||\n      (data.score !== null && (!Number.isFinite(data.score) || data.score < 0 || data.score > 100))) {\n    throw new Error('Invalid score');\n  }\n  output.textContent = data.score === null\n    ? `${data.game.name} · No ratings yet`\n    : `${data.game.name} · ${data.score.toFixed(1)}/100`;\n} catch {\n  output.textContent = 'Score unavailable. Try again later.';\n}"
-      },
-      {
-        "kind": "html",
-        "html": "<p>Le score va de 0 à 100 ; <code>null</code> indique qu’aucune note n’est disponible. Pour afficher un autre jeu, modifiez l’URL et sa permission dans le manifeste. L’aperçu navigateur nécessite une réponse simulée correspondante. Consultez le <a href=\"/docs/api-reseau/\">guide réseau</a> pour les erreurs HTTP et les limites.</p><h2 id=\"ratings-and-reviews\">Comptes et migration</h2><p>Retirez les anciens droits et appels SDK PlayerVox. Les widgets publics ne peuvent pas utiliser la connexion PlayerVox d’OverCrow, les notes personnelles, les joueurs suivis, les avis ou les éditeurs natifs. La requête de score public ne lit aucun état de compte connecté.</p>"
-      }
-    ]
-  },
-  {
-    "key": "journal",
-    "slug": "api-journal",
-    "group": "build",
-    "label": "Historique",
-    "title": "Créer un historique de sessions",
-    "description": "Enregistrez un petit historique à partir de la partie courante dans le stockage du widget.",
-    "headings": [
-      {
-        "id": "permissions",
-        "title": "Permission de stockage"
-      },
-      {
-        "id": "example",
-        "title": "Enregistrer la session courante"
-      },
-      {
-        "id": "pages-and-actions",
-        "title": "Historique et migration"
-      }
-    ],
-    "blocks": [
-      {
-        "kind": "html",
-        "html": "<p class=\"lead\">Un widget peut enregistrer le contexte de la partie courante dans son propre stockage. Il ne peut ni lire, ni modifier, ni supprimer le journal local ou cloud intégré à OverCrow.</p><h2 id=\"permissions\">Permission de stockage</h2><p>Fusionnez ce champ avec votre manifeste existant. Il demande un stockage persistant propre au widget ; l’aperçu navigateur utilise toujours une mémoire temporaire.</p>"
-      },
-      {
-        "kind": "code",
-        "language": "json",
-        "title": "manifest.json · champs à fusionner",
-        "source": "{\n  \"permissions\": { \"storage\": true }\n}"
-      },
-      {
-        "kind": "html",
-        "html": "<h2 id=\"example\">Enregistrer la session courante</h2><p>Placez <code>overcrow.js</code> et <code>view.js</code> à côté de <code>index.html</code>. Utilisez ce HTML, puis le JavaScript ci-dessous.</p><p>Chaque clic enregistre la date et la durée écoulée en minutes. Cet exemple conserve les 20 dernières entrées.</p>"
-      },
-      {
-        "kind": "code",
-        "language": "html",
-        "title": "index.html",
-        "source": "<button id=\"save\" type=\"button\">Save current session</button>\n<pre id=\"entries\"></pre>\n<p id=\"status\" role=\"status\"></p>\n<script type=\"module\" src=\"./view.js\"></script>"
-      },
-      {
-        "kind": "code",
-        "language": "javascript",
-        "title": "view.js",
-        "source": "import overcrow from './overcrow.js';\nconst save = document.querySelector('#save');\nconst output = document.querySelector('#entries');\nconst status = document.querySelector('#status');\nsave.onclick = async () => {\n  save.disabled = true;\n  try {\n    const game = await overcrow.game.snapshot();\n    if (!game.selectedActive || game.sessionElapsedMs == null) throw new Error('No session');\n    const entries = await overcrow.storage.get('sessions') ?? [];\n    if (!Array.isArray(entries) || entries.length > 20 || entries.some(x => typeof x !== 'string')) {\n      throw new Error('Invalid session log');\n    }\n    const entry = `${new Date().toISOString()} · ${Math.floor(game.sessionElapsedMs / 60000)} min`;\n    const next = [...entries, entry].slice(-20);\n    await overcrow.storage.set('sessions', next);\n    output.textContent = next.join('\\n');\n    status.textContent = 'Saved';\n  } catch { status.textContent = 'Could not save this session.'; }\n  finally { save.disabled = false; }\n};"
-      },
-      {
-        "kind": "html",
-        "html": "<h2 id=\"pages-and-actions\">Historique et migration</h2><p>Ce journal garde la trace des clics, pas automatiquement celle des parties terminées. Ajoutez vos propres champs, pages ou commandes de suppression. Vérifiez la structure des données avant de les remplacer ; conservez les dernières entrées affichées si une écriture échoue.</p><p>Retirez les anciens droits et appels du journal. Aucun historique natif ni aucune donnée de compte ne sont copiés dans le stockage du widget. Le <a href=\"/docs/api-jeu/\">contexte de jeu</a> fournit seulement la session courante ; le <a href=\"/docs/api-stockage/\">guide du stockage</a> décrit les limites et la persistance.</p>"
-      }
-    ]
-  },
-  {
-    "key": "twitch",
-    "slug": "api-twitch",
-    "group": "troubleshooting",
-    "label": "Migration Twitch",
-    "title": "Retrait de l’intégration Twitch",
-    "description": "Le SDK public ne partage plus la connexion Twitch intégrée à OverCrow.",
-    "headings": [
-      {
-        "id": "permissions",
-        "title": "Retirer les anciens droits"
-      },
-      {
-        "id": "example",
-        "title": "Retirer les anciens appels"
-      },
-      {
-        "id": "write-and-reply",
-        "title": "Messages et réponses"
-      },
-      {
-        "id": "connection-and-messages",
-        "title": "Comptes connectés"
-      }
-    ],
-    "blocks": [
-      {
-        "kind": "html",
-        "html": "<p class=\"lead\">Le SDK public ne propose aucune intégration Twitch. Les widgets n’ont accès ni au compte Twitch intégré, ni à l’état du chat, ni à la connexion native.</p><h2 id=\"permissions\">Retirer les anciens droits</h2><p>Retirez <code>twitch.chat.read</code> et <code>twitch.chat.compose</code> des manifestes existants.</p><h2 id=\"example\">Retirer les anciens appels</h2><p>Supprimez les appels à <code>overcrow.twitch</code>. Le modèle de référence Twitch et son archive ne sont plus distribués.</p><h2 id=\"write-and-reply\">Messages et réponses</h2><p>Le SDK ne propose ni chat partagé, ni éditeur natif de message, ni commande de réponse.</p><h2 id=\"connection-and-messages\">Comptes connectés</h2><p>La connexion Twitch intégrée et ses jetons restent privés à l’application. Cette version ne propose aucune API SDK publique de remplacement. Consultez les <a href=\"/docs/api-services/\">services hôte disponibles</a>.</p>"
       }
     ]
   },
@@ -1386,6 +1354,38 @@
       {
         "kind": "html",
         "html": "\n<p>La commande contrôle le manifeste et ses fichiers puis crée un ZIP déterministe au format .ocpkg. Elle ne signe, n’installe et ne publie rien. Toute modification des octets impose de préparer de nouveau ; toute nouvelle livraison d’un widget publié utilise une nouvelle version.</p>\n<h2 id=\"fiche\">Préparer une fiche</h2><p>La fiche <code>listing.json</code> décrit l’auteur, la licence, les sources et les traductions du catalogue. Elle reste séparée des fichiers runtime. Les traductions de la fiche ne déclarent pas les langues réellement fournies par le widget.</p>\n<p><a href=\"https://github.com/Valhallab/playervox-overcrow-releases/blob/main/docs/creator-guide.md\" rel=\"noreferrer\">Suivre le guide créateur du marketplace ↗</a> et <a href=\"https://github.com/Valhallab/playervox-overcrow-releases/blob/main/docs/review-policy.md\" rel=\"noreferrer\">les règles de revue ↗</a>.</p>\n<p><strong>Capture pour la marketplace.</strong> Ajoutez un PNG au widget, par exemple <code>widget/preview.png</code>, avant de préparer son paquet. Dans le fichier de publication <code>listing.json</code>, ajoutez <code>\"preview\": \"preview.png\"</code> ou un autre chemin relatif comme <code>\"preview\": \"images/screenshot.png\"</code>. L’image doit figurer dans la liste <code>manifest.files</code> générée. Utilisez un PNG statique de 256 Kio maximum et de 1 024 × 1 024 pixels maximum ; 960 × 600 convient pour une capture en paysage. Les URL, SVG, images animées et chemins hors du widget sont refusés.</p><p>La marketplace affiche l’image admise sur les cartes et les fiches, avec un emplacement neutre si elle est absente. Modifier une capture publiée nécessite une nouvelle version du widget et une publication signée.</p>\n<h2 id=\"admission\">Revue et installation</h2><p>La revue et la publication utilisent le manifeste, le paquet exact et la fiche validée. Le catalogue signé et le consentement d’installation restent distincts du développement local. Le lien « Open in OverCrow » ouvre la fiche dans le Control Center ; il n’installe ni n’active automatiquement le widget.</p>\n<h2 id=\"licences\">Licences</h2><p>Le SDK et les exemples fournis ici sont sous MIT ; conservez leurs notices. Cette licence n’impose pas MIT à votre propre widget. La politique d’admission des licences tierces reste à confirmer dans les règles publiques du marketplace ; ne déduisez pas une autorisation de publication de la seule validation technique du champ de licence.</p>"
+      }
+    ]
+  },
+  {
+    "key": "twitch",
+    "slug": "api-twitch",
+    "group": "troubleshooting",
+    "label": "Migration Twitch",
+    "title": "Retrait de l’intégration Twitch",
+    "description": "Le SDK public ne partage plus la connexion Twitch intégrée à OverCrow.",
+    "headings": [
+      {
+        "id": "permissions",
+        "title": "Retirer les anciens droits"
+      },
+      {
+        "id": "example",
+        "title": "Retirer les anciens appels"
+      },
+      {
+        "id": "write-and-reply",
+        "title": "Messages et réponses"
+      },
+      {
+        "id": "connection-and-messages",
+        "title": "Comptes connectés"
+      }
+    ],
+    "blocks": [
+      {
+        "kind": "html",
+        "html": "<p class=\"lead\">Le SDK public ne propose aucune intégration Twitch. Les widgets n’ont accès ni au compte Twitch intégré, ni à l’état du chat, ni à la connexion native.</p><h2 id=\"permissions\">Retirer les anciens droits</h2><p>Retirez <code>twitch.chat.read</code> et <code>twitch.chat.compose</code> des manifestes existants.</p><h2 id=\"example\">Retirer les anciens appels</h2><p>Supprimez les appels à <code>overcrow.twitch</code>. Le modèle de référence Twitch et son archive ne sont plus distribués.</p><h2 id=\"write-and-reply\">Messages et réponses</h2><p>Le SDK ne propose ni chat partagé, ni éditeur natif de message, ni commande de réponse.</p><h2 id=\"connection-and-messages\">Comptes connectés</h2><p>La connexion Twitch intégrée et ses jetons restent privés à l’application. Cette version ne propose aucune API SDK publique de remplacement. Consultez les <a href=\"/docs/api-services/\">services hôte disponibles</a>.</p>"
       }
     ]
   },
