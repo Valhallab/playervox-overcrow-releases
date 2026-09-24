@@ -525,11 +525,12 @@ function createIndexedStorage(ErrorClass) {
         transaction.onabort = () => finish(reason ?? failure(transaction.error));
         const store = transaction.objectStore('values');
         if (operation === 'get') {
-          const request = store.get(key);
+          const request = store.openCursor(key);
           request.onsuccess = () => {
-            if (request.result !== undefined && typeof request.result !== 'string') {
+            const record = request.result;
+            if (record && typeof record.value !== 'string') {
               abort(new ErrorClass('invalid_response', 'Stored widget data is invalid'));
-            } else result = request.result ?? null;
+            } else result = record ? record.value : null;
           };
         } else if (operation === 'remove') store.delete(key);
         else {
@@ -727,9 +728,13 @@ function cloneJson(value, seen = new Set(), depth = 0) {
   if (!Array.isArray(value) && prototype !== Object.prototype && prototype !== null) {
     throw new OvercrowError('invalid_message', 'Payload must contain plain JSON objects only');
   }
+  const keys = Object.keys(value);
+  if (Array.isArray(value) && (keys.length !== value.length || keys.some((key, index) => key !== String(index)))) {
+    throw new OvercrowError('invalid_message', 'JSON arrays must be dense and contain only indexed values');
+  }
   seen.add(value);
   const cloned = Array.isArray(value) ? [] : {};
-  for (const key of Object.keys(value)) {
+  for (const key of keys) {
     Object.defineProperty(cloned, key, {
       value: cloneJson(value[key], seen, depth + 1),
       enumerable: true,

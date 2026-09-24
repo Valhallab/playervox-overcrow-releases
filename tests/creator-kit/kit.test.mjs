@@ -81,6 +81,16 @@ test('preview serves only a frozen widget generation and rejects traversal and f
   assert.match(shell,/aria-label="Options du widget"/);
   assert.match(shell,/Taille du contenu/);
   assert.match(shell,/Opacité du fond/);
+  const modules=['app.js'], visited=new Set();
+  for (const name of modules) {
+    if (visited.has(name)) continue;
+    visited.add(name);
+    const resource=await fetch(preview.url+name);
+    assert.equal(resource.status,200,`Preview module ${name} must be served`);
+    assert.ok(resource.headers.get('content-type').startsWith('text/javascript'),name);
+    const source=await resource.text();
+    for (const match of source.matchAll(/(?:from|import)\s*['"]\.\/([^'"]+)['"]/g)) modules.push(match[1]);
+  }
   for(const [asset,type] of [['chrome.mjs','text/javascript'],['chrome-messages.mjs','text/javascript'],['NotoSansUI-Regular.ttf','font/ttf']]) {
     const resource=await fetch(preview.url+asset);assert.equal(resource.status,200,asset);
     assert.ok(resource.headers.get('content-type').startsWith(type),asset);

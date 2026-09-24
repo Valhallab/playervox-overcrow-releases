@@ -50,7 +50,7 @@ export async function startPreview(project,port=4175) {
   const permissions=JSON.stringify(bundle.manifest.permissions);
   const base=`/${randomBytes(16).toString('hex')}/`;
   const clients=new Set(),staticFiles=new Map();
-  for(const name of ['index.html','app.js','bridge.js','network.mjs','services.mjs','service-fixtures.mjs','chrome.mjs','chrome-messages.mjs','styles.css','NotoSansUI-Regular.ttf'])staticFiles.set(name,await readFile(path.join(assets,name)));
+  for(const name of ['index.html','app.js','bridge.js','network.mjs','services.mjs','storage.mjs','service-fixtures.mjs','chrome.mjs','chrome-messages.mjs','styles.css','NotoSansUI-Regular.ttf'])staticFiles.set(name,await readFile(path.join(assets,name)));
   const publish=value=>{for(const client of clients){if(!client.write(`data: ${JSON.stringify(value)}\n\n`)){clients.delete(client);client.end();}}};
   const state=()=>({manifest:bundle.manifest,config,generation});
   const server=createServer((request,response)=>{
