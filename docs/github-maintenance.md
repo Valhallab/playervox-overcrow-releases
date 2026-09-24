@@ -19,6 +19,8 @@ CI uses pinned actions, disposable hosted runners, no persisted Git credentials,
 and no signing or deployment secrets. Static admission uses the exact reviewed
 base; proposed widget code is data and is never executed by admission. The
 separate creator-kit workflow runs unprivileged tests on Linux and Windows.
+It builds source downloads on both branches, but requires committed reproducible
+downloads only on `main`: candidate submissions cannot change `published/`.
 
 Do not modify desktop GitHub Releases, the `v*` application tags, or
 `docs/channels/` while changing creator tooling. SDK and creator-kit versions

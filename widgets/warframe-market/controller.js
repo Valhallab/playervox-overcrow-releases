@@ -1,5 +1,6 @@
 import overcrow from './overcrow.js';
 import { createIndexedDbStore, createMarketSession } from './session.mjs';
+import { createPacedFetch } from './requests.mjs';
 
 async function fetchJson(url) {
   const response = await overcrow.fetch(url, { method: 'GET' });
@@ -11,7 +12,7 @@ async function fetchJson(url) {
 
 const session = createMarketSession({
   store: createIndexedDbStore(),
-  fetchJson,
+  fetchJson: createPacedFetch(fetchJson),
 });
 
 const ready = session.start();

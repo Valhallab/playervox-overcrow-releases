@@ -13,10 +13,7 @@ export const REFERENCE_TEMPLATES = Object.freeze([
   "media",
   "notes",
   "score",
-  "rating",
-  "reviews",
   "journal",
-  "twitch",
 ]);
 export const TEMPLATES = Object.freeze([
   ...STARTER_TEMPLATES,

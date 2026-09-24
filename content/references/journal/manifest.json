@@ -2,22 +2,16 @@
   "schemaVersion": 1,
   "id": "com.playervox.examples.journal",
   "version": "1.0.0",
-  "apiVersion": "2",
+  "apiVersion": "1",
   "entrypoints": {
     "view": "index.html"
   },
   "permissions": {
     "network": [],
     "gameEvents": [],
-    "storage": false,
+    "storage": true,
     "clipboardWrite": false,
-    "capabilities": [
-      "journal.local.read",
-      "journal.cloud.read",
-      "journal.notes.read",
-      "journal.notes.write",
-      "journal.delete"
-    ]
+    "capabilities": []
   },
   "localization": {
     "defaultLocale": "en",

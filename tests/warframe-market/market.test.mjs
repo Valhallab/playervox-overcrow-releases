@@ -7,6 +7,7 @@ import { dirname, join } from 'node:path';
 
 import { parseCatalog, searchItems } from '../../widgets/warframe-market/catalog.mjs';
 import { parseOrders, whisperLine } from '../../widgets/warframe-market/orders.mjs';
+import { createPacedFetch } from '../../widgets/warframe-market/requests.mjs';
 import { createIndexedDbStore, createMarketSession } from '../../widgets/warframe-market/session.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
@@ -73,6 +74,25 @@ test('orders parser keeps PC visible top buy and sell rows and builds a whisper'
     whisperLine(sell, 'Arcane Energize'),
     '/w SellerOne Hi, WTB Arcane Energize for 100p',
   );
+});
+
+test('orders preserve bundle totals and every item variant in trade whispers', async () => {
+  const payload = await fixture('orders.json');
+  Object.assign(payload.data.sell[0], { platinum: 30, perTrade: 6, rank: 0, charges: 2, subtype: 'intact', amberStars: 1, cyanStars: 3 });
+  const [order] = parseOrders(payload);
+  assert.equal(order.perTrade, 6);
+  assert.equal(whisperLine(order, 'Arcane Energize'), '/w SellerOne Hi, WTB 6 x Arcane Energize (Rank 0, 2 charges, 1 amber / 3 cyan stars, intact) for 30p total');
+});
+
+test('orders reject malformed envelopes, invented prices and invalid variants', async () => {
+  for (const payload of [{ data: [] }, { data: {} }, { data: { sell: [], buy: null } }]) {
+    assert.throws(() => parseOrders(payload), /invalid orders/);
+  }
+  for (const patch of [{ platinum: true }, { platinum: '30' }, { perTrade: 0 }, { perTrade: 7 }, { rank: -1 }, { charges: 1.5 }, { subtype: 'x\n/w target' }]) {
+    const payload = await fixture('orders.json');
+    Object.assign(payload.data.sell[0], patch);
+    assert.ok(!parseOrders(payload).some((order) => order.id === 'order-sell-online'));
+  }
 });
 
 test('session keeps query and catalog across view hide/show reconnects', async () => {
@@ -370,6 +390,42 @@ test('IndexedDB rejects an abort after request success and closes the connection
   });
 });
 
+test('IndexedDB rejects blocked and stalled opens and closes a late connection', async (context) => {
+  context.mock.timers.enable({ apis: ['setTimeout'] });
+  for (const blocked of [true, false]) {
+    const opening = {};
+    let closed = 0;
+    await withIndexedDb({ indexedDB: { open: () => opening } }, async () => {
+      const rejected = assert.rejects(createIndexedDbStore().get('state'), /storage unavailable/);
+      if (blocked) opening.onblocked?.();
+      else context.mock.timers.tick(5000);
+      await rejected;
+      let aborted = false;
+      opening.transaction = { abort() { aborted = true; } };
+      opening.onupgradeneeded();
+      assert.equal(aborted, true);
+      opening.result = { close() { closed += 1; } };
+      opening.onsuccess();
+      assert.equal(closed, 1);
+    });
+  }
+});
+
+test('IndexedDB aborts a stalled transaction and closes its connection', async (context) => {
+  context.mock.timers.enable({ apis: ['setTimeout'] });
+  const harness = indexedDbHarness();
+  await withIndexedDb(harness, async () => {
+    const rejected = assert.rejects(createIndexedDbStore().set('state', { query: 'flow' }), /storage unavailable/);
+    await new Promise((resolve) => setImmediate(resolve));
+    let aborted = false;
+    harness.transactions[0].abort = () => { aborted = true; throw new Error('already committed'); };
+    context.mock.timers.tick(5000);
+    await rejected;
+    assert.equal(aborted, true);
+    assert.equal(harness.closed(), 1);
+  });
+});
+
 test('controller publishes initial state and handles messages received during startup', async () => {
   const harness = indexedDbHarness({ automatic: true, records: new Map([
     ['state', { query: 'flow' }],
@@ -574,4 +630,57 @@ test('view derives displayed offer metrics and gives search focus back after cle
     assert.match(node('orders').textContent, /No sell offers/);
     assert.match(node('orders').textContent, /No buy offers/);
   });
+});
+
+
+test('requests share active reads, retain only the latest queued read and respect provider cadence', async (context) => {
+  context.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 1000 });
+  const starts = [];
+  let complete;
+  const request = createPacedFetch(async (url) => {
+    starts.push([url, Date.now()]);
+    return new Promise((resolve) => { complete = resolve; });
+  });
+  const first = request('items');
+  assert.equal(request('items'), first);
+  const discarded = assert.rejects(request('old-selection'), /superseded/);
+  const latest = request('latest-selection');
+  assert.equal(request('latest-selection'), latest);
+  complete('catalog');
+  assert.equal(await first, 'catalog');
+  await discarded;
+  context.mock.timers.tick(399);
+  assert.equal(starts.length, 1);
+  context.mock.timers.tick(1);
+  await Promise.resolve();
+  assert.deepEqual(starts, [['items', 1000], ['latest-selection', 1400]]);
+  complete('orders');
+  assert.equal(await latest, 'orders');
+});
+
+test('failed requests release the queue without bypassing its cadence', async (context) => {
+  context.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 1000 });
+  const request = createPacedFetch(async (url) => {
+    if (url === 'failed') throw new Error('offline');
+    return url;
+  });
+  await assert.rejects(request('failed'), /offline/);
+  const next = request('recovery');
+  context.mock.timers.tick(400);
+  assert.equal(await next, 'recovery');
+});
+
+test('returning to the active selection drops a different queued selection', async () => {
+  const starts = [];
+  let complete;
+  const request = createPacedFetch((url) => {
+    starts.push(url);
+    return new Promise((resolve) => { complete = resolve; });
+  });
+  const active = request('first');
+  const discarded = assert.rejects(request('second'), /superseded/);
+  assert.equal(request('first'), active);
+  complete('done');
+  await Promise.all([active, discarded]);
+  assert.deepEqual(starts, ['first']);
 });

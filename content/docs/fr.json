@@ -5,15 +5,15 @@
     "group": "get-started",
     "label": "Bienvenue",
     "title": "Vos idées, dans le jeu.",
-    "description": "Créez des widgets avec HTML, CSS et JavaScript. OverCrow les affiche à côté du jeu.",
+    "description": "Créez un widget avec HTML, CSS et JavaScript, puis affichez-le dans OverCrow.",
     "headings": [
       {
         "id": "un-point-de-depart",
-        "title": "Choisissez votre point de départ"
+        "title": "Par où commencer"
       },
       {
         "id": "le-sdk-en-pratique",
-        "title": "Le SDK en pratique"
+        "title": "Utiliser le SDK"
       },
       {
         "id": "plateformes",
@@ -23,17 +23,17 @@
     "blocks": [
       {
         "kind": "html",
-        "html": "\n<div class=\"intro-label\">DOCUMENTATION CRÉATEURS · WEB API V1 / V2</div>\n<p class=\"lead\">Une petite application web. Votre interface, vos interactions, vos données. Commencez avec un exemple complet, puis faites-le évoluer.</p>\n<div class=\"hero-actions\"><a class=\"button-primary\" href=\"/studio/\">Ouvrir l’atelier en ligne ↗</a><a class=\"button-secondary\" href=\"/docs/premier-widget/\">Créer mon premier widget</a></div>\n<div class=\"architecture-strip\"><span>HTML + CSS + JS</span><span aria-hidden=\"true\">→</span><span>SDK OverCrow</span><span aria-hidden=\"true\">→</span><span>Votre widget en jeu</span></div>\n<h2 id=\"un-point-de-depart\">Choisissez votre point de départ</h2>\n<div class=\"entry-grid\"><a class=\"entry-card\" href=\"/docs/premier-widget/\"><span class=\"card-number\">01 / DÉMARRER</span><h3>Un premier résultat</h3><p>Téléchargez un compteur complet, personnalisez-le et préparez votre premier paquet.</p><span class=\"card-link\">Suivre le guide →</span></a><a class=\"entry-card\" href=\"/docs/exemples/\"><span class=\"card-number\">02 / COMPOSER</span><h3>Partir d’un vrai exemple</h3><p>Compteur, checklist persistante ou recherche de marché avec contrôleur et cache.</p><span class=\"card-link\">Choisir un exemple →</span></a><a class=\"entry-card\" href=\"/docs/api-reseau/\"><span class=\"card-number\">03 / CONNECTER</span><h3>Brancher une API</h3><p>Comprendre les permissions, lire une réponse et présenter une erreur utile.</p><span class=\"card-link\">Lire la référence →</span></a><a class=\"entry-card\" href=\"/docs/depannage/\"><span class=\"card-number\">04 / DÉBLOQUER</span><h3>Comprendre une erreur</h3><p>Retrouvez sa cause probable et la prochaine action à essayer.</p><span class=\"card-link\">Ouvrir le dépannage →</span></a></div>\n<h2 id=\"le-sdk-en-pratique\">Le SDK en pratique</h2>\n"
+        "html": "<div class=\"intro-label\">DOCUMENTATION CRÉATEURS</div>\n<p class=\"lead\">Commencez avec un compteur. Personnalisez-le, essayez-le dans votre navigateur, puis importez-le dans OverCrow.</p>\n<div class=\"hero-actions\"><a class=\"button-primary\" href=\"/docs/premier-widget/\">Créer mon premier widget</a><a class=\"button-secondary\" href=\"/studio/\">Essayer le Studio en ligne ↗</a></div>\n<div class=\"architecture-strip\"><span>HTML + CSS + JS</span><span aria-hidden=\"true\">→</span><span>SDK OverCrow</span><span aria-hidden=\"true\">→</span><span>Votre widget en jeu</span></div>\n<h2 id=\"un-point-de-depart\">Par où commencer</h2>\n<div class=\"entry-grid\"><a class=\"entry-card\" href=\"/docs/premier-widget/\"><span class=\"card-number\">01 / DÉMARRER</span><h3>Créer un compteur</h3><p>Créez un projet, modifiez-le et importez votre premier paquet.</p><span class=\"card-link\">Suivre le guide →</span></a><a class=\"entry-card\" href=\"/docs/exemples/\"><span class=\"card-number\">02 / EXPLORER</span><h3>Partir d’un exemple</h3><p>Essayez une checklist, une recherche de marché ou un affichage de performances.</p><span class=\"card-link\">Voir les exemples →</span></a><a class=\"entry-card\" href=\"/docs/api-reseau/\"><span class=\"card-number\">03 / CONNECTER</span><h3>Appeler une API</h3><p>Déclarez une permission et affichez une réponse JSON.</p><span class=\"card-link\">Lire le guide →</span></a><a class=\"entry-card\" href=\"/docs/depannage/\"><span class=\"card-number\">04 / DÉBLOQUER</span><h3>Corriger une erreur</h3><p>Trouvez la cause et la prochaine action à essayer.</p><span class=\"card-link\">Ouvrir le dépannage →</span></a></div>\n<h2 id=\"le-sdk-en-pratique\">Utiliser le SDK</h2>\n<p>Le SDK relie votre widget à OverCrow. Cet appel lit par exemple un catalogue en ligne :</p>"
       },
       {
         "kind": "code",
-        "language": "js",
-        "title": "Une API, une permission explicite",
-        "source": "import overcrow from './overcrow.js';\nconst response = await overcrow.fetch(\n  'https://api.warframe.market/v2/items'\n);\nif (!response.ok) throw new Error('Catalogue indisponible');\nconst catalog = await response.json();"
+        "language": "javascript",
+        "title": "Lire un catalogue",
+        "source": "import overcrow from './overcrow.js';\nconst response = await overcrow.fetch('https://api.warframe.market/v2/items');\nif (!response.ok) throw new Error('Catalog unavailable');\nconst catalog = await response.json();"
       },
       {
         "kind": "html",
-        "html": "\n<p>Cette requête s’exécute dans OverCrow et nécessite une permission réseau. <a href=\"/docs/api-reseau/\">Voir le manifeste et les états d’erreur</a>.</p>\n<aside class=\"note note-info\"><strong>Version de cette documentation</strong><p>SDK JavaScript 1.2.0 · API v1 conservée ; la prise en charge v2 dépend de l’hôte. Vérifiez les capacités et les états avant utilisation.</p></aside>\n<h2 id=\"plateformes\">Windows et Linux</h2><p>OverCrow est supporté sur Windows et les environnements Linux compatibles. Le <a href=\"/docs/kit-createur/\">kit créateur</a> offre le même parcours de création, simulation et export sur les deux plateformes. La CLI native avancée <code>overcrow-widget dev</code> utilise D-Bus sous Linux. Le kit propose aussi <code>npm run dev -- --native</code> sur les deux plateformes.</p>"
+        "html": "<p>Ajoutez la permission réseau correspondante dans le manifeste. <a href=\"/docs/api-reseau/\">Voir l’exemple complet</a>.</p>\n<h2 id=\"plateformes\">Windows et Linux</h2>\n<p>Le kit créateur utilise les mêmes commandes sous Windows et Linux. Consultez <a href=\"/docs/installation/\">l’installation et les systèmes compatibles</a>.</p>\n<aside class=\"note note-info\"><strong>SDK 1.3.0</strong><p>Tous les widgets utilisent l’API web v1. <a href=\"/docs/api-services/\">Découvrir les services hôte</a>.</p></aside>"
       }
     ]
   },
@@ -41,9 +41,9 @@
     "key": "first-widget",
     "slug": "premier-widget",
     "group": "get-started",
-    "label": "Votre premier widget",
+    "label": "Premier widget",
     "title": "Votre premier widget",
-    "description": "Du projet au paquet, avec les mêmes outils sous Windows et Linux.",
+    "description": "Créez un compteur, prévisualisez vos changements et importez-le dans OverCrow.",
     "headings": [
       {
         "id": "prerequis",
@@ -51,15 +51,15 @@
       },
       {
         "id": "creer",
-        "title": "2. Créer votre compteur"
+        "title": "2. Créer un compteur"
       },
       {
         "id": "personnaliser",
-        "title": "3. Modifier et voir le résultat"
+        "title": "3. Personnaliser le compteur"
       },
       {
         "id": "exporter",
-        "title": "4. Produire votre paquet"
+        "title": "4. Créer le paquet"
       },
       {
         "id": "tester",
@@ -67,13 +67,13 @@
       },
       {
         "id": "ensuite",
-        "title": "Et maintenant ?"
+        "title": "La suite"
       }
     ],
     "blocks": [
       {
         "kind": "html",
-        "html": "\n<h2 id=\"prerequis\">1. Télécharger le kit</h2><p>Installez <a href=\"https://nodejs.org/en/download\" rel=\"noreferrer\">Node.js 22 ou plus récent</a>, puis téléchargez et décompressez le kit :</p><p><a class=\"button-primary\" href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/creator-kit.zip\" download>Télécharger le kit créateur ↓</a></p><p>Ouvrez un terminal dans le dossier <code>overcrow-creator-kit</code> décompressé. Aucun accès au dépôt privé, outil Linux ou <code>npm install</code> n’est nécessaire.</p>\n<h2 id=\"creer\">2. Créer votre compteur</h2>"
+        "html": "<h2 id=\"prerequis\">1. Télécharger le kit</h2>\n<p>Installez <a href=\"https://nodejs.org/en/download\" rel=\"noreferrer\">Node.js 22 ou plus récent</a>, puis téléchargez et décompressez le kit. Ouvrez un terminal dans le dossier <code>overcrow-creator-kit</code>.</p>\n<p><a class=\"button-primary\" href=\"/docs/downloads/creator-kit.zip\" download>Télécharger le kit créateur ↓</a></p>\n<p>Pour travailler en ligne, <a href=\"/studio/\">utilisez le Studio</a> puis téléchargez votre projet ou votre paquet.</p>\n<h2 id=\"creer\">2. Créer un compteur</h2>"
       },
       {
         "kind": "code",
@@ -83,27 +83,27 @@
       },
       {
         "kind": "html",
-        "html": "\n<p>Ouvrez l’URL affichée par le terminal. Le compteur apparaît dans un aperçu marqué « Simulation navigateur ». Cliquez sur le bouton pour l’incrémenter. Sous PowerShell, si npm.ps1 est bloqué, utilisez <code>npm.cmd run dev</code>.</p>\n<h2 id=\"personnaliser\">3. Modifier et voir le résultat</h2><p>Changez le titre dans <code>widget/index.html</code>, les couleurs dans <code>widget/styles.css</code> ou l’action du bouton dans <code>widget/view.js</code>. L’aperçu recharge automatiquement les versions valides. Une erreur conserve la dernière version affichée et explique quoi corriger.</p>\n"
+        "html": "<p>Ouvrez l’URL affichée dans le terminal et cliquez sur +1. Cet aperçu navigateur recharge les modifications valides ; une erreur conserve la dernière version qui fonctionne.</p>\n<h2 id=\"personnaliser\">3. Personnaliser le compteur</h2>\n<p>Changez les couleurs dans <code>widget/styles.css</code> ou les textes dans <code>widget/locales/en.mjs</code> et <code>widget/locales/fr.mjs</code>. <code>widget/index.html</code> définit la structure.</p>\n<p>Pour ajouter deux à chaque clic, remplacez la fonction <code>increment()</code> existante dans <code>widget/view.js</code> par :</p>"
       },
       {
         "kind": "code",
-        "language": "js",
-        "title": "Une interaction HTML ordinaire",
-        "source": "let count = 0;\nconst output = document.querySelector('#count');\ndocument.querySelector('#increment').addEventListener('click', () => {\n  output.textContent = String(++count);\n});"
+        "language": "javascript",
+        "title": "widget/view.js · increment()",
+        "source": "function increment() {\n  count += 2;\n  renderCount();\n}"
       },
       {
         "kind": "html",
-        "html": "\n<h2 id=\"exporter\">4. Produire votre paquet</h2><p>Dans un autre terminal ouvert sur <code>my-widget</code>, ou après avoir arrêté l’aperçu avec Ctrl+C :</p>\n"
+        "html": "<p>Changez aussi le libellé du bouton de +1 à +2 dans <code>widget/index.html</code>.</p>\n<h2 id=\"exporter\">4. Créer le paquet</h2>\n<p>Arrêtez l’aperçu avec Ctrl+C, puis lancez :</p>"
       },
       {
         "kind": "code",
         "language": "sh",
-        "title": "Empreintes calculées automatiquement",
+        "title": "Depuis my-widget/",
         "source": "npm run check\nnpm run package"
       },
       {
         "kind": "html",
-        "html": "\n<p>Le terminal indique le paquet <code>.ocpkg</code> dans <code>.overcrow-output/</code>. Seuls les fichiers de <code>widget/</code> sont exportés. Les outils et données de simulation restent dans le projet.</p>\n<h2 id=\"tester\">5. Tester dans OverCrow</h2><p>Avec OverCrow installé sous Windows ou Linux, importez le paquet dans le Control Center. Vérifiez les permissions puis activez le widget dans la bibliothèque de l’overlay. Testez les clics, le redimensionnement et le retour après masquage en situation réelle.</p>\n<p>Pour remplacer une version déjà installée, augmentez la version dans <code>widget/manifest.json</code>, exportez de nouveau et réimportez le nouveau paquet. Le changement d’empreinte seul ne constitue pas une nouvelle version.</p>\n<aside class=\"note note-info\"><strong>Aperçu et runtime natif</strong><p>L’aperçu permet de travailler l’interface et les scénarios simulés. Les gestes de copie, la capture, le focus et les API réellement accessibles nécessitent OverCrow. Le kit propose un rechargement dans le moteur natif sur les deux plateformes avec --native. Cette session reste hors écran ; le test de l’overlay se fait par export/import.</p></aside>\n<h2 id=\"ensuite\">Et maintenant ?</h2><p><a href=\"/docs/kit-createur/\">Explorez le kit et ses fixtures</a>, <a href=\"/docs/api-stockage/\">conservez des préférences</a>, <a href=\"/docs/api-reseau/\">connectez une API</a> ou <a href=\"/docs/concepts/\">ajoutez un contrôleur</a>. Le template <code>checklist</code> fournit un exemple persistant prêt à modifier.</p>"
+        "html": "<p>Le terminal indique le chemin du <code>.ocpkg</code> dans <code>.overcrow-output/</code>. Il contient les fichiers de <code>widget/</code>.</p>\n<h2 id=\"tester\">5. Tester dans OverCrow</h2>\n<p>Importez le paquet dans le Control Center, vérifiez ses permissions et activez-le dans la bibliothèque de l’overlay. En jeu, testez les clics, le redimensionnement et le retour après masquage.</p>\n<p>Pour une mise à jour, augmentez <code>version</code> dans <code>widget/manifest.json</code>, puis exportez et importez de nouveau.</p>\n<h2 id=\"ensuite\">La suite</h2>\n<p><a href=\"/docs/api-stockage/\">Enregistrer des préférences</a>, <a href=\"/docs/api-reseau/\">appeler une API</a> ou <a href=\"/docs/exemples/\">essayer un autre exemple</a>. <a href=\"/docs/kit-createur/\">Le guide du kit créateur</a> détaille les réglages de l’aperçu, les tests natifs et le dépannage PowerShell.</p>"
       }
     ]
   },
@@ -111,25 +111,25 @@
     "key": "installation",
     "slug": "installation",
     "group": "get-started",
-    "label": "Installation et compatibilité",
-    "title": "Installation et compatibilité",
-    "description": "Obtenez le SDK et choisissez le bon parcours de développement.",
+    "label": "Installation",
+    "title": "Installation",
+    "description": "Installez le kit créateur, le SDK et OverCrow.",
     "headings": [
       {
         "id": "kit",
-        "title": "Le kit pour démarrer"
+        "title": "Démarrer avec le kit"
       },
       {
         "id": "telechargements",
-        "title": "Télécharger le SDK seul"
+        "title": "Télécharger le SDK"
       },
       {
         "id": "matrice",
-        "title": "Application et outils créateurs"
+        "title": "Systèmes compatibles"
       },
       {
         "id": "obtenir-overcrow",
-        "title": "Obtenir OverCrow"
+        "title": "Installer OverCrow"
       },
       {
         "id": "import",
@@ -137,33 +137,39 @@
       },
       {
         "id": "apercu",
-        "title": "Afficher le HTML dans un navigateur"
+        "title": "Servir un projet HTML"
       }
     ],
     "blocks": [
       {
         "kind": "html",
-        "html": "\n<h2 id=\"kit\">Le kit pour démarrer</h2><p>Le <a href=\"/docs/kit-createur/\">kit créateur Windows et Linux</a> inclut le SDK, trois templates et les outils locaux. Node.js 22+ suffit pour créer, prévisualiser et exporter votre widget. <a href=\"/docs/premier-widget/\">Suivre le démarrage rapide</a>.</p>\n<h2 id=\"telechargements\">Télécharger le SDK seul</h2><p>Le SDK est disponible sans registre npm : <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/content/sdk/overcrow.js\" download>overcrow.js</a>, <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/content/sdk/overcrow.d.ts\" download>déclarations TypeScript</a> et <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/content/sdk/LICENSE\" download>licence MIT</a>. Les <a href=\"/docs/exemples/\">exemples</a> l’incluent déjà.</p>\n<aside class=\"note note-info\"><strong>JavaScript et TypeScript</strong><p>Écrivez du JavaScript directement ou utilisez votre propre compilation TypeScript. Le résultat livré doit être un projet web statique. Le fichier .d.ts apporte les types ; il ne compile pas le code.</p></aside>\n<h2 id=\"matrice\">Application et outils créateurs</h2>\n<div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Capacité, Linux, Windows\"><table><thead><tr><th>Capacité</th><th>Linux</th><th>Windows</th></tr></thead><tbody><tr><td>Exécuter un widget installé</td><td>Supporté sur les sessions compatibles</td><td>Supporté</td></tr><tr><td>Importer un .ocpkg local</td><td>Control Center</td><td>Control Center</td></tr><tr><td>Kit créateur : créer, simuler, contrôler et exporter</td><td>Node.js 22+, npm run dev / check / package</td><td>Même kit, mêmes commandes, sans WSL</td></tr><tr><td>Kit : npm run dev -- --native / --devtools / --replay</td><td>CLI installée et Control Center du même utilisateur</td><td>Hôte OverCrow compatible installé, sans WSL</td></tr><tr><td>Affichage de la session de développement dans l’overlay</td><td>Session native hors écran ; importer le paquet pour tester l’overlay</td><td>Même fonctionnement</td></tr><tr><td>Travailler le HTML/CSS dans un navigateur</td><td>Oui, sans services natifs du SDK</td><td>Oui, sans services natifs du SDK</td></tr></tbody></table></div>\n<p>Linux : Hyprland 0.55+ Wayland, Plasma 6 Wayland, GNOME 46–50 Wayland ou X11/EWMH. Windows : Windows 10 1809+ ou Windows 11 x64, avec WebView2 et les prérequis graphiques de l’application. Utilisez un jeu fenêtré ou sans bordure ; le plein écran exclusif n’est pas pris en charge.</p>\n<h2 id=\"obtenir-overcrow\">Obtenir OverCrow</h2><p><a href=\"https://github.com/Valhallab/playervox-overcrow-releases/releases\" rel=\"noreferrer\">Téléchargez une version officielle</a>. Sous Linux, vérifiez ensuite la présence de l’outil :</p>"
+        "html": "<h2 id=\"kit\">Démarrer avec le kit</h2>\n<p>Le <a href=\"/docs/kit-createur/\">kit créateur</a> réunit le SDK, les modèles et les outils locaux. Installez Node.js 22+ et suivez <a href=\"/docs/premier-widget/\">Premier widget</a>.</p>\n<h2 id=\"telechargements\">Télécharger le SDK</h2>\n<p>Pour un projet existant, téléchargez <a href=\"/docs/downloads/overcrow.js\" download>overcrow.js</a>, <a href=\"/docs/downloads/overcrow.d.ts\" download>les déclarations TypeScript</a> et <a href=\"/docs/downloads/LICENSE\" download>la licence MIT</a>. Les <a href=\"/docs/exemples/\">archives d’exemples</a> les incluent déjà.</p>\n<p>Écrivez du JavaScript ou compilez le TypeScript avec vos outils. Livrez les fichiers statiques obtenus ; le fichier .d.ts fournit les types à votre éditeur.</p>\n<h2 id=\"matrice\">Systèmes compatibles</h2>\n<div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Tâche, Linux, Windows\"><table><thead><tr><th>Tâche</th><th>Linux</th><th>Windows</th></tr></thead><tbody><tr><td>Créer, prévisualiser et exporter</td><td>Node.js 22+</td><td>Node.js 22+</td></tr><tr><td>Afficher un paquet dans l’overlay</td><td>Importer dans le Control Center</td><td>Importer dans le Control Center</td></tr><tr><td>Développement natif et devtools</td><td>CLI installée et Control Center du même utilisateur</td><td>Installation OverCrow compatible</td></tr><tr><td>Affichage en développement natif</td><td>Hors écran ; importer un paquet pour tester en jeu</td><td>Même fonctionnement</td></tr></tbody></table></div>\n<p><strong>Linux :</strong> Hyprland 0.55+ Wayland, Plasma 6 Wayland, GNOME 46–50 Wayland ou X11/EWMH.<br/><strong>Windows :</strong> Windows 10 1809+ ou Windows 11 x64, avec WebView2 et les prérequis graphiques de l’application.</p>\n<p>Utilisez un jeu fenêtré ou sans bordure. Le plein écran exclusif n’est pas pris en charge.</p>\n<h2 id=\"obtenir-overcrow\">Installer OverCrow</h2>\n<p><a href=\"https://github.com/Valhallab/playervox-overcrow-releases/releases\" rel=\"noreferrer\">Téléchargez une version officielle</a>. Sous Linux, vérifiez que la CLI native est disponible :</p>"
       },
       {
         "kind": "code",
         "language": "sh",
-        "title": "Terminal · Linux",
+        "title": "Terminal Linux",
         "source": "command -v overcrow-widget"
       },
       {
         "kind": "html",
-        "html": "\n<p>Si la commande manque, vérifiez la version et le contenu du paquet installé. Le package source du SDK est actuellement marqué privé pour la publication npm : utilisez les fichiers fournis ici.</p>\n<h2 id=\"import\">Importer le SDK</h2>"
+        "html": "<p>Si la commande manque, vérifiez le paquet OverCrow installé.</p>\n<h2 id=\"import\">Importer le SDK</h2><p>Ajoutez ce contenu dans le <code>index.html</code> de la vue avant de charger le module :</p>"
       },
       {
         "kind": "code",
-        "language": "js",
-        "title": "Module JavaScript",
-        "source": "import overcrow from './overcrow.js';\nif (overcrow.runtime.role === 'unavailable') {\n  document.querySelector('#status').textContent =\n    'Aperçu HTML : les services OverCrow ne sont pas connectés.';\n}"
+        "language": "html",
+        "title": "index.html",
+        "source": "<p id=\"status\" role=\"status\"></p>"
+      },
+      {
+        "kind": "code",
+        "language": "javascript",
+        "title": "view.js",
+        "source": "import overcrow from './overcrow.js';\nif (overcrow.runtime.role === 'unavailable') {\n  document.querySelector('#status').textContent = 'OverCrow services are not connected.';\n}"
       },
       {
         "kind": "html",
-        "html": "\n<p>Chargez votre fichier avec <code>&lt;script type=\"module\" src=\"./view.js\"&gt;&lt;/script&gt;</code>. Les services natifs nécessitent le runtime OverCrow. Un aperçu navigateur ne reproduit pas sa gestion du réseau, des permissions ou de l’entrée.</p>\n<h2 id=\"apercu\">Afficher le HTML dans un navigateur</h2><p>Servez le dossier décompressé avec le serveur statique de votre éditeur. Si Python 3 est installé, ouvrez un terminal dans ce dossier et utilisez :</p>\n"
+        "html": "<p>Chargez <code>view.js</code> avec <code>&lt;script type=\"module\" src=\"./view.js\"&gt;&lt;/script&gt;</code>. Les services hôte nécessitent OverCrow ; l’aperçu navigateur du kit les simule.</p>\n<h2 id=\"apercu\">Servir un projet HTML</h2>\n<p>Pour un aperçu simple de l’interface, servez le dossier avec le serveur local de votre éditeur. Avec Python 3 installé :</p>"
       },
       {
         "kind": "code",
@@ -172,22 +178,14 @@
         "source": "python3 -m http.server 4173 --bind 127.0.0.1"
       },
       {
-        "kind": "html",
-        "html": "\n"
-      },
-      {
         "kind": "code",
         "language": "sh",
-        "title": "Windows · avec le lanceur Python installé",
+        "title": "Windows · lanceur Python",
         "source": "py -m http.server 4173 --bind 127.0.0.1"
       },
       {
         "kind": "html",
-        "html": "\n<p>Ouvrez ensuite <code>http://127.0.0.1:4173/</code>. Évitez le double-clic sur index.html : les modules JavaScript peuvent être bloqués sur une URL file://. Cet aperçu permet de travailler le compteur ou la checklist ; il ne fournit pas les appels natifs du SDK.</p>"
-      },
-      {
-        "kind": "html",
-        "html": "<p><a href=\"/docs/api-services/\">SDK 1.2.0 : services par capacités, dimensions natives et douze widgets de référence</a>.</p>"
+        "html": "<p>Ouvrez <code>http://127.0.0.1:4173/</code>. Le double-clic sur index.html peut bloquer les modules JavaScript sur une URL file://. Ce serveur statique ne fournit pas les services hôte.</p>\n<p><a href=\"/docs/api-services/\">Voir les services hôte disponibles</a>.</p>"
       }
     ]
   },
@@ -195,35 +193,35 @@
     "key": "concepts",
     "slug": "concepts",
     "group": "get-started",
-    "label": "Comment un widget fonctionne",
-    "title": "Comment un widget fonctionne",
-    "description": "Un projet web statique, une vue et, si nécessaire, un contrôleur.",
+    "label": "Concepts",
+    "title": "Comment fonctionne un widget",
+    "description": "Une vue HTML, un manifeste et un contrôleur facultatif.",
     "headings": [
       {
         "id": "vue",
-        "title": "La vue dessine votre interface"
+        "title": "La vue"
       },
       {
         "id": "controleur",
-        "title": "Le contrôleur conserve l’état pendant un rechargement"
+        "title": "Un contrôleur facultatif"
       },
       {
         "id": "permissions",
-        "title": "Des capacités déclarées"
+        "title": "Le manifeste"
       },
       {
         "id": "cycle",
-        "title": "Trois étapes distinctes"
+        "title": "Du projet au paquet"
       },
       {
         "id": "framework",
-        "title": "Choisir votre framework"
+        "title": "Utiliser un framework"
       }
     ],
     "blocks": [
       {
         "kind": "html",
-        "html": "\n<h2 id=\"vue\">La vue dessine votre interface</h2><p>La vue est un document HTML local. Vous maîtrisez composants, formulaires et styles. OverCrow gère le cadre, la position, la taille et l’opacité du panneau. Gardez le fond HTML/body transparent et prévoyez les petits espaces.</p>\n<h2 id=\"controleur\">Le contrôleur conserve l’état pendant un rechargement</h2><p>Un contrôleur est un deuxième document HTML, facultatif. Il peut porter le cache et les requêtes. Lors du remplacement d’une vue en développement, il reste vivant. Pour survivre à un redémarrage complet, utilisez le stockage autorisé.</p>\n<div class=\"architecture-strip\"><span>Contrôleur · données</span><span aria-hidden=\"true\">⇄</span><span>runtime.send</span><span aria-hidden=\"true\">⇄</span><span>Vue · interface</span></div>\n<p>Une vue qui revient envoie un message <code>hello</code> ; le contrôleur renvoie son état actuel. <a href=\"/docs/api-runtime/\">Voir le protocole minimal</a>.</p>\n<h2 id=\"permissions\">Des capacités déclarées</h2><p>Le manifeste nomme les fichiers et les permissions : réseau, événements de jeu, stockage et écriture du presse-papiers. L’hôte vérifie l’autorisation réelle à l’exécution. Un nom d’événement inventé ne crée pas une source de données.</p>\n<h2 id=\"cycle\">Trois étapes distinctes</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Étape, Résultat\"><table><thead><tr><th>Étape</th><th>Résultat</th></tr></thead><tbody><tr><td>Préparer</td><td>Copier les fichiers, calculer les empreintes et valider le manifeste.</td></tr><tr><td>Développer</td><td>Enregistrer temporairement le dossier dans le runtime isolé.</td></tr><tr><td>Distribuer</td><td>Exporter un .ocpkg, puis suivre l’admission marketplace.</td></tr></tbody></table></div>\n<h2 id=\"framework\">Choisir votre framework</h2><p>HTML/CSS/JavaScript suffisent. Un framework convient si son build produit des fichiers statiques locaux, sans serveur Node ni CDN. WASM est une option de calcul locale. Évitez les bundles volumineux et le travail continu lorsque la vue est masquée.</p>\n<p>Livrez vos scripts, styles, images et polices avec le widget. Les images distantes, iframes, Web Workers et médias audio/vidéo sont bloqués par la politique du runtime actuel. Une autorisation réseau du manifeste ne les active pas : elle autorise les requêtes transmises par <code>overcrow.fetch</code>.</p>\n<aside class=\"note note-info\"><strong>Des données exposées explicitement</strong><p>Le SDK ne lit pas la mémoire du jeu. Utilisez les données publiques d’OverCrow ou une API HTTPS autorisée. Le widget installé fonctionne sans assistant IA.</p></aside>"
+        "html": "<h2 id=\"vue\">La vue</h2>\n<p>Un widget commence par une page HTML locale. Écrivez son interface avec HTML, CSS et JavaScript. OverCrow fournit le cadre, la position et l’opacité du panneau. Gardez le fond HTML/body transparent et vérifiez les petites tailles.</p>\n<h2 id=\"controleur\">Un contrôleur facultatif</h2>\n<p>Ajoutez un deuxième document HTML si vos requêtes ou votre cache doivent survivre au rechargement natif de la vue. La vue envoie des messages au contrôleur, qui répond avec les données à afficher. Utilisez le stockage pour les données à retrouver après un redémarrage complet.</p>\n<div class=\"architecture-strip\"><span>Contrôleur · données</span><span aria-hidden=\"true\">⇄</span><span>runtime.send</span><span aria-hidden=\"true\">⇄</span><span>Vue · interface</span></div>\n<p><a href=\"/docs/api-runtime/\">Voir un compteur avec contrôleur</a>.</p>\n<h2 id=\"permissions\">Le manifeste</h2>\n<p>Le manifeste identifie votre widget, nomme ses fichiers et déclare les permissions. OverCrow les vérifie pour le réseau, le stockage, l’écriture du presse-papiers et les événements de jeu. <a href=\"/docs/manifeste/\">Lire le guide du manifeste</a>.</p>\n<h2 id=\"cycle\">Du projet au paquet</h2>\n<div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Étape, Résultat\"><table><thead><tr><th>Étape</th><th>Résultat</th></tr></thead><tbody><tr><td>Développer</td><td>Modifier les fichiers et prévisualiser le widget.</td></tr><tr><td>Préparer</td><td>Valider le manifeste et calculer les empreintes.</td></tr><tr><td>Distribuer</td><td>Exporter un .ocpkg, le tester dans OverCrow et suivre l’admission marketplace.</td></tr></tbody></table></div>\n<h2 id=\"framework\">Utiliser un framework</h2>\n<p>Un framework convient s’il produit des fichiers statiques locaux. Lancez sa compilation et livrez scripts, styles, images, polices et licences dans le widget. WASM permet du calcul local. Limitez la taille du build et suspendez le travail inutile lorsque la vue est masquée.</p>\n<p>Le runtime bloque les images distantes, les iframes, les Web Workers et les médias audio/vidéo. Une permission réseau autorise <code>overcrow.fetch</code> uniquement. Utilisez les données du SDK ou une API HTTPS autorisée ; le widget n’accède pas à la mémoire du jeu ni aux modules natifs.</p>"
       }
     ]
   },
@@ -231,9 +229,9 @@
     "key": "creator-kit",
     "slug": "kit-createur",
     "group": "build",
-    "label": "Kit créateur Windows et Linux",
-    "title": "Kit créateur Windows et Linux",
-    "description": "Un projet prêt à modifier, un aperçu qui se recharge et un paquet à importer dans OverCrow.",
+    "label": "Kit créateur",
+    "title": "Kit créateur",
+    "description": "Créez, prévisualisez et exportez un widget sous Windows ou Linux.",
     "headings": [
       {
         "id": "creer",
@@ -241,101 +239,97 @@
       },
       {
         "id": "fichiers",
-        "title": "Vos fichiers"
+        "title": "Fichiers du projet"
       },
       {
         "id": "commandes",
-        "title": "Les commandes au quotidien"
+        "title": "Commandes"
       },
       {
         "id": "apercu",
-        "title": "Un aperçu qui explique ses limites"
+        "title": "Aperçu navigateur"
       },
       {
         "id": "fixtures",
-        "title": "Simuler une API ou une session"
+        "title": "Simuler des données"
       },
       {
         "id": "natif",
-        "title": "Valider avec le moteur natif"
+        "title": "Tester le moteur natif"
       },
       {
         "id": "export",
-        "title": "Tester le même projet dans OverCrow"
+        "title": "Importer le paquet"
       },
       {
         "id": "diagnostics",
-        "title": "Des diagnostics exploitables"
+        "title": "Diagnostics"
       }
     ],
     "blocks": [
       {
         "kind": "html",
-        "html": "\n<p><a class=\"button-primary\" href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/creator-kit.zip\" download>Télécharger le kit créateur ↓</a></p><p>Le kit est téléchargé directement depuis le <a href=\"https://github.com/Valhallab/playervox-overcrow-releases/tree/main/tools/creator-kit\" rel=\"noreferrer\">dépôt GitHub public officiel</a>. Sur ce site, le téléchargement correspond à la même révision vérifiée que cette documentation. Le site ne fabrique pas une édition distincte du kit.</p>\n<aside class=\"note note-info\"><strong>Un seul prérequis</strong><p>Installez Node.js 22 ou plus récent. Le kit ne demande ni Rust, ni WSL, ni Python, ni accès au dépôt privé. Aucune dépendance npm à installer. L’aperçu navigateur est une simulation clairement indiquée ; le test dans l’overlay se fait par import du paquet dans OverCrow.</p></aside>\n<h2 id=\"creer\">Créer un projet</h2>"
+        "html": "<p>Installez Node.js 22+, puis décompressez le kit. <a href=\"https://github.com/Valhallab/playervox-overcrow-releases/tree/main/tools/creator-kit\" rel=\"noreferrer\">Les sources</a> sont disponibles sur GitHub ; le téléchargement correspond à la révision de cette documentation.</p>\n<p><a class=\"button-primary\" href=\"/docs/downloads/creator-kit.zip\" download>Télécharger le kit créateur ↓</a> &nbsp; <a href=\"/studio/\">Ou utiliser le Studio en ligne →</a></p>\n<h2 id=\"creer\">Créer un projet</h2>"
       },
       {
         "kind": "code",
         "language": "sh",
-        "title": "Depuis le dossier décompressé du kit",
+        "title": "Depuis le dossier du kit",
         "source": "node overcrow.mjs init my-widget --template counter --id com.example.my-widget\ncd my-widget\nnpm run dev"
       },
       {
         "kind": "html",
-        "html": "\n<p>Choisissez <code>blank</code> pour une base vide (HTML, CSS, JavaScript et manifeste), <code>counter</code> pour un premier exemple, ou <code>checklist</code> pour un état persistant. Le contrôleur est facultatif ; Blank ne contient aucun texte à traduire. Sans <code>--id</code>, le kit génère un identifiant distinct. Un dossier existant n’est jamais écrasé. <a href=\"/docs/premier-widget/\">Suivre le tutoriel complet</a>.</p>\n<p>Dans <a href=\"/studio/\">l’atelier en ligne</a>, le choix du template et sa remise à zéro se trouvent dans l’en-tête. L’explorateur permet de créer, renommer, supprimer et replier les dossiers et fichiers. Après un renommage, adaptez les imports et références de fichiers. Les brouillons restent dans ce navigateur ; téléchargez le projet pour les conserver ailleurs. Les dossiers vides sont conservés dans le ZIP du projet.</p>\n<h2 id=\"fichiers\">Vos fichiers</h2>"
+        "html": "<p>Choisissez <code>blank</code> pour une vue vide, <code>counter</code> pour débuter ou <code>checklist</code> pour sauvegarder des tâches. Omettez <code>--id</code> pour générer un identifiant. Les dossiers existants sont protégés. <a href=\"/docs/premier-widget/\">Tutoriel complet</a>.</p>\n<h2 id=\"fichiers\">Fichiers du projet</h2>"
       },
       {
         "kind": "code",
         "language": "text",
-        "title": "Une séparation visible entre le widget et ses outils",
-        "source": "my-widget/\n  widget/             ← HTML, CSS, JS, manifeste et SDK\n  preview.json        ← données de simulation, jamais exportées\n  tooling/            ← outils locaux du projet\n  package.json        ← raccourcis de développement\n  .overcrow-output/   ← paquets créés par npm run package"
+        "title": "Seul widget/ est exporté",
+        "source": "my-widget/\n  widget/             # HTML, CSS, JS, manifest and SDK\n  preview.json        # Simulated data\n  tooling/            # Local tools\n  package.json        # Development commands\n  .overcrow-output/   # Exported packages"
       },
       {
         "kind": "html",
-        "html": "\n<p>Gardez les clés d’API, données personnelles et outils de build hors de <code>widget/</code>. Pour utiliser un framework, placez son résultat statique dans ce dossier ; le kit n’exécute pas votre compilateur à votre place.</p>\n<p>Les textes de Counter et Checklist vivent dans <code>widget/locales/en.mjs</code> et <code>widget/locales/fr.mjs</code>. Le fichier <code>i18n.mjs</code> applique ces dictionnaires aux éléments <code>data-i18n</code> du HTML ; <code>view.js</code> contient les interactions du widget. L’attribut <code>lang=\"en\"</code> est le défaut initial, actualisé quand le SDK transmet la langue effective. Modifiez un fichier de langue pour changer les libellés, sans toucher à la vue.</p>\n<h2 id=\"commandes\">Les commandes au quotidien</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Commande, Résultat\"><table><thead><tr><th>Commande</th><th>Résultat</th></tr></thead><tbody><tr><td>npm run dev -- --native</td><td>Session native Linux ou Windows, rechargement de la vue et contrôleur conservé.</td></tr><tr><td>npm run dev</td><td>Aperçu local et rechargement après validation ; Ctrl+C pour arrêter.</td></tr><tr><td>npm run check</td><td>Diagnostic des sources et du manifeste, sans modification du projet.</td></tr><tr><td>npm run package</td><td>Empreintes recalculées et paquet .ocpkg dans .overcrow-output.</td></tr><tr><td>npm run doctor</td><td>Version de Node, système et parcours de test disponible.</td></tr></tbody></table></div>\n<p>Sous PowerShell, si <code>npm.ps1</code> est bloqué, utilisez <code>npm.cmd run dev</code> ou <code>node tooling/overcrow.mjs dev</code>. Vous n’avez pas besoin de modifier la politique d’exécution de Windows. Pour choisir un autre port : <code>npm run dev -- --port 4176</code>.</p>\n<h2 id=\"apercu\">Un aperçu qui explique ses limites</h2><p>Le terminal affiche une URL sur <code>127.0.0.1</code>. Le bandeau permet de simuler une session active, une langue déclarée et le mode actif ou passif. Une édition invalide conserve la dernière version lisible et affiche une action corrective. Un changement de permissions demande un redémarrage explicite.</p>\n<p>L’aperçu inclut le cadre obligatoire d’OverCrow, sa police et sa barre flottante, visible au survol ou au focus. Ouvrez les trois points pour régler <strong>Taille du contenu</strong> de 50 à 175 % et <strong>Opacité du fond</strong> de 0 à 100 %, avec un curseur ou un pourcentage saisi puis validé par Entrée ou en quittant le champ. Les templates démarrent à 100 % pour la taille et l’opacité du fond. La taille adapte la mise en page du contenu dans le même cadre ; l’opacité agit sur le fond et la bordure du cadre, sans atténuer le widget. Un fond dessiné par votre propre CSS reste indépendant de ce réglage.</p>\n<p>Déplacez le widget depuis sa bande supérieure de 22 px et redimensionnez-le depuis son coin inférieur droit, en conservant le coin supérieur gauche fixe dans le canvas. Au clavier, placez le focus sur la zone de déplacement ou la poignée et utilisez les flèches ; Maj accélère le réglage. La position, la taille du cadre et ses réglages restent conservés pendant les rechargements du widget jusqu’à l’actualisation de la page d’aperçu. Échap ou un clic à l’extérieur ferme les options.</p>\n<aside class=\"note note-info\"><strong>Un cadre fourni par OverCrow</strong><p>Ne reproduisez pas cette barre dans votre widget : elle appartient à l’hôte et les outils d’aperçu ne sont jamais exportés dans le paquet. L’œil choisit si le widget reste visible en mode passif. Le sélecteur Mode bascule l’overlay entier, transmet <code>overlayMode</code> au SDK et actualise les événements de visibilité. Les widgets SDK gardent un cadre manuel. Le mode passif masque les commandes du cadre ; revenez en mode actif pour déplacer, redimensionner ou régler le widget. La croix reste illustrative. Les templates sont en anglais par défaut et traduits en français ; changez leur langue dans l’aperçu.</p></aside>\n<p>Le rechargement redémarre la vue et le contrôleur. Le stockage simulé est séparé par identifiant de widget et distinct du stockage natif OverCrow. Utilisez <code>getItem/setItem</code>, pas la syntaxe <code>localStorage.maCle</code>. Les clics/focus en jeu, la capture graphique et le presse-papiers doivent être testés dans OverCrow.</p>\n<h2 id=\"fixtures\">Simuler une API ou une session</h2>"
+        "html": "<p>Gardez les clés d’API, les données personnelles de test et les outils de compilation hors de <code>widget/</code>. Placez-y le résultat statique compilé de votre framework.</p>\n<p>Modifiez les textes de Counter/Checklist dans <code>widget/locales/en.mjs</code> et <code>fr.mjs</code>. <code>i18n.mjs</code> actualise <code>data-i18n</code> et la langue de la page ; modifiez les interactions dans <code>view.js</code>.</p>\n<p>Dans le Studio, choisissez ou réinitialisez le modèle dans l’en-tête et gérez les fichiers dans l’explorateur. Adaptez les imports après un renommage. Téléchargez le projet pour conserver vos brouillons ailleurs ; le ZIP préserve les dossiers vides.</p>\n<h2 id=\"commandes\">Commandes</h2>\n<div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Commande, Résultat\"><table><thead><tr><th>Commande</th><th>Résultat</th></tr></thead><tbody><tr><td>npm run dev</td><td>Aperçu navigateur ; recharge les modifications valides.</td></tr><tr><td>npm run check</td><td>Vérifie les sources et le manifeste sans les modifier.</td></tr><tr><td>npm run package</td><td>Calcule les empreintes et exporte dans .overcrow-output/.</td></tr><tr><td>npm run dev -- --native</td><td>Session native ; conserve le contrôleur pendant le rechargement de la vue.</td></tr><tr><td>npm run doctor</td><td>Indique Node, le système et la disponibilité d’OverCrow.</td></tr></tbody></table></div>\n<p>Ctrl+C arrête une session. Pour changer le port de l’aperçu : <code>npm run dev -- --port 4176</code>.</p>\n<h2 id=\"apercu\">Aperçu navigateur</h2>\n<p>Ouvrez l’URL 127.0.0.1 affichée. Simulez la session, la langue et le mode de l’overlay. Une erreur conserve la dernière vue valide ; un changement de permissions demande un redémarrage.</p>\n<ul><li>Le menu à trois points règle la taille du contenu (50–175 %) et l’opacité du cadre (0–100 %), à 100 % dans les modèles. Utilisez les curseurs ou saisissez un pourcentage. Le fond CSS du widget reste indépendant.</li>\n<li>Déplacez le widget par la bande supérieure de 22 px. La poignée inférieure droite des modèles redimensionne depuis le coin supérieur gauche fixe. Les flèches fonctionnent au focus ; Maj accélère.</li>\n<li>L’œil règle la visibilité passive. Ce mode masque les commandes du cadre et actualise la visibilité SDK et <code>overlayMode</code>. La fermeture est illustrative. Échap ou un clic extérieur ferme les options.</li>\n<li>Les réglages du cadre restent pendant les rechargements, jusqu’à l’actualisation de la page. OverCrow fournit ce cadre ; gardez-le hors du widget.</li></ul>\n<p>Le rechargement redémarre vue et contrôleur. Le simulateur conserve les données du widget en mémoire temporaire. <a href=\"/docs/api-stockage/\">Comportement du stockage SDK</a>.</p>\n<h2 id=\"fixtures\">Simuler des données</h2>"
       },
       {
         "kind": "code",
         "language": "json",
-        "title": "preview.json · situé à côté de widget/",
-        "source": "{\n  \"snapshot\": { \"running\": true, \"selectedActive\": true, \"sessionElapsedMs\": 300000 },\n  \"responses\": [{\n    \"url\": \"https://api.example.com/v2/items\",\n    \"method\": \"GET\",\n    \"status\": 200,\n    \"json\": { \"data\": [{ \"name\": \"Exemple\" }] }\n  }]\n}"
+        "title": "preview.json · à côté de widget/",
+        "source": "{\n  \"snapshot\": { \"running\": true, \"selectedActive\": true, \"sessionElapsedMs\": 300000 },\n  \"responses\": [{\n    \"url\": \"https://api.example.com/v2/items\", \"method\": \"GET\",\n    \"status\": 200, \"json\": { \"data\": [{ \"name\": \"Example\" }] }\n  }]\n}"
       },
       {
         "kind": "html",
-        "html": "\n<p>Déclarez aussi la permission HTTPS correspondante dans le manifeste. La simulation répond à la méthode et à l’URL exactes, sans requête externe. Le corps de la requête ne sert pas de critère de correspondance. Utilisez <code>text</code> à la place de <code>json</code> pour du texte ; changez <code>status</code> en 503 pour exercer une erreur. Une fixture manquante produit <code>fixture_missing</code>. Les événements nommés arbitraires ne sont pas générés par ce simulateur.</p>\n<h2 id=\"natif\">Valider avec le moteur natif</h2>"
+        "html": "<p>Déclarez la permission HTTPS correspondante. Les fixtures comparent méthode/URL exactes, ignorent le corps et évitent toute requête externe. Utilisez <code>text</code> pour du texte ou le statut 503 pour un échec. Une fixture absente renvoie <code>fixture_missing</code>. Les événements de jeu nommés nécessitent le replay.</p>\n<h2 id=\"natif\">Tester le moteur natif</h2>"
       },
       {
         "kind": "code",
         "language": "sh",
-        "title": "Les mêmes commandes sous Windows et Linux",
+        "title": "Windows et Linux",
         "source": "npm run dev -- --native\nnpm run dev -- --native --devtools\nnpm run dev -- --native --replay ./events.json"
       },
       {
         "kind": "html",
-        "html": "\n<p>Le kit recalcule les empreintes et transmet chaque version valide au moteur OverCrow. Le contrôleur conserve son état pendant le remplacement de la vue. Un échec conserve la dernière version acceptée. Après une modification du code du contrôleur, un ajout de permissions ou un changement de la permission de stockage, examinez vos changements puis redémarrez la commande. Le mode de stockage du navigateur reste fixé pour toute la session native. Ctrl+C ferme la session.</p>\n<p>Sous Linux, ouvrez le Control Center et utilisez une installation avec <code>overcrow-widget</code>. Sous Windows, utilisez un hôte compatible avec le mode développeur du kit. Pour une installation portable, ajoutez <code>--host \"C:/Outils/OverCrow/OverCrow.exe\"</code>. Aucune dépendance Rust, WSL ou Python n’est requise. <code>npm run doctor</code> aide à retrouver l’hôte ; il ne lance pas de session de test.</p>\n<aside class=\"note note-attention\"><strong>Session native hors écran</strong><p>Ce mode exécute le véritable SDK et le moteur natif ; il n’affiche pas le widget dans l’overlay du jeu. Utilisez l’aperçu navigateur pour travailler l’interface, les devtools pour inspecter le moteur, puis l’export/import pour vérifier l’overlay. Une ancienne version d’OverCrow peut nécessiter une mise à jour pour accepter ce mode.</p></aside>\n<h2 id=\"export\">Tester le même projet dans OverCrow</h2>"
+        "html": "<p>Linux nécessite le Control Center et <code>overcrow-widget</code>; Windows nécessite une installation compatible. Pour une version portable, ajoutez <code>--host \"C:/Tools/OverCrow/OverCrow.exe\"</code>.</p>\n<p>Le kit recalcule les empreintes et recharge les vues valides en conservant le contrôleur. Redémarrez après modification du contrôleur, ajout de permissions ou changement de permission de stockage.</p>\n<aside class=\"note note-info\"><strong>Session hors écran</strong><p>Inspectez le moteur natif avec les devtools. Importez un paquet pour tester les entrées, le focus, la capture et les gestes de copie dans l’overlay.</p></aside>\n<h2 id=\"export\">Importer le paquet</h2>"
       },
       {
         "kind": "code",
         "language": "sh",
-        "title": "Export identique sous Windows et Linux",
+        "title": "Créer un .ocpkg",
         "source": "npm run package"
       },
       {
         "kind": "html",
-        "html": "\n<p>Le terminal indique le chemin du <code>.ocpkg</code>. Importez-le dans le Control Center, examinez les permissions et activez le widget. Pour remplacer une version déjà installée, augmentez <code>version</code> dans <code>widget/manifest.json</code>. Le suffixe d’empreinte du fichier conserve vos exports précédents ; il ne remplace pas le numéro de version.</p>\n<aside class=\"note note-attention\"><strong>Validation native</strong><p>Les contrôles du kit donnent un retour rapide. OverCrow et la marketplace conservent leurs validateurs et le consentement. Le kit ne signe, n’installe et ne publie rien. Les sessions de développement natives restent hors écran sur les deux plateformes. Le test de l’overlay utilise le paquet installé.</p></aside>\n<h2 id=\"diagnostics\">Des diagnostics exploitables</h2>"
+        "html": "<p>Importez le chemin affiché dans le Control Center, vérifiez les permissions et activez le widget. Augmentez <code>version</code> dans <code>widget/manifest.json</code> pour chaque mise à jour. Les suffixes d’empreinte préservent les exports sans changer la version.</p>\n<h2 id=\"diagnostics\">Diagnostics</h2>\n<p>Si PowerShell bloque <code>npm.ps1</code>, utilisez <code>npm.cmd run dev</code> ou <code>node tooling/overcrow.mjs dev</code>.</p>"
       },
       {
         "kind": "code",
         "language": "sh",
-        "title": "Pour un éditeur ou un futur assistant",
+        "title": "Diagnostics structurés",
         "source": "node tooling/overcrow.mjs check --json"
       },
       {
         "kind": "html",
-        "html": "\n<p>La sortie JSON versionnée fournit <code>ok</code>, le code d’erreur, le champ concerné et une action ; le processus renvoie un statut non nul en cas d’échec. <a href=\"/docs/depannage/\">Consulter aussi le dépannage du runtime</a>.</p><p><a class=\"button-secondary\" href=\"/studio/\">Ouvrir l’atelier de widgets ↗</a></p>"
-      },
-      {
-        "kind": "html",
-        "html": "<p><a href=\"/docs/api-services/\">SDK 1.2.0 : services par capacités, dimensions natives et douze widgets de référence</a>.</p>"
+        "html": "<p>Le JSON fournit <code>ok</code>, code d’erreur, champ et action ; un échec renvoie un statut non nul. OverCrow et la marketplace effectuent la validation finale. <a href=\"/docs/depannage/\">Rechercher une erreur</a>.</p>\n<p><a href=\"/docs/api-services/\">Services hôte et exemples de widgets</a>.</p>"
       }
     ]
   },
@@ -343,59 +337,55 @@
     "key": "manifest",
     "slug": "manifeste",
     "group": "build",
-    "label": "Le manifeste",
+    "label": "Manifeste",
     "title": "Le manifeste",
-    "description": "Déclarez votre identité, vos fichiers et les capacités nécessaires.",
+    "description": "Identifiez votre widget et déclarez ses fichiers et permissions.",
     "headings": [
       {
         "id": "minimal",
-        "title": "Un manifeste minimal"
+        "title": "Commencer avec ce manifeste"
       },
       {
         "id": "champs",
-        "title": "Les champs"
+        "title": "Champs"
       },
       {
         "id": "reseau",
-        "title": "Une permission réseau précise"
+        "title": "Autoriser une requête HTTPS"
       },
       {
         "id": "fichiers",
-        "title": "Préparer des fichiers fiables"
+        "title": "Inclure les fichiers"
       },
       {
         "id": "limites",
-        "title": "Limites utiles"
+        "title": "Limites"
       }
     ],
     "blocks": [
       {
         "kind": "html",
-        "html": "\n<h2 id=\"minimal\">Un manifeste minimal</h2>"
+        "html": "<h2 id=\"minimal\">Commencer avec ce manifeste</h2>\n<p>Ce manifeste suffit pour une vue locale. Le kit génère les empreintes des fichiers lors de l’export.</p>"
       },
       {
         "kind": "code",
         "language": "json",
-        "title": "manifest.json · avant prepare",
-        "source": "{\n  \"schemaVersion\": 1,\n  \"id\": \"com.example.counter\",\n  \"version\": \"1.0.0\",\n  \"apiVersion\": \"1\",\n  \"entrypoints\": { \"view\": \"index.html\" },\n  \"permissions\": {\n    \"network\": [], \"gameEvents\": [],\n    \"storage\": false, \"clipboardWrite\": false\n  }\n}"
+        "title": "widget/manifest.json · avant export",
+        "source": "{\n  \"schemaVersion\": 1,\n  \"id\": \"com.example.my-widget\",\n  \"version\": \"1.0.0\",\n  \"apiVersion\": \"1\",\n  \"entrypoints\": { \"view\": \"index.html\" },\n  \"permissions\": {\n    \"network\": [], \"gameEvents\": [],\n    \"storage\": false, \"clipboardWrite\": false\n  }\n}"
       },
       {
         "kind": "html",
-        "html": "\n<p>Le champ <code>files</code> peut être omis avant <code>prepare</code>. Il est obligatoire et doit correspondre exactement aux fichiers pour <code>dev</code> et <code>package</code>. Le manifeste ne calcule pas sa propre empreinte.</p>\n<h2 id=\"champs\">Les champs</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Champ, Usage\"><table><thead><tr><th>Champ</th><th>Usage</th></tr></thead><tbody><tr><td>schemaVersion / apiVersion</td><td>1 (nombre) / \"1\" (chaîne).</td></tr><tr><td>id</td><td>Identifiant stable en forme de domaine inversé, par exemple com.example.counter.</td></tr><tr><td>version</td><td>Version SemVer du widget, distincte de la version du SDK.</td></tr><tr><td>entrypoints.view</td><td>Chemin local HTML ; index.html doit être présent dans le projet.</td></tr><tr><td>entrypoints.controller</td><td>Document HTML local facultatif pour un contrôleur persistant.</td></tr><tr><td>permissions</td><td>Autorisations réseau, événements, persistance et presse-papiers.</td></tr><tr><td>localization</td><td>Langue par défaut et langues réellement fournies.</td></tr><tr><td>files</td><td>Chemin → sha256 et taille exacte en octets, générés par prepare.</td></tr></tbody></table></div>\n<h2 id=\"reseau\">Une permission réseau précise</h2>"
+        "html": "<p>Gardez <code>id</code> stable lors des mises à jour : il identifie l’installation et le stockage du widget.</p>\n<h2 id=\"champs\">Champs</h2>\n<div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Champ, Usage\"><table><thead><tr><th>Champ</th><th>Usage</th></tr></thead><tbody><tr><td>schemaVersion</td><td>Le nombre 1.</td></tr><tr><td>apiVersion</td><td>La chaîne \"1\". Obligatoire pour chaque widget.</td></tr><tr><td>id</td><td>Identifiant stable en domaine inversé minuscule, par exemple com.example.my-widget.</td></tr><tr><td>version</td><td>Version SemVer du widget, par exemple 1.0.0 ; à augmenter pour les mises à jour.</td></tr><tr><td>entrypoints.view</td><td>Page HTML locale à afficher.</td></tr><tr><td>entrypoints.controller</td><td>Contrôleur HTML local facultatif.</td></tr><tr><td>permissions</td><td>Les autorisations nécessaires : réseau, événements, stockage, presse-papiers ou capacités natives.</td></tr><tr><td>localization</td><td>Langues fournies et langue par défaut.</td></tr><tr><td>presentation</td><td><a href=\"/docs/api-presentation/\">Options natives et dimensions du contenu</a>.</td></tr><tr><td>files</td><td>Tailles et empreintes SHA-256 générées.</td></tr></tbody></table></div>\n<p><a href=\"/docs/api-services/\">Voir les services hôte API v1</a> et <a href=\"/docs/api-langue/\">la déclaration des langues</a>.</p>\n<h2 id=\"reseau\">Autoriser une requête HTTPS</h2>"
       },
       {
         "kind": "code",
         "language": "json",
-        "title": "Fragment de permissions",
-        "source": "\"network\": [{\n  \"origin\": \"https://api.warframe.market\",\n  \"method\": \"GET\",\n  \"pathPrefix\": \"/v2/\"\n}]"
+        "title": "Dans permissions",
+        "source": "{\n  \"network\": [{\n    \"origin\": \"https://api.warframe.market\",\n    \"method\": \"GET\",\n    \"path\": \"/v2/items\"\n  }]\n}"
       },
       {
         "kind": "html",
-        "html": "\n<p>Origine HTTPS, méthode et chemin forment une autorisation. Un chemin terminé par <code>/</code> autorise son sous-arbre ; sans ce slash final, seul le chemin exact est autorisé. Aucun wildcard d’hôte. Les redirections et destinations locales sont refusées. <a href=\"/docs/api-reseau/\">Lire le contrat réseau</a>.</p>\n<h2 id=\"fichiers\">Préparer des fichiers fiables</h2><p>Utilisez des chemins relatifs ASCII, sans <code>..</code>, lien symbolique ni collision de casse. Placez les outils de build hors du dossier runtime. Les scripts, styles, images, polices, traductions et licences doivent tous figurer dans les empreintes. Les champs inconnus sont rejetés.</p>\n<aside class=\"note note-info\"><strong>Une modification de permission est une décision explicite</strong><p>Le rechargement surveillé s’arrête en cas d’ajout de capacité. Vérifiez le manifeste puis démarrez un nouvel enregistrement pour confirmer le changement. prepare ne déduit pas les permissions depuis le code.</p></aside>\n<h2 id=\"limites\">Limites utiles</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Élément, Plafond actuel\"><table><thead><tr><th>Élément</th><th>Plafond actuel</th></tr></thead><tbody><tr><td>Paquet</td><td>128 Mio ; 4 096 entrées, manifeste compris</td></tr><tr><td>Manifeste</td><td>1 Mio</td></tr><tr><td>Chemins</td><td>192 octets ASCII</td></tr><tr><td>Messages JSON</td><td>1 Mio ; profondeur 64</td></tr><tr><td>Corps réseau</td><td>2 Mio en requête ; 32 Mio en réponse</td></tr><tr><td>Langues déclarées</td><td>1 à 16, uniques, dont la langue par défaut</td></tr></tbody></table></div>"
-      },
-      {
-        "kind": "html",
-        "html": "<p><a href=\"/docs/api-services/\">SDK 1.2.0 : services par capacités, dimensions natives et douze widgets de référence</a>.</p>"
+        "html": "<p>Cette permission autorise uniquement <code>GET /v2/items</code>. Chaque route est exacte, même avec un slash final. Déclarez les valeurs variables avec <code>pathParams</code> et les paramètres d’URL avec <code>queryParams</code>. <a href=\"/docs/api-reseau/\">Référence réseau</a>.</p>\n<h2 id=\"fichiers\">Inclure les fichiers</h2>\n<p>Placez HTML, CSS, JavaScript, images, polices, traductions et licences dans <code>widget/</code>. Utilisez des chemins relatifs ASCII, sans <code>..</code>, liens ni collisions de casse. Gardez les outils de compilation hors de ce dossier.</p>\n<p>Le champ généré <code>files</code> doit correspondre à chaque fichier exporté ; le manifeste exclut sa propre empreinte. La CLI native exige ces empreintes pour <code>dev</code> et <code>package</code>. Les champs inconnus sont rejetés.</p>\n<p>Vérifiez tout ajout de permissions et redémarrez le développement pour l’accepter. La préparation ne déduit pas les permissions depuis votre code.</p>\n<h2 id=\"limites\">Limites</h2>\n<div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Élément, Limite\"><table><thead><tr><th>Élément</th><th>Limite</th></tr></thead><tbody><tr><td>Paquet</td><td>128 Mio ; 4 096 entrées, manifeste compris</td></tr><tr><td>Manifeste</td><td>1 Mio</td></tr><tr><td>Chemins</td><td>192 octets ASCII</td></tr></tbody></table></div>\n<p>Les pages API détaillent les limites des <a href=\"/docs/api-reseau/\">requêtes</a>, <a href=\"/docs/api-runtime/\">messages</a> et <a href=\"/docs/api-langue/\">langues</a>.</p>"
       }
     ]
   },
@@ -403,47 +393,27 @@
     "key": "examples",
     "slug": "exemples",
     "group": "build",
-    "label": "Exemples à reprendre",
-    "title": "Exemples à reprendre",
-    "description": "Trois points de départ concrets, avec leurs sources et permissions.",
+    "label": "Exemples",
+    "title": "Exemples",
+    "description": "Ouvrez un exemple dans le Studio ou téléchargez ses sources.",
     "headings": [
       {
-        "id": "blank",
-        "title": "Blank · une base vide"
+        "id": "studio",
+        "title": "Essayer un exemple"
       },
       {
-        "id": "compteur",
-        "title": "Compteur · le premier widget"
-      },
-      {
-        "id": "checklist",
-        "title": "Checklist · un état qui reste"
-      },
-      {
-        "id": "marche",
-        "title": "Warframe Market · une application intermédiaire"
+        "id": "references",
+        "title": "Télécharger les sources"
       },
       {
         "id": "utilisation",
-        "title": "Utiliser les archives"
-      },
-      {
-        "id": "references-v2",
-        "title": "Références API v2"
+        "title": "Utiliser une archive de sources"
       }
     ],
     "blocks": [
       {
         "kind": "html",
-        "html": "\n<h2 id=\"blank\">Blank · une base vide</h2><p>Quatre fichiers : HTML, CSS, JavaScript et manifeste, accompagnés du SDK. Sans interface d’exemple ni contrôleur superflu. <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/blank.zip\" download>Télécharger les sources ↓</a> ou <a href=\"/studio/\">ouvrir l’atelier</a>.</p>\n<h2 id=\"compteur\">Compteur · le premier widget</h2><p>Une vue, deux boutons et un compteur. Sans réseau ni stockage. Idéal pour modifier une interface, comprendre le manifeste et vérifier le parcours de préparation.</p><p><a class=\"button-primary\" href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/counter.zip\" download>Télécharger le compteur ↓</a></p>\n<h2 id=\"checklist\">Checklist · un état qui reste</h2><p>Ajoutez des tâches, cochez-les et retrouvez-les au redémarrage. La sauvegarde locale est versionnée et validée ; une donnée corrompue est signalée sans être écrasée silencieusement. Permission : <code>storage: true</code>.</p><p><a class=\"button-primary\" href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/checklist.zip\" download>Télécharger la checklist ↓</a></p>\n<h2 id=\"marche\">Warframe Market · une application intermédiaire</h2><p>Exemple existant du marketplace : recherche de catalogue, offres d’achat/vente, cache IndexedDB, contrôleur séparé, vue resynchronisée et copie d’un message. Permissions : GET vers <code>https://api.warframe.market/v2/</code>, stockage et presse-papiers.</p><p><a class=\"button-primary\" href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/warframe-market.zip\" download>Télécharger les sources du widget ↓</a></p><p>Ce téléchargement contient le bundle de référence 2.0.5, tel que présent dans le dépôt, avec sa version embarquée du SDK. Il ne constitue pas une nouvelle publication du widget ni un ajout au catalogue. <a href=\"https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/warframe-market\" rel=\"noreferrer\">Consulter les sources et leur historique ↗</a>.</p>\n<h2 id=\"utilisation\">Utiliser les archives</h2><p>Décompressez, modifiez puis utilisez <a href=\"/docs/kit-createur/\">le kit créateur</a> ou <a href=\"/docs/developpement/\">les outils natifs Linux</a>. Pour reprendre une archive source dans le kit, copiez ses fichiers dans le dossier widget/ d’un projet créé. Chaque archive contient une licence MIT et son SDK. Conservez les notices. Pour votre propre création, choisissez un identifiant distinct et une version adaptée.</p>\n<aside class=\"note note-info\"><strong>Ce que les exemples prouvent</strong><p>Le site vérifie les fichiers, empreintes et scripts des archives. Leur rendu et leurs interactions doivent ensuite être testés dans OverCrow sur les plateformes visées. Le compteur et la checklist ne sont pas des widgets déjà publiés au marketplace.</p></aside>"
-      },
-      {
-        "kind": "html",
-        "html": "<p><a href=\"/docs/api-services/\">SDK 1.2.0 : services par capacités, dimensions natives et douze widgets de référence</a>.</p>"
-      },
-      {
-        "kind": "html",
-        "html": "<h2 id=\"references-v2\">Références API v2</h2><p><a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/session.zip\">session</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/clock.zip\">clock</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/performance.zip\">performance</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/fps.zip\">fps</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/stopwatch.zip\">stopwatch</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/media.zip\">media</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/notes.zip\">notes</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/score.zip\">score</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/rating.zip\">rating</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/reviews.zip\">reviews</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/journal.zip\">journal</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/twitch.zip\">twitch</a></p>"
+        "html": "<h2 id=\"studio\">Essayer un exemple</h2><p><a class=\"button-primary\" href=\"/studio/\">Ouvrir le Studio →</a></p><p>Choisissez un modèle, modifiez-le et testez le résultat dans votre navigateur.</p><h2 id=\"references\">Télécharger les sources</h2><p><a href=\"/docs/downloads/blank.zip\" download>Blank</a> · <a href=\"/docs/downloads/counter.zip\" download>Counter</a> · <a href=\"/docs/downloads/checklist.zip\" download>Checklist</a> · <a href=\"/docs/downloads/warframe-market.zip\" download>Warframe Market</a> · <a href=\"/docs/downloads/session.zip\" download>Session</a> · <a href=\"/docs/downloads/clock.zip\" download>Clock</a> · <a href=\"/docs/downloads/performance.zip\" download>Performance</a> · <a href=\"/docs/downloads/fps.zip\" download>FPS</a> · <a href=\"/docs/downloads/media.zip\" download>Media</a> · <a href=\"/docs/downloads/stopwatch.zip\" download>Stopwatch</a> · <a href=\"/docs/downloads/notes.zip\" download>Notes</a> · <a href=\"/docs/downloads/journal.zip\" download>Journal</a> · <a href=\"/docs/downloads/score.zip\" download>Score</a></p><h2 id=\"utilisation\">Utiliser une archive de sources</h2><p>Copiez les fichiers extraits dans <code>widget/</code> d’un <a href=\"/docs/kit-createur/\">projet du kit créateur</a>. Choisissez votre identifiant de widget, conservez les notices MIT, puis exportez et importez le paquet dans OverCrow.</p>"
       }
     ]
   },
@@ -451,55 +421,87 @@
     "key": "network",
     "slug": "api-reseau",
     "group": "sdk-reference",
-    "label": "Requêtes réseau",
+    "label": "Réseau",
     "title": "Requêtes réseau",
-    "description": "overcrow.fetch : des requêtes HTTPS transmises par le runtime.",
+    "description": "Lisez une API HTTPS avec overcrow.fetch.",
     "headings": [
       {
         "id": "signature",
-        "title": "Signature"
+        "title": "Méthodes et signatures"
+      },
+      {
+        "id": "routes",
+        "title": "Identifiants variables"
+      },
+      {
+        "id": "query",
+        "title": "Paramètres d’URL"
       },
       {
         "id": "exemple",
-        "title": "Lire du JSON et afficher une erreur utile"
+        "title": "Lire une réponse JSON"
       },
       {
         "id": "reponse",
-        "title": "La réponse"
+        "title": "Lire le résultat"
       },
       {
         "id": "contraintes",
-        "title": "Ce qui est disponible aujourd’hui"
+        "title": "Limites et permissions"
       },
       {
         "id": "recette",
-        "title": "Une interface qui reste utilisable"
+        "title": "Gérer les échecs"
       }
     ],
     "blocks": [
       {
         "kind": "html",
-        "html": "\n<h2 id=\"signature\">Signature</h2>"
-      },
-      {
-        "kind": "code",
-        "language": "ts",
-        "title": "Surface prise en charge",
-        "source": "overcrow.fetch(url: string, options?: {\n  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';\n  body?: string | ArrayBuffer | ArrayBufferView | null;\n}): Promise<OvercrowResponse>"
+        "html": "<h2 id=\"signature\">Méthodes et signatures</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Méthode / signature, Rôle\"><table><thead><tr><th>Méthode / signature</th><th>Rôle</th></tr></thead><tbody><tr><td><code>overcrow.fetch(url: string, options?: FetchOptions): Promise&lt;OvercrowResponse&gt;</code></td><td>Envoyer une requête HTTPS autorisée.</td></tr><tr><td><code>response.json(): Promise&lt;unknown&gt;</code></td><td>Lire le corps une fois en JSON ; valider sa structure.</td></tr><tr><td><code>response.text(): Promise&lt;string&gt;</code></td><td>Lire le corps une fois en texte.</td></tr><tr><td><code>response.arrayBuffer(): Promise&lt;ArrayBuffer&gt;</code></td><td>Lire le corps une fois en octets.</td></tr></tbody></table></div>"
       },
       {
         "kind": "html",
-        "html": "\n<p>La méthode par défaut est GET. Déclarez chaque origine/méthode/préfixe utilisé dans <a href=\"/docs/manifeste/\">le manifeste</a>. L’appel n’utilise jamais le fetch réseau du navigateur comme secours.</p>\n<h2 id=\"exemple\">Lire du JSON et afficher une erreur utile</h2>"
-      },
-      {
-        "kind": "code",
-        "language": "js",
-        "title": "view.js · permission GET /v2/ nécessaire",
-        "source": "import overcrow from './overcrow.js';\nconst status = document.querySelector('#status');\ntry {\n  status.textContent = 'Chargement…';\n  const response = await overcrow.fetch('https://api.warframe.market/v2/items');\n  if (!response.ok) throw new Error('HTTP ' + response.status);\n  const payload = await response.json();\n  if (!Array.isArray(payload.data)) throw new Error('Catalogue invalide');\n  status.textContent = payload.data.length + ' objets disponibles';\n} catch (error) {\n  status.textContent = 'Catalogue indisponible. Réessayez.';\n  console.error(error.code ?? error.message); // Local development diagnostic.\n}"
+        "html": "<p><code>FetchOptions</code> accepte <code>method?: string</code> (GET par défaut ; GET, POST, PUT, PATCH ou DELETE) et <code>body?: string | ArrayBuffer | ArrayBufferView | null</code>. Les autres options de requête ne sont pas prises en charge.</p>"
       },
       {
         "kind": "html",
-        "html": "\n<h2 id=\"reponse\">La réponse</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Membre, Comportement\"><table><thead><tr><th>Membre</th><th>Comportement</th></tr></thead><tbody><tr><td>status / ok</td><td>Statut HTTP ; ok pour 200–299. Vérifiez-le avant de traiter la réponse.</td></tr><tr><td>contentType</td><td>Type de contenu ou null.</td></tr><tr><td>bodyUsed</td><td>Devient true après la première lecture du corps.</td></tr><tr><td>json()</td><td>Lit le corps une fois et parse le JSON. Sa structure reste à valider.</td></tr><tr><td>text() / arrayBuffer()</td><td>Alternatives de lecture unique. Une seconde lecture rejette avec body_used.</td></tr></tbody></table></div>\n<h2 id=\"contraintes\">Ce qui est disponible aujourd’hui</h2><p>Les options <code>headers</code>, <code>signal</code>, cookies et authentification ambiante ne font pas partie de cette API. Une requête est limitée côté hôte à 30 secondes. Les redirections, proxies et destinations locales sont refusés. Le corps d’une requête est transmis comme octets ; ne supposez pas qu’envoyer une chaîne ajoute un Content-Type JSON.</p>\n<p>Un <code>Promise.race</code> peut arrêter votre attente mais n’annule pas la requête native. Préférez une relance explicite, une seule requête utile à la fois et une protection contre les réponses devenues obsolètes.</p>\n<h2 id=\"recette\">Une interface qui reste utilisable</h2><p>Gardez les dernières données valides pendant un rafraîchissement, distinguez chargement et erreur, indiquez l’âge du cache et proposez Réessayer. <a href=\"/docs/exemples/\">Warframe Market</a> montre une recherche, un cache IndexedDB et la protection contre les anciennes réponses.</p>"
+        "html": "<p>Déclarez chaque origine HTTPS, méthode et route exacte dans <a href=\"/docs/manifeste/\">le manifeste</a>. <code>/api/</code> n’autorise que ce chemin précis, jamais ses sous-chemins. Il n’existe ni wildcard ni préfixe réseau.</p><h2 id=\"routes\">Identifiants variables</h2><p>Une variable occupe un segment entier du chemin. Déclarez son type et sa limite ; ici, <code>/v2/orders/item/rhino_prime_set/top</code> est autorisé, mais <code>/v2/orders/item/rhino_prime_set/history</code> est refusé.</p>"
+      },
+      {
+        "kind": "code",
+        "language": "json",
+        "title": "permissions.network",
+        "source": "{\n  \"network\": [{\n    \"origin\": \"https://api.warframe.market\",\n    \"method\": \"GET\",\n    \"path\": \"/v2/orders/item/{slug}/top\",\n    \"pathParams\": { \"slug\": { \"type\": \"slug\", \"maxLength\": 96 } }\n  }]\n}"
+      },
+      {
+        "kind": "html",
+        "html": "<p>Chaque variable doit être déclarée une seule fois. Construisez ensuite l’URL en JavaScript ; l’hôte vérifie la valeur à chaque requête. Voir l’<a href=\"/docs/api-jeu/#snapshot\">appel qui lit l’identifiant Steam du jeu actif</a>.</p><ul><li><code>integer</code> : <code>min</code> et <code>max</code> obligatoires, de 0 à 9 007 199 254 740 991. Chiffres uniquement, sans zéro initial.</li><li><code>slug</code> : lettres ASCII, chiffres, <code>_</code> et <code>-</code> ; <code>maxLength</code> entre 1 et 128.</li><li><code>enum</code> : une liste <code>values</code> de 1 à 32 valeurs distinctes, de 1 à 128 caractères ASCII non réservés chacune (<code>A–Z a–z 0–9 . _ ~ -</code>), sauf <code>.</code> et <code>..</code>.</li><li><code>string</code> : réservé à la query string ; <code>maxLength</code> entre 1 et 256 octets UTF-8, sans caractères de contrôle.</li></ul><p>Seuls <code>integer</code>, <code>slug</code> et <code>enum</code> sont valides dans <code>pathParams</code>. Chaque <code>{name}</code> occupe un segment entier, apparaît une fois et possède une déclaration ; les déclarations inutilisées sont refusées. Le chemin commence par <code>/</code> et contient des segments fixes utilisant uniquement <code>A–Z a–z 0–9 . _ ~ -</code>, sans chemin réduit à la racine, encodage %, segment <code>.</code> ou <code>..</code>, double barre oblique, barre oblique inverse, query string ni fragment. Une barre oblique finale compte.</p><h2 id=\"query\">Paramètres d’URL</h2><p>Sans <code>queryParams</code>, toute query string est refusée. Déclarez chaque clé autorisée avec les mêmes types. Les clés sont facultatives sauf <code>required: true</code>. L’exemple suivant autorise <code>?page=2&amp;sort=name</code>, pas <code>?page=2&amp;debug=true</code>.</p>"
+      },
+      {
+        "kind": "code",
+        "language": "json",
+        "title": "permissions.network · exemple avec pagination",
+        "source": "{\n  \"network\": [{\n    \"origin\": \"https://api.example.com\",\n    \"method\": \"GET\",\n    \"path\": \"/items\",\n    \"queryParams\": {\n      \"page\": { \"type\": \"integer\", \"min\": 1, \"max\": 100, \"required\": true },\n      \"sort\": { \"type\": \"enum\", \"values\": [\"name\", \"date\"] }\n    }\n  }]\n}"
+      },
+      {
+        "kind": "html",
+        "html": "<p>Utilisez <code>URLSearchParams</code> pour encoder les valeurs. Les clés répétées, inconnues ou encodées sont refusées, tout comme les valeurs vides et les encodages invalides. Noms de paramètres : une lettre ASCII, puis lettres, chiffres ou <code>_</code>, sur 32 caractères maximum.</p><p>Limites par widget : 32 routes. Par route : 1 024 octets de chemin, 8 variables de chemin et 16 clés de query string. L’URL complète ne dépasse pas 2 048 octets.</p><p>Un <code>queryParams</code> absent ou vide refuse aussi un simple <code>?</code>. Chaque paire exige <code>=</code> et une valeur non vide. Les valeurs sont décodées une fois (<code>+</code> devient un espace) ; les clés restent en ASCII littéral. Toutes les clés obligatoires doivent être présentes ; leur ordre est libre. <code>required</code> ne s’applique qu’aux paramètres de query string. Les identifiants dans l’URL et les fragments, même un simple <code>#</code>, sont refusés.</p><h2 id=\"exemple\">Lire une réponse JSON</h2><p>Pour cet exemple, déclarez <code>GET https://api.warframe.market/v2/items</code>, sans paramètres. Ajoutez cette sortie dans votre vue :</p>"
+      },
+      {
+        "kind": "code",
+        "language": "html",
+        "title": "index.html",
+        "source": "<p id=\"status\" role=\"status\"></p>"
+      },
+      {
+        "kind": "code",
+        "language": "javascript",
+        "title": "view.js · GET /v2/items",
+        "source": "import overcrow from './overcrow.js';\nconst status = document.querySelector('#status');\ntry {\n  status.textContent = 'Loading…';\n  const response = await overcrow.fetch('https://api.warframe.market/v2/items');\n  if (!response.ok) throw new Error('HTTP ' + response.status);\n  const payload = await response.json();\n  if (!Array.isArray(payload?.data)) throw new Error('Invalid catalog');\n  status.textContent = payload.data.length + ' items available';\n} catch (error) {\n  status.textContent = 'Catalog unavailable. Try again.';\n  console.error(error.code ?? error.message);\n}"
+      },
+      {
+        "kind": "html",
+        "html": "<h2 id=\"reponse\">Lire le résultat</h2>\n<div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Membre, Comportement\"><table><thead><tr><th>Membre</th><th>Comportement</th></tr></thead><tbody><tr><td>status / ok</td><td>Statut HTTP ; ok vaut true pour 200–299.</td></tr><tr><td>contentType</td><td>Type de contenu ou null.</td></tr><tr><td>bodyUsed</td><td>Vaut true après la première lecture du corps.</td></tr><tr><td>json()</td><td>Analyse le JSON une seule fois ; validez les données avant de les utiliser.</td></tr><tr><td>text() / arrayBuffer()</td><td>Lit le texte ou les octets une seule fois. Une deuxième lecture rejette avec body_used.</td></tr></tbody></table></div>\n<p>Un statut 404 ou 503 reste une réponse HTTP : vérifiez <code>response.ok</code>. Une permission refusée ou un délai dépassé rejette l’appel avec une erreur SDK.</p>\n<h2 id=\"contraintes\">Limites et permissions</h2>\n<p>L’hôte limite une requête à 30 secondes, son corps à 2 Mio et la réponse à 32 Mio. Il refuse les redirections, proxies et destinations locales. Le corps est transmis en octets ; une chaîne ne définit pas automatiquement un Content-Type JSON.</p>\n<p><code>headers</code>, <code>signal</code>, les cookies et l’authentification ambiante ne sont pas pris en charge. Un <code>Promise.race</code> peut arrêter votre attente, mais n’annule pas la requête native. Ignorez les réponses des recherches devenues obsolètes.</p>\n<p>Utilisez <code>overcrow.fetch</code> pour les requêtes externes. Cette permission n’active pas les images distantes, WebSockets, workers ou iframes. Gardez les clés d’API hors des fichiers distribués ; utilisez votre propre service pour les identifiants privés.</p>\n<h2 id=\"recette\">Gérer les échecs</h2>\n<p>Conservez les dernières données valides pendant le rafraîchissement, distinguez résultat vide et erreur, indiquez l’âge du cache et proposez une nouvelle tentative. <a href=\"/studio/\">Warframe Market dans le Studio</a> illustre ce fonctionnement avec un contrôleur et un cache. <a href=\"/docs/depannage/\">Rechercher un code d’erreur</a>.</p>"
       }
     ]
   },
@@ -507,69 +509,63 @@
     "key": "game",
     "slug": "api-jeu",
     "group": "sdk-reference",
-    "label": "Session et données du jeu",
-    "title": "Session et données du jeu",
-    "description": "Lire les données explicitement exposées par OverCrow.",
+    "label": "Session de jeu",
+    "title": "Session de jeu",
+    "description": "Lisez l’état de la session et suivez ses changements.",
     "headings": [
       {
-        "id": "snapshot",
-        "title": "Lire le snapshot courant"
+        "id": "methods",
+        "title": "Méthodes et signatures"
       },
       {
-        "id": "champs",
-        "title": "Champs du snapshot natif actuel"
+        "id": "snapshot",
+        "title": "Lire une fois ou suivre les changements"
       },
       {
         "id": "abonnement",
-        "title": "Suivre les mises à jour natives"
+        "title": "Suivre les changements"
+      },
+      {
+        "id": "champs",
+        "title": "Champs du snapshot"
       },
       {
         "id": "evenements",
-        "title": "Écouter un événement"
+        "title": "Événements nommés"
       },
       {
         "id": "replay",
-        "title": "Tester sans jeu"
+        "title": "Tester avec une fixture"
       }
     ],
     "blocks": [
       {
         "kind": "html",
-        "html": "\n<h2 id=\"snapshot\">Lire le snapshot courant</h2>"
+        "html": "<h2 id=\"methods\">Méthodes et signatures</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Méthode / signature, Rôle\"><table><thead><tr><th>Méthode / signature</th><th>Rôle</th></tr></thead><tbody><tr><td><code>overcrow.game.snapshot(): Promise&lt;GameSnapshot&gt;</code></td><td>Lire le contexte de jeu courant une seule fois.</td></tr><tr><td><code>overcrow.game.onSnapshot(listener: (snapshot: GameSnapshot) =&gt; void): () =&gt; void</code></td><td>Recevoir les futurs snapshots du jeu ; renvoyer une fonction de désabonnement.</td></tr><tr><td><code>overcrow.game.on(event: string, listener: (payload: CloneableJson) =&gt; void): () =&gt; void</code></td><td>Écouter un événement nommé déclaré ; renvoyer une fonction de désabonnement.</td></tr></tbody></table></div>"
+      },
+      {
+        "kind": "html",
+        "html": "<h2 id=\"snapshot\">Lire une fois ou suivre les changements</h2><p><code>snapshot()</code> prend une photographie de l’état courant. Sa Promise fournit un résultat avec <code>await</code> ; elle ne met pas ensuite votre page à jour. Utilisez cet appel pour lire l’identifiant Steam et construire une <a href=\"/docs/api-reseau/#routes\">requête réseau avec un identifiant variable</a>.</p>"
       },
       {
         "kind": "code",
-        "language": "js",
-        "title": "Lecture ponctuelle dans le runtime",
-        "source": "import overcrow from './overcrow.js';\nconst snapshot = await overcrow.game.snapshot();\nconst ms = snapshot.sessionElapsedMs;\nconst minutes = typeof ms === 'number' ? Math.floor(ms / 60000) : null;\ndocument.querySelector('#duration').textContent =\n  minutes === null ? 'Session indisponible' : minutes + ' min';"
+        "language": "javascript",
+        "title": "Lire une fois",
+        "source": "import overcrow from './overcrow.js';\nconst snapshot = await overcrow.game.snapshot();\nconst steamAppId = snapshot.selectedActive ? snapshot.steamAppId : null;\nconsole.log(steamAppId ?? 'Steam ID unavailable');"
       },
       {
         "kind": "html",
-        "html": "\n<p>Déclarez les événements requis par votre intégration dans <code>permissions.gameEvents</code>. Les données sont choisies par l’hôte sous l’autorité du jeu actif ; un jeu absent, un capteur manquant ou le développement sans jeu produit des valeurs indisponibles.</p>\n<h2 id=\"champs\">Champs du snapshot natif actuel</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Champ, Type / unité\"><table><thead><tr><th>Champ</th><th>Type / unité</th></tr></thead><tbody><tr><td>running / selectedActive</td><td>Booléens d’activité ; le snapshot minimal de développement peut ne contenir que running.</td></tr><tr><td>steamAppId</td><td>Nombre ou null. Ne fournit pas le titre ou une image du jeu.</td></tr><tr><td>sessionElapsedMs</td><td>Durée en millisecondes ou null.</td></tr><tr><td>overlayMode</td><td>\"passive\" ou \"interactive\".</td></tr><tr><td>cpuPercentHundredths</td><td>CPU du processus en centièmes de pourcentage, ou null.</td></tr><tr><td>residentBytes</td><td>Mémoire résidente en octets, ou null.</td></tr><tr><td>cpuTemperatureMillicelsius / gpuTemperatureMillicelsius</td><td>Millièmes de degré Celsius ou null, selon la disponibilité du capteur.</td></tr></tbody></table></div>\n<p>Le type <code>GameSnapshot</code> décrit ces champs depuis le SDK 1.2.0. Les propriétés restent facultatives pour les snapshots minimaux ; les champs JSON supplémentaires sont conservés. Une réponse dont un champ connu a un type invalide est rejetée avec <code>invalid_response</code>.</p><p>Testez les types avant tout formatage. Zéro et absence de mesure sont des états différents. Le contrat actuel n’expose pas de champ FPS, inventaire, santé du personnage ou position dans le jeu.</p>\n<h2 id=\"abonnement\">Suivre les mises à jour natives</h2>"
+        "html": "<p>Aucune capacité supplémentaire n’est requise. Des champs peuvent être absents avant qu’une session soit disponible ; un identifiant Steam inconnu n’est pas une erreur et une durée de zéro est valide.</p><h2 id=\"abonnement\">Suivre les changements</h2><p><code>onSnapshot(callback)</code> demande au SDK d’appeler votre fonction à chaque futur snapshot du jeu. Un callback est simplement une fonction transmise pour être appelée plus tard. Dans <code>snapshot =&gt; { ... }</code>, la valeur avant <code>=&gt;</code> est le paramètre de la fonction et les accolades contiennent le code à exécuter avec cette valeur.</p><p>Abonnez-vous d’abord, puis appelez <code>snapshot()</code> pour initialiser l’affichage. L’abonnement au jeu n’envoie pas de valeur initiale ; <a href=\"/docs/api-services/#abonnements\">les abonnements aux services hôte le font</a>. La fonction renvoyée, nommée <code>stop</code> ci-dessous, retire l’écouteur ; appelez-la à la fermeture du composant. Ce module crée son propre affichage.</p>"
       },
       {
         "kind": "code",
-        "language": "js",
-        "title": "SDK 1.1.0 · abonnement puis lecture initiale",
-        "source": "import overcrow from './overcrow.js';\nfunction render(snapshot) {\n  const ms = snapshot.sessionElapsedMs;\n  document.querySelector('#duration').textContent =\n    typeof ms === 'number' ? Math.floor(ms / 60000) + ' min' : 'Session indisponible';\n}\nconst stop = overcrow.game.onSnapshot(render);\nrender(await overcrow.game.snapshot());\n// Call stop() when the component is destroyed."
+        "language": "javascript",
+        "title": "view.js",
+        "source": "import overcrow from './overcrow.js';\nconst output = document.createElement('output');\ndocument.body.append(output);\nconst render = snapshot => {\n  const ms = snapshot.sessionElapsedMs;\n  output.textContent = typeof ms === 'number'\n    ? Math.floor(ms / 60000) + ' min' : 'Session unavailable';\n};\nconst stop = overcrow.game.onSnapshot(render);\ntry { render(await overcrow.game.snapshot()); }\ncatch { output.textContent = 'Session unavailable'; }\nwindow.addEventListener('pagehide', stop, { once: true });"
       },
       {
         "kind": "html",
-        "html": "\n<p><code>onSnapshot</code> livre les mises à jour natives suivantes ; il ne déclenche pas lui-même une lecture initiale. Le désabonnement est sans effet après le premier appel. Les événements mal formés sont ignorés. Aucun polling permanent n’est nécessaire.</p>\n<h2 id=\"evenements\">Écouter un événement</h2>"
-      },
-      {
-        "kind": "code",
-        "language": "js",
-        "title": "Abonnement · exemple compatible avec les fixtures de replay",
-        "source": "const stop = overcrow.game.on('overcrow.game.session.v1', payload => {\n  // Schema defined by the delivered event or your fixture.\n  console.log(payload);\n});\n// Clean up when the component is destroyed:\nstop();"
-      },
-      {
-        "kind": "html",
-        "html": "\n<aside class=\"note note-attention\"><strong>Snapshot natif et événement de démonstration</strong><p>game.on reçoit les événements nommés effectivement livrés. Une mise à jour du snapshot natif n’est pas automatiquement un événement session.v1. Les fixtures de démonstration utilisent parfois elapsedMs, alors que le snapshot natif utilise sessionElapsedMs. Ne les traitez pas comme le même contrat. Utilisez snapshot() pour une lecture courante et onSnapshot() pour ses mises à jour natives. game.on reste réservé aux événements nommés réellement émis ou rejoués.</p></aside>\n<h2 id=\"replay\">Tester sans jeu</h2><p><a href=\"/docs/developpement/\">Le replay de fixtures</a> permet d’exercer vos réactions à des événements déclarés et ordonnés. Il ne simule pas automatiquement l’intégralité du runtime ni les capacités d’un jeu.</p>"
-      },
-      {
-        "kind": "html",
-        "html": "<p><a href=\"/docs/api-services/\">SDK 1.2.0 : services par capacités, dimensions natives et douze widgets de référence</a>.</p>"
+        "html": "<h2 id=\"champs\">Champs du snapshot</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Champ / type, Signification\"><table><thead><tr><th>Champ / type</th><th>Signification</th></tr></thead><tbody><tr><td><code>running?: boolean</code></td><td>Indique si le jeu est lancé.</td></tr><tr><td><code>selectedActive?: boolean</code></td><td>Indique si le jeu sélectionné est actif.</td></tr><tr><td><code>steamAppId?: number | null</code></td><td>Identifiant Steam du jeu actif sélectionné ; sans identité du joueur, titre ni illustration.</td></tr><tr><td><code>sessionElapsedMs?: number | null</code></td><td>Durée de la session courante en millisecondes.</td></tr><tr><td><code>overlayMode?: &#x27;passive&#x27; | &#x27;interactive&#x27;</code></td><td>Mode d’interaction courant de l’overlay.</td></tr><tr><td><code>fixture?: boolean</code></td><td>Vaut true pour les données fictives de l’aperçu.</td></tr></tbody></table></div><p>Le snapshot du jeu contient uniquement le contexte de session. <a href=\"/docs/api-performance/\">CPU, mémoire, températures et FPS</a> ont leurs propres permissions. Un type de snapshot invalide rejette avec <code>invalid_response</code> ; les événements de mise à jour malformés sont ignorés.</p><h2 id=\"evenements\">Événements nommés</h2><p>Déclarez les noms d’événements dans <code>permissions.gameEvents</code>, puis passez un nom et un callback à <code>game.on(event, listener)</code>. L’hôte ou votre fixture doit réellement émettre ce nom. Validez le contenu JSON selon le schéma de cet événement. Ces événements sont distincts des snapshots natifs : un champ de replay nommé <code>elapsedMs</code> ne renomme pas <code>sessionElapsedMs</code>.</p><h2 id=\"replay\">Tester avec une fixture</h2><p><a href=\"/docs/developpement/\">Rejouez des événements ordonnés</a> pour tester vos fonctions sans jeu, puis vérifiez les vraies données de session dans OverCrow.</p>"
       }
     ]
   },
@@ -577,105 +573,215 @@
     "key": "services",
     "slug": "api-services",
     "group": "sdk-reference",
-    "label": "Services natifs",
-    "title": "Services par capacités · SDK 1.2.0",
-    "description": "Services natifs typés, capacités, snapshots et actions contrôlées.",
+    "label": "Services hôte",
+    "title": "Services hôte OverCrow",
+    "description": "Retrouvez télémétrie, FPS, médias et présentation, leurs permissions et les règles communes des snapshots.",
     "headings": [
       {
-        "id": "disponibilite",
-        "title": "Disponibilité et états"
+        "id": "services",
+        "title": "Liste des services"
       },
       {
         "id": "permissions",
-        "title": "Déclarer les capacités"
+        "title": "Permissions et disponibilité"
       },
       {
         "id": "abonnements",
-        "title": "Lire et s’abonner"
+        "title": "Lire une fois ou recevoir les mises à jour"
       },
       {
-        "id": "donnees",
-        "title": "Données, unités et périmètre"
-      },
-      {
-        "id": "actions",
-        "title": "Actions natives nommées"
-      },
-      {
-        "id": "presentation",
-        "title": "Dimensions et options"
+        "id": "disponibilite",
+        "title": "Résultat d’un snapshot"
       },
       {
         "id": "confidentialite",
-        "title": "Données privées et Twitch"
-      },
-      {
-        "id": "simulation",
-        "title": "Aperçu et références"
-      },
-      {
-        "id": "migration",
-        "title": "Migrer depuis l’API v1"
+        "title": "Autres outils du SDK"
       }
     ],
     "blocks": [
       {
         "kind": "html",
-        "html": "<p class=\"lead\">Le SDK 1.2.0 ajoute une façade typée pour les services du système hôte et conserve l’API v1. La présence d’une méthode ne garantit ni sa prise en charge ni son autorisation.</p><h2 id=\"disponibilite\">Disponibilité et états</h2><p><code>await overcrow.host.capabilities()</code> renvoie la liste fermée de capacités avec <code>{supported, granted}</code>. L’hôte décide de la disponibilité selon l’installation, la plateforme et le jeu autorisé. Le SDK et l’aperçu n’activent pas les fournisseurs natifs. Leur intégration se poursuit : vérifiez les états et ne déduisez pas une parité complète avec les widgets intégrés à partir des exemples.</p><p>Chaque module de données expose <code>snapshot()</code> et <code>onSnapshot(listener)</code>. Une enveloppe contient <code>{contextId, revision, status, data, sampleAgeMs?, retryAfterMs?}</code>. Le contexte est opaque et la révision est un entier JavaScript sûr et croissant.</p><ul><li><code>ready</code> : DTO valide ; certaines mesures peuvent rester nulles.</li><li><code>stale</code> : DTO ancien ou null ; afficher l’âge de la mesure.</li><li><code>unavailable</code> : mesure ou session autorisée indisponible.</li><li><code>unsupported</code> : fonction non implémentée par l’hôte ou la plateforme.</li><li><code>permissionDenied</code> : autorisation absente ou révoquée.</li><li><code>notConnected</code> : un service autorisé nécessite la connexion native.</li><li><code>rateLimited</code> : attendre le délai facultatif <code>retryAfterMs</code>.</li></ul><p>Seuls ready/stale peuvent contenir des données. Un ancien hôte sans enveloppe de services renvoie unsupported, un contexte null et la révision 0. Sans pont natif, une lecture directe rejette avec <code>bridge_unavailable</code> ; un abonnement dont la lecture initiale échoue reçoit unavailable. Une mesure absente n’est jamais un zéro.</p><h2 id=\"permissions\">Déclarer les capacités</h2><p>Utilisez la chaîne <code>apiVersion: \"2\"</code> et <code>permissions.capabilities</code>. Une installation, une mise à jour, un compte déjà connecté ou la déclaration d’une capacité ne vaut pas consentement. Toute extension des droits nécessite un nouvel accord. L’API v1 n’accepte pas les déclarations de capacités ou de présentation v2.</p>"
+        "html": "<h2 id=\"services\">Liste des services</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Service / méthode, Permission, Rôle\"><table><thead><tr><th>Service / méthode</th><th>Permission</th><th>Rôle</th></tr></thead><tbody><tr><td><code>overcrow.host.capabilities(): Promise&lt;CapabilityMap&gt;</code></td><td>—</td><td>Indiquer la disponibilité et l’autorisation de chaque capacité.</td></tr><tr><td><a href=\"/docs/api-performance/\"><code>overcrow.telemetry</code></a></td><td><code>telemetry.read</code></td><td>CPU, mémoire et températures des capteurs de la machine.</td></tr><tr><td><a href=\"/docs/api-performance/\"><code>overcrow.fps</code></a></td><td><code>fps.read</code></td><td>Fréquence d’images et fraîcheur de la mesure.</td></tr><tr><td><a href=\"/docs/api-media/\"><code>overcrow.media</code></a></td><td><code>media.read</code> / <code>media.control</code></td><td>Informations du morceau / commandes de lecture.</td></tr><tr><td><a href=\"/docs/api-media/#artwork\"><code>overcrow.assets</code></a></td><td><code>media.read</code></td><td>Lire les illustrations dont le widget a reçu l’identifiant.</td></tr><tr><td><a href=\"/docs/api-presentation/\"><code>overcrow.presentation</code></a></td><td>—</td><td>Options natives et dimensions ; déclarer presentation dans le manifeste.</td></tr></tbody></table></div><p>Des services sont ajoutés au fil des mises à jour d’OverCrow. Cet index décrit le SDK actuel ; conservez <code>apiVersion: \"1\"</code> et gérez les services indisponibles ou non pris en charge. Chaque référence liée contient sa liste complète de méthodes et un exemple. Téléchargez les <a href=\"/docs/downloads/overcrow.d.ts\">définitions TypeScript</a> pour consulter tous les types.</p><h2 id=\"permissions\">Permissions et disponibilité</h2><p>Ajoutez uniquement les capacités nécessaires dans <code>permissions.capabilities</code> du <a href=\"/docs/manifeste/\">manifeste</a>. Les quatre noms du tableau forment la liste complète des capacités. OverCrow demande le consentement de l’utilisateur ; ajouter une permission exige un nouveau consentement.</p><p><code>host.capabilities()</code> renvoie les booléens <code>supported</code> et <code>granted</code> de chaque capacité. La prise en charge n’implique ni consentement ni données disponibles à cet instant. La présentation utilise sa déclaration dans le manifeste, sans nom de capacité.</p><h2 id=\"abonnements\">Lire une fois ou recevoir les mises à jour</h2><p><code>snapshot()</code> lit l’état une seule fois. Cette méthode renvoie une Promise : <code>await</code> attend cet unique résultat. Elle ne maintient pas ensuite votre affichage à jour.</p><p><code>onSnapshot(callback)</code> enregistre une fonction que le SDK appelle avec l’état courant, puis avec les changements suivants. Pour la télémétrie, les FPS, les médias et la présentation, la première lecture est automatique. <a href=\"/docs/api-jeu/#abonnement\">L’API du jeu diffère : elle n’envoie que les mises à jour futures.</a></p><p>Un callback est simplement votre fonction, transmise au SDK pour être exécutée plus tard. Dans <code>snapshot =&gt; { ... }</code>, <code>snapshot</code> nomme la valeur reçue et les accolades contiennent votre code. Cette syntaxe fléchée est une écriture courte d’une fonction JavaScript. La méthode renvoie une autre fonction : conservez-la sous le nom <code>stop</code>, puis appelez <code>stop()</code> pour arrêter l’abonnement à la fermeture de la vue ou du composant.</p><h2 id=\"disponibilite\">Résultat d’un snapshot</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Statut, Signification\"><table><thead><tr><th>Statut</th><th>Signification</th></tr></thead><tbody><tr><td><code>ready</code></td><td>Les données courantes sont présentes ; un champ peut rester null.</td></tr><tr><td><code>stale</code></td><td>Données anciennes, ou null ; afficher leur âge si disponible.</td></tr><tr><td><code>unavailable</code></td><td>Aucune source courante ; data vaut null.</td></tr><tr><td><code>unsupported</code></td><td>L’hôte ou la plateforme ne possède pas de source ; data vaut null.</td></tr><tr><td><code>permissionDenied</code></td><td>L’accès n’a pas été accordé ; data vaut null.</td></tr></tbody></table></div><p>Chaque <code>ServiceSnapshot&lt;T&gt;</code> contient <code>status</code>, <code>data</code>, un <code>contextId</code> opaque et une <code>revision</code> croissante positive ou nulle ; <code>sampleAgeMs</code> est facultatif. Distinguez une mesure absente de zéro. Ignorez un résultat asynchrone dont le contexte n’est plus courant.</p><p>Une lecture ponctuelle qui échoue rejette avec une erreur SDK. L’échec de la lecture initiale d’un abonnement transmet <code>unavailable</code> avec <code>data: null</code>, <code>contextId: null</code> et <code>revision: 0</code>. Des mises à jour peuvent être regroupées ; un abonnement n’est pas un historique d’événements. Le SDK autorise jusqu’à 128 abonnements actifs aux services et 32 actions en attente ; l’hôte peut appliquer des limites plus basses.</p><h2 id=\"confidentialite\">Autres outils du SDK</h2><p>Consultez <a href=\"/docs/api-jeu/\">contexte de jeu</a> · <a href=\"/docs/api-stockage/\">stockage du widget</a> · <a href=\"/docs/api-reseau/\">réseau</a> · <a href=\"/docs/api-runtime/\">cycle de vie et messages</a> · <a href=\"/docs/api-langue/\">langues</a> · <a href=\"/docs/api-presse-papiers/\">presse-papiers</a>.</p><p>Les notes intégrées, l’état du chronomètre, l’historique du journal et les comptes connectés ne sont pas exposés. Les <a href=\"/studio/\">exemples du Studio</a> utilisent des données fictives ; vérifiez les sources et les permissions réelles dans OverCrow.</p>"
+      }
+    ]
+  },
+  {
+    "key": "performance",
+    "slug": "api-performance",
+    "group": "sdk-reference",
+    "label": "Performances et FPS",
+    "title": "Performances et FPS",
+    "description": "Affichez les mesures disponibles du jeu avec leurs unités et leur ancienneté.",
+    "headings": [
+      {
+        "id": "methods",
+        "title": "Méthodes et signatures"
+      },
+      {
+        "id": "permissions",
+        "title": "Autorisations"
+      },
+      {
+        "id": "example",
+        "title": "Afficher une mesure en direct"
+      },
+      {
+        "id": "data-and-limits",
+        "title": "Unités et disponibilité"
+      }
+    ],
+    "blocks": [
+      {
+        "kind": "html",
+        "html": "<h2 id=\"methods\">Méthodes et signatures</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Méthode / signature, Rôle\"><table><thead><tr><th>Méthode / signature</th><th>Rôle</th></tr></thead><tbody><tr><td><code>overcrow.telemetry.snapshot(): Promise&lt;ServiceSnapshot&lt;TelemetryData&gt;&gt;</code></td><td>Lire les mesures courantes une seule fois.</td></tr><tr><td><code>overcrow.telemetry.onSnapshot(listener: (snapshot: ServiceSnapshot&lt;TelemetryData&gt;) =&gt; void): () =&gt; void</code></td><td>Recevoir les mesures courantes puis leurs mises à jour ; renvoyer une fonction de désabonnement.</td></tr><tr><td><code>overcrow.fps.snapshot(): Promise&lt;ServiceSnapshot&lt;FpsData&gt;&gt;</code></td><td>Lire les mesures courantes une seule fois.</td></tr><tr><td><code>overcrow.fps.onSnapshot(listener: (snapshot: ServiceSnapshot&lt;FpsData&gt;) =&gt; void): () =&gt; void</code></td><td>Recevoir les mesures courantes puis leurs mises à jour ; renvoyer une fonction de désabonnement.</td></tr></tbody></table></div>"
+      },
+      {
+        "kind": "html",
+        "html": "<p class=\"lead\">Créez un affichage compact des performances : le service telemetry fournit CPU, mémoire et températures, et le service FPS fournit la fréquence d’images. Une mesure absente ne vaut pas zéro.</p><h2 id=\"permissions\">Autorisations</h2><p>Fusionnez ces champs avec votre manifeste. Utilisez <code>telemetry.read</code> pour les mesures système et <code>fps.read</code> pour la fréquence d’images ; retirez toute autorisation inutile. Leur déclaration demande le consentement de l’utilisateur, sans garantir la disponibilité sur sa plateforme.</p>"
       },
       {
         "kind": "code",
         "language": "json",
-        "title": "manifest.json",
-        "source": "{\n  \"schemaVersion\": 1,\n  \"id\": \"com.example.stopwatch\",\n  \"version\": \"1.0.0\",\n  \"apiVersion\": \"2\",\n  \"entrypoints\": {\n    \"view\": \"index.html\"\n  },\n  \"permissions\": {\n    \"network\": [],\n    \"gameEvents\": [],\n    \"storage\": false,\n    \"clipboardWrite\": false,\n    \"capabilities\": [\n      \"stopwatch.read\",\n      \"stopwatch.control\"\n    ]\n  }\n}"
+        "title": "manifest.json (fragment)",
+        "source": "{\n  \"apiVersion\": \"1\",\n  \"permissions\": {\n    \"network\": [],\n    \"clipboardWrite\": false,\n    \"capabilities\": [\n      \"telemetry.read\",\n      \"fps.read\"\n    ]\n  }\n}"
       },
       {
         "kind": "html",
-        "html": "<p><code>telemetry.read · fps.read · stopwatch.read / stopwatch.control · media.read / media.control · notes.read / notes.write · playervox.score.read · playervox.rating.read / playervox.rating.write · playervox.reviews.read / playervox.followed.read · journal.local.read / journal.cloud.read / journal.notes.read / journal.notes.write / journal.delete · twitch.chat.read / twitch.chat.compose</code></p><h2 id=\"abonnements\">Lire et s’abonner</h2><p>Les nouveaux abonnements demandent immédiatement l’état courant, regroupent les changements et rejettent les anciennes révisions, y compris les réponses tardives d’un contexte remplacé. Désabonnez-vous à la fermeture. <code>game.onSnapshot</code> conserve son comportement v1 : événements futurs uniquement.</p>"
+        "html": "<h2 id=\"example\">Afficher une mesure en direct</h2><p><code>snapshot()</code> lit une seule fois ; utilisez <code>await</code> pour recevoir le résultat. <code>onSnapshot(callback)</code> reçoit l’état courant, puis les mises à jour. Le callback est votre fonction : dans <code>snapshot =&gt; { ... }</code>, <code>snapshot</code> est la valeur reçue et les accolades contiennent le code exécuté à chaque mise à jour. La fonction <code>stop()</code> renvoyée arrête l’abonnement. <a href=\"/docs/api-services/#abonnements\">Règles communes des snapshots</a>.</p><p>Ce module crée un affichage CPU. Placez <code>overcrow.js</code> à côté et chargez-le avec <code>&lt;script type=\"module\" src=\"./view.js\"&gt;&lt;/script&gt;</code>.</p>"
       },
       {
         "kind": "code",
-        "language": "js",
-        "title": "CPU",
-        "source": "const stop = overcrow.telemetry.onSnapshot(snapshot => {\n  const cpu = snapshot.data?.normalizedCpuPercentHundredths;\n  label.textContent = cpu == null ? snapshot.status : `${cpu / 100}%`;\n});\nwindow.addEventListener('pagehide', stop, {once: true});"
+        "language": "javascript",
+        "title": "view.js",
+        "source": "import overcrow from './overcrow.js';\nconst output = document.createElement('output');\ndocument.body.append(output);\nconst stop = overcrow.telemetry.onSnapshot(snapshot => {\n  const value = snapshot.data?.normalizedCpuPercentHundredths;\n  output.textContent = value == null ? 'CPU unavailable' : `${value / 100}% CPU`;\n  if (snapshot.status === 'stale') output.textContent += ' (stale)';\n});\nwindow.addEventListener('pagehide', stop, { once: true });"
       },
       {
         "kind": "html",
-        "html": "<h2 id=\"donnees\">Données, unités et périmètre</h2><table><thead><tr><th>Module</th><th>DTO</th></tr></thead><tbody><tr><td><code>telemetry</code></td><td><code>normalizedCpuPercentHundredths, residentBytes, cpuTemperatureMillicelsius, gpuTemperatureMillicelsius</code></td></tr><tr><td><code>fps</code></td><td><code>value, sampleAgeMs, stale</code></td></tr><tr><td><code>stopwatch</code></td><td><code>elapsedMs, running</code></td></tr><tr><td><code>media</code></td><td><code>title, artist, playbackState, artworkHandle, actions {previous, playPause, next}</code></td></tr><tr><td><code>notes</code></td><td><code>documentRevision, activeNoteId, saveState, notes [{id, title, body, items [{id, text, checked}]}]</code></td></tr><tr><td><code>playervox.score</code></td><td><code>name, score, ratingsCount, criteria {gameplay, art, tech}</code></td></tr><tr><td><code>playervox.rating</code></td><td><code>rating: null | {gameplayScore, artScore, techScore, averageScore, review}</code></td></tr><tr><td><code>playervox.reviews</code></td><td><code>page, totalPages, ratingsCount, followedOnly, reviews [{id, displayName, gameplayScore, artScore, techScore, averageScore, review, originalReview, translated, createdAt, hidden}]</code></td></tr><tr><td><code>journal</code></td><td><code>page, hasMore, nextCursor, previousCursor, sessions [{id, source, startedAt, endedAt, durationMs, interrupted, note}]</code></td></tr><tr><td><code>twitch.chat</code></td><td><code>connection, channelDisplayName, messages [{id, displayName, text, color, fragments, reply}]</code></td></tr><tr><td><code>presentation</code></td><td><code>sizingMode, width, height, options</code></td></tr></tbody></table><p>Le CPU est exprimé en centièmes de la capacité totale de la machine (0–10000), la mémoire résidente en octets, les capteurs de température de l’hôte en millièmes de degré Celsius et les durées/âges en millisecondes. Les notes sont sur 100. Linux mesure le groupe Steam sélectionné ou les descendants du processus manuel ; Windows mesure le processus cible validé. Ces périmètres diffèrent. Wayland natif n’a pas de source FPS actuelle ; la température CPU Windows est indisponible et ses FPS nécessitent le service de capture validé. Le champ CPU brut de l’API v1 reste inchangé.</p><p>Les notes natives sont limitées à 8 notes et 64 éléments de checklist par note. Les pages contiennent 3 avis ou 5 sessions, et le chat au maximum 200 messages. Affichez le contenu utilisateur comme du texte, respectez les indicateurs de modération, remplacez la liste du chat lors des suppressions/réinitialisations et conservez la provenance locale/cloud du journal.</p>"
+        "html": "<h2 id=\"data-and-limits\">Unités et disponibilité</h2><table><thead><tr><th>Champ</th><th>Signification</th></tr></thead><tbody><tr><td><code>normalizedCpuPercentHundredths</code></td><td>0–10000 ; divisez par 100 pour obtenir le pourcentage de la capacité CPU totale.</td></tr><tr><td><code>residentBytes</code></td><td>Octets ; divisez par 1048576 pour obtenir des Mio.</td></tr><tr><td><code>cpuTemperatureMillicelsius</code>, <code>gpuTemperatureMillicelsius</code></td><td>Températures des capteurs de la machine ; divisez par 1000 pour obtenir des °C.</td></tr><tr><td>FPS <code>value</code>, <code>sampleAgeMs</code>, <code>stale</code></td><td>Fréquence d’images, âge de la mesure en millisecondes et ancienneté.</td></tr></tbody></table><p>Toute mesure peut être null, même si le service est <code>ready</code>. Signalez une valeur ancienne et son âge ; un âge absent reste inconnu. Un service <code>unsupported</code> n’a pas de source sur cet hôte.</p><p>Sous Linux, CPU et mémoire couvrent le groupe de processus Steam sélectionné ou les descendants du processus choisi manuellement. Windows utilise le processus cible validé. Les températures viennent des capteurs de la machine, pas du processus du jeu. La température CPU est indisponible sous Windows ; les FPS nécessitent le service de capture validé. Wayland natif n’a actuellement aucune source FPS.</p><p>Les mesures système nécessitent <code>telemetry.read</code> ; le snapshot du jeu contient uniquement le contexte de la session. Les mesures de l’aperçu navigateur sont fictives et les FPS y sont unsupported par défaut.</p><p>Consultez les <a href=\"/docs/api-services/#disponibilite\">règles communes aux services</a>, les <a href=\"/docs/downloads/overcrow.d.ts\">définitions TypeScript complètes</a> et les <a href=\"/docs/exemples/#references\">widgets de référence complets</a>.</p>"
+      }
+    ]
+  },
+  {
+    "key": "media",
+    "slug": "api-media",
+    "group": "sdk-reference",
+    "label": "Média",
+    "title": "Lecture multimédia",
+    "description": "Lisez les informations du média natif et utilisez les commandes proposées par le lecteur.",
+    "headings": [
+      {
+        "id": "methods",
+        "title": "Méthodes et signatures"
+      },
+      {
+        "id": "permissions",
+        "title": "Autorisations"
+      },
+      {
+        "id": "example",
+        "title": "Afficher et contrôler la lecture"
+      },
+      {
+        "id": "next-steps",
+        "title": "Informations et commandes"
+      },
+      {
+        "id": "artwork",
+        "title": "Illustrations et stockage"
+      }
+    ],
+    "blocks": [
+      {
+        "kind": "html",
+        "html": "<h2 id=\"methods\">Méthodes et signatures</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Méthode / signature, Rôle\"><table><thead><tr><th>Méthode / signature</th><th>Rôle</th></tr></thead><tbody><tr><td><code>overcrow.media.snapshot(): Promise&lt;ServiceSnapshot&lt;MediaData&gt;&gt;</code></td><td>Lire le morceau courant une seule fois.</td></tr><tr><td><code>overcrow.media.onSnapshot(listener: (snapshot: ServiceSnapshot&lt;MediaData&gt;) =&gt; void): () =&gt; void</code></td><td>Recevoir l’état de lecture courant puis ses mises à jour ; renvoyer une fonction de désabonnement.</td></tr><tr><td><code>overcrow.media.previous(): Promise&lt;ActionResult&gt;</code></td><td>Demander le morceau précédent.</td></tr><tr><td><code>overcrow.media.playPause(): Promise&lt;ActionResult&gt;</code></td><td>Demander la lecture ou la pause.</td></tr><tr><td><code>overcrow.media.next(): Promise&lt;ActionResult&gt;</code></td><td>Demander le morceau suivant.</td></tr><tr><td><code>overcrow.assets.read(handle: string): Promise&lt;Blob&gt;</code></td><td>Lire une illustration reçue sous forme de Blob PNG.</td></tr></tbody></table></div>"
       },
       {
         "kind": "html",
-        "html": "<h2 id=\"actions\">Actions natives nommées</h2><p>Les actions renvoient <code>{status, revision?}</code> : accepted, cancelled, persisted, conflict ou failed. Accepted signifie ouvert/en file, pas enregistré ou publié. Les notes exposent notamment saving/persisted/conflict/failed ; conservez les brouillons jusqu’à confirmation durable. L’hôte revérifie le geste, le jeu actif, la révision attendue et le contexte du compte. Ne rejouez pas automatiquement une mutation incertaine.</p>"
-      },
-      {
-        "kind": "code",
-        "language": "js",
-        "title": "Actions",
-        "source": "await overcrow.stopwatch.start(); // pause(), reset()\nawait overcrow.media.playPause(); // previous(), next()\nconst notes = await overcrow.notes.snapshot();\nif (notes.status === 'ready') {\n  await overcrow.notes.requestCreate({expectedRevision: notes.data.documentRevision});\n}\n// requestEdit/requestDelete/select({noteId, expectedRevision})\n// setChecked({noteId, itemId, checked, expectedRevision})\nawait overcrow.playervox.requestConnect();\n// rating.requestEdit({expectedRevision: ratingSnapshot.revision})\nawait overcrow.playervox.reviews.page({page: 1, followedOnly: false});\nawait overcrow.journal.page({cursor: null});\n// journal.requestEditNote/requestDelete({sessionId, expectedRevision})\nawait overcrow.twitch.chat.requestCompose({replyTo: 'native-message-id'});"
-      },
-      {
-        "kind": "html",
-        "html": "<p>Les actions de notes utilisent documentRevision ; les intentions sur notes PlayerVox et journal utilisent la révision de leur enveloppe. La sélection nécessite notes.read et l’écriture notes.write. Les avis acceptent les pages 1–1000 ; le filtre des joueurs suivis nécessite sa capacité dédiée. Les curseurs du journal sont opaques ; null ouvre la première page. Les données paginées arrivent par les snapshots. Limites : 128 abonnements et 32 actions en attente. Gérez les codes stables capability_denied, permission_denied, stale_context, unsupported_operation, unavailable, conflict et rate_limited ; retryAfterMs est en millisecondes.</p><h2 id=\"presentation\">Dimensions et options</h2><p>presentation.sizing déclare le mode intrinsic, autoHeight ou manual et les dimensions entières preferred/min/max. Un widget compact n’a pas de poignée ; autoHeight garde un réglage horizontal ; manual règle les deux axes. Déclarez au maximum 16 options natives boolean, enum ou number borné, avec libellés EN/FR. Les valeurs sont dans presentation.data.options ; le widget n’a pas de setter. Le conteneur natif garde la position, la fermeture, le déplacement, l’opacité, l’échelle, la visibilité passive et les entrées.</p>"
-      },
-      {
-        "kind": "code",
-        "language": "js",
-        "title": "Content size / Dimensions",
-        "source": "await overcrow.presentation.reportSize({\n  width: Math.ceil(content.scrollWidth),\n  height: Math.ceil(content.scrollHeight),\n});\n// View only; integers 1–4096. Coalesce ResizeObserver reports.\n// Report unscaled CSS layout dimensions, never scaled client bounds."
-      },
-      {
-        "kind": "html",
-        "html": "<h2 id=\"confidentialite\">Données privées et Twitch</h2><p>Les capacités sensibles ne peuvent pas être combinées à un accès réseau contrôlé par le widget ou au presse-papiers brut, même pour une URL autorisée. Les jetons, identifiants secrets, routes privées et clients de compte restent natifs. La révocation/perte du contexte efface les surfaces natives ; passer d’un accès privé au réseau nécessite la destruction des runtimes et le nettoyage du stockage. L’aperçu navigateur ne prouve pas ces garanties de sécurité.</p><p>Les actions Twitch requestConnect() et requestChooseChannel() ouvrent l’interface native. Tous les utilisateurs connectent Twitch via le même parcours OAuth natif. Les widgets intégrés et personnalisés utilisent cette connexion partagée. La connexion initiale demande <code>user:read:chat</code> et <code>user:write:chat</code> ensemble ; une connexion existante autorisée pour les deux est réutilisée. L’ouverture du composeur ne nécessite pas de demande d’autorisation supplémentaire.</p><p>Les autorisations OAuth Twitch restent distinctes des capacités accordées au widget : un widget limité à <code>twitch.chat.read</code> ne peut pas composer. <code>requestCompose({replyTo?})</code> nécessite <code>twitch.chat.compose</code> et ouvre le composeur natif, où l’utilisateur saisit et confirme le texte. Les jetons restent natifs. Aucun corps prérempli, send(text) libre, flux OAuth ou socket Twitch direct n’est exposé aux widgets. Les illustrations/emotes utilisent des identifiants opaques : assets.read(handle) renvoie un Blob PNG local, au maximum 512 Kio. Révoquez les URL objet après usage et ne les remplacez pas par des URL externes.</p><h2 id=\"simulation\">Aperçu et références</h2><p>Le kit signale toutes les fixtures comme fictives. Il ne se connecte ni aux appareils, ni à l’API privée PlayerVox, ni à Twitch. Les commandes chronomètre/média/checklist modifient seulement la mémoire de l’aperçu. Les intentions de connexion/édition/suppression/composition natives renvoient cancelled ; testez leur véritable interface dans OverCrow. Les FPS sont unsupported par défaut. Une session inactive masque les données ; un rechargement/changement de contexte invalide les anciennes réponses.</p><p>Les capacités sensibles imposent un stockage navigateur éphémère, même si <code>storage</code> est déclaré. Un changement de runtime, de session ou de compte efface ces données du navigateur ; les notes et les préférences natives restent dans leurs propres espaces de stockage. Un contexte natif ne peut pas conserver le stockage du navigateur lors du passage entre capacités sensibles et non sensibles.</p>"
+        "html": "<p class=\"lead\">Affichez le morceau fourni par le service média natif et proposez des commandes de lecture. Les boutons disponibles dépendent des fonctions prises en charge par le lecteur courant.</p><h2 id=\"permissions\">Autorisations</h2><p>Fusionnez ces champs avec votre manifeste. <code>media.read</code> lit les informations du morceau ; <code>media.control</code> autorise les commandes. Pour un simple affichage, retirez cette seconde autorisation. Ces autorisations sensibles exigent une liste réseau vide et <code>clipboardWrite: false</code>.</p>"
       },
       {
         "kind": "code",
         "language": "json",
-        "title": "preview.json",
-        "source": "{\n  \"services\": {\n    \"snapshots\": {\n      \"fps\": {\n        \"status\": \"stale\",\n        \"sampleAgeMs\": 3000,\n        \"data\": {\n          \"value\": 60,\n          \"sampleAgeMs\": 3000,\n          \"stale\": true\n        }\n      }\n    }\n  }\n}"
+        "title": "manifest.json (fragment)",
+        "source": "{\n  \"apiVersion\": \"1\",\n  \"permissions\": {\n    \"network\": [],\n    \"clipboardWrite\": false,\n    \"capabilities\": [\n      \"media.read\",\n      \"media.control\"\n    ]\n  }\n}"
       },
       {
         "kind": "html",
-        "html": "<p>Références utilisant uniquement le SDK : <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/session.zip\">session</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/clock.zip\">clock</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/performance.zip\">performance</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/fps.zip\">fps</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/stopwatch.zip\">stopwatch</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/media.zip\">media</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/notes.zip\">notes</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/score.zip\">score</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/rating.zip\">rating</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/reviews.zip\">reviews</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/journal.zip\">journal</a> · <a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/twitch.zip\">twitch</a>.</p><p>Créez un projet avec <code>node overcrow.mjs init mes-notes --template notes</code>. Les modèles blank/counter/checklist restent en API v1. Les références montrent les contrats et les états indisponibles/refusés ; elles ne prouvent pas une validation native sur chaque plateforme.</p><h2 id=\"migration\">Migrer depuis l’API v1</h2><ol><li>Remplacez ensemble JavaScript et déclarations par le SDK 1.2.0 et conservez les notices MIT.</li><li>Gardez apiVersion \"1\" pour un widget exclusivement v1, ou adoptez explicitement \"2\" avec les capacités nécessaires et le schéma de présentation.</li><li>Vérifiez les états/capacités et gérez les anciens hôtes unsupported. Ne réinterprétez pas game.cpuPercentHundredths comme le CPU normalisé.</li><li>Conservez la logique future uniquement de game.onSnapshot ; le nouvel onSnapshot de service demande déjà sa valeur initiale.</li><li>Retirez les droits réseau incompatibles avant de demander des données privées, régénérez le registre du paquet et obtenez le consentement natif.</li></ol><p><a href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/content/sdk/overcrow.d.ts\">DTO et signatures TypeScript complets</a>.</p>"
+        "html": "<h2 id=\"example\">Afficher et contrôler la lecture</h2><p><code>snapshot()</code> lit une seule fois ; utilisez <code>await</code> pour recevoir le résultat. <code>onSnapshot(callback)</code> reçoit l’état courant, puis les mises à jour. Le callback est votre fonction : dans <code>snapshot =&gt; { ... }</code>, <code>snapshot</code> est la valeur reçue et les accolades contiennent le code exécuté à chaque mise à jour. La fonction <code>stop()</code> renvoyée arrête l’abonnement. <a href=\"/docs/api-services/#abonnements\">Règles communes des snapshots</a>.</p><p>Ce module crée un titre et un bouton. Les commandes exigent un snapshot à jour et un clic dans une vue interactive.</p>"
+      },
+      {
+        "kind": "code",
+        "language": "javascript",
+        "title": "view.js",
+        "source": "import overcrow from './overcrow.js';\nconst title = document.createElement('p');\nconst play = document.createElement('button');\nplay.textContent = 'Play / pause';\nplay.disabled = true;\ndocument.body.append(title, play);\nconst stop = overcrow.media.onSnapshot(snapshot => {\n  title.textContent = snapshot.data?.title ?? 'No track';\n  if (snapshot.status === 'stale') title.textContent += ' (stale)';\n  play.disabled = snapshot.status !== 'ready' || !snapshot.data?.actions.playPause;\n});\nplay.addEventListener('click', async () => {\n  try { await overcrow.media.playPause(); }\n  catch (error) { title.textContent = error.code ?? 'Playback unavailable'; }\n});\nwindow.addEventListener('pagehide', stop, { once: true });"
+      },
+      {
+        "kind": "html",
+        "html": "<h2 id=\"next-steps\">Informations et commandes</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Champ / type, Signification\"><table><thead><tr><th>Champ / type</th><th>Signification</th></tr></thead><tbody><tr><td><code>title: string | null</code></td><td>Titre du morceau.</td></tr><tr><td><code>artist: string | null</code></td><td>Nom de l’artiste.</td></tr><tr><td><code>playbackState: &#x27;playing&#x27; | &#x27;paused&#x27; | &#x27;stopped&#x27;</code></td><td>État de lecture courant.</td></tr><tr><td><code>artworkHandle: string | null</code></td><td>Identifiant opaque pour assets.read ; jamais une URL.</td></tr><tr><td><code>actions: { previous: boolean; playPause: boolean; next: boolean }</code></td><td>Actions proposées par le lecteur courant ; la permission de contrôle reste nécessaire.</td></tr></tbody></table></div><p>Appelez les commandes directement depuis le gestionnaire du clic. L’hôte vérifie la permission de contrôle et un geste utilisateur bref à usage unique. <code>ActionResult</code> vaut <code>{ status: \"accepted\" }</code> : la commande a été mise en attente. Le snapshot média suivant indique l’état obtenu ; gérez les échecs tels que <code>permission_denied</code>, <code>unsupported_operation</code>, <code>stale_context</code> ou <code>busy</code>.</p><h2 id=\"artwork\">Illustrations et stockage</h2><p>Passez à <code>assets.read</code> uniquement un identifiant fourni à ce widget par le service média. Le PNG renvoyé ne dépasse pas 512 Kio. Affichez-le avec <code>URL.createObjectURL(blob)</code> et révoquez l’URL au remplacement ou à la fermeture. Ignorez une lecture tardive si le morceau ou le contexte a changé.</p><p>Chaque permission média exige une liste réseau vide et <code>clipboardWrite: false</code>, et impose un <a href=\"/docs/api-stockage/\">stockage temporaire</a> même avec <code>storage: true</code>. Les options natives restent gérées par l’hôte. Les commandes du Studio modifient uniquement des données fictives.</p>"
+      }
+    ]
+  },
+  {
+    "key": "presentation",
+    "slug": "api-presentation",
+    "group": "sdk-reference",
+    "label": "Options et taille",
+    "title": "Options et dimensions du widget",
+    "description": "Déclarez les réglages natifs et adaptez le cadre au contenu du widget.",
+    "blocks": [
+      {
+        "kind": "html",
+        "html": "<h2 id=\"methods\">Méthodes et signatures</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Méthode / signature, Rôle\"><table><thead><tr><th>Méthode / signature</th><th>Rôle</th></tr></thead><tbody><tr><td><code>overcrow.presentation.snapshot(): Promise&lt;ServiceSnapshot&lt;PresentationData&gt;&gt;</code></td><td>Lire les dimensions et les valeurs des options natives une seule fois.</td></tr><tr><td><code>overcrow.presentation.onSnapshot(listener: (snapshot: ServiceSnapshot&lt;PresentationData&gt;) =&gt; void): () =&gt; void</code></td><td>Recevoir les réglages courants puis leurs changements ; renvoyer une fonction de désabonnement.</td></tr><tr><td><code>overcrow.presentation.reportSize(parameters: { readonly width: number; readonly height: number }): Promise&lt;ActionResult&gt;</code></td><td>Signaler la taille du contenu non zoomé depuis une vue ; l’hôte choisit la taille finale du cadre.</td></tr></tbody></table></div>"
+      },
+      {
+        "kind": "html",
+        "html": "<h2 id=\"declaration\">Déclarer les options et les limites</h2><p>Fusionnez cet objet <code>presentation</code> avec votre manifeste. Aucune permission de capacité n’est nécessaire. Conservez <code>apiVersion: \"1\"</code>. L’exemple ajoute une case Compact dans les réglages du widget d’OverCrow.</p>"
+      },
+      {
+        "kind": "code",
+        "language": "json",
+        "title": "manifest.json · champs à fusionner",
+        "source": "{\n  \"presentation\": {\n    \"sizing\": {\n      \"mode\": \"intrinsic\",\n      \"preferred\": { \"width\": 240, \"height\": 80 },\n      \"min\": { \"width\": 80, \"height\": 24 },\n      \"max\": { \"width\": 480, \"height\": 320 }\n    },\n    \"options\": [{\n      \"id\": \"compact\",\n      \"type\": \"boolean\",\n      \"label\": { \"en\": \"Compact\", \"fr\": \"Compact\" },\n      \"default\": false\n    }]\n  }\n}"
+      },
+      {
+        "kind": "html",
+        "html": "<h2 id=\"sizing\">Choisir un mode de taille</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"presentation.sizing.mode, Comportement\"><table><thead><tr><th>presentation.sizing.mode</th><th>Comportement</th></tr></thead><tbody><tr><td><code>intrinsic</code></td><td>Le contenu détermine les deux dimensions. L’utilisateur ne redimensionne pas le cadre par glissement.</td></tr><tr><td><code>autoHeight</code></td><td>L’utilisateur règle la largeur ; le contenu détermine la hauteur.</td></tr><tr><td><code>manual</code></td><td>L’utilisateur règle les deux dimensions. Les tailles signalées par le contenu ne remplacent pas ce choix.</td></tr></tbody></table></div><p>Chaque objet <code>preferred</code>, <code>min</code> et <code>max</code> exige des entiers <code>width</code> et <code>height</code> entre 1 et 4096, avec <code>min ≤ preferred ≤ max</code> sur chaque axe. <code>preferred</code> fournit la taille initiale et la valeur utilisée avant la mesure du contenu.</p><p>L’hôte applique une fois le zoom de l’utilisateur, puis limite le résultat aux bornes déclarées et à la zone disponible dans l’overlay. Une taille signalée est une indication, pas une garantie de dimensions exactes. Gardez une interface utilisable à la taille maximale, avec retour à la ligne ou défilement si nécessaire. La position, l’opacité, le zoom et la visibilité passive restent des réglages natifs.</p><h2 id=\"updates\">Appliquer les options et adapter le cadre</h2><p><code>snapshot()</code> lit une seule fois ; utilisez <code>await</code> pour recevoir le résultat. <code>onSnapshot(callback)</code> reçoit l’état courant, puis les mises à jour. Le callback est votre fonction : dans <code>snapshot =&gt; { ... }</code>, <code>snapshot</code> est la valeur reçue et les accolades contiennent le code exécuté à chaque mise à jour. La fonction <code>stop()</code> renvoyée arrête l’abonnement. <a href=\"/docs/api-services/#abonnements\">Règles communes des snapshots</a>.</p><p>La vue suivante observe son contenu, signale ses dimensions CSS non zoomées et applique l’option Compact. Mesurez le contenu, pas la fenêtre ni un cadre déjà zoomé. Placez ce module à côté d’<code>overcrow.js</code>.</p>"
+      },
+      {
+        "kind": "code",
+        "language": "javascript",
+        "title": "view.js",
+        "source": "import overcrow from './overcrow.js';\nconst content = document.createElement('div');\ncontent.textContent = 'Ready';\ncontent.style.cssText = 'display: inline-block; padding: 12px';\ndocument.body.style.margin = '0';\ndocument.body.append(content);\nconst observer = new ResizeObserver(() => {\n  const width = Math.max(1, Math.min(4096, Math.ceil(content.offsetWidth)));\n  const height = Math.max(1, Math.min(4096, Math.ceil(content.offsetHeight)));\n  overcrow.presentation.reportSize({ width, height }).catch(console.error);\n});\nobserver.observe(content);\nconst stop = overcrow.presentation.onSnapshot(snapshot => {\n  if (snapshot.status !== 'ready') return;\n  content.style.padding = snapshot.data.options.compact ? '4px' : '12px';\n});\nwindow.addEventListener('pagehide', () => {\n  stop();\n  observer.disconnect();\n}, { once: true });"
+      },
+      {
+        "kind": "html",
+        "html": "<p>Sans <code>presentation</code> dans le manifeste, ce service indique <code>unsupported</code>. <code>reportSize</code> exige une vue et cette déclaration. Un contrôleur rejette avec <code>role_denied</code> ; des dimensions hors de 1–4096 rejettent avec <code>invalid_request</code>. Le succès renvoie <code>{ status: \"accepted\" }</code>. Signalez les vrais changements de contenu, sans boucle continue ; l’hôte regroupe les signalements répétés.</p><h2 id=\"data\">Lire les réglages et leurs changements</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Champ de PresentationData, Signification\"><table><thead><tr><th>Champ de PresentationData</th><th>Signification</th></tr></thead><tbody><tr><td><code>sizingMode: &#x27;intrinsic&#x27; | &#x27;autoHeight&#x27; | &#x27;manual&#x27;</code></td><td>Mode de taille courant.</td></tr><tr><td><code>width: number</code>, <code>height: number</code></td><td>Dimensions logiques courantes fournies par l’hôte.</td></tr><tr><td><code>options: Readonly&lt;Record&lt;string, boolean | number | string&gt;&gt;</code></td><td>Valeurs des options natives, indexées par les identifiants du manifeste.</td></tr></tbody></table></div><p>OverCrow fournit les valeurs par défaut et les choix enregistrés encore valides de l’utilisateur. Un changement de réglage ou de taille arrive par le même abonnement <code>presentation.onSnapshot</code>. Lisez les options dans <code>snapshot.data.options</code> après avoir vérifié le statut. Le SDK n’a ni méthode pour modifier ces options ni événement distinct de changement d’option. Utilisez le <a href=\"/docs/api-stockage/\">stockage du widget</a> pour les données de votre propre interface.</p><h2 id=\"options\">Types et limites des options</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Type, Champs requis\"><table><thead><tr><th>Type</th><th>Champs requis</th></tr></thead><tbody><tr><td><code>boolean</code></td><td><code>default: true</code> / <code>false</code>.</td></tr><tr><td><code>enum</code></td><td><code>default</code>, <code>choices: [{ value, label: { en, fr } }]</code>. 2 à 16 choix uniques ; default doit correspondre à l’un d’eux.</td></tr><tr><td><code>number</code></td><td><code>default</code>, <code>min</code>, <code>max</code>, <code>step</code>. Nombres finis entre −1 000 000 et 1 000 000 ; min &lt; max, min ≤ default ≤ max et 0 &lt; step ≤ max − min. Step règle l’incrément de l’interface, pas la divisibilité de la valeur enregistrée.</td></tr></tbody></table></div><p>Déclarez au maximum 16 options. Chacune exige <code>id</code>, <code>type</code>, <code>label: { en, fr }</code> et <code>default</code>. Les identifiants et les valeurs enum contiennent 1 à 48 caractères ASCII, commencent par une lettre minuscule puis utilisent lettres, chiffres, <code>_</code> ou <code>-</code> ; les identifiants des options sont uniques. Les libellés sont du texte simple de 1 à 80 caractères, sans espaces aux extrémités ni caractères de contrôle. <code>options</code> peut être omis ; si <code>presentation</code> est présent, <code>sizing</code> est obligatoire.</p>"
+      }
+    ],
+    "headings": [
+      {
+        "id": "methods",
+        "title": "Méthodes et signatures"
+      },
+      {
+        "id": "declaration",
+        "title": "Déclarer les options et les limites"
+      },
+      {
+        "id": "sizing",
+        "title": "Choisir un mode de taille"
+      },
+      {
+        "id": "updates",
+        "title": "Appliquer les options et adapter le cadre"
+      },
+      {
+        "id": "data",
+        "title": "Lire les réglages et leurs changements"
+      },
+      {
+        "id": "options",
+        "title": "Types et limites des options"
       }
     ]
   },
@@ -683,71 +789,79 @@
     "key": "runtime",
     "slug": "api-runtime",
     "group": "sdk-reference",
-    "label": "Vue, contrôleur et cycle de vie",
-    "title": "Vue, contrôleur et cycle de vie",
-    "description": "Échanger de l’état et réagir à la visibilité.",
+    "label": "Cycle de vie",
+    "title": "Cycle de vie et messages",
+    "description": "Conservez l’état dans un contrôleur et réagissez au masquage du widget.",
     "headings": [
       {
+        "id": "methods",
+        "title": "Méthodes et signatures"
+      },
+      {
         "id": "roles",
-        "title": "Connaître le rôle courant"
+        "title": "Vue ou contrôleur"
       },
       {
         "id": "relais",
-        "title": "Un protocole de synchronisation minimal"
+        "title": "Partager un compteur"
       },
       {
         "id": "visibilite",
-        "title": "Visibilité"
+        "title": "Suspendre le travail masqué"
       },
       {
         "id": "surface",
-        "title": "Demander une nouvelle capture"
+        "title": "Demander une capture"
       }
     ],
     "blocks": [
       {
         "kind": "html",
-        "html": "\n<h2 id=\"roles\">Connaître le rôle courant</h2>"
-      },
-      {
-        "kind": "code",
-        "language": "js",
-        "title": "Rôle déterminé au chargement du SDK",
-        "source": "overcrow.runtime.role; // 'view', 'controller' or 'unavailable'"
+        "html": "<h2 id=\"methods\">Méthodes et signatures</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Méthode / signature, Rôle\"><table><thead><tr><th>Méthode / signature</th><th>Rôle</th></tr></thead><tbody><tr><td><code>overcrow.runtime.role: &#x27;controller&#x27; | &#x27;view&#x27; | &#x27;unavailable&#x27;</code></td><td>Rôle en lecture seule, fixé au chargement du SDK.</td></tr><tr><td><code>overcrow.runtime.send(payload: CloneableJson): Promise&lt;void&gt;</code></td><td>Envoyer du JSON à l’autre rôle du même widget.</td></tr><tr><td><code>overcrow.runtime.onMessage(listener: (payload: CloneableJson) =&gt; void): () =&gt; void</code></td><td>Écouter les futurs messages ; renvoyer une fonction de désabonnement.</td></tr><tr><td><code>overcrow.lifecycle.onVisibility(listener: (visible: boolean) =&gt; void): () =&gt; void</code></td><td>Suivre les changements de visibilité ; renvoyer une fonction de désabonnement.</td></tr><tr><td><code>overcrow.surface.invalidate(): Promise&lt;void&gt;</code></td><td>Demander un rafraîchissement de la surface.</td></tr></tbody></table></div>"
       },
       {
         "kind": "html",
-        "html": "\n<p>Ajoutez <code>\"controller\": \"controller.html\"</code> à <code>entrypoints</code> pour créer un contrôleur. Chaque document importe le SDK. Hors du runtime, le rôle vaut unavailable et les appels natifs rejettent.</p>\n<h2 id=\"relais\">Un protocole de synchronisation minimal</h2>"
-      },
-      {
-        "kind": "code",
-        "language": "js",
-        "title": "Contrôleur · état en mémoire",
-        "source": "import overcrow from './overcrow.js';\nconst state = { count: 0 };\novercrow.runtime.onMessage(async message => {\n  if (!message || typeof message !== 'object') return;\n  if (message.type === 'increment') state.count += 1;\n  if (message.type === 'hello' || message.type === 'increment') {\n    await overcrow.runtime.send({ type: 'state', count: state.count });\n  }\n});"
+        "html": "<h2 id=\"roles\">Vue ou contrôleur</h2>"
       },
       {
         "kind": "html",
-        "html": "\n"
+        "html": "<p>Ajoutez <code>\"controller\": \"controller.html\"</code> dans <code>entrypoints</code> pour un contrôleur facultatif. Les deux documents importent le SDK. Un navigateur simple indique <code>unavailable</code>; les appels natifs sont rejetés.</p>\n<h2 id=\"relais\">Partager un compteur</h2>\n<p>Le contrôleur conserve le compteur. Une nouvelle vue envoie <code>hello</code> pour recevoir sa valeur courante.</p><p>Chaque écouteur est un callback : une fonction appelée plus tard avec la valeur reçue. Dans <code>message =&gt; { ... }</code>, <code>message</code> est son paramètre. Conservez la fonction de désabonnement renvoyée et appelez-la au retrait du composant.</p>"
       },
       {
         "kind": "code",
-        "language": "js",
-        "title": "Vue · resynchronisation après remplacement",
-        "source": "import overcrow from './overcrow.js';\novercrow.runtime.onMessage(message => {\n  if (message?.type !== 'state' || !Number.isSafeInteger(message.count)) return;\n  document.querySelector('#count').textContent = String(message.count);\n});\nawait overcrow.runtime.send({ type: 'hello' });\ndocument.querySelector('#increment').addEventListener('click', () => {\n  overcrow.runtime.send({ type: 'increment' }).catch(console.error);\n});"
+        "language": "javascript",
+        "title": "controller.js",
+        "source": "import overcrow from './overcrow.js';\nconst state = { count: 0 };\nconst stop = overcrow.runtime.onMessage(async message => {\n  if (!message || typeof message !== 'object') return;\n  if (message.type === 'increment') state.count += 1;\n  if (message.type === 'hello' || message.type === 'increment') {\n    await overcrow.runtime.send({ type: 'state', count: state.count });\n  }\n});\nwindow.addEventListener('pagehide', stop, { once: true });"
       },
       {
         "kind": "html",
-        "html": "\n<p><code>send</code> cible l’autre rôle. Les messages doivent être du JSON simple : pas de fonctions, cycles, Date, Map, undefined ou nombres non finis. Une promesse résolue n’est pas un accusé de traitement métier : ajoutez un identifiant et une réponse si votre protocole en a besoin. Le désabonnement est renvoyé par <code>onMessage</code>.</p>\n<h2 id=\"visibilite\">Visibilité</h2>"
+        "html": "<p>Abonnez la vue avant d’envoyer le premier message :</p><p>Ajoutez ce contenu dans le <code>index.html</code> de la vue avant de charger le module :</p>"
       },
       {
         "kind": "code",
-        "language": "js",
-        "title": "Notification de visibilité",
-        "source": "const stop = overcrow.lifecycle.onVisibility(visible => {\n  document.body.dataset.visible = String(visible);\n  // Pause animations or work that is no longer needed.\n});"
+        "language": "html",
+        "title": "index.html",
+        "source": "<p id=\"count\">0</p>\n<button id=\"increment\">+1</button>"
+      },
+      {
+        "kind": "code",
+        "language": "javascript",
+        "title": "view.js",
+        "source": "import overcrow from './overcrow.js';\nconst stop = overcrow.runtime.onMessage(message => {\n  if (message?.type !== 'state' || !Number.isSafeInteger(message.count)) return;\n  document.querySelector('#count').textContent = String(message.count);\n});\nawait overcrow.runtime.send({ type: 'hello' });\ndocument.querySelector('#increment').addEventListener('click', () => {\n  overcrow.runtime.send({ type: 'increment' }).catch(console.error);\n});\nwindow.addEventListener('pagehide', stop, { once: true });"
       },
       {
         "kind": "html",
-        "html": "\n<p>Masquer une vue n’arrête pas forcément son contrôleur. Conservez les opérations utiles et évitez les timers de rafraîchissement sans besoin.</p>\n<h2 id=\"surface\">Demander une nouvelle capture</h2><p><code>await overcrow.surface.invalidate()</code> signale qu’une surface doit être rafraîchie. Ce n’est ni un moteur de rendu ni une boucle d’animation. Le runtime observe déjà les changements de la page ; ne l’appelez pas continuellement pour un widget statique.</p>"
+        "html": "<p><code>send</code> cible l’autre rôle. <code>onMessage</code> renvoie une fonction de désabonnement. Pour confirmer le traitement d’un message, ajoutez un identifiant de requête et envoyez une réponse ; la promesse de <code>send</code> seule ne confirme ni le traitement ni la sauvegarde.</p>\n<p>Les messages doivent être du JSON simple, limité à 1 Mio et 64 niveaux. Fonctions, cycles, Date, Map, undefined et nombres non finis sont rejetés.</p>\n<h2 id=\"visibilite\">Suspendre le travail masqué</h2>"
+      },
+      {
+        "kind": "code",
+        "language": "javascript",
+        "title": "Changements de visibilité",
+        "source": "import overcrow from './overcrow.js';\nconst stop = overcrow.lifecycle.onVisibility(visible => {\n  document.body.dataset.visible = String(visible);\n  // Pause animations or unnecessary work while hidden.\n});\nwindow.addEventListener('pagehide', stop, { once: true });"
+      },
+      {
+        "kind": "html",
+        "html": "<p>Une vue masquée peut garder un contrôleur actif. Conservez les opérations nécessaires et suspendez les timers ou animations inutiles.</p>\n<h2 id=\"surface\">Demander une capture</h2>\n<p><code>await overcrow.surface.invalidate()</code> demande à OverCrow de rafraîchir la surface. Le runtime observe déjà les changements de page ; réservez cet appel à un rafraîchissement nécessaire plutôt qu’à une boucle continue.</p>"
       }
     ]
   },
@@ -755,51 +869,69 @@
     "key": "storage",
     "slug": "api-stockage",
     "group": "sdk-reference",
-    "label": "Stockage et état persistant",
-    "title": "Stockage et état persistant",
-    "description": "Utilisez les API du navigateur dans la partition privée du widget.",
+    "label": "Stockage",
+    "title": "Stockage du widget",
+    "description": "Lisez, enregistrez et supprimez vos données JSON locales avec overcrow.storage.",
     "headings": [
       {
+        "id": "methods",
+        "title": "Méthodes et signatures"
+      },
+      {
         "id": "permission",
-        "title": "Déclarer la persistance"
+        "title": "Conserver les données entre les sessions"
       },
       {
         "id": "petits-reglages",
-        "title": "Un petit réglage, avec repli"
+        "title": "Enregistrer et lire du JSON"
       },
       {
         "id": "cache",
-        "title": "Un cache plus conséquent"
+        "title": "Limites et erreurs"
       },
       {
         "id": "recuperation",
-        "title": "Préserver le travail de l’utilisateur"
+        "title": "Préserver les données"
       }
     ],
     "blocks": [
       {
         "kind": "html",
-        "html": "\n<h2 id=\"permission\">Déclarer la persistance</h2>"
+        "html": "<h2 id=\"methods\">Méthodes et signatures</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Méthode / signature, Rôle\"><table><thead><tr><th>Méthode / signature</th><th>Rôle</th></tr></thead><tbody><tr><td><code>overcrow.storage.getInfo(): Promise&lt;StorageInfo&gt;</code></td><td>Lire la politique effective : persistante ou temporaire.</td></tr><tr><td><code>overcrow.storage.get(key: string): Promise&lt;CloneableJson | undefined&gt;</code></td><td>Lire une valeur JSON ; une clé absente renvoie undefined.</td></tr><tr><td><code>overcrow.storage.set(key: string, value: CloneableJson): Promise&lt;void&gt;</code></td><td>Enregistrer une valeur JSON ; terminer après validation de la transaction.</td></tr><tr><td><code>overcrow.storage.remove(key: string): Promise&lt;void&gt;</code></td><td>Supprimer une clé ; une clé absente réussit aussi.</td></tr></tbody></table></div>"
+      },
+      {
+        "kind": "html",
+        "html": "<h2 id=\"permission\">Conserver les données entre les sessions</h2><p>Utilisez <code>overcrow.storage</code> pour enregistrer du JSON localement. Cette API fournit un stockage JSON isolé pour chaque widget. Elle ne lit ni ne modifie les notes, l’historique, les préférences ou les comptes intégrés. OverCrow natif utilise IndexedDB. Pour demander la conservation des données, ajoutez ceci dans <code>permissions</code> du manifeste :</p>"
       },
       {
         "kind": "code",
         "language": "json",
-        "title": "Fragment de permissions",
-        "source": "\"storage\": true"
+        "title": "manifest.json · permissions",
+        "source": "{\n  \"storage\": true\n}"
       },
       {
         "kind": "html",
-        "html": "\n<p>Le stockage est isolé par identifiant de widget. Gardez cet identifiant stable pour les mises à jour. Il n’existe pas d’API <code>overcrow.storage</code> dans le SDK actuel : utilisez localStorage pour de petits réglages et IndexedDB pour des données structurées.</p>\n<h2 id=\"petits-reglages\">Un petit réglage, avec repli</h2>"
+        "html": "<p>Sans cette permission, ou avec des permissions de médias sensibles, le stockage est temporaire. Le Studio et l’aperçu navigateur utilisent toujours une mémoire temporaire, effacée au rechargement de l’aperçu ou au changement de session de jeu simulée.</p><h2 id=\"petits-reglages\">Enregistrer et lire du JSON</h2>"
       },
       {
         "kind": "code",
-        "language": "js",
-        "title": "Validation et erreur de sauvegarde",
-        "source": "function readPreferences() {\n  try {\n    const value = JSON.parse(localStorage.getItem('preferences.v1') ?? '{}');\n    return { compact: value?.compact === true };\n  } catch {\n    return { compact: false };\n  }\n}\nfunction savePreferences(preferences) {\n  try {\n    localStorage.setItem('preferences.v1', JSON.stringify(preferences));\n    return true;\n  } catch {\n    return false; // Show that the setting remains in memory only.\n  }\n}"
+        "language": "javascript",
+        "title": "view.js",
+        "source": "import overcrow from './overcrow.js';\n\nawait overcrow.storage.set('settings', { compact: true });\nconst settings = await overcrow.storage.get('settings');\nconsole.log(settings); // { compact: true }\nawait overcrow.storage.remove('obsolete-setting');"
       },
       {
         "kind": "html",
-        "html": "\n<h2 id=\"cache\">Un cache plus conséquent</h2><p>Préférez IndexedDB, avec un schéma versionné et des transactions dont vous attendez la fin. Validez les données relues comme des données externes. Évitez d’écrire à chaque rendu : sauvegardez lorsque l’état change et regroupez les modifications rapides.</p>\n<h2 id=\"recuperation\">Préserver le travail de l’utilisateur</h2><p>Affichez un échec d’écriture. Ne remplacez pas silencieusement un contenu invalide par un document vide. Lors d’une évolution de schéma, migrez explicitement et conservez une voie de récupération. Ne stockez pas de secret dans un paquet distribué.</p>\n<p><a href=\"/docs/exemples/\">La checklist téléchargeable</a> montre un petit état versionné, borné et validé. Warframe Market fournit un exemple IndexedDB avec un contrôleur.</p>"
+        "html": "<p><code>get()</code> renvoie <code>undefined</code> si la clé n’existe pas ; un <code>null</code> enregistré reste <code>null</code>. <code>set()</code> se termine après validation de sa transaction. Vérifiez si une écriture réussie est temporaire ou persistante :</p>"
+      },
+      {
+        "kind": "code",
+        "language": "javascript",
+        "title": "Mode de stockage",
+        "source": "const { mode } = await overcrow.storage.getInfo();\nconsole.log(mode); // 'persistent' or 'temporary'"
+      },
+      {
+        "kind": "html",
+        "html": "<h2 id=\"cache\">Limites et erreurs</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Stockage du widget\"><table><thead><tr><th>Élément</th><th>Limite</th></tr></thead><tbody><tr><td>Clés</td><td>256 clés ; 1 à 128 octets UTF-8 chacune.</td></tr><tr><td>Valeurs</td><td>JSON uniquement ; 64 Kio par valeur, 64 niveaux d’imbrication.</td></tr><tr><td>Opérations</td><td>32 requêtes en attente ; ouverture et transactions limitées à 5 secondes chacune.</td></tr></tbody></table></div><p>Gérez les erreurs autour des appels attendus avec <code>await</code>. En cas de <code>storage_quota_exceeded</code> ou <code>storage_unavailable</code>, conservez les données affichées et signalez l’échec. <code>invalid_storage_key</code> et <code>invalid_storage_value</code> indiquent des entrées invalides. Autres codes : <code>busy</code>, <code>invalid_response</code>, <code>stale_context</code> et <code>bridge_unavailable</code>.</p><h2 id=\"recuperation\">Préserver les données</h2><ul><li>Gardez un identifiant de widget stable. Validez et versionnez les documents ; préservez les données illisibles pour permettre leur récupération.</li><li>Un <code>get()</code> suivi d’un <code>set()</code> n’est pas atomique. Centralisez les écritures concurrentes dans le contrôleur.</li><li>La persistance ne remplace pas une sauvegarde. Les données SDK ne sont pas incluses dans les paquets exportés ni dans les brouillons de projet du Studio.</li></ul><p>L’usage avancé d’IndexedDB reste soumis à la politique native ; utilisez une autre base, jamais <code>overcrow.sdk.storage</code>. IndexedDB brut est indisponible dans le Studio en ligne. Ne stockez jamais d’identifiants secrets.</p>"
       }
     ]
   },
@@ -807,43 +939,51 @@
     "key": "language",
     "slug": "api-langue",
     "group": "sdk-reference",
-    "label": "Langue du widget",
-    "title": "Langue du widget",
-    "description": "Suivre la préférence OverCrow avec vos propres traductions.",
+    "label": "Langues",
+    "title": "Langues du widget",
+    "description": "Utilisez la préférence de langue OverCrow avec vos traductions.",
     "headings": [
       {
+        "id": "methods",
+        "title": "Méthodes et signatures"
+      },
+      {
         "id": "declaration",
-        "title": "Déclarer les langues livrées"
+        "title": "Déclarer les langues"
       },
       {
         "id": "rendu",
-        "title": "Lire et suivre la langue"
+        "title": "Afficher le texte traduit"
       }
     ],
     "blocks": [
       {
         "kind": "html",
-        "html": "\n<h2 id=\"declaration\">Déclarer les langues livrées</h2>"
+        "html": "<h2 id=\"methods\">Méthodes et signatures</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Méthode / signature, Rôle\"><table><thead><tr><th>Méthode / signature</th><th>Rôle</th></tr></thead><tbody><tr><td><code>overcrow.locale.getCurrent(): Promise&lt;string | null&gt;</code></td><td>Lire une fois la langue déclarée effectivement utilisée.</td></tr><tr><td><code>overcrow.locale.onChanged(listener: (locale: string | null) =&gt; void): () =&gt; void</code></td><td>Recevoir les futurs changements de langue ; renvoyer une fonction de désabonnement.</td></tr></tbody></table></div>"
+      },
+      {
+        "kind": "html",
+        "html": "<h2 id=\"declaration\">Déclarer les langues</h2>"
       },
       {
         "kind": "code",
         "language": "json",
-        "title": "Fragment de manifest.json",
-        "source": "\"localization\": {\n  \"defaultLocale\": \"en\",\n  \"availableLocales\": [\"en\", \"fr\"]\n}"
+        "title": "Extrait de manifest.json",
+        "source": "{\n  \"localization\": {\n    \"defaultLocale\": \"en\",\n    \"availableLocales\": [\"en\", \"fr\"]\n  }\n}"
       },
       {
         "kind": "html",
-        "html": "\n<p>Déclarez 1 à 16 langues uniques, avec la langue par défaut dans la liste. Formats acceptés : <code>fr</code>, <code>en</code>, <code>en-US</code>. La préférence du Control Center est comparée exactement ; sinon la langue par défaut est utilisée.</p>\n<h2 id=\"rendu\">Lire et suivre la langue</h2>"
+        "html": "<p>Déclarez 1 à 16 langues uniques, dont celle par défaut, sous la forme <code>fr</code>, <code>en</code> ou <code>en-US</code>. OverCrow utilise la correspondance exacte avec la préférence du Control Center, ou votre langue par défaut.</p><h2 id=\"rendu\">Afficher le texte traduit</h2><p>Fournissez vos traductions. <code>getCurrent()</code> lit une fois ; <code>onChanged(render)</code> appelle votre fonction <code>render</code> lors des futurs changements. Abonnez-vous avant de lire la langue initiale, puis désabonnez-vous à la fermeture de la vue. Cet exemple crée son propre affichage.</p>"
       },
       {
         "kind": "code",
-        "language": "js",
-        "title": "Les dictionnaires sont fournis par le créateur",
-        "source": "import overcrow from './overcrow.js';\nconst messages = {\n  en: { ready: 'Ready' },\n  fr: { ready: 'Prêt' }\n};\nfunction render(locale) {\n  const selected = messages[locale] ?? messages.en;\n  document.querySelector('#status').textContent = selected.ready;\n}\nconst stop = overcrow.locale.onChanged(render);\nrender(await overcrow.locale.getCurrent());"
+        "language": "javascript",
+        "title": "view.js · dictionnaires locaux",
+        "source": "import overcrow from './overcrow.js';\nconst messages = { en: { ready: 'Ready' }, fr: { ready: 'Prêt' } };\nconst output = document.createElement('p');\ndocument.body.append(output);\nfunction render(locale) {\n  output.textContent = (messages[locale] ?? messages.en).ready;\n}\nconst stop = overcrow.locale.onChanged(render);\nrender(await overcrow.locale.getCurrent());\nwindow.addEventListener('pagehide', stop, { once: true });"
       },
       {
         "kind": "html",
-        "html": "\n<p>Sans déclaration, <code>getCurrent()</code> renvoie null et aucun changement de langue n’est émis. Le host ne traduit pas vos textes. Les traductions de la fiche marketplace sont indépendantes du contenu du widget.</p>"
+        "html": "<p>Appelez <code>stop()</code> au retrait du composant. Sans <code>localization</code>, <code>getCurrent()</code> renvoie <code>null</code> et aucun événement de changement de langue n’est émis. Vous fournissez les traductions du widget ; celles de la fiche marketplace sont séparées.</p>"
       }
     ]
   },
@@ -851,47 +991,61 @@
     "key": "clipboard",
     "slug": "api-presse-papiers",
     "group": "sdk-reference",
-    "label": "Copier dans le presse-papiers",
+    "label": "Presse-papiers",
     "title": "Copier dans le presse-papiers",
-    "description": "Une action explicite, autorisée en mode interactif.",
+    "description": "Copiez un texte préparé lors d’un clic en mode interactif.",
     "headings": [
       {
+        "id": "methods",
+        "title": "Méthodes et signatures"
+      },
+      {
         "id": "permission",
-        "title": "Autoriser l’écriture"
+        "title": "Déclarer la permission"
       },
       {
         "id": "geste",
-        "title": "Copier directement après un clic"
+        "title": "Copier au clic"
       },
       {
         "id": "resultat",
-        "title": "Afficher le résultat réel"
+        "title": "Afficher le résultat"
       }
     ],
     "blocks": [
       {
         "kind": "html",
-        "html": "\n<h2 id=\"permission\">Autoriser l’écriture</h2>"
+        "html": "<h2 id=\"methods\">Méthodes et signatures</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Méthode / signature, Rôle\"><table><thead><tr><th>Méthode / signature</th><th>Rôle</th></tr></thead><tbody><tr><td><code>overcrow.clipboard.writeText(text: string): Promise&lt;void&gt;</code></td><td>Écrire du texte lors d’un geste utilisateur courant dans une vue interactive.</td></tr></tbody></table></div>"
+      },
+      {
+        "kind": "html",
+        "html": "<h2 id=\"permission\">Déclarer la permission</h2>"
       },
       {
         "kind": "code",
         "language": "json",
-        "title": "Fragment de permissions",
-        "source": "\"clipboardWrite\": true"
+        "title": "Dans permissions",
+        "source": "{\n  \"clipboardWrite\": true\n}"
       },
       {
         "kind": "html",
-        "html": "\n<h2 id=\"geste\">Copier directement après un clic</h2>"
+        "html": "<h2 id=\"geste\">Copier au clic</h2>\n<p>Préparez le texte avant le clic et appelez <code>writeText</code> directement dans son gestionnaire.</p><p>Ajoutez ce contenu dans le <code>index.html</code> de la vue avant de charger le module :</p>"
       },
       {
         "kind": "code",
-        "language": "js",
-        "title": "Texte déjà disponible au moment du clic",
-        "source": "import overcrow from './overcrow.js';\ndocument.querySelector('#copy').addEventListener('click', async () => {\n  const status = document.querySelector('#status');\n  try {\n    await overcrow.clipboard.writeText('Bonjour depuis OverCrow');\n    status.textContent = 'Copié';\n  } catch (error) {\n    status.textContent = 'Copie refusée. Cliquez de nouveau en mode interactif.';\n  }\n});"
+        "language": "html",
+        "title": "index.html",
+        "source": "<button id=\"copy\">Copy</button>\n<p id=\"status\" role=\"status\"></p>"
+      },
+      {
+        "kind": "code",
+        "language": "javascript",
+        "title": "view.js",
+        "source": "import overcrow from './overcrow.js';\ndocument.querySelector('#copy').addEventListener('click', async () => {\n  const status = document.querySelector('#status');\n  try {\n    await overcrow.clipboard.writeText('Hello from OverCrow');\n    status.textContent = 'Copied';\n  } catch {\n    status.textContent = 'Copy denied. Try again in interactive mode.';\n  }\n});"
       },
       {
         "kind": "html",
-        "html": "\n<p>Une permission déclarée ne suffit pas. Il faut un geste utilisateur actuel dans le mode interactif ; il est consommé par une seule copie. Préparez le texte avant le clic : attendre une requête réseau peut faire expirer l’autorisation. Le texte est limité à 16 Kio et ne peut contenir de NUL.</p>\n<h2 id=\"resultat\">Afficher le résultat réel</h2><p>Attendez la résolution avant d’afficher « Copié ». En cas de refus, rendez le bouton utilisable de nouveau. Le SDK ne donne aucun accès à la lecture du presse-papiers.</p>"
+        "html": "<p>Chaque geste utilisateur actuel en mode interactif autorise une écriture. Attendre une réponse réseau peut le faire expirer. Le texte est limité à 16 Kio et ne peut contenir de NUL.</p>\n<h2 id=\"resultat\">Afficher le résultat</h2>\n<p>Affichez « Copié » après confirmation du succès. En cas de refus, proposez de réessayer. Testez les gestes dans OverCrow ; les aperçus navigateur ne permettent pas de les valider. Le SDK permet l’écriture, sans accès à la lecture du presse-papiers.</p>"
       }
     ]
   },
@@ -899,39 +1053,39 @@
     "key": "development",
     "slug": "developpement",
     "group": "test-and-package",
-    "label": "Tester et recharger",
-    "title": "Tester et recharger",
-    "description": "Recharger avec le moteur natif sous Windows et Linux, puis tester dans l’overlay.",
+    "label": "Tester",
+    "title": "Tester un widget",
+    "description": "Inspectez le moteur natif, rejouez des événements et testez l’overlay en jeu.",
     "headings": [
       {
         "id": "kit-natif",
-        "title": "Le parcours commun Windows et Linux"
+        "title": "Tester avec le kit créateur"
       },
       {
         "id": "boucle",
-        "title": "La boucle native Linux"
+        "title": "Utiliser la CLI Linux"
       },
       {
         "id": "watch",
-        "title": "Surveiller un dossier validé"
+        "title": "Recharger un dossier préparé"
       },
       {
         "id": "serveur",
-        "title": "Utiliser un serveur statique local"
+        "title": "Charger depuis un serveur local"
       },
       {
         "id": "replay",
-        "title": "Rejouer une fixture sans jeu"
+        "title": "Rejouer des événements de test"
       },
       {
         "id": "devtools",
-        "title": "Diagnostics de développement"
+        "title": "Inspecter les erreurs"
       }
     ],
     "blocks": [
       {
         "kind": "html",
-        "html": "\n<h2 id=\"kit-natif\">Le parcours commun Windows et Linux</h2>"
+        "html": "\n<h2 id=\"kit-natif\">Tester avec le kit créateur</h2>"
       },
       {
         "kind": "code",
@@ -941,17 +1095,17 @@
       },
       {
         "kind": "html",
-        "html": "<p>Les sources sont validées et leurs empreintes recalculées par le kit. La vue native est remplacée après chargement ; le contrôleur reste vivant. Redémarrez la session pour charger un nouveau code contrôleur. Cette session reste hors écran : le rendu en jeu nécessite un paquet importé.</p><p>Pour commencer sous Windows ou Linux, utilisez <a href=\"/docs/kit-createur/\">le kit créateur et son aperçu avec rechargement automatique</a>. La suite détaille aussi la CLI avancée propre à Linux.</p><h2 id=\"boucle\">La boucle native Linux</h2><p>Compilez votre framework si nécessaire, puis exécutez <code>prepare</code> sur son dossier statique. Enregistrez cette sortie avec <code>dev</code>. Les permissions restent explicites ; chaque sortie préparée est neuve.</p>\n"
+        "html": "<p>Le kit valide les sources, recalcule les empreintes et recharge la vue native. Le contrôleur reste actif ; redémarrez après modification de son code. Cette session hors écran permet de vérifier le moteur. Importez un paquet pour tester l’overlay en jeu.</p><p>Pour commencer sous Windows ou Linux, utilisez <a href=\"/docs/kit-createur/\">le kit créateur et son aperçu avec rechargement automatique</a>. La suite détaille aussi la CLI avancée propre à Linux.</p><h2 id=\"boucle\">Utiliser la CLI Linux</h2><p>Compilez votre framework si nécessaire, puis exécutez <code>prepare</code> sur son dossier statique. Enregistrez cette sortie avec <code>dev</code>. Les permissions restent explicites ; chaque sortie préparée est neuve.</p>\n"
       },
       {
         "kind": "code",
         "language": "sh",
         "title": "Linux · output doit être un dossier privé 0700",
-        "source": "overcrow-widget prepare /absolute/path/dist /absolute/path/output/build-1\novercrow-widget dev --watch --devtools /absolute/path/output/build-1"
+        "source": "mkdir -m 700 /absolute/path/output\novercrow-widget prepare /absolute/path/dist /absolute/path/output/build-1\novercrow-widget dev --watch --devtools /absolute/path/output/build-1"
       },
       {
         "kind": "html",
-        "html": "\n<h2 id=\"watch\">Surveiller un dossier validé</h2>"
+        "html": "\n<h2 id=\"watch\">Recharger un dossier préparé</h2>"
       },
       {
         "kind": "code",
@@ -961,7 +1115,7 @@
       },
       {
         "kind": "html",
-        "html": "\n<p>Le watcher regroupe une rafale d’édition et n’accepte qu’un dossier dont le manifeste et les empreintes sont cohérents. Il conserve la dernière vue valide en cas d’erreur, ainsi que le contrôleur. Il <strong>ne compile pas</strong> votre framework et <strong>ne recalcule pas</strong> les empreintes à votre place. Pour le parcours simple, utilisez npm run dev -- --native : le kit prépare les empreintes après vos modifications.</p>\n<p>Une extension de permissions interrompt la session avec <code>capability_confirmation_required</code>. Examinez le nouveau manifeste avant de démarrer un nouvel enregistrement.</p>\n<h2 id=\"serveur\">Utiliser un serveur statique local</h2>"
+        "html": "\n<p>Le watcher regroupe les modifications et accepte seulement un manifeste et des empreintes cohérents. Une erreur conserve la dernière vue valide et son contrôleur. Compilez votre framework vous-même. Utilisez <code>npm run dev -- --native</code> pour recalculer automatiquement les empreintes.</p>\n<p>Une extension de permissions interrompt la session avec <code>capability_confirmation_required</code>. Examinez le nouveau manifeste avant de démarrer un nouvel enregistrement.</p>\n<h2 id=\"serveur\">Charger depuis un serveur local</h2>"
       },
       {
         "kind": "code",
@@ -971,7 +1125,7 @@
       },
       {
         "kind": "html",
-        "html": "\n<p>Utilisez une adresse loopback numérique et un port explicite ; <code>localhost</code> n’est pas accepté. L’hôte télécharge et fige les fichiers vérifiés. La page ne se connecte pas directement au serveur : ce n’est pas un tunnel HMR ou WebSocket. L’option <code>--watch</code> n’est pas combinable avec <code>--url</code>.</p>\n<h2 id=\"replay\">Rejouer une fixture sans jeu</h2>"
+        "html": "\n<p>Utilisez une adresse loopback numérique et un port explicite ; <code>localhost</code> n’est pas accepté. L’hôte télécharge et fige les fichiers vérifiés. La page ne se connecte pas directement au serveur : ce n’est pas un tunnel HMR ou WebSocket. L’option <code>--watch</code> n’est pas combinable avec <code>--url</code>.</p>\n<h2 id=\"replay\">Rejouer des événements de test</h2>"
       },
       {
         "kind": "code",
@@ -997,7 +1151,7 @@
       },
       {
         "kind": "html",
-        "html": "\n<p>Les événements sont livrés dans l’ordre du fichier ; les timestamps doivent être non décroissants. Limites : 1 Mio et 1 024 événements. Le replay est réappliqué après un rechargement réussi. Ici <code>elapsedMs</code> est un champ de fixture, pas le nom du champ natif <code>sessionElapsedMs</code>.</p>\n<h2 id=\"devtools\">Diagnostics de développement</h2><p><code>--devtools</code> active les outils locaux de développement. Le terminal signale les échecs de remplacement ; l’inspecteur donne accès aux détails du moteur. Les consoles peuvent contenir des données privées : ne copiez pas de tokens ou de réponses personnelles dans un rapport public.</p>"
+        "html": "\n<p>Les événements sont livrés dans l’ordre du fichier ; les timestamps doivent être non décroissants. Limites : 1 Mio et 1 024 événements. Le replay est réappliqué après un rechargement réussi. Ici <code>elapsedMs</code> est un champ de fixture, pas le nom du champ natif <code>sessionElapsedMs</code>.</p>\n<h2 id=\"devtools\">Inspecter les erreurs</h2><p><code>--devtools</code> active les outils locaux de développement. Le terminal signale les échecs de remplacement ; l’inspecteur donne accès aux détails du moteur. Les consoles peuvent contenir des données privées : ne copiez pas de tokens ou de réponses personnelles dans un rapport public.</p>"
       }
     ]
   },
@@ -1005,9 +1159,9 @@
     "key": "publication",
     "slug": "publication",
     "group": "test-and-package",
-    "label": "Préparer et distribuer",
-    "title": "Préparer et distribuer",
-    "description": "Du projet local au paquet, puis à la fiche marketplace.",
+    "label": "Distribuer",
+    "title": "Distribuer un widget",
+    "description": "Exportez un paquet et préparez sa fiche marketplace.",
     "headings": [
       {
         "id": "avant-export",
@@ -1015,15 +1169,15 @@
       },
       {
         "id": "paquet",
-        "title": "Un paquet local"
+        "title": "Créer un paquet"
       },
       {
         "id": "fiche",
-        "title": "Préparer la fiche"
+        "title": "Préparer une fiche"
       },
       {
         "id": "admission",
-        "title": "Admission et installation"
+        "title": "Revue et installation"
       },
       {
         "id": "licences",
@@ -1033,7 +1187,7 @@
     "blocks": [
       {
         "kind": "html",
-        "html": "\n<h2 id=\"avant-export\">Avant l’export</h2><ul><li>Tester les petites tailles, le zoom, le mode passif et le mode interactif.</li><li>Prévoir chargement, absence de données, erreur et reprise.</li><li>Vérifier les sauvegardes et le retour après masquage.</li><li>Inclure toutes les ressources locales et licences dans le bundle préparé.</li></ul>\n<h2 id=\"paquet\">Un paquet local</h2><p>Dans un projet du kit créateur Windows/Linux : <code>npm run package</code>. La sortie est indiquée dans le terminal. Les empreintes sont recalculées sans étape manuelle. <a href=\"/docs/kit-createur/\">Voir le parcours complet</a>.</p><p>Avec la CLI native Linux :</p>"
+        "html": "\n<h2 id=\"avant-export\">Avant l’export</h2><ul><li>Tester les petites tailles, le zoom, le mode passif et le mode interactif.</li><li>Prévoir chargement, absence de données, erreur et reprise.</li><li>Vérifier les sauvegardes et le retour après masquage.</li><li>Inclure toutes les ressources locales et licences dans le bundle préparé.</li></ul>\n<h2 id=\"paquet\">Créer un paquet</h2><p>Dans un projet du kit créateur Windows/Linux : <code>npm run package</code>. La sortie est indiquée dans le terminal. Les empreintes sont recalculées sans étape manuelle. <a href=\"/docs/kit-createur/\">Voir le parcours complet</a>.</p><p>Avec la CLI native Linux :</p>"
       },
       {
         "kind": "code",
@@ -1043,7 +1197,7 @@
       },
       {
         "kind": "html",
-        "html": "\n<p>La commande contrôle le manifeste et ses fichiers puis crée un ZIP déterministe au format .ocpkg. Elle ne signe, n’installe et ne publie rien. Toute modification des octets impose de préparer de nouveau ; toute nouvelle livraison d’un widget publié utilise une nouvelle version.</p>\n<h2 id=\"fiche\">Préparer la fiche</h2><p>La fiche <code>listing.json</code> décrit l’auteur, la licence, les sources et les traductions du catalogue. Elle reste séparée des fichiers runtime. Les traductions de la fiche ne déclarent pas les langues réellement fournies par le widget.</p>\n<p><a href=\"https://github.com/Valhallab/playervox-overcrow-releases/blob/main/docs/creator-guide.md\" rel=\"noreferrer\">Suivre le guide créateur du marketplace ↗</a> et <a href=\"https://github.com/Valhallab/playervox-overcrow-releases/blob/main/docs/review-policy.md\" rel=\"noreferrer\">les règles de revue ↗</a>.</p>\n<p><strong>Capture pour la marketplace.</strong> Ajoutez un PNG au widget, par exemple <code>widget/preview.png</code>, avant de préparer son paquet. Dans le fichier de publication <code>listing.json</code>, ajoutez <code>\"preview\": \"preview.png\"</code> ou un autre chemin relatif comme <code>\"preview\": \"images/screenshot.png\"</code>. L’image doit figurer dans la liste <code>manifest.files</code> générée. Utilisez un PNG statique de 256 Kio maximum et de 1 024 × 1 024 pixels maximum ; 960 × 600 convient pour une capture en paysage. Les URL, SVG, images animées et chemins hors du widget sont refusés.</p><p>La publication extrait le PNG exact du paquet admis et inscrit son URL, sa taille et son SHA-256 dans le catalogue signé. La marketplace l’affiche sur les cartes et les fiches. Une image facultative absente est remplacée par un emplacement neutre. Modifier une capture publiée nécessite une nouvelle version du widget et une publication signée.</p>\n<h2 id=\"admission\">Admission et installation</h2><p>La revue et la publication utilisent le manifeste, le paquet exact et la fiche validée. Le catalogue signé et le consentement d’installation restent distincts du développement local. Le lien « Open in OverCrow » ouvre la fiche dans le Control Center ; il n’installe ni n’active automatiquement le widget.</p>\n<h2 id=\"licences\">Licences</h2><p>Le SDK et les exemples fournis ici sont sous MIT ; conservez leurs notices. Cette licence n’impose pas MIT à votre propre widget. La politique d’admission des licences tierces reste à confirmer dans les règles publiques du marketplace ; ne déduisez pas une autorisation de publication de la seule validation technique du champ de licence.</p>"
+        "html": "\n<p>La commande contrôle le manifeste et ses fichiers puis crée un ZIP déterministe au format .ocpkg. Elle ne signe, n’installe et ne publie rien. Toute modification des octets impose de préparer de nouveau ; toute nouvelle livraison d’un widget publié utilise une nouvelle version.</p>\n<h2 id=\"fiche\">Préparer une fiche</h2><p>La fiche <code>listing.json</code> décrit l’auteur, la licence, les sources et les traductions du catalogue. Elle reste séparée des fichiers runtime. Les traductions de la fiche ne déclarent pas les langues réellement fournies par le widget.</p>\n<p><a href=\"https://github.com/Valhallab/playervox-overcrow-releases/blob/main/docs/creator-guide.md\" rel=\"noreferrer\">Suivre le guide créateur du marketplace ↗</a> et <a href=\"https://github.com/Valhallab/playervox-overcrow-releases/blob/main/docs/review-policy.md\" rel=\"noreferrer\">les règles de revue ↗</a>.</p>\n<p><strong>Capture pour la marketplace.</strong> Ajoutez un PNG au widget, par exemple <code>widget/preview.png</code>, avant de préparer son paquet. Dans le fichier de publication <code>listing.json</code>, ajoutez <code>\"preview\": \"preview.png\"</code> ou un autre chemin relatif comme <code>\"preview\": \"images/screenshot.png\"</code>. L’image doit figurer dans la liste <code>manifest.files</code> générée. Utilisez un PNG statique de 256 Kio maximum et de 1 024 × 1 024 pixels maximum ; 960 × 600 convient pour une capture en paysage. Les URL, SVG, images animées et chemins hors du widget sont refusés.</p><p>La marketplace affiche l’image admise sur les cartes et les fiches, avec un emplacement neutre si elle est absente. Modifier une capture publiée nécessite une nouvelle version du widget et une publication signée.</p>\n<h2 id=\"admission\">Revue et installation</h2><p>La revue et la publication utilisent le manifeste, le paquet exact et la fiche validée. Le catalogue signé et le consentement d’installation restent distincts du développement local. Le lien « Open in OverCrow » ouvre la fiche dans le Control Center ; il n’installe ni n’active automatiquement le widget.</p>\n<h2 id=\"licences\">Licences</h2><p>Le SDK et les exemples fournis ici sont sous MIT ; conservez leurs notices. Cette licence n’impose pas MIT à votre propre widget. La politique d’admission des licences tierces reste à confirmer dans les règles publiques du marketplace ; ne déduisez pas une autorisation de publication de la seule validation technique du champ de licence.</p>"
       }
     ]
   },
@@ -1051,31 +1205,31 @@
     "key": "troubleshooting",
     "slug": "depannage",
     "group": "troubleshooting",
-    "label": "Débloquer votre widget",
-    "title": "Débloquer votre widget",
-    "description": "Une erreur, une cause probable, une action concrète.",
+    "label": "Dépannage",
+    "title": "Dépannage",
+    "description": "Trouvez une erreur et la prochaine action à essayer.",
     "headings": [
       {
         "id": "erreurs",
-        "title": "Retrouver une erreur"
+        "title": "Codes d’erreur"
       },
       {
         "id": "isoler",
-        "title": "Isoler le problème en trois vérifications"
+        "title": "Trois vérifications"
       },
       {
         "id": "signaler",
-        "title": "Préparer un retour utile"
+        "title": "Signaler un problème"
       },
       {
         "id": "limites",
-        "title": "Éviter les fausses pistes"
+        "title": "Limites du runtime"
       }
     ],
     "blocks": [
       {
         "kind": "html",
-        "html": "\n<h2 id=\"erreurs\">Retrouver une erreur</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Symptôme / code, Cause probable, Prochaine action\"><table><thead><tr><th>Symptôme / code</th><th>Cause probable</th><th>Prochaine action</th></tr></thead><tbody><tr><td>bridge_unavailable</td><td>Le SDK ne trouve pas le runtime natif.</td><td>Tester avec dev ou un paquet installé ; un serveur web seul ne fournit pas la passerelle.</td></tr><tr><td>invalid_manifest / invalid_bundle / invalid widget project</td><td>Schéma, chemin, fichier ou empreinte incohérent.</td><td>Vérifier les entrypoints et les permissions, puis refaire prepare dans une sortie neuve.</td></tr><tr><td>unsafe_path</td><td>Chemin relatif, lien symbolique ou droits incompatibles.</td><td>Choisir un chemin absolu réel et un parent de sortie 0700 ; éviter les dossiers partagés en écriture.</td></tr><tr><td>capability_confirmation_required</td><td>Le rechargement demande davantage de permissions.</td><td>Relire les permissions et redémarrer explicitement la session de développement.</td></tr><tr><td>capability_denied / permission_denied</td><td>Une autorisation manque ou le geste utilisateur est absent/expiré.</td><td>Vérifier manifeste et consentement ; pour la copie, cliquer de nouveau en mode interactif.</td></tr><tr><td>body_used</td><td>Le même corps de réponse a été lu deux fois.</td><td>Lire json(), text() ou arrayBuffer() une seule fois et conserver le résultat.</td></tr><tr><td>invalid_message / message_too_large</td><td>Valeur non JSON, cycle, profondeur ou taille excessive.</td><td>Envoyer un petit objet JSON simple ; fractionner les données applicatives.</td></tr><tr><td>request_body_limit</td><td>Le corps dépasse 2 Mio.</td><td>Réduire la requête ou traiter les éléments séparément si le service le permet.</td></tr><tr><td>busy / unresponsive</td><td>Opération déjà en cours ou runtime ne répondant pas dans le délai.</td><td>Éviter les doubles actions, attendre le résultat, puis proposer une nouvelle tentative.</td></tr><tr><td>Vue vide après une modification</td><td>Erreur JavaScript, entrée manquante ou build non préparé.</td><td>Ouvrir les devtools, vérifier index.html et refaire prepare.</td></tr><tr><td>Les événements de session ne se déclenchent pas</td><td>Un nom déclaré n’implique pas un flux live.</td><td>Avec SDK 1.2.0, utiliser onSnapshot pour les mises à jour natives ; pour le replay, vérifier le nom et le payload déclarés.</td></tr><tr><td>HTTP 4xx / 5xx</td><td>Le service distant refuse ou échoue.</td><td>Vérifier response.ok, présenter une erreur et conserver les dernières données valides.</td></tr></tbody></table></div>\n<h2 id=\"isoler\">Isoler le problème en trois vérifications</h2><ol><li>Le HTML s’affiche-t-il, avec les assets locaux et les bonnes dimensions ?</li><li>Le widget est-il dans OverCrow, avec les permissions nécessaires ?</li><li>Les données reçues correspondent-elles au schéma que votre code attend ?</li></ol>\n<h2 id=\"signaler\">Préparer un retour utile</h2><p>Indiquez version d’OverCrow, version du widget et du SDK, plateforme, étapes minimales, résultat attendu et code d’erreur. Ajoutez un exemple réduit ou une fixture de données non personnelles. Les diagnostics de l’application permettent aussi de préparer un rapport avant envoi explicite.</p>\n<h2 id=\"limites\">Éviter les fausses pistes</h2><p>Le SDK n’a pas de shell, Node, Tauri, accès aux fichiers arbitraires ou lecture mémoire du jeu. Le réseau navigateur externe est bloqué. Ces frontières ne se corrigent pas en ajoutant une permission inventée au manifeste.</p>"
+        "html": "\n<h2 id=\"erreurs\">Codes d’erreur</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Symptôme / code, Cause probable, Prochaine action\"><table><thead><tr><th>Symptôme / code</th><th>Cause probable</th><th>Prochaine action</th></tr></thead><tbody><tr><td>bridge_unavailable</td><td>Le SDK ne trouve pas le runtime natif.</td><td>Tester avec dev ou un paquet installé ; un serveur web seul ne fournit pas la passerelle.</td></tr><tr><td>invalid_manifest / invalid_bundle / invalid widget project</td><td>Schéma, chemin, fichier ou empreinte incohérent.</td><td>Vérifier les entrypoints et les permissions, puis refaire prepare dans une sortie neuve.</td></tr><tr><td>unsafe_path</td><td>Chemin relatif, lien symbolique ou droits incompatibles.</td><td>Choisir un chemin absolu réel et un parent de sortie 0700 ; éviter les dossiers partagés en écriture.</td></tr><tr><td>capability_confirmation_required</td><td>Le rechargement demande davantage de permissions.</td><td>Relire les permissions et redémarrer explicitement la session de développement.</td></tr><tr><td>capability_denied / permission_denied</td><td>Une autorisation manque ou le geste utilisateur est absent/expiré.</td><td>Vérifier manifeste et consentement ; pour la copie, cliquer de nouveau en mode interactif.</td></tr><tr><td>body_used</td><td>Le même corps de réponse a été lu deux fois.</td><td>Lire json(), text() ou arrayBuffer() une seule fois et conserver le résultat.</td></tr><tr><td>invalid_message / message_too_large</td><td>Valeur non JSON, cycle, profondeur ou taille excessive.</td><td>Envoyer un petit objet JSON simple ; fractionner les données applicatives.</td></tr><tr><td>request_body_limit</td><td>Le corps dépasse 2 Mio.</td><td>Réduire la requête ou traiter les éléments séparément si le service le permet.</td></tr><tr><td>busy / unresponsive</td><td>Opération déjà en cours ou runtime ne répondant pas dans le délai.</td><td>Éviter les doubles actions, attendre le résultat, puis proposer une nouvelle tentative.</td></tr><tr><td>Vue vide après une modification</td><td>Erreur JavaScript, entrée manquante ou build non préparé.</td><td>Ouvrir les devtools, vérifier index.html et refaire prepare.</td></tr><tr><td>Les événements de session ne se déclenchent pas</td><td>Un nom déclaré n’implique pas un flux live.</td><td>Utiliser onSnapshot pour les mises à jour natives ; pour le replay, vérifier le nom et le payload déclarés.</td></tr><tr><td>HTTP 4xx / 5xx</td><td>Le service distant refuse ou échoue.</td><td>Vérifier response.ok, présenter une erreur et conserver les dernières données valides.</td></tr></tbody></table></div>\n<h2 id=\"isoler\">Trois vérifications</h2><ol><li>Le HTML s’affiche-t-il, avec les assets locaux et les bonnes dimensions ?</li><li>Le widget est-il dans OverCrow, avec les permissions nécessaires ?</li><li>Les données reçues correspondent-elles au schéma que votre code attend ?</li></ol>\n<h2 id=\"signaler\">Signaler un problème</h2><p>Indiquez version d’OverCrow, version du widget et du SDK, plateforme, étapes minimales, résultat attendu et code d’erreur. Ajoutez un exemple réduit ou une fixture de données non personnelles. Les diagnostics de l’application permettent aussi de préparer un rapport avant envoi explicite.</p>\n<h2 id=\"limites\">Limites du runtime</h2><p>Le SDK n’a pas de shell, Node, Tauri, accès aux fichiers arbitraires ou lecture mémoire du jeu. Le réseau navigateur externe est bloqué. Ces frontières ne se corrigent pas en ajoutant une permission inventée au manifeste.</p>"
       }
     ]
   }

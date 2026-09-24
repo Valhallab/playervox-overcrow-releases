@@ -1,5 +1,6 @@
 // MIT License. Copyright (c) 2026 Valhallab SASU.
 // Authoring diagnostics only. OverCrow remains the installation authority.
+import {canonicalNetworkRules,NetworkPolicyError} from '../preview/network-policy.mjs';
 export class CreatorError extends Error {
   constructor(code, message, action, pointer = '') {
     super(message); this.code=code; this.action=action; this.pointer=pointer;
@@ -10,14 +11,9 @@ export const fail=(code,message,action,pointer)=>{throw new CreatorError(code,me
 export const MAX_BYTES=128*1024*1024;
 export const MAX_FILES=4096;
 export const WEB_CAPABILITIES=Object.freeze([
-  'telemetry.read','fps.read','stopwatch.read','stopwatch.control',
-  'media.read','media.control','notes.read','notes.write','playervox.score.read',
-  'playervox.rating.read','playervox.rating.write','playervox.reviews.read','playervox.followed.read',
-  'journal.local.read','journal.cloud.read','journal.notes.read','journal.notes.write','journal.delete',
-  'twitch.chat.read','twitch.chat.compose',
+  'telemetry.read','fps.read','media.read','media.control',
 ]);
-export const SENSITIVE_WEB_CAPABILITIES=Object.freeze(WEB_CAPABILITIES.filter(capability=>
-  !['telemetry.read','fps.read','stopwatch.read','stopwatch.control','playervox.score.read'].includes(capability)));
+export const SENSITIVE_WEB_CAPABILITIES=Object.freeze(['media.read','media.control']);
 export function parseJson(source,maximum=1024*1024) {
   if(new TextEncoder().encode(source).length>maximum) fail('json.size','JSON trop volumineux.','Réduisez le fichier.');
   // JSON.parse accepts duplicate keys; reject them before interpreting permissions.
@@ -60,7 +56,7 @@ export function validateManifest(manifest,names) {
   fields(manifest,['schemaVersion','id','version','apiVersion','entrypoints','permissions','localization','presentation','files'],'');
   const require=(condition,pointer,message,action='Corrigez ce champ dans widget/manifest.json.')=>{if(!condition)fail('manifest.invalid',message,action,pointer);};
   require(manifest.schemaVersion===1,'/schemaVersion','schemaVersion doit être le nombre 1.');
-  require(['1','2'].includes(manifest.apiVersion),'/apiVersion','apiVersion doit être la chaîne "1" ou "2".');
+  require(manifest.apiVersion==='1','/apiVersion','apiVersion doit être la chaîne "1".');
   require(validId(manifest.id),'/id','Identifiant attendu : domaine inversé en minuscules, par exemple com.example.counter.');
   const version=manifest.version;
   const match=typeof version==='string'&&version.match(/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/);
@@ -72,18 +68,11 @@ export function validateManifest(manifest,names) {
     require(names.has(file),`/entrypoints/${role}`,`Fichier absent : ${file}.`,'Ajoutez le fichier ou corrigez le chemin.');
   }
   fields(manifest.permissions,['network','gameEvents','storage','clipboardWrite','capabilities'],'/permissions');
-  require(manifest.apiVersion==='2'||(!Object.hasOwn(manifest.permissions,'capabilities')&&!Object.hasOwn(manifest,'presentation')),'/apiVersion','Les capacités et la présentation native nécessitent apiVersion "2".');
   for(const key of ['storage','clipboardWrite']) if(Object.hasOwn(manifest.permissions,key)) require(typeof manifest.permissions[key]==='boolean',`/permissions/${key}`,'Valeur booléenne attendue.');
-  const network=manifest.permissions.network??[];
-  require(Array.isArray(network),'/permissions/network','Liste attendue.');
-  const seen=new Set();
-  for(const [index,rule] of network.entries()) {
-    const pointer=`/permissions/network/${index}`;fields(rule,['origin','method','pathPrefix'],pointer);
-    let url;try{url=new URL(rule.origin);}catch{require(false,pointer+'/origin','Origine HTTPS invalide.');}
-    require(url.protocol==='https:'&&url.origin===rule.origin&&url.hostname.includes('.')&&!/^\d+(?:\.\d+){3}$/.test(url.hostname)&&url.hostname.length<=253&&url.hostname.split('.').every(s=>s.length<=63&&/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(s)),pointer+'/origin','Origine HTTPS canonique attendue, sans chemin ni identifiants.');
-    require(['GET','POST','PUT','PATCH','DELETE'].includes(rule.method),pointer+'/method','Méthode réseau non prise en charge.');
-    require(typeof rule.pathPrefix==='string'&&rule.pathPrefix.startsWith('/')&&rule.pathPrefix!=='/'&&!rule.pathPrefix.includes('//')&&rule.pathPrefix.slice(1).split('/').every(s=>s!=='.'&&s!=='..'&&/^[a-zA-Z0-9._~-]*$/.test(s)),pointer+'/pathPrefix','Préfixe explicite attendu, par exemple /v2/.');
-    const identity=JSON.stringify([rule.origin,rule.method,rule.pathPrefix]);require(!seen.has(identity),pointer,'Permission réseau dupliquée.');seen.add(identity);
+  const network=Object.hasOwn(manifest.permissions,'network')?manifest.permissions.network:[];
+  try{canonicalNetworkRules(network);}catch(error){
+    if(!(error instanceof NetworkPolicyError))throw error;
+    fail('manifest.invalid',error.message,'Declare exact routes and bounded parameters in permissions.network.',error.pointer);
   }
   const events=manifest.permissions.gameEvents??[];
   require(Array.isArray(events),'/permissions/gameEvents','Liste attendue.');

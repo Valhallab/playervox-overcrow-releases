@@ -1,20 +1,16 @@
 # Public SDK reference widgets
 
-These original MIT examples use SDK 1.2.0 only. They do not contain proprietary
-built-in renderers. Each folder supplies its API v2 manifest and identity; the
-shared view/styles in `common/` are assembled by the creator kit and archive
-builder. All exported examples include the byte-identical public SDK and license.
+These MIT examples use SDK 1.3.0 and own their state. They never access built-in
+widget data or native account sessions. Session, performance, FPS and media use
+host/system services; stopwatch uses JavaScript; notes and journal use isolated
+SDK storage. Score uses the anonymous PlayerVox HTTP endpoint with an explicit
+network permission. Browser score data is explicitly fictional.
 
-Run `node tools/creator-kit/overcrow.mjs init /new/project --template notes`, or
-choose session, clock, performance, fps, stopwatch, media, score, rating, reviews,
-journal or twitch. `npm run dev`, `check` and `package` run from the new project.
+Initialize one with `node tools/creator-kit/overcrow.mjs init /new/project --template notes`.
+Available references: session, clock, performance, fps, stopwatch, media, notes,
+score and journal. Each project supports EN/FR, native wrapper options and export.
 
-Reference coverage includes data/status display, declared grants, native actions,
-EN/FR, native preferences, passive mode, content sizing and unsubscribe/disposal.
-The browser uses clearly labeled fictional data. Native-only account/editor/chat
-UI returns cancelled in simulation. Availability depends on the installed host;
-these examples and automated checks do not establish complete native parity.
-
-Per-example source ZIPs and the portable kit are built with
-`python3 scripts/package-docs-examples.py published/docs/downloads`.
-No reference is signed or added to the marketplace catalog by that command.
+The shared view/styles in `common/` are assembled by the creator kit and archive
+builder. All exports include the byte-identical SDK and MIT license.
+`python3 scripts/package-docs-examples.py published/docs/downloads` builds source
+ZIPs and the portable kit; it does not sign or publish marketplace widgets.

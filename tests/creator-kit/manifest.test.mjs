@@ -2,32 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { validateManifest } from "../../tools/creator-kit/lib/manifest.mjs";
 
-const publicCapabilities = [
-  "telemetry.read",
-  "fps.read",
-  "stopwatch.read",
-  "stopwatch.control",
-  "playervox.score.read",
-];
-const sensitiveCapabilities = [
-  "media.read",
-  "media.control",
-  "notes.read",
-  "notes.write",
-  "playervox.rating.read",
-  "playervox.rating.write",
-  "playervox.reviews.read",
-  "playervox.followed.read",
-  "journal.local.read",
-  "journal.cloud.read",
-  "journal.notes.read",
-  "journal.notes.write",
-  "journal.delete",
-  "twitch.chat.read",
-  "twitch.chat.compose",
-];
+const publicCapabilities = ["telemetry.read", "fps.read"];
+const sensitiveCapabilities = ["media.read", "media.control"];
 const network = [
-  { origin: "https://api.example.test", method: "GET", pathPrefix: "/v2/" },
+  { origin: "https://api.example.test", method: "GET", path: "/v2/items" },
 ];
 const presentation = () => ({
   sizing: {
@@ -66,15 +44,40 @@ const presentation = () => ({
 });
 const fixture = () => ({
   schemaVersion: 1,
-  id: "com.example.v2",
+  id: "com.example.services",
   version: "1.0.0",
-  apiVersion: "2",
+  apiVersion: "1",
   entrypoints: { view: "index.html" },
   permissions: {},
 });
 const validate = (value) => validateManifest(value, new Set(["index.html"]));
 
-test("v2 accepts the closed capability set and refuses private-data egress", () => {
+test("retired built-in permissions cannot enter a public widget package", () => {
+  for (const capability of [
+    "stopwatch.read",
+    "stopwatch.control",
+    "notes.read",
+    "notes.write",
+    "playervox.score.read",
+    "playervox.rating.read",
+    "playervox.rating.write",
+    "playervox.reviews.read",
+    "playervox.followed.read",
+    "journal.local.read",
+    "journal.cloud.read",
+    "journal.notes.read",
+    "journal.notes.write",
+    "journal.delete",
+    "twitch.chat.read",
+    "twitch.chat.compose",
+  ]) {
+    const manifest = fixture();
+    manifest.permissions.capabilities = [capability];
+    assert.throws(() => validate(manifest), capability);
+  }
+});
+
+test("manifest accepts the closed capability set and refuses private-data egress", () => {
   for (const capability of [...publicCapabilities, ...sensitiveCapabilities]) {
     const manifest = fixture();
     manifest.permissions = { capabilities: [capability], storage: true };
@@ -87,7 +90,7 @@ test("v2 accepts the closed capability set and refuses private-data egress", () 
     }
   }
   for (const capabilities of [
-    ["notes.read", "notes.read"],
+    ["media.read", "media.read"],
     ["native.shell"],
     ["Notes.Read"],
     null,
@@ -100,21 +103,15 @@ test("v2 accepts the closed capability set and refuses private-data egress", () 
   }
 });
 
-test("v1 retains its existing shape and rejects even empty v2 declarations", () => {
-  const manifest = fixture();
-  manifest.apiVersion = "1";
-  manifest.permissions = { network, clipboardWrite: true };
-  assert.doesNotThrow(() => validate(manifest));
-  for (const capabilities of [[], ["fps.read"], null]) {
-    const changed = structuredClone(manifest);
-    changed.permissions.capabilities = capabilities;
-    assert.throws(() => validate(changed));
+test("only the current API version is accepted, including permission-free widgets", () => {
+  for (const apiVersion of ["2", "3", "01", 1, null, undefined]) {
+    const manifest = fixture();
+    manifest.apiVersion = apiVersion;
+    assert.throws(() => validate(manifest), String(apiVersion));
   }
-  manifest.presentation = presentation();
-  assert.throws(() => validate(manifest));
 });
 
-test("v2 validates all native sizing modes and typed bilingual options", () => {
+test("manifest validates all native sizing modes and typed bilingual options", () => {
   for (const mode of ["intrinsic", "autoHeight", "manual"]) {
     const manifest = fixture();
     manifest.presentation = presentation();
@@ -127,7 +124,7 @@ test("v2 validates all native sizing modes and typed bilingual options", () => {
   assert.doesNotThrow(() => validate(manifest));
 });
 
-test("v2 refuses malformed dimensions, native option writers, and unbounded options", () => {
+test("manifest refuses malformed dimensions, native option writers, and unbounded options", () => {
   const invalid = [
     (value) => (value.sizing.mode = "free"),
     (value) => (value.sizing.preferred.width = 0),

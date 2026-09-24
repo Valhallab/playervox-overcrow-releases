@@ -2,16 +2,25 @@
   "schemaVersion": 1,
   "id": "com.playervox.examples.score",
   "version": "1.0.0",
-  "apiVersion": "2",
+  "apiVersion": "1",
   "entrypoints": {
     "view": "index.html"
   },
   "permissions": {
-    "network": [],
+    "network": [
+      {
+        "origin": "https://api.playervox.com",
+        "method": "GET",
+        "path": "/api/v1/overcrow/games/steam/{steamAppId}/score",
+        "pathParams": {
+          "steamAppId": { "type": "integer", "min": 1, "max": 4294967295 }
+        }
+      }
+    ],
     "gameEvents": [],
     "storage": false,
     "clipboardWrite": false,
-    "capabilities": ["playervox.score.read"]
+    "capabilities": []
   },
   "localization": {
     "defaultLocale": "en",

@@ -21,7 +21,7 @@ assets in the manifest ledger. See [licensing scope](../LICENSING.md).
    ```sh
    mkdir -m 700 /absolute/path/to/widget-output
    overcrow-widget prepare /absolute/path/to/static-build /absolute/path/to/widget-output/build-1
-   overcrow-widget dev /absolute/path/to/widget-output/build-1
+   overcrow-widget dev --watch /absolute/path/to/widget-output/build-1
    ```
 
    `prepare` copies the static assets and computes their SHA-256 and byte
@@ -71,6 +71,13 @@ framework may ship opaque data without creating a new executable file class.
 Page code may read those verified same-bundle files with browser APIs; external
 HTTP(S) remains available only through `overcrow.fetch` and exact grants.
 
+Every manifest declares `"apiVersion": "1"`. The host service capabilities are
+`telemetry.read`, `fps.read`, `media.read` and `media.control`. Game context,
+locale, messages, presentation, network, clipboard and isolated widget storage
+have their own SDK methods. Built-in notes, stopwatch state, journals and connected
+accounts are private to OverCrow. Implement your own editors and timers with
+JavaScript and `overcrow.storage`; see the [SDK guides](https://overcrow.playervox.com/docs/en/).
+
 ## Marketplace screenshot
 
 Put a static PNG inside the widget before preparing the file ledger, for example
@@ -101,6 +108,6 @@ image are immutable; prepare a new version and signed publication for changes.
 
 The [creator kit](../published/docs/downloads/creator-kit.zip) and example archives
 are built and checked in this public repository. The website imports these exact
-archives and links to the GitHub revision used by its documentation. Its legacy
-`/docs/downloads/` URLs are compatibility mirrors, not a separate build. Creator
+archives and links to the GitHub revision used by its documentation. The
+`/docs/downloads/` URLs serve byte-identical copies. Creator
 archives do not use desktop GitHub Releases or affect the application updater.

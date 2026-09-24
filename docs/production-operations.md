@@ -12,11 +12,23 @@ from `marketplace-tool package`. WIT, Wasmtime, native widgets, and
 provider graphs are retired.
 
 `published/marketplace/v1/` contains the signed Web API v1 catalog with Warframe
-Market 2.0.5 under MIT. Superseded packages and native-era previews are no longer
-published. Further retirement requires explicit authorization after the
-replacement catalog has been verified. Website-only updates preserve that
-subtree byte-for-byte and do not rotate keys. The private web repository mirrors
-these bytes and owns the complete `published/` website served by Coolify.
+Market 2.0.5 under MIT. Source changes require a new widget version, admission
+and signed publication; they never replace an existing signed package. Version
+retirement requires explicit authorization after the replacement catalog has
+been verified. Website-only updates preserve that subtree byte-for-byte and do
+not rotate keys. The private web repository mirrors these bytes and owns the
+complete `published/` website served by Coolify.
+
+The current SDK contract requires exact network `path` rules and bounded
+`pathParams` / `queryParams`; `pathPrefix` is rejected. The signed 2.0.5 package
+uses the former contract. Before deploying this SDK and website, admit the
+updated Warframe 2.0.6 source and prepare a new signed catalog with an explicit
+`removeVersions` entry for 2.0.5. Review and authorize that retirement as part of
+publication. The existing immutable 2.0.5 URL and archive remain unchanged.
+Do not deploy the new clients against the old catalog: they reject its manifest;
+the website displays an unavailable catalog and offers no installation action.
+The API version remains `"1"`; unsupported permissions are never translated or
+silently widened. Revoked or suspended versions still cannot be retired.
 
 ## 2. Preconditions and role separation
 
@@ -171,25 +183,19 @@ repeating the same operation may reuse only its exact matching files. Extra,
 modified, or linked output files are rejected. Do not put another output or the
 publication state inside one of these roots.
 
-### Initial Web API v1 migration
+### Publication history
 
-The historical native-era snapshot is not an accepted Web API v1 previous
-output. Before the first preparation, independently establish the highest
-production sequence ever signed from the verified production catalog and the
-offline publisher's records. Set `previousSequence` to that high-water mark,
-including any later sequence reserved by an interrupted publication. Set
-`sequence` to exactly that number plus one. Do not guess, default to zero, or
-use an expired downloaded catalog as proof of the latest sequence. If the
-high-water mark cannot be established, stop publication and recover the offline
-records. Initial bootstrap is an explicit operator assertion; the tool cannot
-infer prior production history from an empty state directory.
+Use the last completed production-signed output together with the offline
+publication state. Establish the highest production sequence from that state,
+the verified catalog and the publisher's records, including a later sequence
+reserved by an interrupted publication. Set `previousSequence` to that
+high-water mark and `sequence` to exactly that number plus one. An unfinished
+reservation follows the recovery rules below before another release can proceed.
 
-The first preparation omits `--previous-output`. It creates a Web API v1 output
-from the selected accepted receipt. It does not import legacy manifests,
-previews, or archives. The separate deployment operator preserves historical
-package URLs during initial migration. Later removal requires explicit
-authorization and verification that the replacement signed catalog no longer
-references those objects.
+Do not guess the sequence, default it to zero, or treat an expired downloaded
+catalog as proof of the latest publication. If history cannot be established,
+stop publication and recover the offline records. An empty state directory
+cannot establish prior production history.
 
 ### Preparation
 
@@ -210,23 +216,23 @@ confirmed high-water mark and the current canonical UTC time
 (`YYYY-MM-DDTHH:MM:SSZ`). Expiration is calculated as exactly 90 days after
 `generatedAt`; future generation and already expired requests are rejected.
 
-For the initial migration, run:
+Prepare the next catalog from its authenticated predecessor:
 
 ```sh
 cargo run -p marketplace-tool --locked -- prepare-production-catalog \
   --store "$accepted_store" --review-tree "$review_tree" \
   --state "$publication_state" --request "$request_json" \
+  --previous-output "$previous_finalized_output" \
   --output "$prepared_output"
 ```
 
-For every subsequent release, append
-`--previous-output "$previous_finalized_output"`. It must contain a completed
+`previous_finalized_output` must contain a completed
 production-signed Web API v1 catalog from this tool, with the fixed origin,
 90-day lifetime, optional authenticated PNG previews, and its exact package and
 preview inventory. An expired previous catalog may be used as authenticated history, but a new preparation
 must have a current validity window. Its envelope digest must match the last
-signature recorded in publication state. The tool does not accept native-era
-or arbitrary third-party catalog layouts through this option.
+signature recorded in publication state. The tool validates the catalog and all
+referenced artifacts before carrying that history forward.
 
 Preparation verifies the admitted receipt, listings and archives, then writes
 `payload.json`, `packages/<id>/<version>/<sha256>.ocpkg`, and any declared

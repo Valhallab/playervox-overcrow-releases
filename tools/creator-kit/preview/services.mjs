@@ -13,82 +13,18 @@ const failure = (code) => ({
   metadata: { ok: false, error: { code, message: `Preview service: ${code}` } },
   body: empty(),
 });
-const basic = new Set([
-  "telemetry.read",
-  "fps.read",
-  "stopwatch.read",
-  "stopwatch.control",
-  "playervox.score.read",
-]);
-const safeActions = new Set([
-  "presentation.reportSize",
-  "journal.page",
-  "playervox.reviews.page",
-  "assets.read",
-]);
+const basic = new Set(["telemetry.read", "fps.read"]);
+const safeActions = new Set(["presentation.reportSize", "assets.read"]);
 const integer = (value, min = 0, max = Number.MAX_SAFE_INTEGER) =>
   Number.isSafeInteger(value) && value >= min && value <= max;
 const id = (value, max = 128) =>
   typeof value === "string" &&
   value.length <= max &&
   /^[A-Za-z0-9_-]+$/.test(value);
-const cursor = (value) =>
-  value === null ||
-  (typeof value === "string" &&
-    value.length > 0 &&
-    new TextEncoder().encode(value).length <= 2048 &&
-    !/[\u0000-\u001f\u007f-\u009f]/u.test(value));
-const note = { noteId: (value) => id(value, 64), expectedRevision: integer };
-const session = { sessionId: id, expectedRevision: integer };
 const definitions = {
-  "stopwatch.start": [{}, ["stopwatch.control"]],
-  "stopwatch.pause": [{}, ["stopwatch.control"]],
-  "stopwatch.reset": [{}, ["stopwatch.control"]],
   "media.previous": [{}, ["media.control"]],
   "media.playPause": [{}, ["media.control"]],
   "media.next": [{}, ["media.control"]],
-  "notes.requestCreate": [{ expectedRevision: integer }, ["notes.write"]],
-  "notes.requestEdit": [note, ["notes.write"]],
-  "notes.requestDelete": [note, ["notes.write"]],
-  "notes.select": [note, ["notes.read"]],
-  "notes.setChecked": [
-    {
-      ...note,
-      itemId: (value) => id(value, 64),
-      checked: (value) => typeof value === "boolean",
-    },
-    ["notes.write"],
-  ],
-  "playervox.requestConnect": [
-    {},
-    [
-      "playervox.rating.read",
-      "playervox.rating.write",
-      "playervox.reviews.read",
-      "journal.cloud.read",
-    ],
-  ],
-  "playervox.rating.requestEdit": [
-    { expectedRevision: integer },
-    ["playervox.rating.write"],
-  ],
-  "playervox.reviews.page": [
-    {
-      page: (value) => integer(value, 1, 1000),
-      followedOnly: (value) =>
-        value === undefined || typeof value === "boolean",
-    },
-    ["playervox.reviews.read"],
-  ],
-  "journal.page": [{ cursor }, ["journal.local.read", "journal.cloud.read"]],
-  "journal.requestEditNote": [session, ["journal.notes.write"]],
-  "journal.requestDelete": [session, ["journal.delete"]],
-  "twitch.chat.requestConnect": [{}, ["twitch.chat.read"]],
-  "twitch.chat.requestChooseChannel": [{}, ["twitch.chat.read"]],
-  "twitch.chat.requestCompose": [
-    { replyTo: (value) => value === undefined || id(value) },
-    ["twitch.chat.compose"],
-  ],
   "presentation.reportSize": [
     {
       width: (value) => integer(value, 1, 4096),
@@ -104,22 +40,18 @@ export function createServiceSimulator({
   fixture = {},
   onSnapshot = () => {},
   onSize = () => {},
-  now = () => performance.now(),
 }) {
   let disposed = false,
     contextId,
     frameRevision,
     base = {},
     snapshots,
-    capabilities,
-    startedAt = null,
-    lastElapsed = 0;
+    capabilities;
   function reset(nextManifest, nextFixture) {
     manifest = copy(nextManifest);
     fixture = copy(nextFixture ?? {});
     contextId = `preview-${++contextSequence}`;
     frameRevision = ++revision;
-    startedAt = null;
     snapshots = serviceFixtures(manifest.presentation);
     const supplied = fixture.snapshots ?? {};
     if (supplied && typeof supplied === "object" && !Array.isArray(supplied))
@@ -127,10 +59,7 @@ export function createServiceSimulator({
         if (Object.hasOwn(supplied, name))
           snapshots[name] = copy(supplied[name]);
       }
-    const declared =
-      manifest.apiVersion === "2"
-        ? (manifest.permissions?.capabilities ?? [])
-        : [];
+    const declared = manifest.permissions?.capabilities ?? [];
     const outbound = Boolean(
       manifest.permissions?.network?.length ||
       manifest.permissions?.clipboardWrite,
@@ -151,28 +80,19 @@ export function createServiceSimulator({
         ];
       }),
     );
-    if (snapshots.stopwatch?.data?.running) startedAt = now();
-    lastElapsed = snapshots.stopwatch?.data?.elapsedMs ?? 0;
   }
   reset(manifest, fixture);
   const granted = (names) =>
     names.length === 0 || names.some((name) => capabilities[name]?.granted);
-  function elapsed() {
-    const data = snapshots.stopwatch?.data;
-    return data
-      ? data.elapsedMs +
-          (data.running && startedAt !== null
-            ? Math.max(0, Math.floor(now() - startedAt))
-            : 0)
-      : 0;
-  }
   function snapshot(nextBase) {
     if (nextBase !== undefined) {
-      base = copy(nextBase);
-      delete base.services;
+      base = Object.fromEntries(
+        ["running", "selectedActive", "steamAppId", "sessionElapsedMs", "overlayMode"]
+          .filter((key) => Object.hasOwn(nextBase, key))
+          .map((key) => [key, copy(nextBase[key])]),
+      );
     }
     const result = { ...copy(base), fixture: true };
-    if (manifest.apiVersion !== "2") return result;
     const visible = {};
     for (const [name, required] of Object.entries(READ_CAPABILITIES)) {
       if (!granted(required)) {
@@ -190,32 +110,8 @@ export function createServiceSimulator({
       }
       visible[name] = copy(snapshots[name]);
     }
-    if (visible.stopwatch?.data) {
-      const value = elapsed();
-      if (value !== lastElapsed) {
-        lastElapsed = value;
-        frameRevision = ++revision;
-      }
-      visible.stopwatch.data.elapsedMs = value;
-    }
-    if (visible.journal?.data)
-      visible.journal.data.sessions = visible.journal.data.sessions
-        .filter(
-          (session) => capabilities[`journal.${session.source}.read`]?.granted,
-        )
-        .map((session) => ({
-          ...session,
-          note: capabilities["journal.notes.read"].granted
-            ? session.note
-            : null,
-        }));
-    if (
-      visible["playervox.reviews"]?.data?.followedOnly &&
-      !capabilities["playervox.followed.read"].granted
-    )
-      visible["playervox.reviews"] = { status: "permissionDenied", data: null };
     result.services = {
-      apiVersion: 2,
+      apiVersion: 1,
       contextId,
       revision: frameRevision,
       capabilities: copy(capabilities),
@@ -230,7 +126,6 @@ export function createServiceSimulator({
   function request(metadata, { role, interactive } = {}) {
     if (disposed || metadata?.contextId !== contextId)
       return failure("stale_context");
-    if (manifest.apiVersion !== "2") return failure("unsupported_operation");
     const definition = Object.hasOwn(definitions, metadata?.action)
         ? definitions[metadata.action]
         : null,
@@ -264,21 +159,6 @@ export function createServiceSimulator({
       onSize(copy(parameters));
       return success({ status: "accepted" });
     }
-    if (action.startsWith("stopwatch.")) {
-      const data = snapshots.stopwatch?.data;
-      if (!data) return failure("unavailable");
-      data.elapsedMs = elapsed();
-      if (action === "stopwatch.start") {
-        data.running = true;
-        startedAt = now();
-      } else {
-        data.running = false;
-        startedAt = null;
-        if (action === "stopwatch.reset") data.elapsedMs = 0;
-      }
-      publish();
-      return success({ status: "accepted" });
-    }
     if (action.startsWith("media.")) {
       const data = snapshots.media?.data;
       if (!data) return failure("unavailable");
@@ -293,57 +173,7 @@ export function createServiceSimulator({
       publish();
       return success({ status: "accepted" });
     }
-    if (action.startsWith("notes.")) {
-      const data = snapshots.notes?.data;
-      if (!data) return failure("unavailable");
-      if (parameters.expectedRevision !== data.documentRevision)
-        return success({ status: "conflict", revision: data.documentRevision });
-      const note = data.notes.find((note) => note.id === parameters.noteId);
-      if (action !== "notes.requestCreate" && !note)
-        return failure("invalid_request");
-      if (action === "notes.select") data.activeNoteId = parameters.noteId;
-      else if (action === "notes.setChecked") {
-        const item = note.items.find((item) => item.id === parameters.itemId);
-        if (!item) return failure("invalid_request");
-        item.checked = parameters.checked;
-      } else return success({ status: "cancelled" });
-      data.documentRevision++;
-      data.saveState = "persisted";
-      publish();
-      return success({ status: "persisted", revision: data.documentRevision });
-    }
-    if (action === "playervox.reviews.page") {
-      if (
-        parameters.followedOnly &&
-        !capabilities["playervox.followed.read"].granted
-      )
-        return failure("capability_denied");
-      const data = snapshots["playervox.reviews"]?.data;
-      if (!data) return failure("unavailable");
-      data.page = parameters.page;
-      data.followedOnly = parameters.followedOnly ?? false;
-      data.reviews =
-        parameters.page === 1
-          ? serviceFixtures()["playervox.reviews"].data.reviews
-          : [];
-      publish();
-      return success({ status: "accepted" });
-    }
-    if (action === "journal.page") {
-      const data = snapshots.journal?.data;
-      if (!data) return failure("unavailable");
-      if (parameters.cursor !== null) return failure("invalid_request");
-      data.page = 1;
-      publish();
-      return success({ status: "accepted" });
-    }
-    // Browser previews cannot open native editors, authenticate, delete or publish.
-    if (
-      parameters.expectedRevision !== undefined &&
-      parameters.expectedRevision !== frameRevision
-    )
-      return success({ status: "conflict" });
-    return success({ status: "cancelled" });
+    return failure("unsupported_operation");
   }
   return {
     snapshot,
@@ -381,7 +211,6 @@ export function createServiceSimulator({
       disposed = true;
       contextId = `disposed-${++contextSequence}`;
       frameRevision = ++revision;
-      startedAt = null;
       fixture = {};
       base = {};
       snapshots = Object.fromEntries(

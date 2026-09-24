@@ -7,6 +7,7 @@ import os from 'node:os';
 import {randomUUID} from 'node:crypto';
 import {collect,readRegular} from './bundle.mjs';
 import {CreatorError,MAX_BYTES,parseJson,validId} from './manifest.mjs';
+import {networkRuleKey} from '../preview/network-policy.mjs';
 
 const MAX_HEADER_BYTES=1024*1024;
 const REQUEST_TIMEOUT_MS=65_000;
@@ -24,9 +25,10 @@ function codeError(code) {
 }
 function report(options,error) {options.onError?.(error instanceof CreatorError?error:nativeError('native.failed','Le test natif a échoué.','Vérifiez OverCrow et les fichiers du widget, puis redémarrez.'));}
 function permissionsSubset(candidate,granted) {
-  const networksEqual=(left,right)=>left.origin===right.origin&&left.method===right.method&&left.pathPrefix===right.pathPrefix;
-  return (candidate.network??[]).every(permission=>(granted.network??[]).some(existing=>networksEqual(permission,existing)))
+  const networks=new Set((granted.network??[]).map(networkRuleKey));
+  return (candidate.network??[]).every(permission=>networks.has(networkRuleKey(permission)))
     &&(candidate.gameEvents??[]).every(event=>(granted.gameEvents??[]).includes(event))
+    &&(candidate.capabilities??[]).every(capability=>(granted.capabilities??[]).includes(capability))
     &&Boolean(candidate.storage)===Boolean(granted.storage)
     &&(!candidate.clipboardWrite||Boolean(granted.clipboardWrite));
 }

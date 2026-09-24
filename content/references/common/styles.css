@@ -115,3 +115,26 @@ body.passive #actions,
 body.passive article button {
   display: none;
 }
+
+#editor-label {
+  display: grid;
+  gap: 6px;
+}
+textarea {
+  width: 100%;
+  min-height: 90px;
+  resize: vertical;
+  color: inherit;
+  background: #182030;
+  border: 1px solid #64749a;
+  border-radius: 6px;
+  font: inherit;
+  padding: 8px;
+}
+textarea:focus-visible {
+  outline: 2px solid #a5c2ff;
+  outline-offset: 2px;
+}
+body.passive #editor-label {
+  display: none;
+}

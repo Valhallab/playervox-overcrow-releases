@@ -11,6 +11,7 @@ import {
 } from "../../tools/creator-kit/lib/bundle.mjs";
 import { REFERENCE_TEMPLATES } from "../../tools/creator-kit/lib/templates.mjs";
 import { createServiceSimulator } from "../../tools/creator-kit/preview/services.mjs";
+import { createStorageSimulator } from "../../tools/creator-kit/preview/storage.mjs";
 const root = fileURLToPath(new URL("../../", import.meta.url));
 
 test("every SDK-only reference initializes, validates and exports the shipped SDK", async (t) => {
@@ -32,8 +33,11 @@ test("every SDK-only reference initializes, validates and exports the shipped SD
     );
     assert.equal(result.status, 0, `${name}: ${result.stdout}${result.stderr}`);
     const bundle = await collect(project);
-    assert.equal(bundle.manifest.apiVersion, "2");
-    assert.deepEqual(bundle.manifest.permissions.network, []);
+    assert.equal(bundle.manifest.apiVersion, "1");
+    assert.equal(
+      bundle.manifest.permissions.network.length,
+      name === "score" ? 1 : 0,
+    );
     assert.ok(bundle.manifest.presentation.options.length > 0);
     assert.deepEqual(
       bundle.entries.get("overcrow.js"),
@@ -50,7 +54,7 @@ test("every SDK-only reference initializes, validates and exports the shipped SD
   }
 });
 
-test("reference views consume the real SDK, render text, expose native intents and clear revoked data", async (t) => {
+test("references use system services or isolated local data and clear revoked media", async (t) => {
   const folder = await mkdtemp(
     path.join(os.tmpdir(), "overcrow-reference-views-"),
   );
@@ -120,6 +124,9 @@ test("reference views consume the real SDK, render text, expose native intents a
             "details",
             "actions",
             "status",
+            "entry",
+            "editor-label",
+            "editor-title",
           ].map((id) => [id, new Element()]),
         ),
         events = new Map(),
@@ -160,14 +167,25 @@ test("reference views consume the real SDK, render text, expose native intents a
         sessionElapsedMs: 65000,
         overlayMode: "interactive",
       });
+      const storage = createStorageSimulator();
+      let storageWriteGate = null;
+      let fetchRequest = null;
       globalThis.__overcrowNative = {
         role: "view",
+        storage: { mode: "temporary", backend: "memory" },
         subscribe(listener) {
           listeners.add(listener);
           return () => listeners.delete(listener);
         },
         async request(metadata) {
           calls.push(metadata);
+          if (metadata.type === "storage") {
+            if (metadata.operation === "set" && storageWriteGate)
+              await storageWriteGate;
+            return storage(metadata);
+          }
+          if (metadata.type === "fetch" && fetchRequest)
+            return fetchRequest(metadata);
           return metadata.type === "gameSnapshot"
             ? {
                 metadata: { ok: true, value: sim.snapshot() },
@@ -191,18 +209,98 @@ test("reference views consume the real SDK, render text, expose native intents a
           assert.equal(nodes.primary.textContent, "unsupported");
         if (name === "session")
           assert.equal(nodes.primary.textContent, "00:01:05");
-        if (name === "twitch") {
-          const composer = nodes.actions.children.find(
-            (button) => button.textContent === "Compose in OverCrow",
+        if (name === "notes" || name === "journal") {
+          assert.equal(nodes.entry.disabled, false);
+          nodes.entry.value = "Only this widget owns this text";
+          const save = nodes.actions.children.find(
+            (button) => button.textContent === "Save",
           );
-          assert.ok(composer);
-          await composer.listeners.get("click")();
-          assert.equal(calls.at(-1).action, "twitch.chat.requestCompose");
-          assert.deepEqual(calls.at(-1).parameters, {});
-          assert.match(nodes.status.textContent, /Native UI/);
+          assert.ok(save);
+          await save.listeners.get("click")();
+          const saved = storage({
+            type: "storage",
+            operation: "get",
+            key: name + ".v1",
+          });
+          assert.deepEqual(
+            JSON.parse(saved.metadata.value),
+            name === "notes"
+              ? "Only this widget owns this text"
+              : ["Only this widget owns this text"],
+          );
+          assert.equal(
+            calls.some((call) =>
+              /^(notes|journal|stopwatch|playervox|twitch)\./.test(
+                call.action ?? "",
+              ),
+            ),
+            false,
+          );
+
+          let releaseWrite;
+          storageWriteGate = new Promise((resolve) => {
+            releaseWrite = resolve;
+          });
+          nodes.entry.value = "Save through a snapshot update";
+          const pendingSave = nodes.actions.children
+            .find((button) => button.textContent === "Save")
+            .listeners.get("click")();
+          try {
+            sim.setOption("details", false);
+            await new Promise((resolve) => setImmediate(resolve));
+            assert.equal(nodes.entry.disabled, true, `${name}: pending editor`);
+            assert.equal(
+              nodes.actions.children.find(
+                (button) => button.textContent === "Save",
+              ).disabled,
+              true,
+              `${name}: pending save after a snapshot rebuilds the controls`,
+            );
+          } finally {
+            releaseWrite();
+            await pendingSave;
+            storageWriteGate = null;
+          }
+          assert.equal(nodes.entry.disabled, false);
+          assert.equal(
+            nodes.actions.children.find(
+              (button) => button.textContent === "Save",
+            ).disabled,
+            false,
+          );
+          assert.deepEqual(
+            JSON.parse(
+              storage({ type: "storage", operation: "get", key: name + ".v1" })
+                .metadata.value,
+            ),
+            name === "notes"
+              ? "Save through a snapshot update"
+              : [
+                  "Only this widget owns this text",
+                  "Save through a snapshot update",
+                ],
+          );
+
+          let rejectWrite;
+          storageWriteGate = new Promise((_, reject) => {
+            rejectWrite = reject;
+          });
+          nodes.entry.value = "Keep this draft after a failed save";
+          const failedSave = nodes.actions.children
+            .find((button) => button.textContent === "Save")
+            .listeners.get("click")();
+          rejectWrite(new Error("Simulated storage failure"));
+          await failedSave;
+          storageWriteGate = null;
+          assert.equal(nodes.entry.disabled, false);
+          assert.equal(
+            nodes.entry.value,
+            "Keep this draft after a failed save",
+          );
+          assert.equal(nodes.status.textContent, "storage_unavailable");
         }
-        if (name === "notes") {
-          assert.match(nodes.details.textContent, /Fictional native note/);
+        if (name === "media") {
+          assert.match(nodes.primary.textContent, /Preview track/);
           sim.setContext({
             manifest: {
               ...manifest,
@@ -213,6 +311,79 @@ test("reference views consume the real SDK, render text, expose native intents a
           assert.equal(nodes.primary.textContent, "permissionDenied");
           assert.equal(nodes.details.textContent, "");
           assert.equal(nodes.actions.children.length, 0);
+        }
+        if (name === "score") {
+          const pendingFetches = [];
+          fetchRequest = () =>
+            new Promise((resolve) => pendingFetches.push(resolve));
+          const selectGame = (steamAppId) => {
+            for (const listener of listeners)
+              listener({
+                type: "gameSnapshot",
+                payload: {
+                  ...sim.snapshot(),
+                  fixture: false,
+                  steamAppId,
+                },
+              });
+          };
+          const reply = (index, score) =>
+            pendingFetches[index]({
+              metadata: { ok: true, status: score === null ? 503 : 200 },
+              body: new TextEncoder().encode(
+                JSON.stringify({
+                  game: { name: "Public game" },
+                  score,
+                  ratings_count: 1,
+                  criteria: {},
+                }),
+              ).buffer,
+            });
+          selectGame(620);
+          assert.equal(pendingFetches.length, 1);
+          reply(0, null);
+          await new Promise((resolve) => setImmediate(resolve));
+          const retry = nodes.actions.children.find(
+            (button) => button.textContent === "Retry",
+          );
+          assert.ok(retry, "failed public scores offer an explicit retry");
+          selectGame(620);
+          assert.equal(
+            pendingFetches.length,
+            1,
+            "snapshot updates do not retry automatically",
+          );
+          retry.listeners.get("click")();
+          retry.listeners.get("click")();
+          assert.equal(
+            pendingFetches.length,
+            2,
+            "only one retry may be in flight",
+          );
+          assert.equal(
+            nodes.actions.children.length,
+            0,
+            "pending retries hide the retry control",
+          );
+          reply(1, 84);
+          await new Promise((resolve) => setImmediate(resolve));
+          assert.equal(nodes.primary.textContent, "84.0 / 100");
+
+          selectGame(730);
+          selectGame(440);
+          selectGame(730);
+          assert.equal(pendingFetches.length, 5);
+          reply(2, 10);
+          reply(3, 20);
+          await new Promise((resolve) => setImmediate(resolve));
+          assert.equal(
+            nodes.primary.textContent,
+            "Loading…",
+            "late results cannot restore a previous context of the same game",
+          );
+          reply(4, 90);
+          await new Promise((resolve) => setImmediate(resolve));
+          assert.equal(nodes.primary.textContent, "90.0 / 100");
         }
         assert.ok(
           calls.some((call) => call.action === "presentation.reportSize"),

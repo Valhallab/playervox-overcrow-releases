@@ -110,7 +110,7 @@ test('automatic sizing prevents pointer and keyboard resizing until explicitly d
 });
 
 const presentation=mode=>({sizing:{mode,preferred:{width:120,height:40},min:{width:24,height:12},max:{width:800,height:600}},options:[{id:'showArtist',type:'boolean',label:{en:'Show artist',fr:'Afficher l’artiste'},default:true}]});
-test('v2 chrome keeps intrinsic fixed, auto height horizontal, and scales CSS reports once',async()=>{
+test('chrome keeps intrinsic fixed, auto height horizontal, and scales CSS reports once',async()=>{
   const {el,fire,chrome}=setup(undefined,undefined,el=>{el('#stage-surface').rect={left:0,right:1000,top:0,bottom:900,width:1000,height:900};});
   chrome.setPresentation(presentation('intrinsic'));
   assert.equal(el('#widget-host').style.width,'120px');assert.equal(el('#widget-host').style.height,'40px');
@@ -130,7 +130,7 @@ test('v2 chrome keeps intrinsic fixed, auto height horizontal, and scales CSS re
   chrome.dispose();
 });
 
-test('v2 native preview options are localized, bounded and disabled in passive mode',()=>{
+test('native preview options are localized, bounded and disabled in passive mode',()=>{
   const changes=[];
   const {el,fire,chrome}=setup(undefined,{onOptionChange:(key,value)=>changes.push([key,value])});
   chrome.setPresentation(presentation('manual'));

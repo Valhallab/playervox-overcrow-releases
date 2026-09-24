@@ -63,7 +63,7 @@ test('checklist storage permission and locale/network rules survive export',asyn
   const {project}=await fixture(t,'checklist');
   const file=path.join(project,'widget/manifest.json'),manifest=JSON.parse(await fs.readFile(file,'utf8'));
   manifest.localization={defaultLocale:'fr',availableLocales:['fr','en']};
-  manifest.permissions.network=[{origin:'https://api.example.com',method:'GET',pathPrefix:'/v2/'}];
+  manifest.permissions.network=[{origin:'https://api.example.com',method:'GET',path:'/v2/items'}];
   manifest.permissions.gameEvents=['overcrow.game.session.v1'];
   await fs.writeFile(file,JSON.stringify(manifest));
   const bundle=await collect(project);assert.equal(bundle.manifest.permissions.storage,true);assert.deepEqual(bundle.manifest.localization,manifest.localization);
@@ -81,7 +81,17 @@ test('preview serves only a frozen widget generation and rejects traversal and f
   assert.match(shell,/aria-label="Options du widget"/);
   assert.match(shell,/Taille du contenu/);
   assert.match(shell,/Opacité du fond/);
-  for(const [asset,type] of [['chrome.mjs','text/javascript'],['chrome-messages.mjs','text/javascript'],['NotoSansUI-Regular.ttf','font/ttf']]) {
+  const modules=['app.js'], visited=new Set();
+  for (const name of modules) {
+    if (visited.has(name)) continue;
+    visited.add(name);
+    const resource=await fetch(preview.url+name);
+    assert.equal(resource.status,200,`Preview module ${name} must be served`);
+    assert.ok(resource.headers.get('content-type').startsWith('text/javascript'),name);
+    const source=await resource.text();
+    for (const match of source.matchAll(/(?:from|import)\s*['"]\.\/([^'"]+)['"]/g)) modules.push(match[1]);
+  }
+  for(const [asset,type] of [['network-policy.mjs','text/javascript'],['chrome.mjs','text/javascript'],['chrome-messages.mjs','text/javascript'],['NotoSansUI-Regular.ttf','font/ttf']]) {
     const resource=await fetch(preview.url+asset);assert.equal(resource.status,200,asset);
     assert.ok(resource.headers.get('content-type').startsWith(type),asset);
     assert.ok((await resource.arrayBuffer()).byteLength>0,asset);
@@ -97,6 +107,9 @@ test('preview serves only a frozen widget generation and rejects traversal and f
 });
 test('watch preserves the last good generation and requires restart for permission changes',async t=>{
   const {project}=await fixture(t);
+  const file=path.join(project,'widget/manifest.json'),initial=JSON.parse(await fs.readFile(file,'utf8'));
+  initial.permissions.network=[{origin:'https://api.example.com',method:'GET',path:'/items/{id}',pathParams:{id:{type:'integer',min:1,max:10}},queryParams:{mode:{type:'enum',values:['small','large']},search:{type:'string',maxLength:10}}}];
+  await fs.writeFile(file,JSON.stringify(initial));
   const preview=await startPreview(project,0);t.after(()=>preview.close());
   const abort=new AbortController();t.after(()=>abort.abort());
   const response=await fetch(preview.url+'events',{signal:abort.signal});const reader=response.body.getReader();
@@ -112,11 +125,19 @@ test('watch preserves the last good generation and requires restart for permissi
     }
   }
   assert.equal((await nextEvent()).generation,1);
-  const file=path.join(project,'widget/manifest.json'),original=await fs.readFile(file,'utf8');
+  const original=await fs.readFile(file,'utf8');
   await fs.writeFile(file,'{');const failure=await nextEvent(e=>Boolean(e.error));assert.equal(failure.generation,1);
   assert.equal((await fetch(preview.url+'state.json').then(r=>r.json())).generation,1);
   await fs.writeFile(file,original);await fs.appendFile(path.join(project,'widget/styles.css'),'\n/* edit */');
   assert.equal((await nextEvent(e=>e.generation===2)).generation,2);
+  const reordered=JSON.parse(original),rule=reordered.permissions.network[0];
+  rule.queryParams.mode.values.reverse();rule.queryParams.mode.required=false;rule.queryParams=Object.fromEntries(Object.entries(rule.queryParams).reverse());
+  await fs.writeFile(file,JSON.stringify(reordered));
+  const orderEvent=await nextEvent(e=>e.generation===3||Boolean(e.error));
+  assert.equal(orderEvent.error,undefined,'Equivalent map/enum order must not require new preview consent');
+  assert.equal(orderEvent.generation,3);
+  rule.queryParams.search.maxLength=11;await fs.writeFile(file,JSON.stringify(reordered));
+  assert.equal((await nextEvent(e=>Boolean(e.error))).error.code,'preview.permissions');
   const changed=JSON.parse(original);changed.permissions.storage=true;await fs.writeFile(file,JSON.stringify(changed));
   assert.equal((await nextEvent(e=>Boolean(e.error))).error.code,'preview.permissions');
   assert.equal((await fetch(preview.url+'state.json').then(r=>r.json())).manifest.permissions.storage,false);

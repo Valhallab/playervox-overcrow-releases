@@ -30,7 +30,7 @@ export function createWidgetChrome(
   let contentHint = null, sizeTimer = null, lastContentSize = null, previousContentSize = null, sizeCycle = null;
   let lastContentAt = 0;
   let maximumWidth = 900, maximumHeight = 900;
-  const legacyMinimum = {width: minimumWidth, height: minimumHeight};
+  const defaultMinimum = {width: minimumWidth, height: minimumHeight};
   const sizingMode = () => presentation?.sizing.mode ?? (autoSize ? "intrinsic" : "manual");
   let contentCleanup = () => {};
   function listen(target, type, callback, options) {
@@ -549,8 +549,8 @@ export function createWidgetChrome(
     }
     close();contentHint=null;lastContentSize=previousContentSize=sizeCycle=null;
     if (sizeTimer!==null) { clearTimeout(sizeTimer);sizeTimer=null; }
-    minimumWidth=presentation?.sizing.min.width ?? legacyMinimum.width;
-    minimumHeight=presentation?.sizing.min.height ?? legacyMinimum.height;
+    minimumWidth=presentation?.sizing.min.width ?? defaultMinimum.width;
+    minimumHeight=presentation?.sizing.min.height ?? defaultMinimum.height;
     maximumWidth=presentation?.sizing.max.width ?? 900;
     maximumHeight=presentation?.sizing.max.height ?? 900;
     if (presentation) resize(presentation.sizing.preferred.width,presentation.sizing.preferred.height);

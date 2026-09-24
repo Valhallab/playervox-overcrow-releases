@@ -2,10 +2,12 @@
 import {simulateFetch} from './network.mjs';
 import {createWidgetChrome} from './chrome.mjs';
 import {createServiceSimulator} from './services.mjs';
+import {createStorageSimulator} from './storage.mjs';
 const base=new URL('./',location.href).pathname;
 const view=document.querySelector('#view'),controller=document.querySelector('#controller');
 const status=document.querySelector('#status'),locale=document.querySelector('#locale');
 let state,snapshot,services,generation=0,loading=0;
+let storage=createStorageSimulator();
 const chrome=createWidgetChrome(document,'fr',mode=>{
   snapshot=services?.snapshot({...snapshot,overlayMode:mode})??{...snapshot,overlayMode:mode};
   publish(snapshot);
@@ -20,12 +22,13 @@ function publish(next) {
   for(const frame of [view,controller])send(frame,{type:'gameSnapshot',payload:snapshot});
 }
 function message(text,error=false){status.textContent=text;status.classList.toggle('error',error);}
-function sessionSnapshot(active){return {running:active,selectedActive:active,steamAppId:active?230410:null,sessionElapsedMs:active?300000:null,overlayMode:chrome.mode,cpuPercentHundredths:active?325:null,residentBytes:active?104857600:null,cpuTemperatureMillicelsius:null,gpuTemperatureMillicelsius:null};}
+function sessionSnapshot(active){return {running:active,selectedActive:active,steamAppId:active?230410:null,sessionElapsedMs:active?300000:null,overlayMode:chrome.mode};}
 async function load() {
   const request=++loading;
   const response=await fetch(base+'state.json');if(!response.ok)throw new Error('Aperçu indisponible.');
   const next=await response.json();if(request!==loading)return;
   state=next;generation=state.generation;
+  storage=createStorageSimulator();
   services?.dispose();
   services=createServiceSimulator({manifest:state.manifest,fixture:state.config.services??{},onSnapshot:publish,onSize:size=>chrome.reportSize(size)});
   ready.view=false;ready.controller=false;queued.view=[];queued.controller=[];
@@ -39,7 +42,7 @@ async function load() {
   if(state.manifest.entrypoints.controller)controller.src=base+'controller/'+state.manifest.entrypoints.controller;
   else controller.removeAttribute('src');
   view.src=base+'view/'+state.manifest.entrypoints.view;
-  message(`Version ${generation} prête · ${state.manifest.id}`);
+  message(`Version ${generation} prête · données SDK temporaires · ${state.manifest.id}`);
 }
 function failure(code,text){return {metadata:{ok:false,error:{code,message:text}},body:empty()};}
 window.addEventListener('message',event=>{
@@ -53,6 +56,7 @@ window.addEventListener('message',event=>{
   if(!ready[role]||data.bridgeId!==bridges[role])return;
   const meta=data.metadata;let response;
   if(meta.type==='gameSnapshot')response={metadata:{ok:true,value:services.snapshot(snapshot)},body:empty()};
+  else if(meta.type==='storage')response=storage(meta);
   else if(meta.type==='serviceAction')response=services.request(meta,{role,interactive:chrome.mode==='interactive'});
   else if(meta.type==='locale')response={metadata:{ok:true,value:locale.value||null},body:empty()};
   else if(meta.type==='invalidate')response={metadata:{ok:true},body:empty()};
@@ -72,11 +76,12 @@ window.addEventListener('message',event=>{
   event.source.postMessage({source:'overcrow-creator',type:'reply',id:data.id,response,bridgeId:data.bridgeId},location.origin);
 });
 document.querySelector('#session').addEventListener('change',event=>{
+  storage=createStorageSimulator();
   snapshot=sessionSnapshot(event.target.value==='active');services.snapshot(snapshot);services.setContext();
 });
 locale.addEventListener('change',()=>{for(const frame of [view,controller])send(frame,{type:'localeChanged',locale:locale.value||null});});
 document.querySelector('#reload').addEventListener('click',()=>load().catch(error=>message(error.message,true)));
 const stream=new EventSource(base+'events');
-stream.onmessage=event=>{const update=JSON.parse(event.data);if(update.error)message(`${update.error.message} ${update.error.action}`,true);else if(update.generation!==generation)load().catch(error=>message(error.message,true));else if(update.ok)message(`Version ${generation} prête · ${state?.manifest.id??''}`);};
+stream.onmessage=event=>{const update=JSON.parse(event.data);if(update.error)message(`${update.error.message} ${update.error.action}`,true);else if(update.generation!==generation)load().catch(error=>message(error.message,true));else if(update.ok)message(`Version ${generation} prête · données SDK temporaires · ${state?.manifest.id??''}`);};
 stream.onerror=()=>message('Connexion à l’aperçu interrompue. Vérifiez le terminal ; reconnexion automatique.',true);
 window.addEventListener('pagehide',()=>{stream.close();services?.dispose();chrome.dispose();},{once:true});
