@@ -12,21 +12,24 @@ from `marketplace-tool package`. WIT, Wasmtime, native widgets, and
 provider graphs are retired.
 
 `published/marketplace/v1/` contains the signed Web API v1 catalog with Warframe
-Market 2.0.5 under MIT. Source changes require a new widget version, admission
+Market 2.0.6 under MIT (catalog sequence 5). Source changes require a new widget version, admission
 and signed publication; they never replace an existing signed package. Version
 retirement requires explicit authorization after the replacement catalog has
 been verified. Website-only updates preserve that subtree byte-for-byte and do
 not rotate keys. The private web repository mirrors these bytes and owns the
 complete `published/` website served by Coolify.
 
-The current SDK contract requires exact network `path` rules and bounded
-`pathParams` / `queryParams`; `pathPrefix` is rejected. The signed 2.0.5 package
-uses the former contract. Before deploying this SDK and website, admit the
-updated Warframe 2.0.6 source and prepare a new signed catalog with an explicit
-`removeVersions` entry for 2.0.5. Review and authorize that retirement as part of
-publication. The existing immutable 2.0.5 URL and archive remain unchanged.
-Do not deploy the new clients against the old catalog: they reject its manifest;
-the website displays an unavailable catalog and offers no installation action.
+The SDK contract requires exact network `path` rules and bounded
+`pathParams` / `queryParams`; `pathPrefix` is rejected. Warframe 2.0.6 declares
+only its three public API routes. Its controller paces requests and bounds
+IndexedDB operations; offers and copied whispers preserve variants and bundle
+quantities. The large item cache uses a separate IndexedDB database under the
+host's storage permission, as allowed by the advanced storage contract.
+
+Sequence 5 retires the incompatible 2.0.5 listing from the active catalog.
+Its immutable package URL and archive remain unchanged for historical access.
+Do not restore an older catalog alongside the current clients: they reject its
+legacy manifest and show the marketplace as unavailable.
 The API version remains `"1"`; unsupported permissions are never translated or
 silently widened. Revoked or suspended versions still cannot be retired.
 
@@ -222,8 +225,8 @@ Prepare the next catalog from its authenticated predecessor:
 cargo run -p marketplace-tool --locked -- prepare-production-catalog \
   --store "$accepted_store" --review-tree "$review_tree" \
   --state "$publication_state" --request "$request_json" \
-  --previous-output "$previous_finalized_output" \
-  --output "$prepared_output"
+  --output "$prepared_output" \
+  --previous-output "$previous_finalized_output"
 ```
 
 `previous_finalized_output` must contain a completed
