@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "com.playervox.examples.twitch",
+  "version": "1.0.0",
+  "apiVersion": "2",
+  "entrypoints": {
+    "view": "index.html"
+  },
+  "permissions": {
+    "network": [],
+    "gameEvents": [],
+    "storage": false,
+    "clipboardWrite": false,
+    "capabilities": ["twitch.chat.read", "twitch.chat.compose"]
+  },
+  "localization": {
+    "defaultLocale": "en",
+    "availableLocales": ["en", "fr"]
+  },
+  "presentation": {
+    "sizing": {
+      "mode": "manual",
+      "preferred": {
+        "width": 360,
+        "height": 320
+      },
+      "min": {
+        "width": 200,
+        "height": 48
+      },
+      "max": {
+        "width": 800,
+        "height": 900
+      }
+    },
+    "options": [
+      {
+        "id": "details",
+        "type": "boolean",
+        "label": {
+          "en": "Show details",
+          "fr": "Afficher les détails"
+        },
+        "default": true
+      }
+    ]
+  }
+}

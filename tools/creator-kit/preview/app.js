@@ -1,14 +1,24 @@
 // MIT License. Copyright (c) 2026 Valhallab SASU.
 import {simulateFetch} from './network.mjs';
 import {createWidgetChrome} from './chrome.mjs';
+import {createServiceSimulator} from './services.mjs';
 const base=new URL('./',location.href).pathname;
 const view=document.querySelector('#view'),controller=document.querySelector('#controller');
 const status=document.querySelector('#status'),locale=document.querySelector('#locale');
-const chrome=createWidgetChrome(document,'fr',mode=>{snapshot={...snapshot,overlayMode:mode};for(const frame of [view,controller])send(frame,{type:'gameSnapshot',payload:snapshot});},{onVisibilityChange:visible=>{for(const frame of [view,controller])send(frame,{type:'visibility',visible});}});
-let state,snapshot,generation=0,loading=0;
+let state,snapshot,services,generation=0,loading=0;
+const chrome=createWidgetChrome(document,'fr',mode=>{
+  snapshot=services?.snapshot({...snapshot,overlayMode:mode})??{...snapshot,overlayMode:mode};
+  publish(snapshot);
+},{onVisibilityChange:visible=>{for(const frame of [view,controller])send(frame,{type:'visibility',visible});},onOptionChange:(key,value)=>services?.setOption(key,value)});
 const ready={view:false,controller:false},queued={view:[],controller:[]};
+const bridges={view:null,controller:null};
 const empty=()=>new ArrayBuffer(0);
 const send=(frame,event)=>frame.contentWindow?.postMessage({source:'overcrow-creator',type:'event',event},location.origin);
+function publish(next) {
+  snapshot=next;
+  chrome.setPresentation(state?.manifest.presentation,snapshot?.services?.snapshots.presentation?.data?.options??{});
+  for(const frame of [view,controller])send(frame,{type:'gameSnapshot',payload:snapshot});
+}
 function message(text,error=false){status.textContent=text;status.classList.toggle('error',error);}
 function sessionSnapshot(active){return {running:active,selectedActive:active,steamAppId:active?230410:null,sessionElapsedMs:active?300000:null,overlayMode:chrome.mode,cpuPercentHundredths:active?325:null,residentBytes:active?104857600:null,cpuTemperatureMillicelsius:null,gpuTemperatureMillicelsius:null};}
 async function load() {
@@ -16,8 +26,12 @@ async function load() {
   const response=await fetch(base+'state.json');if(!response.ok)throw new Error('Aperçu indisponible.');
   const next=await response.json();if(request!==loading)return;
   state=next;generation=state.generation;
+  services?.dispose();
+  services=createServiceSimulator({manifest:state.manifest,fixture:state.config.services??{},onSnapshot:publish,onSize:size=>chrome.reportSize(size)});
   ready.view=false;ready.controller=false;queued.view=[];queued.controller=[];
-  snapshot={...(state.config.snapshot??sessionSnapshot(document.querySelector('#session').value==='active')),overlayMode:chrome.mode};
+  bridges.view=bridges.controller=null;
+  snapshot=services.snapshot({...(state.config.snapshot??sessionSnapshot(document.querySelector('#session').value==='active')),overlayMode:chrome.mode});
+  chrome.setPresentation(state.manifest.presentation,snapshot.services?.snapshots.presentation?.data?.options??{});
   const previousLocale=locale.value,locales=state.manifest.localization?.availableLocales??[];locale.replaceChildren();
   for(const value of locales.length?locales:['Non déclarée']){const option=document.createElement('option');option.value=locales.length?value:'';option.textContent=value;locale.append(option);}
   locale.value=locales.includes(previousLocale)?previousLocale:state.manifest.localization?.defaultLocale??'';locale.disabled=!locales.length;
@@ -34,10 +48,12 @@ window.addEventListener('message',event=>{
   if(!role||!state)return;
   const data=event.data;
   if(data.type==='error'){message(data.message,true);return;}
-  if(data.type==='ready'){ready[role]=true;const frame=role==='view'?view:controller;for(const item of queued[role])send(frame,item);queued[role]=[];send(frame,{type:'visibility',visible:chrome.visible});return;}
+  if(data.type==='ready'){bridges[role]=data.bridgeId;ready[role]=true;const frame=role==='view'?view:controller;for(const item of queued[role])send(frame,item);queued[role]=[];send(frame,{type:'visibility',visible:chrome.visible});return;}
   if(data.type!=='request'||!Number.isSafeInteger(data.id)||!data.metadata)return;
+  if(!ready[role]||data.bridgeId!==bridges[role])return;
   const meta=data.metadata;let response;
-  if(meta.type==='gameSnapshot')response={metadata:{ok:true,value:snapshot},body:empty()};
+  if(meta.type==='gameSnapshot')response={metadata:{ok:true,value:services.snapshot(snapshot)},body:empty()};
+  else if(meta.type==='serviceAction')response=services.request(meta,{role,interactive:chrome.mode==='interactive'});
   else if(meta.type==='locale')response={metadata:{ok:true,value:locale.value||null},body:empty()};
   else if(meta.type==='invalidate')response={metadata:{ok:true},body:empty()};
   else if(meta.type==='relay') {
@@ -53,12 +69,14 @@ window.addEventListener('message',event=>{
     response=simulateFetch(state.manifest.permissions,state.config.responses??[],meta);
     if(response.metadata.error?.code==='fixture_missing')message('Réponse absente de preview.json : ajoutez une fixture pour cette méthode et cette URL.',true);
   } else response=failure('invalid_request','Unsupported preview operation.');
-  event.source.postMessage({source:'overcrow-creator',type:'reply',id:data.id,response},location.origin);
+  event.source.postMessage({source:'overcrow-creator',type:'reply',id:data.id,response,bridgeId:data.bridgeId},location.origin);
 });
-document.querySelector('#session').addEventListener('change',event=>{snapshot=sessionSnapshot(event.target.value==='active');for(const frame of [view,controller])send(frame,{type:'gameSnapshot',payload:snapshot});});
+document.querySelector('#session').addEventListener('change',event=>{
+  snapshot=sessionSnapshot(event.target.value==='active');services.snapshot(snapshot);services.setContext();
+});
 locale.addEventListener('change',()=>{for(const frame of [view,controller])send(frame,{type:'localeChanged',locale:locale.value||null});});
 document.querySelector('#reload').addEventListener('click',()=>load().catch(error=>message(error.message,true)));
 const stream=new EventSource(base+'events');
 stream.onmessage=event=>{const update=JSON.parse(event.data);if(update.error)message(`${update.error.message} ${update.error.action}`,true);else if(update.generation!==generation)load().catch(error=>message(error.message,true));else if(update.ok)message(`Version ${generation} prête · ${state?.manifest.id??''}`);};
 stream.onerror=()=>message('Connexion à l’aperçu interrompue. Vérifiez le terminal ; reconnexion automatique.',true);
-window.addEventListener('pagehide',()=>stream.close(),{once:true});
+window.addEventListener('pagehide',()=>{stream.close();services?.dispose();chrome.dispose();},{once:true});

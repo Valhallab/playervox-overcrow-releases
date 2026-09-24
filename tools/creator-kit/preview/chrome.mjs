@@ -14,6 +14,7 @@ export function createWidgetChrome(
   {
     onClose,
     onVisibilityChange,
+    onOptionChange,
     query,
     minimumWidth = 280,
     minimumHeight = 160,
@@ -25,6 +26,12 @@ export function createWidgetChrome(
   const find = query ?? ((selector) => document.querySelector(selector)),
     window = document.defaultView;
   const listeners = [];
+  let presentation = null, optionValues = "{}", optionControls = [], optionCleanups = [], nativeOptions = null;
+  let contentHint = null, sizeTimer = null, lastContentSize = null, previousContentSize = null, sizeCycle = null;
+  let lastContentAt = 0;
+  let maximumWidth = 900, maximumHeight = 900;
+  const legacyMinimum = {width: minimumWidth, height: minimumHeight};
+  const sizingMode = () => presentation?.sizing.mode ?? (autoSize ? "intrinsic" : "manual");
   let contentCleanup = () => {};
   function listen(target, type, callback, options) {
     target.addEventListener(type, callback, options);
@@ -46,8 +53,11 @@ export function createWidgetChrome(
     const passive = mode === "passive";
     move.disabled = toggle.disabled = eye.disabled = passive;
     move.hidden = passive;
-    grip.disabled = grip.hidden = passive || autoSize;
-    host.setAttribute("data-auto-size", String(autoSize));
+    grip.disabled = grip.hidden = passive || sizingMode() === "intrinsic";
+    grip.style.cursor = sizingMode() === "autoHeight" ? "ew-resize" : "nwse-resize";
+    host.setAttribute("data-auto-size", String(sizingMode() === "intrinsic"));
+    host.setAttribute("data-sizing-mode", sizingMode());
+    for (const control of optionControls) control.disabled = passive;
   }
   function syncVisibility() {
     const nextVisible = mode === "interactive" || showInPassive;
@@ -114,6 +124,7 @@ export function createWidgetChrome(
     surface.style.borderColor = `rgba(255, 255, 255, ${(24 / 255) * opacity})`;
     for (const [key, setting] of Object.entries(settings))
       find(`#value-${key}`).textContent = `${setting.value}%`;
+    if (presentation && sizingMode() !== "manual") applyContentSize(true);
   }
   function syncEditor() {
     const setting = settings[active];
@@ -305,14 +316,14 @@ export function createWidgetChrome(
     anchorPosition();
     const bounds = host.getBoundingClientRect(),
       area = stage.getBoundingClientRect();
-    const maxWidth = Math.max(0, Math.min(900, area.right - bounds.left));
-    const maxHeight = Math.max(0, Math.min(900, area.bottom - bounds.top));
+    const maxWidth = Math.max(0, Math.min(maximumWidth, area.right - bounds.left));
+    const maxHeight = Math.max(0, Math.min(maximumHeight, area.bottom - bounds.top));
     host.style.width = `${clamp(width, Math.min(minimumWidth, maxWidth), maxWidth)}px`;
     host.style.height = `${clamp(height, Math.min(minimumHeight, maxHeight), maxHeight)}px`;
     positionToolbar();
   }
   listen(grip, "pointerdown", (event) => {
-    if (event.button !== 0 || autoSize || mode !== "interactive") return;
+    if (event.button !== 0 || sizingMode() === "intrinsic" || mode !== "interactive") return;
     event.preventDefault();
     close();
     const bounds = host.getBoundingClientRect();
@@ -330,7 +341,7 @@ export function createWidgetChrome(
     if (drag?.id === event.pointerId)
       resize(
         drag.width + event.clientX - drag.x,
-        drag.height + event.clientY - drag.y,
+        sizingMode() === "autoHeight" ? drag.height : drag.height + event.clientY - drag.y,
       );
   });
   for (const type of ["pointerup", "pointercancel", "lostpointercapture"])
@@ -339,7 +350,8 @@ export function createWidgetChrome(
       view.style.pointerEvents = "";
     });
   listen(grip, "keydown", (event) => {
-    if (autoSize || mode !== "interactive") return;
+    if (sizingMode() === "intrinsic" || mode !== "interactive") return;
+    if (sizingMode() === "autoHeight" && ["ArrowUp", "ArrowDown"].includes(event.key)) return;
     if (
       !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)
     )
@@ -494,6 +506,88 @@ export function createWidgetChrome(
     host.style.height = `${height}px`;
     positionToolbar();
   }
+  function applyContentSize(reset = false) {
+    if (!presentation || sizingMode() === "manual") return;
+    if (reset) { lastContentSize = previousContentSize = sizeCycle = null; }
+    const content = contentHint ?? presentation.sizing.preferred, scale = settings.scale.value / 100;
+    const currentWidth = Number.parseFloat(host.style.width) || presentation.sizing.preferred.width;
+    let next = {
+      width: sizingMode() === "intrinsic" ? content.width * scale : currentWidth,
+      height: content.height * scale,
+    };
+    next = {width: Math.round(clamp(next.width, minimumWidth, maximumWidth)), height: Math.round(clamp(next.height, minimumHeight, maximumHeight))};
+    const near = (a,b) => a && Math.abs(a.width-b.width)<=1 && Math.abs(a.height-b.height)<=1;
+    if (sizeCycle && sizeCycle.some(size=>near(size,next))) next={width:Math.max(...sizeCycle.map(size=>size.width)),height:Math.max(...sizeCycle.map(size=>size.height))};
+    else if (Date.now()-lastContentAt<=500 && near(previousContentSize,next) && !near(lastContentSize,next)) {
+      sizeCycle=[previousContentSize,lastContentSize];next={width:Math.max(...sizeCycle.map(size=>size.width)),height:Math.max(...sizeCycle.map(size=>size.height))};
+    } else if (sizeCycle) { sizeCycle=null;previousContentSize=null; }
+    if (near(lastContentSize,next)) return;
+    previousContentSize=lastContentSize;lastContentSize=next;lastContentAt=Date.now();
+    resize(next.width,next.height);
+  }
+  function reportSize(size) {
+    if (!presentation || !size || ![size.width,size.height].every(value=>Number.isInteger(value)&&value>=1&&value<=4096)) return false;
+    contentHint={width:size.width,height:size.height};
+    if (sizeTimer===null) sizeTimer=setTimeout(()=>{sizeTimer=null;applyContentSize();},100);
+    return true;
+  }
+  function setPresentation(next, values = {}) {
+    const changed = JSON.stringify(presentation) !== JSON.stringify(next ?? null);
+    const nextValues=JSON.stringify(values);
+    if (optionValues!==nextValues) previousContentSize=sizeCycle=null;
+    optionValues=nextValues;
+    presentation=next ?? null;
+    if (!changed) {
+      for (const [index,control] of optionControls.entries()) {
+        const option=presentation.options[index];
+        if (document.activeElement===control) continue;
+        const value=Object.hasOwn(values,option.id)?values[option.id]:option.default;
+        if (option.type==="boolean") control.checked=value;
+        else control.value=String(value);
+      }
+      syncInteraction();return;
+    }
+    if (changed) {
+      close();contentHint=null;lastContentSize=previousContentSize=sizeCycle=null;
+      if (sizeTimer!==null) { clearTimeout(sizeTimer);sizeTimer=null; }
+      minimumWidth=presentation?.sizing.min.width ?? legacyMinimum.width;
+      minimumHeight=presentation?.sizing.min.height ?? legacyMinimum.height;
+      maximumWidth=presentation?.sizing.max.width ?? 900;
+      maximumHeight=presentation?.sizing.max.height ?? 900;
+      if (presentation) resize(presentation.sizing.preferred.width,presentation.sizing.preferred.height);
+      else resize(480,320);
+    }
+    for (const remove of optionCleanups) remove();
+    optionCleanups=[];optionControls=[];
+    if (!nativeOptions && presentation?.options?.length) {
+      nativeOptions=document.createElement("div");nativeOptions.className="native-widget-options";menu.append(nativeOptions);
+      listen(nativeOptions,"focusin",()=>closeEditor());
+      listen(nativeOptions,"pointerenter",()=>closeEditor());
+    }
+    if (nativeOptions) nativeOptions.replaceChildren();
+    for (const option of presentation?.options ?? []) {
+      const label=document.createElement("label"),text=document.createElement("span");
+      text.textContent=option.label[locale==="en"?"en":"fr"];
+      const control=document.createElement(option.type==="enum"?"select":"input");
+      control.setAttribute("aria-label",text.textContent);
+      const value=Object.hasOwn(values,option.id)?values[option.id]:option.default;
+      if (option.type==="boolean") { control.type="checkbox";control.checked=value; }
+      else if (option.type==="enum") {
+        for (const choice of option.choices) { const item=document.createElement("option");item.value=choice.value;item.textContent=choice.label[locale==="en"?"en":"fr"];control.append(item); }
+        control.value=value;
+      } else { control.type="number";control.min=String(option.min);control.max=String(option.max);control.step=String(option.step);control.value=String(value); }
+      const change=()=>{
+        if (mode!=="interactive") return;
+        const value=option.type==="boolean"?control.checked:option.type==="number"?Number(control.value):control.value;
+        const valid=option.type==="boolean"?typeof value==="boolean":option.type==="enum"?option.choices.some(choice=>choice.value===value):control.value.trim()!==""&&Number.isFinite(value)&&value>=option.min&&value<=option.max;
+        if (valid) onOptionChange?.(option.id,value);
+      };
+      control.addEventListener("change",change);optionCleanups.push(()=>control.removeEventListener("change",change));
+      optionControls.push(control);label.append(text,control);nativeOptions.append(label);
+    }
+    syncInteraction();
+    if (changed && presentation && sizingMode()!=="manual") applyContentSize(true);
+  }
   if (onClose) {
     const dismiss = find("#widget-close");
     dismiss.removeAttribute("aria-disabled");
@@ -519,6 +613,8 @@ export function createWidgetChrome(
       return visible;
     },
     setMode,
+    setPresentation,
+    reportSize,
     setAutoSize(enabled) {
       autoSize = Boolean(enabled);
       drag = null;
@@ -538,6 +634,8 @@ export function createWidgetChrome(
       close();
       contentCleanup();
       for (const remove of listeners) remove();
+      for (const remove of optionCleanups) remove();
+      if (sizeTimer!==null) clearTimeout(sizeTimer);
     },
   };
 }

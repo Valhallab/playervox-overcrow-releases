@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "id": "com.playervox.examples.clock",
+  "version": "1.0.0",
+  "apiVersion": "2",
+  "entrypoints": {
+    "view": "index.html"
+  },
+  "permissions": {
+    "network": [],
+    "gameEvents": [],
+    "storage": false,
+    "clipboardWrite": false,
+    "capabilities": []
+  },
+  "localization": {
+    "defaultLocale": "en",
+    "availableLocales": ["en", "fr"]
+  },
+  "presentation": {
+    "sizing": {
+      "mode": "intrinsic",
+      "preferred": {
+        "width": 240,
+        "height": 120
+      },
+      "min": {
+        "width": 100,
+        "height": 48
+      },
+      "max": {
+        "width": 800,
+        "height": 900
+      }
+    },
+    "options": [
+      {
+        "id": "details",
+        "type": "boolean",
+        "label": {
+          "en": "Show details",
+          "fr": "Afficher les détails"
+        },
+        "default": true
+      },
+      {
+        "id": "seconds",
+        "type": "boolean",
+        "label": {
+          "en": "Show seconds",
+          "fr": "Afficher les secondes"
+        },
+        "default": true
+      },
+      {
+        "id": "zone",
+        "type": "enum",
+        "label": {
+          "en": "Time zone",
+          "fr": "Fuseau horaire"
+        },
+        "default": "local",
+        "choices": [
+          {
+            "value": "local",
+            "label": {
+              "en": "Local device",
+              "fr": "Appareil local"
+            }
+          },
+          {
+            "value": "utc",
+            "label": {
+              "en": "UTC",
+              "fr": "UTC"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

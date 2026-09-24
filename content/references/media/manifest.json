@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "com.playervox.examples.media",
+  "version": "1.0.0",
+  "apiVersion": "2",
+  "entrypoints": {
+    "view": "index.html"
+  },
+  "permissions": {
+    "network": [],
+    "gameEvents": [],
+    "storage": false,
+    "clipboardWrite": false,
+    "capabilities": ["media.read", "media.control"]
+  },
+  "localization": {
+    "defaultLocale": "en",
+    "availableLocales": ["en", "fr"]
+  },
+  "presentation": {
+    "sizing": {
+      "mode": "autoHeight",
+      "preferred": {
+        "width": 360,
+        "height": 320
+      },
+      "min": {
+        "width": 200,
+        "height": 48
+      },
+      "max": {
+        "width": 800,
+        "height": 900
+      }
+    },
+    "options": [
+      {
+        "id": "details",
+        "type": "boolean",
+        "label": {
+          "en": "Show details",
+          "fr": "Afficher les détails"
+        },
+        "default": true
+      }
+    ]
+  }
+}

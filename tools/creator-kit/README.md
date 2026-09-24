@@ -1,7 +1,7 @@
 # OverCrow Creator Kit 1.0.0
 
 Public, dependency-free authoring tools for **Node.js 22+**, Windows and Linux.
-SDK **1.1.0**, Web API v1. The code is MIT-licensed. No application source, Rust
+SDK **1.2.0**, Web API v1 and v2. The code is MIT-licensed. No application source, Rust
 compiler, Python, D-Bus or package installation is required by the downloaded kit.
 
 ```sh
@@ -27,12 +27,12 @@ random-path preview URL, reloads valid changes and retains the last good generat
 on invalid/partial edits. A permission change requires an explicit restart.
 The preview includes OverCrow's host wrapper: hover the widget to reveal its
 floating toolbar, then open the options menu. Content scale (50–175%, initially
-100%) reflows the widget inside its fixed frame; background opacity (0–100%,
+100%) reflows the widget inside its native sizing mode; background opacity (0–100%,
 initially 100% for the starter templates) affects the host background and border only. Use the sliders
 or type a percentage and press Enter or leave the field. Backgrounds painted by
 the widget itself remain unchanged. The eye chooses whether the widget stays visible in passive mode. The Mode selector switches the whole overlay and sends the corresponding SDK snapshot and visibility events; only close is illustrative.
 Move the widget
-from its 22-pixel top strip and resize it with its bottom-right handle. The upper-left corner stays fixed while resizing, within the canvas bounds. SDK widgets keep a manual frame. Wrapper controls are hidden in passive mode; use the Mode selector to return to interactive mode. Focus
+from its 22-pixel top strip. API v1 keeps its manual frame and bottom-right resize handle. API v2 supports intrinsic size without a handle, autoHeight with a horizontal-only handle, and manual dimensions. Content-size reports use unscaled CSS layout pixels; the wrapper applies scale once. The upper-left corner stays fixed while resizing, within the canvas bounds. Wrapper controls are hidden in passive mode; use the Mode selector to return to interactive mode. Focus
 either control and use arrow keys
 (Shift for 10-pixel steps). Appearance and frame size survive widget reloads until the preview page itself is refreshed. This wrapper belongs to the
 host: do not implement it in widget/; it is never included in an exported package.
@@ -62,6 +62,52 @@ fixtures produce `fixture_missing`. Use `text` instead of `json` for plain text.
 The preview supplies native snapshot, locale, visibility and controller/view relay
 contracts, but does not generate arbitrary named game events or simulate all host
 failure modes. Browser devtools remain available for inspecting your widget.
+
+## SDK service references
+
+Use `--template session`, `clock`, `performance`, `fps`, `stopwatch`, `media`,
+`notes`, `score`, `rating`, `reviews`, `journal`, or `twitch` for an API v2
+reference. Each uses the public SDK only, declares its exact capabilities,
+includes EN/FR labels and native options, respects passive mode, and reports
+unscaled preferred content dimensions. Blank, Counter and Checklist retain API v1.
+
+```sh
+node overcrow.mjs init my-notes --template notes
+```
+
+The browser preview labels fictional data and never contacts device services,
+private PlayerVox endpoints, or Twitch. Stopwatch/media/checklist controls only
+change in-memory fixtures. Native connection, editor, delete and composer intents
+return `cancelled`; actual native UI and permissions need OverCrow testing. FPS
+defaults to `unsupported`. Inactive sessions hide service data. Context changes
+and page disposal invalidate old replies. This is a contract simulator, not proof
+of native coverage or security. Native support may still be unavailable.
+
+Add optional service fixtures outside `widget/` in `preview.json`:
+
+```json
+{
+  "services": {
+    "capabilities": {"fps.read": {"supported": true, "granted": true}},
+    "snapshots": {
+      "fps": {"status": "stale", "sampleAgeMs": 3000,
+        "data": {"value": 60, "sampleAgeMs": 3000, "stale": true}}
+    }
+  }
+}
+```
+
+Fixtures cannot grant a capability absent from the manifest. Set `granted:false`
+or a service's `permissionDenied`, `notConnected`, `unavailable`, `unsupported`
+or `rateLimited` status with `data:null` to exercise fallback UI. The simulator
+owns context IDs and monotonic revisions. Never put real credentials or private
+content in fixtures. Native sensitive grants cannot be combined with outbound
+network or raw clipboard access; the authoring checks reject that combination.
+
+Twitch `requestCompose({replyTo?})` opens only the native composer. A widget
+cannot supply message text. Notes, rating and journal intent results distinguish
+queued acceptance from persistence; see the EN/FR API services guide and shipped
+TypeScript declarations for DTOs, units, revisions and action signatures.
 
 Use `npm run dev -- --native` to run the same project in OverCrow's installed
 engine in an offscreen development session. Use `npm run dev` for a visual preview;
@@ -114,3 +160,8 @@ matrix exercises the same Node tests. Native package compatibility can additiona
 be checked on Linux by extracting an exported archive and running
 `overcrow-widget package` against it: output bytes must match exactly. This is
 an offline validation, not an application install or native overlay session.
+
+Native sensitive grants force ephemeral browser storage even with `storage` declared.
+Runtime/session/account changes discard browser data; native notes and option
+preferences remain native. The browser simulator keeps only fictional fixture data
+and does not reproduce OS credential stores or the native browser sandbox.

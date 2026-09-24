@@ -9,6 +9,15 @@ export class CreatorError extends Error {
 export const fail=(code,message,action,pointer)=>{throw new CreatorError(code,message,action,pointer);};
 export const MAX_BYTES=128*1024*1024;
 export const MAX_FILES=4096;
+export const WEB_CAPABILITIES=Object.freeze([
+  'telemetry.read','fps.read','stopwatch.read','stopwatch.control',
+  'media.read','media.control','notes.read','notes.write','playervox.score.read',
+  'playervox.rating.read','playervox.rating.write','playervox.reviews.read','playervox.followed.read',
+  'journal.local.read','journal.cloud.read','journal.notes.read','journal.notes.write','journal.delete',
+  'twitch.chat.read','twitch.chat.compose',
+]);
+export const SENSITIVE_WEB_CAPABILITIES=Object.freeze(WEB_CAPABILITIES.filter(capability=>
+  !['telemetry.read','fps.read','stopwatch.read','stopwatch.control','playervox.score.read'].includes(capability)));
 export function parseJson(source,maximum=1024*1024) {
   if(new TextEncoder().encode(source).length>maximum) fail('json.size','JSON trop volumineux.','Réduisez le fichier.');
   // JSON.parse accepts duplicate keys; reject them before interpreting permissions.
@@ -48,10 +57,10 @@ export function validPath(file) {
   return typeof file==='string'&&file.length>0&&file.length<=192&&file.split('/').every(s=>/^[a-zA-Z0-9._-]+$/.test(s)&&s!=='.'&&s!=='..'&&!s.endsWith('.')&&!/^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(s));
 }
 export function validateManifest(manifest,names) {
-  fields(manifest,['schemaVersion','id','version','apiVersion','entrypoints','permissions','localization','files'],'');
+  fields(manifest,['schemaVersion','id','version','apiVersion','entrypoints','permissions','localization','presentation','files'],'');
   const require=(condition,pointer,message,action='Corrigez ce champ dans widget/manifest.json.')=>{if(!condition)fail('manifest.invalid',message,action,pointer);};
   require(manifest.schemaVersion===1,'/schemaVersion','schemaVersion doit être le nombre 1.');
-  require(manifest.apiVersion==='1','/apiVersion','apiVersion doit être la chaîne "1".');
+  require(['1','2'].includes(manifest.apiVersion),'/apiVersion','apiVersion doit être la chaîne "1" ou "2".');
   require(validId(manifest.id),'/id','Identifiant attendu : domaine inversé en minuscules, par exemple com.example.counter.');
   const version=manifest.version;
   const match=typeof version==='string'&&version.match(/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/);
@@ -62,7 +71,8 @@ export function validateManifest(manifest,names) {
     require(validPath(file)&&file.endsWith('.html'),`/entrypoints/${role}`,'Chemin HTML local attendu.');
     require(names.has(file),`/entrypoints/${role}`,`Fichier absent : ${file}.`,'Ajoutez le fichier ou corrigez le chemin.');
   }
-  fields(manifest.permissions,['network','gameEvents','storage','clipboardWrite'],'/permissions');
+  fields(manifest.permissions,['network','gameEvents','storage','clipboardWrite','capabilities'],'/permissions');
+  require(manifest.apiVersion==='2'||(!Object.hasOwn(manifest.permissions,'capabilities')&&!Object.hasOwn(manifest,'presentation')),'/apiVersion','Les capacités et la présentation native nécessitent apiVersion "2".');
   for(const key of ['storage','clipboardWrite']) if(Object.hasOwn(manifest.permissions,key)) require(typeof manifest.permissions[key]==='boolean',`/permissions/${key}`,'Valeur booléenne attendue.');
   const network=manifest.permissions.network??[];
   require(Array.isArray(network),'/permissions/network','Liste attendue.');
@@ -78,9 +88,58 @@ export function validateManifest(manifest,names) {
   const events=manifest.permissions.gameEvents??[];
   require(Array.isArray(events),'/permissions/gameEvents','Liste attendue.');
   require(events.every(event=>typeof event==='string'&&/^overcrow\.game\.[a-z0-9.-]+\.v1$/.test(event)&&event.slice(14,-3).split('.').every(s=>/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(s)))&&new Set(events).size===events.length,'/permissions/gameEvents','Événements uniques overcrow.game.<nom>.v1 attendus.');
+  if(Object.hasOwn(manifest.permissions,'capabilities')) {
+    const capabilities=manifest.permissions.capabilities;
+    require(Array.isArray(capabilities)&&capabilities.every(capability=>WEB_CAPABILITIES.includes(capability))&&new Set(capabilities).size===capabilities.length,'/permissions/capabilities','Liste de capacités connues et uniques attendue.');
+    require(!capabilities.some(capability=>SENSITIVE_WEB_CAPABILITIES.includes(capability))||(network.length===0&&!manifest.permissions.clipboardWrite),'/permissions','Une capacité sensible ne peut pas être combinée au réseau ou au presse-papiers brut.');
+  }
+  if(Object.hasOwn(manifest,'presentation')) validatePresentation(manifest.presentation,require);
   if(manifest.localization!==undefined) {
     const loc=manifest.localization;fields(loc,['defaultLocale','availableLocales'],'/localization');
     require(Array.isArray(loc.availableLocales)&&loc.availableLocales.length>=1&&loc.availableLocales.length<=16&&loc.availableLocales.every(l=>typeof l==='string'&&/^[a-z]{2}(?:-[A-Z]{2})?$/.test(l))&&new Set(loc.availableLocales).size===loc.availableLocales.length&&loc.availableLocales.includes(loc.defaultLocale),'/localization','Déclarez 1 à 16 langues uniques, dont la langue par défaut.');
   }
   return manifest;
+}
+
+function validatePresentation(presentation,require) {
+  const pointer='/presentation';
+  fields(presentation,['sizing','options'],pointer);
+  const sizing=presentation.sizing;
+  fields(sizing,['mode','preferred','min','max'],pointer+'/sizing');
+  require(['intrinsic','autoHeight','manual'].includes(sizing.mode),pointer+'/sizing/mode','Mode de taille natif invalide.');
+  for(const key of ['preferred','min','max']) {
+    const size=sizing[key];fields(size,['width','height'],`${pointer}/sizing/${key}`);
+    for(const axis of ['width','height']) require(Number.isInteger(size[axis])&&size[axis]>=1&&size[axis]<=4096,`${pointer}/sizing/${key}/${axis}`,'Dimension entière entre 1 et 4096 attendue.');
+  }
+  for(const axis of ['width','height']) require(sizing.min[axis]<=sizing.preferred[axis]&&sizing.preferred[axis]<=sizing.max[axis],pointer+'/sizing','La taille préférée doit rester dans les bornes min/max.');
+  const options=Object.hasOwn(presentation,'options')?presentation.options:[];
+  require(Array.isArray(options)&&options.length<=16,pointer+'/options','Déclarez au maximum 16 options natives.');
+  const ids=new Set();
+  const identifier=value=>typeof value==='string'&&/^[a-z][A-Za-z0-9_-]{0,47}$/.test(value);
+  const label=(value,path)=>{
+    fields(value,['en','fr'],path);
+    for(const locale of ['en','fr']) require(typeof value[locale]==='string'&&value[locale].length>0&&[...value[locale]].length<=80&&!/^\p{White_Space}|\p{White_Space}$/u.test(value[locale])&&!/\p{Cc}/u.test(value[locale]),`${path}/${locale}`,'Libellé EN/FR de 1 à 80 caractères, sans espaces aux extrémités ni caractères de contrôle.');
+  };
+  const number=value=>typeof value==='number'&&Number.isFinite(value)&&Math.abs(value)<=1000000;
+  for(const [index,option] of options.entries()) {
+    const path=`${pointer}/options/${index}`;
+    require(object(option),path,'Objet option attendu.');
+    const kind=option.type;
+    require(['boolean','enum','number'].includes(kind),path+'/type','Type boolean, enum ou number attendu.');
+    fields(option,['id','type','label','default',...(kind==='enum'?['choices']:kind==='number'?['min','max','step']:[])],path);
+    require(identifier(option.id)&&!ids.has(option.id),path+'/id','Identifiant unique de 1 à 48 caractères ASCII attendu.');ids.add(option.id);
+    label(option.label,path+'/label');
+    if(kind==='boolean') require(typeof option.default==='boolean',path+'/default','Valeur booléenne attendue.');
+    if(kind==='enum') {
+      require(Array.isArray(option.choices)&&option.choices.length>=2&&option.choices.length<=16,path+'/choices','Déclarez entre 2 et 16 choix uniques.');
+      const choices=new Set();
+      for(const [choiceIndex,choice] of option.choices.entries()) {
+        const choicePath=`${path}/choices/${choiceIndex}`;fields(choice,['value','label'],choicePath);
+        require(identifier(choice.value)&&!choices.has(choice.value),choicePath+'/value','Valeur de choix unique attendue.');choices.add(choice.value);
+        label(choice.label,choicePath+'/label');
+      }
+      require(choices.has(option.default),path+'/default','La valeur par défaut doit faire partie des choix.');
+    }
+    if(kind==='number') require([option.default,option.min,option.max,option.step].every(number)&&option.min<option.max&&option.default>=option.min&&option.default<=option.max&&option.step>0&&option.step<=option.max-option.min,path,'Bornes numériques finies (±1 000 000), valeur par défaut et pas positif attendus.');
+  }
 }
