@@ -124,7 +124,7 @@ export function createWidgetChrome(
     surface.style.borderColor = `rgba(255, 255, 255, ${(24 / 255) * opacity})`;
     for (const [key, setting] of Object.entries(settings))
       find(`#value-${key}`).textContent = `${setting.value}%`;
-    if (presentation && sizingMode() !== "manual") applyContentSize(true);
+    applyContentSize(true);
   }
   function syncEditor() {
     const setting = settings[active];
@@ -547,16 +547,14 @@ export function createWidgetChrome(
       }
       syncInteraction();return;
     }
-    if (changed) {
-      close();contentHint=null;lastContentSize=previousContentSize=sizeCycle=null;
-      if (sizeTimer!==null) { clearTimeout(sizeTimer);sizeTimer=null; }
-      minimumWidth=presentation?.sizing.min.width ?? legacyMinimum.width;
-      minimumHeight=presentation?.sizing.min.height ?? legacyMinimum.height;
-      maximumWidth=presentation?.sizing.max.width ?? 900;
-      maximumHeight=presentation?.sizing.max.height ?? 900;
-      if (presentation) resize(presentation.sizing.preferred.width,presentation.sizing.preferred.height);
-      else resize(480,320);
-    }
+    close();contentHint=null;lastContentSize=previousContentSize=sizeCycle=null;
+    if (sizeTimer!==null) { clearTimeout(sizeTimer);sizeTimer=null; }
+    minimumWidth=presentation?.sizing.min.width ?? legacyMinimum.width;
+    minimumHeight=presentation?.sizing.min.height ?? legacyMinimum.height;
+    maximumWidth=presentation?.sizing.max.width ?? 900;
+    maximumHeight=presentation?.sizing.max.height ?? 900;
+    if (presentation) resize(presentation.sizing.preferred.width,presentation.sizing.preferred.height);
+    else resize(480,320);
     for (const remove of optionCleanups) remove();
     optionCleanups=[];optionControls=[];
     if (!nativeOptions && presentation?.options?.length) {
@@ -586,7 +584,7 @@ export function createWidgetChrome(
       optionControls.push(control);label.append(text,control);nativeOptions.append(label);
     }
     syncInteraction();
-    if (changed && presentation && sizingMode()!=="manual") applyContentSize(true);
+    applyContentSize(true);
   }
   if (onClose) {
     const dismiss = find("#widget-close");

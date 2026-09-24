@@ -38,6 +38,8 @@ const cursor = (value) =>
     value.length > 0 &&
     new TextEncoder().encode(value).length <= 2048 &&
     !/[\u0000-\u001f\u007f-\u009f]/u.test(value));
+const note = { noteId: (value) => id(value, 64), expectedRevision: integer };
+const session = { sessionId: id, expectedRevision: integer };
 const definitions = {
   "stopwatch.start": [{}, ["stopwatch.control"]],
   "stopwatch.pause": [{}, ["stopwatch.control"]],
@@ -46,23 +48,13 @@ const definitions = {
   "media.playPause": [{}, ["media.control"]],
   "media.next": [{}, ["media.control"]],
   "notes.requestCreate": [{ expectedRevision: integer }, ["notes.write"]],
-  "notes.requestEdit": [
-    { noteId: (value) => id(value, 64), expectedRevision: integer },
-    ["notes.write"],
-  ],
-  "notes.requestDelete": [
-    { noteId: (value) => id(value, 64), expectedRevision: integer },
-    ["notes.write"],
-  ],
-  "notes.select": [
-    { noteId: (value) => id(value, 64), expectedRevision: integer },
-    ["notes.read"],
-  ],
+  "notes.requestEdit": [note, ["notes.write"]],
+  "notes.requestDelete": [note, ["notes.write"]],
+  "notes.select": [note, ["notes.read"]],
   "notes.setChecked": [
     {
-      noteId: (value) => id(value, 64),
+      ...note,
       itemId: (value) => id(value, 64),
-      expectedRevision: integer,
       checked: (value) => typeof value === "boolean",
     },
     ["notes.write"],
@@ -89,14 +81,8 @@ const definitions = {
     ["playervox.reviews.read"],
   ],
   "journal.page": [{ cursor }, ["journal.local.read", "journal.cloud.read"]],
-  "journal.requestEditNote": [
-    { sessionId: id, expectedRevision: integer },
-    ["journal.notes.write"],
-  ],
-  "journal.requestDelete": [
-    { sessionId: id, expectedRevision: integer },
-    ["journal.delete"],
-  ],
+  "journal.requestEditNote": [session, ["journal.notes.write"]],
+  "journal.requestDelete": [session, ["journal.delete"]],
   "twitch.chat.requestConnect": [{}, ["twitch.chat.read"]],
   "twitch.chat.requestChooseChannel": [{}, ["twitch.chat.read"]],
   "twitch.chat.requestCompose": [

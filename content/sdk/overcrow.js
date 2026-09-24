@@ -32,11 +32,6 @@ const SERVICE_CAPABILITIES = Object.freeze([
   'journal.delete', 'twitch.chat.read', 'twitch.chat.compose',
 ]);
 
-const SERVICE_NAMES = Object.freeze([
-  'telemetry', 'fps', 'stopwatch', 'media', 'notes', 'playervox.score',
-  'playervox.rating', 'playervox.reviews', 'journal', 'twitch.chat', 'presentation',
-]);
-
 // MIT licensed; see ../LICENSE.
 
 function createServiceValidation(ErrorClass, clone) {
@@ -182,7 +177,7 @@ function createServiceValidation(ErrorClass, clone) {
     }
     object(value.snapshots);
     for (const [name, envelope] of Object.entries(value.snapshots)) {
-      if (!SERVICE_NAMES.includes(name)) invalid();
+      if (!Object.hasOwn(checks, name)) invalid();
       object(envelope);
       const status = choice(['ready', 'stale', 'unavailable', 'unsupported', 'permissionDenied', 'notConnected', 'rateLimited'])(envelope.status);
       if (status !== 'ready' && status !== 'stale' && envelope.data !== null) invalid();
@@ -263,10 +258,7 @@ function createServiceActions(ErrorClass) {
     'twitch.chat.requestChooseChannel': [{}, ['twitch.chat.read']],
     'twitch.chat.requestCompose': [{replyTo: value => value === undefined ? undefined : id(128)(value)}, ['twitch.chat.compose']],
     'presentation.reportSize': [{width: size, height: size}, []],
-    'assets.read': [{handle: value => {
-      if (typeof value !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(value)) invalid();
-      return value;
-    }}, []],
+    'assets.read': [{handle: id(128)}, []],
   };
 
   return (action, parameters) => {
@@ -336,13 +328,13 @@ function createServices({native, role, ErrorClass, clone}) {
   }
 
   function schedule(subscriber, value) {
-    if (!subscriber.active) return;
+    if (!subscribers.has(subscriber)) return;
     subscriber.pending = value;
     if (subscriber.queued) return;
     subscriber.queued = true;
     queueMicrotask(() => {
       subscriber.queued = false;
-      if (!subscriber.active || !subscriber.pending) return;
+      if (!subscribers.has(subscriber) || !subscriber.pending) return;
       const next = subscriber.pending;
       subscriber.pending = null;
       if (subscriber.last && next.contextId === subscriber.last.contextId
@@ -393,7 +385,7 @@ function createServices({native, role, ErrorClass, clone}) {
   function onSnapshot(name, listener) {
     if (typeof listener !== 'function') fail('invalid_listener', 'Listener must be a function');
     if (subscribers.size >= 128) fail('subscription_limit', 'Service subscription limit reached');
-    const subscriber = {name, listener, active: true, queued: false, pending: null, last: null};
+    const subscriber = {name, listener, queued: false, pending: null, last: null};
     subscribers.add(subscriber);
     readCurrent().then(frame => schedule(subscriber, envelope(frame, name)), () => {
       if (!subscriber.last && !subscriber.pending) {
@@ -401,7 +393,6 @@ function createServices({native, role, ErrorClass, clone}) {
       }
     });
     return () => {
-      subscriber.active = false;
       subscriber.pending = null;
       subscribers.delete(subscriber);
     };
