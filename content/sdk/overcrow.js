@@ -22,6 +22,481 @@
  * SOFTWARE.
  */
 
+// MIT licensed; see ../LICENSE.
+const SERVICE_CAPABILITIES = Object.freeze([
+  'telemetry.read', 'fps.read', 'media.read', 'media.control',
+]);
+
+// MIT licensed; see ../LICENSE.
+
+function createServiceValidation(ErrorClass, clone) {
+  const utf8 = new TextEncoder();
+  const invalid = () => { throw new ErrorClass('invalid_response', 'Native service response is invalid'); };
+  const object = value => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) invalid();
+    return value;
+  };
+  const bool = value => {
+    if (typeof value !== 'boolean') invalid();
+    return value;
+  };
+  const integer = (min = 0, max = Number.MAX_SAFE_INTEGER) => value => {
+    if (!Number.isSafeInteger(value) || value < min || value > max) invalid();
+    return value;
+  };
+  const number = (min, max) => value => {
+    if (typeof value !== 'number' || !Number.isFinite(value) || value < min || value > max) invalid();
+    return value;
+  };
+  const text = (maxBytes, minBytes = 0) => value => {
+    if (typeof value !== 'string' || value.length > maxBytes) invalid();
+    const length = utf8.encode(value).byteLength;
+    if (length < minBytes || length > maxBytes) invalid();
+    return value;
+  };
+  const choice = values => value => {
+    if (!values.includes(value)) invalid();
+    return value;
+  };
+  const nullable = check => value => value === null ? null : check(value);
+  const shape = fields => value => {
+    object(value);
+    return Object.fromEntries(Object.entries(fields).map(([key, check]) => [key, check(value[key])]));
+  };
+  const id = text(128, 1);
+  const revision = integer();
+  const handle = value => {
+    if (typeof value !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(value)) invalid();
+    return value;
+  };
+  const checks = {
+    telemetry: shape({
+      normalizedCpuPercentHundredths: nullable(integer(0, 10000)),
+      residentBytes: nullable(integer()),
+      cpuTemperatureMillicelsius: nullable(integer(-273150, 1000000)),
+      gpuTemperatureMillicelsius: nullable(integer(-273150, 1000000)),
+    }),
+    fps: shape({value: nullable(number(0, 10000)), sampleAgeMs: nullable(integer()), stale: bool}),
+    media: shape({
+      title: nullable(text(4096)), artist: nullable(text(4096)),
+      playbackState: choice(['playing', 'paused', 'stopped']),
+      artworkHandle: nullable(handle), actions: shape({previous: bool, playPause: bool, next: bool}),
+    }),
+    presentation: shape({sizingMode: choice(['intrinsic', 'autoHeight', 'manual']),
+      width: integer(1, 4096), height: integer(1, 4096), options: value => {
+        object(value);
+        if (Object.keys(value).length > 32) invalid();
+        return Object.fromEntries(Object.entries(value).map(([key, item]) => {
+          if (!/^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(key)) invalid();
+          if (typeof item === 'boolean') return [key, item];
+          if (typeof item === 'number') return [key, number(-Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)(item)];
+          return [key, text(128)(item)];
+        }));
+      }}),
+  };
+
+  function services(raw) {
+    let value;
+    try { value = clone(raw); } catch (_) { invalid(); }
+    object(value);
+    if (value.apiVersion !== 1) invalid();
+    const result = {contextId: id(value.contextId), revision: revision(value.revision), capabilities: {}, snapshots: {}};
+    if (/[\u0000-\u001f\u007f-\u009f]/u.test(result.contextId)) invalid();
+    object(value.capabilities);
+    if (Object.keys(value.capabilities).length !== SERVICE_CAPABILITIES.length) invalid();
+    for (const [name, access] of Object.entries(value.capabilities)) {
+      if (!SERVICE_CAPABILITIES.includes(name)) invalid();
+      result.capabilities[name] = shape({supported: bool, granted: bool})(access);
+      if (access.granted && !access.supported) invalid();
+    }
+    object(value.snapshots);
+    if (Object.keys(value.snapshots).length !== Object.keys(checks).length) invalid();
+    for (const [name, envelope] of Object.entries(value.snapshots)) {
+      if (!Object.hasOwn(checks, name)) invalid();
+      object(envelope);
+      const status = choice(['ready', 'stale', 'unavailable', 'unsupported', 'permissionDenied'])(envelope.status);
+      if (status !== 'ready' && status !== 'stale' && envelope.data !== null) invalid();
+      const data = envelope.data === null && status !== 'ready' ? null : checks[name](envelope.data);
+      const snapshot = {status, data};
+      if (Object.hasOwn(envelope, 'sampleAgeMs')) snapshot.sampleAgeMs = integer()(envelope.sampleAgeMs);
+      result.snapshots[name] = snapshot;
+    }
+    return result;
+  }
+
+  function actionResult(value) {
+    return shape({status: choice(['accepted'])})(value);
+  }
+
+  function asset(value) {
+    object(value);
+    if (value.contentType !== 'image/png' || typeof value.data !== 'string'
+        || value.data.length > 699052 || value.data.length % 4 !== 0
+        || !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value.data)) invalid();
+    let decoded;
+    try { decoded = atob(value.data); } catch (_) { invalid(); }
+    if (decoded.length < 8 || decoded.length > 512 * 1024) invalid();
+    const bytes = Uint8Array.from(decoded, character => character.charCodeAt(0));
+    if (![137, 80, 78, 71, 13, 10, 26, 10].every((byte, index) => byte === bytes[index])) invalid();
+    return new Blob([bytes], {type: 'image/png'});
+  }
+
+  return {services, actionResult, asset};
+}
+
+// MIT licensed; see ../LICENSE.
+function createServiceActions(ErrorClass) {
+  const utf8 = new TextEncoder();
+  const invalid = () => { throw new ErrorClass('invalid_request', 'Service action parameters are invalid'); };
+  const integer = (min, max = Number.MAX_SAFE_INTEGER) => value => {
+    if (!Number.isSafeInteger(value) || value < min || value > max) invalid();
+    return value;
+  };
+  const text = max => value => {
+    if (typeof value !== 'string' || value.length === 0 || value.length > max
+        || utf8.encode(value).byteLength > max || /[\u0000-\u001f\u007f-\u009f]/u.test(value)) invalid();
+    return value;
+  };
+  const id = max => value => {
+    text(max)(value);
+    if (!/^[A-Za-z0-9_-]+$/.test(value)) invalid();
+    return value;
+  };
+  const size = integer(1, 4096);
+  const definitions = {
+    'media.previous': [{}, ['media.control']],
+    'media.playPause': [{}, ['media.control']],
+    'media.next': [{}, ['media.control']],
+    'presentation.reportSize': [{width: size, height: size}, []],
+    'assets.read': [{handle: id(128)}, []],
+  };
+
+  return (action, parameters) => {
+    if (!Object.hasOwn(definitions, action)) invalid();
+    const [fields, capabilities] = definitions[action];
+    if (!parameters || typeof parameters !== 'object' || Array.isArray(parameters)
+        || (Object.getPrototypeOf(parameters) !== Object.prototype && Object.getPrototypeOf(parameters) !== null)
+        || Object.keys(parameters).some(key => !Object.hasOwn(fields, key))) invalid();
+    const checked = Object.fromEntries(Object.entries(fields)
+      .map(([key, check]) => [key, check(parameters[key])]).filter(([, value]) => value !== undefined));
+    return {parameters: checked, capabilities};
+  };
+}
+
+// MIT licensed; see ../LICENSE.
+
+function createServices({native, role, ErrorClass, clone}) {
+  const validation = createServiceValidation(ErrorClass, clone);
+  const validateAction = createServiceActions(ErrorClass);
+  const subscribers = new Set();
+  let current = null;
+  let readPending = null;
+  let pendingActions = 0;
+  const fail = (code, message) => { throw new ErrorClass(code, message); };
+  const nativeErrorCodes = new Set([
+    'capability_denied', 'permission_denied', 'stale_context', 'unavailable',
+    'unsupported_operation', 'invalid_request', 'role_denied', 'busy',
+  ]);
+
+  async function request(metadata) {
+    if (!native) fail('bridge_unavailable', 'OverCrow native bridge is unavailable');
+    let response;
+    try { response = await native.request(metadata, new ArrayBuffer(0)); }
+    catch (_) { fail('native_failure', 'OverCrow native request failed'); }
+    if (!response || typeof response !== 'object' || !(response.body instanceof ArrayBuffer)
+        || response.body.byteLength !== 0) fail('invalid_response', 'Native service response is invalid');
+    let checked;
+    try { checked = clone(response.metadata); }
+    catch (_) { fail('invalid_response', 'Native service response is invalid'); }
+    if (!checked || typeof checked !== 'object' || Array.isArray(checked)) {
+      fail('invalid_response', 'Native service response is invalid');
+    }
+    if (checked.ok === false) {
+      const code = checked.error?.code;
+      if (!nativeErrorCodes.has(code)) fail('invalid_response', 'Native service rejection is invalid');
+      fail(code, `OverCrow service request failed (${code})`);
+    }
+    if (checked.ok !== true || Object.hasOwn(checked, 'error') || !Object.hasOwn(checked, 'value')) {
+      fail('invalid_response', 'Native service response is invalid');
+    }
+    return checked.value;
+  }
+
+  function envelope(frame, name) {
+    return clone({contextId: frame.contextId, revision: frame.revision,
+      ...frame.snapshots[name]});
+  }
+
+  function schedule(subscriber, value) {
+    if (!subscribers.has(subscriber)) return;
+    subscriber.pending = value;
+    if (subscriber.queued) return;
+    subscriber.queued = true;
+    queueMicrotask(() => {
+      subscriber.queued = false;
+      if (!subscribers.has(subscriber) || !subscriber.pending) return;
+      const next = subscriber.pending;
+      subscriber.pending = null;
+      if (subscriber.last && next.contextId === subscriber.last.contextId
+          && next.revision === subscriber.last.revision && next.status === subscriber.last.status) return;
+      subscriber.last = {contextId: next.contextId, revision: next.revision, status: next.status};
+      // A consumer exception must not stop independent service subscriptions.
+      try { subscriber.listener(next); } catch (_) { /* Listener owns its errors. */ }
+    });
+  }
+
+  function accept(frame) {
+    if (current && frame.revision <= current.revision) return current;
+    current = frame;
+    for (const subscriber of subscribers) schedule(subscriber, envelope(frame, subscriber.name));
+    return frame;
+  }
+
+  function receiveSnapshot(snapshot) {
+    let frame;
+    try { frame = validation.services(snapshot.services); } catch (_) { return; }
+    accept(frame);
+  }
+
+  function readCurrent() {
+    if (readPending) return readPending;
+    readPending = (async () => {
+      const snapshot = await request({type: 'gameSnapshot'});
+      if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
+        fail('invalid_response', 'Native game snapshot is invalid');
+      }
+      const frame = validation.services(snapshot.services);
+      return accept(frame);
+    })();
+    const pending = readPending;
+    // Attach both handlers so rejected initial reads never become unhandled promises.
+    pending.then(() => { if (readPending === pending) readPending = null; },
+      () => { if (readPending === pending) readPending = null; });
+    return pending;
+  }
+
+  function onSnapshot(name, listener) {
+    if (typeof listener !== 'function') fail('invalid_listener', 'Listener must be a function');
+    if (subscribers.size >= 128) fail('subscription_limit', 'Service subscription limit reached');
+    const subscriber = {name, listener, queued: false, pending: null, last: null};
+    subscribers.add(subscriber);
+    readCurrent().then(frame => schedule(subscriber, envelope(frame, name)), () => {
+      if (!subscriber.last && !subscriber.pending) {
+        schedule(subscriber, {contextId: null, revision: 0, status: 'unavailable', data: null});
+      }
+    });
+    return () => {
+      subscriber.pending = null;
+      subscribers.delete(subscriber);
+    };
+  }
+
+  function requireAccess(frame, capabilities) {
+    if (capabilities.length === 0) return;
+    if (!capabilities.some(name => frame.capabilities[name].supported)) {
+      fail('unsupported', 'Native service capability is unsupported');
+    }
+    if (!capabilities.some(name => frame.capabilities[name].granted)) {
+      fail('permission_denied', 'Native service capability is not granted');
+    }
+  }
+
+  async function action(name, raw = {}) {
+    const {parameters, capabilities} = validateAction(name, raw);
+    if (name === 'presentation.reportSize' && role !== 'view') {
+      fail('role_denied', 'Content sizing requires a view');
+    }
+    if (pendingActions >= 32) fail('busy', 'Too many pending service actions');
+    pendingActions += 1;
+    try {
+      const frame = await readCurrent();
+      requireAccess(frame, capabilities);
+      const result = await request({type: 'serviceAction', action: name, contextId: frame.contextId, parameters});
+      if (!current || current.contextId !== frame.contextId) {
+        fail('stale_context', 'Native service context changed');
+      }
+      requireAccess(current, capabilities);
+      return name === 'assets.read' ? validation.asset(result) : validation.actionResult(result);
+    } finally { pendingActions -= 1; }
+  }
+
+  const module = (name, actions = {}) => Object.freeze({
+    async snapshot() { return envelope(await readCurrent(), name); },
+    onSnapshot(listener) { return onSnapshot(name, listener); },
+    ...actions,
+  });
+  const call = name => parameters => action(name, parameters);
+  const noArgs = name => () => action(name);
+  const api = {
+    host: Object.freeze({async capabilities() { return clone((await readCurrent()).capabilities); }}),
+    telemetry: module('telemetry'),
+    fps: module('fps'),
+    media: module('media', {previous: noArgs('media.previous'), playPause: noArgs('media.playPause'), next: noArgs('media.next')}),
+    presentation: module('presentation', {reportSize: call('presentation.reportSize')}),
+    assets: Object.freeze({read: handle => action('assets.read', {handle})}),
+  };
+  return {api, receiveSnapshot};
+}
+
+// MIT licensed; see ../LICENSE.
+function createIndexedStorage(ErrorClass) {
+  let connection = null;
+  const failure = error => error instanceof ErrorClass ? error : new ErrorClass(
+    error?.name === 'QuotaExceededError' ? 'storage_quota_exceeded' : 'storage_unavailable',
+    'Widget storage operation failed',
+  );
+
+  function open() {
+    if (connection) return connection;
+    const opening = new Promise((resolve, reject) => {
+      let settled = false;
+      const timer = setTimeout(() => finish(failure()), 5000);
+      const finish = (error, database) => {
+        if (settled) { database?.close(); return; }
+        settled = true;
+        clearTimeout(timer);
+        if (error) reject(error); else resolve(database);
+      };
+      try {
+        const request = globalThis.indexedDB.open('overcrow.sdk.storage', 1);
+        request.onupgradeneeded = () => {
+          if (settled) { request.transaction.abort(); return; }
+          request.result.createObjectStore('values');
+        };
+        request.onerror = () => finish(failure(request.error));
+        request.onblocked = () => finish(new ErrorClass('busy', 'Widget storage upgrade is blocked'));
+        request.onsuccess = () => {
+          const database = request.result;
+          database.onversionchange = () => {
+            if (connection === opening) connection = null;
+            database.close();
+          };
+          database.onclose = () => { if (connection === opening) connection = null; };
+          finish(null, database);
+        };
+      } catch (error) { finish(failure(error)); }
+    });
+    connection = opening;
+    opening.catch(() => { if (connection === opening) connection = null; });
+    return opening;
+  }
+
+  return async (operation, key, value) => {
+    const database = await open();
+    return new Promise((resolve, reject) => {
+      let transaction, result = null, reason = null;
+      const timer = setTimeout(() => abort(failure()), 5000);
+      const finish = error => {
+        clearTimeout(timer);
+        if (error) reject(error); else resolve(result);
+      };
+      const abort = error => {
+        reason = error;
+        try { transaction?.abort(); } catch (_) { /* A completed transaction cannot be aborted. */ }
+        finish(error);
+      };
+      try {
+        transaction = database.transaction('values', operation === 'get' ? 'readonly' : 'readwrite');
+        // A successful request is not a successful commit: only oncomplete resolves.
+        transaction.oncomplete = () => finish(reason);
+        transaction.onabort = () => finish(reason ?? failure(transaction.error));
+        const store = transaction.objectStore('values');
+        if (operation === 'get') {
+          const request = store.openCursor(key);
+          request.onsuccess = () => {
+            const record = request.result;
+            if (record && typeof record.value !== 'string') {
+              abort(new ErrorClass('invalid_response', 'Stored widget data is invalid'));
+            } else result = record ? record.value : null;
+          };
+        } else if (operation === 'remove') store.delete(key);
+        else {
+          // Count and insert share one write transaction across views/controllers.
+          const existing = store.getKey(key), count = store.count();
+          let completed = 0;
+          const write = () => {
+            if (++completed !== 2) return;
+            if (existing.result === undefined && count.result >= 256) {
+              abort(new ErrorClass('storage_quota_exceeded', 'Widget storage contains too many keys'));
+              return;
+            }
+            try { store.put(value, key); } catch (error) { abort(failure(error)); }
+          };
+          existing.onsuccess = count.onsuccess = write;
+        }
+      } catch (error) { abort(failure(error)); }
+    });
+  };
+}
+
+// MIT licensed; see ../LICENSE.
+
+function createStorage({native, ErrorClass, clone}) {
+  const encoder = new TextEncoder();
+  const indexed = createIndexedStorage(ErrorClass);
+  let pending = 0;
+  const fail = code => { throw new ErrorClass(code, `Widget storage operation failed (${code})`); };
+  const policy = () => {
+    if (!native) fail('bridge_unavailable');
+    const storage = native.storage;
+    if (!storage || !['persistent', 'temporary'].includes(storage.mode)
+        || !['indexeddb', 'memory'].includes(storage.backend)
+        || (storage.backend === 'memory' && storage.mode !== 'temporary')) fail('unsupported');
+    return storage;
+  };
+  const encode = (value, code) => {
+    try {
+      const text = JSON.stringify(clone(value));
+      if (encoder.encode(text).byteLength > 65536) fail(code);
+      return text;
+    } catch (_) { fail(code); }
+  };
+  const decode = value => {
+    if (value === null) return undefined;
+    if (typeof value !== 'string' || encoder.encode(value).byteLength > 65536) fail('invalid_response');
+    try { return JSON.parse(encode(JSON.parse(value), 'invalid_response')); }
+    catch (_) { fail('invalid_response'); }
+  };
+  async function memory(operation, key, value) {
+    let timer;
+    try {
+      const response = await Promise.race([
+        native.request({type: 'storage', operation, key, ...(operation === 'set' ? {value} : {})}, new ArrayBuffer(0)),
+        new Promise((_, reject) => { timer = setTimeout(() => reject(new ErrorClass('storage_unavailable', 'Widget storage timed out')), 5000); }),
+      ]);
+      if (!(response?.body instanceof ArrayBuffer) || response.body.byteLength !== 0) fail('invalid_response');
+      const metadata = response.metadata;
+      if (metadata?.ok !== true) {
+        const code = metadata?.error?.code;
+        fail(['storage_quota_exceeded', 'storage_unavailable', 'busy', 'stale_context'].includes(code) ? code : 'invalid_response');
+      }
+      if (!Object.hasOwn(metadata, 'value') || (operation !== 'get' && metadata.value !== null)) fail('invalid_response');
+      return metadata.value;
+    } catch (error) {
+      if (error instanceof ErrorClass) throw error;
+      fail('storage_unavailable');
+    } finally { clearTimeout(timer); }
+  }
+  async function run(operation, key, value) {
+    const storage = policy();
+    if (typeof key !== 'string' || !key.length || encoder.encode(key).byteLength > 128) fail('invalid_storage_key');
+    if (pending >= 32) fail('busy');
+    // Snapshot before the first await so caller mutations cannot alter a queued save.
+    const encoded = operation === 'set' ? encode(value, 'invalid_storage_value') : undefined;
+    pending += 1;
+    try {
+      const result = await (storage.backend === 'indexeddb' ? indexed : memory)(operation, key, encoded);
+      if (operation === 'get') return decode(result);
+    } finally { pending -= 1; }
+  }
+  return Object.freeze({
+    async getInfo() { return Object.freeze({mode: policy().mode}); },
+    get: key => run('get', key),
+    set: (key, value) => run('set', key, value),
+    remove: key => run('remove', key),
+  });
+}
+
 const MAX_JSON_BYTES = 1024 * 1024;
 const MAX_JSON_DEPTH = 64;
 const MAX_REQUEST_BODY_BYTES = 2 * 1024 * 1024;
@@ -130,9 +605,13 @@ function cloneJson(value, seen = new Set(), depth = 0) {
   if (!Array.isArray(value) && prototype !== Object.prototype && prototype !== null) {
     throw new OvercrowError('invalid_message', 'Payload must contain plain JSON objects only');
   }
+  const keys = Object.keys(value);
+  if (Array.isArray(value) && (keys.length !== value.length || keys.some((key, index) => key !== String(index)))) {
+    throw new OvercrowError('invalid_message', 'JSON arrays must be dense and contain only indexed values');
+  }
   seen.add(value);
   const cloned = Array.isArray(value) ? [] : {};
-  for (const key of Object.keys(value)) {
+  for (const key of keys) {
     Object.defineProperty(cloned, key, {
       value: cloneJson(value[key], seen, depth + 1),
       enumerable: true,
@@ -156,17 +635,17 @@ function checkedSnapshot(value) {
   const snapshot = checkedJson(value);
   const invalid = () => { throw new OvercrowError('invalid_response', 'Native game snapshot is invalid'); };
   if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) invalid();
-  for (const key of ['running', 'selectedActive']) {
+  for (const key of ['running', 'selectedActive', 'fixture']) {
     if (Object.hasOwn(snapshot, key) && typeof snapshot[key] !== 'boolean') invalid();
   }
   if (Object.hasOwn(snapshot, 'overlayMode') && !['passive', 'interactive'].includes(snapshot.overlayMode)) invalid();
-  for (const key of ['steamAppId', 'sessionElapsedMs', 'cpuPercentHundredths', 'residentBytes', 'cpuTemperatureMillicelsius', 'gpuTemperatureMillicelsius']) {
+  for (const key of ['steamAppId', 'sessionElapsedMs']) {
     if (!Object.hasOwn(snapshot, key) || snapshot[key] === null) continue;
     const number = snapshot[key];
-    if (!Number.isSafeInteger(number) || (!key.endsWith('TemperatureMillicelsius') && number < 0)) invalid();
+    if (!Number.isSafeInteger(number) || number < 0) invalid();
   }
-  // Keep missing and extension fields intact for older hosts and replay fixtures.
-  return snapshot;
+  return Object.fromEntries(['running', 'selectedActive', 'steamAppId', 'sessionElapsedMs', 'overlayMode', 'fixture']
+    .filter(key => Object.hasOwn(snapshot, key)).map(key => [key, snapshot[key]]));
 }
 
 async function invoke(metadata, body = EMPTY_BODY) {
@@ -202,6 +681,7 @@ async function invoke(metadata, body = EMPTY_BODY) {
 
 const nativeAtLoad = bridge();
 const role = nativeAtLoad?.role ?? 'unavailable';
+const services = createServices({native: nativeAtLoad, role, ErrorClass: OvercrowError, clone: checkedJson});
 const relayListeners = new Set();
 const visibilityListeners = new Set();
 const gameListeners = new Map();
@@ -229,6 +709,7 @@ if (nativeAtLoad) {
     } else if (event.type === 'gameSnapshot') {
       let snapshot;
       try { snapshot = checkedSnapshot(event.payload); } catch (_) { return; }
+      services.receiveSnapshot(event.payload);
       for (const listener of [...snapshotListeners]) listener(checkedJson(snapshot));
     } else if (event.type === 'gameEvent' && typeof event.event === 'string') {
       for (const listener of [...(gameListeners.get(event.event) ?? [])]) listener(event.payload);
@@ -249,6 +730,8 @@ function listen(collection, listener) {
 }
 
 export const overcrow = Object.freeze({
+  ...services.api,
+  storage: createStorage({native: nativeAtLoad, ErrorClass: OvercrowError, clone: checkedJson}),
   async fetch(url, options = {}) {
     if (typeof url !== 'string' || !options || typeof options !== 'object') {
       throw new OvercrowError('invalid_request', 'Fetch URL or options are invalid');

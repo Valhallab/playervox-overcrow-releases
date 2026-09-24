@@ -6,7 +6,7 @@ import {createWidgetChrome} from '../../tools/creator-kit/preview/chrome.mjs';
 class Element extends EventTarget {
   constructor(document) {
     super();this.ownerDocument=document;this.hidden=false;this.value='';this.style={setProperty(key,value){this[key]=value;}};
-    this.attributes=new Map();this.textContent='';this.clientWidth=800;
+    this.attributes=new Map();this.textContent='';this.clientWidth=800;this.children=[];
     this.rect={left:100,right:580,top:300,bottom:620,width:480,height:320};
   }
   setAttribute(key,value){this.attributes.set(key,String(value));}
@@ -17,14 +17,19 @@ class Element extends EventTarget {
   getBoundingClientRect(){return this.rect;}
   setPointerCapture(){}
   releasePointerCapture(){}
+  append(...children){this.children.push(...children);}
+  replaceChildren(...children){this.children=[...children];}
 }
-function setup(onModeChange, options) {
+function setup(onModeChange, options, configure = () => {}) {
   const document=new EventTarget();document.defaultView=new EventTarget();
   Object.assign(document.defaultView,{innerWidth:1200,innerHeight:900});
   const nodes=new Map();
+  document.createElement=()=>new Element(document);
   document.querySelector=selector=>{if(!nodes.has(selector))nodes.set(selector,new Element(document));return nodes.get(selector);};
   const el=selector=>document.querySelector(selector);
   const frameDocument=new EventTarget();el('#view').contentDocument=frameDocument;el('#view').src='view/index.html';
+  el('#widget-toolbar').rect={left:492,right:580,top:266,bottom:294,width:88,height:28};
+  configure(el);
   const chrome=createWidgetChrome(document,'fr',onModeChange,options);
   const fire=(target,type,properties={})=>{const event=new Event(type,{cancelable:true});Object.assign(event,properties);target.dispatchEvent(event);return event;};
   return {document,el,chrome,fire,frameDocument};
@@ -103,6 +108,40 @@ test('automatic sizing prevents pointer and keyboard resizing until explicitly d
   assert.equal(grip.hidden,false);assert.equal(grip.disabled,false);
   fire(grip,'keydown',{key:'ArrowDown'});assert.equal(host.style.height,'321px');
 });
+
+const presentation=mode=>({sizing:{mode,preferred:{width:120,height:40},min:{width:24,height:12},max:{width:800,height:600}},options:[{id:'showArtist',type:'boolean',label:{en:'Show artist',fr:'Afficher l’artiste'},default:true}]});
+test('chrome keeps intrinsic fixed, auto height horizontal, and scales CSS reports once',async()=>{
+  const {el,fire,chrome}=setup(undefined,undefined,el=>{el('#stage-surface').rect={left:0,right:1000,top:0,bottom:900,width:1000,height:900};});
+  chrome.setPresentation(presentation('intrinsic'));
+  assert.equal(el('#widget-host').style.width,'120px');assert.equal(el('#widget-host').style.height,'40px');
+  assert.equal(el('#widget-resize').hidden,true);
+  chrome.reportSize({width:160,height:60});await new Promise(resolve=>setTimeout(resolve,120));
+  assert.equal(el('#widget-host').style.width,'160px');assert.equal(el('#widget-host').style.height,'60px');
+  fire(el('#widget-options'),'click');fire(el('#option-scale'),'click');el('#option-range').value='150';fire(el('#option-range'),'input');
+  assert.equal(el('#widget-host').style.width,'240px');assert.equal(el('#widget-host').style.height,'90px');
+  chrome.reportSize({width:160,height:60});await new Promise(resolve=>setTimeout(resolve,120));
+  assert.equal(el('#widget-host').style.height,'90px');
+  chrome.setPresentation(presentation('autoHeight'));
+  assert.equal(el('#widget-resize').hidden,false);
+  const height=el('#widget-host').style.height;
+  fire(el('#widget-resize'),'keydown',{key:'ArrowDown'});
+  assert.equal(el('#widget-host').style.height,height);
+  assert.equal(el('#widget-host').getAttribute('data-sizing-mode'),'autoHeight');
+  chrome.dispose();
+});
+
+test('native preview options are localized, bounded and disabled in passive mode',()=>{
+  const changes=[];
+  const {el,fire,chrome}=setup(undefined,{onOptionChange:(key,value)=>changes.push([key,value])});
+  chrome.setPresentation(presentation('manual'));
+  const options=el('#options-menu').children.at(-1);
+  const control=options.children[0].children[1];
+  assert.equal(control.getAttribute('aria-label'),'Afficher l’artiste');
+  control.checked=false;fire(control,'change');assert.deepEqual(changes,[['showArtist',false]]);
+  chrome.setMode('passive');control.checked=true;fire(control,'change');
+  assert.equal(changes.length,1);assert.equal(control.disabled,true);
+  chrome.dispose();
+});
 test('passive mode cancels gestures and blocks programmatic move or resize events',()=>{
   const {el,fire,chrome}=setup();
   const grip=el('#widget-resize'),move=el('#widget-move'),host=el('#widget-host');
@@ -155,6 +194,51 @@ test('widget moves by its native top strip and stays inside the preview surface'
   fire(move,'pointerup',{pointerId:4});
   fire(move,'keydown',{key:'ArrowLeft'});
   assert.equal(host.style.left,'319px');assert.equal(host.style.top,'380px');
+});
+
+for(const {name,widget,left,top,bridgeTop,bridgeHeight} of [
+  {name:'prefers above when both sides fit',widget:{left:200,top:300,width:480,height:160},left:392,top:-34,bridgeTop:-34,bridgeHeight:34},
+  {name:'fits exactly against the top stage boundary',widget:{left:200,top:134,width:480,height:160},left:392,top:-34,bridgeTop:-34,bridgeHeight:34},
+  {name:'moves below when above is one pixel too short',widget:{left:200,top:133,width:480,height:160},left:392,top:166,bridgeTop:160,bridgeHeight:34},
+  {name:'moves below a widget flush with the top edge',widget:{left:200,top:100,width:480,height:160},left:392,top:166,bridgeTop:160,bridgeHeight:34},
+  {name:'stays above a widget flush with the bottom edge',widget:{left:200,top:540,width:480,height:160},left:392,top:-34,bridgeTop:-34,bridgeHeight:34},
+  {name:'moves inside a widget spanning the stage height',widget:{left:200,top:100,width:480,height:600},left:392,top:6,bridgeTop:6,bridgeHeight:28},
+  {name:'shifts right for a narrow widget at the left edge',widget:{left:50,top:300,width:40,height:160},left:0,top:-34,bridgeTop:-34,bridgeHeight:34},
+  {name:'stays inside the right edge for a narrow widget',widget:{left:810,top:300,width:40,height:160},left:-48,top:-34,bridgeTop:-34,bridgeHeight:34},
+]) {
+  test(`toolbar ${name}`,()=>{
+    const {el,chrome}=setup(undefined,undefined,el=>{
+      el('#stage-surface').rect={left:50,right:850,top:100,bottom:700,width:800,height:600};
+      el('#widget-host').rect={...widget,right:widget.left+widget.width,bottom:widget.top+widget.height};
+    });
+    chrome.fitToStage();
+    const style=el('#widget-host').style;
+    assert.equal(style['--widget-toolbar-left'],`${left}px`);
+    assert.equal(style['--widget-toolbar-top'],`${top}px`);
+    assert.equal(style['--widget-toolbar-bridge-top'],`${bridgeTop}px`);
+    assert.equal(style['--widget-toolbar-bridge-height'],`${bridgeHeight}px`);
+  });
+}
+
+test('toolbar is bounded on first render and follows a changing stage without moving open appearance controls',()=>{
+  const {document,el,fire,chrome}=setup(undefined,undefined,el=>{
+    el('#stage-surface').rect={left:50,right:850,top:100,bottom:700,width:800,height:600};
+    el('#widget-host').rect={left:200,right:680,top:100,bottom:260,width:480,height:160};
+  });
+  const host=el('#widget-host');
+  assert.equal(host.style['--widget-toolbar-top'],'166px');
+  fire(el('#widget-options'),'click');fire(el('#option-scale'),'click');
+  const controls=[el('#options-menu'),el('#option-editor')];
+  const positions=controls.map(control=>({left:control.style.left,top:control.style.top}));
+  el('#widget-options').rect={left:620,right:648,top:266,bottom:294,width:28,height:28};
+  el('#stage-surface').rect={left:50,right:850,top:50,bottom:650,width:800,height:600};
+  chrome.fitToStage();
+  assert.equal(host.style['--widget-toolbar-top'],'-34px');
+  assert.deepEqual(controls.map(control=>({left:control.style.left,top:control.style.top})),positions);
+  assert.equal(el('#option-editor').hidden,false);
+  el('#stage-surface').rect={left:50,right:850,top:100,bottom:300,width:800,height:200};
+  fire(document.defaultView,'resize');
+  assert.equal(host.style['--widget-toolbar-top'],'166px');
 });
 
 test('widget display controls dismiss the appearance submenu without closing their menu',()=>{

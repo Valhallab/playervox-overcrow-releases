@@ -77,3 +77,43 @@ test('native host resolution and doctor availability report paths without launch
   assert.deepEqual(await nativeAvailability({platform:'linux',env:{PATH:temporary}}),{platform:'linux',path:executable,available:true});
   assert.deepEqual(await nativeAvailability({platform:'linux',env:{PATH:''}}),{platform:'linux',path:null,available:false});
 });
+
+test('Linux reload consent compares every route constraint and ignores canonical ordering',{skip:process.platform!=='linux'},async t=>{
+  const {temporary,project,manifestFile,cleanup}=await fixture(t),host=await fakeHost(temporary),errors=[];
+  const manifest=JSON.parse(await fs.readFile(manifestFile,'utf8'));
+  const route={origin:'https://api.example.com',method:'GET',path:'/items/{id}/{slug}/{mode}',pathParams:{id:{type:'integer',min:1,max:100},slug:{type:'slug',maxLength:4},mode:{type:'enum',values:['small','large']}},queryParams:{q:{type:'string',maxLength:8},page:{type:'integer',min:1,max:10},tag:{type:'slug',maxLength:8},sort:{type:'enum',values:['new','top']},flag:{type:'enum',values:['yes'],required:true}}};
+  manifest.permissions.network=[route,{origin:route.origin,method:'GET',path:'/versions'}];
+  await fs.writeFile(manifestFile,JSON.stringify(manifest));
+  const session=await startNativeDevelopment(project,{platform:'linux',host:process.execPath,hostArguments:[host.script,host.log],onError:error=>errors.push(error)});t.after(()=>session.close());t.after(cleanup);
+  await waitFor(async()=>session.snapshot?.generation===1);
+  const reordered=structuredClone(manifest),reorderedRoute=reordered.permissions.network[0];
+  reorderedRoute.pathParams=Object.fromEntries(Object.entries(reorderedRoute.pathParams).reverse());reorderedRoute.pathParams.mode.values.reverse();
+  reorderedRoute.queryParams=Object.fromEntries(Object.entries(reorderedRoute.queryParams).reverse());reorderedRoute.queryParams.sort.values.reverse();reorderedRoute.queryParams.q.required=false;
+  reordered.permissions.network.reverse();
+  await fs.writeFile(manifestFile,JSON.stringify(reordered));
+  await waitFor(async()=>session.snapshot?.generation===2);
+  assert.deepEqual(errors,[]);
+  const approved=(await rows(host.log)).at(-1).files['manifest.json'].text;
+  const changes=[
+    value=>value.origin='https://other.example.com',value=>value.method='POST',value=>value.path='/other/{id}/{slug}/{mode}',
+    value=>value.pathParams.id.min=0,value=>value.pathParams.id.max=101,value=>value.pathParams.id={type:'slug',maxLength:3},
+    value=>value.pathParams.slug.maxLength=5,value=>value.pathParams.mode.values.push('medium'),
+    value=>value.queryParams.q.maxLength=9,value=>value.queryParams.q.required=true,value=>value.queryParams.flag.required=false,
+    value=>value.queryParams.page.min=0,value=>value.queryParams.page.max=11,value=>value.queryParams.page={type:'slug',maxLength:2},
+    value=>value.queryParams.tag.maxLength=9,value=>value.queryParams.sort.values.push('old'),
+    value=>value.queryParams.extra={type:'slug',maxLength:1},value=>delete value.queryParams.q,
+  ];
+  for(const change of changes) {
+    const next=structuredClone(manifest);change(next.permissions.network[0]);const count=errors.length;
+    await fs.writeFile(manifestFile,JSON.stringify(next));
+    await waitFor(()=>errors.length>count);
+    assert.equal(errors.at(-1).code,'capability_confirmation_required',String(change));
+    assert.equal((await rows(host.log)).at(-1).files['manifest.json'].text,approved,String(change));
+  }
+  const capabilities=structuredClone(manifest);capabilities.permissions.capabilities=['telemetry.read'];const count=errors.length;
+  await fs.writeFile(manifestFile,JSON.stringify(capabilities));await waitFor(()=>errors.length>count);
+  assert.equal(errors.at(-1).code,'capability_confirmation_required');
+  const reduced=structuredClone(manifest);reduced.permissions.network=[route];await fs.writeFile(manifestFile,JSON.stringify(reduced));
+  await waitFor(async()=>session.snapshot?.generation===3);
+  assert.equal(JSON.parse((await rows(host.log)).at(-1).files['manifest.json'].text).permissions.network.length,1);
+});

@@ -135,14 +135,33 @@ export function createIndexedDbStore(databaseName = 'overcrow-warframe-market') 
   function open() {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(databaseName, 1);
+      let settled = false;
+      const fail = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        reject(new Error('storage unavailable'));
+      };
+      const timer = setTimeout(fail, 5000);
+      request.onblocked = fail;
       request.onupgradeneeded = () => {
+        if (settled) {
+          request.transaction.abort();
+          return;
+        }
         const db = request.result;
         if (!db.objectStoreNames.contains('kv')) {
           db.createObjectStore('kv');
         }
       };
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        if (settled) return request.result.close();
+        settled = true;
+        clearTimeout(timer);
+        request.result.onversionchange = () => request.result.close();
+        resolve(request.result);
+      };
+      request.onerror = fail;
     });
   }
 
@@ -152,9 +171,20 @@ export function createIndexedDbStore(databaseName = 'overcrow-warframe-market') 
       return await new Promise((resolve, reject) => {
         const transaction = db.transaction('kv', mode);
         const request = operation(transaction.objectStore('kv'));
-        transaction.oncomplete = () => resolve(mode === 'readonly' ? request.result : undefined);
-        transaction.onabort = () => reject(transaction.error ?? new Error('transaction aborted'));
-        transaction.onerror = () => reject(transaction.error ?? request.error ?? new Error('transaction failed'));
+        const timer = setTimeout(() => {
+          reject(new Error('storage unavailable'));
+          try { transaction.abort(); } catch {
+            // A committed transaction may still have its completion event queued.
+          }
+        }, 5000);
+        transaction.oncomplete = () => {
+          clearTimeout(timer);
+          resolve(mode === 'readonly' ? request.result : undefined);
+        };
+        transaction.onabort = transaction.onerror = () => {
+          clearTimeout(timer);
+          reject(transaction.error ?? request.error ?? new Error('transaction aborted'));
+        };
       });
     } finally {
       db.close();

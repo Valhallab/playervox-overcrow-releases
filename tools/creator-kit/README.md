@@ -1,7 +1,7 @@
 # OverCrow Creator Kit 1.0.0
 
 Public, dependency-free authoring tools for **Node.js 22+**, Windows and Linux.
-SDK **1.1.0**, Web API v1. The code is MIT-licensed. No application source, Rust
+SDK **1.3.0**, Web API v1. The code is MIT-licensed. No application source, Rust
 compiler, Python, D-Bus or package installation is required by the downloaded kit.
 
 ```sh
@@ -27,17 +27,25 @@ random-path preview URL, reloads valid changes and retains the last good generat
 on invalid/partial edits. A permission change requires an explicit restart.
 The preview includes OverCrow's host wrapper: hover the widget to reveal its
 floating toolbar, then open the options menu. Content scale (50–175%, initially
-100%) reflows the widget inside its fixed frame; background opacity (0–100%,
+100%) reflows the widget inside its native sizing mode; background opacity (0–100%,
 initially 100% for the starter templates) affects the host background and border only. Use the sliders
 or type a percentage and press Enter or leave the field. Backgrounds painted by
 the widget itself remain unchanged. The eye chooses whether the widget stays visible in passive mode. The Mode selector switches the whole overlay and sends the corresponding SDK snapshot and visibility events; only close is illustrative.
 Move the widget
-from its 22-pixel top strip and resize it with its bottom-right handle. The upper-left corner stays fixed while resizing, within the canvas bounds. SDK widgets keep a manual frame. Wrapper controls are hidden in passive mode; use the Mode selector to return to interactive mode. Focus
+from its 22-pixel top strip. Presentation supports intrinsic size without a handle,
+autoHeight with a horizontal-only handle, and manual dimensions with a bottom-right
+handle. Content-size reports use unscaled CSS layout pixels; the wrapper applies
+scale once. The upper-left corner stays fixed while resizing, within the canvas
+bounds. Wrapper controls are hidden in passive mode; use the Mode selector to return to interactive mode. Focus
 either control and use arrow keys
 (Shift for 10-pixel steps). Appearance and frame size survive widget reloads until the preview page itself is refreshed. This wrapper belongs to the
 host: do not implement it in widget/; it is never included in an exported package.
-The simulator restarts both documents on reload; persistent browser storage is
-namespaced by widget ID but remains separate from OverCrow's native storage.
+`overcrow.storage` uses shared, bounded runtime memory and reports `temporary`,
+regardless of the persistence permission. Its data resets on preview reload or
+a simulated game session change and is never packaged. Native mode uses the
+actual OverCrow IndexedDB partition and effective persistence policy.
+The simulator restarts both documents on reload. Browser storage is scoped to the
+widget and remains separate from OverCrow's native storage.
 The preview refresh and drag icons are from Lucide; its license is included in
 `preview/lucide-LICENSE.txt` (or `tooling/preview/` inside a project).
 Its Storage facade supports getItem/setItem/removeItem/clear/key/length; property
@@ -62,6 +70,56 @@ fixtures produce `fixture_missing`. Use `text` instead of `json` for plain text.
 The preview supplies native snapshot, locale, visibility and controller/view relay
 contracts, but does not generate arbitrary named game events or simulate all host
 failure modes. Browser devtools remain available for inspecting your widget.
+
+## Widget references
+
+Use `--template session`, `clock`, `performance`, `fps`, `media`, `stopwatch`,
+`notes`, `journal`, or `score` for a complete reference with English/French labels
+and presentation settings. Every template declares `"apiVersion": "1"`.
+Session reads the game context; Clock uses
+JavaScript time. Performance, FPS and Media use the host services. Stopwatch uses JavaScript time without persistence.
+Notes and Journal keep their own data in isolated `overcrow.storage`. Score uses anonymous `overcrow.fetch` to read the public
+PlayerVox score API.
+
+```sh
+node overcrow.mjs init my-notes --template notes
+```
+
+Public widgets cannot access built-in notes, stopwatch state, journal history or
+connected PlayerVox/Twitch accounts. The SDK has no native login, rating editor,
+review browser or Twitch integration. Its four service capabilities are
+`telemetry.read`, `fps.read`, `media.read` and `media.control`.
+
+The browser preview uses fictional telemetry, FPS and media data. Media controls
+change only the fixture; independent widgets update their own temporary storage.
+The Score example displays a fictional score in preview and never calls the
+public API there. FPS defaults to `unsupported`. Test actual host support, gestures and
+permissions in OverCrow before distributing a widget.
+
+Add optional service fixtures outside `widget/` in `preview.json`:
+
+```json
+{
+  "services": {
+    "capabilities": {"fps.read": {"supported": true, "granted": true}},
+    "snapshots": {
+      "fps": {"status": "stale", "sampleAgeMs": 3000,
+        "data": {"value": 60, "sampleAgeMs": 3000, "stale": true}}
+    }
+  }
+}
+```
+
+Fixtures cannot grant a capability absent from the manifest. Set `granted:false`
+or a service's `permissionDenied`, `unavailable` or `unsupported` status with
+`data:null` to exercise fallback UI. `ready` supplies current data; `stale` marks
+older data. The simulator owns context IDs
+and monotonic revisions. Never put real credentials or private content in
+fixtures. Media permissions are sensitive: they cannot be combined with outbound
+network or clipboard writes, and they force temporary storage even when
+`storage: true` is declared. Artwork is read through `overcrow.assets.read(handle)`
+using a media-service handle. See the EN/FR host-services guide and shipped
+TypeScript declarations for fields, units and action signatures.
 
 Use `npm run dev -- --native` to run the same project in OverCrow's installed
 engine in an offscreen development session. Use `npm run dev` for a visual preview;
@@ -114,3 +172,8 @@ matrix exercises the same Node tests. Native package compatibility can additiona
 be checked on Linux by extracting an exported archive and running
 `overcrow-widget package` against it: output bytes must match exactly. This is
 an offline validation, not an application install or native overlay session.
+
+Media grants force temporary browser storage even with `storage` declared.
+Runtime or game-session changes discard temporary browser data. Widget storage is
+isolated from built-in application data. The browser simulator keeps only fictional
+fixtures and does not reproduce the native browser sandbox.

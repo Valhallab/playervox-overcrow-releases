@@ -28,7 +28,7 @@ test('the actual downloadable archive can initialize, validate and export withou
   const output=JSON.parse(result.stdout);assert.equal((await readFile(output.file)).length,output.bytes);
   const shippedSdk=await readFile(path.join(project,'widget/overcrow.js'));
   assert.deepEqual(shippedSdk,await readFile(new URL('../../content/sdk/overcrow.js',import.meta.url)));
-  for(const name of ['chrome.mjs','chrome-messages.mjs','NotoSansUI-Regular.ttf','NotoSans-OFL.txt']) {
+  for(const name of ['network.mjs','network-policy.mjs','chrome.mjs','chrome-messages.mjs','services.mjs','service-fixtures.mjs','NotoSansUI-Regular.ttf','NotoSans-OFL.txt']) {
     assert.deepEqual(await readFile(path.join(project,'tooling/preview',name)),await readFile(new URL(`../../tools/creator-kit/preview/${name}`,import.meta.url)));
   }
   const {startPreview}=await import(pathToFileURL(path.join(project,'tooling/lib/preview.mjs')));
@@ -37,4 +37,17 @@ test('the actual downloadable archive can initialize, validate and export withou
   assert.equal((await fetch(preview.url+'chrome.mjs')).status,200);
   assert.equal((await fetch(preview.url+'chrome-messages.mjs')).status,200);
   assert.equal((await fetch(preview.url+'NotoSansUI-Regular.ttf')).status,200);
+  assert.equal((await fetch(preview.url+'services.mjs')).status,200);
+  assert.equal((await fetch(preview.url+'service-fixtures.mjs')).status,200);
+  assert.equal((await fetch(preview.url+'network-policy.mjs')).status,200);
+  const {simulateFetch}=await import(pathToFileURL(path.join(project,'tooling/preview/network.mjs')));
+  const permissions={network:[{origin:'https://api.example.com',method:'GET',path:'/items/{id}',pathParams:{id:{type:'integer',min:1,max:10}}}]};
+  const fixture={url:'https://api.example.com/items/10',status:200,json:{fixture:true}};
+  assert.equal(simulateFetch(permissions,[fixture],{url:fixture.url,method:'GET'}).metadata.ok,true);
+  assert.equal(simulateFetch(permissions,[fixture],{url:fixture.url+'/extra',method:'GET'}).metadata.error.code,'capability_denied');
+  const reference=path.join(temporary,'Isolated notes reference');
+  result=run(['init',reference,'--template','notes','--json']);assert.equal(result.status,0,result.stdout+result.stderr);
+  result=run(['package',reference,'--json']);assert.equal(result.status,0,result.stdout+result.stderr);
+  const nativeManifest=JSON.parse(await readFile(path.join(reference,'widget/manifest.json'),'utf8'));
+  assert.equal(nativeManifest.apiVersion,'1');assert.deepEqual(nativeManifest.permissions.capabilities,[]);assert.equal(nativeManifest.permissions.storage,true);
 });

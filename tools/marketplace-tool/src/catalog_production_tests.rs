@@ -13,6 +13,9 @@ const TREE: &str = "3333333333333333333333333333333333333333";
 const TRUST: &str = "1111111111111111111111111111111111111111";
 const REVIEW: &str = "2222222222222222222222222222222222222222";
 
+#[path = "catalog_preview_tests.rs"]
+mod preview_tests;
+
 #[test]
 fn detached_production_flow_preserves_admitted_bytes_and_is_idempotent() {
     let fixture = Fixture::new();
@@ -658,6 +661,17 @@ fn write_json(path: &Path, value: &Value) {
 }
 
 fn admit_version(root: &Path, store: &Path, tree: &str, version: &str, view: &[u8]) -> Vec<u8> {
+    admit_version_with_preview(root, store, tree, version, view, None)
+}
+
+fn admit_version_with_preview(
+    root: &Path,
+    store: &Path,
+    tree: &str,
+    version: &str,
+    view: &[u8],
+    preview: Option<(&str, &[u8])>,
+) -> Vec<u8> {
     let input = directory(root, &format!("input-{tree}"));
     let source = directory(&input, "source");
     let artifacts = directory(&input, "artifacts");
@@ -671,6 +685,10 @@ fn admit_version(root: &Path, store: &Path, tree: &str, version: &str, view: &[u
         &source.join("manifest.json"),
         &json!({"schemaVersion":1,"id":"com.playervox.overcrow.hello","version":version,"apiVersion":"1","entrypoints":{"view":"index.html"},"permissions":{},"files":{"index.html":{"sha256":hash(view),"bytes":view.len()}}}),
     );
+    if let Some((path, bytes)) = preview {
+        add_source_preview(&source, path, bytes);
+    }
+    let listing = fs::read(source.join("listing.json")).unwrap();
     let archive = artifacts.join("1.ocpkg");
     let written = package::write_package(&source, &archive).unwrap();
     let bytes = fs::read(archive).unwrap();
@@ -704,6 +722,10 @@ struct Fixture {
 
 impl Fixture {
     fn new() -> Self {
+        Self::with_preview(None)
+    }
+
+    fn with_preview(preview: Option<(&str, &[u8])>) -> Self {
         let scratch = tempfile::tempdir_in("/var/tmp").unwrap();
         fs::set_permissions(scratch.path(), fs::Permissions::from_mode(0o700)).unwrap();
         let store = directory(scratch.path(), "store");
@@ -711,7 +733,15 @@ impl Fixture {
         let prepared = directory(scratch.path(), "prepared");
         let output = directory(scratch.path(), "output");
         let artifacts = directory(scratch.path(), "artifacts");
-        let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/hello-web");
+        let original = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/hello-web");
+        let source = directory(scratch.path(), "source");
+        for entry in fs::read_dir(original).unwrap() {
+            let entry = entry.unwrap();
+            fs::copy(entry.path(), source.join(entry.file_name())).unwrap();
+        }
+        if let Some((path, bytes)) = preview {
+            add_source_preview(&source, path, bytes);
+        }
         let package_path = artifacts.join("1.ocpkg");
         let written = package::write_package(&source, &package_path).unwrap();
         let package_bytes = fs::read(&package_path).unwrap();
@@ -777,6 +807,17 @@ impl Fixture {
             output: &self.output,
         }
     }
+}
+
+fn add_source_preview(source: &Path, path: &str, bytes: &[u8]) {
+    fs::create_dir_all(source.join(path).parent().unwrap()).unwrap();
+    fs::write(source.join(path), bytes).unwrap();
+    let mut manifest: Value = read_json(&source.join("manifest.json"), 1024 * 1024).unwrap();
+    manifest["files"][path] = json!({"sha256": hash(bytes), "bytes": bytes.len()});
+    write_json(&source.join("manifest.json"), &manifest);
+    let mut listing: Value = read_json(&source.join("listing.json"), 64 * 1024).unwrap();
+    listing["preview"] = json!(path);
+    write_json(&source.join("listing.json"), &listing);
 }
 fn directory(parent: &Path, name: &str) -> PathBuf {
     let path = parent.join(name);

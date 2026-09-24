@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "com.playervox.overcrow.warframe.market",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "apiVersion": "1",
   "entrypoints": {
     "view": "index.html",
@@ -12,7 +12,23 @@
       {
         "origin": "https://api.warframe.market",
         "method": "GET",
-        "pathPrefix": "/v2/"
+        "path": "/v2/items"
+      },
+      {
+        "origin": "https://api.warframe.market",
+        "method": "GET",
+        "path": "/v2/versions"
+      },
+      {
+        "origin": "https://api.warframe.market",
+        "method": "GET",
+        "path": "/v2/orders/item/{slug}/top",
+        "pathParams": {
+          "slug": {
+            "type": "slug",
+            "maxLength": 96
+          }
+        }
       }
     ],
     "storage": true,
@@ -32,32 +48,36 @@
       "bytes": 205
     },
     "controller.js": {
-      "sha256": "2e642157df60ae665eaac347febf34784438c731877a528c476de887ddfdede6",
-      "bytes": 791
+      "sha256": "97c4b5189a62d277b55019685bb03229d589a3b3fa24f8395ab41aac4eab0816",
+      "bytes": 871
     },
     "index.html": {
-      "sha256": "328bb778f7068101f4ad1b90b9d45a0d48c0f2c03a981fc404698cb15f6ddc4b",
-      "bytes": 1933
+      "sha256": "3d9881a88227fc74d1191955d77e909ed03d88cdf199d980cf6f01935292b5fb",
+      "bytes": 2066
     },
     "orders.mjs": {
-      "sha256": "0f2a918e276c98c4c50abb2da781ff6ae8eb0d5b9ab7094cd1b26dfc8b271377",
-      "bytes": 2009
+      "sha256": "9989e6f4cb0e9240645c2fd2322d01758ad4a3e73ab8856fdf90ac808cfd59f8",
+      "bytes": 3272
     },
     "overcrow.js": {
-      "sha256": "4afcad53bac4c53b1826ca0a7f1acee7e197cfb44c65bc00c59c4902c380c4b3",
-      "bytes": 10248
+      "sha256": "000a7dee2a010fe21994baf113a024ecc3f9630db72d2f95550efa7b83cbfb28",
+      "bytes": 33633
+    },
+    "requests.mjs": {
+      "sha256": "b2262459996f25e8039df0f7d6a03a471e04d091e0caf7204c6e513eb9d36c59",
+      "bytes": 1224
     },
     "session.mjs": {
-      "sha256": "f26b048e5b7f7988bf224dc760626c05b4e3617d6cdd2e1df1b62b37c8a143f1",
-      "bytes": 5101
+      "sha256": "be023486a9bbd343a2c10ca7096d9cda10ab3f8736a0e1f528eaf18d063eb925",
+      "bytes": 5919
     },
     "styles.css": {
-      "sha256": "220225ea587da7d6e907bb7abc916214dbed7a3928be0d29c3e5b7ccdeee24bb",
-      "bytes": 6414
+      "sha256": "322b104c2e5afcbf193ede9c5aefcfd4180a55dfd67e3cd8948fb2990f4b5a32",
+      "bytes": 6594
     },
     "view.js": {
-      "sha256": "74b060f20e76c3effe1a201c57b7afce4cabee606dc5cc8189fc6006e190c91a",
-      "bytes": 8734
+      "sha256": "9605d493794dd1f170a540b40af95ee87e930332fff0695cd64ceb1e7f673966",
+      "bytes": 9102
     }
   }
 }
