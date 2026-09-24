@@ -64,6 +64,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
       - name: Reject invalid paths before toolchain setup
         if: ${{ github.event_name == 'pull_request_target' }}
         env:
