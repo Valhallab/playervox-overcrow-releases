@@ -526,7 +526,11 @@ function createIndexedStorage(ErrorClass) {
         const store = transaction.objectStore('values');
         if (operation === 'get') {
           const request = store.get(key);
-          request.onsuccess = () => { result = request.result ?? null; };
+          request.onsuccess = () => {
+            if (request.result !== undefined && typeof request.result !== 'string') {
+              abort(new ErrorClass('invalid_response', 'Stored widget data is invalid'));
+            } else result = request.result ?? null;
+          };
         } else if (operation === 'remove') store.delete(key);
         else {
           // Count and insert share one write transaction across views/controllers.

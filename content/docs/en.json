@@ -480,7 +480,7 @@
       {
         "kind": "code",
         "language": "ts",
-        "title": "JavaScript SDK 1.2.0",
+        "title": "JavaScript SDK 1.3.0",
         "source": "overcrow.fetch(url, { method?, headers?, body?, signal? }): Promise<OvercrowResponse>"
       },
       {
