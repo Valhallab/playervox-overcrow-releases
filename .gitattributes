@@ -3,6 +3,7 @@
 /content/sdk/*.ts text eol=lf
 /content/sdk/LICENSE text eol=lf
 /content/templates/** text=auto eol=lf
+/content/references/** text=auto eol=lf
 /tools/creator-kit/** text=auto eol=lf
 # Manifest ledgers describe exact package bytes on every operating system.
 /widgets/** -text
