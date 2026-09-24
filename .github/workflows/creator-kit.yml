@@ -35,6 +35,7 @@ jobs:
       - name: Build the downloadable creator kit
         run: python scripts/package-docs-examples.py published/docs/downloads
       - name: Require reproducible creator downloads
+        if: github.ref == 'refs/heads/main' || github.base_ref == 'main'
         run: git diff --exit-code -- published/docs/downloads/
       - name: Exercise public creator workflow
         run: >-
