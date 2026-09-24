@@ -67,6 +67,7 @@ export class OvercrowError extends Error {
 }
 
 export interface OvercrowSdk extends OvercrowServices {
+  readonly storage: OvercrowStorage;
   fetch(url: string, options?: FetchOptions): Promise<OvercrowResponse>;
   readonly locale: {
     /** Effective declared runtime locale, or null when localization is not declared. */
@@ -324,4 +325,22 @@ export interface OvercrowServices {
     /** Reads only an opaque handle delivered to this widget. PNG, at most 512 KiB. */
     read(handle: string): Promise<Blob>;
   };
+}
+
+// MIT licensed; see ../LICENSE.
+
+export interface StorageInfo {
+  /** Effective host policy, not a guarantee against disk failures or user deletion. */
+  readonly mode: 'persistent' | 'temporary';
+}
+
+export interface OvercrowStorage {
+  /** Older hosts without storage metadata reject with unsupported. */
+  getInfo(): Promise<StorageInfo>;
+  /** Missing keys return undefined. Validate your application's schema after reading. */
+  get(key: string): Promise<CloneableJson | undefined>;
+  /** Resolves after commit. JSON values up to 64 KiB; up to 256 keys of 128 UTF-8 bytes. */
+  set(key: string, value: CloneableJson): Promise<void>;
+  /** Removing a missing key succeeds. */
+  remove(key: string): Promise<void>;
 }

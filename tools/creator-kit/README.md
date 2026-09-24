@@ -36,7 +36,11 @@ from its 22-pixel top strip. API v1 keeps its manual frame and bottom-right resi
 either control and use arrow keys
 (Shift for 10-pixel steps). Appearance and frame size survive widget reloads until the preview page itself is refreshed. This wrapper belongs to the
 host: do not implement it in widget/; it is never included in an exported package.
-The simulator restarts both documents on reload; persistent browser storage is
+`overcrow.storage` uses shared, bounded runtime memory and reports `temporary`,
+regardless of the persistence permission. Its data resets on preview reload or
+a simulated game session change and is never packaged. Native mode uses the
+actual OverCrow IndexedDB partition and effective persistence policy.
+The simulator restarts both documents on reload; legacy persistent browser storage is
 namespaced by widget ID but remains separate from OverCrow's native storage.
 The preview refresh and drag icons are from Lucide; its license is included in
 `preview/lucide-LICENSE.txt` (or `tooling/preview/` inside a project).

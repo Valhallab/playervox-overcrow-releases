@@ -187,7 +187,7 @@
       },
       {
         "kind": "html",
-        "html": "<p><a href=\"/docs/api-services/\">SDK 1.2.0 : services par capacités, dimensions natives et douze widgets de référence</a>.</p>"
+        "html": "<p><a href=\"/docs/api-services/\">SDK 1.3.0 : services par capacités, dimensions natives et douze widgets de référence</a>.</p>"
       }
     ]
   },
@@ -757,7 +757,7 @@
     "group": "sdk-reference",
     "label": "Stockage et état persistant",
     "title": "Stockage et état persistant",
-    "description": "Utilisez les API du navigateur dans la partition privée du widget.",
+    "description": "Stockez du JSON avec le SDK asynchrone et consultez la persistance effective.",
     "headings": [
       {
         "id": "permission",
@@ -765,11 +765,11 @@
       },
       {
         "id": "petits-reglages",
-        "title": "Un petit réglage, avec repli"
+        "title": "Lire et écrire du JSON"
       },
       {
         "id": "cache",
-        "title": "Un cache plus conséquent"
+        "title": "Contrat et limites"
       },
       {
         "id": "recuperation",
@@ -789,17 +789,17 @@
       },
       {
         "kind": "html",
-        "html": "\n<p>Le stockage est isolé par identifiant de widget. Gardez cet identifiant stable pour les mises à jour. Il n’existe pas d’API <code>overcrow.storage</code> dans le SDK actuel : utilisez localStorage pour de petits réglages et IndexedDB pour des données structurées.</p>\n<h2 id=\"petits-reglages\">Un petit réglage, avec repli</h2>"
+        "html": "<p>Le SDK 1.3 fournit <code>overcrow.storage.get/set/remove/getInfo</code>. OverCrow utilise IndexedDB dans une partition isolée par identifiant de widget. Gardez cet identifiant stable entre les versions. Tout reste local.</p><p><code>storage: true</code> demande la conservation entre les sessions. Sans cette permission, ou avec des capacités sensibles, les données restent temporaires. <code>getInfo()</code> renvoie le <code>mode</code> effectif : <code>persistent</code> ou <code>temporary</code>. Il décrit la politique appliquée ; une lecture ou une écriture peut encore échouer. Les anciens hôtes sans ce contrat renvoient <code>unsupported</code> : mettez OverCrow à jour plutôt que de supposer une persistance.</p><aside class=\"note note-info\"><strong>Aperçus navigateur</strong><p>Le kit créateur en mode navigateur et le Studio utilisent la mémoire et renvoient toujours <code>temporary</code>. Les données SDK sont réinitialisées au rechargement de l’aperçu ou au changement de session de jeu simulée. Dans l’aperçu local, contrôleur et vue partagent le même stockage. Les brouillons du Studio et les fichiers exportés sont distincts ; les données SDK ne sont pas incluses dans les paquets.</p></aside><h2 id=\"petits-reglages\">Lire et écrire du JSON</h2>"
       },
       {
         "kind": "code",
         "language": "js",
-        "title": "Validation et erreur de sauvegarde",
-        "source": "function readPreferences() {\n  try {\n    const value = JSON.parse(localStorage.getItem('preferences.v1') ?? '{}');\n    return { compact: value?.compact === true };\n  } catch {\n    return { compact: false };\n  }\n}\nfunction savePreferences(preferences) {\n  try {\n    localStorage.setItem('preferences.v1', JSON.stringify(preferences));\n    return true;\n  } catch {\n    return false; // Show that the setting remains in memory only.\n  }\n}"
+        "title": "Attendre l’écriture et consulter le mode de persistance",
+        "source": "const info = await overcrow.storage.getInfo();\nconst stored = await overcrow.storage.get('settings.v1');\nif (stored !== undefined &&\n    (!stored || typeof stored.compact !== 'boolean')) {\n  throw new Error('Invalid settings; preserve existing data.');\n}\nconst settings = stored ?? { compact: false };\nawait overcrow.storage.set('settings.v1', settings);\nawait overcrow.storage.remove('obsolete-setting');\n// A successful temporary write lasts only for this runtime.\nconst savedForNextSession = info.mode === 'persistent';"
       },
       {
         "kind": "html",
-        "html": "\n<h2 id=\"cache\">Un cache plus conséquent</h2><p>Préférez IndexedDB, avec un schéma versionné et des transactions dont vous attendez la fin. Validez les données relues comme des données externes. Évitez d’écrire à chaque rendu : sauvegardez lorsque l’état change et regroupez les modifications rapides.</p>\n<h2 id=\"recuperation\">Préserver le travail de l’utilisateur</h2><p>Affichez un échec d’écriture. Ne remplacez pas silencieusement un contenu invalide par un document vide. Lors d’une évolution de schéma, migrez explicitement et conservez une voie de récupération. Ne stockez pas de secret dans un paquet distribué.</p>\n<p><a href=\"/docs/exemples/\">La checklist téléchargeable</a> montre un petit état versionné, borné et validé. Warframe Market fournit un exemple IndexedDB avec un contrôleur.</p>"
+        "html": "<p>Indiquez si une sauvegarde réussie est temporaire ou persistante. En cas d’échec, conservez les données affichées et montrez l’erreur ; le SDK ne change jamais silencieusement de stockage.</p><h2 id=\"cache\">Contrat et limites</h2><p><code>get(key)</code> renvoie <code>undefined</code> pour une clé absente et préserve une valeur JSON <code>null</code>. <code>set(key, value)</code> copie son entrée et se termine après la validation de sa transaction. <code>remove(key)</code> réussit également si la clé n’existe pas. Les valeurs doivent être du JSON : pas de fonctions, dates, données binaires, cycles ou nombres non finis.</p><p>Clés : 1 à 128 octets UTF-8. Valeurs : 64 Kio de JSON encodé maximum, avec au plus 64 niveaux d’imbrication. Stockage : 256 clés. SDK : 32 opérations en attente. L’ouverture et les transactions disposent chacune d’un délai de cinq secondes. Les quotas natifs restent la limite de sécurité. Une lecture suivie d’une écriture ne constitue pas une transaction atomique ; centralisez les écritures concurrentes dans le contrôleur.</p><p>Gérez <code>invalid_storage_key</code>, <code>invalid_storage_value</code>, <code>storage_quota_exceeded</code>, <code>storage_unavailable</code>, <code>busy</code> et <code>invalid_response</code>. La fermeture d’un contexte simulé peut aussi produire <code>stale_context</code>. Un pont natif absent produit <code>bridge_unavailable</code>.</p><h2 id=\"recuperation\">Préserver le travail de l’utilisateur</h2><p>Versionnez et validez le schéma de vos documents. Préservez les données illisibles jusqu’à leur récupération. La persistance ne protège pas des pannes de disque, de l’éviction ou d’une suppression par l’utilisateur. Les données localStorage et IndexedDB existantes ne sont ni migrées ni supprimées. Pour des index ou des transactions avancées, IndexedDB reste accessible selon la politique native ; utilisez une base distincte et ne modifiez pas <code>overcrow.sdk.storage</code>, réservée au SDK. IndexedDB brut n’est pas accessible dans le Studio en ligne. N’y stockez jamais d’identifiants secrets.</p>"
       }
     ]
   },

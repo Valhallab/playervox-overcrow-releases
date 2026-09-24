@@ -33,6 +33,7 @@ test('simulation uses declared permissions and fixtures without external request
   assert.equal(simulateFetch(exact,fixtures,{url:'https://api.example.com/v2/items/other',method:'GET'}).metadata.error.code,'capability_denied');
 });
 test('browser storage simulation is permission gated and namespaced per widget',async()=>{
+  for (const enabled of [true, false]) assert.deepEqual({...bridge(enabled).context.__overcrowNative.storage},{mode:'temporary',backend:'memory'});
   const denied=bridge(false);assert.throws(()=>denied.context.localStorage.getItem('test'),e=>e.name==='SecurityError');
   assert.throws(()=>denied.context.indexedDB,e=>e.name==='SecurityError');
   const shared=storage(),first=bridge(true,'com.example.one',shared),second=bridge(true,'com.example.two',shared);

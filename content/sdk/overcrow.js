@@ -461,6 +461,160 @@ function createServices({native, role, ErrorClass, clone}) {
   return {api, receiveSnapshot};
 }
 
+// MIT licensed; see ../LICENSE.
+function createIndexedStorage(ErrorClass) {
+  let connection = null;
+  const failure = error => error instanceof ErrorClass ? error : new ErrorClass(
+    error?.name === 'QuotaExceededError' ? 'storage_quota_exceeded' : 'storage_unavailable',
+    'Widget storage operation failed',
+  );
+
+  function open() {
+    if (connection) return connection;
+    const opening = new Promise((resolve, reject) => {
+      let settled = false;
+      const timer = setTimeout(() => finish(failure()), 5000);
+      const finish = (error, database) => {
+        if (settled) { database?.close(); return; }
+        settled = true;
+        clearTimeout(timer);
+        if (error) reject(error); else resolve(database);
+      };
+      try {
+        const request = globalThis.indexedDB.open('overcrow.sdk.storage', 1);
+        request.onupgradeneeded = () => {
+          if (settled) { request.transaction.abort(); return; }
+          request.result.createObjectStore('values');
+        };
+        request.onerror = () => finish(failure(request.error));
+        request.onblocked = () => finish(new ErrorClass('busy', 'Widget storage upgrade is blocked'));
+        request.onsuccess = () => {
+          const database = request.result;
+          database.onversionchange = () => {
+            if (connection === opening) connection = null;
+            database.close();
+          };
+          database.onclose = () => { if (connection === opening) connection = null; };
+          finish(null, database);
+        };
+      } catch (error) { finish(failure(error)); }
+    });
+    connection = opening;
+    opening.catch(() => { if (connection === opening) connection = null; });
+    return opening;
+  }
+
+  return async (operation, key, value) => {
+    const database = await open();
+    return new Promise((resolve, reject) => {
+      let transaction, result = null, reason = null;
+      const timer = setTimeout(() => abort(failure()), 5000);
+      const finish = error => {
+        clearTimeout(timer);
+        if (error) reject(error); else resolve(result);
+      };
+      const abort = error => {
+        reason = error;
+        try { transaction?.abort(); } catch (_) { /* A completed transaction cannot be aborted. */ }
+        finish(error);
+      };
+      try {
+        transaction = database.transaction('values', operation === 'get' ? 'readonly' : 'readwrite');
+        // A successful request is not a successful commit: only oncomplete resolves.
+        transaction.oncomplete = () => finish(reason);
+        transaction.onabort = () => finish(reason ?? failure(transaction.error));
+        const store = transaction.objectStore('values');
+        if (operation === 'get') {
+          const request = store.get(key);
+          request.onsuccess = () => { result = request.result ?? null; };
+        } else if (operation === 'remove') store.delete(key);
+        else {
+          // Count and insert share one write transaction across views/controllers.
+          const existing = store.getKey(key), count = store.count();
+          let completed = 0;
+          const write = () => {
+            if (++completed !== 2) return;
+            if (existing.result === undefined && count.result >= 256) {
+              abort(new ErrorClass('storage_quota_exceeded', 'Widget storage contains too many keys'));
+              return;
+            }
+            try { store.put(value, key); } catch (error) { abort(failure(error)); }
+          };
+          existing.onsuccess = count.onsuccess = write;
+        }
+      } catch (error) { abort(failure(error)); }
+    });
+  };
+}
+
+// MIT licensed; see ../LICENSE.
+
+function createStorage({native, ErrorClass, clone}) {
+  const encoder = new TextEncoder();
+  const indexed = createIndexedStorage(ErrorClass);
+  let pending = 0;
+  const fail = code => { throw new ErrorClass(code, `Widget storage operation failed (${code})`); };
+  const policy = () => {
+    if (!native) fail('bridge_unavailable');
+    const storage = native.storage;
+    if (!storage || !['persistent', 'temporary'].includes(storage.mode)
+        || !['indexeddb', 'memory'].includes(storage.backend)
+        || (storage.backend === 'memory' && storage.mode !== 'temporary')) fail('unsupported');
+    return storage;
+  };
+  const encode = (value, code) => {
+    try {
+      const text = JSON.stringify(clone(value));
+      if (encoder.encode(text).byteLength > 65536) fail(code);
+      return text;
+    } catch (_) { fail(code); }
+  };
+  const decode = value => {
+    if (value === null) return undefined;
+    if (typeof value !== 'string' || encoder.encode(value).byteLength > 65536) fail('invalid_response');
+    try { return JSON.parse(encode(JSON.parse(value), 'invalid_response')); }
+    catch (_) { fail('invalid_response'); }
+  };
+  async function memory(operation, key, value) {
+    let timer;
+    try {
+      const response = await Promise.race([
+        native.request({type: 'storage', operation, key, ...(operation === 'set' ? {value} : {})}, new ArrayBuffer(0)),
+        new Promise((_, reject) => { timer = setTimeout(() => reject(new ErrorClass('storage_unavailable', 'Widget storage timed out')), 5000); }),
+      ]);
+      if (!(response?.body instanceof ArrayBuffer) || response.body.byteLength !== 0) fail('invalid_response');
+      const metadata = response.metadata;
+      if (metadata?.ok !== true) {
+        const code = metadata?.error?.code;
+        fail(['storage_quota_exceeded', 'storage_unavailable', 'busy', 'stale_context'].includes(code) ? code : 'invalid_response');
+      }
+      if (!Object.hasOwn(metadata, 'value') || (operation !== 'get' && metadata.value !== null)) fail('invalid_response');
+      return metadata.value;
+    } catch (error) {
+      if (error instanceof ErrorClass) throw error;
+      fail('storage_unavailable');
+    } finally { clearTimeout(timer); }
+  }
+  async function run(operation, key, value) {
+    const storage = policy();
+    if (typeof key !== 'string' || !key.length || encoder.encode(key).byteLength > 128) fail('invalid_storage_key');
+    if (pending >= 32) fail('busy');
+    // Snapshot before the first await so caller mutations cannot alter a queued save.
+    const encoded = operation === 'set' ? encode(value, 'invalid_storage_value') : undefined;
+    pending += 1;
+    try {
+      const result = await (storage.backend === 'indexeddb' ? indexed : memory)(operation, key, encoded);
+      if (operation === 'get') return decode(result);
+    } finally { pending -= 1; }
+  }
+  return Object.freeze({
+    async getInfo() { return Object.freeze({mode: policy().mode}); },
+    get: key => run('get', key),
+    set: (key, value) => run('set', key, value),
+    remove: key => run('remove', key),
+  });
+}
+
 const MAX_JSON_BYTES = 1024 * 1024;
 const MAX_JSON_DEPTH = 64;
 const MAX_REQUEST_BODY_BYTES = 2 * 1024 * 1024;
@@ -691,6 +845,7 @@ function listen(collection, listener) {
 
 export const overcrow = Object.freeze({
   ...services.api,
+  storage: createStorage({native: nativeAtLoad, ErrorClass: OvercrowError, clone: checkedJson}),
   async fetch(url, options = {}) {
     if (typeof url !== 'string' || !options || typeof options !== 'object') {
       throw new OvercrowError('invalid_request', 'Fetch URL or options are invalid');

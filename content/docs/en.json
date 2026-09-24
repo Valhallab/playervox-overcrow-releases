@@ -33,7 +33,7 @@
       },
       {
         "kind": "html",
-        "html": "\n<p>This request runs through OverCrow and needs a network permission. <a href=\"/docs/en/api-reseau/\">See the manifest and error states</a>.</p>\n<aside class=\"note note-info\"><strong>Documentation version</strong><p>JavaScript SDK 1.2.0 · API v1 retained; API v2 support depends on the host. Check capability and service status before using native features.</p></aside>\n<h2 id=\"plateformes\">Windows and Linux</h2><p>OverCrow supports Windows and compatible Linux environments. The <a href=\"/docs/en/kit-createur/\">creator kit</a> offers the same creation, preview and export workflow on both. The advanced native <code>overcrow-widget dev</code> CLI uses D-Bus on Linux; <code>npm run dev -- --native</code> works on both platforms.</p>"
+        "html": "\n<p>This request runs through OverCrow and needs a network permission. <a href=\"/docs/en/api-reseau/\">See the manifest and error states</a>.</p>\n<aside class=\"note note-info\"><strong>Documentation version</strong><p>JavaScript SDK 1.3.0 · API v1 retained; API v2 support depends on the host. Check capability and service status before using native features.</p></aside>\n<h2 id=\"plateformes\">Windows and Linux</h2><p>OverCrow supports Windows and compatible Linux environments. The <a href=\"/docs/en/kit-createur/\">creator kit</a> offers the same creation, preview and export workflow on both. The advanced native <code>overcrow-widget dev</code> CLI uses D-Bus on Linux; <code>npm run dev -- --native</code> works on both platforms.</p>"
       }
     ]
   },
@@ -183,7 +183,7 @@
       },
       {
         "kind": "html",
-        "html": "<p><a href=\"/docs/en/api-services/\">SDK 1.2.0: capability services, native sizing and twelve reference widgets</a>.</p>"
+        "html": "<p><a href=\"/docs/en/api-services/\">SDK 1.3.0: capability services, native sizing and twelve reference widgets</a>.</p>"
       }
     ]
   },
@@ -753,7 +753,7 @@
     "group": "sdk-reference",
     "label": "Storage and persistent state",
     "title": "Storage and persistent state",
-    "description": "Use browser storage in the widget’s private partition.",
+    "description": "Store JSON through the asynchronous SDK and check the effective persistence policy.",
     "headings": [
       {
         "id": "permission",
@@ -761,11 +761,11 @@
       },
       {
         "id": "petits-reglages",
-        "title": "Read a setting with a fallback"
+        "title": "Read and write JSON"
       },
       {
         "id": "cache",
-        "title": "A larger cache"
+        "title": "Contract and limits"
       },
       {
         "id": "recuperation",
@@ -785,17 +785,17 @@
       },
       {
         "kind": "html",
-        "html": "\n<p>Storage is isolated by widget ID, so preserve that ID through updates. There is no current <code>overcrow.storage</code> API. Use localStorage for small settings and IndexedDB for structured data.</p>\n<h2 id=\"petits-reglages\">Read a setting with a fallback</h2>"
+        "html": "<p>SDK 1.3 provides <code>overcrow.storage.get/set/remove/getInfo</code>. Native OverCrow uses IndexedDB in a partition isolated by widget ID. Keep that ID stable across updates. All storage stays local.</p><p><code>storage: true</code> requests persistence between sessions. Without it, or with sensitive capabilities, data remains temporary. <code>getInfo()</code> reports the effective <code>mode</code>: <code>persistent</code> or <code>temporary</code>. It reports policy; individual reads and writes can still fail. Older hosts without this contract reject with <code>unsupported</code>: update OverCrow instead of guessing persistence.</p><aside class=\"note note-info\"><strong>Browser previews</strong><p>The creator-kit browser preview and Studio use memory and always report <code>temporary</code>. SDK data resets when the preview reloads or its simulated game session changes. The local preview controller and view share one runtime store. Studio editor drafts and exported source files are separate; SDK data is not included in packages.</p></aside><h2 id=\"petits-reglages\">Read and write JSON</h2>"
       },
       {
         "kind": "code",
         "language": "js",
-        "title": "Validate data and detect failed saves",
-        "source": "function readPreferences() {\n  try {\n    const value = JSON.parse(localStorage.getItem('preferences.v1') ?? '{}');\n    return { compact: value?.compact === true };\n  } catch { return { compact: false }; }\n}\nfunction savePreferences(preferences) {\n  try { localStorage.setItem('preferences.v1', JSON.stringify(preferences)); return true; }\n  catch { return false; }\n}"
+        "title": "Await writes and inspect the persistence mode",
+        "source": "const info = await overcrow.storage.getInfo();\nconst stored = await overcrow.storage.get('settings.v1');\nif (stored !== undefined &&\n    (!stored || typeof stored.compact !== 'boolean')) {\n  throw new Error('Invalid settings; preserve existing data.');\n}\nconst settings = stored ?? { compact: false };\nawait overcrow.storage.set('settings.v1', settings);\nawait overcrow.storage.remove('obsolete-setting');\n// A successful temporary write lasts only for this runtime.\nconst savedForNextSession = info.mode === 'persistent';"
       },
       {
         "kind": "html",
-        "html": "\n<p>If saving fails, tell the user that changes remain in memory for this session.</p>\n<h2 id=\"cache\">A larger cache</h2><p>Prefer IndexedDB with a versioned schema and transactions whose completion you await. Validate cached data like any external input. Save when state changes; group rapid updates instead of writing on every render.</p>\n<h2 id=\"recuperation\">Protect user work</h2><p>Show write failures. Do not silently replace invalid content with an empty document. Migrate schemas explicitly and offer recovery. Never put secrets in a distributed package. <a href=\"/docs/en/exemples/\">The checklist</a> demonstrates bounded, versioned local state; Warframe Market shows IndexedDB and a controller.</p>"
+        "html": "<p>Show whether a successful save is temporary or persistent. On failure, keep the current UI data and show the error; the SDK never silently falls back to another backend.</p><h2 id=\"cache\">Contract and limits</h2><p><code>get(key)</code> returns <code>undefined</code> for a missing key and preserves stored JSON <code>null</code>. <code>set(key, value)</code> copies its input and resolves after its transaction completes. <code>remove(key)</code> also succeeds when the key does not exist. Values are JSON only: no functions, dates, binary blobs, cycles or non-finite numbers.</p><p>Keys: 1–128 UTF-8 bytes. Values: at most 64 KiB of encoded JSON, with at most 64 levels of nesting. Store: 256 keys. SDK: 32 pending operations. Opening and transaction work each have a five-second deadline. Native sandbox quotas remain authoritative. Separate reads and writes are not an atomic read-modify-write operation; coordinate concurrent writers through a controller.</p><p>Handle <code>invalid_storage_key</code>, <code>invalid_storage_value</code>, <code>storage_quota_exceeded</code>, <code>storage_unavailable</code>, <code>busy</code> and <code>invalid_response</code>. Simulated runtime disposal can also produce <code>stale_context</code>. A missing host bridge produces <code>bridge_unavailable</code>.</p><h2 id=\"recuperation\">Protect user work</h2><p>Version and validate your document schema. Preserve unreadable data until it can be recovered. Persistence cannot guarantee protection from disk failures, eviction or user deletion. Existing localStorage and IndexedDB data is neither migrated nor deleted. For advanced indexes or multi-record transactions, direct IndexedDB remains available under the native storage policy; use a separate database and leave the SDK-owned <code>overcrow.sdk.storage</code> database untouched. Raw IndexedDB is unavailable in the online Studio. Never store credentials here.</p>"
       }
     ]
   },

@@ -34,7 +34,7 @@
       pending.delete(message.id);clearTimeout(request.timer);request.resolve(message.response);
     } else if(message.type==='event')for(const listener of [...listeners])listener(message.event);
   });
-  Object.defineProperty(globalThis,'__overcrowNative',{value:Object.freeze({role,
+  Object.defineProperty(globalThis,'__overcrowNative',{value:Object.freeze({role,storage:Object.freeze({mode:'temporary',backend:'memory'}),
     request(metadata,body){
       if(closed)return Promise.resolve(stale());
       if(pending.size>=32)return Promise.resolve({metadata:{ok:false,error:{code:'busy',message:'Preview request limit reached'}},body:new ArrayBuffer(0)});
