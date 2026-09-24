@@ -153,7 +153,13 @@
       },
       {
         "kind": "html",
-        "html": "<p>Si la commande manque, vérifiez le paquet OverCrow installé.</p>\n<h2 id=\"import\">Importer le SDK</h2>"
+        "html": "<p>Si la commande manque, vérifiez le paquet OverCrow installé.</p>\n<h2 id=\"import\">Importer le SDK</h2><p>Ajoutez ce contenu dans le <code>index.html</code> de la vue avant de charger le module :</p>"
+      },
+      {
+        "kind": "code",
+        "language": "html",
+        "title": "index.html",
+        "source": "<p id=\"status\" role=\"status\"></p>"
       },
       {
         "kind": "code",
@@ -263,7 +269,7 @@
     "blocks": [
       {
         "kind": "html",
-        "html": "<p>Installez Node.js 22+, puis décompressez le kit. <a href=\"https://github.com/Valhallab/playervox-overcrow-releases/tree/main/tools/creator-kit\" rel=\"noreferrer\">Les sources</a> et le téléchargement correspondent à la révision de cette documentation.</p>\n<p><a class=\"button-primary\" href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/creator-kit.zip\" download>Télécharger le kit créateur ↓</a> &nbsp; <a href=\"/studio/\">Ou utiliser le Studio en ligne →</a></p>\n<h2 id=\"creer\">Créer un projet</h2>"
+        "html": "<p>Installez Node.js 22+, puis décompressez le kit. <a href=\"https://github.com/Valhallab/playervox-overcrow-releases/tree/main/tools/creator-kit\" rel=\"noreferrer\">Les sources</a> sont disponibles sur GitHub ; le téléchargement correspond à la révision de cette documentation.</p>\n<p><a class=\"button-primary\" href=\"https://raw.githubusercontent.com/Valhallab/playervox-overcrow-releases/main/published/docs/downloads/creator-kit.zip\" download>Télécharger le kit créateur ↓</a> &nbsp; <a href=\"/studio/\">Ou utiliser le Studio en ligne →</a></p>\n<h2 id=\"creer\">Créer un projet</h2>"
       },
       {
         "kind": "code",
@@ -473,7 +479,13 @@
       },
       {
         "kind": "html",
-        "html": "<p>Déclarez l’origine HTTPS, la méthode et le préfixe de chemin dans <a href=\"/docs/manifeste/\">le manifeste</a>.</p>\n<h2 id=\"exemple\">Lire une réponse JSON</h2>"
+        "html": "<p>Déclarez l’origine HTTPS, la méthode et le préfixe de chemin dans <a href=\"/docs/manifeste/\">le manifeste</a>.</p>\n<h2 id=\"exemple\">Lire une réponse JSON</h2><p>Ajoutez ce contenu dans le <code>index.html</code> de la vue avant de charger le module :</p>"
+      },
+      {
+        "kind": "code",
+        "language": "html",
+        "title": "index.html",
+        "source": "<p id=\"status\" role=\"status\"></p>"
       },
       {
         "kind": "code",
@@ -519,7 +531,13 @@
     "blocks": [
       {
         "kind": "html",
-        "html": "<h2 id=\"snapshot\">Lire la session courante</h2>"
+        "html": "<h2 id=\"snapshot\">Lire la session courante</h2><p>Ajoutez ce contenu dans le <code>index.html</code> de la vue avant de charger le module :</p>"
+      },
+      {
+        "kind": "code",
+        "language": "html",
+        "title": "index.html",
+        "source": "<p id=\"duration\">—</p>"
       },
       {
         "kind": "code",
@@ -535,7 +553,7 @@
         "kind": "code",
         "language": "js",
         "title": "S’abonner, puis lire l’état initial",
-        "source": "import overcrow from './overcrow.js';\nfunction render(snapshot) {\n  const ms = snapshot.sessionElapsedMs;\n  document.querySelector('#duration').textContent =\n    typeof ms === 'number' ? Math.floor(ms / 60000) + ' min' : 'Session unavailable';\n}\nconst stop = overcrow.game.onSnapshot(render);\nrender(await overcrow.game.snapshot());\n// Call stop() when the component is removed."
+        "source": "import overcrow from './overcrow.js';\nfunction render(snapshot) {\n  const ms = snapshot.sessionElapsedMs;\n  document.querySelector('#duration').textContent =\n    typeof ms === 'number' ? Math.floor(ms / 60000) + ' min' : 'Session unavailable';\n}\nconst stop = overcrow.game.onSnapshot(render);\nrender(await overcrow.game.snapshot());\nwindow.addEventListener('pagehide', stop, { once: true });"
       },
       {
         "kind": "html",
@@ -545,7 +563,7 @@
         "kind": "code",
         "language": "js",
         "title": "Exemple d’événement de replay",
-        "source": "const stop = overcrow.game.on('overcrow.game.session.v1', payload => {\n  // Validate the schema defined by the event or fixture.\n  console.log(payload);\n});\n// Call when the component is removed:\nstop();"
+        "source": "import overcrow from './overcrow.js';\n\nconst stop = overcrow.game.on('overcrow.game.session.v1', payload => {\n  // Validate the schema defined by the event or fixture.\n  console.log(payload);\n});\nwindow.addEventListener('pagehide', stop, { once: true });"
       },
       {
         "kind": "html",
@@ -625,7 +643,7 @@
       },
       {
         "kind": "html",
-        "html": "<h2 id=\"disponibilite\">Gérer les données indisponibles</h2><p>Chaque service renvoie <code>{ status, data, contextId, revision }</code>. Seuls <code>ready</code> et <code>stale</code> peuvent contenir des données ; certaines mesures peuvent rester <code>null</code>.</p><div class=\"table-scroll\"><table><thead><tr><th>status</th><th>Quoi afficher</th></tr></thead><tbody><tr><td><code>ready</code></td><td>Les données actuelles.</td></tr><tr><td><code>stale</code></td><td>Les données anciennes, avec leur âge (<code>sampleAgeMs</code>).</td></tr><tr><td><code>unavailable</code></td><td>Un emplacement vide : aucune session ou mesure utilisable.</td></tr><tr><td><code>unsupported</code></td><td>Une explication : cette version ou plateforme ne propose pas la fonction.</td></tr><tr><td><code>permissionDenied</code></td><td>Une indication de permission manquante.</td></tr><tr><td><code>notConnected</code></td><td>Un bouton vers la connexion native.</td></tr><tr><td><code>rateLimited</code></td><td>Attendre avant de réessayer ; respecter <code>retryAfterMs</code> s’il est fourni.</td></tr></tbody></table></div><p>Pour une lecture ponctuelle, utilisez <code>snapshot()</code> et gérez les erreurs. <code>host.capabilities()</code> indique <code>supported</code> et <code>granted</code> pour chaque droit. Sans OverCrow ni simulateur, <code>snapshot()</code> échoue avec <code>bridge_unavailable</code> ; un abonnement signale <code>unavailable</code> si sa lecture initiale échoue.</p><p>Limitez-vous à 128 abonnements actifs et 32 actions en attente. Appelez la fonction renvoyée par <code>onSnapshot()</code> à la fermeture de la vue.</p><h2 id=\"donnees\">Trouver les champs et les unités</h2><p>Chaque page de service décrit ses champs, unités et limites. Les <a href=\"/docs/downloads/overcrow.d.ts\" download>définitions TypeScript</a> donnent les types complets. Une valeur absente est indisponible, pas égale à zéro.</p><h2 id=\"actions\">Réagir à une action utilisateur</h2><p>Appelez les commandes directement depuis un clic dans une vue interactive, avant d’attendre une autre opération. Chaque geste natif est temporaire et utilisable une seule fois. Les éditeurs et confirmations s’ouvrent dans OverCrow ; un contrôleur ne peut pas les déclencher. Le résultat <code>accepted</code> signifie ouvert ou mis en file, pas enregistré ou envoyé. Suivez les mises à jour pour afficher le résultat.</p><p>Pour modifier des données, transmettez la révision courante indiquée sur la page du service. En cas de <code>conflict</code> ou <code>stale_context</code>, actualisez l’affichage et laissez l’utilisateur réessayer. Les autres erreurs incluent <code>capability_denied</code>, <code>permission_denied</code>, <code>unsupported_operation</code>, <code>unavailable</code> et <code>rate_limited</code>. Ne répétez pas automatiquement une écriture dont le résultat est incertain.</p><h2 id=\"presentation\">Dimensions et options d’affichage</h2><div class=\"table-scroll\"><table><thead><tr><th><code>presentation.sizing.mode</code></th><th>Comportement</th></tr></thead><tbody><tr><td><code>intrinsic</code></td><td>S’adapte au contenu ; aucun redimensionnement manuel.</td></tr><tr><td><code>autoHeight</code></td><td>Hauteur automatique, largeur réglable.</td></tr><tr><td><code>manual</code></td><td>Les deux dimensions sont réglables.</td></tr></tbody></table></div><p>Déclarez les dimensions entières <code>preferred</code>, <code>min</code> et <code>max</code> dans le manifeste. Le menu natif accepte jusqu’à 16 options <code>boolean</code>, <code>enum</code> ou <code>number</code> borné. Lisez leurs valeurs avec <code>presentation.onSnapshot()</code>, dans <code>data.options</code>.</p><p>Si le contenu de votre vue est dans <code>&lt;main&gt;</code>, signalez sa taille CSS sans mise à l’échelle (entiers de 1 à 4096) :</p>"
+        "html": "<h2 id=\"disponibilite\">Gérer les données indisponibles</h2><p>Chaque service renvoie <code>{ status, data, contextId, revision }</code>. Seuls <code>ready</code> et <code>stale</code> peuvent contenir des données ; certaines mesures peuvent rester <code>null</code>.</p><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Utiliser les services OverCrow\"><table><thead><tr><th>status</th><th>Quoi afficher</th></tr></thead><tbody><tr><td><code>ready</code></td><td>Les données actuelles.</td></tr><tr><td><code>stale</code></td><td>Les données anciennes, avec leur âge (<code>sampleAgeMs</code>).</td></tr><tr><td><code>unavailable</code></td><td>Un emplacement vide : aucune session ou mesure utilisable.</td></tr><tr><td><code>unsupported</code></td><td>Une explication : cette version ou plateforme ne propose pas la fonction.</td></tr><tr><td><code>permissionDenied</code></td><td>Une indication de permission manquante.</td></tr><tr><td><code>notConnected</code></td><td>Un bouton vers la connexion native.</td></tr><tr><td><code>rateLimited</code></td><td>Attendre avant de réessayer ; respecter <code>retryAfterMs</code> s’il est fourni.</td></tr></tbody></table></div><p>Pour une lecture ponctuelle, utilisez <code>snapshot()</code> et gérez les erreurs. <code>host.capabilities()</code> indique <code>supported</code> et <code>granted</code> pour chaque droit. Sans OverCrow ni simulateur, <code>snapshot()</code> échoue avec <code>bridge_unavailable</code> ; un abonnement signale <code>unavailable</code> si sa lecture initiale échoue.</p><p>Limitez-vous à 128 abonnements actifs et 32 actions en attente. Appelez la fonction renvoyée par <code>onSnapshot()</code> à la fermeture de la vue.</p><h2 id=\"donnees\">Trouver les champs et les unités</h2><p>Chaque page de service décrit ses champs, unités et limites. Les <a href=\"/docs/downloads/overcrow.d.ts\" download>définitions TypeScript</a> donnent les types complets. Une valeur absente est indisponible, pas égale à zéro.</p><h2 id=\"actions\">Réagir à une action utilisateur</h2><p>Appelez les commandes directement depuis un clic dans une vue interactive, avant d’attendre une autre opération. Chaque geste natif est temporaire et utilisable une seule fois. Les éditeurs et confirmations s’ouvrent dans OverCrow ; un contrôleur ne peut pas les déclencher. Le résultat <code>accepted</code> signifie ouvert ou mis en file, pas enregistré ou envoyé. Suivez les mises à jour pour afficher le résultat.</p><p>Pour modifier des données, transmettez la révision courante indiquée sur la page du service. En cas de <code>conflict</code> ou <code>stale_context</code>, actualisez l’affichage et laissez l’utilisateur réessayer. Les autres erreurs incluent <code>capability_denied</code>, <code>permission_denied</code>, <code>unsupported_operation</code>, <code>unavailable</code> et <code>rate_limited</code>. Ne répétez pas automatiquement une écriture dont le résultat est incertain.</p><h2 id=\"presentation\">Dimensions et options d’affichage</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Utiliser les services OverCrow\"><table><thead><tr><th><code>presentation.sizing.mode</code></th><th>Comportement</th></tr></thead><tbody><tr><td><code>intrinsic</code></td><td>S’adapte au contenu ; aucun redimensionnement manuel.</td></tr><tr><td><code>autoHeight</code></td><td>Hauteur automatique, largeur réglable.</td></tr><tr><td><code>manual</code></td><td>Les deux dimensions sont réglables.</td></tr></tbody></table></div><p>Déclarez les dimensions entières <code>preferred</code>, <code>min</code> et <code>max</code> dans le manifeste. Le menu natif accepte jusqu’à 16 options <code>boolean</code>, <code>enum</code> ou <code>number</code> borné, avec des libellés anglais et français (choix des enums inclus). Lisez leurs valeurs avec <code>presentation.onSnapshot()</code>, dans <code>data.options</code>.</p><p>Si le contenu de votre vue est dans <code>&lt;main&gt;</code>, signalez sa taille CSS sans mise à l’échelle (entiers de 1 à 4096) :</p>"
       },
       {
         "kind": "code",
@@ -1051,7 +1069,13 @@
       },
       {
         "kind": "html",
-        "html": "<p>Abonnez la vue avant d’envoyer le premier message :</p>"
+        "html": "<p>Abonnez la vue avant d’envoyer le premier message :</p><p>Ajoutez ce contenu dans le <code>index.html</code> de la vue avant de charger le module :</p>"
+      },
+      {
+        "kind": "code",
+        "language": "html",
+        "title": "index.html",
+        "source": "<p id=\"count\">0</p>\n<button id=\"increment\">+1</button>"
       },
       {
         "kind": "code",
@@ -1133,7 +1157,7 @@
       },
       {
         "kind": "html",
-        "html": "<h2 id=\"cache\">Limites et erreurs</h2><div class=\"table-scroll\"><table><thead><tr><th>Élément</th><th>Limite</th></tr></thead><tbody><tr><td>Clés</td><td>256 clés ; 1 à 128 octets UTF-8 chacune.</td></tr><tr><td>Valeurs</td><td>JSON uniquement ; 64 Kio par valeur, 64 niveaux d’imbrication.</td></tr><tr><td>Opérations</td><td>32 requêtes en attente ; ouverture et transactions limitées à 5 secondes chacune.</td></tr></tbody></table></div><p>Gérez les erreurs autour des appels attendus avec <code>await</code>. En cas de <code>storage_quota_exceeded</code> ou <code>storage_unavailable</code>, conservez les données affichées et signalez l’échec. <code>invalid_storage_key</code> et <code>invalid_storage_value</code> indiquent des entrées invalides. Autres codes : <code>busy</code>, <code>invalid_response</code>, <code>stale_context</code> et <code>bridge_unavailable</code>. Un ancien hôte sans cette API renvoie <code>unsupported</code> ; mettez OverCrow à jour.</p><h2 id=\"recuperation\">Préserver les données</h2><ul><li>Gardez un identifiant de widget stable. Validez et versionnez les documents ; préservez les données illisibles pour permettre leur récupération.</li><li>Un <code>get()</code> suivi d’un <code>set()</code> n’est pas atomique. Centralisez les écritures concurrentes dans le contrôleur.</li><li>La persistance ne remplace pas une sauvegarde. Les données SDK ne sont pas incluses dans les paquets exportés ni dans les brouillons de projet du Studio.</li></ul><p>Les données localStorage/IndexedDB existantes ne sont ni migrées ni supprimées. L’usage avancé d’IndexedDB reste soumis à la politique native ; utilisez une autre base, jamais <code>overcrow.sdk.storage</code>. IndexedDB brut est indisponible dans le Studio en ligne. Ne stockez jamais d’identifiants secrets.</p>"
+        "html": "<h2 id=\"cache\">Limites et erreurs</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Enregistrer les données du widget\"><table><thead><tr><th>Élément</th><th>Limite</th></tr></thead><tbody><tr><td>Clés</td><td>256 clés ; 1 à 128 octets UTF-8 chacune.</td></tr><tr><td>Valeurs</td><td>JSON uniquement ; 64 Kio par valeur, 64 niveaux d’imbrication.</td></tr><tr><td>Opérations</td><td>32 requêtes en attente ; ouverture et transactions limitées à 5 secondes chacune.</td></tr></tbody></table></div><p>Gérez les erreurs autour des appels attendus avec <code>await</code>. En cas de <code>storage_quota_exceeded</code> ou <code>storage_unavailable</code>, conservez les données affichées et signalez l’échec. <code>invalid_storage_key</code> et <code>invalid_storage_value</code> indiquent des entrées invalides. Autres codes : <code>busy</code>, <code>invalid_response</code>, <code>stale_context</code> et <code>bridge_unavailable</code>. Un ancien hôte sans cette API renvoie <code>unsupported</code> ; mettez OverCrow à jour.</p><h2 id=\"recuperation\">Préserver les données</h2><ul><li>Gardez un identifiant de widget stable. Validez et versionnez les documents ; préservez les données illisibles pour permettre leur récupération.</li><li>Un <code>get()</code> suivi d’un <code>set()</code> n’est pas atomique. Centralisez les écritures concurrentes dans le contrôleur.</li><li>La persistance ne remplace pas une sauvegarde. Les données SDK ne sont pas incluses dans les paquets exportés ni dans les brouillons de projet du Studio.</li></ul><p>Les données localStorage/IndexedDB existantes ne sont ni migrées ni supprimées. L’usage avancé d’IndexedDB reste soumis à la politique native ; utilisez une autre base, jamais <code>overcrow.sdk.storage</code>. IndexedDB brut est indisponible dans le Studio en ligne. Ne stockez jamais d’identifiants secrets.</p>"
       }
     ]
   },
@@ -1167,7 +1191,13 @@
       },
       {
         "kind": "html",
-        "html": "<p>Déclarez 1 à 16 langues uniques, dont la langue par défaut. Les formes comprennent <code>fr</code>, <code>en</code> et <code>en-US</code>. OverCrow utilise la correspondance exacte avec la préférence du Control Center, ou la langue par défaut.</p>\n<h2 id=\"rendu\">Afficher le texte traduit</h2>\n<p>Fournissez un dictionnaire par langue. Ici, chaque module exporte un objet avec une propriété <code>ready</code> :</p>"
+        "html": "<p>Déclarez 1 à 16 langues uniques, dont la langue par défaut. Les formes comprennent <code>fr</code>, <code>en</code> et <code>en-US</code>. OverCrow utilise la correspondance exacte avec la préférence du Control Center, ou la langue par défaut.</p>\n<h2 id=\"rendu\">Afficher le texte traduit</h2>\n<p>Fournissez un dictionnaire par langue. Ici, chaque module exporte un objet avec une propriété <code>ready</code> :</p><p>Ajoutez ce contenu dans le <code>index.html</code> de la vue avant de charger le module :</p>"
+      },
+      {
+        "kind": "code",
+        "language": "html",
+        "title": "index.html",
+        "source": "<p id=\"status\" role=\"status\"></p>"
       },
       {
         "kind": "code",
@@ -1215,7 +1245,13 @@
       },
       {
         "kind": "html",
-        "html": "<h2 id=\"geste\">Copier au clic</h2>\n<p>Préparez le texte avant le clic et appelez <code>writeText</code> directement dans son gestionnaire.</p>"
+        "html": "<h2 id=\"geste\">Copier au clic</h2>\n<p>Préparez le texte avant le clic et appelez <code>writeText</code> directement dans son gestionnaire.</p><p>Ajoutez ce contenu dans le <code>index.html</code> de la vue avant de charger le module :</p>"
+      },
+      {
+        "kind": "code",
+        "language": "html",
+        "title": "index.html",
+        "source": "<button id=\"copy\">Copy</button>\n<p id=\"status\" role=\"status\"></p>"
       },
       {
         "kind": "code",
