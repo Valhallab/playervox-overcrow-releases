@@ -1,5 +1,5 @@
 import overcrow from './overcrow.js';
-import { whisperLine } from './orders.mjs';
+import { variantLabel, whisperLine } from './orders.mjs';
 
 const query = document.querySelector('#query');
 const clearQuery = document.querySelector('#clear-query');
@@ -162,8 +162,10 @@ function renderDetail() {
   detailName.textContent = state.detail.name;
   const sells = state.detail.orders.filter((order) => order.side === 'sell');
   const buys = state.detail.orders.filter((order) => order.side === 'buy');
-  minSell.textContent = sells.length ? `${Math.min(...sells.map((order) => order.platinum))}p` : '—';
-  maxBuy.textContent = buys.length ? `${Math.max(...buys.map((order) => order.platinum))}p` : '—';
+  const unitPrice = (order) => order.platinum / order.perTrade;
+  const priceLabel = (value) => `${value.toLocaleString('en-US', { maximumFractionDigits: 2 })}p`;
+  minSell.textContent = sells.length ? priceLabel(Math.min(...sells.map(unitPrice))) : '—';
+  maxBuy.textContent = buys.length ? priceLabel(Math.max(...buys.map(unitPrice))) : '—';
   orderCount.textContent = String(state.detail.orders.length);
   for (const [side, entries] of [['sell', sells], ['buy', buys]]) {
     const section = element('section', 'offer-section');
@@ -195,6 +197,10 @@ function renderDetail() {
         button.setAttribute('aria-label', `Copy whisper to ${order.trader}`);
         copyButtons.push(button);
         row.append(element('span', 'order-price', `${order.platinum}p`), trader, presence, button);
+        row.append(element('span', 'order-variant', [
+          order.perTrade > 1 ? `${order.perTrade} items · total price` : '1 item',
+          variantLabel(order),
+        ].filter(Boolean).join(' · ')));
         list.append(row);
       }
       section.append(labels, list);
