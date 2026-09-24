@@ -6,7 +6,7 @@ import {createWidgetChrome} from '../../tools/creator-kit/preview/chrome.mjs';
 class Element extends EventTarget {
   constructor(document) {
     super();this.ownerDocument=document;this.hidden=false;this.value='';this.style={setProperty(key,value){this[key]=value;}};
-    this.attributes=new Map();this.textContent='';this.clientWidth=800;
+    this.attributes=new Map();this.textContent='';this.clientWidth=800;this.children=[];
     this.rect={left:100,right:580,top:300,bottom:620,width:480,height:320};
   }
   setAttribute(key,value){this.attributes.set(key,String(value));}
@@ -17,11 +17,14 @@ class Element extends EventTarget {
   getBoundingClientRect(){return this.rect;}
   setPointerCapture(){}
   releasePointerCapture(){}
+  append(...children){this.children.push(...children);}
+  replaceChildren(...children){this.children=[...children];}
 }
 function setup(onModeChange, options, configure = () => {}) {
   const document=new EventTarget();document.defaultView=new EventTarget();
   Object.assign(document.defaultView,{innerWidth:1200,innerHeight:900});
   const nodes=new Map();
+  document.createElement=()=>new Element(document);
   document.querySelector=selector=>{if(!nodes.has(selector))nodes.set(selector,new Element(document));return nodes.get(selector);};
   const el=selector=>document.querySelector(selector);
   const frameDocument=new EventTarget();el('#view').contentDocument=frameDocument;el('#view').src='view/index.html';
@@ -104,6 +107,40 @@ test('automatic sizing prevents pointer and keyboard resizing until explicitly d
   chrome.setAutoSize(false);
   assert.equal(grip.hidden,false);assert.equal(grip.disabled,false);
   fire(grip,'keydown',{key:'ArrowDown'});assert.equal(host.style.height,'321px');
+});
+
+const presentation=mode=>({sizing:{mode,preferred:{width:120,height:40},min:{width:24,height:12},max:{width:800,height:600}},options:[{id:'showArtist',type:'boolean',label:{en:'Show artist',fr:'Afficher l’artiste'},default:true}]});
+test('v2 chrome keeps intrinsic fixed, auto height horizontal, and scales CSS reports once',async()=>{
+  const {el,fire,chrome}=setup(undefined,undefined,el=>{el('#stage-surface').rect={left:0,right:1000,top:0,bottom:900,width:1000,height:900};});
+  chrome.setPresentation(presentation('intrinsic'));
+  assert.equal(el('#widget-host').style.width,'120px');assert.equal(el('#widget-host').style.height,'40px');
+  assert.equal(el('#widget-resize').hidden,true);
+  chrome.reportSize({width:160,height:60});await new Promise(resolve=>setTimeout(resolve,120));
+  assert.equal(el('#widget-host').style.width,'160px');assert.equal(el('#widget-host').style.height,'60px');
+  fire(el('#widget-options'),'click');fire(el('#option-scale'),'click');el('#option-range').value='150';fire(el('#option-range'),'input');
+  assert.equal(el('#widget-host').style.width,'240px');assert.equal(el('#widget-host').style.height,'90px');
+  chrome.reportSize({width:160,height:60});await new Promise(resolve=>setTimeout(resolve,120));
+  assert.equal(el('#widget-host').style.height,'90px');
+  chrome.setPresentation(presentation('autoHeight'));
+  assert.equal(el('#widget-resize').hidden,false);
+  const height=el('#widget-host').style.height;
+  fire(el('#widget-resize'),'keydown',{key:'ArrowDown'});
+  assert.equal(el('#widget-host').style.height,height);
+  assert.equal(el('#widget-host').getAttribute('data-sizing-mode'),'autoHeight');
+  chrome.dispose();
+});
+
+test('v2 native preview options are localized, bounded and disabled in passive mode',()=>{
+  const changes=[];
+  const {el,fire,chrome}=setup(undefined,{onOptionChange:(key,value)=>changes.push([key,value])});
+  chrome.setPresentation(presentation('manual'));
+  const options=el('#options-menu').children.at(-1);
+  const control=options.children[0].children[1];
+  assert.equal(control.getAttribute('aria-label'),'Afficher l’artiste');
+  control.checked=false;fire(control,'change');assert.deepEqual(changes,[['showArtist',false]]);
+  chrome.setMode('passive');control.checked=true;fire(control,'change');
+  assert.equal(changes.length,1);assert.equal(control.disabled,true);
+  chrome.dispose();
 });
 test('passive mode cancels gestures and blocks programmatic move or resize events',()=>{
   const {el,fire,chrome}=setup();

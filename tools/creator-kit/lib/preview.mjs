@@ -7,6 +7,7 @@ import {randomBytes} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {collect,readRegular,diagnostic} from './bundle.mjs';
 import {parseJson,fail} from './manifest.mjs';
+import {CAPABILITIES,READ_CAPABILITIES} from '../preview/service-fixtures.mjs';
 const assets=fileURLToPath(new URL('../preview/',import.meta.url));
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp','.ttf':'font/ttf','.woff2':'font/woff2','.wasm':'application/wasm'};
 const csp="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src 'self'; media-src 'none'; object-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'";
@@ -14,8 +15,25 @@ async function fixtures(project) {
   let raw;
   try{raw=await readRegular(path.join(project,'preview.json'),1024*1024);}catch(error){if(error.code==='ENOENT')return {};throw error;}
   const config=parseJson(raw.toString('utf8'));
-  if(!config||typeof config!=='object'||Array.isArray(config)||Object.keys(config).some(key=>!['snapshot','responses'].includes(key)))fail('preview.fixture','preview.json est invalide.','Utilisez les champs snapshot et responses.');
+  if(!config||typeof config!=='object'||Array.isArray(config)||Object.keys(config).some(key=>!['snapshot','responses','services'].includes(key)))fail('preview.fixture','preview.json est invalide.','Utilisez les champs snapshot, services et responses.');
   if(config.snapshot!==undefined&&(!config.snapshot||typeof config.snapshot!=='object'||Array.isArray(config.snapshot)))fail('preview.fixture','snapshot doit être un objet.','Utilisez les champs natifs documentés.');
+  if(config.services!==undefined) {
+    const object=value=>value!==null&&typeof value==='object'&&!Array.isArray(value),services=config.services;
+    const invalid=()=>fail('preview.fixture','Services simulés invalides.','Utilisez des capacités connues et des enveloppes {status,data}, sans contexte ou révision manuels.');
+    if(!object(services)||Object.keys(services).some(key=>!['capabilities','snapshots'].includes(key)))invalid();
+    if(services.capabilities!==undefined) {
+      if(!object(services.capabilities))invalid();
+      for(const [name,flags] of Object.entries(services.capabilities))if(!CAPABILITIES.includes(name)||!object(flags)||Object.keys(flags).some(key=>!['supported','granted'].includes(key))||Object.values(flags).some(value=>typeof value!=='boolean'))invalid();
+    }
+    if(services.snapshots!==undefined) {
+      if(!object(services.snapshots))invalid();
+      for(const [name,envelope] of Object.entries(services.snapshots)) {
+        if(!Object.hasOwn(READ_CAPABILITIES,name)||!object(envelope)||Object.keys(envelope).some(key=>!['status','data','sampleAgeMs','retryAfterMs'].includes(key))||!['ready','stale','unavailable','unsupported','permissionDenied','notConnected','rateLimited'].includes(envelope.status))invalid();
+        if(envelope.status==='ready'?!object(envelope.data):envelope.status==='stale'?envelope.data!==null&&!object(envelope.data):envelope.data!==null)invalid();
+        for(const key of ['sampleAgeMs','retryAfterMs'])if(Object.hasOwn(envelope,key)&&(!Number.isSafeInteger(envelope[key])||envelope[key]<0))invalid();
+      }
+    }
+  }
   const responses=config.responses??[];
   if(!Array.isArray(responses)||responses.length>64)fail('preview.fixture','Au maximum 64 réponses simulées.','Réduisez responses.');
   const seen=new Set();
@@ -32,7 +50,7 @@ export async function startPreview(project,port=4175) {
   const permissions=JSON.stringify(bundle.manifest.permissions);
   const base=`/${randomBytes(16).toString('hex')}/`;
   const clients=new Set(),staticFiles=new Map();
-  for(const name of ['index.html','app.js','bridge.js','network.mjs','chrome.mjs','chrome-messages.mjs','styles.css','NotoSansUI-Regular.ttf'])staticFiles.set(name,await readFile(path.join(assets,name)));
+  for(const name of ['index.html','app.js','bridge.js','network.mjs','services.mjs','service-fixtures.mjs','chrome.mjs','chrome-messages.mjs','styles.css','NotoSansUI-Regular.ttf'])staticFiles.set(name,await readFile(path.join(assets,name)));
   const publish=value=>{for(const client of clients){if(!client.write(`data: ${JSON.stringify(value)}\n\n`)){clients.delete(client);client.end();}}};
   const state=()=>({manifest:bundle.manifest,config,generation});
   const server=createServer((request,response)=>{

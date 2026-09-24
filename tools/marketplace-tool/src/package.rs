@@ -11,6 +11,9 @@ use sha2::{Digest, Sha256};
 
 use crate::private_fs::{open_regular_file, read_bounded_file};
 
+#[path = "package_manifest_v2.rs"]
+mod manifest_v2;
+
 const UTF8_FLAG: u16 = 1 << 11;
 const DOS_DATE_1980_01_01: u16 = 33;
 const REGULAR_MODE: u32 = 0o100644;
@@ -60,6 +63,9 @@ struct WireManifest {
     api_version: String,
     entrypoints: WireEntrypoints,
     permissions: WirePermissions,
+    localization: Option<WireLocalization>,
+    #[serde(default, deserialize_with = "deserialize_present")]
+    presentation: Option<manifest_v2::WirePresentation>,
     #[serde(deserialize_with = "deserialize_unique_file_map")]
     files: BTreeMap<String, WireFile>,
 }
@@ -82,6 +88,23 @@ struct WirePermissions {
     storage: bool,
     #[serde(default)]
     clipboard_write: bool,
+    #[serde(default, deserialize_with = "deserialize_present")]
+    capabilities: Option<Vec<String>>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct WireLocalization {
+    default_locale: String,
+    available_locales: Vec<String>,
+}
+
+fn deserialize_present<'de, D, T>(deserializer: D) -> Result<Option<T>, D::Error>
+where
+    D: Deserializer<'de>,
+    T: Deserialize<'de>,
+{
+    T::deserialize(deserializer).map(Some)
 }
 
 #[derive(Deserialize)]
@@ -370,7 +393,9 @@ fn validate_manifest(
     files: &BTreeMap<String, Vec<u8>>,
 ) -> Result<(), PackageError> {
     if manifest.schema_version != 1
-        || manifest.api_version != "1"
+        || !matches!(manifest.api_version.as_str(), "1" | "2")
+        || (manifest.api_version == "1"
+            && (manifest.permissions.capabilities.is_some() || manifest.presentation.is_some()))
         || !valid_extension_id(&manifest.id)
         || !canonical_semver(&manifest.version)
         || manifest.files.is_empty()
@@ -389,6 +414,26 @@ fn validate_manifest(
         return Err(error("invalid manifest"));
     }
     validate_permissions(&manifest.permissions)?;
+    if manifest
+        .presentation
+        .as_ref()
+        .is_some_and(|presentation| !presentation.is_valid())
+    {
+        return Err(error("invalid presentation"));
+    }
+    if let Some(localization) = &manifest.localization {
+        let locales = localization
+            .available_locales
+            .iter()
+            .collect::<BTreeSet<_>>();
+        if !(1..=16).contains(&locales.len())
+            || locales.len() != localization.available_locales.len()
+            || !locales.contains(&localization.default_locale)
+            || locales.iter().any(|locale| !valid_locale(locale))
+        {
+            return Err(error("invalid localization"));
+        }
+    }
     validate_declared_size(manifest)?;
     let mut declared = BTreeSet::from(["manifest.json".to_owned()]);
     declared.extend(manifest.files.keys().cloned());
@@ -469,6 +514,18 @@ pub(crate) fn canonical_semver(value: &str) -> bool {
 }
 
 fn validate_permissions(permissions: &WirePermissions) -> Result<(), PackageError> {
+    if permissions
+        .capabilities
+        .as_ref()
+        .is_some_and(|capabilities| {
+            !manifest_v2::valid_capabilities(
+                capabilities,
+                !permissions.network.is_empty() || permissions.clipboard_write,
+            )
+        })
+    {
+        return Err(error("invalid permissions"));
+    }
     let mut network = BTreeSet::new();
     for permission in &permissions.network {
         if !valid_https_origin(&permission.origin)
@@ -1167,6 +1224,191 @@ mod tests {
 
         let native = fixture(&[("index.html", VIEW), ("module.so", b"\x7fELF")]);
         assert!(write_package(native.path(), &native.path().join("x.ocpkg")).is_err());
+    }
+
+    #[test]
+    fn package_v2_roundtrips_capabilities_and_native_presentation() {
+        let source = fixture(&[("index.html", VIEW)]);
+        mutate_manifest(source.path(), |manifest| {
+            manifest["apiVersion"] = serde_json::json!("2");
+            manifest["permissions"] =
+                serde_json::json!({"capabilities":["media.read"],"storage":true});
+            manifest["presentation"] = v2_presentation();
+            manifest["localization"] =
+                serde_json::json!({"defaultLocale":"en","availableLocales":["en","fr"]});
+        });
+        let output = tempfile::tempdir().unwrap();
+        let archive = output.path().join("v2.ocpkg");
+        write_package(source.path(), &archive).expect("v2 package with bounded presentation");
+        let inspected = inspect(&archive).expect("v2 package inspection");
+        assert_eq!(inspected.catalog_value["apiVersion"], "2");
+        assert_eq!(inspected.catalog_value["presentation"], v2_presentation());
+        assert_eq!(
+            inspected.catalog_value["permissions"]["capabilities"],
+            serde_json::json!(["media.read"])
+        );
+    }
+
+    fn v2_presentation() -> serde_json::Value {
+        serde_json::json!({"sizing":{"mode":"autoHeight","preferred":{"width":360,"height":240},"min":{"width":80,"height":24},"max":{"width":1600,"height":1200}},"options":[
+            {"id":"showArtist","type":"boolean","label":{"en":"Show artist","fr":"Afficher l’artiste"},"default":true},
+            {"id":"theme","type":"enum","label":{"en":"Theme","fr":"Thème"},"default":"dark","choices":[{"value":"dark","label":{"en":"Dark","fr":"Sombre"}},{"value":"light","label":{"en":"Light","fr":"Clair"}}]},
+            {"id":"fontSize","type":"number","label":{"en":"Font size","fr":"Taille du texte"},"default":14.5,"min":8,"max":48,"step":0.5}
+        ]})
+    }
+
+    fn v2_manifest() -> serde_json::Value {
+        serde_json::json!({
+            "schemaVersion":1,"id":"com.example.v2","version":"1.0.0","apiVersion":"2",
+            "entrypoints":{"view":"index.html"},"permissions":{},
+            "files":{"index.html":{"sha256":file_sha256_hex(VIEW),"bytes":VIEW.len()}}
+        })
+    }
+
+    fn accepts_manifest(value: &serde_json::Value) -> bool {
+        let bytes = serde_json::to_vec(value).unwrap();
+        let Ok(manifest) = serde_json::from_slice::<WireManifest>(&bytes) else {
+            return false;
+        };
+        validate_manifest(
+            &manifest,
+            &BTreeMap::from([
+                ("manifest.json".to_owned(), bytes),
+                ("index.html".to_owned(), VIEW.to_vec()),
+            ]),
+        )
+        .is_ok()
+    }
+
+    #[test]
+    fn package_v2_capabilities_reject_unknown_duplicate_and_sensitive_egress() {
+        for capability in [
+            "telemetry.read",
+            "fps.read",
+            "stopwatch.read",
+            "stopwatch.control",
+            "playervox.score.read",
+            "media.read",
+            "media.control",
+            "notes.read",
+            "notes.write",
+            "playervox.rating.read",
+            "playervox.rating.write",
+            "playervox.reviews.read",
+            "playervox.followed.read",
+            "journal.local.read",
+            "journal.cloud.read",
+            "journal.notes.read",
+            "journal.notes.write",
+            "journal.delete",
+            "twitch.chat.read",
+            "twitch.chat.compose",
+        ] {
+            let mut value = v2_manifest();
+            value["permissions"]["capabilities"] = serde_json::json!([capability]);
+            assert!(
+                accepts_manifest(&value),
+                "supported capability {capability}"
+            );
+            let sensitive = ![
+                "telemetry.read",
+                "fps.read",
+                "stopwatch.read",
+                "stopwatch.control",
+                "playervox.score.read",
+            ]
+            .contains(&capability);
+            value["permissions"]["network"] = serde_json::json!([{"origin":"https://api.example.test","method":"GET","pathPrefix":"/v2/"}]);
+            assert_eq!(
+                accepts_manifest(&value),
+                !sensitive,
+                "network with {capability}"
+            );
+            value["permissions"]["network"] = serde_json::json!([]);
+            value["permissions"]["clipboardWrite"] = serde_json::json!(true);
+            assert_eq!(
+                accepts_manifest(&value),
+                !sensitive,
+                "clipboard with {capability}"
+            );
+        }
+        for capabilities in [
+            serde_json::json!(["native.shell"]),
+            serde_json::json!(["notes.read", "notes.read"]),
+            serde_json::json!(null),
+        ] {
+            let mut value = v2_manifest();
+            value["permissions"]["capabilities"] = capabilities;
+            assert!(!accepts_manifest(&value));
+        }
+        for capabilities in [
+            serde_json::json!([]),
+            serde_json::json!(["fps.read"]),
+            serde_json::json!(null),
+        ] {
+            let mut value = v2_manifest();
+            value["apiVersion"] = serde_json::json!("1");
+            value["permissions"]["capabilities"] = capabilities;
+            assert!(!accepts_manifest(&value));
+        }
+    }
+
+    #[test]
+    fn package_v2_presentation_rejects_unsafe_and_unbounded_fields() {
+        for mode in ["intrinsic", "autoHeight", "manual"] {
+            let mut value = v2_manifest();
+            value["presentation"] = v2_presentation();
+            value["presentation"]["sizing"]["mode"] = serde_json::json!(mode);
+            assert!(accepts_manifest(&value));
+        }
+        for (pointer, replacement) in [
+            ("/presentation", serde_json::json!(null)),
+            ("/presentation/sizing/mode", serde_json::json!("free")),
+            ("/presentation/sizing/min/width", serde_json::json!(361)),
+            (
+                "/presentation/sizing/preferred/height",
+                serde_json::json!(0),
+            ),
+            ("/presentation/sizing/max/width", serde_json::json!(4097)),
+            ("/presentation/options/0/id", serde_json::json!("__proto__")),
+            ("/presentation/options/0/label/en", serde_json::json!(" ")),
+            (
+                "/presentation/options/0/label/fr",
+                serde_json::json!("x".repeat(81)),
+            ),
+            ("/presentation/options/0/default", serde_json::json!(1)),
+            (
+                "/presentation/options/1/default",
+                serde_json::json!("missing"),
+            ),
+            (
+                "/presentation/options/1/choices/1/value",
+                serde_json::json!("dark"),
+            ),
+            ("/presentation/options/2/default", serde_json::json!(49)),
+            ("/presentation/options/2/min", serde_json::json!(-1_000_001)),
+            ("/presentation/options/2/max", serde_json::json!(1_000_001)),
+            ("/presentation/options/2/step", serde_json::json!(0)),
+            ("/presentation/options/2/step", serde_json::json!(41)),
+        ] {
+            let mut value = v2_manifest();
+            value["presentation"] = v2_presentation();
+            *value.pointer_mut(pointer).unwrap() = replacement;
+            assert!(!accepts_manifest(&value), "accepted {pointer}");
+        }
+        for pointer in [
+            "/presentation",
+            "/presentation/sizing",
+            "/presentation/sizing/min",
+            "/presentation/options/0",
+            "/presentation/options/0/label",
+            "/presentation/options/1/choices/0",
+        ] {
+            let mut value = v2_manifest();
+            value["presentation"] = v2_presentation();
+            value.pointer_mut(pointer).unwrap()["setValue"] = serde_json::json!(true);
+            assert!(!accepts_manifest(&value), "unknown field at {pointer}");
+        }
     }
 
     #[test]

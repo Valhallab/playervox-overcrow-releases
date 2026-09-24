@@ -52,5 +52,17 @@ test('preview bridge accepts only its parent, correlates requests and removes su
   deliver({type:'event',event:{type:'gameSnapshot',payload:{running:false}}});off();deliver({type:'event',event:{type:'visibility',visible:true}});assert.equal(received.length,1);
   const promise=native.request({type:'gameSnapshot'},new ArrayBuffer(0));const request=messages.at(-1);
   const response={metadata:{ok:true,value:{running:false}},body:new ArrayBuffer(0)};
-  deliver({type:'reply',id:request.id,response});assert.equal(await promise,response);
+  deliver({type:'reply',id:request.id,bridgeId:request.bridgeId,response});assert.equal(await promise,response);
+});
+
+test('preview page disposal clears listeners and pending requests; old document replies are ignored',async()=>{
+  const {context,messages,events,parent}=bridge(false),native=context.__overcrowNative;
+  const promise=native.request({type:'gameSnapshot'},new ArrayBuffer(0));const request=messages.at(-1);
+  events.get('message')({source:parent,origin:context.location.origin,data:{source:'overcrow-creator',type:'reply',bridgeId:'old-document',id:request.id,response:{metadata:{ok:true,value:{private:'old'}},body:new ArrayBuffer(0)}}});
+  const seen=[];native.subscribe(value=>seen.push(value));
+  assert.equal(typeof events.get('pagehide'),'function');events.get('pagehide')();
+  assert.equal((await promise).metadata.error.code,'stale_context');
+  assert.equal((await native.request({type:'gameSnapshot'},new ArrayBuffer(0))).metadata.error.code,'stale_context');
+  events.get('message')({source:parent,origin:context.location.origin,data:{source:'overcrow-creator',type:'event',event:{type:'gameSnapshot',payload:{running:true}}}});
+  assert.equal(seen.length,0);
 });
