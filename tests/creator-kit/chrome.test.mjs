@@ -192,12 +192,12 @@ test('old size changes cannot complete a new oscillation after a quiet interval'
   const {el, chrome} = sizingSetup();
   try {
     chrome.setPresentation(presentation('both'));
-    for (const width of [160, 120]) {
+    for (const width of [120, 160]) {
       chrome.reportSize({width, height:40});
       await settleSize();
     }
     await new Promise(resolve => setTimeout(resolve, 520));
-    for (const width of [160, 120]) {
+    for (const width of [120, 160, 120]) {
       chrome.reportSize({width, height:40});
       await settleSize();
       assert.equal(el('#widget-host').style.width, `${width}px`);
