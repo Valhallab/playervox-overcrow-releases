@@ -28,7 +28,7 @@ export function createWidgetChrome(
     window = document.defaultView;
   const listeners = [];
   let presentation = null, optionValues = "{}", optionControls = [], optionCleanups = [], nativeOptions = null;
-  let contentHint = null, sizeTimer = null, lastContentSize = null, previousContentSize = null, sizeCycle = null;
+  let contentHint = null, sizeTimer = null, lastContentSize = null, previousContentSize = null, earlierContentSize = null, sizeCycle = null;
   let lastContentAt = 0;
   let maximumWidth = 900, maximumHeight = 900;
   let userSizingMode = "manual", presentationKey = "null", settingPresentation = false, lastPresentationState = null;
@@ -555,7 +555,7 @@ export function createWidgetChrome(
   }
   function applyContentSize(reset = false) {
     if (!presentation || sizingMode() === "manual") return;
-    if (reset) { lastContentSize = previousContentSize = sizeCycle = null; }
+    if (reset) { lastContentSize = previousContentSize = earlierContentSize = sizeCycle = null; }
     const content = contentHint ?? presentation.sizing.preferred, scale = settings.scale.value / 100;
     const currentWidth = Number.parseFloat(host.style.width) || presentation.sizing.preferred.width;
     let next = {
@@ -564,12 +564,14 @@ export function createWidgetChrome(
     };
     next = {width: Math.round(clamp(next.width, minimumWidth, maximumWidth)), height: Math.round(clamp(next.height, minimumHeight, maximumHeight))};
     const near = (a,b) => a && Math.abs(a.width-b.width)<=1 && Math.abs(a.height-b.height)<=1;
+    if (Date.now()-lastContentAt>500) previousContentSize=earlierContentSize=null;
     if (sizeCycle && sizeCycle.some(size=>near(size,next))) next={width:Math.max(...sizeCycle.map(size=>size.width)),height:Math.max(...sizeCycle.map(size=>size.height))};
-    else if (Date.now()-lastContentAt<=500 && near(previousContentSize,next) && !near(lastContentSize,next)) {
+    // One return to an earlier size is normal; require a repeated alternating transition.
+    else if (near(previousContentSize,next) && near(earlierContentSize,lastContentSize) && !near(lastContentSize,next)) {
       sizeCycle=[previousContentSize,lastContentSize];next={width:Math.max(...sizeCycle.map(size=>size.width)),height:Math.max(...sizeCycle.map(size=>size.height))};
-    } else if (sizeCycle) { sizeCycle=null;previousContentSize=null; }
+    } else if (sizeCycle) { sizeCycle=null;previousContentSize=earlierContentSize=null; }
     if (near(lastContentSize,next)) return;
-    previousContentSize=lastContentSize;lastContentSize=next;lastContentAt=Date.now();
+    earlierContentSize=previousContentSize;previousContentSize=lastContentSize;lastContentSize=next;lastContentAt=Date.now();
     resize(next.width,next.height);
   }
   function reportSize(size) {
@@ -598,7 +600,7 @@ export function createWidgetChrome(
     const previousSize = frameSize();
     presentationKey = nextKey;
     const nextValues=JSON.stringify(values);
-    if (optionValues!==nextValues) previousContentSize=sizeCycle=null;
+    if (optionValues!==nextValues) previousContentSize=earlierContentSize=sizeCycle=null;
     optionValues=nextValues;
     presentation=next ? structuredClone(next) : null;
     if (!changed) {
@@ -618,7 +620,7 @@ export function createWidgetChrome(
         || previousMode === "autoHeight" && presentation?.sizing.fitToContent === "height" ? "fit" : "manual";
     close();
     if (initialize) contentHint=null;
-    lastContentSize=previousContentSize=sizeCycle=null;
+    lastContentSize=previousContentSize=earlierContentSize=sizeCycle=null;
     if (sizeTimer!==null) { clearTimeout(sizeTimer);sizeTimer=null; }
     minimumWidth=presentation?.sizing.min.width ?? defaultMinimum.width;
     minimumHeight=presentation?.sizing.min.height ?? defaultMinimum.height;

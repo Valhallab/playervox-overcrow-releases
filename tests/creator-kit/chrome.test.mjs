@@ -159,6 +159,52 @@ function sizingSetup(options, locale = 'fr') {
 const fitControl = el => el('#options-menu').children.flatMap(group => group.children).flatMap(row => row.children).find(control => ['Ajuster au contenu', 'Fit to content'].includes(control.getAttribute('aria-label')));
 const settleSize = () => new Promise(resolve => setTimeout(resolve, 120));
 
+test('a single content size return can shrink without being treated as a resize loop', async () => {
+  const {el, chrome} = sizingSetup();
+  try {
+    chrome.setPresentation(presentation('both'));
+    chrome.reportSize({width:160, height:60});
+    await settleSize();
+    assert.equal(el('#widget-host').style.width, '160px');
+    chrome.reportSize({width:120, height:40});
+    await settleSize();
+    assert.equal(el('#widget-host').style.width, '120px');
+    assert.equal(el('#widget-host').style.height, '40px');
+  } finally { chrome.dispose(); }
+});
+
+test('repeated alternating sizes settle without blocking different content', async () => {
+  const {el, chrome} = sizingSetup();
+  try {
+    chrome.setPresentation(presentation('height'));
+    for (const height of [80, 100, 80, 100, 80, 100, 80]) {
+      chrome.reportSize({width:120, height});
+      await settleSize();
+    }
+    assert.equal(el('#widget-host').style.height, '100px');
+    chrome.reportSize({width:120, height:60});
+    await settleSize();
+    assert.equal(el('#widget-host').style.height, '60px');
+  } finally { chrome.dispose(); }
+});
+
+test('old size changes cannot complete a new oscillation after a quiet interval', async () => {
+  const {el, chrome} = sizingSetup();
+  try {
+    chrome.setPresentation(presentation('both'));
+    for (const width of [160, 120]) {
+      chrome.reportSize({width, height:40});
+      await settleSize();
+    }
+    await new Promise(resolve => setTimeout(resolve, 520));
+    for (const width of [160, 120]) {
+      chrome.reportSize({width, height:40});
+      await settleSize();
+      assert.equal(el('#widget-host').style.width, `${width}px`);
+    }
+  } finally { chrome.dispose(); }
+});
+
 test('native fit checkbox freezes displayed size and resumes the latest content report', async () => {
   const {el, fire, chrome} = sizingSetup();
   chrome.setPresentation(presentation('both'));

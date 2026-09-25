@@ -17,6 +17,9 @@ main {
   padding: 18px;
   min-width: 0;
 }
+body[data-sizing-mode="intrinsic"] main {
+  width: max-content;
+}
 h1 {
   font-size: 18px;
   margin: 0 0 12px;

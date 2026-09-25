@@ -1,6 +1,7 @@
 import overcrow from "./overcrow.js";
 import { applyLocale, translate } from "./i18n.mjs";
 import { connectWidget } from "./runtime.mjs";
+import "./presentation.mjs";
 
 const output = document.querySelector("#count");
 const status = document.querySelector("#status");
