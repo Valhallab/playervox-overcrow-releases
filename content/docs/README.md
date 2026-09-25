@@ -27,6 +27,11 @@ initial state automatically. Keep native options, presentation data and content
 sizing together in `api-presentation`. Use short navigation labels and English
 identifiers in code examples in both languages.
 
+Manifest sizing declares `fitToContent: false | "both" | "height"` and an optional
+`defaultMode: "fit" | "manual"`; users own the active choice. Document option
+behavior with examples unrelated to sizing, and show size measurement separately.
+Custom options are flat; only boolean, enum and number controls are supported.
+
 The public host boundary is game context, telemetry/FPS, media, presentation,
 media assets, network, clipboard, lifecycle/messages, locale and isolated widget
 storage. Only `telemetry.read`, `fps.read`, `media.read` and `media.control` are

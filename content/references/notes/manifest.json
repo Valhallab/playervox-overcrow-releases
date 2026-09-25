@@ -19,7 +19,7 @@
   },
   "presentation": {
     "sizing": {
-      "mode": "autoHeight",
+      "fitToContent": "height",
       "preferred": {
         "width": 360,
         "height": 320

@@ -11,7 +11,7 @@ let storage=createStorageSimulator();
 const chrome=createWidgetChrome(document,'fr',mode=>{
   snapshot=services?.snapshot({...snapshot,overlayMode:mode})??{...snapshot,overlayMode:mode};
   publish(snapshot);
-},{onVisibilityChange:visible=>{for(const frame of [view,controller])send(frame,{type:'visibility',visible});},onOptionChange:(key,value)=>services?.setOption(key,value)});
+},{onVisibilityChange:visible=>{for(const frame of [view,controller])send(frame,{type:'visibility',visible});},onOptionChange:(key,value)=>services?.setOption(key,value),onPresentationChange:value=>services?.setPresentation(value)});
 const ready={view:false,controller:false},queued={view:[],controller:[]};
 const bridges={view:null,controller:null};
 const empty=()=>new ArrayBuffer(0);
@@ -19,6 +19,7 @@ const send=(frame,event)=>frame.contentWindow?.postMessage({source:'overcrow-cre
 function publish(next) {
   snapshot=next;
   chrome.setPresentation(state?.manifest.presentation,snapshot?.services?.snapshots.presentation?.data?.options??{});
+  if(snapshot!==next||services?.setPresentation(chrome.presentationState))return;
   for(const frame of [view,controller])send(frame,{type:'gameSnapshot',payload:snapshot});
 }
 function message(text,error=false){status.textContent=text;status.classList.toggle('error',error);}
@@ -27,6 +28,7 @@ async function load() {
   const request=++loading;
   const response=await fetch(base+'state.json');if(!response.ok)throw new Error('Aperçu indisponible.');
   const next=await response.json();if(request!==loading)return;
+  const changedWidget=state?.manifest.id!==next.manifest.id;
   state=next;generation=state.generation;
   storage=createStorageSimulator();
   services?.dispose();
@@ -34,7 +36,8 @@ async function load() {
   ready.view=false;ready.controller=false;queued.view=[];queued.controller=[];
   bridges.view=bridges.controller=null;
   snapshot=services.snapshot({...(state.config.snapshot??sessionSnapshot(document.querySelector('#session').value==='active')),overlayMode:chrome.mode});
-  chrome.setPresentation(state.manifest.presentation,snapshot.services?.snapshots.presentation?.data?.options??{});
+  chrome.setPresentation(state.manifest.presentation,snapshot.services?.snapshots.presentation?.data?.options??{},{reset:changedWidget});
+  services.setPresentation(chrome.presentationState);
   const previousLocale=locale.value,locales=state.manifest.localization?.availableLocales??[];locale.replaceChildren();
   for(const value of locales.length?locales:['Non déclarée']){const option=document.createElement('option');option.value=locales.length?value:'';option.textContent=value;locale.append(option);}
   locale.value=locales.includes(previousLocale)?previousLocale:state.manifest.localization?.defaultLocale??'';locale.disabled=!locales.length;

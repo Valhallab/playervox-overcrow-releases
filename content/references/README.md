@@ -10,6 +10,11 @@ Initialize one with `node tools/creator-kit/overcrow.mjs init /new/project --tem
 Available references: session, clock, performance, fps, stopwatch, media, notes,
 score and journal. Each project supports EN/FR, native wrapper options and export.
 
+Each manifest declares whether content can fit both dimensions or only height.
+Users can turn fitting off in the native menu and resize manually. The shared
+view reports content size as a hint; those reports never override manual geometry.
+Custom options such as Show details are independent of this sizing choice.
+
 The shared view/styles in `common/` are assembled by the creator kit and archive
 builder. All exports include the byte-identical SDK and MIT license.
 `python3 scripts/package-docs-examples.py published/docs/downloads` builds source

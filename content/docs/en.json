@@ -727,7 +727,7 @@
     "group": "sdk-reference",
     "label": "Options & sizing",
     "title": "Widget options and sizing",
-    "description": "Declare native settings and fit the widget frame to your content.",
+    "description": "Declare native options and let users choose how the widget is sized.",
     "blocks": [
       {
         "kind": "html",
@@ -735,27 +735,53 @@
       },
       {
         "kind": "html",
-        "html": "<h2 id=\"declaration\">Declare options and bounds</h2><p>Merge this <code>presentation</code> object into your manifest. It needs no capability permission. Keep <code>apiVersion: \"1\"</code>. The example adds a Compact checkbox to OverCrow’s widget settings.</p>"
+        "html": "<h2 id=\"declaration\">Declare native options</h2><p>Merge this <code>presentation</code> object into your manifest. It adds a Show title checkbox to the native widget menu and declares support for fitting the content. No capability permission is needed; keep <code>apiVersion: \"1\"</code>.</p>"
       },
       {
         "kind": "code",
         "language": "json",
         "title": "manifest.json · fields to merge",
-        "source": "{\n  \"presentation\": {\n    \"sizing\": {\n      \"mode\": \"intrinsic\",\n      \"preferred\": { \"width\": 240, \"height\": 80 },\n      \"min\": { \"width\": 80, \"height\": 24 },\n      \"max\": { \"width\": 480, \"height\": 320 }\n    },\n    \"options\": [{\n      \"id\": \"compact\",\n      \"type\": \"boolean\",\n      \"label\": { \"en\": \"Compact\", \"fr\": \"Compact\" },\n      \"default\": false\n    }]\n  }\n}"
+        "source": "{\n  \"presentation\": {\n    \"sizing\": {\n      \"fitToContent\": \"both\",\n      \"defaultMode\": \"fit\",\n      \"preferred\": { \"width\": 240, \"height\": 80 },\n      \"min\": { \"width\": 80, \"height\": 24 },\n      \"max\": { \"width\": 480, \"height\": 320 }\n    },\n    \"options\": [{\n      \"id\": \"showTitle\",\n      \"type\": \"boolean\",\n      \"label\": { \"en\": \"Show title\", \"fr\": \"Afficher le titre\" },\n      \"default\": true\n    }]\n  }\n}"
       },
       {
         "kind": "html",
-        "html": "<h2 id=\"sizing\">Choose a sizing mode</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"presentation.sizing.mode, Behavior\"><table><thead><tr><th>presentation.sizing.mode</th><th>Behavior</th></tr></thead><tbody><tr><td><code>intrinsic</code></td><td>Content determines both dimensions. The user cannot drag the frame to resize it.</td></tr><tr><td><code>autoHeight</code></td><td>The user sets the width; content determines the height.</td></tr><tr><td><code>manual</code></td><td>The user sets both dimensions. Content reports do not override that size.</td></tr></tbody></table></div><p>Each <code>preferred</code>, <code>min</code> and <code>max</code> object requires integer <code>width</code> and <code>height</code> from 1 to 4096, with <code>min ≤ preferred ≤ max</code> on each axis. <code>preferred</code> provides the initial size and the fallback before content is measured.</p><p>The host applies the user’s zoom once and clamps the result to the declared bounds and available overlay area. A size report is a hint, not a guarantee of an exact frame size. Keep the layout usable at the maximum size, with wrapping or scrolling when needed. Position, opacity, zoom and passive visibility remain native settings.</p><h2 id=\"updates\">Apply options and fit the content</h2><p><code>snapshot()</code> reads once; use <code>await</code> to receive its result. <code>onSnapshot(callback)</code> receives the current state, then later updates. The callback is your function: in <code>snapshot =&gt; { ... }</code>, <code>snapshot</code> is the received value and the braces contain what runs for each update. The returned <code>stop()</code> function unsubscribes. <a href=\"/docs/en/api-services/#abonnements\">Shared snapshot rules</a>.</p><p>The view below observes its content element, reports its unscaled CSS dimensions and applies the Compact option. Measure the content, not the viewport or an already zoomed frame. Keep the module beside <code>overcrow.js</code>.</p>"
+        "html": "<h2 id=\"updates\">Apply native options</h2><p><code>snapshot()</code> reads once; <code>await</code> receives the result. <code>onSnapshot(snapshot =&gt; { ... })</code> calls your function with the current settings and later changes. The returned <code>stop()</code> function unsubscribes. <a href=\"/docs/en/api-services/#abonnements\">Shared snapshot rules</a>.</p><p>This view shows or hides a title using the checkbox value. Keep the module beside <code>overcrow.js</code>.</p>"
       },
       {
         "kind": "code",
         "language": "javascript",
-        "title": "view.js",
-        "source": "import overcrow from './overcrow.js';\nconst content = document.createElement('div');\ncontent.textContent = 'Ready';\ncontent.style.cssText = 'display: inline-block; padding: 12px';\ndocument.body.style.margin = '0';\ndocument.body.append(content);\nconst observer = new ResizeObserver(() => {\n  const width = Math.max(1, Math.min(4096, Math.ceil(content.offsetWidth)));\n  const height = Math.max(1, Math.min(4096, Math.ceil(content.offsetHeight)));\n  overcrow.presentation.reportSize({ width, height }).catch(console.error);\n});\nobserver.observe(content);\nconst stop = overcrow.presentation.onSnapshot(snapshot => {\n  if (snapshot.status !== 'ready') return;\n  content.style.padding = snapshot.data.options.compact ? '4px' : '12px';\n});\nwindow.addEventListener('pagehide', () => {\n  stop();\n  observer.disconnect();\n}, { once: true });"
+        "title": "view.js · native option",
+        "source": "import overcrow from './overcrow.js';\nconst title = document.createElement('h2');\ntitle.textContent = 'Session';\ndocument.body.append(title);\nconst stop = overcrow.presentation.onSnapshot(snapshot => {\n  if (snapshot.status !== 'ready') return;\n  title.hidden = snapshot.data.options.showTitle === false;\n});\nwindow.addEventListener('pagehide', stop, { once: true });"
       },
       {
         "kind": "html",
-        "html": "<p>Without a manifest <code>presentation</code>, this service reports <code>unsupported</code>. <code>reportSize</code> requires a view and that declaration. A controller rejects with <code>role_denied</code>; dimensions outside 1–4096 reject with <code>invalid_request</code>. Success returns <code>{ status: \"accepted\" }</code>. Report after actual content changes, not in a continuous loop; the host groups repeated reports.</p><h2 id=\"data\">Read settings and changes</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"PresentationData field, Meaning\"><table><thead><tr><th>PresentationData field</th><th>Meaning</th></tr></thead><tbody><tr><td><code>sizingMode: &#x27;intrinsic&#x27; | &#x27;autoHeight&#x27; | &#x27;manual&#x27;</code></td><td>Current sizing mode.</td></tr><tr><td><code>width: number</code>, <code>height: number</code></td><td>Current logical dimensions supplied by the host.</td></tr><tr><td><code>options: Readonly&lt;Record&lt;string, boolean | number | string&gt;&gt;</code></td><td>Native option values, keyed by their manifest IDs.</td></tr></tbody></table></div><p>OverCrow supplies defaults and valid saved user choices. A setting or size change arrives through the same <code>presentation.onSnapshot</code> subscription. Read options from <code>snapshot.data.options</code> after checking the status. The SDK has no option setter or separate options-change event. Use <a href=\"/docs/en/api-stockage/\">widget storage</a> for data owned by your own interface.</p><h2 id=\"options\">Option types and limits</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Type, Required fields\"><table><thead><tr><th>Type</th><th>Required fields</th></tr></thead><tbody><tr><td><code>boolean</code></td><td><code>default: true</code> / <code>false</code>.</td></tr><tr><td><code>enum</code></td><td><code>default</code>, <code>choices: [{ value, label: { en, fr } }]</code>. 2–16 unique choices; default must be one of them.</td></tr><tr><td><code>number</code></td><td><code>default</code>, <code>min</code>, <code>max</code>, <code>step</code>. Finite numbers within ±1,000,000; min &lt; max, min ≤ default ≤ max and 0 &lt; step ≤ max − min. Step controls the UI increment, not stored-value divisibility.</td></tr></tbody></table></div><p>Declare at most 16 options. Each needs <code>id</code>, <code>type</code>, <code>label: { en, fr }</code> and <code>default</code>. IDs and enum values contain 1–48 ASCII characters, start with a lowercase letter and continue with letters, digits, <code>_</code> or <code>-</code>; option IDs must be unique. Labels are plain text, 1–80 characters, with no surrounding whitespace or control characters. <code>options</code> may be omitted; if <code>presentation</code> is present, <code>sizing</code> is required.</p>"
+        "html": "<h2 id=\"sizing\">Let users choose the size</h2><p><code>presentation.sizing.fitToContent</code> is required. It declares the fitting behavior your content supports. The user can always choose manual sizing; when fitting is supported, the native widget menu includes a Fit to content toggle.</p><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"fitToContent, Behavior while fitting\"><table><thead><tr><th>fitToContent</th><th>Behavior while fitting</th></tr></thead><tbody><tr><td><code>\"both\"</code></td><td>Content sets width and height. Frame resizing is disabled while fitting.</td></tr><tr><td><code>\"height\"</code></td><td>The user resizes horizontally; content sets height.</td></tr><tr><td><code>false</code></td><td>Manual sizing only; the fit toggle is hidden. Useful for content such as chat.</td></tr></tbody></table></div><p>Optional <code>defaultMode: \"fit\" | \"manual\"</code> sets the initial choice. If omitted, fitting is the default when supported; otherwise manual sizing is used. <code>fitToContent: false</code> with <code>defaultMode: \"fit\"</code> is invalid. Turning fitting off lets the user resize both dimensions within the bounds. Widget code cannot change this choice.</p><p><code>preferred</code>, <code>min</code> and <code>max</code> each require integer <code>width</code> and <code>height</code> from 1 to 4096, with <code>min ≤ preferred ≤ max</code> on each axis. <code>preferred</code> supplies the initial size and the fallback before measurement.</p><p>The separate view below reports unscaled CSS content dimensions. Measure content, not the viewport or a zoomed frame. The host applies user zoom once and clamps the result to the declared bounds and available overlay area. <code>reportSize()</code> is a hint: it never overrides manual geometry. Allow wrapping or scrolling when the content reaches a size limit.</p>"
+      },
+      {
+        "kind": "code",
+        "language": "javascript",
+        "title": "view.js · content measurement",
+        "source": "import overcrow from './overcrow.js';\nconst content = document.createElement('main');\ncontent.textContent = 'Ready';\ncontent.style.cssText = 'display: inline-block; padding: 12px';\ndocument.body.style.margin = '0';\ndocument.body.append(content);\nconst observer = new ResizeObserver(() => {\n  const width = Math.max(1, Math.min(4096, Math.ceil(content.offsetWidth)));\n  const height = Math.max(1, Math.min(4096, Math.ceil(content.offsetHeight)));\n  overcrow.presentation.reportSize({ width, height }).catch(console.error);\n});\nobserver.observe(content);\nwindow.addEventListener('pagehide', () => observer.disconnect(), { once: true });"
+      },
+      {
+        "kind": "html",
+        "html": "<p>Without a manifest <code>presentation</code>, the service reports <code>unsupported</code>. <code>reportSize()</code> requires a view and that declaration. Controllers reject with <code>role_denied</code>; dimensions outside 1–4096 reject with <code>invalid_request</code>. Success returns <code>{ status: \"accepted\" }</code>. Report actual content changes; the host groups repeated reports.</p><h2 id=\"data\">Read settings and changes</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"PresentationData field, Meaning\"><table><thead><tr><th>PresentationData field</th><th>Meaning</th></tr></thead><tbody><tr><td><code>sizingMode: 'intrinsic' | 'autoHeight' | 'manual'</code></td><td>Effective user choice: <code>intrinsic</code> for fitting both axes, <code>autoHeight</code> for fitting height, or <code>manual</code> when fitting is off.</td></tr><tr><td><code>width: number</code>, <code>height: number</code></td><td>Current logical dimensions supplied by the host.</td></tr><tr><td><code>options: Readonly&lt;Record&lt;string, boolean | number | string&gt;&gt;</code></td><td>Native option values, keyed by their manifest IDs.</td></tr></tbody></table></div><p>OverCrow supplies defaults and valid saved user choices. Option, sizing-mode and dimension changes arrive through <code>presentation.onSnapshot</code>. Check the status before reading <code>snapshot.data</code>. The SDK has no setter for native options or sizing mode, and no separate options-change event. Use <a href=\"/docs/en/api-stockage/\">widget storage</a> for your own interface’s data.</p><h2 id=\"options\">Option types and limits</h2><p><code>presentation.options</code> is a flat list in the native menu. The schema has no groups or custom submenus; an enum opens its own list of choices.</p><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Type, Native control, Required fields\"><table><thead><tr><th>Type</th><th>Native control</th><th>Required fields</th></tr></thead><tbody><tr><td><code>boolean</code></td><td>Checkbox</td><td><code>default: true</code> / <code>false</code>.</td></tr><tr><td><code>enum</code></td><td>Dropdown</td><td><code>default</code>, <code>choices: [{ value, label: { en, fr } }]</code>. 2–16 unique choices; default must be one of them.</td></tr><tr><td><code>number</code></td><td>Slider</td><td><code>default</code>, <code>min</code>, <code>max</code>, <code>step</code>. Finite numbers within ±1,000,000; min &lt; max, min ≤ default ≤ max and 0 &lt; step ≤ max − min. Step controls the UI increment, not stored-value divisibility.</td></tr></tbody></table></div><p>Declare at most 16 options. Each needs <code>id</code>, <code>type</code>, <code>label: { en, fr }</code> and <code>default</code>. IDs and enum values contain 1–48 ASCII characters, start with a lowercase letter and continue with letters, digits, <code>_</code> or <code>-</code>; option IDs must be unique. Labels are plain text, 1–80 characters, with no surrounding whitespace or control characters. <code>options</code> may be omitted; <code>sizing</code> is required whenever <code>presentation</code> is declared.</p>"
+      },
+      {
+        "kind": "html",
+        "html": "<p>Append either object below to <code>presentation.options</code>. Read the values from <code>snapshot.data.options.itemLimit</code> and <code>snapshot.data.options.sortOrder</code>. The browser preview uses a numeric field for number options.</p>"
+      },
+      {
+        "kind": "code",
+        "language": "json",
+        "title": "number · slider",
+        "source": "{\n  \"id\": \"itemLimit\", \"type\": \"number\",\n  \"label\": { \"en\": \"Item limit\", \"fr\": \"Nombre maximal d’éléments\" },\n  \"default\": 5,\n  \"min\": 1, \"max\": 20, \"step\": 1\n}"
+      },
+      {
+        "kind": "code",
+        "language": "json",
+        "title": "enum · dropdown",
+        "source": "{\n  \"id\": \"sortOrder\", \"type\": \"enum\",\n  \"label\": { \"en\": \"Sort order\", \"fr\": \"Ordre de tri\" },\n  \"default\": \"newest\",\n  \"choices\": [\n    { \"value\": \"newest\", \"label\": { \"en\": \"Newest first\", \"fr\": \"Plus récents d’abord\" } },\n    { \"value\": \"oldest\", \"label\": { \"en\": \"Oldest first\", \"fr\": \"Plus anciens d’abord\" } }\n  ]\n}"
       }
     ],
     "headings": [
@@ -765,15 +791,15 @@
       },
       {
         "id": "declaration",
-        "title": "Declare options and bounds"
-      },
-      {
-        "id": "sizing",
-        "title": "Choose a sizing mode"
+        "title": "Declare native options"
       },
       {
         "id": "updates",
-        "title": "Apply options and fit the content"
+        "title": "Apply native options"
+      },
+      {
+        "id": "sizing",
+        "title": "Let users choose the size"
       },
       {
         "id": "data",

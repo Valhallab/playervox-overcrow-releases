@@ -69,9 +69,11 @@ impl WirePresentation {
 }
 
 #[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct WireSizing {
-    mode: WireSizingMode,
+    fit_to_content: WireFitToContent,
+    #[serde(default, deserialize_with = "super::deserialize_present")]
+    default_mode: Option<WireDefaultMode>,
     preferred: WireDimensions,
     min: WireDimensions,
     max: WireDimensions,
@@ -79,8 +81,10 @@ struct WireSizing {
 
 impl WireSizing {
     fn is_valid(&self) -> bool {
-        let _ = self.mode;
-        self.preferred.is_valid()
+        self.fit_to_content.is_valid()
+            && !(matches!(self.fit_to_content, WireFitToContent::Boolean(false))
+                && matches!(self.default_mode, Some(WireDefaultMode::Fit)))
+            && self.preferred.is_valid()
             && self.min.is_valid()
             && self.max.is_valid()
             && self.min.width <= self.preferred.width
@@ -92,10 +96,32 @@ impl WireSizing {
 
 #[derive(Clone, Copy, Deserialize)]
 #[serde(rename_all = "camelCase")]
-enum WireSizingMode {
-    Intrinsic,
-    AutoHeight,
+enum WireDefaultMode {
+    Fit,
     Manual,
+}
+
+#[derive(Clone, Copy, Deserialize)]
+#[serde(untagged)]
+enum WireFitToContent {
+    Boolean(bool),
+    Axes(WireFitAxes),
+}
+
+impl WireFitToContent {
+    fn is_valid(self) -> bool {
+        match self {
+            Self::Boolean(value) => !value,
+            Self::Axes(axes) => matches!(axes, WireFitAxes::Both | WireFitAxes::Height),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Deserialize)]
+#[serde(rename_all = "camelCase")]
+enum WireFitAxes {
+    Both,
+    Height,
 }
 
 #[derive(Deserialize)]

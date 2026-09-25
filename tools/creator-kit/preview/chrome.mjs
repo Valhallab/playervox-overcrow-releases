@@ -5,7 +5,7 @@ import messages from "./chrome-messages.mjs";
  * @param {Document} document
  * @param {string} locale
  * @param {(mode: string) => void} onModeChange
- * @param {{ onClose?: () => void, onVisibilityChange?: (visible: boolean) => void, query?: (selector: string) => Element | null, minimumWidth?: number, minimumHeight?: number, autoSize?: boolean, showInPassive?: boolean }} options
+ * @param {{ onPresentationChange?: (state: {sizingMode: string, width: number, height: number}) => void, onOptionChange?: (key: string, value: unknown) => void, onClose?: () => void, onVisibilityChange?: (visible: boolean) => void, query?: (selector: string) => Element | null, minimumWidth?: number, minimumHeight?: number, autoSize?: boolean, showInPassive?: boolean }} options
  */
 export function createWidgetChrome(
   document,
@@ -15,6 +15,7 @@ export function createWidgetChrome(
     onClose,
     onVisibilityChange,
     onOptionChange,
+    onPresentationChange,
     query,
     minimumWidth = 280,
     minimumHeight = 160,
@@ -30,8 +31,15 @@ export function createWidgetChrome(
   let contentHint = null, sizeTimer = null, lastContentSize = null, previousContentSize = null, sizeCycle = null;
   let lastContentAt = 0;
   let maximumWidth = 900, maximumHeight = 900;
+  let userSizingMode = "manual", presentationKey = "null", settingPresentation = false, lastPresentationState = null;
+  let nativeSizing = null, fitControl = null;
   const defaultMinimum = {width: minimumWidth, height: minimumHeight};
-  const sizingMode = () => presentation?.sizing.mode ?? (autoSize ? "intrinsic" : "manual");
+  const supportsFit = () => ["both", "height"].includes(presentation?.sizing.fitToContent);
+  const sizingMode = () => presentation
+    ? userSizingMode === "fit" && supportsFit()
+      ? presentation.sizing.fitToContent === "both" ? "intrinsic" : "autoHeight"
+      : "manual"
+    : autoSize ? "intrinsic" : "manual";
   let contentCleanup = () => {};
   function listen(target, type, callback, options) {
     target.addEventListener(type, callback, options);
@@ -58,6 +66,11 @@ export function createWidgetChrome(
     host.setAttribute("data-auto-size", String(sizingMode() === "intrinsic"));
     host.setAttribute("data-sizing-mode", sizingMode());
     for (const control of optionControls) control.disabled = passive;
+    if (fitControl) {
+      nativeSizing.hidden = !supportsFit();
+      fitControl.disabled = passive || !supportsFit();
+      fitControl.checked = supportsFit() && sizingMode() !== "manual";
+    }
   }
   function syncVisibility() {
     const nextVisible = mode === "interactive" || showInPassive;
@@ -312,6 +325,18 @@ export function createWidgetChrome(
     host.style.top = `${origin.y}px`;
   }
 
+  function presentationState() {
+    const bounds = host.getBoundingClientRect();
+    return {sizingMode: sizingMode(), width: Math.round(bounds.width), height: Math.round(bounds.height)};
+  }
+  function notifyPresentation() {
+    if (settingPresentation) return;
+    const state = presentationState();
+    const key = JSON.stringify(state);
+    if (key === lastPresentationState) return;
+    lastPresentationState = key;
+    onPresentationChange?.(state);
+  }
   function resize(width, height) {
     anchorPosition();
     const bounds = host.getBoundingClientRect(),
@@ -321,6 +346,7 @@ export function createWidgetChrome(
     host.style.width = `${clamp(width, Math.min(minimumWidth, maxWidth), maxWidth)}px`;
     host.style.height = `${clamp(height, Math.min(minimumHeight, maxHeight), maxHeight)}px`;
     positionToolbar();
+    notifyPresentation();
   }
   listen(grip, "pointerdown", (event) => {
     if (event.button !== 0 || sizingMode() === "intrinsic" || mode !== "interactive") return;
@@ -505,6 +531,7 @@ export function createWidgetChrome(
     host.style.width = `${width}px`;
     host.style.height = `${height}px`;
     positionToolbar();
+    notifyPresentation();
   }
   function applyContentSize(reset = false) {
     if (!presentation || sizingMode() === "manual") return;
@@ -531,12 +558,29 @@ export function createWidgetChrome(
     if (sizeTimer===null) sizeTimer=setTimeout(()=>{sizeTimer=null;applyContentSize();},100);
     return true;
   }
-  function setPresentation(next, values = {}) {
-    const changed = JSON.stringify(presentation) !== JSON.stringify(next ?? null);
+  function setAutoSize(enabled) {
+    const previous = sizingMode();
+    if (presentation) userSizingMode = enabled && supportsFit() ? "fit" : "manual";
+    else autoSize = Boolean(enabled);
+    drag = null;
+    view.style.pointerEvents = "";
+    syncInteraction();
+    if (previous === sizingMode()) return;
+    if (sizeTimer !== null) { clearTimeout(sizeTimer); sizeTimer = null; }
+    applyContentSize(true);
+    notifyPresentation();
+  }
+  function setPresentation(next, values = {}, {reset = false} = {}) {
+    const nextKey = JSON.stringify(next ?? null);
+    const changed = reset || presentationKey !== nextKey;
+    const initialize = reset || !presentation;
+    const previousMode = sizingMode();
+    const previousSize = presentationState();
+    presentationKey = nextKey;
     const nextValues=JSON.stringify(values);
     if (optionValues!==nextValues) previousContentSize=sizeCycle=null;
     optionValues=nextValues;
-    presentation=next ?? null;
+    presentation=next ? structuredClone(next) : null;
     if (!changed) {
       for (const [index,control] of optionControls.entries()) {
         const option=presentation.options[index];
@@ -547,16 +591,38 @@ export function createWidgetChrome(
       }
       syncInteraction();return;
     }
-    close();contentHint=null;lastContentSize=previousContentSize=sizeCycle=null;
+    settingPresentation=true;
+    userSizingMode=initialize
+      ? supportsFit() && presentation.sizing.defaultMode !== "manual" ? "fit" : "manual"
+      : previousMode === "intrinsic" && presentation?.sizing.fitToContent === "both"
+        || previousMode === "autoHeight" && presentation?.sizing.fitToContent === "height" ? "fit" : "manual";
+    close();
+    if (initialize) contentHint=null;
+    lastContentSize=previousContentSize=sizeCycle=null;
     if (sizeTimer!==null) { clearTimeout(sizeTimer);sizeTimer=null; }
     minimumWidth=presentation?.sizing.min.width ?? defaultMinimum.width;
     minimumHeight=presentation?.sizing.min.height ?? defaultMinimum.height;
     maximumWidth=presentation?.sizing.max.width ?? 900;
     maximumHeight=presentation?.sizing.max.height ?? 900;
-    if (presentation) resize(presentation.sizing.preferred.width,presentation.sizing.preferred.height);
+    if (!initialize) resize(previousSize.width,previousSize.height);
+    else if (presentation) resize(presentation.sizing.preferred.width,presentation.sizing.preferred.height);
     else resize(480,320);
     for (const remove of optionCleanups) remove();
     optionCleanups=[];optionControls=[];
+    if (!nativeSizing && supportsFit()) {
+      nativeSizing=document.createElement("div");nativeSizing.className="native-widget-options";
+      const label=document.createElement("label"), text=document.createElement("span");
+      text.textContent=copy.fitToContent;
+      fitControl=document.createElement("input");fitControl.type="checkbox";
+      fitControl.setAttribute("aria-label",copy.fitToContent);
+      label.append(text,fitControl);nativeSizing.append(label);menu.append(nativeSizing);
+      listen(nativeSizing,"focusin",()=>closeEditor());
+      listen(nativeSizing,"pointerenter",()=>closeEditor());
+      listen(fitControl,"change",()=>{
+        if (mode!=="interactive") { syncInteraction();return; }
+        setAutoSize(fitControl.checked);
+      });
+    }
     if (!nativeOptions && presentation?.options?.length) {
       nativeOptions=document.createElement("div");nativeOptions.className="native-widget-options";menu.append(nativeOptions);
       listen(nativeOptions,"focusin",()=>closeEditor());
@@ -584,7 +650,9 @@ export function createWidgetChrome(
       optionControls.push(control);label.append(text,control);nativeOptions.append(label);
     }
     syncInteraction();
-    applyContentSize(true);
+    if (initialize || contentHint) applyContentSize(true);
+    settingPresentation=false;
+    notifyPresentation();
   }
   if (onClose) {
     const dismiss = find("#widget-close");
@@ -613,12 +681,10 @@ export function createWidgetChrome(
     setMode,
     setPresentation,
     reportSize,
-    setAutoSize(enabled) {
-      autoSize = Boolean(enabled);
-      drag = null;
-      view.style.pointerEvents = "";
-      syncInteraction();
+    get presentationState() {
+      return presentationState();
     },
+    setAutoSize,
     fitToStage,
     resetGeometry() {
       close();

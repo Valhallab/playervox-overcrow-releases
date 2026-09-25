@@ -31,7 +31,7 @@ export function serviceFixtures(presentation) {
       actions: { previous: true, playPause: true, next: true },
     }),
     presentation: ready({
-      sizingMode: sizing?.mode ?? "manual",
+      sizingMode: sizing?.defaultMode === "manual" ? "manual" : sizing?.fitToContent === "both" ? "intrinsic" : sizing?.fitToContent === "height" ? "autoHeight" : "manual",
       width: sizing?.preferred.width ?? 320,
       height: sizing?.preferred.height ?? 240,
       options: Object.fromEntries(

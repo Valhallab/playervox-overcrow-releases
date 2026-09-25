@@ -156,10 +156,11 @@ export interface MediaData {
   readonly actions: {readonly previous: boolean; readonly playPause: boolean; readonly next: boolean};
 }
 export interface PresentationData {
+  /** Effective user choice: fit both axes, fit height, or manual sizing. Read-only. */
   readonly sizingMode: 'intrinsic' | 'autoHeight' | 'manual';
   readonly width: number;
   readonly height: number;
-  /** Native user preferences; widget code cannot set values. */
+  /** Flat native user preferences; widget code cannot set values. */
   readonly options: Readonly<Record<string, boolean | number | string>>;
 }
 
@@ -173,7 +174,8 @@ export interface OvercrowServices {
     next(): Promise<ActionResult>;
   };
   readonly presentation: SnapshotService<PresentationData> & {
-    /** View only. Integer logical dimensions 1–4096; native retains geometry authority. */
+    /** View-only hint in unscaled integer CSS pixels, 1–4096. The host scales and clamps it;
+     * manual geometry is unchanged. This cannot change the user's sizing mode. */
     reportSize(parameters: {readonly width: number; readonly height: number}): Promise<ActionResult>;
   };
   readonly assets: {

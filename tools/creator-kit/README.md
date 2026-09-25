@@ -32,13 +32,19 @@ initially 100% for the starter templates) affects the host background and border
 or type a percentage and press Enter or leave the field. Backgrounds painted by
 the widget itself remain unchanged. The eye chooses whether the widget stays visible in passive mode. The Mode selector switches the whole overlay and sends the corresponding SDK snapshot and visibility events; only close is illustrative.
 Move the widget
-from its 22-pixel top strip. Presentation supports intrinsic size without a handle,
-autoHeight with a horizontal-only handle, and manual dimensions with a bottom-right
-handle. Content-size reports use unscaled CSS layout pixels; the wrapper applies
+from its 22-pixel top strip. If the widget supports fitting, its native settings include
+“Fit to content”: checked fits both axes without a handle, or only the height with a
+horizontal handle; unchecked always permits manual resizing in both dimensions.
+Creators declare `presentation.sizing.fitToContent` as `false`, `"both"` or `"height"`
+and can set `defaultMode` to `"fit"` or `"manual"`. Without a default, supported fitting
+starts enabled. `false` requires manual mode. The declaration sets capabilities and
+initial defaults; host controls own the user's current choice. Manifest `mode` is no
+longer accepted, while SDK snapshots retain `intrinsic`, `autoHeight` and `manual`
+to report the effective mode. Content-size reports use unscaled CSS layout pixels; the wrapper applies
 scale once. The upper-left corner stays fixed while resizing, within the canvas
 bounds. Wrapper controls are hidden in passive mode; use the Mode selector to return to interactive mode. Focus
 either control and use arrow keys
-(Shift for 10-pixel steps). Appearance and frame size survive widget reloads until the preview page itself is refreshed. This wrapper belongs to the
+(Shift for 10-pixel steps). Appearance, frame size and the user’s fit choice survive same-widget reloads until the preview page itself is refreshed. A changed fitting axis returns to manual; changing widgets applies the new initial defaults. This wrapper belongs to the
 host: do not implement it in widget/; it is never included in an exported package.
 `overcrow.storage` uses shared, bounded runtime memory and reports `temporary`,
 regardless of the persistence permission. Its data resets on preview reload or
