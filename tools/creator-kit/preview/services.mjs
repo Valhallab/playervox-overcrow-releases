@@ -67,7 +67,6 @@ export function createServiceSimulator({
       const sizing = manifest.presentation?.sizing;
       if (!(hostPresentation.sizingMode === "intrinsic" && sizing?.fitToContent === "both")
           && !(hostPresentation.sizingMode === "autoHeight" && sizing?.fitToContent === "height")) hostPresentation.sizingMode = "manual";
-      for (const axis of ["width", "height"]) hostPresentation[axis] = Math.max(sizing?.min[axis] ?? 1, Math.min(sizing?.max[axis] ?? 4096, hostPresentation[axis]));
     }
     const supplied = fixture.snapshots ?? {};
     if (supplied && typeof supplied === "object" && !Array.isArray(supplied))
@@ -218,7 +217,7 @@ export function createServiceSimulator({
       const fit = manifest.presentation?.sizing.fitToContent;
       if (
         !(sizingMode === "manual" || (sizingMode === "intrinsic" && fit === "both") || (sizingMode === "autoHeight" && fit === "height")) ||
-        ![width, height].every(value => typeof value === "number" && Number.isFinite(value) && value >= 1 && value <= 4096)
+        ![width, height].every(value => integer(value, 1, 8192))
       ) return false;
       if (hostPresentation.sizingMode === sizingMode && hostPresentation.width === width && hostPresentation.height === height) return false;
       hostPresentation = { sizingMode, width, height };

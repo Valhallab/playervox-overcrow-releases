@@ -33,6 +33,7 @@ export function createWidgetChrome(
   let maximumWidth = 900, maximumHeight = 900;
   let userSizingMode = "manual", presentationKey = "null", settingPresentation = false, lastPresentationState = null;
   let nativeSizing = null, fitControl = null;
+  let lastFrameSize = {width:480, height:320};
   const defaultMinimum = {width: minimumWidth, height: minimumHeight};
   const supportsFit = () => ["both", "height"].includes(presentation?.sizing.fitToContent);
   const sizingMode = () => presentation
@@ -87,6 +88,7 @@ export function createWidgetChrome(
   function setMode(next) {
     if (!["interactive", "passive"].includes(next)) return;
     const changed = mode !== next;
+    if (changed) frameSize();
     mode = next;
     if (changed) {
       close();
@@ -126,7 +128,7 @@ export function createWidgetChrome(
     drag = null,
     stacked = false;
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-  function paint() {
+  function paint(notify = true) {
     const scale = settings.scale.value / 100,
       opacity = settings.opacity.value / 100;
     // Inverse viewport size models native WebView zoom: layout reflows while the host stays fixed.
@@ -138,6 +140,7 @@ export function createWidgetChrome(
     for (const [key, setting] of Object.entries(settings))
       find(`#value-${key}`).textContent = `${setting.value}%`;
     applyContentSize(true);
+    if (notify) notifyPresentation();
   }
   function syncEditor() {
     const setting = settings[active];
@@ -325,9 +328,18 @@ export function createWidgetChrome(
     host.style.top = `${origin.y}px`;
   }
 
-  function presentationState() {
+  function frameSize() {
     const bounds = host.getBoundingClientRect();
-    return {sizingMode: sizingMode(), width: Math.round(bounds.width), height: Math.round(bounds.height)};
+    // display:none has no measured box; keep the last measured or host-resized frame.
+    for (const axis of ["width", "height"]) {
+      const measured = Math.round(bounds[axis]);
+      if (measured > 0) lastFrameSize[axis] = measured;
+    }
+    return {...lastFrameSize};
+  }
+  function presentationState() {
+    const size = frameSize(), scalePercent = settings.scale.value;
+    return {sizingMode: sizingMode(), width: Math.ceil(size.width * 100 / scalePercent), height: Math.ceil(size.height * 100 / scalePercent)};
   }
   function notifyPresentation() {
     if (settingPresentation) return;
@@ -341,10 +353,18 @@ export function createWidgetChrome(
     anchorPosition();
     const bounds = host.getBoundingClientRect(),
       area = stage.getBoundingClientRect();
-    const maxWidth = Math.max(0, Math.min(maximumWidth, area.right - bounds.left));
-    const maxHeight = Math.max(0, Math.min(maximumHeight, area.bottom - bounds.top));
-    host.style.width = `${clamp(width, Math.min(minimumWidth, maxWidth), maxWidth)}px`;
-    host.style.height = `${clamp(height, Math.min(minimumHeight, maxHeight), maxHeight)}px`;
+    const left = bounds.width > 0 ? bounds.left : area.left + origin.x + positionX;
+    const top = bounds.height > 0 ? bounds.top : area.top + origin.y + positionY;
+    const maxWidth = Math.max(0, Math.min(maximumWidth, area.width > 0 ? area.right - left : maximumWidth));
+    const maxHeight = Math.max(0, Math.min(maximumHeight, area.height > 0 ? area.bottom - top : maximumHeight));
+    const next = {
+      width: clamp(width, Math.min(minimumWidth, maxWidth), maxWidth),
+      height: clamp(height, Math.min(minimumHeight, maxHeight), maxHeight),
+    };
+    for (const axis of ["width", "height"]) {
+      host.style[axis] = `${next[axis]}px`;
+      if (next[axis] > 0) lastFrameSize[axis] = Math.round(next[axis]);
+    }
     positionToolbar();
     notifyPresentation();
   }
@@ -575,7 +595,7 @@ export function createWidgetChrome(
     const changed = reset || presentationKey !== nextKey;
     const initialize = reset || !presentation;
     const previousMode = sizingMode();
-    const previousSize = presentationState();
+    const previousSize = frameSize();
     presentationKey = nextKey;
     const nextValues=JSON.stringify(values);
     if (optionValues!==nextValues) previousContentSize=sizeCycle=null;
@@ -664,7 +684,7 @@ export function createWidgetChrome(
   }
   menu.hidden = true;
   editor.hidden = true;
-  paint();
+  paint(false);
   setMode("interactive");
   modeSelect.disabled = false;
   positionToolbar();

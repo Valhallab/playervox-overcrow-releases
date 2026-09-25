@@ -149,6 +149,7 @@ function sizingSetup(options, locale = 'fr') {
     el('#stage-surface').rect = {left:0,right:1000,top:0,bottom:900,width:1000,height:900};
     const host = el('#widget-host');
     host.getBoundingClientRect = () => {
+      if(host.hidden||(host.getAttribute('data-mode')==='passive'&&host.getAttribute('data-show-in-passive')==='false'))return {left:0,top:0,right:0,bottom:0,width:0,height:0};
       const width = Number.parseFloat(host.style.width) || host.rect.width;
       const height = Number.parseFloat(host.style.height) || host.rect.height;
       return {...host.rect, width, height, right:host.rect.left+width, bottom:host.rect.top+height};
@@ -437,4 +438,63 @@ test('scoped widget controls stay independent and remove their handlers on dispo
   first.fire(first.el('#widget-eye'),'click');
   assert.equal(first.chrome.mode,'interactive');
   assert.equal(first.chrome.showInPassive,false);
+});
+
+
+test('hidden host state retains frame size and publishes fitted reports without zero dimensions', async () => {
+  const changes=[];
+  const {el,fire,chrome}=sizingSetup({onPresentationChange:value=>changes.push(value)});
+  chrome.setPresentation(presentation('both'));
+  fire(el('#widget-eye'),'click');chrome.setMode('passive');
+  assert.deepEqual(chrome.presentationState,{sizingMode:'intrinsic',width:120,height:40});
+  chrome.reportSize({width:240,height:180});await settleSize();
+  assert.deepEqual(chrome.presentationState,{sizingMode:'intrinsic',width:240,height:180});
+  assert.deepEqual(changes.at(-1),{sizingMode:'intrinsic',width:240,height:180});
+  chrome.setAutoSize(false);
+  assert.deepEqual(changes.at(-1),{sizingMode:'manual',width:240,height:180});
+  assert.ok(changes.every(({width,height})=>width>0&&height>0));
+  chrome.setMode('interactive');
+  assert.equal(el('#widget-host').style.width,'240px');assert.equal(el('#widget-host').style.height,'180px');
+  chrome.dispose();
+});
+
+test('presentation snapshots use CSS viewport dimensions and notify when manual zoom changes', async () => {
+  const changes=[];
+  const {el,fire,chrome}=sizingSetup({onPresentationChange:value=>changes.push(value)});
+  chrome.setPresentation(presentation('both'));
+  chrome.reportSize({width:160,height:80});await settleSize();
+  fire(el('#widget-options'),'click');fire(el('#option-scale'),'click');
+  el('#option-range').value='150';fire(el('#option-range'),'input');
+  assert.equal(el('#widget-host').style.width,'240px');assert.equal(el('#widget-host').style.height,'120px');
+  assert.deepEqual(chrome.presentationState,{sizingMode:'intrinsic',width:160,height:80});
+  chrome.setAutoSize(false);
+  const before=changes.length;
+  el('#option-range').value='125';fire(el('#option-range'),'input');
+  assert.equal(el('#widget-host').style.width,'240px');assert.equal(el('#widget-host').style.height,'120px');
+  assert.deepEqual(changes.at(-1),{sizingMode:'manual',width:192,height:96});
+  assert.equal(changes.length,before+1);
+  const changed=presentation('both');changed.options[0].default=false;
+  chrome.setPresentation(changed);
+  assert.equal(el('#widget-host').style.width,'240px');assert.equal(el('#widget-host').style.height,'120px');
+  fire(el('#widget-resize'),'keydown',{key:'ArrowRight'});
+  fire(el('#widget-resize'),'keydown',{key:'ArrowDown'});
+  assert.deepEqual(chrome.presentationState,{sizingMode:'manual',width:193,height:97});
+  chrome.dispose();
+});
+
+
+test('hidden reload keeps the last visible frame when CSS clipped the inline width', () => {
+  const {el,fire,chrome}=sizingSetup();
+  const declared=presentation('both','manual');
+  chrome.setPresentation(declared);
+  const host=el('#widget-host'),measure=host.getBoundingClientRect;
+  host.getBoundingClientRect=()=>{const bounds=measure();return {...bounds,width:Math.min(bounds.width,100),right:bounds.left+Math.min(bounds.width,100)};};
+  assert.equal(host.style.width,'120px');
+  assert.equal(host.getBoundingClientRect().width,100);
+  fire(el('#widget-eye'),'click');chrome.setMode('passive');
+  declared.options[0].default=false;
+  chrome.setPresentation(declared);
+  assert.deepEqual(chrome.presentationState,{sizingMode:'manual',width:100,height:40});
+  assert.equal(host.style.width,'100px');
+  chrome.dispose();
 });

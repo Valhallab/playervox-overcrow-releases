@@ -295,8 +295,9 @@ test("host-only geometry changes publish once and reject unsupported modes or di
     {sizingMode:"intrinsic",width:320,height:200},
     {sizingMode:"fit",width:320,height:200},
     {sizingMode:"manual",width:Infinity,height:200},
+    {sizingMode:"manual",width:320.5,height:200},
     {sizingMode:"manual",width:0,height:200},
-    {sizingMode:"manual",width:320,height:4097},
+    {sizingMode:"manual",width:320,height:8193},
   ]) assert.equal(sim.setPresentation(invalid), false);
   assert.equal(events.length, 1);
   assert.equal(request(sim,"presentation.setMode",{mode:"fit"}).metadata.error.code,"invalid_request");
@@ -333,5 +334,28 @@ test("declaration edits preserve host choices and revoke incompatible fit axes",
   assert.deepEqual(sim.snapshot().services.snapshots.presentation.data, {sizingMode:"manual",width:320,height:220,options:{details:false}});
   sim.setContext({manifest:{...declared,id:"com.example.other"}});
   assert.deepEqual(sim.snapshot().services.snapshots.presentation.data, {sizingMode:"intrinsic",width:280,height:180,options:{details:false}});
+  sim.dispose();
+});
+
+
+test("host CSS viewport snapshots allow zoomed-out dimensions through 8192", () => {
+  const sim=createServiceSimulator({manifest:manifest()});
+  assert.equal(sim.setPresentation({sizingMode:"manual",width:8192,height:8192}),true);
+  assert.equal(sim.snapshot().services.snapshots.presentation.data.width,8192);
+  assert.equal(sim.setPresentation({sizingMode:"manual",width:8193,height:8192}),false);
+  assert.equal(request(sim,"presentation.reportSize",{width:4097,height:100}).metadata.error.code,"invalid_request");
+  sim.dispose();
+});
+
+test("context changes preserve CSS dimensions without applying frame bounds to them", () => {
+  const declared=manifest();
+  const sim=createServiceSimulator({manifest:declared});
+  for(const [width,height] of [[100,30],[1500,1500]]) {
+    sim.setPresentation({sizingMode:"manual",width,height});
+    declared.presentation.options[0].default=!declared.presentation.options[0].default;
+    sim.setContext({manifest:declared});
+    const data=sim.snapshot().services.snapshots.presentation.data;
+    assert.equal(data.width,width);assert.equal(data.height,height);
+  }
   sim.dispose();
 });

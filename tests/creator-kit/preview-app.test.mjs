@@ -27,7 +27,7 @@ function preview() {
     focus(){document.activeElement=this;}
     append(...children){this.children.push(...children);}
     replaceChildren(...children){this.children=[...children];}
-    getBoundingClientRect(){const width=Number.parseFloat(this.style.width)||this.rect.width,height=Number.parseFloat(this.style.height)||this.rect.height;return {...this.rect,width,height,right:this.rect.left+width,bottom:this.rect.top+height};}
+    getBoundingClientRect(){if(this.hidden||(this.getAttribute('data-mode')==='passive'&&this.getAttribute('data-show-in-passive')==='false'))return {left:0,top:0,right:0,bottom:0,width:0,height:0};const width=Number.parseFloat(this.style.width)||this.rect.width,height=Number.parseFloat(this.style.height)||this.rect.height;return {...this.rect,width,height,right:this.rect.left+width,bottom:this.rect.top+height};}
   }
   document.createElement=()=>new Element();
   const el=selector=>{if(!nodes.has(selector))nodes.set(selector,new Element());return nodes.get(selector);};
@@ -49,8 +49,9 @@ function preview() {
   function send(data) { fire(window,'message',{origin:location.origin,source:el('#view').contentWindow,data:{source:'overcrow-widget-preview',bridgeId:'view-document',...data}}); }
   const request=metadata=>{send({type:'request',id:++requestId,metadata});return messages.filter(message=>message.type==='reply').at(-1)?.response;};
   const snapshot=()=>request({type:'gameSnapshot'}).metadata.value;
-  async function load(id=next.manifest.id) {
+  async function load(id=next.manifest.id, update=()=>{}) {
     next={...next,generation:next.generation+1,manifest:{...next.manifest,id}};
+    update(next.manifest);
     stream.onmessage({data:JSON.stringify({generation:next.generation})});
     await new Promise(resolve=>setImmediate(resolve));
     send({type:'ready'});
@@ -78,4 +79,24 @@ test('standalone preview publishes user sizing and preserves it across snapshots
   assert.deepEqual(data(),{sizingMode:'intrinsic',width:200,height:80,options:{}});
   await app.load('com.example.second');
   assert.deepEqual(data(),{sizingMode:'intrinsic',width:120,height:40,options:{}});
+});
+
+
+test('passive hidden reloads preserve manual frame dimensions and SDK geometry', async t => {
+  const app=preview();t.after(app.dispose);await app.load();
+  const fit=app.el('#options-menu').children.flatMap(group=>group.children).flatMap(row=>row.children).find(control=>control.getAttribute('aria-label')==='Ajuster au contenu');
+  fit.checked=false;app.fire(fit,'change');
+  for(let i=0;i<12;i++)app.fire(app.el('#widget-resize'),'keydown',{key:'ArrowRight',shiftKey:true});
+  for(let i=0;i<14;i++)app.fire(app.el('#widget-resize'),'keydown',{key:'ArrowDown',shiftKey:true});
+  app.fire(app.el('#widget-eye'),'click');
+  app.el('#overlay-mode').value='passive';app.fire(app.el('#overlay-mode'),'change');
+  assert.equal(app.el('#widget-host').getBoundingClientRect().width,0);
+  await app.load(undefined, manifest=>{manifest.presentation.options=[{id:'details',type:'boolean',label:{en:'Details',fr:'Détails'},default:false}];});
+  assert.deepEqual(app.snapshot().services.snapshots.presentation.data,{sizingMode:'manual',width:240,height:180,options:{details:false}});
+  app.el('#session').value='active';app.fire(app.el('#session'),'change');
+  assert.deepEqual(app.snapshot().services.snapshots.presentation.data,{sizingMode:'manual',width:240,height:180,options:{details:false}});
+  assert.equal(app.el('#widget-host').style.width,'240px');assert.equal(app.el('#widget-host').style.height,'180px');
+  app.el('#overlay-mode').value='interactive';app.fire(app.el('#overlay-mode'),'change');
+  assert.equal(app.el('#widget-host').getBoundingClientRect().width,240);
+  assert.equal(app.el('#widget-host').getBoundingClientRect().height,180);
 });
