@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createWidgetChrome} from '../../tools/creator-kit/preview/chrome.mjs';
+import {createServiceSimulator} from '../../tools/creator-kit/preview/services.mjs';
 
 // Minimal event/element surface: exercises the shipped handlers without a browser dependency.
 class Element extends EventTarget {
@@ -20,7 +21,7 @@ class Element extends EventTarget {
   append(...children){this.children.push(...children);}
   replaceChildren(...children){this.children=[...children];}
 }
-function setup(onModeChange, options, configure = () => {}) {
+function setup(onModeChange, options, configure = () => {}, locale = "fr") {
   const document=new EventTarget();document.defaultView=new EventTarget();
   Object.assign(document.defaultView,{innerWidth:1200,innerHeight:900});
   const nodes=new Map();
@@ -30,7 +31,7 @@ function setup(onModeChange, options, configure = () => {}) {
   const frameDocument=new EventTarget();el('#view').contentDocument=frameDocument;el('#view').src='view/index.html';
   el('#widget-toolbar').rect={left:492,right:580,top:266,bottom:294,width:88,height:28};
   configure(el);
-  const chrome=createWidgetChrome(document,'fr',onModeChange,options);
+  const chrome=createWidgetChrome(document,locale,onModeChange,options);
   const fire=(target,type,properties={})=>{const event=new Event(type,{cancelable:true});Object.assign(event,properties);target.dispatchEvent(event);return event;};
   return {document,el,chrome,fire,frameDocument};
 }
@@ -109,10 +110,10 @@ test('automatic sizing prevents pointer and keyboard resizing until explicitly d
   fire(grip,'keydown',{key:'ArrowDown'});assert.equal(host.style.height,'321px');
 });
 
-const presentation=mode=>({sizing:{mode,preferred:{width:120,height:40},min:{width:24,height:12},max:{width:800,height:600}},options:[{id:'showArtist',type:'boolean',label:{en:'Show artist',fr:'Afficher l’artiste'},default:true}]});
+const presentation=(fitToContent, defaultMode)=>({sizing:{fitToContent,...(defaultMode?{defaultMode}:{}),preferred:{width:120,height:40},min:{width:24,height:12},max:{width:800,height:600}},options:[{id:'showArtist',type:'boolean',label:{en:'Show artist',fr:'Afficher l’artiste'},default:true}]});
 test('chrome keeps intrinsic fixed, auto height horizontal, and scales CSS reports once',async()=>{
   const {el,fire,chrome}=setup(undefined,undefined,el=>{el('#stage-surface').rect={left:0,right:1000,top:0,bottom:900,width:1000,height:900};});
-  chrome.setPresentation(presentation('intrinsic'));
+  chrome.setPresentation(presentation('both'));
   assert.equal(el('#widget-host').style.width,'120px');assert.equal(el('#widget-host').style.height,'40px');
   assert.equal(el('#widget-resize').hidden,true);
   chrome.reportSize({width:160,height:60});await new Promise(resolve=>setTimeout(resolve,120));
@@ -121,7 +122,7 @@ test('chrome keeps intrinsic fixed, auto height horizontal, and scales CSS repor
   assert.equal(el('#widget-host').style.width,'240px');assert.equal(el('#widget-host').style.height,'90px');
   chrome.reportSize({width:160,height:60});await new Promise(resolve=>setTimeout(resolve,120));
   assert.equal(el('#widget-host').style.height,'90px');
-  chrome.setPresentation(presentation('autoHeight'));
+  chrome.setPresentation(presentation('height'), {}, {reset:true});
   assert.equal(el('#widget-resize').hidden,false);
   const height=el('#widget-host').style.height;
   fire(el('#widget-resize'),'keydown',{key:'ArrowDown'});
@@ -133,7 +134,7 @@ test('chrome keeps intrinsic fixed, auto height horizontal, and scales CSS repor
 test('native preview options are localized, bounded and disabled in passive mode',()=>{
   const changes=[];
   const {el,fire,chrome}=setup(undefined,{onOptionChange:(key,value)=>changes.push([key,value])});
-  chrome.setPresentation(presentation('manual'));
+  chrome.setPresentation(presentation(false));
   const options=el('#options-menu').children.at(-1);
   const control=options.children[0].children[1];
   assert.equal(control.getAttribute('aria-label'),'Afficher l’artiste');
@@ -142,6 +143,166 @@ test('native preview options are localized, bounded and disabled in passive mode
   assert.equal(changes.length,1);assert.equal(control.disabled,true);
   chrome.dispose();
 });
+
+function sizingSetup(options, locale = 'fr') {
+  return setup(undefined, options, el => {
+    el('#stage-surface').rect = {left:0,right:1000,top:0,bottom:900,width:1000,height:900};
+    const host = el('#widget-host');
+    host.getBoundingClientRect = () => {
+      if(host.hidden||(host.getAttribute('data-mode')==='passive'&&host.getAttribute('data-show-in-passive')==='false'))return {left:0,top:0,right:0,bottom:0,width:0,height:0};
+      const width = Number.parseFloat(host.style.width) || host.rect.width;
+      const height = Number.parseFloat(host.style.height) || host.rect.height;
+      return {...host.rect, width, height, right:host.rect.left+width, bottom:host.rect.top+height};
+    };
+  }, locale);
+}
+const fitControl = el => el('#options-menu').children.flatMap(group => group.children).flatMap(row => row.children).find(control => ['Ajuster au contenu', 'Fit to content'].includes(control.getAttribute('aria-label')));
+const settleSize = () => new Promise(resolve => setTimeout(resolve, 120));
+
+test('native fit checkbox freezes displayed size and resumes the latest content report', async () => {
+  const {el, fire, chrome} = sizingSetup();
+  chrome.setPresentation(presentation('both'));
+  const control = fitControl(el);
+  assert.ok(control, 'the host settings expose fit to content');
+  assert.equal(control.type, 'checkbox');
+  assert.equal(control.checked, true);
+  chrome.reportSize({width:160, height:60});
+  await settleSize();
+  control.checked = false;
+  fire(control, 'change');
+  assert.deepEqual(chrome.presentationState, {sizingMode:'manual',width:160,height:60});
+  assert.equal(el('#widget-resize').hidden, false);
+  chrome.reportSize({width:220, height:90});
+  await settleSize();
+  assert.deepEqual(chrome.presentationState, {sizingMode:'manual',width:160,height:60});
+  chrome.setPresentation(structuredClone(presentation('both')), {showArtist:false});
+  assert.equal(control.checked, false);
+  assert.deepEqual(chrome.presentationState, {sizingMode:'manual',width:160,height:60});
+  control.checked = true;
+  fire(control, 'change');
+  assert.deepEqual(chrome.presentationState, {sizingMode:'intrinsic',width:220,height:90});
+  assert.equal(el('#widget-resize').hidden, true);
+  chrome.dispose();
+});
+
+test('manual default initializes once until another project is loaded', () => {
+  const {el, fire, chrome} = sizingSetup(undefined, 'en');
+  const declared = presentation('height', 'manual');
+  chrome.setPresentation(declared);
+  const control = fitControl(el);
+  assert.equal(control.getAttribute('aria-label'), 'Fit to content');
+  assert.equal(control.checked, false);
+  control.checked = true;
+  fire(control, 'change');
+  fire(el('#widget-resize'), 'keydown', {key:'ArrowRight',shiftKey:true});
+  fire(el('#widget-resize'), 'keydown', {key:'ArrowDown',shiftKey:true});
+  chrome.setPresentation(structuredClone(declared));
+  assert.deepEqual(chrome.presentationState, {sizingMode:'autoHeight',width:130,height:40});
+  assert.equal(control.checked, true);
+  control.checked = false;
+  fire(control, 'change');
+  fire(el('#widget-resize'), 'keydown', {key:'ArrowDown',shiftKey:true});
+  assert.deepEqual(chrome.presentationState, {sizingMode:'manual',width:130,height:50});
+  chrome.setPresentation(structuredClone(declared), {}, {reset:true});
+  assert.deepEqual(chrome.presentationState, {sizingMode:'manual',width:120,height:40});
+  chrome.setPresentation(presentation('both'), {}, {reset:true});
+  assert.equal(chrome.presentationState.sizingMode, 'intrinsic');
+  chrome.dispose();
+});
+
+test('same-project declaration edits preserve manual choices and clamp existing dimensions', () => {
+  const {el, fire, chrome} = sizingSetup();
+  const declared = presentation('both');
+  chrome.setPresentation(declared);
+  chrome.setAutoSize(false);
+  fire(el('#widget-resize'), 'keydown', {key:'ArrowRight',shiftKey:true});
+  const updated = structuredClone(declared);
+  updated.sizing.defaultMode = 'fit';
+  updated.options[0].default = false;
+  chrome.setPresentation(updated);
+  assert.deepEqual(chrome.presentationState, {sizingMode:'manual',width:130,height:40});
+  updated.sizing.max.width = 125;
+  chrome.setPresentation(updated);
+  assert.deepEqual(chrome.presentationState, {sizingMode:'manual',width:125,height:40});
+  chrome.setAutoSize(true);
+  updated.sizing.fitToContent = 'height';
+  chrome.setPresentation(updated);
+  assert.deepEqual(chrome.presentationState, {sizingMode:'manual',width:120,height:40});
+  chrome.setAutoSize(true);
+  assert.equal(chrome.presentationState.sizingMode, 'autoHeight');
+  chrome.dispose();
+});
+
+test('unsupported fit blocks stale native controls and programmatic overrides', async () => {
+  const {el, fire, chrome} = sizingSetup();
+  chrome.setPresentation(presentation('both'));
+  const control = fitControl(el);
+  chrome.setMode('passive');
+  assert.equal(control.disabled, true);
+  control.checked = false;
+  fire(control, 'change');
+  assert.equal(chrome.presentationState.sizingMode, 'intrinsic');
+  chrome.setMode('interactive');
+  chrome.setPresentation(presentation(false));
+  assert.equal(control.disabled, true);
+  assert.equal(control.checked, false);
+  control.checked = true;
+  fire(control, 'change');
+  chrome.setAutoSize(true);
+  chrome.reportSize({width:300,height:200});
+  await settleSize();
+  assert.deepEqual(chrome.presentationState, {sizingMode:'manual',width:120,height:40});
+  assert.equal(el('#widget-resize').hidden, false);
+  chrome.dispose();
+});
+
+test('host geometry snapshots reflect toggles and resizing without refresh loops', async () => {
+  let chrome, sim;
+  const events = [];
+  const declared = presentation('height');
+  const widget = {permissions:{}, presentation:declared};
+  const setupResult = sizingSetup({onPresentationChange:state => sim?.setPresentation(state)});
+  chrome = setupResult.chrome;
+  sim = createServiceSimulator({manifest:widget,onSize:size=>chrome.reportSize(size),onSnapshot:next=>{
+    events.push(next.services.snapshots.presentation.data);
+    chrome.setPresentation(structuredClone(declared), next.services.snapshots.presentation.data.options);
+  }});
+  const {el, fire} = setupResult;
+  chrome.setPresentation(declared);
+  sim.setPresentation(chrome.presentationState);
+  events.length = 0;
+  const control = fitControl(el);
+  control.checked = false;
+  fire(control, 'change');
+  fire(el('#widget-resize'), 'keydown', {key:'ArrowDown',shiftKey:true});
+  sim.setOption('showArtist', false);
+  assert.deepEqual(sim.snapshot().services.snapshots.presentation.data, {sizingMode:'manual',width:120,height:50,options:{showArtist:false}});
+  assert.equal(events.length, 3);
+  sim.request({type:'serviceAction',contextId:sim.snapshot().services.contextId,action:'presentation.reportSize',parameters:{width:280,height:80}},{role:'view',interactive:true});
+  await settleSize();
+  assert.equal(events.length, 3);
+  control.checked = true;
+  fire(control, 'change');
+  assert.deepEqual(events.at(-1), {sizingMode:'autoHeight',width:120,height:80,options:{showArtist:false}});
+  const count = events.length;
+  chrome.setAutoSize(true);
+  chrome.setPresentation(structuredClone(declared), {showArtist:false});
+  assert.equal(events.length, count);
+  chrome.dispose();sim.dispose();
+});
+
+test('no-manifest chrome keeps the landing fit control external', () => {
+  const {el,chrome} = sizingSetup({autoSize:true});
+  assert.equal(fitControl(el), undefined);
+  assert.equal(el('#widget-resize').hidden, true);
+  chrome.setAutoSize(false);
+  assert.equal(el('#widget-resize').hidden, false);
+  chrome.setAutoSize(true);
+  assert.equal(el('#widget-resize').hidden, true);
+  assert.equal(fitControl(el), undefined);
+  chrome.dispose();
+});
+
 test('passive mode cancels gestures and blocks programmatic move or resize events',()=>{
   const {el,fire,chrome}=setup();
   const grip=el('#widget-resize'),move=el('#widget-move'),host=el('#widget-host');
@@ -277,4 +438,63 @@ test('scoped widget controls stay independent and remove their handlers on dispo
   first.fire(first.el('#widget-eye'),'click');
   assert.equal(first.chrome.mode,'interactive');
   assert.equal(first.chrome.showInPassive,false);
+});
+
+
+test('hidden host state retains frame size and publishes fitted reports without zero dimensions', async () => {
+  const changes=[];
+  const {el,fire,chrome}=sizingSetup({onPresentationChange:value=>changes.push(value)});
+  chrome.setPresentation(presentation('both'));
+  fire(el('#widget-eye'),'click');chrome.setMode('passive');
+  assert.deepEqual(chrome.presentationState,{sizingMode:'intrinsic',width:120,height:40});
+  chrome.reportSize({width:240,height:180});await settleSize();
+  assert.deepEqual(chrome.presentationState,{sizingMode:'intrinsic',width:240,height:180});
+  assert.deepEqual(changes.at(-1),{sizingMode:'intrinsic',width:240,height:180});
+  chrome.setAutoSize(false);
+  assert.deepEqual(changes.at(-1),{sizingMode:'manual',width:240,height:180});
+  assert.ok(changes.every(({width,height})=>width>0&&height>0));
+  chrome.setMode('interactive');
+  assert.equal(el('#widget-host').style.width,'240px');assert.equal(el('#widget-host').style.height,'180px');
+  chrome.dispose();
+});
+
+test('presentation snapshots use CSS viewport dimensions and notify when manual zoom changes', async () => {
+  const changes=[];
+  const {el,fire,chrome}=sizingSetup({onPresentationChange:value=>changes.push(value)});
+  chrome.setPresentation(presentation('both'));
+  chrome.reportSize({width:160,height:80});await settleSize();
+  fire(el('#widget-options'),'click');fire(el('#option-scale'),'click');
+  el('#option-range').value='150';fire(el('#option-range'),'input');
+  assert.equal(el('#widget-host').style.width,'240px');assert.equal(el('#widget-host').style.height,'120px');
+  assert.deepEqual(chrome.presentationState,{sizingMode:'intrinsic',width:160,height:80});
+  chrome.setAutoSize(false);
+  const before=changes.length;
+  el('#option-range').value='125';fire(el('#option-range'),'input');
+  assert.equal(el('#widget-host').style.width,'240px');assert.equal(el('#widget-host').style.height,'120px');
+  assert.deepEqual(changes.at(-1),{sizingMode:'manual',width:192,height:96});
+  assert.equal(changes.length,before+1);
+  const changed=presentation('both');changed.options[0].default=false;
+  chrome.setPresentation(changed);
+  assert.equal(el('#widget-host').style.width,'240px');assert.equal(el('#widget-host').style.height,'120px');
+  fire(el('#widget-resize'),'keydown',{key:'ArrowRight'});
+  fire(el('#widget-resize'),'keydown',{key:'ArrowDown'});
+  assert.deepEqual(chrome.presentationState,{sizingMode:'manual',width:193,height:97});
+  chrome.dispose();
+});
+
+
+test('hidden reload keeps the last visible frame when CSS clipped the inline width', () => {
+  const {el,fire,chrome}=sizingSetup();
+  const declared=presentation('both','manual');
+  chrome.setPresentation(declared);
+  const host=el('#widget-host'),measure=host.getBoundingClientRect;
+  host.getBoundingClientRect=()=>{const bounds=measure();return {...bounds,width:Math.min(bounds.width,100),right:bounds.left+Math.min(bounds.width,100)};};
+  assert.equal(host.style.width,'120px');
+  assert.equal(host.getBoundingClientRect().width,100);
+  fire(el('#widget-eye'),'click');chrome.setMode('passive');
+  declared.options[0].default=false;
+  chrome.setPresentation(declared);
+  assert.deepEqual(chrome.presentationState,{sizingMode:'manual',width:100,height:40});
+  assert.equal(host.style.width,'100px');
+  chrome.dispose();
 });

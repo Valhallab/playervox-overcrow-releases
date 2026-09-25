@@ -19,7 +19,7 @@
   },
   "presentation": {
     "sizing": {
-      "mode": "intrinsic",
+      "fitToContent": "both",
       "preferred": {
         "width": 240,
         "height": 120

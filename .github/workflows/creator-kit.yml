@@ -44,8 +44,11 @@ jobs:
           tests/creator-kit/simulation.test.mjs
           tests/creator-kit/services.test.mjs
           tests/creator-kit/references.test.mjs
-          tests/creator-kit/manifest-v2.test.mjs
+          tests/creator-kit/manifest.test.mjs
           tests/creator-kit/chrome.test.mjs
+          tests/creator-kit/preview-app.test.mjs
+          tests/creator-kit/network.test.mjs
+          tests/creator-kit/storage.test.mjs
           tests/creator-kit/distribution.test.mjs
           tests/creator-kit/native-cli.test.mjs
           tests/creator-kit/native-linux.test.mjs

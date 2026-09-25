@@ -9,7 +9,7 @@ const network = [
 ];
 const presentation = () => ({
   sizing: {
-    mode: "autoHeight",
+    fitToContent: "height",
     preferred: { width: 360, height: 240 },
     min: { width: 80, height: 24 },
     max: { width: 1600, height: 1200 },
@@ -111,12 +111,15 @@ test("only the current API version is accepted, including permission-free widget
   }
 });
 
-test("manifest validates all native sizing modes and typed bilingual options", () => {
-  for (const mode of ["intrinsic", "autoHeight", "manual"]) {
-    const manifest = fixture();
-    manifest.presentation = presentation();
-    manifest.presentation.sizing.mode = mode;
-    assert.doesNotThrow(() => validate(manifest));
+test("manifest validates fit capabilities and supported initial user modes", () => {
+  for (const fitToContent of [false, "both", "height"]) {
+    for (const defaultMode of [undefined, "manual", ...(fitToContent ? ["fit"] : [])]) {
+      const manifest = fixture();
+      manifest.presentation = presentation();
+      Object.assign(manifest.presentation.sizing, { fitToContent });
+      if (defaultMode !== undefined) manifest.presentation.sizing.defaultMode = defaultMode;
+      assert.doesNotThrow(() => validate(manifest));
+    }
   }
   const manifest = fixture();
   manifest.presentation = presentation();
@@ -126,7 +129,17 @@ test("manifest validates all native sizing modes and typed bilingual options", (
 
 test("manifest refuses malformed dimensions, native option writers, and unbounded options", () => {
   const invalid = [
-    (value) => (value.sizing.mode = "free"),
+    (value) => delete value.sizing.fitToContent,
+    ...[true, null, 0, "intrinsic", "autoHeight", "manual", "false"].map(
+      (fitToContent) => (value) => (value.sizing.fitToContent = fitToContent),
+    ),
+    ...[null, false, "intrinsic", "autoHeight", "both", ""].map(
+      (defaultMode) => (value) => (value.sizing.defaultMode = defaultMode),
+    ),
+    (value) => Object.assign(value.sizing, { fitToContent: false, defaultMode: "fit" }),
+    ...["intrinsic", "autoHeight", "manual"].map(
+      (mode) => (value) => (value.sizing.mode = mode),
+    ),
     (value) => (value.sizing.preferred.width = 0),
     (value) => (value.sizing.preferred.width = 360.5),
     (value) => (value.sizing.min.width = 361),

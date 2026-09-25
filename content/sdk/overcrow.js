@@ -83,7 +83,8 @@ function createServiceValidation(ErrorClass, clone) {
       artworkHandle: nullable(handle), actions: shape({previous: bool, playPause: bool, next: bool}),
     }),
     presentation: shape({sizingMode: choice(['intrinsic', 'autoHeight', 'manual']),
-      width: integer(1, 4096), height: integer(1, 4096), options: value => {
+      // The largest native frame (4096) exposes 8192 CSS pixels at 50% scale.
+      width: integer(1, 8192), height: integer(1, 8192), options: value => {
         object(value);
         if (Object.keys(value).length > 32) invalid();
         return Object.fromEntries(Object.entries(value).map(([key, item]) => {

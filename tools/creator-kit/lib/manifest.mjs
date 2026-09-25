@@ -94,8 +94,9 @@ function validatePresentation(presentation,require) {
   const pointer='/presentation';
   fields(presentation,['sizing','options'],pointer);
   const sizing=presentation.sizing;
-  fields(sizing,['mode','preferred','min','max'],pointer+'/sizing');
-  require(['intrinsic','autoHeight','manual'].includes(sizing.mode),pointer+'/sizing/mode','Mode de taille natif invalide.');
+  fields(sizing,['fitToContent','defaultMode','preferred','min','max'],pointer+'/sizing');
+  require([false,'both','height'].includes(sizing.fitToContent),pointer+'/sizing/fitToContent','Valeur false, both ou height attendue.');
+  if(Object.hasOwn(sizing,'defaultMode')) require(['fit','manual'].includes(sizing.defaultMode)&&(sizing.defaultMode!=='fit'||sizing.fitToContent!==false),pointer+'/sizing/defaultMode','Mode initial fit ou manual attendu ; fit exige un ajustement au contenu pris en charge.');
   for(const key of ['preferred','min','max']) {
     const size=sizing[key];fields(size,['width','height'],`${pointer}/sizing/${key}`);
     for(const axis of ['width','height']) require(Number.isInteger(size[axis])&&size[axis]>=1&&size[axis]<=4096,`${pointer}/sizing/${key}/${axis}`,'Dimension entière entre 1 et 4096 attendue.');

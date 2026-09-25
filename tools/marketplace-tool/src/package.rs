@@ -1217,7 +1217,7 @@ mod tests {
     }
 
     fn native_presentation() -> serde_json::Value {
-        serde_json::json!({"sizing":{"mode":"autoHeight","preferred":{"width":360,"height":240},"min":{"width":80,"height":24},"max":{"width":1600,"height":1200}},"options":[
+        serde_json::json!({"sizing":{"fitToContent":"height","preferred":{"width":360,"height":240},"min":{"width":80,"height":24},"max":{"width":1600,"height":1200}},"options":[
             {"id":"showArtist","type":"boolean","label":{"en":"Show artist","fr":"Afficher l’artiste"},"default":true},
             {"id":"theme","type":"enum","label":{"en":"Theme","fr":"Thème"},"default":"dark","choices":[{"value":"dark","label":{"en":"Dark","fr":"Sombre"}},{"value":"light","label":{"en":"Light","fr":"Clair"}}]},
             {"id":"fontSize","type":"number","label":{"en":"Font size","fr":"Taille du texte"},"default":14.5,"min":8,"max":48,"step":0.5}
@@ -1294,15 +1294,68 @@ mod tests {
 
     #[test]
     fn package_presentation_rejects_unsafe_and_unbounded_fields() {
+        for capability in [
+            serde_json::json!(false),
+            serde_json::json!("both"),
+            serde_json::json!("height"),
+        ] {
+            for default_mode in [None, Some("manual"), Some("fit")] {
+                let mut value = service_manifest();
+                value["presentation"] = native_presentation();
+                value["presentation"]["sizing"]["fitToContent"] = capability.clone();
+                if let Some(mode) = default_mode {
+                    value["presentation"]["sizing"]["defaultMode"] = serde_json::json!(mode);
+                }
+                assert_eq!(
+                    accepts_manifest(&value),
+                    capability != serde_json::json!(false) || default_mode != Some("fit")
+                );
+            }
+        }
+        for invalid in [
+            serde_json::json!(true),
+            serde_json::json!(null),
+            serde_json::json!(0),
+            serde_json::json!("intrinsic"),
+            serde_json::json!("autoHeight"),
+            serde_json::json!("manual"),
+        ] {
+            let mut value = service_manifest();
+            value["presentation"] = native_presentation();
+            value["presentation"]["sizing"]["fitToContent"] = invalid;
+            assert!(!accepts_manifest(&value));
+        }
+        for invalid in [
+            serde_json::json!(null),
+            serde_json::json!(false),
+            serde_json::json!("both"),
+            serde_json::json!("intrinsic"),
+            serde_json::json!("autoHeight"),
+        ] {
+            let mut value = service_manifest();
+            value["presentation"] = native_presentation();
+            value["presentation"]["sizing"]["defaultMode"] = invalid;
+            assert!(!accepts_manifest(&value));
+        }
         for mode in ["intrinsic", "autoHeight", "manual"] {
             let mut value = service_manifest();
             value["presentation"] = native_presentation();
             value["presentation"]["sizing"]["mode"] = serde_json::json!(mode);
-            assert!(accepts_manifest(&value));
+            assert!(!accepts_manifest(&value));
         }
+        let mut value = service_manifest();
+        value["presentation"] = native_presentation();
+        value["presentation"]["sizing"]
+            .as_object_mut()
+            .unwrap()
+            .remove("fitToContent");
+        assert!(!accepts_manifest(&value));
         for (pointer, replacement) in [
             ("/presentation", serde_json::json!(null)),
-            ("/presentation/sizing/mode", serde_json::json!("free")),
+            (
+                "/presentation/sizing/fitToContent",
+                serde_json::json!("free"),
+            ),
             ("/presentation/sizing/min/width", serde_json::json!(361)),
             (
                 "/presentation/sizing/preferred/height",

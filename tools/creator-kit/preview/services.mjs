@@ -46,19 +46,43 @@ export function createServiceSimulator({
     frameRevision,
     base = {},
     snapshots,
-    capabilities;
+    capabilities,
+    hostPresentation,
+    presentationKey;
   function reset(nextManifest, nextFixture) {
+    const nextKey = JSON.stringify([nextManifest.id, nextManifest.presentation ?? null]);
+    const presentationChanged = nextKey !== presentationKey;
+    const initializePresentation = !hostPresentation || manifest.id !== nextManifest.id;
+    presentationKey = nextKey;
     manifest = copy(nextManifest);
     fixture = copy(nextFixture ?? {});
     contextId = `preview-${++contextSequence}`;
     frameRevision = ++revision;
     snapshots = serviceFixtures(manifest.presentation);
+    const initialPresentation = snapshots.presentation;
+    if (initializePresentation) {
+      const { sizingMode, width, height } = initialPresentation.data;
+      hostPresentation = { sizingMode, width, height };
+    } else if (presentationChanged) {
+      const sizing = manifest.presentation?.sizing;
+      if (!(hostPresentation.sizingMode === "intrinsic" && sizing?.fitToContent === "both")
+          && !(hostPresentation.sizingMode === "autoHeight" && sizing?.fitToContent === "height")) hostPresentation.sizingMode = "manual";
+    }
     const supplied = fixture.snapshots ?? {};
     if (supplied && typeof supplied === "object" && !Array.isArray(supplied))
       for (const name of Object.keys(snapshots)) {
         if (Object.hasOwn(supplied, name))
           snapshots[name] = copy(supplied[name]);
       }
+    // Effective mode and dimensions belong to the host, including when fixtures supply options.
+    snapshots.presentation = {
+      ...initialPresentation,
+      data: {
+        ...initialPresentation.data,
+        options: snapshots.presentation?.data?.options ?? initialPresentation.data.options,
+        ...hostPresentation,
+      },
+    };
     const declared = manifest.permissions?.capabilities ?? [];
     const outbound = Boolean(
       manifest.permissions?.network?.length ||
@@ -186,6 +210,20 @@ export function createServiceSimulator({
       reset(nextManifest, nextFixture);
       onSnapshot(snapshot());
       return snapshot();
+    },
+    setPresentation(next) {
+      if (disposed || !next || typeof next !== "object") return false;
+      const { sizingMode, width, height } = next;
+      const fit = manifest.presentation?.sizing.fitToContent;
+      if (
+        !(sizingMode === "manual" || (sizingMode === "intrinsic" && fit === "both") || (sizingMode === "autoHeight" && fit === "height")) ||
+        ![width, height].every(value => integer(value, 1, 8192))
+      ) return false;
+      if (hostPresentation.sizingMode === sizingMode && hostPresentation.width === width && hostPresentation.height === height) return false;
+      hostPresentation = { sizingMode, width, height };
+      Object.assign(snapshots.presentation.data, hostPresentation);
+      publish();
+      return true;
     },
     setOption(key, value) {
       if (disposed) return false;

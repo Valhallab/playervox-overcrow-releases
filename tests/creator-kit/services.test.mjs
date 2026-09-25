@@ -8,7 +8,7 @@ const manifest = (capabilities = WEB_CAPABILITIES) => ({
   permissions: { capabilities, network: [], clipboardWrite: false },
   presentation: {
     sizing: {
-      mode: "autoHeight",
+      fitToContent: "height",
       preferred: { width: 280, height: 180 },
       min: { width: 120, height: 40 },
       max: { width: 1000, height: 1000 },
@@ -267,4 +267,95 @@ test("inactive sessions hide fake private data and deny controls until a new con
     "unavailable",
   );
   assert.equal(sim.snapshot().services.snapshots.presentation.status, "ready");
+});
+
+
+test("presentation fixtures start from supported fit defaults and cannot override host geometry", () => {
+  for (const [fitToContent, defaultMode, sizingMode] of [
+    [false, undefined, "manual"], ["both", undefined, "intrinsic"],
+    ["height", undefined, "autoHeight"], ["both", "manual", "manual"],
+    ["height", "manual", "manual"],
+  ]) {
+    const declared = manifest();
+    Object.assign(declared.presentation.sizing, {fitToContent, defaultMode});
+    const sim = createServiceSimulator({manifest:declared,fixture:{snapshots:{presentation:{status:"ready",data:{sizingMode:"intrinsic",width:99999,height:1,options:{details:false}}}}}});
+    assert.deepEqual(sim.snapshot().services.snapshots.presentation.data, {sizingMode,width:280,height:180,options:{details:false}});
+    sim.dispose();
+  }
+});
+
+test("host-only geometry changes publish once and reject unsupported modes or dimensions", () => {
+  const events = [];
+  const sim = createServiceSimulator({manifest:manifest(),onSnapshot:next=>events.push(next)});
+  assert.equal(sim.setPresentation({sizingMode:"manual",width:320,height:200}), true);
+  assert.equal(events.length, 1);
+  assert.equal(sim.setPresentation({sizingMode:"manual",width:320,height:200}), false);
+  assert.equal(events.length, 1);
+  for (const invalid of [
+    {sizingMode:"intrinsic",width:320,height:200},
+    {sizingMode:"fit",width:320,height:200},
+    {sizingMode:"manual",width:Infinity,height:200},
+    {sizingMode:"manual",width:320.5,height:200},
+    {sizingMode:"manual",width:0,height:200},
+    {sizingMode:"manual",width:320,height:8193},
+  ]) assert.equal(sim.setPresentation(invalid), false);
+  assert.equal(events.length, 1);
+  assert.equal(request(sim,"presentation.setMode",{mode:"fit"}).metadata.error.code,"invalid_request");
+  const disabled = manifest();disabled.presentation.sizing.fitToContent=false;
+  sim.setContext({manifest:disabled});
+  assert.equal(sim.snapshot().services.snapshots.presentation.data.sizingMode,"manual");
+  assert.equal(sim.setPresentation({sizingMode:"autoHeight",width:320,height:200}),false);
+  assert.equal(sim.setPresentation({sizingMode:"manual",width:330,height:200}),true);
+  sim.dispose();
+  assert.equal(sim.setPresentation({sizingMode:"manual",width:320,height:200}),false);
+});
+
+test("game context changes preserve host sizing for an unchanged declaration", () => {
+  const sim = createServiceSimulator({manifest:manifest()});
+  sim.setPresentation({sizingMode:"manual",width:320,height:200});
+  sim.snapshot({selectedActive:false});
+  sim.setContext();
+  assert.deepEqual(sim.snapshot().services.snapshots.presentation.data, {sizingMode:"manual",width:320,height:200,options:{details:true}});
+  sim.dispose();
+});
+
+
+test("declaration edits preserve host choices and revoke incompatible fit axes", () => {
+  const declared = manifest();
+  const sim = createServiceSimulator({manifest:declared});
+  sim.setPresentation({sizingMode:"manual",width:320,height:200});
+  declared.presentation.sizing.defaultMode = "fit";
+  declared.presentation.options[0].default = false;
+  sim.setContext({manifest:declared});
+  assert.deepEqual(sim.snapshot().services.snapshots.presentation.data, {sizingMode:"manual",width:320,height:200,options:{details:false}});
+  sim.setPresentation({sizingMode:"autoHeight",width:320,height:220});
+  declared.presentation.sizing.fitToContent = "both";
+  sim.setContext({manifest:declared});
+  assert.deepEqual(sim.snapshot().services.snapshots.presentation.data, {sizingMode:"manual",width:320,height:220,options:{details:false}});
+  sim.setContext({manifest:{...declared,id:"com.example.other"}});
+  assert.deepEqual(sim.snapshot().services.snapshots.presentation.data, {sizingMode:"intrinsic",width:280,height:180,options:{details:false}});
+  sim.dispose();
+});
+
+
+test("host CSS viewport snapshots allow zoomed-out dimensions through 8192", () => {
+  const sim=createServiceSimulator({manifest:manifest()});
+  assert.equal(sim.setPresentation({sizingMode:"manual",width:8192,height:8192}),true);
+  assert.equal(sim.snapshot().services.snapshots.presentation.data.width,8192);
+  assert.equal(sim.setPresentation({sizingMode:"manual",width:8193,height:8192}),false);
+  assert.equal(request(sim,"presentation.reportSize",{width:4097,height:100}).metadata.error.code,"invalid_request");
+  sim.dispose();
+});
+
+test("context changes preserve CSS dimensions without applying frame bounds to them", () => {
+  const declared=manifest();
+  const sim=createServiceSimulator({manifest:declared});
+  for(const [width,height] of [[100,30],[1500,1500]]) {
+    sim.setPresentation({sizingMode:"manual",width,height});
+    declared.presentation.options[0].default=!declared.presentation.options[0].default;
+    sim.setContext({manifest:declared});
+    const data=sim.snapshot().services.snapshots.presentation.data;
+    assert.equal(data.width,width);assert.equal(data.height,height);
+  }
+  sim.dispose();
 });

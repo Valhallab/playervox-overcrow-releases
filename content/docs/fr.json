@@ -727,7 +727,7 @@
     "group": "sdk-reference",
     "label": "Options et taille",
     "title": "Options et dimensions du widget",
-    "description": "Déclarez les réglages natifs et adaptez le cadre au contenu du widget.",
+    "description": "Déclarez les options natives et laissez l’utilisateur choisir la taille du widget.",
     "blocks": [
       {
         "kind": "html",
@@ -735,27 +735,53 @@
       },
       {
         "kind": "html",
-        "html": "<h2 id=\"declaration\">Déclarer les options et les limites</h2><p>Fusionnez cet objet <code>presentation</code> avec votre manifeste. Aucune permission de capacité n’est nécessaire. Conservez <code>apiVersion: \"1\"</code>. L’exemple ajoute une case Compact dans les réglages du widget d’OverCrow.</p>"
+        "html": "<h2 id=\"declaration\">Déclarer les options natives</h2><p>Fusionnez cet objet <code>presentation</code> avec votre manifeste. Il ajoute une case Afficher le titre au menu natif du widget et déclare la prise en charge de l’ajustement au contenu. Aucune permission de capacité n’est nécessaire ; conservez <code>apiVersion: \"1\"</code>.</p>"
       },
       {
         "kind": "code",
         "language": "json",
         "title": "manifest.json · champs à fusionner",
-        "source": "{\n  \"presentation\": {\n    \"sizing\": {\n      \"mode\": \"intrinsic\",\n      \"preferred\": { \"width\": 240, \"height\": 80 },\n      \"min\": { \"width\": 80, \"height\": 24 },\n      \"max\": { \"width\": 480, \"height\": 320 }\n    },\n    \"options\": [{\n      \"id\": \"compact\",\n      \"type\": \"boolean\",\n      \"label\": { \"en\": \"Compact\", \"fr\": \"Compact\" },\n      \"default\": false\n    }]\n  }\n}"
+        "source": "{\n  \"presentation\": {\n    \"sizing\": {\n      \"fitToContent\": \"both\",\n      \"defaultMode\": \"fit\",\n      \"preferred\": { \"width\": 240, \"height\": 80 },\n      \"min\": { \"width\": 80, \"height\": 24 },\n      \"max\": { \"width\": 480, \"height\": 320 }\n    },\n    \"options\": [{\n      \"id\": \"showTitle\",\n      \"type\": \"boolean\",\n      \"label\": { \"en\": \"Show title\", \"fr\": \"Afficher le titre\" },\n      \"default\": true\n    }]\n  }\n}"
       },
       {
         "kind": "html",
-        "html": "<h2 id=\"sizing\">Choisir un mode de taille</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"presentation.sizing.mode, Comportement\"><table><thead><tr><th>presentation.sizing.mode</th><th>Comportement</th></tr></thead><tbody><tr><td><code>intrinsic</code></td><td>Le contenu détermine les deux dimensions. L’utilisateur ne redimensionne pas le cadre par glissement.</td></tr><tr><td><code>autoHeight</code></td><td>L’utilisateur règle la largeur ; le contenu détermine la hauteur.</td></tr><tr><td><code>manual</code></td><td>L’utilisateur règle les deux dimensions. Les tailles signalées par le contenu ne remplacent pas ce choix.</td></tr></tbody></table></div><p>Chaque objet <code>preferred</code>, <code>min</code> et <code>max</code> exige des entiers <code>width</code> et <code>height</code> entre 1 et 4096, avec <code>min ≤ preferred ≤ max</code> sur chaque axe. <code>preferred</code> fournit la taille initiale et la valeur utilisée avant la mesure du contenu.</p><p>L’hôte applique une fois le zoom de l’utilisateur, puis limite le résultat aux bornes déclarées et à la zone disponible dans l’overlay. Une taille signalée est une indication, pas une garantie de dimensions exactes. Gardez une interface utilisable à la taille maximale, avec retour à la ligne ou défilement si nécessaire. La position, l’opacité, le zoom et la visibilité passive restent des réglages natifs.</p><h2 id=\"updates\">Appliquer les options et adapter le cadre</h2><p><code>snapshot()</code> lit une seule fois ; utilisez <code>await</code> pour recevoir le résultat. <code>onSnapshot(callback)</code> reçoit l’état courant, puis les mises à jour. Le callback est votre fonction : dans <code>snapshot =&gt; { ... }</code>, <code>snapshot</code> est la valeur reçue et les accolades contiennent le code exécuté à chaque mise à jour. La fonction <code>stop()</code> renvoyée arrête l’abonnement. <a href=\"/docs/api-services/#abonnements\">Règles communes des snapshots</a>.</p><p>La vue suivante observe son contenu, signale ses dimensions CSS non zoomées et applique l’option Compact. Mesurez le contenu, pas la fenêtre ni un cadre déjà zoomé. Placez ce module à côté d’<code>overcrow.js</code>.</p>"
+        "html": "<h2 id=\"updates\">Appliquer les options natives</h2><p><code>snapshot()</code> lit une seule fois ; <code>await</code> reçoit le résultat. <code>onSnapshot(snapshot =&gt; { ... })</code> appelle votre fonction avec les réglages courants, puis leurs changements. La fonction <code>stop()</code> renvoyée arrête l’abonnement. <a href=\"/docs/api-services/#abonnements\">Règles communes des snapshots</a>.</p><p>Cette vue affiche ou masque un titre selon la valeur de la case. Placez ce module à côté d’<code>overcrow.js</code>.</p>"
       },
       {
         "kind": "code",
         "language": "javascript",
-        "title": "view.js",
-        "source": "import overcrow from './overcrow.js';\nconst content = document.createElement('div');\ncontent.textContent = 'Ready';\ncontent.style.cssText = 'display: inline-block; padding: 12px';\ndocument.body.style.margin = '0';\ndocument.body.append(content);\nconst observer = new ResizeObserver(() => {\n  const width = Math.max(1, Math.min(4096, Math.ceil(content.offsetWidth)));\n  const height = Math.max(1, Math.min(4096, Math.ceil(content.offsetHeight)));\n  overcrow.presentation.reportSize({ width, height }).catch(console.error);\n});\nobserver.observe(content);\nconst stop = overcrow.presentation.onSnapshot(snapshot => {\n  if (snapshot.status !== 'ready') return;\n  content.style.padding = snapshot.data.options.compact ? '4px' : '12px';\n});\nwindow.addEventListener('pagehide', () => {\n  stop();\n  observer.disconnect();\n}, { once: true });"
+        "title": "view.js · option native",
+        "source": "import overcrow from './overcrow.js';\nconst title = document.createElement('h2');\ntitle.textContent = 'Session';\ndocument.body.append(title);\nconst stop = overcrow.presentation.onSnapshot(snapshot => {\n  if (snapshot.status !== 'ready') return;\n  title.hidden = snapshot.data.options.showTitle === false;\n});\nwindow.addEventListener('pagehide', stop, { once: true });"
       },
       {
         "kind": "html",
-        "html": "<p>Sans <code>presentation</code> dans le manifeste, ce service indique <code>unsupported</code>. <code>reportSize</code> exige une vue et cette déclaration. Un contrôleur rejette avec <code>role_denied</code> ; des dimensions hors de 1–4096 rejettent avec <code>invalid_request</code>. Le succès renvoie <code>{ status: \"accepted\" }</code>. Signalez les vrais changements de contenu, sans boucle continue ; l’hôte regroupe les signalements répétés.</p><h2 id=\"data\">Lire les réglages et leurs changements</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Champ de PresentationData, Signification\"><table><thead><tr><th>Champ de PresentationData</th><th>Signification</th></tr></thead><tbody><tr><td><code>sizingMode: &#x27;intrinsic&#x27; | &#x27;autoHeight&#x27; | &#x27;manual&#x27;</code></td><td>Mode de taille courant.</td></tr><tr><td><code>width: number</code>, <code>height: number</code></td><td>Dimensions logiques courantes fournies par l’hôte.</td></tr><tr><td><code>options: Readonly&lt;Record&lt;string, boolean | number | string&gt;&gt;</code></td><td>Valeurs des options natives, indexées par les identifiants du manifeste.</td></tr></tbody></table></div><p>OverCrow fournit les valeurs par défaut et les choix enregistrés encore valides de l’utilisateur. Un changement de réglage ou de taille arrive par le même abonnement <code>presentation.onSnapshot</code>. Lisez les options dans <code>snapshot.data.options</code> après avoir vérifié le statut. Le SDK n’a ni méthode pour modifier ces options ni événement distinct de changement d’option. Utilisez le <a href=\"/docs/api-stockage/\">stockage du widget</a> pour les données de votre propre interface.</p><h2 id=\"options\">Types et limites des options</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Type, Champs requis\"><table><thead><tr><th>Type</th><th>Champs requis</th></tr></thead><tbody><tr><td><code>boolean</code></td><td><code>default: true</code> / <code>false</code>.</td></tr><tr><td><code>enum</code></td><td><code>default</code>, <code>choices: [{ value, label: { en, fr } }]</code>. 2 à 16 choix uniques ; default doit correspondre à l’un d’eux.</td></tr><tr><td><code>number</code></td><td><code>default</code>, <code>min</code>, <code>max</code>, <code>step</code>. Nombres finis entre −1 000 000 et 1 000 000 ; min &lt; max, min ≤ default ≤ max et 0 &lt; step ≤ max − min. Step règle l’incrément de l’interface, pas la divisibilité de la valeur enregistrée.</td></tr></tbody></table></div><p>Déclarez au maximum 16 options. Chacune exige <code>id</code>, <code>type</code>, <code>label: { en, fr }</code> et <code>default</code>. Les identifiants et les valeurs enum contiennent 1 à 48 caractères ASCII, commencent par une lettre minuscule puis utilisent lettres, chiffres, <code>_</code> ou <code>-</code> ; les identifiants des options sont uniques. Les libellés sont du texte simple de 1 à 80 caractères, sans espaces aux extrémités ni caractères de contrôle. <code>options</code> peut être omis ; si <code>presentation</code> est présent, <code>sizing</code> est obligatoire.</p>"
+        "html": "<h2 id=\"sizing\">Laisser l’utilisateur choisir la taille</h2><p><code>presentation.sizing.fitToContent</code> est obligatoire. Ce champ déclare l’ajustement que votre contenu prend en charge. L’utilisateur peut toujours choisir une taille manuelle ; si l’ajustement est pris en charge, le menu natif du widget propose l’option Ajuster au contenu.</p><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"fitToContent, Comportement pendant l’ajustement\"><table><thead><tr><th>fitToContent</th><th>Comportement pendant l’ajustement</th></tr></thead><tbody><tr><td><code>\"both\"</code></td><td>Le contenu règle largeur et hauteur. Le redimensionnement du cadre est désactivé pendant l’ajustement.</td></tr><tr><td><code>\"height\"</code></td><td>L’utilisateur redimensionne horizontalement ; le contenu règle la hauteur.</td></tr><tr><td><code>false</code></td><td>Taille manuelle uniquement ; l’option d’ajustement est masquée. Utile pour un chat, par exemple.</td></tr></tbody></table></div><p>Le champ facultatif <code>defaultMode: \"fit\" | \"manual\"</code> définit le choix initial. Sans ce champ, l’ajustement est activé s’il est pris en charge ; sinon, la taille est manuelle. Associer <code>fitToContent: false</code> à <code>defaultMode: \"fit\"</code> est invalide. Désactiver l’ajustement permet de redimensionner les deux axes dans les limites déclarées. Le code du widget ne peut pas modifier ce choix.</p><p><code>preferred</code>, <code>min</code> et <code>max</code> exigent chacun des entiers <code>width</code> et <code>height</code> entre 1 et 4096, avec <code>min ≤ preferred ≤ max</code> sur chaque axe. <code>preferred</code> fournit la taille initiale et la valeur utilisée avant la mesure.</p><p>La vue indépendante ci-dessous signale les dimensions CSS du contenu non zoomé. Mesurez le contenu, pas la fenêtre ni un cadre zoomé. L’hôte applique une fois le zoom de l’utilisateur, puis limite le résultat aux bornes déclarées et à la zone disponible dans l’overlay. <code>reportSize()</code> est une indication : elle ne remplace jamais les dimensions manuelles. Prévoyez le retour à la ligne ou le défilement quand le contenu atteint une limite de taille.</p>"
+      },
+      {
+        "kind": "code",
+        "language": "javascript",
+        "title": "view.js · mesure du contenu",
+        "source": "import overcrow from './overcrow.js';\nconst content = document.createElement('main');\ncontent.textContent = 'Ready';\ncontent.style.cssText = 'display: inline-block; padding: 12px';\ndocument.body.style.margin = '0';\ndocument.body.append(content);\nconst observer = new ResizeObserver(() => {\n  const width = Math.max(1, Math.min(4096, Math.ceil(content.offsetWidth)));\n  const height = Math.max(1, Math.min(4096, Math.ceil(content.offsetHeight)));\n  overcrow.presentation.reportSize({ width, height }).catch(console.error);\n});\nobserver.observe(content);\nwindow.addEventListener('pagehide', () => observer.disconnect(), { once: true });"
+      },
+      {
+        "kind": "html",
+        "html": "<p>Sans <code>presentation</code> dans le manifeste, le service indique <code>unsupported</code>. <code>reportSize()</code> exige une vue et cette déclaration. Les contrôleurs rejettent avec <code>role_denied</code> ; des dimensions hors de 1–4096 rejettent avec <code>invalid_request</code>. Le succès renvoie <code>{ status: \"accepted\" }</code>. Signalez les vrais changements de contenu ; l’hôte regroupe les signalements répétés.</p><h2 id=\"data\">Lire les réglages et leurs changements</h2><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Champ de PresentationData, Signification\"><table><thead><tr><th>Champ de PresentationData</th><th>Signification</th></tr></thead><tbody><tr><td><code>sizingMode: 'intrinsic' | 'autoHeight' | 'manual'</code></td><td>Choix effectif de l’utilisateur : <code>intrinsic</code> pour ajuster les deux axes, <code>autoHeight</code> pour ajuster la hauteur, ou <code>manual</code> lorsque l’ajustement est désactivé.</td></tr><tr><td><code>width: number</code>, <code>height: number</code></td><td>Dimensions actuelles de la vue en pixels CSS, hors zoom.</td></tr><tr><td><code>options: Readonly&lt;Record&lt;string, boolean | number | string&gt;&gt;</code></td><td>Valeurs des options natives, indexées par les identifiants du manifeste.</td></tr></tbody></table></div><p>OverCrow fournit les valeurs par défaut et les choix enregistrés encore valides. Les changements d’option, de mode de taille et de dimensions arrivent par <code>presentation.onSnapshot</code>. Vérifiez le statut avant de lire <code>snapshot.data</code>. Le SDK n’a ni méthode pour modifier les options natives ou le mode de taille, ni événement distinct de changement d’option. Utilisez le <a href=\"/docs/api-stockage/\">stockage du widget</a> pour les données de votre propre interface.</p><h2 id=\"options\">Types et limites des options</h2><p><code>presentation.options</code> est une liste à un seul niveau dans le menu natif. Le schéma ne permet ni groupes ni sous-menus personnalisés ; une enum ouvre sa propre liste de choix.</p><div class=\"table-scroll\" tabindex=\"0\" role=\"region\" aria-label=\"Type, Contrôle natif, Champs requis\"><table><thead><tr><th>Type</th><th>Contrôle natif</th><th>Champs requis</th></tr></thead><tbody><tr><td><code>boolean</code></td><td>Case à cocher</td><td><code>default: true</code> / <code>false</code>.</td></tr><tr><td><code>enum</code></td><td>Liste déroulante</td><td><code>default</code>, <code>choices: [{ value, label: { en, fr } }]</code>. 2 à 16 choix uniques ; default doit correspondre à l’un d’eux.</td></tr><tr><td><code>number</code></td><td>Curseur</td><td><code>default</code>, <code>min</code>, <code>max</code>, <code>step</code>. Nombres finis entre −1 000 000 et 1 000 000 ; min &lt; max, min ≤ default ≤ max et 0 &lt; step ≤ max − min. Step règle l’incrément de l’interface, pas la divisibilité de la valeur enregistrée.</td></tr></tbody></table></div><p>Déclarez au maximum 16 options. Chacune exige <code>id</code>, <code>type</code>, <code>label: { en, fr }</code> et <code>default</code>. Les identifiants et les valeurs enum contiennent 1 à 48 caractères ASCII, commencent par une lettre minuscule puis utilisent lettres, chiffres, <code>_</code> ou <code>-</code> ; les identifiants des options sont uniques. Les libellés sont du texte simple de 1 à 80 caractères, sans espaces aux extrémités ni caractères de contrôle. <code>options</code> peut être omis ; <code>sizing</code> est obligatoire dès que <code>presentation</code> est déclaré.</p>"
+      },
+      {
+        "kind": "html",
+        "html": "<p>Ajoutez l’un de ces objets à <code>presentation.options</code>. Lisez les valeurs dans <code>snapshot.data.options.itemLimit</code> et <code>snapshot.data.options.sortOrder</code>. L’aperçu navigateur utilise un champ numérique pour les options number.</p>"
+      },
+      {
+        "kind": "code",
+        "language": "json",
+        "title": "number · curseur",
+        "source": "{\n  \"id\": \"itemLimit\", \"type\": \"number\",\n  \"label\": { \"en\": \"Item limit\", \"fr\": \"Nombre maximal d’éléments\" },\n  \"default\": 5,\n  \"min\": 1, \"max\": 20, \"step\": 1\n}"
+      },
+      {
+        "kind": "code",
+        "language": "json",
+        "title": "enum · liste déroulante",
+        "source": "{\n  \"id\": \"sortOrder\", \"type\": \"enum\",\n  \"label\": { \"en\": \"Sort order\", \"fr\": \"Ordre de tri\" },\n  \"default\": \"newest\",\n  \"choices\": [\n    { \"value\": \"newest\", \"label\": { \"en\": \"Newest first\", \"fr\": \"Plus récents d’abord\" } },\n    { \"value\": \"oldest\", \"label\": { \"en\": \"Oldest first\", \"fr\": \"Plus anciens d’abord\" } }\n  ]\n}"
       }
     ],
     "headings": [
@@ -765,15 +791,15 @@
       },
       {
         "id": "declaration",
-        "title": "Déclarer les options et les limites"
-      },
-      {
-        "id": "sizing",
-        "title": "Choisir un mode de taille"
+        "title": "Déclarer les options natives"
       },
       {
         "id": "updates",
-        "title": "Appliquer les options et adapter le cadre"
+        "title": "Appliquer les options natives"
+      },
+      {
+        "id": "sizing",
+        "title": "Laisser l’utilisateur choisir la taille"
       },
       {
         "id": "data",
