@@ -564,14 +564,15 @@ export function createWidgetChrome(
     };
     next = {width: Math.round(clamp(next.width, minimumWidth, maximumWidth)), height: Math.round(clamp(next.height, minimumHeight, maximumHeight))};
     const near = (a,b) => a && Math.abs(a.width-b.width)<=1 && Math.abs(a.height-b.height)<=1;
-    if (Date.now()-lastContentAt>500) previousContentSize=earlierContentSize=null;
+    const now = Date.now(), recent = now-lastContentAt<=500;
+    if (!recent) previousContentSize=earlierContentSize=null;
     if (sizeCycle && sizeCycle.some(size=>near(size,next))) next={width:Math.max(...sizeCycle.map(size=>size.width)),height:Math.max(...sizeCycle.map(size=>size.height))};
     // One return to an earlier size is normal; require a repeated alternating transition.
     else if (near(previousContentSize,next) && near(earlierContentSize,lastContentSize) && !near(lastContentSize,next)) {
       sizeCycle=[previousContentSize,lastContentSize];next={width:Math.max(...sizeCycle.map(size=>size.width)),height:Math.max(...sizeCycle.map(size=>size.height))};
     } else if (sizeCycle) { sizeCycle=null;previousContentSize=earlierContentSize=null; }
     if (near(lastContentSize,next)) return;
-    earlierContentSize=previousContentSize;previousContentSize=lastContentSize;lastContentSize=next;lastContentAt=Date.now();
+    earlierContentSize=previousContentSize;previousContentSize=recent?lastContentSize:null;lastContentSize=next;lastContentAt=now;
     resize(next.width,next.height);
   }
   function reportSize(size) {
