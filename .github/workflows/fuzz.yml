@@ -38,6 +38,10 @@ jobs:
       # stable toolchain.
       FUZZ_TOOLCHAIN: nightly-2026-09-26
       FUZZ_SECONDS: ${{ github.event_name == 'schedule' && '2700' || '60' }}
+      # Without allocation stacks ASan's memory stays flat over long runs
+      # (a 10-minute run otherwise grows past 2 GiB); the parsers are safe
+      # Rust, so crashes are panics whose stacks libFuzzer still prints.
+      ASAN_OPTIONS: quarantine_size_mb=16:malloc_context_size=0
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:

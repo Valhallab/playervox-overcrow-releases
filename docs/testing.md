@@ -34,9 +34,13 @@ from the conformance fixtures, then run a target, from the repository root:
 
 ```sh
 sh fuzz/seed-corpus.sh
-cargo +nightly fuzz run -O ocml -- -max_total_time=600 -rss_limit_mb=2048 -malloc_limit_mb=64 -max_len=16384
+ASAN_OPTIONS=quarantine_size_mb=16:malloc_context_size=0 \
+  cargo +nightly fuzz run -O ocml -- -max_total_time=600 \
+  -rss_limit_mb=2048 -malloc_limit_mb=64 -max_len=16384
 ```
 
+Without the `ASAN_OPTIONS` above, ASan keeps every allocation stack and a
+long run outgrows the RSS limit with an `oom` artifact that replays cleanly.
 A crash leaves its input under `fuzz/artifacts/<target>/`; fix it with a
 regression test in the crate's test suite before rerunning. Besides "no
 panic", the targets check that an accepted view is accepted by the host's
