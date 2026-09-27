@@ -52,7 +52,11 @@ pub fn generate() -> BTreeMap<String, Vec<u8>> {
                 expression.expr.to_js()
             ));
         }
-        table.push_str(&format!("functions\t{}\n", view.functions.join(", ")));
+        if view.functions.is_empty() {
+            table.push_str("functions\n");
+        } else {
+            table.push_str(&format!("functions\t{}\n", view.functions.join(", ")));
+        }
         out.insert(
             format!("{GENERATED_DIR}/{name}.expressions.txt"),
             table.into_bytes(),
