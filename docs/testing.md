@@ -49,7 +49,9 @@ reject another seed, and cover the envelope, listing, manifest, URL, size, and
 digest contract.
 
 The admission smoke uses real temporary Git revisions. It proves that an
-undeclared file present only in the proposed revision is rejected, that a valid
+undeclared file present only in the proposed revision is rejected, that a
+proposal changing the widget schema crate is rejected by the trusted-path
+policy, that a valid
 proposal emits a receipt v2 bound to its revision, tree, identity, version, and
 the SHA-256 and byte length of its package and listing, and that tests from an
 exact trusted push cannot be silently skipped. Pull-request admission never

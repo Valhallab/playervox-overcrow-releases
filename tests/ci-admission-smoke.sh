@@ -33,6 +33,8 @@ JS
 # fixture's trusted revision contain the exact driver under test.
 /usr/bin/install -D -m 0755 -- "$repo_root/scripts/ci-verify.sh" \
     "$repository/scripts/ci-verify.sh"
+/usr/bin/install -D -m 0755 -- "$repo_root/tests/reject-trusted-change.sh" \
+    "$repository/tests/reject-trusted-change.sh"
 for relative in Cargo.lock Cargo.toml tools/marketplace-tool/Cargo.toml \
         tools/marketplace-tool/src/admission.rs \
         tools/marketplace-tool/src/catalog.rs \
@@ -48,7 +50,8 @@ for relative in Cargo.lock Cargo.toml tools/marketplace-tool/Cargo.toml \
         "$repository/$relative"
 done
 /usr/bin/git -C "$repository" add -- Cargo.lock Cargo.toml \
-    scripts/ci-verify.sh tools/marketplace-tool/Cargo.toml \
+    scripts/ci-verify.sh tests/reject-trusted-change.sh \
+    tools/marketplace-tool/Cargo.toml \
     tools/marketplace-tool/src/admission.rs \
     tools/marketplace-tool/src/catalog.rs \
     tools/marketplace-tool/src/catalog_production.rs \
@@ -102,12 +105,35 @@ if test -s "$stdout"; then
     exit 1
 fi
 
+/usr/bin/git -C "$repository" checkout --quiet -B contract-fixture "$trust_sha"
+printf '%s\n' '// weakened validator' \
+    >>"$repository/crates/overcrow-widget-schema/src/limits.rs"
+/usr/bin/git -C "$repository" add -- \
+    crates/overcrow-widget-schema/src/limits.rs
+/usr/bin/git -C "$repository" commit --quiet -m 'contract change fixture'
+contract_sha=$(/usr/bin/git -C "$repository" rev-parse --verify 'HEAD^{commit}')
+if run_pull_request_admission "$contract_sha" >"$stdout" 2>"$stderr"; then
+    printf '%s\n' 'error: CI admitted a candidate that changes the widget schema' >&2
+    exit 1
+fi
+if ! /usr/bin/grep -F -x \
+        'error: pull-request trusted-path policy rejected' "$stderr" >/dev/null \
+        || test -s "$stdout"; then
+    printf '%s\n' 'error: widget schema change rejection was not explicit' >&2
+    /usr/bin/cat "$stdout" >&2
+    /usr/bin/cat "$stderr" >&2
+    exit 1
+fi
+
 /usr/bin/git -C "$repository" checkout --quiet -B archive-fixture "$trust_sha"
-printf '%s\n' 'widgets/warframe-market/undeclared.js export-ignore' \
-    >"$repository/.gitattributes"
+# The root .gitattributes is a trusted path; a nested one still reaches
+# git archive and must be caught by the snapshot comparison.
+printf '%s\n' 'undeclared.js export-ignore' \
+    >"$repository/widgets/warframe-market/.gitattributes"
 printf '%s\n' 'console.log("hidden from git archive");' \
     >"$repository/widgets/warframe-market/undeclared.js"
-/usr/bin/git -C "$repository" add -- .gitattributes \
+/usr/bin/git -C "$repository" add -- \
+    widgets/warframe-market/.gitattributes \
     widgets/warframe-market/undeclared.js
 /usr/bin/git -C "$repository" commit --quiet \
     -m 'archive attribute attack fixture'

@@ -11,9 +11,13 @@ remains a separately authorized offline operation described in
 
 Protect `main` and `candidate` against deletion and force pushes. Require pull
 requests, human review, and the base-specific admission check. On `main`, require
-both portable creator-kit checks as well. Keep owner maintenance bypass available
-for reviewed changes to `.github/`, `scripts/`, `tests/`, and `tools/`: static
-admission deliberately rejects changes to its own trusted implementation.
+both portable creator-kit checks as well, and the `contract` check. Keep owner
+maintenance bypass available for reviewed changes to `.github/`, `scripts/`,
+`tests/`, `tools/`, and the widget contract: `crates/`, the Cargo workspace
+files and toolchain, `.gitattributes`, `.gitignore`,
+`docs/widget-schema-v1.md`, `keys/` and `fixtures/keys/`. Static admission
+deliberately rejects changes to its own trusted implementation and to the
+validator OverCrow pins; `tests/reject-trusted-change.sh` holds the exact list.
 
 CI uses pinned actions, disposable hosted runners, no persisted Git credentials,
 and no signing or deployment secrets. Static admission uses the exact reviewed
