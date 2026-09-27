@@ -1,7 +1,9 @@
 //! The closed `style.ocss` subset: properties, value grammars, selectors and
 //! cascade rules. Anything absent from these tables is rejected.
 
-use crate::limits::{MAX_GRADIENT_STOPS, MAX_GRID_TRACKS, MAX_SHADOWS, MAX_TRANSITIONS};
+use crate::limits::{
+    MAX_GRADIENT_STOPS, MAX_GRID_TRACKS, MAX_SHADOWS, MAX_TRANSFORM_FUNCTIONS, MAX_TRANSITIONS,
+};
 use crate::model::Limit;
 
 /// Grammar of a property value. Every length is bounded by `MAX_LENGTH_PX`,
@@ -36,13 +38,17 @@ pub enum StyleValue {
     Color,
     FontFamily,
     FontSize,
-    LineHeight,
+    /// A multiple of the font size within `min..=max`, or `<px>`.
+    LineHeight {
+        min: f64,
+        max: f64,
+    },
     /// `<color>` or one `linear-gradient()` with bounded stops.
     Background(&'static Limit),
     /// `<width> <style>? <color>?`.
     Border,
     Shadow(&'static Limit),
-    Transform,
+    Transform(&'static Limit),
     TransformOrigin,
     GridTracks(&'static Limit),
     GridTrack,
@@ -99,11 +105,11 @@ impl StyleValue {
             Self::Number { min, max } => format!("number {min}..={max}"),
             Self::Integer { min, max } => format!("integer {min}..={max}"),
             Self::Color => "`<color>`".into(),
-            Self::FontFamily => "`ui` \\| `mono` \\| `display`, or a font token".into(),
+            Self::FontFamily => format!("{}, or a font token", Self::Keywords(FONT_FAMILIES).syntax()),
             Self::FontSize => {
                 "`<px>` within `MIN_FONT_SIZE_PX`..=`MAX_FONT_SIZE_PX`, or a size token".into()
             }
-            Self::LineHeight => "number 0.5..=4 (× font size) \\| `<px>`".into(),
+            Self::LineHeight { min, max } => format!("number {min}..={max} (× font size) \\| `<px>`"),
             Self::Background(limit) => format!(
                 "`<color>` \\| `linear-gradient(<angle>?, <color> <percent>?, …)`, stops ≤ `{}`",
                 limit.key
@@ -113,10 +119,10 @@ impl StyleValue {
                 "`none` \\| list ≤ `{}` of `inset`? `<px> <px> <px>? <px>? <color>`",
                 limit.key
             ),
-            Self::Transform => {
-                "`none` \\| up to 4 of `translate(<length>, <length>)` with `<px>` or `<percent>`, `translateX()`, `translateY()`, `scale(<number>{1,2})` 0..=8, `rotate(<angle>)`"
-                    .into()
-            }
+            Self::Transform(limit) => format!(
+                "`none` \\| up to `{}` of `translate(<length>, <length>)` with `<px>` or `<percent>`, `translateX()`, `translateY()`, `scale(<number>{{1,2}})` 0..=`MAX_TRANSFORM_SCALE`, `rotate(<angle>)`",
+                limit.key
+            ),
             Self::TransformOrigin => {
                 "1–2 × (`left` \\| `center` \\| `right` \\| `top` \\| `bottom` \\| `<percent>` \\| `<px>`)"
                     .into()
@@ -130,14 +136,14 @@ impl StyleValue {
                     .into()
             }
             Self::GridPlacement => {
-                "`auto` \\| `<integer>` \\| `span <integer>` \\| `<start> / <end>` (1..=24)".into()
+                "`auto` \\| `<integer>` \\| `span <integer>` \\| `<start> / <end>`, lines 1..=`MAX_GRID_TRACKS`".into()
             }
             Self::Transition(limit) => format!(
                 "`none` \\| list ≤ `{}` of `<animatable-property> <time> <easing>? <time>?`",
                 limit.key
             ),
             Self::Animation(limit) => format!(
-                "`none` \\| list ≤ `{}` of `<keyframes-name> <time> <easing>? <time>? (<integer> \\| infinite)? <direction>? <fill-mode>?`",
+                "`none` \\| list ≤ `{}` of `<keyframes-name> <time> <easing>? <time>? (<integer> \\| infinite)? <direction>? <fill-mode>?`, integer 1..=`MAX_ANIMATION_ITERATIONS`",
                 limit.key
             ),
         }
@@ -483,7 +489,12 @@ pub const PROPERTIES: &[Property] = &[
         StyleValue::Keywords(&["normal", "tabular-nums"]),
         "normal",
     ),
-    inherited(TEXT, "line-height", StyleValue::LineHeight, "1.3"),
+    inherited(
+        TEXT,
+        "line-height",
+        StyleValue::LineHeight { min: 0.5, max: 4.0 },
+        "1.3",
+    ),
     inherited(
         TEXT,
         "letter-spacing",
@@ -536,7 +547,12 @@ pub const PROPERTIES: &[Property] = &[
         StyleValue::Keywords(&["normal", "anywhere"]),
         "normal",
     ),
-    animatable(prop(MOTION, "transform", StyleValue::Transform, "none")),
+    animatable(prop(
+        MOTION,
+        "transform",
+        StyleValue::Transform(&MAX_TRANSFORM_FUNCTIONS),
+        "none",
+    )),
     prop(
         MOTION,
         "transform-origin",
@@ -609,6 +625,19 @@ pub const SELECTORS: &[SyntaxEntry] = &[
     },
 ];
 
+/// Font families named by keyword; the `--font-*` tokens resolve to them.
+pub const FONT_FAMILIES: &[&str] = &["ui", "mono", "display"];
+/// Easing keywords; `steps(<integer>)` is the only easing function.
+pub const EASINGS: &[&str] = &["linear", "ease", "ease-in", "ease-out", "ease-in-out"];
+pub const ANIMATION_DIRECTIONS: &[&str] = &["normal", "reverse", "alternate"];
+pub const FILL_MODES: &[&str] = &["none", "forwards", "backwards", "both"];
+/// Sizing keywords of a grid `<track>`, besides lengths, `<fr>` and `minmax()`.
+pub const TRACK_KEYWORDS: &[&str] = &["auto", "min-content", "max-content"];
+/// Keywords of `transform-origin`, besides lengths.
+pub const ORIGIN_KEYWORDS: &[&str] = &["left", "center", "right", "top", "bottom"];
+/// Elements that match `:checked`.
+pub const CHECKABLE_ELEMENTS: &[&str] = &["toggle", "checkbox"];
+
 pub const PSEUDO_CLASSES: &[&str] = &["hover", "active", "focus", "disabled", "checked"];
 
 pub const VALUE_SYNTAX: &[SyntaxEntry] = &[
@@ -618,7 +647,7 @@ pub const VALUE_SYNTAX: &[SyntaxEntry] = &[
     },
     SyntaxEntry {
         syntax: "<percent>",
-        summary: "`50%` of the containing block, as in CSS.",
+        summary: "`50%` of the containing block, as in CSS; at most `MAX_PERCENT` either way.",
     },
     SyntaxEntry {
         syntax: "<fr>",
@@ -630,7 +659,7 @@ pub const VALUE_SYNTAX: &[SyntaxEntry] = &[
     },
     SyntaxEntry {
         syntax: "<angle>",
-        summary: "`4deg` or `0.5turn`.",
+        summary: "`4deg` or `0.5turn`, at most `MAX_ANGLE_DEG` degrees either way.",
     },
     SyntaxEntry {
         syntax: "<color>",
@@ -642,7 +671,7 @@ pub const VALUE_SYNTAX: &[SyntaxEntry] = &[
     },
     SyntaxEntry {
         syntax: "<easing>",
-        summary: "`linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out`, `steps(<integer 1..=60>)`.",
+        summary: "`linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out`, `steps(<integer 1..=MAX_EASING_STEPS>)`.",
     },
     SyntaxEntry {
         syntax: "<direction>",

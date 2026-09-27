@@ -51,6 +51,8 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MAX_EXPRESSION_BYTES` | 1 KiB | fixed | Source length of one `{expr}` template expression. |
 | `MAX_VIEW_EXPRESSIONS` | 4096 | fixed | Compiled template expressions of one view, handlers included. |
 | `MAX_COMPONENT_PROPS` | 32 | fixed | Declared props of one local component. |
+| `MAX_EXPRESSION_DEPTH` | 32 | fixed | Nesting of operators, calls, members and literals in one template expression. |
+| `MAX_CALL_ARGUMENTS` | 8 | fixed | Arguments of one call, and entries of one object or array literal, in a template expression. |
 | `MAX_SCENE_NODES` | 4096 | fixed | Live nodes in one widget scene, list items included. |
 | `MAX_TREE_DEPTH` | 32 | fixed | Depth of the scene tree below the root, also the template nesting limit. |
 | `MAX_CHILDREN` | 1024 | fixed | Children of one node. |
@@ -81,6 +83,12 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MAX_LENGTH_PX` | 16384 px | fixed | Absolute value of any length, offset or coordinate. |
 | `MIN_FONT_SIZE_PX` | 6 px | fixed | Smallest `font-size` before content scale. |
 | `MAX_FONT_SIZE_PX` | 96 px | fixed | Largest `font-size` before content scale. |
+| `MAX_PERCENT` | 1000 absolute value | fixed | Absolute value of any `<percent>` in a style value. |
+| `MAX_ANGLE_DEG` | 3600 absolute value | fixed | Absolute value of any `<angle>`, in degrees (ten turns). |
+| `MAX_TRANSFORM_FUNCTIONS` | 4 | fixed | Functions in one `transform` value. |
+| `MAX_TRANSFORM_SCALE` | 8 absolute value | fixed | Largest `scale()` factor; the smallest is 0. |
+| `MAX_EASING_STEPS` | 60 | fixed | Steps of one `steps()` easing. |
+| `MAX_ANIMATION_ITERATIONS` | 10000 | fixed | Finite iteration count of one animation; `infinite` stays allowed. |
 | `MAX_CANVASES` | 8 | fixed | `canvas` nodes in one widget. |
 | `MAX_DRAW_COMMANDS` | 4096 | **provisional (P1.3)** | Commands in one `Draw` message, replacing the canvas content. |
 | `MAX_PATH_POINTS` | 16384 | **provisional (P1.3)** | Path points in one `Draw` message, all paths included. |
@@ -135,6 +143,11 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MAX_QUERY_PARAMS` | 16 | fixed | `queryParams` of one network rule, as today. |
 | `MAX_ENUM_VALUES` | 32 | fixed | Values of one `enum` parameter constraint, as today. |
 | `MAX_ENUM_VALUE_BYTES` | 128 bytes | fixed | One `enum` parameter value, as today. |
+| `MAX_PARAMETER_NAME_BYTES` | 32 bytes | fixed | Name of one path or query parameter, as today. |
+| `MAX_SLUG_PARAMETER_BYTES` | 128 bytes | fixed | Largest `maxLength` of a `slug` parameter constraint, as today. |
+| `MAX_STRING_PARAMETER_BYTES` | 256 bytes | fixed | Largest `maxLength` of a `string` query parameter constraint, as today. |
+| `MAX_DNS_LABEL_BYTES` | 63 bytes | fixed | One dot-separated label of a network origin host or of a widget ID. |
+| `MAX_DNS_NAME_BYTES` | 253 bytes | fixed | Host name of one network origin. |
 | `MAX_OBJECT_ID_BYTES` | 128 bytes | fixed | Opaque object ID or cursor exchanged with a capability service. |
 | `MAX_GAME_EVENTS` | 32 | fixed | Semantic game events declared by one package. |
 | `MAX_NOTES` | 8 | fixed | Notes in the user's notes document; `notes.create` fails beyond it. |
@@ -441,8 +454,8 @@ Animatable properties change paint only, so transitions and animations never rer
 | `grid-auto-flow` | Layout | `row` \| `column` | `row` | no | no |
 | `grid-auto-columns` | Layout | `<track>`: `<px>` \| `<percent>` \| `<fr>` \| `auto` \| `min-content` \| `max-content` \| `minmax(<track>, <track>)` | `auto` | no | no |
 | `grid-auto-rows` | Layout | `<track>`: `<px>` \| `<percent>` \| `<fr>` \| `auto` \| `min-content` \| `max-content` \| `minmax(<track>, <track>)` | `auto` | no | no |
-| `grid-column` | Layout | `auto` \| `<integer>` \| `span <integer>` \| `<start> / <end>` (1..=24) | `auto` | no | no |
-| `grid-row` | Layout | `auto` \| `<integer>` \| `span <integer>` \| `<start> / <end>` (1..=24) | `auto` | no | no |
+| `grid-column` | Layout | `auto` \| `<integer>` \| `span <integer>` \| `<start> / <end>`, lines 1..=`MAX_GRID_TRACKS` | `auto` | no | no |
+| `grid-row` | Layout | `auto` \| `<integer>` \| `span <integer>` \| `<start> / <end>`, lines 1..=`MAX_GRID_TRACKS` | `auto` | no | no |
 | `width` | Box | `<px>` \| `<percent>` \| `auto` | `auto` | no | no |
 | `height` | Box | `<px>` \| `<percent>` \| `auto` | `auto` | no | no |
 | `min-width` | Box | `<px>` \| `<percent>` \| `auto` | `auto` | no | no |
@@ -491,10 +504,10 @@ Animatable properties change paint only, so transitions and animations never rer
 | `text-overflow` | Text | `clip` \| `ellipsis` \| `marquee` | `clip` | no | no |
 | `line-clamp` | Text | integer 0..=64 | `0` | no | no |
 | `overflow-wrap` | Text | `normal` \| `anywhere` | `normal` | yes | no |
-| `transform` | Motion | `none` \| up to 4 of `translate(<length>, <length>)` with `<px>` or `<percent>`, `translateX()`, `translateY()`, `scale(<number>{1,2})` 0..=8, `rotate(<angle>)` | `none` | no | yes |
+| `transform` | Motion | `none` \| up to `MAX_TRANSFORM_FUNCTIONS` of `translate(<length>, <length>)` with `<px>` or `<percent>`, `translateX()`, `translateY()`, `scale(<number>{1,2})` 0..=`MAX_TRANSFORM_SCALE`, `rotate(<angle>)` | `none` | no | yes |
 | `transform-origin` | Motion | 1–2 × (`left` \| `center` \| `right` \| `top` \| `bottom` \| `<percent>` \| `<px>`) | `center` | no | no |
 | `transition` | Motion | `none` \| list ≤ `MAX_TRANSITIONS` of `<animatable-property> <time> <easing>? <time>?` | `none` | no | no |
-| `animation` | Motion | `none` \| list ≤ `MAX_TRANSITIONS` of `<keyframes-name> <time> <easing>? <time>? (<integer> \| infinite)? <direction>? <fill-mode>?` | `none` | no | no |
+| `animation` | Motion | `none` \| list ≤ `MAX_TRANSITIONS` of `<keyframes-name> <time> <easing>? <time>? (<integer> \| infinite)? <direction>? <fill-mode>?`, integer 1..=`MAX_ANIMATION_ITERATIONS` | `none` | no | no |
 | `cursor` | Interaction | `default` \| `pointer` \| `text` \| `not-allowed` \| `grab` \| `grabbing` | `default` | yes | no |
 | `pointer-events` | Interaction | `auto` \| `none` | `auto` | no | no |
 
@@ -514,13 +527,13 @@ Animatable properties change paint only, so transitions and animations never rer
 | Syntax | Meaning |
 | --- | --- |
 | `<px>` | `12px`; `0` may omit the unit. Decimal numbers, no exponent. |
-| `<percent>` | `50%` of the containing block, as in CSS. |
+| `<percent>` | `50%` of the containing block, as in CSS; at most `MAX_PERCENT` either way. |
 | `<fr>` | `1fr`, grid tracks only. |
 | `<time>` | `120ms` or `0.12s`, 0..=`MAX_ANIMATION_MS`. |
-| `<angle>` | `4deg` or `0.5turn`. |
+| `<angle>` | `4deg` or `0.5turn`, at most `MAX_ANGLE_DEG` degrees either way. |
 | `<color>` | `#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`, `rgb(r g b)`, `rgb(r g b / a)`, `transparent`, `currentColor`, or a colour token. No named colours. |
 | `var(--token)` | Design-system token of the expected type, as a whole value or a component of a composite value. No fallback argument; widgets cannot declare custom properties. |
-| `<easing>` | `linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out`, `steps(<integer 1..=60>)`. |
+| `<easing>` | `linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out`, `steps(<integer 1..=MAX_EASING_STEPS>)`. |
 | `<direction>` | `normal`, `reverse`, `alternate`. |
 | `<fill-mode>` | `none`, `forwards`, `backwards`, `both`. |
 
@@ -595,7 +608,7 @@ Every icon of the pinned `egui-lucide 0.1.0` crate (Lucide 1.34.0, 1777 names) i
 | --- | --- | --- | --- |
 | `schemaVersion` | integer 1..=1 | yes | Manifest document version. |
 | `apiVersion` | integer 1..=1 | yes | Widget API version; selects this schema. |
-| `id` | `widget ID` | yes | Reverse-DNS ID, `MIN_WIDGET_ID_BYTES`..=`MAX_WIDGET_ID_BYTES`: at least two dot-separated segments of `[a-z0-9-]`, each at most 63 bytes and not starting or ending with `-`. `com.playervox` and `com.playervox.*` are reserved for packages signed by PlayerVox. |
+| `id` | `widget ID` | yes | Reverse-DNS ID, `MIN_WIDGET_ID_BYTES`..=`MAX_WIDGET_ID_BYTES`: at least two dot-separated segments of `[a-z0-9-]`, each at most `MAX_DNS_LABEL_BYTES` and not starting or ending with `-`. `com.playervox` and `com.playervox.*` are reserved for packages signed by PlayerVox. |
 | `version` | `version` | yes | SemVer 2.0.0 `MAJOR.MINOR.PATCH[-PRERELEASE]` in canonical form, at most `MAX_VERSION_BYTES`; build metadata is rejected. |
 | `name` | `WidgetName` | yes | Localized widget name shown by the host. |
 | `sizing` | `Sizing` | yes | Size and fit rules applied by the wrapper. |
@@ -746,7 +759,7 @@ Declaring a permission or capability grants nothing: activation requires consent
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `origin` | `origin` | yes | Canonical `https://host[:port]` origin; no credentials, IP literal or local name. |
+| `origin` | `origin` | yes | Canonical `https://host[:port]` origin, host ≤ `MAX_DNS_NAME_BYTES` with labels ≤ `MAX_DNS_LABEL_BYTES`; no credentials, IP literal or local name. |
 | `method` | `GET` \| `POST` \| `PUT` \| `PATCH` \| `DELETE` | yes | One method. |
 | `path` | text ≤ `MAX_NETWORK_PATH_BYTES` | yes | Complete path; `{name}` segments are typed path parameters. |
 | `pathParams` | `name → ParameterConstraint` | no | Constraint of every `{name}` segment, at most `MAX_PATH_PARAMS`. |
@@ -757,9 +770,9 @@ Declaring a permission or capability grants nothing: activation requires consent
 | Type | Shape | Accepts |
 | --- | --- | --- |
 | `integer` | `{ min, max }` | Decimal without leading zero, 0..=2^53 - 1. |
-| `slug` | `{ maxLength }` | `[a-z0-9-]`, not starting or ending with `-`. |
+| `slug` | `{ maxLength }` | `[a-z0-9-]`, not starting or ending with `-`; `maxLength` 1..=`MAX_SLUG_PARAMETER_BYTES`. |
 | `enum` | list of `literal segment` ≤ `MAX_ENUM_VALUES` | One of the listed values, each ≤ `MAX_ENUM_VALUE_BYTES`. |
-| `string` | `{ maxLength }` | Query parameters only; any text without control characters. |
+| `string` | `{ maxLength }` | Query parameters only; any text without control characters; `maxLength` 1..=`MAX_STRING_PARAMETER_BYTES`. |
 
 ### Capabilities
 

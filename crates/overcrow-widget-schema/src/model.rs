@@ -175,4 +175,22 @@ impl Field {
             summary,
         }
     }
+
+    /// The accepted words of a keyword field; empty for any other type.
+    pub const fn keywords(&self) -> &'static [&'static str] {
+        match self.ty {
+            ValueType::Keyword(words) => words,
+            _ => &[],
+        }
+    }
+}
+
+/// The field `name` of a table; validators read their grammar through it.
+pub fn field<'a>(fields: &'a [Field], name: &str) -> Option<&'a Field> {
+    fields.iter().find(|field| field.name == name)
+}
+
+/// Whether `word` is a keyword of the field `name` of `fields`.
+pub fn is_keyword(fields: &[Field], name: &str, word: &str) -> bool {
+    field(fields, name).is_some_and(|field| field.keywords().contains(&word))
 }

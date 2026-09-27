@@ -16,9 +16,10 @@ use serde_json::{Map, Value};
 use crate::json::{has_exact_fields, parse_strict, plain_text};
 use crate::limits::{
     MAX_AUTHOR_BYTES, MAX_CATALOG_BYTES, MAX_CATALOG_CLOCK_SKEW_MS, MAX_CATALOG_LIFETIME_DAYS,
-    MAX_CATALOG_PAYLOAD_BYTES, MAX_CATALOG_TARGETS, MAX_CATALOG_URL_BYTES, MAX_KEY_ID_BYTES,
-    MAX_LISTING_DESCRIPTION_BYTES, MAX_LISTING_LOCALIZATIONS, MAX_LISTING_NAME_BYTES,
-    MAX_PACKAGE_BYTES, MAX_PREVIEW_BYTES, MAX_SEED_LIFETIME_DAYS, MAX_SPDX_LICENSE_BYTES,
+    MAX_CATALOG_PAYLOAD_BYTES, MAX_CATALOG_TARGETS, MAX_CATALOG_URL_BYTES, MAX_DNS_LABEL_BYTES,
+    MAX_KEY_ID_BYTES, MAX_LISTING_DESCRIPTION_BYTES, MAX_LISTING_LOCALIZATIONS,
+    MAX_LISTING_NAME_BYTES, MAX_PACKAGE_BYTES, MAX_PREVIEW_BYTES, MAX_SEED_LIFETIME_DAYS,
+    MAX_SPDX_LICENSE_BYTES,
 };
 use crate::manifest::{Manifest, ManifestError, Permissions, validate_manifest_value};
 use crate::model::{Field, ValueType};
@@ -805,7 +806,7 @@ fn canonical_source_url(url: &str) -> bool {
         && host.contains('.')
         && host.split('.').all(|label| {
             !label.is_empty()
-                && label.len() <= 63
+                && label.len() as u64 <= MAX_DNS_LABEL_BYTES.value
                 && !label.starts_with('-')
                 && !label.ends_with('-')
                 && label

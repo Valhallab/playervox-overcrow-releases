@@ -16,7 +16,10 @@ use overcrow_widget_schema::catalog::{
     validate_catalog, validate_seed, verify_target_package,
 };
 use overcrow_widget_schema::compiled_view::{ViewError, validate_compiled_view};
-use overcrow_widget_schema::limits::{MAX_PACKAGE_BYTES, VM_HEAP_BYTES};
+use overcrow_widget_schema::limits::{
+    MAX_DNS_LABEL_BYTES, MAX_PACKAGE_BYTES, MAX_PARAMETER_NAME_BYTES, MAX_SLUG_PARAMETER_BYTES,
+    VM_HEAP_BYTES,
+};
 use overcrow_widget_schema::manifest::{ManifestError, is_reserved_id, validate_manifest};
 use overcrow_widget_schema::package::{
     FILE_CLASSES, PackageError, hex, read_package, sha256, stored_zip, write_package,
@@ -118,6 +121,63 @@ fn manifest_heap_request_is_whole_mib_between_16_and_48() {
     assert_eq!(heap("heap-16-mib.json"), 16 << 20);
     assert_eq!(heap("third-party-network.json"), 32 << 20);
     assert_eq!(heap("heap-48-mib.json"), 48 << 20);
+}
+
+/// The grammar bounds of the manifest come from `limits`: each edge case is
+/// accepted at the bound and rejected one past it.
+#[test]
+fn manifest_grammar_bounds_come_from_the_limits() {
+    let base: serde_json::Value =
+        serde_json::from_slice(&read(&fixtures_root().join("manifest/valid/minimal.json")))
+            .expect("minimal manifest");
+    let check = |edit: &dyn Fn(&mut serde_json::Value)| {
+        let mut manifest = base.clone();
+        edit(&mut manifest);
+        validate_manifest(manifest.to_string().as_bytes())
+            .map(|_| ())
+            .map_err(|error| error.as_str())
+    };
+    let label = |bytes: u64| "a".repeat(bytes as usize);
+    let at = MAX_DNS_LABEL_BYTES.value;
+    assert_eq!(
+        check(&|m| m["id"] = format!("com.{}", label(at)).into()),
+        Ok(())
+    );
+    assert_eq!(
+        check(&|m| m["id"] = format!("com.{}", label(at + 1)).into()),
+        Err("id")
+    );
+    let rule = |origin: String, name: u64, slug: u64| {
+        serde_json::json!({"network": [{
+            "origin": origin,
+            "method": "GET",
+            "path": "/v1/items",
+            "queryParams": {label(name): {"type": "slug", "maxLength": slug}},
+        }]})
+    };
+    let host = format!("https://{}.example", label(at));
+    let (name, slug) = (
+        MAX_PARAMETER_NAME_BYTES.value,
+        MAX_SLUG_PARAMETER_BYTES.value,
+    );
+    assert_eq!(
+        check(&|m| m["permissions"] = rule(host.clone(), name, slug)),
+        Ok(())
+    );
+    for permissions in [
+        rule(format!("https://{}.example", label(at + 1)), name, slug),
+        rule(host.clone(), name + 1, slug),
+        rule(host.clone(), name, slug + 1),
+    ] {
+        assert_eq!(
+            check(&|m| m["permissions"] = permissions.clone()),
+            Err("network_rule")
+        );
+    }
+    assert_eq!(
+        check(&|m| m["sizing"]["fit"] = "width".into()),
+        Err("sizing")
+    );
 }
 
 #[test]

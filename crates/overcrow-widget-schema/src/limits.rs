@@ -278,6 +278,18 @@ pub const MAX_COMPONENT_PROPS: Limit = fixed(
     Unit::Count,
     "Declared props of one local component.",
 );
+pub const MAX_EXPRESSION_DEPTH: Limit = fixed(
+    "MAX_EXPRESSION_DEPTH",
+    32,
+    Unit::Count,
+    "Nesting of operators, calls, members and literals in one template expression.",
+);
+pub const MAX_CALL_ARGUMENTS: Limit = fixed(
+    "MAX_CALL_ARGUMENTS",
+    8,
+    Unit::Count,
+    "Arguments of one call, and entries of one object or array literal, in a template expression.",
+);
 
 // Retained scene, enforced on every patch.
 pub const MAX_SCENE_NODES: Limit = fixed(
@@ -456,6 +468,42 @@ pub const MAX_FONT_SIZE_PX: Limit = fixed(
     96,
     Unit::Pixels,
     "Largest `font-size` before content scale.",
+);
+pub const MAX_PERCENT: Limit = fixed(
+    "MAX_PERCENT",
+    1000,
+    Unit::Magnitude,
+    "Absolute value of any `<percent>` in a style value.",
+);
+pub const MAX_ANGLE_DEG: Limit = fixed(
+    "MAX_ANGLE_DEG",
+    3600,
+    Unit::Magnitude,
+    "Absolute value of any `<angle>`, in degrees (ten turns).",
+);
+pub const MAX_TRANSFORM_FUNCTIONS: Limit = fixed(
+    "MAX_TRANSFORM_FUNCTIONS",
+    4,
+    Unit::Count,
+    "Functions in one `transform` value.",
+);
+pub const MAX_TRANSFORM_SCALE: Limit = fixed(
+    "MAX_TRANSFORM_SCALE",
+    8,
+    Unit::Magnitude,
+    "Largest `scale()` factor; the smallest is 0.",
+);
+pub const MAX_EASING_STEPS: Limit = fixed(
+    "MAX_EASING_STEPS",
+    60,
+    Unit::Count,
+    "Steps of one `steps()` easing.",
+);
+pub const MAX_ANIMATION_ITERATIONS: Limit = fixed(
+    "MAX_ANIMATION_ITERATIONS",
+    10_000,
+    Unit::Count,
+    "Finite iteration count of one animation; `infinite` stays allowed.",
 );
 
 // Vector drawing on `canvas`.
@@ -803,6 +851,36 @@ pub const MAX_ENUM_VALUE_BYTES: Limit = fixed(
     Unit::Bytes,
     "One `enum` parameter value, as today.",
 );
+pub const MAX_PARAMETER_NAME_BYTES: Limit = fixed(
+    "MAX_PARAMETER_NAME_BYTES",
+    32,
+    Unit::Bytes,
+    "Name of one path or query parameter, as today.",
+);
+pub const MAX_SLUG_PARAMETER_BYTES: Limit = fixed(
+    "MAX_SLUG_PARAMETER_BYTES",
+    128,
+    Unit::Bytes,
+    "Largest `maxLength` of a `slug` parameter constraint, as today.",
+);
+pub const MAX_STRING_PARAMETER_BYTES: Limit = fixed(
+    "MAX_STRING_PARAMETER_BYTES",
+    256,
+    Unit::Bytes,
+    "Largest `maxLength` of a `string` query parameter constraint, as today.",
+);
+pub const MAX_DNS_LABEL_BYTES: Limit = fixed(
+    "MAX_DNS_LABEL_BYTES",
+    63,
+    Unit::Bytes,
+    "One dot-separated label of a network origin host or of a widget ID.",
+);
+pub const MAX_DNS_NAME_BYTES: Limit = fixed(
+    "MAX_DNS_NAME_BYTES",
+    253,
+    Unit::Bytes,
+    "Host name of one network origin.",
+);
 pub const MAX_OBJECT_ID_BYTES: Limit = fixed(
     "MAX_OBJECT_ID_BYTES",
     128,
@@ -980,6 +1058,8 @@ pub const ALL: &[&Limit] = &[
     &MAX_EXPRESSION_BYTES,
     &MAX_VIEW_EXPRESSIONS,
     &MAX_COMPONENT_PROPS,
+    &MAX_EXPRESSION_DEPTH,
+    &MAX_CALL_ARGUMENTS,
     &MAX_SCENE_NODES,
     &MAX_TREE_DEPTH,
     &MAX_CHILDREN,
@@ -1010,6 +1090,12 @@ pub const ALL: &[&Limit] = &[
     &MAX_LENGTH_PX,
     &MIN_FONT_SIZE_PX,
     &MAX_FONT_SIZE_PX,
+    &MAX_PERCENT,
+    &MAX_ANGLE_DEG,
+    &MAX_TRANSFORM_FUNCTIONS,
+    &MAX_TRANSFORM_SCALE,
+    &MAX_EASING_STEPS,
+    &MAX_ANIMATION_ITERATIONS,
     &MAX_CANVASES,
     &MAX_DRAW_COMMANDS,
     &MAX_PATH_POINTS,
@@ -1064,6 +1150,11 @@ pub const ALL: &[&Limit] = &[
     &MAX_QUERY_PARAMS,
     &MAX_ENUM_VALUES,
     &MAX_ENUM_VALUE_BYTES,
+    &MAX_PARAMETER_NAME_BYTES,
+    &MAX_SLUG_PARAMETER_BYTES,
+    &MAX_STRING_PARAMETER_BYTES,
+    &MAX_DNS_LABEL_BYTES,
+    &MAX_DNS_NAME_BYTES,
     &MAX_OBJECT_ID_BYTES,
     &MAX_GAME_EVENTS,
     &MAX_NOTES,
@@ -1132,5 +1223,6 @@ const _: () = {
     assert!(MAX_CATALOG_PAYLOAD_BYTES.value.div_ceil(3) * 4 < MAX_CATALOG_BYTES.value);
     assert!(MAX_CATALOG_LIFETIME_DAYS.value < MAX_SEED_LIFETIME_DAYS.value);
     assert!(MIN_WIDGET_ID_BYTES.value < MAX_WIDGET_ID_BYTES.value);
+    assert!(MAX_DNS_LABEL_BYTES.value < MAX_DNS_NAME_BYTES.value);
     assert!(MAX_WIDGET_ID_BYTES.value + MAX_VERSION_BYTES.value < MAX_CATALOG_URL_BYTES.value);
 };

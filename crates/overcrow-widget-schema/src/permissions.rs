@@ -55,7 +55,7 @@ pub const NETWORK_RULE_FIELDS: &[Field] = &[
     Field::required(
         "origin",
         ValueType::Record("origin"),
-        "Canonical `https://host[:port]` origin; no credentials, IP literal or local name.",
+        "Canonical `https://host[:port]` origin, host ≤ `MAX_DNS_NAME_BYTES` with labels ≤ `MAX_DNS_LABEL_BYTES`; no credentials, IP literal or local name.",
     ),
     Field::required(
         "method",
@@ -89,7 +89,7 @@ pub const PARAMETER_CONSTRAINTS: &[Field] = &[
     Field::required(
         "slug",
         ValueType::Record("{ maxLength }"),
-        "`[a-z0-9-]`, not starting or ending with `-`.",
+        "`[a-z0-9-]`, not starting or ending with `-`; `maxLength` 1..=`MAX_SLUG_PARAMETER_BYTES`.",
     ),
     Field::required(
         "enum",
@@ -99,7 +99,7 @@ pub const PARAMETER_CONSTRAINTS: &[Field] = &[
     Field::required(
         "string",
         ValueType::Record("{ maxLength }"),
-        "Query parameters only; any text without control characters.",
+        "Query parameters only; any text without control characters; `maxLength` 1..=`MAX_STRING_PARAMETER_BYTES`.",
     ),
 ];
 

@@ -12,13 +12,16 @@ use serde_json::{Map, Value};
 
 use crate::json::{has_exact_fields, integer_in, parse_strict};
 use crate::limits::{
-    MAX_ENUM_VALUE_BYTES, MAX_ENUM_VALUES, MAX_GAME_EVENTS, MAX_MANIFEST_BYTES,
-    MAX_NETWORK_PATH_BYTES, MAX_NETWORK_RULES, MAX_PATH_PARAMS, MAX_QUERY_PARAMS,
-    MAX_WIDGET_EDGE_PX, MAX_WIDGET_ID_BYTES, MAX_WIDGET_NAME_CHARS, MIN_WIDGET_ID_BYTES,
-    VM_HEAP_BYTES, VM_MAX_HEAP_BYTES,
+    MAX_DNS_LABEL_BYTES, MAX_DNS_NAME_BYTES, MAX_ENUM_VALUE_BYTES, MAX_ENUM_VALUES,
+    MAX_GAME_EVENTS, MAX_MANIFEST_BYTES, MAX_NETWORK_PATH_BYTES, MAX_NETWORK_RULES,
+    MAX_PARAMETER_NAME_BYTES, MAX_PATH_PARAMS, MAX_QUERY_PARAMS, MAX_SLUG_PARAMETER_BYTES,
+    MAX_STRING_PARAMETER_BYTES, MAX_WIDGET_EDGE_PX, MAX_WIDGET_ID_BYTES, MAX_WIDGET_NAME_CHARS,
+    MIN_WIDGET_ID_BYTES, VM_HEAP_BYTES, VM_MAX_HEAP_BYTES,
 };
-use crate::model::{Field, ValueType};
-use crate::permissions::{CAPABILITIES, NETWORK_RULE_FIELDS, capability_named};
+use crate::model::{Field, ValueType, field, is_keyword};
+use crate::permissions::{
+    CAPABILITIES, NETWORK_RULE_FIELDS, PARAMETER_CONSTRAINTS, capability_named,
+};
 use crate::version::Version;
 use crate::wrapper::{valid_label_text, validate_wrapper};
 
@@ -47,7 +50,7 @@ pub const MANIFEST_FIELDS: &[Field] = &[
     Field::required(
         "id",
         ValueType::Record("widget ID"),
-        "Reverse-DNS ID, `MIN_WIDGET_ID_BYTES`..=`MAX_WIDGET_ID_BYTES`: at least two dot-separated segments of `[a-z0-9-]`, each at most 63 bytes and not starting or ending with `-`. `com.playervox` and `com.playervox.*` are reserved for packages signed by PlayerVox.",
+        "Reverse-DNS ID, `MIN_WIDGET_ID_BYTES`..=`MAX_WIDGET_ID_BYTES`: at least two dot-separated segments of `[a-z0-9-]`, each at most `MAX_DNS_LABEL_BYTES` and not starting or ending with `-`. `com.playervox` and `com.playervox.*` are reserved for packages signed by PlayerVox.",
     ),
     Field::required(
         "version",
@@ -313,7 +316,7 @@ pub fn valid_widget_id(id: &str) -> bool {
         && id.split('.').count() >= 2
         && id.split('.').all(|segment| {
             !segment.is_empty()
-                && segment.len() <= 63
+                && segment.len() as u64 <= MAX_DNS_LABEL_BYTES.value
                 && !segment.starts_with('-')
                 && !segment.ends_with('-')
                 && segment
@@ -342,14 +345,14 @@ fn validate_sizing(sizing: &Value) -> Result<(), ManifestError> {
         return Err(ManifestError::Shape);
     }
     let fit = object["fit"].as_str().ok_or(ManifestError::Shape)?;
-    if !matches!(fit, "none" | "both" | "height") {
+    if !is_keyword(SIZING_FIELDS, "fit", fit) {
         return Err(ManifestError::Sizing);
     }
     if let Some(mode) = object.get("defaultMode") {
-        match mode.as_str() {
-            Some("manual") => {}
-            Some("fit") if fit != "none" => {}
-            _ => return Err(ManifestError::Sizing),
+        let mode = mode.as_str().ok_or(ManifestError::Sizing)?;
+        // `fit` needs something to fit to.
+        if !is_keyword(SIZING_FIELDS, "defaultMode", mode) || (mode == "fit" && fit == "none") {
+            return Err(ManifestError::Sizing);
         }
     }
     let [preferred, min, max] = ["preferred", "min", "max"].map(|name| dimensions(&object[name]));
@@ -467,10 +470,8 @@ fn validate_network_rule(rule: &Value) -> Result<(), ManifestError> {
     if !canonical_https_origin(origin) {
         return Err(invalid);
     }
-    if !matches!(
-        object["method"].as_str(),
-        Some("GET" | "POST" | "PUT" | "PATCH" | "DELETE")
-    ) {
+    let method = object["method"].as_str().ok_or(invalid)?;
+    if !is_keyword(NETWORK_RULE_FIELDS, "method", method) {
         return Err(invalid);
     }
     let parameters = |name: &str, maximum: u64| match object.get(name) {
@@ -528,6 +529,9 @@ fn validate_constraint(constraint: &Value, query: bool) -> Result<(), ManifestEr
     let invalid = ManifestError::NetworkRule;
     let object = constraint.as_object().ok_or(invalid)?;
     let kind = object.get("type").and_then(Value::as_str).ok_or(invalid)?;
+    if field(PARAMETER_CONSTRAINTS, kind).is_none() {
+        return Err(invalid);
+    }
     let expected: &[&str] = match kind {
         "integer" => &["min", "max"],
         "slug" | "string" => &["maxLength"],
@@ -555,13 +559,23 @@ fn validate_constraint(constraint: &Value, query: bool) -> Result<(), ManifestEr
             }
         }
         "slug" => {
-            integer_in(&object["maxLength"], 1, 128).ok_or(invalid)?;
+            integer_in(
+                &object["maxLength"],
+                1,
+                MAX_SLUG_PARAMETER_BYTES.value as i64,
+            )
+            .ok_or(invalid)?;
         }
         "string" => {
             if !query {
                 return Err(invalid);
             }
-            integer_in(&object["maxLength"], 1, 256).ok_or(invalid)?;
+            integer_in(
+                &object["maxLength"],
+                1,
+                MAX_STRING_PARAMETER_BYTES.value as i64,
+            )
+            .ok_or(invalid)?;
         }
         _ => {
             let values = object["values"].as_array().ok_or(invalid)?;
@@ -605,11 +619,11 @@ fn canonical_https_origin(origin: &str) -> bool {
         last_label.bytes().all(|byte| byte.is_ascii_digit()) || last_label.starts_with("0x");
     port_valid
         && !ip_like
-        && host.len() <= 253
+        && host.len() as u64 <= MAX_DNS_NAME_BYTES.value
         && host.contains('.')
         && host.split('.').all(|label| {
             !label.is_empty()
-                && label.len() <= 63
+                && label.len() as u64 <= MAX_DNS_LABEL_BYTES.value
                 && !label.starts_with('-')
                 && !label.ends_with('-')
                 && label
@@ -620,7 +634,7 @@ fn canonical_https_origin(origin: &str) -> bool {
 
 fn valid_parameter_name(name: &str) -> bool {
     !name.is_empty()
-        && name.len() <= 32
+        && name.len() as u64 <= MAX_PARAMETER_NAME_BYTES.value
         && name.as_bytes()[0].is_ascii_alphabetic()
         && name
             .bytes()
