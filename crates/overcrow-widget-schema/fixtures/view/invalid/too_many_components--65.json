@@ -1,0 +1,370 @@
+{
+  "viewFormat": 1,
+  "expressions": 2,
+  "children": [
+    {
+      "element": "box",
+      "attrs": {
+        "class": "clock"
+      },
+      "children": [
+        {
+          "element": "text",
+          "attrs": {
+            "class": "time"
+          },
+          "text": [
+            {
+              "expr": 0
+            }
+          ]
+        },
+        {
+          "if": [
+            {
+              "test": 1,
+              "children": [
+                {
+                  "element": "badge",
+                  "attrs": {
+                    "class": "hint"
+                  },
+                  "text": [
+                    "UTC"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "name": "c0",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c1",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c2",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c3",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c4",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c5",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c6",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c7",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c8",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c9",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c10",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c11",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c12",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c13",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c14",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c15",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c16",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c17",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c18",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c19",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c20",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c21",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c22",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c23",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c24",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c25",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c26",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c27",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c28",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c29",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c30",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c31",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c32",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c33",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c34",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c35",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c36",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c37",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c38",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c39",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c40",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c41",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c42",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c43",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c44",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c45",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c46",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c47",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c48",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c49",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c50",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c51",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c52",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c53",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c54",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c55",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c56",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c57",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c58",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c59",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c60",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c61",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c62",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c63",
+      "props": [],
+      "children": []
+    },
+    {
+      "name": "c64",
+      "props": [],
+      "children": []
+    }
+  ]
+}

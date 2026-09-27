@@ -1,0 +1,1 @@
+{"viewFormat":1,"expressions":2,"children":[{"element":"box","attrs":{"class":"forecast"},"children":[{"element":"image","attrs":{"src":"assets/icons/sun.png","label":"Sunny"}},{"element":"text","text":[{"expr":0}]}]}]}

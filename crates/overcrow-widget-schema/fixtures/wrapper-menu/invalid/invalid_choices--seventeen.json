@@ -1,0 +1,134 @@
+{
+  "menu": [
+    {
+      "type": "choice",
+      "id": "c",
+      "label": {
+        "en": "C",
+        "fr": "C"
+      },
+      "choices": [
+        {
+          "value": "c0",
+          "label": {
+            "en": "C0",
+            "fr": "C0"
+          }
+        },
+        {
+          "value": "c1",
+          "label": {
+            "en": "C1",
+            "fr": "C1"
+          }
+        },
+        {
+          "value": "c2",
+          "label": {
+            "en": "C2",
+            "fr": "C2"
+          }
+        },
+        {
+          "value": "c3",
+          "label": {
+            "en": "C3",
+            "fr": "C3"
+          }
+        },
+        {
+          "value": "c4",
+          "label": {
+            "en": "C4",
+            "fr": "C4"
+          }
+        },
+        {
+          "value": "c5",
+          "label": {
+            "en": "C5",
+            "fr": "C5"
+          }
+        },
+        {
+          "value": "c6",
+          "label": {
+            "en": "C6",
+            "fr": "C6"
+          }
+        },
+        {
+          "value": "c7",
+          "label": {
+            "en": "C7",
+            "fr": "C7"
+          }
+        },
+        {
+          "value": "c8",
+          "label": {
+            "en": "C8",
+            "fr": "C8"
+          }
+        },
+        {
+          "value": "c9",
+          "label": {
+            "en": "C9",
+            "fr": "C9"
+          }
+        },
+        {
+          "value": "c10",
+          "label": {
+            "en": "C10",
+            "fr": "C10"
+          }
+        },
+        {
+          "value": "c11",
+          "label": {
+            "en": "C11",
+            "fr": "C11"
+          }
+        },
+        {
+          "value": "c12",
+          "label": {
+            "en": "C12",
+            "fr": "C12"
+          }
+        },
+        {
+          "value": "c13",
+          "label": {
+            "en": "C13",
+            "fr": "C13"
+          }
+        },
+        {
+          "value": "c14",
+          "label": {
+            "en": "C14",
+            "fr": "C14"
+          }
+        },
+        {
+          "value": "c15",
+          "label": {
+            "en": "C15",
+            "fr": "C15"
+          }
+        },
+        {
+          "value": "c16",
+          "label": {
+            "en": "C16",
+            "fr": "C16"
+          }
+        }
+      ],
+      "default": "c0"
+    }
+  ]
+}

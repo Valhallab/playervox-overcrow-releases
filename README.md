@@ -56,6 +56,7 @@ stopwatch state, journals or connected accounts.
 
 | Source | Purpose |
 | --- | --- |
+| `crates/overcrow-widget-schema/` | Widget API v1 schema and validators, shared with OverCrow |
 | `content/sdk/` | Public JavaScript SDK and TypeScript definitions |
 | `content/templates/` | Blank, Counter, and Checklist examples |
 | `content/docs/` | English and French SDK articles |
@@ -70,6 +71,20 @@ Use Node.js 22.18+ and Python 3. Downloaded creator projects need only Node.js.
 python3 scripts/package-docs-examples.py published/docs/downloads
 node --test tests/creator-kit/*.test.mjs tests/warframe-market/*.test.mjs
 cargo test -p marketplace-tool --locked
+```
+
+The widget API v1 contract lives in `crates/overcrow-widget-schema/`: elements,
+style, tokens, icons, permissions, services, IPC, bounds, and the manifest,
+package, compiled-view and catalog validators. OverCrow compiles this crate at a
+pinned revision. The [schema reference](docs/widget-schema-v1.md) is generated
+from it, and the [package and catalog format](docs/widget-package-v1.md)
+specifies the `.ocpkg` v1 container. After a change, regenerate the reference
+and the conformance fixtures:
+
+```sh
+cargo run -p overcrow-widget-schema --example reference > docs/widget-schema-v1.md
+cargo run -p overcrow-widget-schema --example fixtures
+cargo test -p overcrow-widget-schema --locked
 ```
 
 The website consumes a reviewed, revision-pinned snapshot from this repository.

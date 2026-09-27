@@ -1,0 +1,13 @@
+{
+  "menu": [
+    {
+      "type": "link",
+      "id": "site",
+      "label": {
+        "en": "Site",
+        "fr": "Site"
+      },
+      "url": "https://example.com"
+    }
+  ]
+}

@@ -12,3 +12,6 @@
 # Generated Vite assets retain exact bytes on every host.
 /published/assets/*.js binary
 /published/assets/*.css binary
+# Conformance fixtures and the generated references are compared byte for byte.
+/crates/overcrow-widget-schema/fixtures/** -text
+/docs/widget-schema-v1.md text eol=lf

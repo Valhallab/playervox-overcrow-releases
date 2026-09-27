@@ -1,5 +1,5 @@
 [workspace]
-members = ["tools/marketplace-tool"]
+members = ["crates/overcrow-widget-schema", "tools/marketplace-tool"]
 resolver = "3"
 
 [workspace.package]

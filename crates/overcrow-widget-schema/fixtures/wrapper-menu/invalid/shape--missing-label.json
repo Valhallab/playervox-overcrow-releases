@@ -1,0 +1,9 @@
+{
+  "menu": [
+    {
+      "type": "toggle",
+      "id": "row",
+      "default": true
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "menu": [
+    {
+      "type": "group",
+      "id": "g",
+      "label": {
+        "en": "Group",
+        "fr": "Groupe"
+      },
+      "rows": []
+    }
+  ]
+}

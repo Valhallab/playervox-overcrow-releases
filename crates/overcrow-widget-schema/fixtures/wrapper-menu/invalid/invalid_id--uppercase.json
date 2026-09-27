@@ -1,0 +1,13 @@
+{
+  "menu": [
+    {
+      "type": "toggle",
+      "id": "ShowSeconds",
+      "label": {
+        "en": "Row",
+        "fr": "Ligne"
+      },
+      "default": true
+    }
+  ]
+}

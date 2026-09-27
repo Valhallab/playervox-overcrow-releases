@@ -1,0 +1,27 @@
+[package]
+name = "overcrow-widget-schema"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+# Plain data plus the manifest, package, compiled-view and catalog validators:
+# the same code compiles into the host, the creator CLI and the Studio
+# WebAssembly bundle. Every dependency is pure Rust. Signature verification is
+# left to the caller (the host links `ring`); this crate fixes the exact bytes
+# that are signed.
+#
+# The OverCrow host pins this crate by Git revision and resolves these
+# requirements with its own lockfile, so they stay semver ranges rather than
+# the workspace's exact pins; this repository's `Cargo.lock` fixes the tested
+# versions.
+[dependencies]
+base64 = "0.22.1"
+crc32fast = "1.5.0"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.150"
+sha2 = "=0.10.9"
+
+[dev-dependencies]
+ring = "0.17.14"

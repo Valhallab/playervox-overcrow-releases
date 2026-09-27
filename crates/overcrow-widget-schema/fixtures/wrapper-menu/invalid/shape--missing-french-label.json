@@ -1,0 +1,12 @@
+{
+  "menu": [
+    {
+      "type": "toggle",
+      "id": "row",
+      "label": {
+        "en": "Row"
+      },
+      "default": true
+    }
+  ]
+}

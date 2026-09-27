@@ -1,0 +1,122 @@
+{
+  "menu": [
+    {
+      "type": "toggle",
+      "id": "show-seconds",
+      "label": {
+        "en": "Show seconds",
+        "fr": "Afficher les secondes"
+      },
+      "icon": "clock",
+      "default": true
+    },
+    {
+      "type": "slider",
+      "id": "message-lifetime",
+      "label": {
+        "en": "Message lifetime",
+        "fr": "Durée des messages"
+      },
+      "icon": "timer",
+      "min": 5,
+      "max": 120,
+      "step": 1,
+      "default": 30
+    },
+    {
+      "type": "choice",
+      "id": "date-format",
+      "label": {
+        "en": "Date format",
+        "fr": "Format de date"
+      },
+      "choices": [
+        {
+          "value": "dmy",
+          "label": {
+            "en": "Day/month/year",
+            "fr": "Jour/mois/année"
+          }
+        },
+        {
+          "value": "ymd",
+          "label": {
+            "en": "Year-month-day",
+            "fr": "Année-mois-jour"
+          }
+        },
+        {
+          "value": "mdy",
+          "label": {
+            "en": "Month/day/year",
+            "fr": "Mois/jour/année"
+          }
+        }
+      ],
+      "default": "dmy"
+    },
+    {
+      "type": "action",
+      "id": "refresh",
+      "label": {
+        "en": "Refresh",
+        "fr": "Actualiser"
+      },
+      "icon": "refresh-cw"
+    },
+    {
+      "type": "group",
+      "id": "metrics",
+      "label": {
+        "en": "Metrics",
+        "fr": "Mesures"
+      },
+      "icon": "gauge",
+      "rows": [
+        {
+          "type": "toggle",
+          "id": "cpu",
+          "label": {
+            "en": "Show cpu",
+            "fr": "Afficher cpu"
+          },
+          "default": true
+        },
+        {
+          "type": "toggle",
+          "id": "ram",
+          "label": {
+            "en": "Show ram",
+            "fr": "Afficher ram"
+          },
+          "default": true
+        },
+        {
+          "type": "choice",
+          "id": "temperature-unit",
+          "label": {
+            "en": "Temperature unit",
+            "fr": "Unité de température"
+          },
+          "choices": [
+            {
+              "value": "celsius",
+              "label": {
+                "en": "°C",
+                "fr": "°C"
+              }
+            },
+            {
+              "value": "fahrenheit",
+              "label": {
+                "en": "°F",
+                "fr": "°F"
+              }
+            }
+          ],
+          "default": "celsius"
+        }
+      ]
+    }
+  ]
+}

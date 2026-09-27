@@ -1,0 +1,25 @@
+{
+  "menu": [
+    {
+      "type": "toggle",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "label": {
+        "en": "éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé",
+        "fr": "日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日日"
+      },
+      "default": false
+    },
+    {
+      "type": "slider",
+      "id": "steps",
+      "label": {
+        "en": "Steps",
+        "fr": "Pas"
+      },
+      "min": -1000000,
+      "max": 1000000,
+      "step": 200,
+      "default": -1000000
+    }
+  ]
+}

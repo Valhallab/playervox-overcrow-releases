@@ -1,0 +1,17 @@
+{
+  "menu": [
+    {
+      "type": "toggle",
+      "id": "show-seconds",
+      "label": { "en": "Show seconds", "fr": "Afficher les secondes" },
+      "visibleWhen": "show-date",
+      "default": false
+    },
+    {
+      "type": "toggle",
+      "id": "show-date",
+      "label": { "en": "Show date", "fr": "Afficher la date" },
+      "default": true
+    }
+  ]
+}

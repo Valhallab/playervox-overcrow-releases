@@ -1,6 +1,7 @@
 # Contributing
 
-SDK, tooling, documentation, and reference-widget contributions are MIT-licensed.
+Schema, SDK, tooling, documentation, and reference-widget contributions are
+MIT-licensed.
 Submit only material you have authority to license and preserve third-party
 notices. Third-party widgets keep their declared licenses; see
 [licensing scope](LICENSING.md).
@@ -11,6 +12,11 @@ files, a complete `manifest.json` ledger, and `listing.json`; never commit secre
 native executable code, or production signing material. Package validation and
 human review are required. Acceptance does not publish anything.
 
+The widget schema in `crates/overcrow-widget-schema/` is the security validator
+of the OverCrow host: schema changes are reviewed by its maintainers before the
+host pins them. Regenerate `docs/widget-schema-v1.md` and the conformance
+fixtures in the same change (see the [README](README.md)).
+
 Keep SDK guides and examples on the current API v1 contract. The four host
 capabilities are `telemetry.read`, `fps.read`, `media.read` and `media.control`.
 Public widgets use their own storage; built-in widget data and connected accounts
@@ -20,6 +26,7 @@ are outside the SDK. Update both documentation languages together.
 python3 scripts/package-docs-examples.py published/docs/downloads
 node --test tests/creator-kit/*.test.mjs tests/warframe-market/*.test.mjs
 cargo test -p marketplace-tool --locked
+cargo test -p overcrow-widget-schema --locked
 sh scripts/check-policy.sh
 ```
 

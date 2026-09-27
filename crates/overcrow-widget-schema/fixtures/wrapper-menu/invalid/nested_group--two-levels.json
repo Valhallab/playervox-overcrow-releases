@@ -1,0 +1,33 @@
+{
+  "menu": [
+    {
+      "type": "group",
+      "id": "outer",
+      "label": {
+        "en": "Outer",
+        "fr": "Externe"
+      },
+      "rows": [
+        {
+          "type": "group",
+          "id": "inner",
+          "label": {
+            "en": "Inner",
+            "fr": "Interne"
+          },
+          "rows": [
+            {
+              "type": "toggle",
+              "id": "x",
+              "label": {
+                "en": "Show x",
+                "fr": "Afficher x"
+              },
+              "default": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

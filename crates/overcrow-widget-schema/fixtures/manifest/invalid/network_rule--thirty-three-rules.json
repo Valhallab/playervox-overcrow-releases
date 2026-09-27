@@ -1,0 +1,194 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.example.minimal",
+  "version": "0.1.0",
+  "name": {
+    "en": "Minimal",
+    "fr": "Minimal"
+  },
+  "sizing": {
+    "fit": "none",
+    "preferred": {
+      "width": 200,
+      "height": 100
+    },
+    "min": {
+      "width": 200,
+      "height": 100
+    },
+    "max": {
+      "width": 200,
+      "height": 100
+    }
+  },
+  "permissions": {
+    "network": [
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r0"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r1"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r2"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r3"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r4"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r5"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r6"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r7"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r8"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r9"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r10"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r11"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r12"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r13"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r14"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r15"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r16"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r17"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r18"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r19"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r20"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r21"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r22"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r23"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r24"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r25"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r26"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r27"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r28"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r29"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r30"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r31"
+      },
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/r32"
+      }
+    ]
+  }
+}

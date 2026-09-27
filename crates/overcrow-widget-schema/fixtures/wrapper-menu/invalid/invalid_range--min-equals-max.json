@@ -1,0 +1,16 @@
+{
+  "menu": [
+    {
+      "type": "slider",
+      "id": "s",
+      "label": {
+        "en": "S",
+        "fr": "S"
+      },
+      "min": 5,
+      "max": 5,
+      "step": 1,
+      "default": 5
+    }
+  ]
+}

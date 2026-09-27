@@ -5,6 +5,18 @@ published/docs/downloads`, then run `npm test`. Creator-kit tests run on Windows
 and Linux; native-host tests use controlled test executables, not the live overlay.
 Website rendering and browser isolation tests belong to the separate web repository.
 
+Run the widget schema checks; the tests fail if the committed reference or a
+generated conformance fixture is stale:
+
+```sh
+cargo test -p overcrow-widget-schema --locked
+cargo run -p overcrow-widget-schema --example fixtures
+cargo run --release -p overcrow-widget-schema --example package_bench
+```
+
+The last command measures package revalidation; results are in
+[package format measurements](testing/package-format.md).
+
 Run the packaging and admission checks:
 
 ```sh

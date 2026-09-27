@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.playervox.clock",
+  "version": "1.0.0",
+  "name": {
+    "en": "Clock",
+    "fr": "Horloge"
+  },
+  "sizing": {
+    "fit": "both",
+    "preferred": {
+      "width": 180,
+      "height": 72
+    },
+    "min": {
+      "width": 120,
+      "height": 48
+    },
+    "max": {
+      "width": 480,
+      "height": 200
+    }
+  },
+  "permissions": {
+    "capabilities": []
+  },
+  "wrapper": {
+    "menu": [
+      {
+        "type": "toggle",
+        "id": "seconds",
+        "icon": "clock",
+        "label": {
+          "en": "Show seconds",
+          "fr": "Afficher les secondes"
+        },
+        "default": true
+      }
+    ]
+  }
+}

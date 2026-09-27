@@ -1,0 +1,10 @@
+.clock {
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-4);
+}
+
+.time {
+  font-size: var(--font-size-value);
+  font-variant-numeric: tabular-nums;
+}

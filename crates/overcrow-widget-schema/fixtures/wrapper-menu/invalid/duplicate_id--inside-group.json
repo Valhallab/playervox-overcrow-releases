@@ -1,0 +1,32 @@
+{
+  "menu": [
+    {
+      "type": "toggle",
+      "id": "cpu",
+      "label": {
+        "en": "Show cpu",
+        "fr": "Afficher cpu"
+      },
+      "default": true
+    },
+    {
+      "type": "group",
+      "id": "g",
+      "label": {
+        "en": "Group",
+        "fr": "Groupe"
+      },
+      "rows": [
+        {
+          "type": "toggle",
+          "id": "cpu",
+          "label": {
+            "en": "Show cpu",
+            "fr": "Afficher cpu"
+          },
+          "default": true
+        }
+      ]
+    }
+  ]
+}

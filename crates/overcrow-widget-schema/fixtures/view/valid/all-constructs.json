@@ -1,0 +1,251 @@
+{
+  "viewFormat": 1,
+  "expressions": 20,
+  "components": [
+    {
+      "name": "stat-row",
+      "props": [
+        "label",
+        "value"
+      ],
+      "children": [
+        {
+          "element": "box",
+          "attrs": {
+            "class": "row"
+          },
+          "children": [
+            {
+              "element": "text",
+              "attrs": {
+                "class": "label"
+              },
+              "text": [
+                {
+                  "expr": 0
+                }
+              ]
+            },
+            {
+              "element": "text",
+              "attrs": {
+                "class": "value"
+              },
+              "text": [
+                {
+                  "expr": 1
+                }
+              ]
+            },
+            {
+              "slot": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "children": [
+    {
+      "element": "image",
+      "attrs": {
+        "src": "assets/logo.png",
+        "label": "Logo"
+      }
+    },
+    {
+      "element": "icon",
+      "attrs": {
+        "name": "circle-check",
+        "label": "OK"
+      }
+    },
+    {
+      "component": "stat-row",
+      "props": {
+        "label": 2,
+        "value": 3
+      },
+      "children": [
+        {
+          "element": "icon",
+          "attrs": {
+            "name": "cpu"
+          }
+        }
+      ]
+    },
+    {
+      "element": "list",
+      "attrs": {
+        "stick-to-end": true,
+        "item-height": 24
+      },
+      "on": {
+        "reachend": 4
+      },
+      "children": [
+        {
+          "for": 5,
+          "as": "message",
+          "key": 6,
+          "children": [
+            {
+              "element": "text",
+              "attrs": {
+                "selectable": true
+              },
+              "children": [
+                {
+                  "element": "span",
+                  "bind": {
+                    "color": 7
+                  },
+                  "text": [
+                    {
+                      "expr": 8
+                    }
+                  ]
+                },
+                {
+                  "element": "span",
+                  "text": [
+                    ": "
+                  ]
+                },
+                {
+                  "for": 9,
+                  "as": "fragment",
+                  "key": 10,
+                  "children": [
+                    {
+                      "element": "image",
+                      "bind": {
+                        "src": 11
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "element": "form",
+      "attrs": {
+        "intent": "twitch.chat.send"
+      },
+      "on": {
+        "submit": 12
+      },
+      "children": [
+        {
+          "element": "field",
+          "attrs": {
+            "name": "message",
+            "placeholder": "Send a message",
+            "max-length": 2000
+          }
+        },
+        {
+          "element": "button",
+          "attrs": {
+            "submit": true,
+            "label": "Send"
+          },
+          "children": [
+            {
+              "element": "icon",
+              "attrs": {
+                "name": "send"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "element": "select",
+      "bind": {
+        "value": 13
+      },
+      "on": {
+        "change": 14
+      },
+      "children": [
+        {
+          "element": "option",
+          "attrs": {
+            "value": "metric"
+          },
+          "text": [
+            "Metric"
+          ]
+        },
+        {
+          "for": 15,
+          "as": "unit",
+          "key": 16,
+          "children": [
+            {
+              "element": "option",
+              "bind": {
+                "value": 17
+              },
+              "text": [
+                {
+                  "expr": 18
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "element": "chart",
+      "attrs": {
+        "kind": "sparkline",
+        "min": 0,
+        "max": 100
+      },
+      "children": [
+        {
+          "element": "series",
+          "attrs": {
+            "values": [
+              1,
+              2.5,
+              3
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "element": "elapsed",
+      "attrs": {
+        "format": "hh:mm:ss.cc"
+      },
+      "bind": {
+        "base": 19,
+        "at": 19
+      }
+    },
+    {
+      "element": "canvas",
+      "attrs": {
+        "class": "badge"
+      }
+    },
+    {
+      "element": "popover",
+      "bind": {
+        "anchor": 19,
+        "open": 19
+      }
+    }
+  ]
+}

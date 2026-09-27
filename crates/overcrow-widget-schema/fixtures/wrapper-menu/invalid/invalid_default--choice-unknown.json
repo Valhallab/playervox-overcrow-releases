@@ -1,0 +1,29 @@
+{
+  "menu": [
+    {
+      "type": "choice",
+      "id": "c",
+      "label": {
+        "en": "C",
+        "fr": "C"
+      },
+      "choices": [
+        {
+          "value": "a",
+          "label": {
+            "en": "A",
+            "fr": "A"
+          }
+        },
+        {
+          "value": "b",
+          "label": {
+            "en": "B",
+            "fr": "B"
+          }
+        }
+      ],
+      "default": "z"
+    }
+  ]
+}

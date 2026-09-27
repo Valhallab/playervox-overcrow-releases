@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.example.minimal",
+  "version": "0.1.0",
+  "name": {
+    "en": "Minimal",
+    "fr": "Minimal"
+  },
+  "sizing": {
+    "fit": "none",
+    "preferred": {
+      "width": 200,
+      "height": 100
+    },
+    "min": {
+      "width": 200,
+      "height": 100
+    },
+    "max": {
+      "width": 200,
+      "height": 100
+    }
+  },
+  "permissions": {
+    "gameEvents": [
+      "overcrow.game.kill.v1",
+      "overcrow.game.kill.v1"
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "menu": [
+    {
+      "type": "slider",
+      "id": "lifetime",
+      "label": { "en": "Lifetime", "fr": "Durée" },
+      "min": 5, "max": 120, "step": 1, "default": 30
+    },
+    {
+      "type": "toggle",
+      "id": "fade",
+      "label": { "en": "Fade", "fr": "Estomper" },
+      "visibleWhen": "lifetime",
+      "default": true
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "menu": [
+    {
+      "type": "toggle",
+      "id": "show-date",
+      "label": { "en": "Show date", "fr": "Afficher la date" },
+      "default": true
+    },
+    {
+      "type": "choice",
+      "id": "date-format",
+      "label": { "en": "Date format", "fr": "Format de date" },
+      "visibleWhen": "show-date",
+      "choices": [
+        { "value": "dmy", "label": { "en": "Day/month/year", "fr": "Jour/mois/année" } },
+        { "value": "mdy", "label": { "en": "Month/day/year", "fr": "Mois/jour/année" } }
+      ],
+      "default": "dmy"
+    },
+    {
+      "type": "toggle",
+      "id": "show-cpu-temperature",
+      "label": { "en": "Show CPU temperature", "fr": "Afficher la température CPU" },
+      "requires": "telemetry.cpuTemperature",
+      "default": true
+    }
+  ]
+}

@@ -1,0 +1,149 @@
+{
+  "menu": [
+    {
+      "type": "toggle",
+      "id": "r0",
+      "label": {
+        "en": "Show r0",
+        "fr": "Afficher r0"
+      },
+      "default": true
+    },
+    {
+      "type": "toggle",
+      "id": "r1",
+      "label": {
+        "en": "Show r1",
+        "fr": "Afficher r1"
+      },
+      "default": true
+    },
+    {
+      "type": "toggle",
+      "id": "r2",
+      "label": {
+        "en": "Show r2",
+        "fr": "Afficher r2"
+      },
+      "default": true
+    },
+    {
+      "type": "toggle",
+      "id": "r3",
+      "label": {
+        "en": "Show r3",
+        "fr": "Afficher r3"
+      },
+      "default": true
+    },
+    {
+      "type": "toggle",
+      "id": "r4",
+      "label": {
+        "en": "Show r4",
+        "fr": "Afficher r4"
+      },
+      "default": true
+    },
+    {
+      "type": "toggle",
+      "id": "r5",
+      "label": {
+        "en": "Show r5",
+        "fr": "Afficher r5"
+      },
+      "default": true
+    },
+    {
+      "type": "toggle",
+      "id": "r6",
+      "label": {
+        "en": "Show r6",
+        "fr": "Afficher r6"
+      },
+      "default": true
+    },
+    {
+      "type": "toggle",
+      "id": "r7",
+      "label": {
+        "en": "Show r7",
+        "fr": "Afficher r7"
+      },
+      "default": true
+    },
+    {
+      "type": "toggle",
+      "id": "r8",
+      "label": {
+        "en": "Show r8",
+        "fr": "Afficher r8"
+      },
+      "default": true
+    },
+    {
+      "type": "toggle",
+      "id": "r9",
+      "label": {
+        "en": "Show r9",
+        "fr": "Afficher r9"
+      },
+      "default": true
+    },
+    {
+      "type": "group",
+      "id": "g",
+      "label": {
+        "en": "Group",
+        "fr": "Groupe"
+      },
+      "rows": [
+        {
+          "type": "toggle",
+          "id": "g0",
+          "label": {
+            "en": "Show g0",
+            "fr": "Afficher g0"
+          },
+          "default": true
+        },
+        {
+          "type": "toggle",
+          "id": "g1",
+          "label": {
+            "en": "Show g1",
+            "fr": "Afficher g1"
+          },
+          "default": true
+        },
+        {
+          "type": "toggle",
+          "id": "g2",
+          "label": {
+            "en": "Show g2",
+            "fr": "Afficher g2"
+          },
+          "default": true
+        },
+        {
+          "type": "toggle",
+          "id": "g3",
+          "label": {
+            "en": "Show g3",
+            "fr": "Afficher g3"
+          },
+          "default": true
+        },
+        {
+          "type": "toggle",
+          "id": "g4",
+          "label": {
+            "en": "Show g4",
+            "fr": "Afficher g4"
+          },
+          "default": true
+        }
+      ]
+    }
+  ]
+}

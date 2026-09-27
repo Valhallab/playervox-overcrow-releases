@@ -1,0 +1,11 @@
+{
+  "menu": [
+    {
+      "type": "toggle",
+      "id": "show-gpu-usage",
+      "label": { "en": "Show GPU usage", "fr": "Afficher l'utilisation GPU" },
+      "requires": "telemetry.gpuUsage",
+      "default": true
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "viewFormat": 1,
+  "expressions": 4097,
+  "children": [
+    {
+      "element": "box",
+      "attrs": {
+        "class": "clock"
+      },
+      "children": [
+        {
+          "element": "text",
+          "attrs": {
+            "class": "time"
+          },
+          "text": [
+            {
+              "expr": 0
+            }
+          ]
+        },
+        {
+          "if": [
+            {
+              "test": 1,
+              "children": [
+                {
+                  "element": "badge",
+                  "attrs": {
+                    "class": "hint"
+                  },
+                  "text": [
+                    "UTC"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
