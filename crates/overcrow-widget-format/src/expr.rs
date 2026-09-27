@@ -381,7 +381,14 @@ impl Expr {
                 name,
                 optional,
             } => {
-                object.write_js(out);
+                // `1.name` would read as the number `1.`.
+                if let Self::Number(_) = **object {
+                    out.push('(');
+                    object.write_js(out);
+                    out.push(')');
+                } else {
+                    object.write_js(out);
+                }
                 out.push_str(if *optional { "?." } else { "." });
                 out.push_str(name);
             }

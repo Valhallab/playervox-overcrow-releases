@@ -571,6 +571,9 @@ fn canonical_expression_text_parses_again_at_the_depth_bound() {
             "})".repeat(depth / 2 - 1)
         ),
         format!("state{}", " ? 1 : state".repeat(depth - 1)),
+        // Fuzz regression (ocml target): a member of a number literal.
+        "state > 1 .name".to_owned(),
+        "(12.5)?.x".to_owned(),
     ] {
         let parsed = expr::parse(&source).unwrap_or_else(|error| panic!("{source}: {error:?}"));
         assert_eq!(expr::parse(&parsed.to_js()), Ok(parsed), "{source}");

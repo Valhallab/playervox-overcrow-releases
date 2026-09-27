@@ -34,7 +34,7 @@ from the conformance fixtures, then run a target, from the repository root:
 
 ```sh
 sh fuzz/seed-corpus.sh
-cargo +nightly fuzz run -O ocml -- -max_total_time=600 -rss_limit_mb=1024 -max_len=16384
+cargo +nightly fuzz run -O ocml -- -max_total_time=600 -rss_limit_mb=2048 -malloc_limit_mb=64 -max_len=16384
 ```
 
 A crash leaves its input under `fuzz/artifacts/<target>/`; fix it with a

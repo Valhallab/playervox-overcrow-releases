@@ -59,7 +59,7 @@ jobs:
       - name: Fuzz
         run: |
           cargo +"$FUZZ_TOOLCHAIN" fuzz run -O "${{ matrix.target }}" -- \
-            -max_total_time="$FUZZ_SECONDS" -rss_limit_mb=1024 -max_len=16384
+            -max_total_time="$FUZZ_SECONDS" -rss_limit_mb=2048 -malloc_limit_mb=64 -max_len=16384
       - name: Keep the crashing input
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
