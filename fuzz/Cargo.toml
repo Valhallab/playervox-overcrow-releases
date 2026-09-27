@@ -1,0 +1,72 @@
+[package]
+name = "overcrow-widget-fuzz"
+version = "0.0.0"
+edition = "2024"
+license = "MIT"
+publish = false
+
+# `cargo +nightly fuzz run <target>` from the repository root; see
+# `docs/testing.md`. Kept out of the main workspace because libFuzzer needs a
+# nightly toolchain and sanitizer flags.
+[package.metadata]
+cargo-fuzz = true
+
+[workspace]
+members = ["."]
+
+[dependencies]
+libfuzzer-sys = "=0.4.12"
+overcrow-widget-format = { path = "../crates/overcrow-widget-format" }
+overcrow-widget-schema = { path = "../crates/overcrow-widget-schema" }
+
+[profile.release]
+debug = 1
+
+[[bin]]
+name = "ocml"
+path = "fuzz_targets/ocml.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "ocss"
+path = "fuzz_targets/ocss.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "expression"
+path = "fuzz_targets/expression.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "validate_manifest"
+path = "fuzz_targets/validate_manifest.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "read_package"
+path = "fuzz_targets/read_package.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "validate_compiled_view"
+path = "fuzz_targets/validate_compiled_view.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "open_envelope"
+path = "fuzz_targets/open_envelope.rs"
+test = false
+doc = false
+bench = false

@@ -19,6 +19,6 @@ for changed_path in "$@"; do
             rust-toolchain | .cargo | .cargo/* | rustfmt.toml | .rustfmt.toml | \
             clippy.toml | .clippy.toml | deny.toml | .gitattributes | \
             .gitignore | docs/widget-schema-v1.md | keys | keys/* | \
-            fixtures/keys | fixtures/keys/*) reject ;;
+            fixtures/keys | fixtures/keys/* | fuzz | fuzz/*) reject ;;
     esac
 done

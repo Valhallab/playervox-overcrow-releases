@@ -12,10 +12,13 @@ files, a complete `manifest.json` ledger, and `listing.json`; never commit secre
 native executable code, or production signing material. Package validation and
 human review are required. Acceptance does not publish anything.
 
-The widget schema in `crates/overcrow-widget-schema/` is the security validator
-of the OverCrow host: schema changes are reviewed by its maintainers before the
-host pins them. Regenerate `docs/widget-schema-v1.md` and the conformance
-fixtures in the same change (see the [README](README.md)).
+The widget schema in `crates/overcrow-widget-schema/` and the source parsers
+in `crates/overcrow-widget-format/` are the security validators of the OverCrow
+host: changes to them or to their fuzz targets in `fuzz/` are reviewed by
+their maintainers before the host pins them. Regenerate
+`docs/widget-schema-v1.md`, the conformance fixtures and the compiled view
+goldens in the same change (see the [README](README.md) and
+[testing](docs/testing.md)).
 
 Keep SDK guides and examples on the current API v1 contract. The four host
 capabilities are `telemetry.read`, `fps.read`, `media.read` and `media.control`.
@@ -27,6 +30,7 @@ python3 scripts/package-docs-examples.py published/docs/downloads
 node --test tests/creator-kit/*.test.mjs tests/warframe-market/*.test.mjs
 cargo test -p marketplace-tool --locked
 cargo test -p overcrow-widget-schema --locked
+cargo test -p overcrow-widget-format --locked
 sh scripts/check-policy.sh
 ```
 

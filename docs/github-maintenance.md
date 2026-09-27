@@ -13,8 +13,8 @@ Protect `main` and `candidate` against deletion and force pushes. Require pull
 requests, human review, and the base-specific admission check. On `main`, require
 both portable creator-kit checks as well, and the `contract` check. Keep owner
 maintenance bypass available for reviewed changes to `.github/`, `scripts/`,
-`tests/`, `tools/`, and the widget contract: `crates/`, the Cargo workspace
-files and toolchain, `.gitattributes`, `.gitignore`,
+`tests/`, `tools/`, and the widget contract: `crates/`, its fuzz targets in
+`fuzz/`, the Cargo workspace files and toolchain, `.gitattributes`, `.gitignore`,
 `docs/widget-schema-v1.md`, `keys/` and `fixtures/keys/`. Static admission
 deliberately rejects changes to its own trusted implementation and to the
 validator OverCrow pins; `tests/reject-trusted-change.sh` holds the exact list.

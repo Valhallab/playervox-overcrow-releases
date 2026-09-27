@@ -36,13 +36,18 @@ jobs:
       - name: Check formatting
         run: cargo fmt --all -- --check
       - name: Lint
-        run: cargo clippy -p overcrow-widget-schema --all-targets --locked -- -D warnings
+        run: |
+          cargo clippy -p overcrow-widget-schema -p overcrow-widget-format \
+            --all-targets --locked -- -D warnings
       - name: Test
-        run: cargo test -p overcrow-widget-schema --all-targets --locked
+        run: |
+          cargo test -p overcrow-widget-schema -p overcrow-widget-format \
+            --all-targets --locked
       - name: Require regenerated reference and fixtures
         run: |
           cargo run -p overcrow-widget-schema --locked --example reference \
             > docs/widget-schema-v1.md
           cargo run -p overcrow-widget-schema --locked --example fixtures
-          git diff --exit-code -- docs/widget-schema-v1.md crates/overcrow-widget-schema
-          test -z "$(git status --porcelain -- crates/overcrow-widget-schema)"
+          cargo run -p overcrow-widget-format --locked --example fixtures
+          git diff --exit-code -- docs/widget-schema-v1.md crates
+          test -z "$(git status --porcelain -- crates)"

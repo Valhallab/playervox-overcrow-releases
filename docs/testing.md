@@ -17,6 +17,34 @@ cargo run --release -p overcrow-widget-schema --example package_bench
 The last command measures package revalidation; results are in
 [package format measurements](testing/package-format.md).
 
+Run the source format checks; the tests fail if a committed compiled view or
+expression table under `fixtures/ocml/compiled/` is stale:
+
+```sh
+cargo test -p overcrow-widget-format --locked
+cargo run -p overcrow-widget-format --example fixtures
+```
+
+The fuzz targets cover every parser and package verifier of the widget
+contract: `ocml`, `ocss`, `expression`, `validate_manifest`, `read_package`,
+`validate_compiled_view` and `open_envelope`. They need a nightly toolchain
+and `cargo-fuzz` 0.13.2; the `fuzz` workflow runs each for 60 seconds on
+pull requests and pushes to `main`, and 45 minutes weekly. Seed the corpus
+from the conformance fixtures, then run a target, from the repository root:
+
+```sh
+sh fuzz/seed-corpus.sh
+cargo +nightly fuzz run -O ocml -- -max_total_time=600 -rss_limit_mb=1024 -max_len=16384
+```
+
+A crash leaves its input under `fuzz/artifacts/<target>/`; fix it with a
+regression test in the crate's test suite before rerunning. Besides "no
+panic", the targets check that an accepted view is accepted by the host's
+compiled-view validator and recompiles identically, that the canonical
+JavaScript of an expression parses back to the same tree, that an accepted
+manifest revalidates from its own value, and that `write_package` reproduces
+any accepted archive byte for byte.
+
 Run the packaging and admission checks:
 
 ```sh
