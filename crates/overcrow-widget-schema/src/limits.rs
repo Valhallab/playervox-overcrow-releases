@@ -427,6 +427,12 @@ pub const MAX_GRID_TRACKS: Limit = fixed(
     Unit::Count,
     "Tracks in one `grid-template-rows` or `grid-template-columns`.",
 );
+pub const MAX_GRID_FRACTION: Limit = fixed(
+    "MAX_GRID_FRACTION",
+    1000,
+    Unit::Magnitude,
+    "Largest `<fr>` factor of one grid track.",
+);
 pub const MAX_TRANSITIONS: Limit = fixed(
     "MAX_TRANSITIONS",
     8,
@@ -1083,6 +1089,7 @@ pub const ALL: &[&Limit] = &[
     &MAX_SHADOW_BLUR_PX,
     &MAX_GRADIENT_STOPS,
     &MAX_GRID_TRACKS,
+    &MAX_GRID_FRACTION,
     &MAX_TRANSITIONS,
     &MAX_ANIMATION_MS,
     &MAX_ACTIVE_ANIMATIONS,

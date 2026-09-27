@@ -76,6 +76,7 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MAX_SHADOW_BLUR_PX` | 64 px | fixed | Blur and spread radius of one shadow. |
 | `MAX_GRADIENT_STOPS` | 8 | fixed | Colour stops in one `linear-gradient()`. |
 | `MAX_GRID_TRACKS` | 24 | fixed | Tracks in one `grid-template-rows` or `grid-template-columns`. |
+| `MAX_GRID_FRACTION` | 1000 absolute value | fixed | Largest `<fr>` factor of one grid track. |
 | `MAX_TRANSITIONS` | 8 | fixed | Entries in one `transition` or `animation` list. |
 | `MAX_ANIMATION_MS` | 300000 ms | fixed | Duration or delay of one transition or animation; covers the 120 s Twitch passive fade. |
 | `MAX_ACTIVE_ANIMATIONS` | 64 | fixed | Transitions and animations running at once in one widget; extra ones jump to their end state. |
@@ -528,7 +529,7 @@ Animatable properties change paint only, so transitions and animations never rer
 | --- | --- |
 | `<px>` | `12px`; `0` may omit the unit. Decimal numbers, no exponent. |
 | `<percent>` | `50%` of the containing block, as in CSS; at most `MAX_PERCENT` either way. |
-| `<fr>` | `1fr`, grid tracks only. |
+| `<fr>` | `1fr`, grid tracks only; 0..=`MAX_GRID_FRACTION`. |
 | `<time>` | `120ms` or `0.12s`, 0..=`MAX_ANIMATION_MS`. |
 | `<angle>` | `4deg` or `0.5turn`, at most `MAX_ANGLE_DEG` degrees either way. |
 | `<color>` | `#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`, `rgb(r g b)`, `rgb(r g b / a)`, `transparent`, `currentColor`, or a colour token. No named colours. |

@@ -551,83 +551,91 @@ impl Checker<'_> {
     }
 
     fn static_value(&self, ty: ValueType, value: &Value) -> Result<(), ViewError> {
-        let invalid = ViewError::InvalidAttribute;
-        let text = |maximum: u64, characters: bool| {
-            value
-                .as_str()
-                .filter(|text| {
-                    let length = if characters {
-                        text.chars().count()
-                    } else {
-                        text.len()
-                    };
-                    length as u64 <= maximum && !text.contains('\0')
+        static_value(ty, value, self.assets)
+    }
+}
+
+/// Checks a static attribute value against its type. `assets` holds the
+/// `assets/…` paths of the package, the only images a static `src` may name.
+pub fn static_value(
+    ty: ValueType,
+    value: &Value,
+    assets: &BTreeSet<String>,
+) -> Result<(), ViewError> {
+    let invalid = ViewError::InvalidAttribute;
+    let text = |maximum: u64, characters: bool| {
+        value
+            .as_str()
+            .filter(|text| {
+                let length = if characters {
+                    text.chars().count()
+                } else {
+                    text.len()
+                };
+                length as u64 <= maximum && !text.contains('\0')
+            })
+            .map(|_| ())
+            .ok_or(invalid)
+    };
+    match ty {
+        ValueType::Bool => value.is_boolean().then_some(()).ok_or(invalid),
+        ValueType::Text(limit) => text(limit.value, false),
+        ValueType::Chars(limit) => text(limit.value, true),
+        ValueType::Identifier(limit) => value
+            .as_str()
+            .filter(|name| name.len() as u64 <= limit.value && valid_identifier(name))
+            .map(|_| ())
+            .ok_or(invalid),
+        ValueType::Integer { min, max } => integer_in(value, min, max).map(|_| ()).ok_or(invalid),
+        ValueType::Number { min, max } => value
+            .as_f64()
+            .filter(|number| number.is_finite() && (min..=max).contains(number))
+            .map(|_| ())
+            .ok_or(invalid),
+        ValueType::Keyword(words) => value
+            .as_str()
+            .filter(|word| words.contains(word))
+            .map(|_| ())
+            .ok_or(invalid),
+        ValueType::ClassList => {
+            let list = value.as_str().ok_or(invalid)?;
+            let mut unique = BTreeSet::new();
+            let valid = !list.is_empty()
+                && list.split(' ').all(|class| {
+                    class.len() as u64 <= MAX_IDENTIFIER_BYTES.value
+                        && valid_identifier(class)
+                        && unique.insert(class)
                 })
-                .map(|_| ())
-                .ok_or(invalid)
-        };
-        match ty {
-            ValueType::Bool => value.is_boolean().then_some(()).ok_or(invalid),
-            ValueType::Text(limit) => text(limit.value, false),
-            ValueType::Chars(limit) => text(limit.value, true),
-            ValueType::Identifier(limit) => value
-                .as_str()
-                .filter(|name| name.len() as u64 <= limit.value && valid_identifier(name))
-                .map(|_| ())
-                .ok_or(invalid),
-            ValueType::Integer { min, max } => {
-                integer_in(value, min, max).map(|_| ()).ok_or(invalid)
-            }
-            ValueType::Number { min, max } => value
-                .as_f64()
-                .filter(|number| number.is_finite() && (min..=max).contains(number))
-                .map(|_| ())
-                .ok_or(invalid),
-            ValueType::Keyword(words) => value
-                .as_str()
-                .filter(|word| words.contains(word))
-                .map(|_| ())
-                .ok_or(invalid),
-            ValueType::ClassList => {
-                let list = value.as_str().ok_or(invalid)?;
-                let mut unique = BTreeSet::new();
-                let valid = !list.is_empty()
-                    && list.split(' ').all(|class| {
-                        class.len() as u64 <= MAX_IDENTIFIER_BYTES.value
-                            && valid_identifier(class)
-                            && unique.insert(class)
-                    })
-                    && unique.len() as u64 <= MAX_CLASSES_PER_NODE.value;
-                valid.then_some(()).ok_or(invalid)
-            }
-            ValueType::Icon => value
-                .as_str()
-                .filter(|name| is_icon(name))
-                .map(|_| ())
-                .ok_or(invalid),
-            ValueType::ImageSource => {
-                // Host asset handles exist only at runtime; a static source
-                // names a file of this package.
-                let source = value.as_str().ok_or(invalid)?;
-                if !source.starts_with("assets/") {
-                    return Err(invalid);
-                }
-                self.assets
-                    .contains(source)
-                    .then_some(())
-                    .ok_or(ViewError::MissingAsset)
-            }
-            ValueType::NumberList(limit) => {
-                let values = value.as_array().ok_or(invalid)?;
-                let valid = values.len() as u64 <= limit.value
-                    && values
-                        .iter()
-                        .all(|value| value.as_f64().is_some_and(f64::is_finite));
-                valid.then_some(()).ok_or(invalid)
-            }
-            // Node references, IDs and structured values exist only at runtime.
-            _ => Err(invalid),
+                && unique.len() as u64 <= MAX_CLASSES_PER_NODE.value;
+            valid.then_some(()).ok_or(invalid)
         }
+        ValueType::Icon => value
+            .as_str()
+            .filter(|name| is_icon(name))
+            .map(|_| ())
+            .ok_or(invalid),
+        ValueType::ImageSource => {
+            // Host asset handles exist only at runtime; a static source
+            // names a file of this package.
+            let source = value.as_str().ok_or(invalid)?;
+            if !source.starts_with("assets/") {
+                return Err(invalid);
+            }
+            assets
+                .contains(source)
+                .then_some(())
+                .ok_or(ViewError::MissingAsset)
+        }
+        ValueType::NumberList(limit) => {
+            let values = value.as_array().ok_or(invalid)?;
+            let valid = values.len() as u64 <= limit.value
+                && values
+                    .iter()
+                    .all(|value| value.as_f64().is_some_and(f64::is_finite));
+            valid.then_some(()).ok_or(invalid)
+        }
+        // Node references, IDs and structured values exist only at runtime.
+        _ => Err(invalid),
     }
 }
 
@@ -662,7 +670,7 @@ fn reaches_itself(start: &str, graph: &BTreeMap<&str, BTreeSet<String>>) -> bool
 }
 
 /// `[a-z][a-z0-9-]*`: component and class names.
-fn valid_identifier(value: &str) -> bool {
+pub fn valid_identifier(value: &str) -> bool {
     value.len() as u64 <= MAX_IDENTIFIER_BYTES.value
         && value.as_bytes().first().is_some_and(u8::is_ascii_lowercase)
         && value
@@ -671,7 +679,7 @@ fn valid_identifier(value: &str) -> bool {
 }
 
 /// `[A-Za-z_][A-Za-z0-9_]*`: names bound in template scope (props, `as`).
-fn valid_scope_name(value: &str) -> bool {
+pub fn valid_scope_name(value: &str) -> bool {
     value.len() as u64 <= MAX_IDENTIFIER_BYTES.value
         && value
             .as_bytes()

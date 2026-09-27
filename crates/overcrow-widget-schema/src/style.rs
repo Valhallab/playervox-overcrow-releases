@@ -651,7 +651,7 @@ pub const VALUE_SYNTAX: &[SyntaxEntry] = &[
     },
     SyntaxEntry {
         syntax: "<fr>",
-        summary: "`1fr`, grid tracks only.",
+        summary: "`1fr`, grid tracks only; 0..=`MAX_GRID_FRACTION`.",
     },
     SyntaxEntry {
         syntax: "<time>",
