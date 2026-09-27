@@ -526,12 +526,11 @@ pub const MAX_DRAW_COMMANDS: Limit = pending(
     Unit::Count,
     "Commands in one `Draw` message, replacing the canvas content.",
 );
-pub const MAX_PATH_POINTS: Limit = pending(
-    Status::P1_3,
+pub const MAX_PATH_POINTS: Limit = fixed(
     "MAX_PATH_POINTS",
     16_384,
     Unit::Count,
-    "Path points in one `Draw` message, all paths included.",
+    "Vertices the host draws for one `Draw` message, all paths included, counted with a fixed ceiling per command that the renderer's adaptive flattening never exceeds: `moveTo` and `lineTo` 1, `quadTo` 8, `cubicTo` 16, `arc` and `circle` 64, `rect` 36, other commands 0.",
 );
 pub const MAX_DRAW_STATE_DEPTH: Limit = fixed(
     "MAX_DRAW_STATE_DEPTH",

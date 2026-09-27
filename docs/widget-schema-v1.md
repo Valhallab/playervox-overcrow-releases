@@ -92,7 +92,7 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MAX_ANIMATION_ITERATIONS` | 10000 | fixed | Finite iteration count of one animation; `infinite` stays allowed. |
 | `MAX_CANVASES` | 8 | fixed | `canvas` nodes in one widget. |
 | `MAX_DRAW_COMMANDS` | 4096 | **provisional (P1.3)** | Commands in one `Draw` message, replacing the canvas content. |
-| `MAX_PATH_POINTS` | 16384 | **provisional (P1.3)** | Path points in one `Draw` message, all paths included. |
+| `MAX_PATH_POINTS` | 16384 | fixed | Vertices the host draws for one `Draw` message, all paths included, counted with a fixed ceiling per command that the renderer's adaptive flattening never exceeds: `moveTo` and `lineTo` 1, `quadTo` 8, `cubicTo` 16, `arc` and `circle` 64, `rect` 36, other commands 0. |
 | `MAX_DRAW_STATE_DEPTH` | 16 | fixed | Nested `save` commands. |
 | `MAX_IMAGE_EDGE_PX` | 2048 px | fixed | Width or height of one decoded image. |
 | `MAX_IMAGE_ENCODED_BYTES` | 2 MiB | fixed | Encoded size of one PNG, JPEG or WebP image before decoding. |
