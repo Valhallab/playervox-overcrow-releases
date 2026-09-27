@@ -1,0 +1,5 @@
+{
+  "type": "Fault",
+  "category": "vm_exited",
+  "fatal": true
+}

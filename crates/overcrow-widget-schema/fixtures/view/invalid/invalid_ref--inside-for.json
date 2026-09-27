@@ -1,0 +1,24 @@
+{
+  "viewFormat": 1,
+  "expressions": 1,
+  "children": [
+    {
+      "for": 0,
+      "as": "item",
+      "key": 0,
+      "children": [
+        {
+          "element": "box",
+          "children": [
+            {
+              "element": "canvas",
+              "attrs": {
+                "ref": "chart"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

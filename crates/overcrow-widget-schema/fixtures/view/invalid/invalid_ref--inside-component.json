@@ -1,0 +1,23 @@
+{
+  "viewFormat": 1,
+  "expressions": 1,
+  "children": [
+    {
+      "component": "row"
+    }
+  ],
+  "components": [
+    {
+      "name": "row",
+      "props": [],
+      "children": [
+        {
+          "element": "canvas",
+          "attrs": {
+            "ref": "chart"
+          }
+        }
+      ]
+    }
+  ]
+}

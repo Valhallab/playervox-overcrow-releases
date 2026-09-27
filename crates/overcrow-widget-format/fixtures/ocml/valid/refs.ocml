@@ -1,0 +1,9 @@
+<!-- `ref` names for Draw.canvas and node-reference attributes. -->
+<box class="toolbar" ref="toolbar">
+  <button ref="more" label="More" on:activate={openMenu}><icon name="ellipsis"/></button>
+</box>
+<canvas ref="chart"/>
+<if test={state.sparkline}><canvas ref="spark"/></if>
+<popover anchor="more" open={state.menuOpen} on:dismiss={closeMenu}>
+  <text>Menu</text>
+</popover>

@@ -1,0 +1,5 @@
+0	Handler	[event]	openMenu(event)
+1	Test	[]	state.sparkline
+2	Attribute	[]	state.menuOpen
+3	Handler	[event]	closeMenu(event)
+functions	closeMenu, openMenu

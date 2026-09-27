@@ -198,6 +198,10 @@ pub enum ViewError {
     InvalidComponent,
     InvalidSlot,
     MissingAsset,
+    /// A `ref` bound, repeated, or inside a `for` or a component body.
+    InvalidRef,
+    /// A reference to a `ref` the view does not declare.
+    UnknownRef,
     TooManyElements,
     TooManyComponents,
     TooManyChildren,
@@ -224,6 +228,8 @@ impl ViewError {
             Self::InvalidComponent => "invalid_component",
             Self::InvalidSlot => "invalid_slot",
             Self::MissingAsset => "missing_asset",
+            Self::InvalidRef => "invalid_ref",
+            Self::UnknownRef => "unknown_ref",
             Self::TooManyElements => "too_many_elements",
             Self::TooManyComponents => "too_many_components",
             Self::TooManyChildren => "too_many_children",
@@ -232,9 +238,29 @@ impl ViewError {
     }
 }
 
+/// What the host keeps from a validated view to check the VM's messages.
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct ViewSummary {
+    /// Length of the expression table.
+    pub expressions: u64,
+    /// Every `ref` name and the element that carries it.
+    pub refs: BTreeMap<String, &'static str>,
+    /// Expression indices of the event handlers (`on`), the only ones a
+    /// non-fatal `Fault` may name.
+    pub handlers: BTreeSet<u64>,
+}
+
 /// Validates `view.json` bytes. `assets` holds the `assets/…` paths of the
 /// package, the only images a static `src` may name.
 pub fn validate_compiled_view(bytes: &[u8], assets: &BTreeSet<String>) -> Result<(), ViewError> {
+    inspect_compiled_view(bytes, assets).map(|_| ())
+}
+
+/// [`validate_compiled_view`], returning the [`ViewSummary`] of the view.
+pub fn inspect_compiled_view(
+    bytes: &[u8],
+    assets: &BTreeSet<String>,
+) -> Result<ViewSummary, ViewError> {
     if bytes.len() as u64 > MAX_COMPILED_VIEW_BYTES.value {
         return Err(ViewError::Size);
     }
@@ -288,6 +314,9 @@ pub fn validate_compiled_view(bytes: &[u8], assets: &BTreeSet<String>) -> Result
             .collect(),
         elements: 0,
         uses: BTreeSet::new(),
+        refs: BTreeMap::new(),
+        references: Vec::new(),
+        handlers: BTreeSet::new(),
     };
     let root = element("box").ok_or(ViewError::UnknownElement)?;
     let mut graph = BTreeMap::new();
@@ -298,6 +327,7 @@ pub fn validate_compiled_view(bytes: &[u8], assets: &BTreeSet<String>) -> Result
             parent: root,
             depth: 1,
             slots: Some(&mut slots),
+            repeated: true,
         };
         checker.children(&component["children"], context)?;
         if slots > 1 {
@@ -309,12 +339,24 @@ pub fn validate_compiled_view(bytes: &[u8], assets: &BTreeSet<String>) -> Result
         parent: root,
         depth: 1,
         slots: None,
+        repeated: false,
     };
     checker.children(&object["children"], context)?;
     if graph.keys().any(|name| reaches_itself(name, &graph)) {
         return Err(ViewError::RecursiveComponent);
     }
-    Ok(())
+    if checker
+        .references
+        .iter()
+        .any(|name| !checker.refs.contains_key(name))
+    {
+        return Err(ViewError::UnknownRef);
+    }
+    Ok(ViewSummary {
+        expressions,
+        refs: checker.refs,
+        handlers: checker.handlers,
+    })
 }
 
 struct Checker<'a> {
@@ -324,6 +366,10 @@ struct Checker<'a> {
     elements: u64,
     /// Components used by the body being checked.
     uses: BTreeSet<String>,
+    refs: BTreeMap<String, &'static str>,
+    /// Static `ref` names used by node-reference attributes.
+    references: Vec<String>,
+    handlers: BTreeSet<u64>,
 }
 
 /// Where a list of nodes is placed: the element whose content model applies
@@ -333,6 +379,9 @@ struct Context<'s> {
     parent: &'static Element,
     depth: u64,
     slots: Option<&'s mut u32>,
+    /// Inside a `for` or a component body: a node here may exist several
+    /// times, so it cannot carry a `ref`.
+    repeated: bool,
 }
 
 impl Context<'_> {
@@ -341,6 +390,7 @@ impl Context<'_> {
             parent,
             depth: self.depth + 1,
             slots: self.slots.as_deref_mut(),
+            repeated: self.repeated,
         }
     }
 }
@@ -403,7 +453,9 @@ impl Checker<'_> {
                     return Err(ViewError::Shape);
                 }
                 let parent = context.parent;
-                self.children(&object["children"], context.nested(parent))
+                let mut nested = context.nested(parent);
+                nested.repeated = true;
+                self.children(&object["children"], nested)
             }
             "component" => {
                 let name = object["component"].as_str().ok_or(ViewError::Shape)?;
@@ -474,9 +526,27 @@ impl Checker<'_> {
         for (name, value) in attrs.into_iter().flatten() {
             let field = attribute(name).ok_or(ViewError::UnknownAttribute)?;
             self.static_value(field.ty, value)?;
+            match field.ty {
+                ValueType::Ref => {
+                    let name = value.as_str().ok_or(ViewError::InvalidRef)?;
+                    if context.repeated || self.refs.insert(name.to_owned(), element.name).is_some()
+                    {
+                        return Err(ViewError::InvalidRef);
+                    }
+                }
+                ValueType::RefName => {
+                    let name = value.as_str().ok_or(ViewError::InvalidAttribute)?;
+                    self.references.push(name.to_owned());
+                }
+                _ => {}
+            }
         }
         for (name, value) in bind.into_iter().flatten() {
-            attribute(name).ok_or(ViewError::UnknownAttribute)?;
+            let field = attribute(name).ok_or(ViewError::UnknownAttribute)?;
+            // A `ref` names one node for the whole life of the view.
+            if field.ty == ValueType::Ref {
+                return Err(ViewError::InvalidRef);
+            }
             if attrs.is_some_and(|attrs| attrs.contains_key(name)) {
                 return Err(ViewError::Shape);
             }
@@ -498,6 +568,9 @@ impl Checker<'_> {
                 return Err(ViewError::UnknownEvent);
             }
             self.expression(handler)?;
+            if let Some(index) = handler.as_u64() {
+                self.handlers.insert(index);
+            }
         }
 
         let text = object.get("text");
@@ -626,6 +699,12 @@ pub fn static_value(
                 .then_some(())
                 .ok_or(ViewError::MissingAsset)
         }
+        // Checked against the view's `ref` names by the caller.
+        ValueType::Ref | ValueType::RefName => value
+            .as_str()
+            .filter(|name| valid_identifier(name))
+            .map(|_| ())
+            .ok_or(invalid),
         ValueType::NumberList(limit) => {
             let values = value.as_array().ok_or(invalid)?;
             let valid = values.len() as u64 <= limit.value

@@ -1,0 +1,6 @@
+{
+  "type": "Fault",
+  "category": "unresponsive",
+  "fatal": true,
+  "handler": 1
+}

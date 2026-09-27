@@ -568,9 +568,20 @@ part and an optional raw payload.\n\n| Offset | Bytes | Field | Rule |\n| --- | 
         status(ipc::PAYLOAD_ENCODING_STATUS),
         ipc::PAYLOAD_ENCODING
     );
+    out.push_str(
+        "\n### VM process arguments\n\nThe host starts the VM binary with exactly these \
+arguments; anything else stops the VM before it reads a frame.\n\n",
+    );
+    fields_table(out, ipc::VM_ARGUMENTS);
     messages(out, "Host → VM messages", HOST_MESSAGES);
     messages(out, "VM → host messages", VM_MESSAGES);
     messages(out, "Scene patch operations", PATCH_OPS);
+    out.push_str(
+        "\nIn `create` and `setAttrs`, `on` is a JSON array of event names of the element, \
+sorted in byte order without duplicates, and `class` is one string of distinct classes separated \
+by one space, as in the view. Node-reference attributes and `Draw.canvas` carry a `ref` name \
+declared by the view; operations keep node IDs.\n",
+    );
     out.push_str(
         "\n### Draw commands\n\nEach command is `[name, …arguments]` in order.\n\n\
 | Command | Arguments | Meaning |\n| --- | --- | --- |\n",
@@ -590,6 +601,16 @@ part and an optional raw payload.\n\n| Offset | Bytes | Field | Rule |\n| --- | 
             out,
             "| `{}` | {arguments} | {} |",
             command.name, command.summary
+        );
+    }
+    out.push_str("\n### Fault categories\n\n| Category | Fatal | Meaning |\n| --- | --- | --- |\n");
+    for category in ipc::FAULT_CATEGORIES {
+        let _ = writeln!(
+            out,
+            "| `{}` | {} | {} |",
+            category.name,
+            yes(category.fatal),
+            category.summary
         );
     }
     out.push_str(

@@ -1,0 +1,12 @@
+{
+  "viewFormat": 1,
+  "expressions": 1,
+  "children": [
+    {
+      "element": "canvas",
+      "bind": {
+        "ref": 0
+      }
+    }
+  ]
+}

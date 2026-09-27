@@ -1,0 +1,1 @@
+<for each={state.items} as="item" key={item.id}><box><canvas ref="chart"/></box></for>

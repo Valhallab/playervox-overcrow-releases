@@ -223,10 +223,11 @@ Expressions: Literals, state and prop paths, `!`, `&&`, `||`, `??`, comparison a
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `class` | class list | no | Style classes. |
+| `class` | class list | no | Style classes; in a scene patch, one string of distinct classes separated by one space, as in the view. |
+| `ref` | static `ref` name | no | Name by which `Draw.canvas` and node-reference attributes such as `popover.anchor` designate this node. Static, unique in the view, and not allowed inside a `for` or a component body, where it would name several nodes. |
 | `label` | text ≤ `MAX_LABEL_BYTES` | no | Accessible name; required on icon-only controls. |
 | `tooltip` | text ≤ `MAX_LABEL_BYTES` | no | Plain text drawn by the host on hover or focus. |
-| `on` | event set | no | Events forwarded to the VM; written `on:<event>` in the view. |
+| `on` | sorted event names | no | Events forwarded to the VM; written `on:<event>` in the view. |
 
 #### `scroll` attributes
 
@@ -398,7 +399,7 @@ Expressions: Literals, state and prop paths, `!`, `&&`, `||`, `??`, comparison a
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `anchor` | node reference | yes | Node the panel is placed against. |
+| `anchor` | `ref` name | yes | `ref` of the node the panel is placed against. |
 | `open` | boolean | no | Visibility; the host closes it and sends `dismiss`. |
 | `placement` | `below` \| `above` \| `start` \| `end` \| `pointer` | no | Preferred side, or the last pointer position; default `below`. |
 
@@ -903,6 +904,14 @@ OCWV v1 runs over one inherited pipe or socket pair per widget; the VM never ope
 
 Raw payload encoding (fixed): UTF-8 JSON: an array of operation objects for `ScenePatch`, an array of command arrays `[name, …arguments]` for `Draw`.
 
+### VM process arguments
+
+The host starts the VM binary with exactly these arguments; anything else stops the VM before it reads a frame.
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `--heap-mib` | integer 16..=48 | yes | QuickJS heap ceiling in MiB: the manifest `vm.heapMiB`, or 16 when it requests none. Written `--heap-mib <N>`, `N` a canonical decimal. |
+
 ### Host → VM messages
 
 #### `Init` (frame 3)
@@ -932,7 +941,7 @@ Input, menu action or timer tick. A gesture event's frame sequence is the only g
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
 | `target` | `node` \| `menu` \| `timer` | yes | Event source. |
-| `node` | node reference | no | `node`: subscribed node. |
+| `node` | node ID | no | `node`: subscribed node. |
 | `event` | `event name` | no | `node`: one of the node's events. |
 | `detail` | JSON | no | `node`: event detail. |
 | `row` | `menu row ID` | no | `menu`: `action` row. |
@@ -1049,7 +1058,7 @@ Replaces the canvas command list.
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `canvas` | node reference | yes | Target `canvas` node. |
+| `canvas` | `ref` name | yes | `ref` of the target `canvas` element. |
 | `commands` | integer 0..=4096 | yes | Commands in the raw payload. |
 
 #### `Log` (frame 2)
@@ -1069,6 +1078,16 @@ Missing it within `HEARTBEAT_DEADLINE_MS` is `unresponsive`.
 | --- | --- | --- | --- |
 | `nonce` | id | yes | Nonce of the latest `Heartbeat`. |
 
+#### `Fault` (frame 2)
+
+The VM reports a failure it detected. No text and no stack. After a fatal fault the VM sends what it can and exits. At most one non-fatal fault per handler and per turn; the host treats more as `protocol_violation` (P1.7).
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `category` | `resource_limit` \| `unresponsive` \| `protocol_violation` \| `invalid_bundle` \| `handler_exception` | yes | A category of the fault table. |
+| `fatal` | boolean | yes | Must equal the category's `fatal`. |
+| `handler` | integer 0..=4095 | no | Expression index of the event handler that threw; required for `handler_exception`, rejected otherwise. |
+
 ### Scene patch operations
 
 #### `create` (frame 6)
@@ -1078,7 +1097,7 @@ Adds a node.
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
 | `node` | id | yes | New node ID. |
-| `parent` | node reference | yes | Parent accepting this element. |
+| `parent` | node ID | yes | Parent accepting this element. |
 | `index` | integer 0..=1024 | yes | Position among siblings. |
 | `element` | `element name` | yes | Element. |
 | `attrs` | `attribute map` | no | Initial attributes. |
@@ -1090,7 +1109,7 @@ Removes a subtree.
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `node` | node reference | yes | Node; its subtree is removed. |
+| `node` | node ID | yes | Node; its subtree is removed. |
 
 #### `move` (frame 6)
 
@@ -1098,17 +1117,17 @@ Reorders or reparents a node (keyed lists).
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `node` | node reference | yes | Node. |
-| `parent` | node reference | yes | New parent, not inside the node. |
+| `node` | node ID | yes | Node. |
+| `parent` | node ID | yes | New parent, not inside the node. |
 | `index` | integer 0..=1024 | yes | Position among siblings. |
 
 #### `setAttrs` (frame 6)
 
-Changes attributes, classes (`class`) and subscriptions (`on`).
+Changes attributes, classes (`class`) and subscriptions (`on`). A `ref` is set only by `create`, as the view declares it.
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `node` | node reference | yes | Node. |
+| `node` | node ID | yes | Node. |
 | `attrs` | `attribute map` | yes | `null` removes an attribute. |
 
 #### `setText` (frame 6)
@@ -1117,8 +1136,10 @@ Replaces text content.
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `node` | node reference | yes | Text-content node. |
+| `node` | node ID | yes | Text-content node. |
 | `text` | text ≤ `MAX_NODE_TEXT_BYTES` | yes | Text. |
+
+In `create` and `setAttrs`, `on` is a JSON array of event names of the element, sorted in byte order without duplicates, and `class` is one string of distinct classes separated by one space, as in the view. Node-reference attributes and `Draw.canvas` carry a `ref` name declared by the view; operations keep node IDs.
 
 ### Draw commands
 
@@ -1146,6 +1167,16 @@ Each command is `[name, …arguments]` in order.
 | `scale` | `x`: number 0..=8; `y`: number 0..=8 | Scales. |
 | `alpha` | `value`: number 0..=1 | Multiplies opacity. |
 
+### Fault categories
+
+| Category | Fatal | Meaning |
+| --- | --- | --- |
+| `resource_limit` | yes | Heap, stack, job queue or message budget exhausted inside the VM. |
+| `unresponsive` | yes | The turn budget interrupted the VM. |
+| `protocol_violation` | yes | The host sent a frame the VM cannot accept. |
+| `invalid_bundle` | yes | `logic.js` or the compiled view failed to load or register. |
+| `handler_exception` | no | An event handler threw; the VM keeps running. |
+
 ### Failure categories
 
 | Category | Restarts | Meaning |
@@ -1155,7 +1186,7 @@ Each command is `[name, …arguments]` in order.
 | `protocol_violation` | no | Malformed, unknown or out-of-order IPC or scene data. |
 | `resource_limit` | yes | A memory, CPU, queue, rate or size ceiling was exceeded. |
 | `unresponsive` | yes | Missed `Ready` or heartbeat deadline, or turn budget exceeded. |
-| `vm_exited` | yes | The VM process ended unexpectedly. |
+| `vm_exited` | yes | The VM process ended without a fatal `Fault` (seccomp kill, out of memory); recorded by the host's supervision, never sent by the VM. |
 
 Transient failures restart after 1, 5 and 15 seconds, at most three times; the budget resets after 60 seconds of stable run.
 

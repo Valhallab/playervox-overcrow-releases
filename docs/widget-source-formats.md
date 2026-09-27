@@ -70,6 +70,12 @@ values`); the text itself otherwise. Static images name a package file
 `assets/…`. Values that exist only at runtime (node references, asset
 handles) must be bound with `{…}`.
 
+`ref="name"` gives a node a name that `Draw.canvas` and node-reference
+attributes such as `popover.anchor` use instead of a node ID. It is always a
+quoted identifier, unique in the view, and rejected inside a `for` or a
+component body, where it would name several nodes. A static `anchor="name"`
+must name a `ref` of the view.
+
 `attr={expr}` binds an attribute to an expression; the VM computes it and the
 host checks every value it sends. `on:event={handler}` subscribes the node to
 an event of its element. A handler is either the name of a function of the
@@ -198,7 +204,8 @@ activation.
 `expression_syntax`,
 `expression_too_long`, `expression_too_deep`, `expression_too_many_entries`,
 `reserved_name`, `unknown_name`, `invalid_text`, `recursive_component`, `invalid_component`, `invalid_slot`,
-`invalid_construct`, `missing_asset`, `too_many_elements`,
+`invalid_construct`, `missing_asset`, `invalid_ref`, `unknown_ref`,
+`too_many_elements`,
 `too_many_components`, `too_many_children`, `too_many_expressions`,
 `too_deep`.
 

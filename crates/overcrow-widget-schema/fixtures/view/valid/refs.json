@@ -1,0 +1,75 @@
+{
+  "viewFormat": 1,
+  "expressions": 4,
+  "children": [
+    {
+      "element": "box",
+      "attrs": {
+        "class": "toolbar",
+        "ref": "toolbar"
+      },
+      "on": {
+        "contextmenu": 0
+      },
+      "children": [
+        {
+          "element": "button",
+          "attrs": {
+            "ref": "more",
+            "label": "More"
+          },
+          "on": {
+            "activate": 1
+          },
+          "children": [
+            {
+              "element": "icon",
+              "attrs": {
+                "name": "ellipsis"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "element": "canvas",
+      "attrs": {
+        "ref": "chart"
+      }
+    },
+    {
+      "if": [
+        {
+          "test": 2,
+          "children": [
+            {
+              "element": "canvas",
+              "attrs": {
+                "ref": "spark"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "element": "popover",
+      "attrs": {
+        "anchor": "more",
+        "placement": "below"
+      },
+      "bind": {
+        "open": 3
+      },
+      "children": [
+        {
+          "element": "text",
+          "text": [
+            "Menu"
+          ]
+        }
+      ]
+    }
+  ]
+}

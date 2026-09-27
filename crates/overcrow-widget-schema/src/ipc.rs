@@ -2,12 +2,22 @@
 //! of the Web runtime's IPC with a redefined message set.
 //! Any unknown frame kind, message, field or value is a `protocol_violation`.
 
+use std::collections::BTreeSet;
+
+use serde_json::Value;
+
+use crate::compiled_view::{ViewSummary, static_value};
+use crate::json::{has_exact_fields, integer_in};
 use crate::limits::{
     MAX_ATTRIBUTE_TEXT_BYTES, MAX_CHILDREN, MAX_CONTENT_SCALE, MAX_DRAW_COMMANDS, MAX_FONT_SIZE_PX,
     MAX_HTTP_REQUEST_BYTES, MAX_HTTP_RESPONSE_BYTES, MAX_LENGTH_PX, MAX_LOG_BYTES, MAX_LOGIC_BYTES,
-    MAX_NODE_TEXT_BYTES, MAX_PATCH_BYTES, MAX_PATCH_OPS, MIN_CONTENT_SCALE, MIN_FONT_SIZE_PX,
+    MAX_NODE_TEXT_BYTES, MAX_PATCH_BYTES, MAX_PATCH_OPS, MAX_VIEW_EXPRESSIONS, MIN_CONTENT_SCALE,
+    MIN_FONT_SIZE_PX, VM_HEAP_BYTES, VM_MAX_HEAP_BYTES,
 };
-use crate::model::{Field, Limit, Status, ValueType};
+use crate::model::{Field, Limit, Status, ValueType, field};
+use crate::view::Element;
+
+const MIB: u64 = 1024 * 1024;
 
 pub const MAGIC: &[u8; 4] = b"OCWV";
 /// Framing version; unchanged because no Web API peer can coexist with v1.
@@ -443,7 +453,11 @@ pub const VM_MESSAGES: &[Message] = &[
         name: "Draw",
         frame: 7,
         fields: &[
-            Field::required("canvas", ValueType::NodeRef, "Target `canvas` node."),
+            Field::required(
+                "canvas",
+                ValueType::RefName,
+                "`ref` of the target `canvas` element.",
+            ),
             Field::required(
                 "commands",
                 ValueType::Integer {
@@ -478,7 +492,269 @@ pub const VM_MESSAGES: &[Message] = &[
         )],
         summary: "Missing it within `HEARTBEAT_DEADLINE_MS` is `unresponsive`.",
     },
+    Message {
+        name: "Fault",
+        frame: 2,
+        fields: &[
+            Field::required(
+                "category",
+                ValueType::Keyword(FAULT_CATEGORY_NAMES),
+                "A category of the fault table.",
+            ),
+            Field::required(
+                "fatal",
+                ValueType::Bool,
+                "Must equal the category's `fatal`.",
+            ),
+            Field::optional(
+                "handler",
+                ValueType::Integer {
+                    min: 0,
+                    max: MAX_VIEW_EXPRESSIONS.value as i64 - 1,
+                },
+                "Expression index of the event handler that threw; required for `handler_exception`, rejected otherwise.",
+            ),
+        ],
+        summary: "The VM reports a failure it detected. No text and no stack. After a fatal fault the VM sends what it can and exits. At most one non-fatal fault per handler and per turn; the host treats more as `protocol_violation` (P1.7).",
+    },
 ];
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct FaultCategory {
+    pub name: &'static str,
+    pub fatal: bool,
+    pub summary: &'static str,
+}
+
+/// Categories of `Fault`, a closed list. A VM that dies without a fault
+/// (seccomp kill, out of memory) is recorded by the host as `vm_exited`,
+/// which is not a fault category.
+pub const FAULT_CATEGORIES: &[FaultCategory] = &[
+    FaultCategory {
+        name: "resource_limit",
+        fatal: true,
+        summary: "Heap, stack, job queue or message budget exhausted inside the VM.",
+    },
+    FaultCategory {
+        name: "unresponsive",
+        fatal: true,
+        summary: "The turn budget interrupted the VM.",
+    },
+    FaultCategory {
+        name: "protocol_violation",
+        fatal: true,
+        summary: "The host sent a frame the VM cannot accept.",
+    },
+    FaultCategory {
+        name: "invalid_bundle",
+        fatal: true,
+        summary: "`logic.js` or the compiled view failed to load or register.",
+    },
+    FaultCategory {
+        name: "handler_exception",
+        fatal: false,
+        summary: "An event handler threw; the VM keeps running.",
+    },
+];
+
+pub const FAULT_CATEGORY_NAMES: &[&str] = &[
+    "resource_limit",
+    "unresponsive",
+    "protocol_violation",
+    "invalid_bundle",
+    "handler_exception",
+];
+
+/// Command-line arguments of the VM binary, set by the trusted host. Any
+/// other argument, a missing one or a value out of range stops the VM
+/// before it reads a frame.
+pub const VM_ARGUMENTS: &[Field] = &[Field::required(
+    "--heap-mib",
+    ValueType::Integer {
+        min: (VM_HEAP_BYTES.value / MIB) as i64,
+        max: (VM_MAX_HEAP_BYTES.value / MIB) as i64,
+    },
+    "QuickJS heap ceiling in MiB: the manifest `vm.heapMiB`, or 16 when it requests none. Written `--heap-mib <N>`, `N` a canonical decimal.",
+)];
+
+/// Fixed reasons a VM message or argument is rejected; every one is a
+/// `protocol_violation` for the host.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum IpcError {
+    /// Wrong JSON type, missing or unknown field, wrong `type`.
+    Shape,
+    /// Unknown fault category.
+    Category,
+    /// `fatal` differs from the category's.
+    Fatal,
+    /// `handler` missing for a non-fatal fault, present for a fatal one, or
+    /// not the index of an event handler of the view.
+    Handler,
+    /// A `ref` name the view does not declare.
+    UnknownRef,
+    /// `Draw.canvas` names an element that is not a `canvas`.
+    NotCanvas,
+    /// `Draw.commands` out of range.
+    Commands,
+    /// A scene patch attribute value of the wrong type or encoding.
+    InvalidAttribute,
+    /// A VM argument missing, unknown, repeated or out of range.
+    Argument,
+}
+
+impl IpcError {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Shape => "shape",
+            Self::Category => "category",
+            Self::Fatal => "fatal",
+            Self::Handler => "handler",
+            Self::UnknownRef => "unknown_ref",
+            Self::NotCanvas => "not_canvas",
+            Self::Commands => "commands",
+            Self::InvalidAttribute => "invalid_attribute",
+            Self::Argument => "argument",
+        }
+    }
+}
+
+fn message(messages: &'static [Message], name: &str) -> Option<&'static Message> {
+    messages.iter().find(|message| message.name == name)
+}
+
+/// The control object of the VM message `name`: its `type` and the fields
+/// of its table, nothing else.
+fn control<'a>(
+    value: &'a Value,
+    name: &str,
+) -> Result<(&'a serde_json::Map<String, Value>, &'static [Field]), IpcError> {
+    let object = value.as_object().ok_or(IpcError::Shape)?;
+    let message = message(VM_MESSAGES, name).ok_or(IpcError::Shape)?;
+    if object.get("type").and_then(Value::as_str) != Some(name) {
+        return Err(IpcError::Shape);
+    }
+    let kind = [Field::required(
+        "type",
+        ValueType::Record("message name"),
+        "",
+    )];
+    if !has_exact_fields(object, &[&kind, message.fields]) {
+        return Err(IpcError::Shape);
+    }
+    Ok((object, message.fields))
+}
+
+/// Validates a `Fault` control object against the view the VM runs.
+pub fn validate_fault(value: &Value, view: &ViewSummary) -> Result<(), IpcError> {
+    let (object, _) = control(value, "Fault")?;
+    let category = object["category"].as_str().ok_or(IpcError::Shape)?;
+    let category = FAULT_CATEGORIES
+        .iter()
+        .find(|known| known.name == category)
+        .ok_or(IpcError::Category)?;
+    if object["fatal"].as_bool().ok_or(IpcError::Shape)? != category.fatal {
+        return Err(IpcError::Fatal);
+    }
+    match (category.fatal, object.get("handler")) {
+        (true, None) => Ok(()),
+        (false, Some(handler)) => handler
+            .as_u64()
+            .filter(|index| view.handlers.contains(index))
+            .map(|_| ())
+            .ok_or(IpcError::Handler),
+        _ => Err(IpcError::Handler),
+    }
+}
+
+/// Validates a `Draw` control object against the view the VM runs.
+pub fn validate_draw(value: &Value, view: &ViewSummary) -> Result<(), IpcError> {
+    let (object, fields) = control(value, "Draw")?;
+    let canvas = object["canvas"].as_str().ok_or(IpcError::Shape)?;
+    match view.refs.get(canvas) {
+        None => return Err(IpcError::UnknownRef),
+        Some(element) if *element != "canvas" => return Err(IpcError::NotCanvas),
+        Some(_) => {}
+    }
+    let Some(ValueType::Integer { min, max }) = field(fields, "commands").map(|field| field.ty)
+    else {
+        return Err(IpcError::Shape);
+    };
+    integer_in(&object["commands"], min, max)
+        .map(|_| ())
+        .ok_or(IpcError::Commands)
+}
+
+/// Validates one attribute value of a scene patch (`create` or `setAttrs`;
+/// `null` removals are the caller's). `on` is a JSON array of event names of
+/// the element, sorted in byte order without duplicates; `class` is one
+/// string of distinct classes separated by one space, as in the view. A
+/// `ref` must be declared by the view on this element; node-reference
+/// attributes name a declared `ref`.
+pub fn validate_patch_attribute(
+    element: &Element,
+    field: &Field,
+    value: &Value,
+    view: &ViewSummary,
+    assets: &BTreeSet<String>,
+) -> Result<(), IpcError> {
+    let invalid = IpcError::InvalidAttribute;
+    match field.ty {
+        ValueType::EventSet => {
+            let events = value.as_array().ok_or(invalid)?;
+            let names: Vec<&str> = events
+                .iter()
+                .map(|event| event.as_str().ok_or(invalid))
+                .collect::<Result<_, _>>()?;
+            let sorted = names.windows(2).all(|pair| pair[0] < pair[1]);
+            if !sorted || !names.iter().all(|name| element.events.contains(name)) {
+                return Err(invalid);
+            }
+            Ok(())
+        }
+        ValueType::Ref => {
+            let name = value.as_str().ok_or(invalid)?;
+            match view.refs.get(name) {
+                Some(owner) if *owner == element.name => Ok(()),
+                Some(_) => Err(invalid),
+                None => Err(IpcError::UnknownRef),
+            }
+        }
+        ValueType::RefName => {
+            let name = value.as_str().ok_or(invalid)?;
+            if view.refs.contains_key(name) {
+                Ok(())
+            } else {
+                Err(IpcError::UnknownRef)
+            }
+        }
+        ty => static_value(ty, value, assets).map_err(|_| invalid),
+    }
+}
+
+/// Parses the VM command line (without the program name) into the heap
+/// ceiling in bytes.
+pub fn parse_vm_arguments<S: AsRef<str>>(arguments: &[S]) -> Result<u64, IpcError> {
+    let [flag, value] = arguments else {
+        return Err(IpcError::Argument);
+    };
+    let heap = VM_ARGUMENTS
+        .iter()
+        .find(|field| field.name == flag.as_ref())
+        .ok_or(IpcError::Argument)?;
+    let ValueType::Integer { min, max } = heap.ty else {
+        return Err(IpcError::Argument);
+    };
+    let text = value.as_ref();
+    let canonical = !text.is_empty()
+        && text.bytes().all(|byte| byte.is_ascii_digit())
+        && !text.starts_with('0');
+    let mib: i64 = text
+        .parse()
+        .ok()
+        .filter(|mib| canonical && (min..=max).contains(mib))
+        .ok_or(IpcError::Argument)?;
+    Ok(mib as u64 * MIB)
+}
 
 /// Scene patch operations, discriminated by `"op"`. Node 0 is the host-owned
 /// root `box`; the VM picks every other ID (1..2^32) and may reuse an ID only
@@ -544,7 +820,7 @@ pub const PATCH_OPS: &[Message] = &[
                 "`null` removes an attribute.",
             ),
         ],
-        summary: "Changes attributes, classes (`class`) and subscriptions (`on`).",
+        summary: "Changes attributes, classes (`class`) and subscriptions (`on`). A `ref` is set only by `create`, as the view declares it.",
     },
     Message {
         name: "setText",
@@ -786,6 +1062,6 @@ pub const FAILURES: &[Failure] = &[
     Failure {
         name: "vm_exited",
         restarts: true,
-        summary: "The VM process ended unexpectedly.",
+        summary: "The VM process ended without a fatal `Fault` (seccomp kill, out of memory); recorded by the host's supervision, never sent by the VM.",
     },
 ];

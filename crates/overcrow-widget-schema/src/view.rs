@@ -82,7 +82,16 @@ const POSITION: ValueType = ValueType::Integer {
 
 /// Accepted by every element.
 pub const COMMON_ATTRIBUTES: &[Field] = &[
-    Field::optional("class", ValueType::ClassList, "Style classes."),
+    Field::optional(
+        "class",
+        ValueType::ClassList,
+        "Style classes; in a scene patch, one string of distinct classes separated by one space, as in the view.",
+    ),
+    Field::optional(
+        "ref",
+        ValueType::Ref,
+        "Name by which `Draw.canvas` and node-reference attributes such as `popover.anchor` designate this node. Static, unique in the view, and not allowed inside a `for` or a component body, where it would name several nodes.",
+    ),
     Field::optional(
         "label",
         LABEL,
@@ -536,8 +545,8 @@ pub const ELEMENTS: &[Element] = &[
         attributes: &[
             Field::required(
                 "anchor",
-                ValueType::NodeRef,
-                "Node the panel is placed against.",
+                ValueType::RefName,
+                "`ref` of the node the panel is placed against.",
             ),
             Field::optional(
                 "open",

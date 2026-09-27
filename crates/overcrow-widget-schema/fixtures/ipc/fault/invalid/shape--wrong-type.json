@@ -1,0 +1,5 @@
+{
+  "type": "Log",
+  "category": "resource_limit",
+  "fatal": true
+}

@@ -1,0 +1,18 @@
+{
+  "viewFormat": 1,
+  "expressions": 1,
+  "children": [
+    {
+      "element": "canvas",
+      "attrs": {
+        "ref": "chart"
+      }
+    },
+    {
+      "element": "canvas",
+      "attrs": {
+        "ref": "chart"
+      }
+    }
+  ]
+}

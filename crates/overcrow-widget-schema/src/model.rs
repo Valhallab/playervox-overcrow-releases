@@ -111,7 +111,13 @@ pub enum ValueType {
     ImageSource,
     /// Scene node ID of another node of the same widget.
     NodeRef,
-    /// Subset of the events of the element.
+    /// The node's own `ref` name: a static identifier, unique in the view,
+    /// never inside a `for` or a component body, never bound.
+    Ref,
+    /// The `ref` name of a node of the view, in place of a node ID.
+    RefName,
+    /// Subset of the events of the element: in a scene patch, a JSON array
+    /// of event names sorted in byte order without duplicates.
     EventSet,
     NumberList(&'static Limit),
     /// A structure defined elsewhere in the schema.
@@ -138,8 +144,10 @@ impl ValueType {
             Self::ClassList => "class list".into(),
             Self::Icon => "Lucide icon name".into(),
             Self::ImageSource => "image source".into(),
-            Self::NodeRef => "node reference".into(),
-            Self::EventSet => "event set".into(),
+            Self::NodeRef => "node ID".into(),
+            Self::Ref => "static `ref` name".into(),
+            Self::RefName => "`ref` name".into(),
+            Self::EventSet => "sorted event names".into(),
             Self::NumberList(limit) => format!("number list ≤ `{}`", limit.key),
             Self::Record(name) => format!("`{name}`"),
             Self::ListOf(name, limit) => format!("list of `{name}` ≤ `{}`", limit.key),

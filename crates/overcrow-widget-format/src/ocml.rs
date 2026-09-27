@@ -75,6 +75,10 @@ pub enum OcmlErrorKind {
     /// `else-if` or `else` without `if`, or a construct misused.
     InvalidConstruct,
     MissingAsset,
+    /// A `ref` bound, repeated, or inside a `for` or a component body.
+    InvalidRef,
+    /// A reference to a `ref` the view does not declare.
+    UnknownRef,
     TooManyElements,
     TooManyComponents,
     TooManyChildren,
@@ -111,6 +115,8 @@ impl OcmlErrorKind {
             Self::InvalidSlot => "invalid_slot",
             Self::InvalidConstruct => "invalid_construct",
             Self::MissingAsset => "missing_asset",
+            Self::InvalidRef => "invalid_ref",
+            Self::UnknownRef => "unknown_ref",
             Self::TooManyElements => "too_many_elements",
             Self::TooManyComponents => "too_many_components",
             Self::TooManyChildren => "too_many_children",
@@ -252,8 +258,17 @@ fn parse_with_functions(
         components: Vec::new(),
         elements: 0,
         functions: Vec::new(),
+        refs: BTreeSet::new(),
+        references: Vec::new(),
     };
     let document = checker.document(raw)?;
+    if let Some((_, offset)) = checker
+        .references
+        .iter()
+        .find(|(name, _)| !checker.refs.contains(name))
+    {
+        return Err(checker.error(OcmlErrorKind::UnknownRef, *offset));
+    }
     let mut functions = checker.functions;
     functions.sort();
     Ok((document, functions))
@@ -298,6 +313,8 @@ fn view_error(error: ViewError) -> OcmlErrorKind {
         ViewError::InvalidComponent => OcmlErrorKind::InvalidComponent,
         ViewError::InvalidSlot => OcmlErrorKind::InvalidSlot,
         ViewError::MissingAsset => OcmlErrorKind::MissingAsset,
+        ViewError::InvalidRef => OcmlErrorKind::InvalidRef,
+        ViewError::UnknownRef => OcmlErrorKind::UnknownRef,
         ViewError::TooManyElements => OcmlErrorKind::TooManyElements,
         ViewError::TooManyComponents => OcmlErrorKind::TooManyComponents,
         ViewError::TooManyChildren => OcmlErrorKind::TooManyChildren,
@@ -774,6 +791,10 @@ struct Checker<'a> {
     components: Vec<(String, Vec<String>)>,
     elements: u64,
     functions: Vec<String>,
+    /// Declared `ref` names.
+    refs: BTreeSet<String>,
+    /// Static references to a `ref`, checked once the view is read.
+    references: Vec<(String, usize)>,
 }
 
 /// Where a list of nodes is placed.
@@ -785,6 +806,9 @@ struct Place<'s> {
     scope: &'s [String],
     /// Inside a component body: the running count of `slot` nodes.
     slots: Option<&'s mut u32>,
+    /// Inside a `for` or a component body, where a node may exist several
+    /// times and cannot carry a `ref`.
+    repeated: bool,
 }
 
 impl<'s> Place<'s> {
@@ -794,6 +818,7 @@ impl<'s> Place<'s> {
             depth: self.depth + 1,
             scope,
             slots: self.slots.as_deref_mut(),
+            repeated: self.repeated,
         }
     }
 }
@@ -842,6 +867,7 @@ impl Checker<'_> {
                             depth: 1,
                             scope: &props,
                             slots: Some(&mut slots),
+                            repeated: true,
                         },
                     )?;
                     if slots > 1 {
@@ -863,6 +889,7 @@ impl Checker<'_> {
                 depth: 1,
                 scope: &[],
                 slots: None,
+                repeated: false,
             },
         )?;
         Ok(Document {
@@ -1083,7 +1110,9 @@ impl Checker<'_> {
         scope.push(item.clone());
         let key = self.construct_expression(&tag, "key", &["as", "each"], &scope)?;
         let parent = place.parent;
-        let children = self.children(tag.children, place.nested(parent, &scope))?;
+        let mut nested = place.nested(parent, &scope);
+        nested.repeated = true;
+        let children = self.children(tag.children, nested)?;
         Ok(Node::For {
             each,
             item,
@@ -1176,6 +1205,18 @@ impl Checker<'_> {
                 .any(|(existing, _)| *existing == field.name)
             {
                 return Err(self.error(OcmlErrorKind::DuplicateAttribute, offset));
+            }
+            // A `ref` is one static name for one node of the view.
+            if field.ty == ValueType::Ref {
+                let RawValue::Quoted(name) = &attribute.value else {
+                    return Err(self.error(OcmlErrorKind::InvalidRef, offset));
+                };
+                if place.repeated || !self.refs.insert(name.clone()) {
+                    return Err(self.error(OcmlErrorKind::InvalidRef, offset));
+                }
+            }
+            if let (ValueType::RefName, RawValue::Quoted(name)) = (field.ty, &attribute.value) {
+                self.references.push((name.clone(), offset));
             }
             let value = match &attribute.value {
                 RawValue::Expr(expr) => {
