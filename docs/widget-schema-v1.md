@@ -4,7 +4,7 @@
 
 This reference is generated from the `overcrow-widget-schema` crate, the single source of truth of widget API version 1 (OverCrow design record ADR 0001, D8). The host, the creator CLI and the Studio compile the same tables; anything absent from them is rejected.
 
-**Status.** A *fixed* value is final for v1; the VM budgets come from the P0.3 measurements (ADR 0002) and the parity bounds from the P0.4 text spike (ADR 0003). A *provisional* value is a conservative placeholder until the named lot delivers its evidence: the P2.4 pilots check the light colours; P1.3, P1.6, P1.7 and P1.8 exercise rendering, sandbox, IPC and service bounds. Capabilities, services and write intents follow the P0.6 audit of the built-ins. A provisional value is enforced exactly like a fixed one until it is revised.
+**Status.** A *fixed* value is final for v1; the VM budgets come from the P0.3 measurements (ADR 0002), the parity bounds from the P0.4 text spike (ADR 0003), and the sandbox and IPC bounds from the P1.6 and P1.7 measurements. A *provisional* value is a conservative placeholder until the named lot delivers its evidence: the P2.4 pilots check the light colours; P1.3 and P1.8 exercise rendering and service bounds. Capabilities, services and write intents follow the P0.6 audit of the built-ins. A provisional value is enforced exactly like a fixed one until it is revised.
 
 Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes unless the unit says characters, which are Unicode scalar values.
 
@@ -107,11 +107,13 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `VM_STACK_BYTES` | 256 KiB | fixed | QuickJS stack ceiling (`JS_SetMaxStackSize`). |
 | `VM_TURN_BUDGET_MS` | 50 ms | fixed | Wall time of one host-to-VM turn before the interrupt handler stops it. |
 | `VM_JOBS_PER_TURN` | 1024 | fixed | Promise jobs drained in one turn; a longer queue is a resource failure. |
-| `VM_EVENT_QUEUE` | 256 | **provisional (P1.7)** | Host messages waiting for one VM; the host coalesces updates beyond it. |
+| `VM_EVENT_QUEUE` | 256 | fixed | Host messages waiting for one VM; the host coalesces updates beyond it. |
 | `VM_PROCESS_MEMORY_BYTES` | 64 MiB | fixed | Hard memory ceiling of one VM process: cgroup `memory.max` on Linux, Job Object memory limit on Windows. |
 | `VM_MESSAGES_PER_TURN` | 64 | fixed | Messages the VM may emit during one host turn (ADR 0002). |
 | `VM_ADDRESS_SPACE_BYTES` | 512 MiB | fixed | Linux address-space rlimit of one VM process (ADR 0002); virtual reservations, not resident memory. |
-| `VM_CPU_PERCENT` | 25 % of one core | **provisional (P1.6)** | CPU ceiling of one VM process (cgroup `cpu.max`, Job Object CPU rate). |
+| `VM_CPU_PERCENT` | 25 % of one core | fixed | CPU ceiling of one VM process: cgroup `cpu.max` of 5 ms per 20 ms period on Linux (the default 100 ms period caused false `unresponsive` faults), Job Object hard CPU rate on Windows. |
+| `VM_TURN_WATCHDOG_MS` | 100 ms | fixed | Wall time the host allows between the last frame of a turn and the VM's acknowledgement; catches a turn stuck outside the QuickJS interrupt (measured worst heavy turn under the CPU ceiling: 30.6 ms). |
+| `VM_TURNS_IN_FLIGHT` | 8 | fixed | Turns the host sends ahead of the VM's acknowledgement; beyond it, host messages wait in the coalescing queue. |
 | `VM_READY_TIMEOUT_MS` | 1000 ms | fixed | Deadline between process start and `Ready`; measured p50 is 4.5 ms on Linux and 11.7 ms on Windows, and the acceptance target stays 150 ms warm. |
 | `MAX_TIMERS` | 16 | fixed | Active host-managed timers of one widget. |
 | `MIN_TIMER_INTERVAL_MS` | 100 ms | fixed | Shortest timer period; animation belongs to style, not to timers. |
@@ -119,11 +121,11 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MAX_CONTROL_JSON_BYTES` | 1 MiB | fixed | JSON control part of one frame, unchanged from the Web runtime (ADR 0002). |
 | `MAX_PATCH_BYTES` | 256 KiB | fixed | Raw payload of one `ScenePatch` or `Draw` frame. |
 | `MAX_PATCH_OPS` | 4096 | fixed | Operations in one `ScenePatch`; a 1000-node patch measured 3.3 ms end to end, so this ceiling stays well inside one turn. |
-| `MAX_VM_MESSAGES_PER_SECOND` | 120 per second | **provisional (P1.7)** | Sustained VM-to-host message rate (token bucket). |
-| `MAX_VM_MESSAGE_BURST` | 240 | **provisional (P1.7)** | Token bucket capacity of the VM-to-host message rate. |
-| `MAX_QUEUED_BYTES` | 4 MiB | **provisional (P1.7)** | Bytes queued in either direction for one widget; holds the largest frame (control JSON plus raw payload). |
-| `HEARTBEAT_INTERVAL_MS` | 1000 ms | **provisional (P1.7)** | Period of host `Heartbeat` messages. |
-| `HEARTBEAT_DEADLINE_MS` | 3000 ms | **provisional (P1.7)** | Deadline for the matching `HeartbeatAck`; missing it is `unresponsive`. |
+| `MAX_VM_MESSAGES_PER_SECOND` | 120 per second | fixed | Sustained VM-to-host message rate (token bucket). |
+| `MAX_VM_MESSAGE_BURST` | 240 | fixed | Token bucket capacity of the VM-to-host message rate. |
+| `MAX_QUEUED_BYTES` | 4 MiB | fixed | Bytes queued in either direction for one widget; holds the largest frame (control JSON plus raw payload). |
+| `HEARTBEAT_INTERVAL_MS` | 1000 ms | fixed | Period of host `Heartbeat` messages. |
+| `HEARTBEAT_DEADLINE_MS` | 3000 ms | fixed | Deadline for the matching `HeartbeatAck`; missing it is `unresponsive`. |
 | `MAX_LOG_BYTES` | 4 KiB | fixed | Text of one development `Log` message. |
 | `MAX_SERVICE_CALLS_IN_FLIGHT` | 16 | fixed | Unanswered service calls of one widget, subscriptions excluded. |
 | `MAX_SUBSCRIPTIONS` | 16 | fixed | Open service subscriptions of one widget. |
@@ -135,7 +137,7 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MAX_NETWORK_RULES` | 32 | fixed | Network rules declared by one package. |
 | `MAX_REQUEST_URL_BYTES` | 2 KiB | fixed | Original URL text of one request, as today. |
 | `MAX_HTTP_REQUEST_BYTES` | 256 KiB | fixed | Body of one outgoing request. |
-| `MAX_HTTP_RESPONSE_BYTES` | 1 MiB | **provisional (P1.8)** | Body of one response delivered to the VM; must fit the VM heap. |
+| `MAX_HTTP_RESPONSE_BYTES` | 1 MiB | fixed | Body of one response delivered to the VM; must fit the VM heap. |
 | `MAX_HTTP_CONCURRENT_PER_WIDGET` | 4 | fixed | Requests in flight for one widget. |
 | `MAX_HTTP_CONCURRENT_GLOBAL` | 64 | fixed | Requests in flight for all widgets. |
 | `HTTP_TIMEOUT_MS` | 30000 ms | fixed | Total duration of one request, as today. |

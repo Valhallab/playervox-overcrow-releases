@@ -37,7 +37,7 @@ fn limits_are_unique_positive_and_name_their_lot() {
         );
         if let Status::Provisional { lot } = limit.status {
             assert!(
-                ["P1.3", "P1.6", "P1.7", "P1.8", "P2.4"].contains(&lot),
+                ["P1.3", "P1.8", "P2.4"].contains(&lot),
                 "{}: unknown lot {lot}",
                 limit.key
             );

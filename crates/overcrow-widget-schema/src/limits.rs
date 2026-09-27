@@ -623,8 +623,7 @@ pub const VM_JOBS_PER_TURN: Limit = fixed(
     Unit::Count,
     "Promise jobs drained in one turn; a longer queue is a resource failure.",
 );
-pub const VM_EVENT_QUEUE: Limit = pending(
-    Status::P1_7,
+pub const VM_EVENT_QUEUE: Limit = fixed(
     "VM_EVENT_QUEUE",
     256,
     Unit::Count,
@@ -648,12 +647,23 @@ pub const VM_ADDRESS_SPACE_BYTES: Limit = fixed(
     Unit::Bytes,
     "Linux address-space rlimit of one VM process (ADR 0002); virtual reservations, not resident memory.",
 );
-pub const VM_CPU_PERCENT: Limit = pending(
-    Status::P1_6,
+pub const VM_CPU_PERCENT: Limit = fixed(
     "VM_CPU_PERCENT",
     25,
     Unit::PercentOfCore,
-    "CPU ceiling of one VM process (cgroup `cpu.max`, Job Object CPU rate).",
+    "CPU ceiling of one VM process: cgroup `cpu.max` of 5 ms per 20 ms period on Linux (the default 100 ms period caused false `unresponsive` faults), Job Object hard CPU rate on Windows.",
+);
+pub const VM_TURN_WATCHDOG_MS: Limit = fixed(
+    "VM_TURN_WATCHDOG_MS",
+    100,
+    Unit::Milliseconds,
+    "Wall time the host allows between the last frame of a turn and the VM's acknowledgement; catches a turn stuck outside the QuickJS interrupt (measured worst heavy turn under the CPU ceiling: 30.6 ms).",
+);
+pub const VM_TURNS_IN_FLIGHT: Limit = fixed(
+    "VM_TURNS_IN_FLIGHT",
+    8,
+    Unit::Count,
+    "Turns the host sends ahead of the VM's acknowledgement; beyond it, host messages wait in the coalescing queue.",
 );
 pub const VM_READY_TIMEOUT_MS: Limit = fixed(
     "VM_READY_TIMEOUT_MS",
@@ -699,36 +709,31 @@ pub const MAX_PATCH_OPS: Limit = fixed(
     Unit::Count,
     "Operations in one `ScenePatch`; a 1000-node patch measured 3.3 ms end to end, so this ceiling stays well inside one turn.",
 );
-pub const MAX_VM_MESSAGES_PER_SECOND: Limit = pending(
-    Status::P1_7,
+pub const MAX_VM_MESSAGES_PER_SECOND: Limit = fixed(
     "MAX_VM_MESSAGES_PER_SECOND",
     120,
     Unit::PerSecond,
     "Sustained VM-to-host message rate (token bucket).",
 );
-pub const MAX_VM_MESSAGE_BURST: Limit = pending(
-    Status::P1_7,
+pub const MAX_VM_MESSAGE_BURST: Limit = fixed(
     "MAX_VM_MESSAGE_BURST",
     240,
     Unit::Count,
     "Token bucket capacity of the VM-to-host message rate.",
 );
-pub const MAX_QUEUED_BYTES: Limit = pending(
-    Status::P1_7,
+pub const MAX_QUEUED_BYTES: Limit = fixed(
     "MAX_QUEUED_BYTES",
     4 * MIB,
     Unit::Bytes,
     "Bytes queued in either direction for one widget; holds the largest frame (control JSON plus raw payload).",
 );
-pub const HEARTBEAT_INTERVAL_MS: Limit = pending(
-    Status::P1_7,
+pub const HEARTBEAT_INTERVAL_MS: Limit = fixed(
     "HEARTBEAT_INTERVAL_MS",
     1000,
     Unit::Milliseconds,
     "Period of host `Heartbeat` messages.",
 );
-pub const HEARTBEAT_DEADLINE_MS: Limit = pending(
-    Status::P1_7,
+pub const HEARTBEAT_DEADLINE_MS: Limit = fixed(
     "HEARTBEAT_DEADLINE_MS",
     3000,
     Unit::Milliseconds,
@@ -802,8 +807,7 @@ pub const MAX_HTTP_REQUEST_BYTES: Limit = fixed(
     Unit::Bytes,
     "Body of one outgoing request.",
 );
-pub const MAX_HTTP_RESPONSE_BYTES: Limit = pending(
-    Status::P1_8,
+pub const MAX_HTTP_RESPONSE_BYTES: Limit = fixed(
     "MAX_HTTP_RESPONSE_BYTES",
     MIB,
     Unit::Bytes,
@@ -1125,6 +1129,8 @@ pub const ALL: &[&Limit] = &[
     &VM_MESSAGES_PER_TURN,
     &VM_ADDRESS_SPACE_BYTES,
     &VM_CPU_PERCENT,
+    &VM_TURN_WATCHDOG_MS,
+    &VM_TURNS_IN_FLIGHT,
     &VM_READY_TIMEOUT_MS,
     &MAX_TIMERS,
     &MIN_TIMER_INTERVAL_MS,
@@ -1203,6 +1209,9 @@ const _: () = {
     assert!(MAX_CONTROL_JSON_BYTES.value + MAX_LOGIC_BYTES.value <= MAX_QUEUED_BYTES.value);
     assert!(MAX_CONTROL_JSON_BYTES.value + MAX_PATCH_BYTES.value <= MAX_QUEUED_BYTES.value);
     assert!(HEARTBEAT_INTERVAL_MS.value < HEARTBEAT_DEADLINE_MS.value);
+    assert!(VM_TURN_BUDGET_MS.value < VM_TURN_WATCHDOG_MS.value);
+    assert!(VM_TURN_WATCHDOG_MS.value < HEARTBEAT_DEADLINE_MS.value);
+    assert!(VM_TURNS_IN_FLIGHT.value <= VM_EVENT_QUEUE.value);
     assert!(MAX_VM_MESSAGES_PER_SECOND.value <= MAX_VM_MESSAGE_BURST.value);
     assert!(MIN_CONTENT_SCALE.value < MAX_CONTENT_SCALE.value);
     assert!(MIN_FONT_SIZE_PX.value < MAX_FONT_SIZE_PX.value);

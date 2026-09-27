@@ -15,8 +15,6 @@ pub enum Status {
 
 impl Status {
     pub const P1_3: Self = Self::Provisional { lot: "P1.3" };
-    pub const P1_6: Self = Self::Provisional { lot: "P1.6" };
-    pub const P1_7: Self = Self::Provisional { lot: "P1.7" };
     pub const P1_8: Self = Self::Provisional { lot: "P1.8" };
     pub const P2_4: Self = Self::Provisional { lot: "P2.4" };
 

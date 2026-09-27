@@ -67,9 +67,10 @@ truth of widget API version {API_VERSION} (OverCrow design record ADR 0001, D8).
 the creator CLI and the Studio compile the same tables; anything absent from them is \
 rejected.\n\n\
 **Status.** A *fixed* value is final for v1; the VM budgets come from the P0.3 measurements \
-(ADR 0002) and the parity bounds from the P0.4 text spike (ADR 0003). A *provisional* value is a conservative placeholder \
-until the named lot delivers its evidence: the P2.4 pilots check the light colours; P1.3, P1.6, \
-P1.7 and P1.8 exercise rendering, sandbox, IPC and service bounds. Capabilities, services and \
+(ADR 0002), the parity bounds from the P0.4 text spike (ADR 0003), and the sandbox and IPC \
+bounds from the P1.6 and P1.7 measurements. A *provisional* value is a conservative placeholder \
+until the named lot delivers its evidence: the P2.4 pilots check the light colours; P1.3 and \
+P1.8 exercise rendering and service bounds. Capabilities, services and \
 write intents follow the P0.6 audit of the built-ins. A \
 provisional value is enforced exactly like a fixed one until it is revised.\n\n\
 Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes unless the unit \

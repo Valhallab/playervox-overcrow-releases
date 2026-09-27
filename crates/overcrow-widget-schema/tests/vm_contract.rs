@@ -8,6 +8,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use overcrow_widget_schema::compiled_view::static_value;
 use overcrow_widget_schema::compiled_view::{ViewSummary, inspect_compiled_view};
 use overcrow_widget_schema::ipc::{
     FAILURES, FAULT_CATEGORIES, FAULT_CATEGORY_NAMES, IpcError, parse_vm_arguments, validate_draw,
@@ -233,4 +234,61 @@ fn patch_attributes_use_the_view_encodings() {
     assert_eq!(check(popover, anchor, json!("toolbar")), Ok(()));
     assert_eq!(check(popover, anchor, json!("missing")), Err("unknown_ref"));
     assert_eq!(check(popover, anchor, json!(3)), Err("invalid_attribute"));
+}
+
+#[test]
+fn span_colors_and_asset_handles_are_accepted_strictly() {
+    let view = refs_view();
+    let assets = assets();
+    let span = element("span").expect("span");
+    let image = element("image").expect("image");
+    let field = |element: &'static overcrow_widget_schema::view::Element, name: &str| {
+        element
+            .attributes
+            .iter()
+            .find(|field| field.name == name)
+            .expect("attribute")
+    };
+    let color = field(span, "color");
+    let source = field(image, "src");
+    let check = |element, field, value: Value| {
+        validate_patch_attribute(element, field, &value, &view, &assets).map_err(IpcError::as_str)
+    };
+    assert_eq!(check(span, color, json!("#00ff7F")), Ok(()));
+    for invalid in [
+        json!("#00ff0g"),
+        json!("#fff"),
+        json!("#00ff7f00"),
+        json!("00ff7f"),
+        json!("red"),
+        json!(7),
+    ] {
+        assert_eq!(
+            check(span, color, invalid.clone()),
+            Err("invalid_attribute"),
+            "{invalid}"
+        );
+    }
+    // A static colour in the view obeys the same rule.
+    assert!(static_value(color.ty, &json!("#0a0B0c"), &assets).is_ok());
+    assert!(static_value(color.ty, &json!("#0a0B0"), &assets).is_err());
+
+    assert_eq!(check(image, source, json!("asset:abc-123_X")), Ok(()));
+    let long = format!("asset:{}", "a".repeat(4096));
+    for invalid in [
+        json!("asset:"),
+        json!("asset:a b"),
+        json!("asset:\u{7f}"),
+        json!(long),
+        json!("https://example.com/a.png"),
+        json!("assets/missing.png"),
+    ] {
+        assert_eq!(
+            check(image, source, invalid.clone()),
+            Err("invalid_attribute"),
+            "{invalid}"
+        );
+    }
+    // A view never names a host handle: handles exist only at run time.
+    assert!(static_value(source.ty, &json!("asset:abc"), &assets).is_err());
 }

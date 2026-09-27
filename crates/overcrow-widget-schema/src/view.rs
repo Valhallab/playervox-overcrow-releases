@@ -80,6 +80,9 @@ const POSITION: ValueType = ValueType::Integer {
     max: MAX_LENGTH_PX.value as i64,
 };
 
+/// Record name of an opaque `#rrggbb` colour attribute (`span.color`).
+pub const OPAQUE_COLOR: &str = "opaque `#rrggbb`";
+
 /// Accepted by every element.
 pub const COMMON_ATTRIBUTES: &[Field] = &[
     Field::optional(
@@ -204,7 +207,7 @@ pub const ELEMENTS: &[Element] = &[
         focus: Focus::Never,
         attributes: &[Field::optional(
             "color",
-            ValueType::Record("opaque `#rrggbb`"),
+            ValueType::Record(OPAQUE_COLOR),
             "Colour from data, such as a chat author's; overrides the style colour, and the host raises its contrast to at least 4.5:1 against the panel.",
         )],
         events: &[],

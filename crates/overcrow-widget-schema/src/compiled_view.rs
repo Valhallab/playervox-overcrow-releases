@@ -20,7 +20,7 @@ use crate::limits::{
     MAX_VIEW_EXPRESSIONS,
 };
 use crate::model::{Field, ValueType};
-use crate::view::{COMMON_ATTRIBUTES, Content, Element, element};
+use crate::view::{COMMON_ATTRIBUTES, Content, Element, OPAQUE_COLOR, element};
 
 /// The only compiled view format.
 pub const VIEW_FORMAT: i64 = 1;
@@ -705,6 +705,11 @@ pub fn static_value(
             .filter(|name| valid_identifier(name))
             .map(|_| ())
             .ok_or(invalid),
+        ValueType::Record(OPAQUE_COLOR) => value
+            .as_str()
+            .filter(|color| is_opaque_color(color))
+            .map(|_| ())
+            .ok_or(invalid),
         ValueType::NumberList(limit) => {
             let values = value.as_array().ok_or(invalid)?;
             let valid = values.len() as u64 <= limit.value
@@ -716,6 +721,13 @@ pub fn static_value(
         // Node references, IDs and structured values exist only at runtime.
         _ => Err(invalid),
     }
+}
+
+/// `#rrggbb`, exactly: six hexadecimal digits, no alpha.
+pub fn is_opaque_color(color: &str) -> bool {
+    color.len() == 7
+        && color.starts_with('#')
+        && color[1..].bytes().all(|byte| byte.is_ascii_hexdigit())
 }
 
 /// Content model of the retained scene, shared with patch validation.

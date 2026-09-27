@@ -11,8 +11,8 @@ use crate::json::{has_exact_fields, integer_in};
 use crate::limits::{
     MAX_ATTRIBUTE_TEXT_BYTES, MAX_CHILDREN, MAX_CONTENT_SCALE, MAX_DRAW_COMMANDS, MAX_FONT_SIZE_PX,
     MAX_HTTP_REQUEST_BYTES, MAX_HTTP_RESPONSE_BYTES, MAX_LENGTH_PX, MAX_LOG_BYTES, MAX_LOGIC_BYTES,
-    MAX_NODE_TEXT_BYTES, MAX_PATCH_BYTES, MAX_PATCH_OPS, MAX_VIEW_EXPRESSIONS, MIN_CONTENT_SCALE,
-    MIN_FONT_SIZE_PX, VM_HEAP_BYTES, VM_MAX_HEAP_BYTES,
+    MAX_NODE_TEXT_BYTES, MAX_PACKAGE_PATH_BYTES, MAX_PATCH_BYTES, MAX_PATCH_OPS,
+    MAX_VIEW_EXPRESSIONS, MIN_CONTENT_SCALE, MIN_FONT_SIZE_PX, VM_HEAP_BYTES, VM_MAX_HEAP_BYTES,
 };
 use crate::model::{Field, Limit, Status, ValueType, field};
 use crate::view::Element;
@@ -727,8 +727,36 @@ pub fn validate_patch_attribute(
                 Err(IpcError::UnknownRef)
             }
         }
+        // A host service may issue an `asset:` handle at run time; whether it
+        // was issued to this widget is checked by the host, not the schema.
+        ValueType::ImageSource
+            if value
+                .as_str()
+                .is_some_and(|source| source.starts_with(ASSET_HANDLE_PREFIX)) =>
+        {
+            value
+                .as_str()
+                .filter(|source| is_asset_handle(source))
+                .map(|_| ())
+                .ok_or(invalid)
+        }
         ty => static_value(ty, value, assets).map_err(|_| invalid),
     }
+}
+
+/// Prefix of an image handle issued by a host service.
+pub const ASSET_HANDLE_PREFIX: &str = "asset:";
+
+/// `asset:` followed by at least one printable ASCII byte, the whole source
+/// within `MAX_PACKAGE_PATH_BYTES`. Syntax only: the host checks that the
+/// handle was issued to the widget that sends it.
+pub fn is_asset_handle(source: &str) -> bool {
+    source.len() as u64 <= MAX_PACKAGE_PATH_BYTES.value
+        && source
+            .strip_prefix(ASSET_HANDLE_PREFIX)
+            .is_some_and(|handle| {
+                !handle.is_empty() && handle.bytes().all(|byte| byte.is_ascii_graphic())
+            })
 }
 
 /// Parses the VM command line (without the program name) into the heap
