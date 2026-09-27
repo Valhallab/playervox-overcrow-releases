@@ -1,0 +1,17 @@
+0	Text	[label, value]	label
+1	Text	[label, value]	value
+2	Text	[]	formatTime(state.now, ({"seconds": state.seconds}))
+3	Test	[]	state.utc
+4	Test	[]	state.local
+5	Handler	[event]	loadMore(event)
+6	List	[]	state.messages
+7	Key	[message]	message.id
+8	Attribute	[message]	message.color
+9	Text	[message]	message.author
+10	Text	[message]	message.text
+11	Prop	[]	"CPU"
+12	Prop	[]	(state.cpu ?? 0)
+13	Handler	[event]	toggle(event.x, (!state.open))
+14	Text	[]	state.name
+15	Text	[]	state.count
+functions	formatTime, loadMore, toggle

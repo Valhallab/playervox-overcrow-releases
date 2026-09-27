@@ -1,0 +1,1 @@
+<component name="row" props="a"><box/></component><row b={1}/>

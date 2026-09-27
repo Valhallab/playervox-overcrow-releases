@@ -1,0 +1,1 @@
+<for each={state.items} as="state" key={state.id}><box/></for>

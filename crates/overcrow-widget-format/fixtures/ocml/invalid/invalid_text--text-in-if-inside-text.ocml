@@ -1,0 +1,1 @@
+<text><if test={state.a}>yes</if></text>

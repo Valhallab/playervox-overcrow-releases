@@ -1,0 +1,1 @@
+@keyframes spin { to { opacity: 0; } } @keyframes spin { to { opacity: 1; } }

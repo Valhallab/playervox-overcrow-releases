@@ -1,0 +1,1 @@
+@keyframes spin { 120% { opacity: 0; } }

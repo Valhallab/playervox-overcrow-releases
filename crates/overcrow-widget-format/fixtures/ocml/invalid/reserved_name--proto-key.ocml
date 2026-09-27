@@ -1,0 +1,1 @@
+<text>{f({ __proto__: state })}</text>

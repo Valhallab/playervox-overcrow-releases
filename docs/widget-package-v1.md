@@ -87,7 +87,8 @@ between the source tree, the package and the catalog.
 
 ### Compiled view
 
-The CLI compiles `view.ocml` into `view.json`, a JSON tree, and compiles each
+The CLI compiles `view.ocml` ([source format](widget-source-formats.md)) into
+`view.json`, a JSON tree, and compiles each
 template expression and event handler into a function of `logic.js`. The tree
 refers to these functions by index in a table that `logic.js` registers with
 the SDK before the widget code runs (the call is defined by P2.1). For
@@ -129,9 +130,11 @@ the fixed category `invalid_bundle`:
 2. every path against the file classes and their size limits; required files
    present;
 3. the ledger, byte for byte;
-4. the manifest, `logic.js`, `style.ocss` (UTF-8 only; the style grammar is
-   P1.1), the locale pair, `LICENSE`, each asset signature, and the compiled
-   view against the package's assets.
+4. the manifest, `logic.js`, `style.ocss` (UTF-8 here; its grammar is
+   checked right after by `overcrow_widget_format::validate_package_style`,
+   see [widget source formats](widget-source-formats.md)), the locale pair,
+   `LICENSE`, each asset signature, and the compiled view against the
+   package's assets.
 
 For a catalog or seed package, the archive size and SHA-256 must first equal
 the signed target, and the package manifest must equal the target's manifest

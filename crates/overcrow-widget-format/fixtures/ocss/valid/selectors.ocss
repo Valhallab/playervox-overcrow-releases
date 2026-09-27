@@ -1,0 +1,10 @@
+/* Selector forms and the cascade inputs. */
+text { color: var(--color-text); }
+.row { gap: var(--space-3); }
+.row.selected:hover { background-color: var(--color-surface-hover); }
+list > text .author { font-weight: bold; }
+box .card > button:focus:active,
+toggle:checked, checkbox:checked:disabled, .item:checked {
+  color: var(--color-accent);
+}
+button:disabled { cursor: not-allowed; opacity: 0.5 }

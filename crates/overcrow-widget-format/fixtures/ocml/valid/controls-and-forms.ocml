@@ -1,0 +1,27 @@
+<form intent="notes.save" target={state.noteId} on:submit={saved}>
+  <textarea name="body" rows="6" max-length="4000" placeholder="Write a note"/>
+  <field name="title" value={state.title} on:input={titleChanged} on:keydown={keys(event.key, event.ctrl)}/>
+  <select name="kind" value="plain" on:change={kindChanged}>
+    <option value="plain">Plain</option>
+    <option value="list" disabled>List</option>
+  </select>
+  <toggle name="pinned" checked={state.pinned}/>
+  <checkbox checked disabled/>
+  <slider name="size" min="-10" max="10.5" step="0.5" value={state.size ?? 0}/>
+  <button submit><icon name="save" label="Save"/></button>
+</form>
+<box on:contextmenu={openMenu(event.x, event.y)} class="anchor">
+  <popover anchor={state.anchor} open={state.menuOpen} placement="pointer" on:dismiss={closeMenu}>
+    <button on:activate={remove(state.selected)} label="Delete"><text>Delete</text></button>
+  </popover>
+</box>
+<chart kind="sparkline" min="0" max="240">
+  <series values="12 18.5 30 0 -4" class="primary"/>
+  <series values={state.history}/>
+</chart>
+<elapsed base={state.base} at={state.at} running={state.running} format="hh:mm:ss.cc"/>
+<progress value={state.done / state.total} max="1"/>
+<gauge value="0.4" shape="arc"/>
+<avatar src={state.avatar} initials="PV"/>
+<separator axis="vertical"/>
+<scroll axis="horizontal" stick-to-end on:reachend={more}><canvas on:wheel={zoom(event.dy)}/></scroll>

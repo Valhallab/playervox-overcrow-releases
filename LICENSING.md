@@ -2,7 +2,7 @@
 
 Copyright (c) 2026 Valhallab SASU.
 
-This repository's widget schema crate, SDK, creator tools, reference widgets, and
+This repository's widget schema and format crates, SDK, creator tools, reference widgets, and
 documentation are open source under the [MIT License](LICENSE). This license covers the public source files;
 it does not cover the separate OverCrow application. OverCrow's Control Center,
 core, overlay, built-in widgets, native tools, and desktop integrations remain

@@ -1,0 +1,8 @@
+<text>
+  Hello   {state.name},
+  you have {state.count} new messages &amp; one&#32;
+</text>
+<text>{state.first} {state.last}</text>
+<text>&lt;tag&gt; &quot;quoted&quot; &apos;single&apos; &lbrace;braces&rbrace; &#x2764;&nbsp;done</text>
+<text label="Tom &amp; Jerry" tooltip='say "hi"'>Tab	separated</text>
+<badge>   padded   </badge>

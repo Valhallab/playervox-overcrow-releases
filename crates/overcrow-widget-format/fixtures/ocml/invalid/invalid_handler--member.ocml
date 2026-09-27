@@ -1,0 +1,1 @@
+<button on:activate={state.go}>Go</button>

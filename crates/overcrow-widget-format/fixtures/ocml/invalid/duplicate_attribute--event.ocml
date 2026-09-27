@@ -1,0 +1,1 @@
+<button on:activate={a} on:activate={b}>Go</button>

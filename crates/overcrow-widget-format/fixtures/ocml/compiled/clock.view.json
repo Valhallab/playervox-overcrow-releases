@@ -1,0 +1,1 @@
+{"children":[{"attrs":{"class":"clock"},"children":[{"attrs":{"class":"time"},"element":"text","text":[{"expr":0}]},{"if":[{"children":[{"attrs":{"class":"hint"},"element":"badge","text":["UTC"]}],"test":1}]}],"element":"box"}],"expressions":2,"viewFormat":1}

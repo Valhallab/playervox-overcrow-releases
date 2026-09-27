@@ -1,0 +1,7 @@
+<!-- Same tree as the schema's package-src/clock/view.json. -->
+<box class="clock">
+  <text class="time">{time(state.now, state.seconds)}</text>
+  <if test={state.utc}>
+    <badge class="hint">UTC</badge>
+  </if>
+</box>

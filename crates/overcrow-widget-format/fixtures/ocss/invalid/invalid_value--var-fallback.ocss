@@ -1,0 +1,1 @@
+.a { color: var(--color-text, #fff); }

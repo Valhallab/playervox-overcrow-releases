@@ -1,0 +1,3 @@
+0	Text	[]	time(state.now, state.seconds)
+1	Test	[]	state.utc
+functions	time

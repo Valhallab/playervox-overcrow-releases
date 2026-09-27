@@ -1,0 +1,30 @@
+<!-- Clock -->
+<component name="stat-row" props="label value">
+  <box class="row">
+    <text class="label">{label}</text>
+    <text class="value">{value} &amp; more</text>
+    <slot/>
+  </box>
+</component>
+<box class="clock">
+  <text class="time">{formatTime(state.now, { seconds: state.seconds })}</text>
+  <if test={state.utc}>
+    <badge class="hint">UTC</badge>
+  </if>
+  <else-if test={state.local}><badge>Local</badge></else-if>
+  <else><badge>?</badge></else>
+  <list stick-to-end item-height="24" on:reachend={loadMore}>
+    <for each={state.messages} as="message" key={message.id}>
+      <text selectable>
+        <span color={message.color}>{message.author}</span>
+        <span>: </span>
+        <span>{message.text}</span>
+      </text>
+    </for>
+  </list>
+  <stat-row label="CPU" value={state.cpu ?? 0}><icon name="cpu"/></stat-row>
+  <button on:activate={toggle(event.x, !state.open)} label="Toggle"><icon name="circle-check"/></button>
+  <image src="assets/logo.png" label="Logo"/>
+  <text>Hello {state.name}, you have {state.count} messages
+     on two lines.</text>
+</box>
