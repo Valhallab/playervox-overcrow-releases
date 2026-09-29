@@ -278,6 +278,24 @@ if test ! -d "$widgets_root" || test -L "$widgets_root" \
 then
     fail 'candidate artifact admission failed'
 fi
+# Widget API v1 sources (a view.ocml) are checked by the widget CLI in the
+# sdk-cli workflow; this Web admission knows only the Web format until the
+# v1 admission replaces it (P4.2).
+web_list="$work/web-widgets"
+/usr/bin/install -m 0600 /dev/null "$web_list"
+while IFS= read -r directory; do
+    case "$directory" in
+        '' | -* | *[!A-Za-z0-9._-]*)
+            fail 'candidate artifact admission failed'
+            ;;
+    esac
+    if test -f "$widgets_root/$directory/view.ocml" \
+            && test ! -L "$widgets_root/$directory/view.ocml"; then
+        continue
+    fi
+    printf '%s\n' "$directory" >>"$web_list"
+done <"$widget_list"
+widget_list=$web_list
 widget_count=$(/usr/bin/wc -l <"$widget_list")
 if test "$widget_count" -eq 0 || test "$widget_count" -gt 512 \
         || test "$(/usr/bin/stat -c '%s' "$widget_list")" -gt 131072; then
