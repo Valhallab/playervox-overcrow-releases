@@ -69,7 +69,7 @@ stopwatch state, journals or connected accounts.
 | `content/docs/` | English and French SDK articles |
 | `tools/creator-kit/` | Portable CLI, packaging, and preview |
 | `tools/marketplace-tool/` | Rust package validation and static admission |
-| `widgets/` | Public reference widgets |
+| `widgets/` | Public reference widgets: the built-ins on widget API v1 (`clock`, `session`, `fps`, each with its tests and reference page) and the Web-format Warframe Market |
 | `published/marketplace/v1/` | Existing signed catalog and immutable packages |
 
 Use Node.js 22.18+ and Python 3. Downloaded creator projects need only Node.js.

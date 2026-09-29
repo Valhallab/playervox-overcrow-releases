@@ -225,6 +225,13 @@ without cgroup delegation, the VM runs without its per-widget cgroup
 the report says `without-cgroup`. On Windows it grants its own executable
 read and execute for the AppContainer when the ACL lacks it.
 
+The CLI pins no published runtime yet: pass `--runtime` with one built from
+OverCrow. Until the runtime is published with the application and pinned
+(P6.4), hosted CI checks the scenarios, their fixtures and reference images
+without playing them (`cli/tests/reference_widgets.rs` for the reference
+widgets of `widgets/`), and the scenarios are played on Linux and Windows
+before each change is merged.
+
 `overcrow-widget test` talks to it through a versioned interface
 (`overcrow_widget_scenario::report`): `--version --format json`, then `run
 --interface 1 --package … --scenario … --out …`, which writes the images and
