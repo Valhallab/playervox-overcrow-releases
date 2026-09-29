@@ -59,7 +59,8 @@ stopwatch state, journals or connected accounts.
 | `crates/overcrow-widget-schema/` | Widget API v1 schema and validators, shared with OverCrow |
 | `crates/overcrow-widget-format/` | `view.ocml` compiler and `style.ocss` parser, shared with OverCrow |
 | `fuzz/` | Fuzz targets of every parser and package verifier |
-| `content/sdk/` | Public JavaScript SDK and TypeScript definitions |
+| `sdk/` | `@overcrow/sdk` 1.0, the TypeScript API of widget API v1 logic ([guide](docs/sdk-guide.md), [reference](docs/sdk-reference.md)) |
+| `content/sdk/` | Web runtime JavaScript SDK 1.3 and TypeScript definitions |
 | `content/templates/` | Blank, Counter, and Checklist examples |
 | `content/docs/` | English and French SDK articles |
 | `tools/creator-kit/` | Portable CLI, packaging, and preview |
@@ -91,7 +92,11 @@ cargo run -p overcrow-widget-schema --example fixtures
 cargo test -p overcrow-widget-schema --locked
 cargo run -p overcrow-widget-format --example fixtures
 cargo test -p overcrow-widget-format --locked
+cargo run -p overcrow-widget-schema --example sdk-types
 ```
+
+The last command writes the SDK types of `sdk/src/generated/`; the SDK
+itself is built and tested with npm in `sdk/` (see [its README](sdk/README.md)).
 
 The website consumes a reviewed, revision-pinned snapshot from this repository.
 Edit creator sources here, then update that snapshot in the private web repository.

@@ -1,0 +1,41 @@
+{
+  "name": "@overcrow/sdk",
+  "version": "1.0.0",
+  "description": "TypeScript API of OverCrow widget logic (widget API v1).",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Valhallab/playervox-overcrow-releases.git",
+    "directory": "sdk"
+  },
+  "keywords": [
+    "overcrow",
+    "widget",
+    "overlay"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p test/tsconfig.json",
+    "test": "node --test --test-concurrency=2 \"test/*.test.mjs\"",
+    "pack:check": "node scripts/pack-check.mjs",
+    "prepack": "node scripts/build.mjs",
+    "bundle:e2e": "node scripts/bundle-e2e.mjs"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3"
+  }
+}

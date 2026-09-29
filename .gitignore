@@ -25,3 +25,8 @@ node_modules/
 !published/marketplace/v1/**/*.ocpkg
 !published/docs/downloads/*.zip
 !crates/overcrow-widget-schema/fixtures/**/*.ocpkg
+
+# SDK build output and packed tarballs.
+sdk/dist/
+sdk/build/
+*.tgz
