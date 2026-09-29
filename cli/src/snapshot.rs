@@ -1,3 +1,8 @@
+//! `snapshot-plan`: the validated `git ls-tree` of a revision that the
+//! marketplace CI materializes (`scripts/materialize-git-snapshot.sh`): only
+//! bounded regular files with portable paths. Maintenance command, not for
+//! creators; Git runs with a fixed, isolated environment.
+
 use std::{
     collections::BTreeSet,
     fmt, fs,
@@ -8,7 +13,7 @@ use std::{
 };
 
 const MAX_PLAN_BYTES: usize = 1024 * 1024;
-const MAX_ENTRIES: usize = 1_000;
+const MAX_ENTRIES: usize = 4_000;
 const MAX_FILE_BYTES: u64 = 8 * 1024 * 1024;
 const MAX_AGGREGATE_BYTES: u64 = 16 * 1024 * 1024;
 const GIT_TIMEOUT: Duration = Duration::from_secs(10);

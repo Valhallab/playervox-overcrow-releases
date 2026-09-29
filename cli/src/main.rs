@@ -1,6 +1,7 @@
 //! `overcrow-widget`: the creator CLI of OverCrow widget API v1. See
 //! `docs/cli.md`.
 
+mod admit;
 mod build;
 mod bundle;
 mod channel;
@@ -16,6 +17,7 @@ mod project;
 mod runtime;
 mod sanitize;
 mod sdk;
+mod snapshot;
 mod sources;
 mod test;
 mod typecheck;
@@ -41,10 +43,13 @@ Usage:
   overcrow-widget inspect <file.ocpkg> [--format human|json]
   overcrow-widget dev [dir] [--format human|json] [--no-typecheck]
   overcrow-widget doctor [dir] [--format human|json] [--deny-warnings]
+  overcrow-widget admit [dir] [--package FILE] [--publisher playervox] [--out DIR] [--format human|json] [--deny-warnings]
+  overcrow-widget admit <file.ocpkg> --listing FILE [--publisher playervox] [--format human|json]
   overcrow-widget test [dir] [--runtime PATH] [--scenario NAME] [--update] [--format human|json] [--no-typecheck]
   overcrow-widget --version | --help
 
 Exit status: 0 success (warnings allowed), 1 errors found, 2 usage or I/O error.
+`admit` ends with 1 when the submission would be refused.
 `test` ends with 1 when a scenario fails, 2 when no runtime can run.
 `dev` runs until Ctrl+C (0), or ends with 1 when the overlay ends the session.
 Guide: docs/cli.md in https://github.com/Valhallab/playervox-overcrow-releases";
@@ -71,6 +76,11 @@ const VALUED: &[&str] = &[
     "--format",
     "--runtime",
     "--scenario",
+    "--package",
+    "--listing",
+    "--publisher",
+    "--repository",
+    "--revision",
 ];
 
 fn parse(mut args: impl Iterator<Item = String>) -> Result<Arguments, String> {
@@ -170,6 +180,8 @@ fn main() -> ExitCode {
         "dev" => run_dev(&arguments),
         "doctor" => run_doctor(&arguments),
         "test" => run_test(&arguments),
+        "admit" => run_admit(&arguments),
+        "snapshot-plan" => run_snapshot_plan(&arguments),
         other => Err(format!("unknown command `{other}`")),
     };
     result.unwrap_or_else(|message| usage(&message))
@@ -227,6 +239,91 @@ fn run_test(arguments: &Arguments) -> Result<ExitCode, String> {
             only: arguments.value("--scenario"),
         },
     ))
+}
+
+fn run_admit(arguments: &Arguments) -> Result<ExitCode, String> {
+    arguments.expect(
+        &[
+            "--package",
+            "--listing",
+            "--publisher",
+            "--out",
+            "--format",
+            "--deny-warnings",
+        ],
+        1,
+    )?;
+    let format = arguments.format()?;
+    let publisher = match arguments.value("--publisher") {
+        None => admit::Publisher::ThirdParty,
+        Some("playervox") => admit::Publisher::PlayerVox,
+        Some(other) => return Err(format!("unknown publisher `{other}`: playervox or none")),
+    };
+    let target = arguments.directory();
+    let listing = arguments.value("--listing").map(Path::new);
+    let input = if target.is_dir() {
+        if listing.is_some() {
+            return Err("--listing is for an archive; a source directory has listing.json".into());
+        }
+        admit::Input::Source(&target)
+    } else if target.is_file() {
+        if arguments.value("--package").is_some() || arguments.value("--out").is_some() {
+            return Err("--package and --out need the source directory".into());
+        }
+        admit::Input::Archive {
+            package: &target,
+            listing: listing.ok_or("admitting an archive needs --listing FILE")?,
+        }
+    } else {
+        return Err(format!("{} is not a directory or a file", target.display()));
+    };
+    let mut report = Report::default();
+    let options = admit::Options {
+        publisher,
+        package: arguments.value("--package").map(Path::new),
+    };
+    let outcome = admit::admit(&input, &options, &mut report);
+    let deny_warnings = arguments.flag("--deny-warnings");
+    let refused = outcome.admitted.is_none() || (deny_warnings && report.warnings() > 0);
+    match format {
+        Format::Json => println!("{}", sanitize::json(&outcome.report.to_string())),
+        Format::Human => {
+            let root = matches!(input, admit::Input::Source(_)).then_some(target.as_path());
+            emit(&report, root, format, deny_warnings, "admit");
+            print!("{}", admit::render_human(&outcome.report));
+        }
+    }
+    if refused {
+        return Ok(ExitCode::from(1));
+    }
+    if let (Some(out), Some(admitted)) = (arguments.value("--out"), &outcome.admitted)
+        && let Err(error) = admit::write_bundle(Path::new(out), admitted)
+    {
+        eprintln!("overcrow-widget: cannot write the admission bundle {out}: {error}");
+        return Ok(ExitCode::from(2));
+    }
+    Ok(ExitCode::SUCCESS)
+}
+
+/// Maintenance command of the marketplace CI (`scripts/ci-verify.sh`): the
+/// validated file list of a Git revision, before it is materialized.
+fn run_snapshot_plan(arguments: &Arguments) -> Result<ExitCode, String> {
+    arguments.expect(&["--repository", "--revision"], 0)?;
+    let (Some(repository), Some(revision)) = (
+        arguments.value("--repository"),
+        arguments.value("--revision"),
+    ) else {
+        return Err("snapshot-plan needs --repository PATH --revision SHA".into());
+    };
+    Ok(
+        match snapshot::write_plan(Path::new(repository), revision) {
+            Ok(()) => ExitCode::SUCCESS,
+            Err(error) => {
+                eprintln!("overcrow-widget: {error}");
+                ExitCode::from(1)
+            }
+        },
+    )
 }
 
 fn usage(message: &str) -> ExitCode {
