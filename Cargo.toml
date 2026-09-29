@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "cli",
+    "crates/overcrow-widget-devchannel",
     "crates/overcrow-widget-format",
     "crates/overcrow-widget-schema",
     "tools/marketplace-tool",

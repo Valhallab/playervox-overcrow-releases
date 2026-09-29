@@ -58,6 +58,7 @@ stopwatch state, journals or connected accounts.
 | --- | --- |
 | `crates/overcrow-widget-schema/` | Widget API v1 schema and validators, shared with OverCrow |
 | `crates/overcrow-widget-format/` | `view.ocml` compiler and `style.ocss` parser, shared with OverCrow |
+| `crates/overcrow-widget-devchannel/` | [Development channel](docs/dev-channel.md) between `overcrow-widget dev` and a running overlay, shared with OverCrow |
 | `fuzz/` | Fuzz targets of every parser and package verifier |
 | `sdk/` | `@overcrow/sdk` 1.0, the TypeScript API of widget API v1 logic ([guide](docs/sdk-guide.md), [reference](docs/sdk-reference.md)) |
 | `cli/` | `overcrow-widget`, the widget API v1 CLI: `init`, `check`, `package`, `inspect` ([guide](docs/cli.md)) |

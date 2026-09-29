@@ -18,6 +18,7 @@ path = "src/main.rs"
 # version, and an upgrade is an explicit change with new measurements
 # (docs/cli.md).
 [dependencies]
+overcrow-widget-devchannel = { path = "../crates/overcrow-widget-devchannel" }
 overcrow-widget-format = { path = "../crates/overcrow-widget-format" }
 overcrow-widget-schema = { path = "../crates/overcrow-widget-schema" }
 oxc_allocator = "=0.152.0"
@@ -35,6 +36,22 @@ oxc_str = "=0.152.0"
 oxc_syntax = "=0.152.0"
 oxc_transformer = "=0.152.0"
 serde_json = { workspace = true, features = ["std"] }
+
+# The development channel's socket peer check and Ctrl+C (`dev`, `doctor`).
+[target.'cfg(unix)'.dependencies]
+libc.workspace = true
+
+# The development channel's pipe, the overlay's token and Ctrl+C.
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "=0.61.2", features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_Security_Authorization",
+    "Win32_Storage_FileSystem",
+    "Win32_System_Console",
+    "Win32_System_Pipes",
+    "Win32_System_Threading",
+] }
 
 [dev-dependencies]
 tempfile.workspace = true

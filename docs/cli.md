@@ -1,7 +1,8 @@
 # The widget CLI: `overcrow-widget`
 
-`overcrow-widget` creates, checks and packages widgets for widget API v1. It
-is one Rust binary for Linux and Windows, built from `cli/` in this
+`overcrow-widget` creates, checks and packages widgets for widget API v1,
+and runs them in a local OverCrow while they are written. It is one Rust
+binary for Linux and Windows, built from `cli/` in this
 repository (MIT). It compiles the same public validators the OverCrow host
 runs at admission and at every activation (`crates/overcrow-widget-schema`
 and `crates/overcrow-widget-format`), so a package it accepts is a package
@@ -14,6 +15,8 @@ npm install              # TypeScript and the SDK types, for type checking
 overcrow-widget check
 overcrow-widget package  # dist/<id>-<version>.ocpkg
 overcrow-widget inspect dist/com.example.my-widget-0.1.0.ocpkg
+overcrow-widget doctor   # what the setup has and lacks
+overcrow-widget dev      # run it in OverCrow, reload on save (Ctrl+C to stop)
 ```
 
 ## Installing
@@ -146,11 +149,80 @@ needs an account; the number of menu rows; and every file with its size and
 SHA-256 (the ledger). A package the host would refuse is reported instead,
 with the refusing category.
 
-### `dev`, `doctor`
+### `dev [dir]`
 
-Not available in this version: `dev` will drive an installed OverCrow
-(hot reload in the real runtime, event replay, service fixtures) and
-`doctor` will diagnose the creator's setup. They exit with status 2.
+Runs the widget in the OverCrow overlay running on this machine, as the
+same user, while you edit it:
+
+1. connects to the overlay's [development channel](dev-channel.md);
+2. builds the package as `package` does, printing the same diagnostics, and
+   sends its bytes to the overlay, which validates it in full and shows it
+   **unverified** ("Unverified · development package"), with the
+   permissions its manifest declares granted for the session only;
+3. watches the project's sources (the files of the
+   [project layout](#project-layout) and `assets/`, polled four times a
+   second; `node_modules/` and `dist/` are not watched) and, 200 ms after the
+   last change, rebuilds and reloads the widget; `tsc` runs again only when
+   `logic.ts`, `tsconfig.json` or `package.json` changed. A build with errors
+   is not sent: the widget keeps running its last good build;
+4. prints what the overlay reports: installs, the widget's states
+   (`starting`, `running`, `restarting` with the failure, `failed`…) and the
+   logs of its logic (`log.info(…)` of the [SDK](sdk-reference.md)). Log
+   texts come from the widget: control characters, terminal escape sequences,
+   line separators and bidirectional controls are shown escaped (`\u{1b}`),
+   never interpreted, and each line is cut at 512 characters (with
+   `--format json`, they are `\uXXXX` escapes of the JSON strings);
+5. on **Ctrl+C**, removes the widget from the overlay and exits with status
+   0. If `dev` dies instead, the overlay removes the widget itself when the
+   connection ends.
+
+The overlay only offers the channel when OverCrow was started with
+development installs allowed (`OVERCROW_WIDGET_DEVELOPMENT=1`; `doctor`
+prints the commands). A development widget takes the place of an installed
+widget of the same ID for the session; nothing of it is stored, and the
+installed widget comes back when it is removed. Widget IDs under
+`com.playervox.` are refused.
+
+Options: `--no-typecheck`, `--format json` (one JSON object per line: the
+diagnostics, `{"type":"built",…}` for each build, then the overlay's
+[messages](dev-channel.md#overlay-messages) as they come).
+
+Exit status: 0 after Ctrl+C, 1 when the overlay ends the session (it quit,
+or refused the session), 2 when no overlay is reachable or on a usage error.
+
+Event replay and service fixtures (simulated game events and service
+answers) come with the widget test harness, in a later release.
+
+### `doctor [dir]`
+
+Shows what the setup has and lacks:
+
+| Line | Checked |
+| --- | --- |
+| `cli`, `sdk` | This CLI's version, its widget API, and the `@overcrow/sdk` it embeds. |
+| `platform` | OS and architecture. |
+| `overcrow` | An installed OverCrow (Linux: `overcrow-overlay` in `/usr/bin`, `/usr/local/bin` or `PATH`; Windows: `%LOCALAPPDATA%\Programs\OverCrow\OverCrow.exe`). |
+| `development` | A running overlay reachable through the development channel, its version, and so whether development installs are on. |
+| `node`, `typescript`, `project sdk` | In a widget project (a directory with `manifest.json`): Node.js on `PATH`, `node_modules/typescript`, and the version of `node_modules/@overcrow/sdk` against the embedded SDK. |
+
+Problems are diagnostics, as for `check`:
+
+| Code | Severity | Meaning |
+| --- | --- | --- |
+| `doctor.overcrow_missing` | warning | OverCrow is not installed. |
+| `doctor.development_off` | warning | No overlay allows development installs; the help gives the commands to restart OverCrow with them. |
+| `doctor.channel_busy` | warning | The overlay already serves its maximum of `dev` sessions. |
+| `doctor.channel_io` | warning | The channel failed while connecting. |
+| `doctor.channel_untrusted` | error | The channel's socket or pipe is not this user's overlay. |
+| `doctor.protocol_version` | error | The overlay speaks another channel version than this CLI. |
+| `doctor.node_missing`, `doctor.node_version` | warning | No Node.js, or older than 22: `check` cannot type-check. |
+| `doctor.typescript_missing`, `doctor.sdk_missing` | warning | `npm install` was not run in the project. |
+| `doctor.sdk_version` | warning | `node_modules/@overcrow/sdk` differs from the embedded SDK. |
+
+Options: `--format json` (the diagnostics, then one
+`{"type":"doctor",…}` object with every fact), `--deny-warnings`. Exit
+status as for `check`: 0 without errors (warnings allowed unless
+`--deny-warnings`), 1 with errors, 2 on a usage error.
 
 ## Diagnostics
 
@@ -167,7 +239,8 @@ check: 1 error(s), 0 warning(s)
 ```
 
 - The code is `<domain>.<category>`. Domains: `project`, `manifest`,
-  `view`, `style`, `locales`, `logic`, `typecheck`, `package`, `init`.
+  `view`, `style`, `locales`, `logic`, `typecheck`, `package`, `init`,
+  `doctor`.
   Categories of `manifest`, `view`, `style` and `package` are the stable
   names of the public validators ([source formats](widget-source-formats.md#error-categories),
   [schema reference](widget-schema-v1.md)); the lint's are listed above;
@@ -228,6 +301,12 @@ over a hand-written script falls from about 1.5 ms to 0.4 ms.
   drift from `sdk/package.json` and `sdk/LICENSE`.
 - The VM's global set (`cli/src/lint.rs`, `VM_GLOBALS`) mirrors the realm
   the VM builds; update both together.
+- `dev` and `doctor` speak the [development channel](dev-channel.md)
+  through `crates/overcrow-widget-devchannel`, which the OverCrow overlay
+  links too; a change of message or bound is a new protocol version.
+  `cli/tests/dev.rs` runs them against a scripted overlay in a private
+  runtime directory; tests must never reach the user's real overlay (no
+  bare `dev` or `doctor` in `cli/tests/cli.rs`).
 - Diagnostic renderings are pinned by golden files in `cli/tests/golden/`;
   regenerate them with
   `OVERCROW_UPDATE_GOLDEN=1 cargo test -p overcrow-widget-cli --test cli`

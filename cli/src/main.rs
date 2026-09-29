@@ -3,15 +3,21 @@
 
 mod build;
 mod bundle;
+mod channel;
+mod dev;
 mod diag;
+mod doctor;
 mod init;
 mod inspect;
+mod interrupt;
 mod jsonpos;
 mod lint;
 mod project;
+mod sanitize;
 mod sdk;
 mod sources;
 mod typecheck;
+mod watch;
 
 use std::fs;
 use std::io::Write as _;
@@ -31,9 +37,12 @@ Usage:
   overcrow-widget check [dir] [--format human|json] [--deny-warnings] [--no-typecheck]
   overcrow-widget package [dir] [--out FILE] [--format human|json] [--deny-warnings] [--no-typecheck]
   overcrow-widget inspect <file.ocpkg> [--format human|json]
+  overcrow-widget dev [dir] [--format human|json] [--no-typecheck]
+  overcrow-widget doctor [dir] [--format human|json] [--deny-warnings]
   overcrow-widget --version | --help
 
 Exit status: 0 success (warnings allowed), 1 errors found, 2 usage or I/O error.
+`dev` runs until Ctrl+C (0), or ends with 1 when the overlay ends the session.
 Guide: docs/cli.md in https://github.com/Valhallab/playervox-overcrow-releases";
 
 #[derive(Clone, Copy, PartialEq)]
@@ -146,13 +155,37 @@ fn main() -> ExitCode {
         "check" => run_build(&arguments, false),
         "package" => run_build(&arguments, true),
         "inspect" => run_inspect(&arguments),
-        "dev" | "doctor" => Err(format!(
-            "`{}` is not available in this version: it will drive an installed OverCrow. Use `check` and `package` meanwhile.",
-            arguments.command
-        )),
+        "dev" => run_dev(&arguments),
+        "doctor" => run_doctor(&arguments),
         other => Err(format!("unknown command `{other}`")),
     };
     result.unwrap_or_else(|message| usage(&message))
+}
+
+fn run_dev(arguments: &Arguments) -> Result<ExitCode, String> {
+    arguments.expect(&["--format", "--no-typecheck"], 1)?;
+    let format = arguments.format()?;
+    let root = arguments.directory();
+    if !root.is_dir() {
+        return Err(format!("{} is not a directory", root.display()));
+    }
+    Ok(dev::run(
+        &root,
+        &dev::Options {
+            typecheck: !arguments.flag("--no-typecheck"),
+            format,
+        },
+    ))
+}
+
+fn run_doctor(arguments: &Arguments) -> Result<ExitCode, String> {
+    arguments.expect(&["--format", "--deny-warnings"], 1)?;
+    let format = arguments.format()?;
+    Ok(doctor::run(
+        &arguments.directory(),
+        format,
+        arguments.flag("--deny-warnings"),
+    ))
 }
 
 fn usage(message: &str) -> ExitCode {

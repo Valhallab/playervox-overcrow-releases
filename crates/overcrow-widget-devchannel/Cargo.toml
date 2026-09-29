@@ -1,0 +1,20 @@
+[package]
+name = "overcrow-widget-devchannel"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+# The development channel between `overcrow-widget dev` and a running
+# OverCrow overlay (docs/dev-channel.md): messages, bounds and framing. No
+# transport and no `unsafe`: the CLI and the host each bring their own
+# same-user socket or pipe and share this code, so both ends read the same
+# bytes the same way.
+#
+# The OverCrow host pins this crate by Git revision and resolves these
+# requirements with its own lockfile, so they stay semver ranges.
+[dependencies]
+overcrow-widget-schema = { path = "../overcrow-widget-schema" }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.150"

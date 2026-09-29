@@ -640,6 +640,8 @@ checksum = "1a80800c0488c3a21695ea981a54918fbb37abf04f4d0720c453632255e2ff0e"
 name = "overcrow-widget-cli"
 version = "0.1.0"
 dependencies = [
+ "libc",
+ "overcrow-widget-devchannel",
  "overcrow-widget-format",
  "overcrow-widget-schema",
  "oxc_allocator",
@@ -658,6 +660,16 @@ dependencies = [
  "oxc_transformer",
  "serde_json",
  "tempfile",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "overcrow-widget-devchannel"
+version = "0.1.0"
+dependencies = [
+ "overcrow-widget-schema",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

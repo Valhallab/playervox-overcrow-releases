@@ -189,10 +189,13 @@ fn init_refuses_existing_content_and_unknown_templates() {
 }
 
 #[test]
-fn later_commands_and_bad_usage_exit_2() {
+fn bad_usage_exits_2() {
+    // Never a bare `dev` or `doctor` here: they would reach this user's
+    // real overlay (tests/dev.rs gives them a private runtime directory).
     for args in [
-        &["dev"][..],
-        &["doctor"],
+        &["dev", "--bogus"][..],
+        &["dev", "no-such-directory"],
+        &["doctor", "--bogus"],
         &["frobnicate"],
         &["check", "--bogus"],
         &["inspect"],
@@ -200,7 +203,6 @@ fn later_commands_and_bad_usage_exit_2() {
         let output = cli(args);
         assert_eq!(output.status.code(), Some(2), "{args:?}");
     }
-    assert!(text(&cli(&["dev"]).stderr).contains("not available in this version"));
 }
 
 #[test]
