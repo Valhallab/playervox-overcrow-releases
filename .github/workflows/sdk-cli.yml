@@ -1,7 +1,9 @@
 name: sdk-cli
 
-# ADR 0004, M4–M5: the @overcrow/sdk package (typecheck, tests, the end-to-end
-# bundle, reproducible npm pack). The widget CLI joins this workflow in P2.2.
+# ADR 0004, M4–M5: the @overcrow/sdk package (typecheck, tests, reproducible
+# npm pack) and the widget CLI `overcrow-widget` (build, tests, init → check
+# → package → read_package end to end, deterministic .ocpkg), on Linux and
+# Windows. The SDK's end-to-end test packages its Clock with the CLI.
 on:
   push:
     branches: [main]
@@ -16,31 +18,72 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  sdk:
-    name: sdk (${{ matrix.os }})
+  sdk-cli:
+    name: sdk-cli (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04, windows-2022]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
+    timeout-minutes: 30
     defaults:
       run:
-        working-directory: sdk
+        shell: bash
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
+      - name: Install the pinned Rust toolchain
+        run: |
+          rustup toolchain install 1.98.0 --profile minimal --component clippy,rustfmt
+          rustup default 1.98.0
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: |
+            ~/.cargo/registry
+            target
+          key: sdk-cli-${{ runner.os }}-rust-1.98-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            sdk-cli-${{ runner.os }}-rust-1.98-
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '22'
-      - name: Install the pinned toolchain
+      - name: Build the CLI
+        run: cargo build -p overcrow-widget-cli --locked
+      - name: Lint the CLI
+        if: runner.os == 'Linux'
+        run: cargo clippy -p overcrow-widget-cli --all-targets --locked -- -D warnings
+      - name: Test the CLI (unit, goldens, init → check → package → read_package)
+        run: cargo test -p overcrow-widget-cli --all-targets --locked
+      - name: Install the SDK's pinned toolchain
+        working-directory: sdk
         run: npm ci --ignore-scripts --no-audit --no-fund
-      - name: Typecheck
+      - name: Typecheck the SDK
+        working-directory: sdk
         run: npm run typecheck
-      - name: Build
+      - name: Build the SDK
+        working-directory: sdk
         run: npm run build
-      - name: Test
+      - name: Test the SDK (its end-to-end Clock is packaged by the CLI)
+        working-directory: sdk
         run: npm test
-      - name: Require a reproducible package
+      - name: Require a reproducible npm package
+        working-directory: sdk
         run: npm run pack:check
+      - name: Require a deterministic .ocpkg and a type-checked template
+        run: |
+          set -eu
+          cli=target/debug/overcrow-widget
+          work=$(mktemp -d)
+          "$cli" package sdk/test/e2e/clock --no-typecheck --out "$work/a.ocpkg"
+          "$cli" package sdk/test/e2e/clock --no-typecheck --out "$work/b.ocpkg"
+          cmp "$work/a.ocpkg" "$work/b.ocpkg"
+          "$cli" inspect "$work/a.ocpkg"
+          "$cli" init "$work/counter" --template counter
+          # @overcrow/sdk is not on npm yet: type against this checkout.
+          mkdir -p "$work/counter/node_modules/@overcrow"
+          cp -R sdk/node_modules/typescript "$work/counter/node_modules/typescript"
+          mkdir "$work/counter/node_modules/@overcrow/sdk"
+          cp -R sdk/package.json sdk/LICENSE sdk/dist "$work/counter/node_modules/@overcrow/sdk/"
+          "$cli" check "$work/counter" --deny-warnings
+          "$cli" package "$work/counter" --out "$work/counter.ocpkg"
