@@ -829,42 +829,300 @@ Declaring a permission or capability grants nothing: activation requires consent
 
 Authority is checked by the host at every call, immediately before acting. Gesture services also require the `cause` of a gesture event of the current Interactive epoch.
 
-| Service | Requires | Kind | Gesture | Confirmation | Parameters | Result | Status |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| `subscription.cancel` | nothing | call | no | no | `call`: id | `null` | fixed |
-| `timer.start` | nothing | call | no | no | `timer`: id; `intervalMs`: integer 100..=86400000; `repeat`: boolean | `null`; ticks arrive as `timer` events, never while hidden | fixed |
-| `timer.cancel` | nothing | call | no | no | `timer`: id | `null` | fixed |
-| `storage.get` | permission `storage` | call | no | no | `key`: text ≤ `MAX_STORAGE_KEY_BYTES` | stored JSON value or `null` | fixed |
-| `storage.set` | permission `storage` | call | no | no | `key`: text ≤ `MAX_STORAGE_KEY_BYTES`; `value`: JSON | `null`; `quota_exceeded` beyond `STORAGE_QUOTA_BYTES` | fixed |
-| `storage.remove` | permission `storage` | call | no | no | `key`: text ≤ `MAX_STORAGE_KEY_BYTES` | `null` | fixed |
-| `storage.keys` | permission `storage` | call | no | no | none | list of keys | fixed |
-| `http.fetch` | permission `network` | call | no | no | `url`: text ≤ `MAX_REQUEST_URL_BYTES`; `method`: `GET` \| `POST` \| `PUT` \| `PATCH` \| `DELETE`; `contentType?`: `application/json` \| `text/plain`; `as`: `json` \| `text` \| `bytes` \| `image` | `{ status, contentType }` with the body as raw payload ≤ `MAX_HTTP_RESPONSE_BYTES`, or `{ status, asset }` | fixed |
-| `clipboard.writeText` | permission `clipboardWrite` | call | yes | no | `text`: text ≤ `MAX_CLIPBOARD_BYTES` | `null` | fixed |
-| `gameEvents.subscribe` | permission `gameEvents` | subscribe | no | no | none | `{ event, at }` for each declared event | fixed |
-| `session.subscribe` | capability `session.read` | subscribe | no | no | none | `{ elapsedMs, at }` counted from the start of the game process, or `null` without an active game | fixed |
-| `telemetry.subscribe` | capability `telemetry.read` | subscribe | no | no | none | `{ cpu, ram, cpuTemperature, gpuTemperature, sources }`, or `null` without an active game: `cpu` is the game's share of the whole machine in % (0–100), `ram` its resident bytes, temperatures are °C or `null`, `sources` `{ cpuTemperature, gpuTemperature }` says whether the host has each sensor | fixed |
-| `fps.subscribe` | capability `fps.read` | subscribe | no | no | none | `{ fps, stale, status }`: `fps` a number or `null`; the host sets `stale` 3 s after the last sample; `status` is `ready`, `waiting`, `unsupported`, `permission_denied`, `ambiguous`, `events_lost` or `unavailable` | fixed |
-| `media.subscribe` | capability `media.read` | subscribe | no | no | `cover?`: boolean | `null` without a player, or `{ player, title, artists, playing, canPrevious, canPlayPause, canNext, cover }`: `player` an opaque ID, `artists` a list, `cover` an `asset:` handle of at most 512 px or `null` | fixed |
-| `media.previous` | capability `media.control` | call | yes | no | `player?`: text ≤ `MAX_OBJECT_ID_BYTES` | `null`; `stale_context` when `player` is no longer current | fixed |
-| `media.playPause` | capability `media.control` | call | yes | no | `player?`: text ≤ `MAX_OBJECT_ID_BYTES` | `null`; `stale_context` when `player` is no longer current | fixed |
-| `media.next` | capability `media.control` | call | yes | no | `player?`: text ≤ `MAX_OBJECT_ID_BYTES` | `null`; `stale_context` when `player` is no longer current | fixed |
-| `stopwatch.subscribe` | capability `stopwatch.read` | subscribe | no | no | none | `{ running, elapsedMs, at, shortcuts }`, or `null` without an active game; `shortcuts` `{ toggle, reset, bound }` holds host-formatted key chords | fixed |
-| `stopwatch.toggle` | capability `stopwatch.control` | call | yes | no | none | the new state, as in `stopwatch.subscribe`; `unavailable` when the host cannot act | fixed |
-| `stopwatch.reset` | capability `stopwatch.control` | call | yes | no | none | the new state, as in `stopwatch.subscribe`; `unavailable` when the host cannot act | fixed |
-| `notes.subscribe` | capability `notes.read` | subscribe | no | no | none | `{ active, notes }` of the user's single notes document; each note `{ id, title, body, items }`, each item `{ id, text, checked }` | fixed |
-| `notes.create` | capability `notes.write` | call | yes | no | none | `{ note }`, a new empty active note titled `Note {n}` in the user's language; `quota_exceeded` beyond `MAX_NOTES` | fixed |
-| `notes.select` | capability `notes.write` | call | yes | no | `note`: text ≤ `MAX_OBJECT_ID_BYTES` | `null`; the host stores the active note | fixed |
-| `notes.setItem` | capability `notes.write` | call | yes | no | `note`: text ≤ `MAX_OBJECT_ID_BYTES`; `item`: text ≤ `MAX_OBJECT_ID_BYTES`; `checked`: boolean | `null` | fixed |
-| `notes.delete` | capability `notes.write` | call | yes | yes | `note`: text ≤ `MAX_OBJECT_ID_BYTES` | `null`, or `cancelled` when the user declines | fixed |
-| `playervox.score.subscribe` | capability `playervox.score.read` | subscribe | no | no | none | `{ state, name, score, grade, ratingsCount, criteria }`: `state` is `ready`, `no_ratings`, `not_found` or `unavailable`; `criteria` `{ gameplay, art, tech }`, each 0–100 or `null` | fixed |
-| `playervox.rating.subscribe` | capability `playervox.rating.read` | subscribe | no | no | none | `null` before the user's first rating, or `{ gameplay, art, tech, review, publishedAt, offsetMinutes }`; `unsupported` outside the PlayerVox catalogue; the host seeds the `playervox.rating.publish` controls from it | fixed |
-| `playervox.reviews.page` | capability `playervox.reviews.read` | call | no | no | `page?`: integer 1..=100000; `followedOnly?`: boolean | `{ items, page, totalPages, count }`; each item `{ id, author, grade, score, text, original, publishedAt, offsetMinutes }`, `text` in the user's language when a translation exists, `original` the untranslated text or `null`, both cut by the host to `MAX_NODE_TEXT_BYTES` | fixed |
-| `journal.page` | capability `journal.read` | call | no | no | `cursor?`: text ≤ `MAX_OBJECT_ID_BYTES` | `{ gameName, items, next, previous }`: local and cloud sessions of the active game, merged and deduplicated, newest first; each item `{ id, startedAt, offsetMinutes, durationMs, source }`; cursors are host handles | fixed |
-| `journal.delete` | capability `journal.delete` | call | yes | yes | `session`: text ≤ `MAX_OBJECT_ID_BYTES` | `null`, or `cancelled` when the user declines; `not_connected` for a cloud session while PlayerVox is disconnected | fixed |
-| `twitch.chat.subscribe` | capability `twitch.chat.read` | subscribe | no | no | none | `{ account, channel, joinState, favorites, canSend, generation, reset, messages, removed }`: `account` is `signed_out`, `pending`, `connected` or `expired` (sign-in is host chrome); messages arrive as deltas, with `reset` after subscribing, a generation change or a show; each message `{ id, author, color, badges, fragments, reply, deleted }` with at most `MAX_CHAT_FRAGMENTS` fragments, emotes and badges as `asset:` handles for the current theme and scale | fixed |
-| `twitch.chat.join` | capability `twitch.chat.read` | call | yes | no | `channel`: text ≤ `MAX_CHAT_CHANNEL_BYTES` | `null`; the host remembers the channel and rejoins it when the widget starts | fixed |
-| `twitch.chat.leave` | capability `twitch.chat.read` | call | yes | no | none | `null`; the host forgets the channel | fixed |
-| `twitch.chat.favorite` | capability `twitch.chat.read` | call | yes | no | `channel`: text ≤ `MAX_CHAT_CHANNEL_BYTES`; `favorite`: boolean | `null`; `quota_exceeded` beyond `MAX_CHAT_FAVORITES` | fixed |
+| Service | Requires | Kind | Gesture | Confirmation | Parameters | Result | Shape | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `subscription.cancel` | nothing | call | no | no | `call`: id | `null` | `null` | fixed |
+| `timer.start` | nothing | call | no | no | `timer`: id; `intervalMs`: integer 100..=86400000; `repeat`: boolean | `null`; ticks arrive as `timer` events, never while hidden | `null` | fixed |
+| `timer.cancel` | nothing | call | no | no | `timer`: id | `null` | `null` | fixed |
+| `storage.get` | permission `storage` | call | no | no | `key`: text ≤ `MAX_STORAGE_KEY_BYTES` | stored JSON value or `null` | JSON | fixed |
+| `storage.set` | permission `storage` | call | no | no | `key`: text ≤ `MAX_STORAGE_KEY_BYTES`; `value`: JSON | `null`; `quota_exceeded` beyond `STORAGE_QUOTA_BYTES` | `null` | fixed |
+| `storage.remove` | permission `storage` | call | no | no | `key`: text ≤ `MAX_STORAGE_KEY_BYTES` | `null` | `null` | fixed |
+| `storage.keys` | permission `storage` | call | no | no | none | list of keys | list of text | fixed |
+| `http.fetch` | permission `network` | call | no | no | `url`: text ≤ `MAX_REQUEST_URL_BYTES`; `method`: `GET` \| `POST` \| `PUT` \| `PATCH` \| `DELETE`; `contentType?`: `application/json` \| `text/plain`; `as`: `json` \| `text` \| `bytes` \| `image` | `{ status, contentType }` with the body as raw payload ≤ `MAX_HTTP_RESPONSE_BYTES`, or `{ status, asset }` | `HttpResponse` | fixed |
+| `clipboard.writeText` | permission `clipboardWrite` | call | yes | no | `text`: text ≤ `MAX_CLIPBOARD_BYTES` | `null` | `null` | fixed |
+| `gameEvents.subscribe` | permission `gameEvents` | subscribe | no | no | none | `{ event, at }` for each declared event | `GameEvent` | fixed |
+| `session.subscribe` | capability `session.read` | subscribe | no | no | none | `{ elapsedMs, at }` counted from the start of the game process, or `null` without an active game | `Session` or `null` | fixed |
+| `telemetry.subscribe` | capability `telemetry.read` | subscribe | no | no | none | `{ cpu, ram, cpuTemperature, gpuTemperature, sources }`, or `null` without an active game: `cpu` is the game's share of the whole machine in % (0–100), `ram` its resident bytes, temperatures are °C or `null`, `sources` `{ cpuTemperature, gpuTemperature }` says whether the host has each sensor | `Telemetry` or `null` | fixed |
+| `fps.subscribe` | capability `fps.read` | subscribe | no | no | none | `{ fps, stale, status }`: `fps` a number or `null`; the host sets `stale` 3 s after the last sample; `status` is `ready`, `waiting`, `unsupported`, `permission_denied`, `ambiguous`, `events_lost` or `unavailable` | `Fps` | fixed |
+| `media.subscribe` | capability `media.read` | subscribe | no | no | `cover?`: boolean | `null` without a player, or `{ player, title, artists, playing, canPrevious, canPlayPause, canNext, cover }`: `player` an opaque ID, `artists` a list, `cover` an `asset:` handle of at most 512 px or `null` | `Media` or `null` | fixed |
+| `media.previous` | capability `media.control` | call | yes | no | `player?`: text ≤ `MAX_OBJECT_ID_BYTES` | `null`; `stale_context` when `player` is no longer current | `null` | fixed |
+| `media.playPause` | capability `media.control` | call | yes | no | `player?`: text ≤ `MAX_OBJECT_ID_BYTES` | `null`; `stale_context` when `player` is no longer current | `null` | fixed |
+| `media.next` | capability `media.control` | call | yes | no | `player?`: text ≤ `MAX_OBJECT_ID_BYTES` | `null`; `stale_context` when `player` is no longer current | `null` | fixed |
+| `stopwatch.subscribe` | capability `stopwatch.read` | subscribe | no | no | none | `{ running, elapsedMs, at, shortcuts }`, or `null` without an active game; `shortcuts` `{ toggle, reset, bound }` holds host-formatted key chords | `Stopwatch` or `null` | fixed |
+| `stopwatch.toggle` | capability `stopwatch.control` | call | yes | no | none | the new state, as in `stopwatch.subscribe`; `unavailable` when the host cannot act | `Stopwatch` or `null` | fixed |
+| `stopwatch.reset` | capability `stopwatch.control` | call | yes | no | none | the new state, as in `stopwatch.subscribe`; `unavailable` when the host cannot act | `Stopwatch` or `null` | fixed |
+| `notes.subscribe` | capability `notes.read` | subscribe | no | no | none | `{ active, notes }` of the user's single notes document; each note `{ id, title, body, items }`, each item `{ id, text, checked }` | `Notes` | fixed |
+| `notes.create` | capability `notes.write` | call | yes | no | none | `{ note }`, a new empty active note titled `Note {n}` in the user's language; `quota_exceeded` beyond `MAX_NOTES` | `CreatedNote` | fixed |
+| `notes.select` | capability `notes.write` | call | yes | no | `note`: text ≤ `MAX_OBJECT_ID_BYTES` | `null`; the host stores the active note | `null` | fixed |
+| `notes.setItem` | capability `notes.write` | call | yes | no | `note`: text ≤ `MAX_OBJECT_ID_BYTES`; `item`: text ≤ `MAX_OBJECT_ID_BYTES`; `checked`: boolean | `null` | `null` | fixed |
+| `notes.delete` | capability `notes.write` | call | yes | yes | `note`: text ≤ `MAX_OBJECT_ID_BYTES` | `null`, or `cancelled` when the user declines | `null` | fixed |
+| `playervox.score.subscribe` | capability `playervox.score.read` | subscribe | no | no | none | `{ state, name, score, grade, ratingsCount, criteria }`: `state` is `ready`, `no_ratings`, `not_found` or `unavailable`; `criteria` `{ gameplay, art, tech }`, each 0–100 or `null` | `Score` | fixed |
+| `playervox.rating.subscribe` | capability `playervox.rating.read` | subscribe | no | no | none | `null` before the user's first rating, or `{ gameplay, art, tech, review, publishedAt, offsetMinutes }`; `unsupported` outside the PlayerVox catalogue; the host seeds the `playervox.rating.publish` controls from it | `Rating` or `null` | fixed |
+| `playervox.reviews.page` | capability `playervox.reviews.read` | call | no | no | `page?`: integer 1..=100000; `followedOnly?`: boolean | `{ items, page, totalPages, count }`; each item `{ id, author, grade, score, text, original, publishedAt, offsetMinutes }`, `text` in the user's language when a translation exists, `original` the untranslated text or `null`, both cut by the host to `MAX_NODE_TEXT_BYTES` | `ReviewsPage` | fixed |
+| `journal.page` | capability `journal.read` | call | no | no | `cursor?`: text ≤ `MAX_OBJECT_ID_BYTES` | `{ gameName, items, next, previous }`: local and cloud sessions of the active game, merged and deduplicated, newest first; each item `{ id, startedAt, offsetMinutes, durationMs, source }`; cursors are host handles | `JournalPage` | fixed |
+| `journal.delete` | capability `journal.delete` | call | yes | yes | `session`: text ≤ `MAX_OBJECT_ID_BYTES` | `null`, or `cancelled` when the user declines; `not_connected` for a cloud session while PlayerVox is disconnected | `null` | fixed |
+| `twitch.chat.subscribe` | capability `twitch.chat.read` | subscribe | no | no | none | `{ account, channel, joinState, favorites, canSend, generation, reset, messages, removed }`: `account` is `signed_out`, `pending`, `connected` or `expired` (sign-in is host chrome); messages arrive as deltas, with `reset` after subscribing, a generation change or a show; each message `{ id, author, color, badges, fragments, reply, deleted }` with at most `MAX_CHAT_FRAGMENTS` fragments, emotes and badges as `asset:` handles for the current theme and scale | `TwitchChat` | fixed |
+| `twitch.chat.join` | capability `twitch.chat.read` | call | yes | no | `channel`: text ≤ `MAX_CHAT_CHANNEL_BYTES` | `null`; the host remembers the channel and rejoins it when the widget starts | `null` | fixed |
+| `twitch.chat.leave` | capability `twitch.chat.read` | call | yes | no | none | `null`; the host forgets the channel | `null` | fixed |
+| `twitch.chat.favorite` | capability `twitch.chat.read` | call | yes | no | `channel`: text ≤ `MAX_CHAT_CHANNEL_BYTES`; `favorite`: boolean | `null`; `quota_exceeded` beyond `MAX_CHAT_FAVORITES` | `null` | fixed |
+
+### Result shapes
+
+The shape of each result and subscription update, and of `ServiceError`. Records are exact: every member is present, a nullable one as `null`, and no other key is. Integers stay below 2^53.
+
+#### `ServiceError`
+
+Failure of a call or of a subscription, and of a `submit` intent. `{ code }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `code` | `invalid_request` \| `permission_denied` \| `gesture_required` \| `not_connected` \| `stale_context` \| `unavailable` \| `busy` \| `cancelled` \| `quota_exceeded` \| `unsupported` \| `url_invalid` \| `resolve_failed` \| `address_denied` \| `too_many_addresses` \| `peer_mismatch` \| `redirect_denied` \| `encoding_denied` \| `content_type_denied` \| `response_metadata_limit` \| `request_body_limit` \| `response_body_limit` \| `image_invalid` \| `timeout` \| `transport_failed` | Failure code. |
+
+#### `HttpResponse`
+
+Answer of `http.fetch`. `{ status, contentType }` or `{ status, asset }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `status` | integer | HTTP status. |
+| `contentType` | text or `null` | Response media type; the body is the raw payload. |
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `status` | integer | HTTP status. |
+| `asset` | `asset:` handle | The decoded image (`as: "image"`). |
+
+#### `GameEvent`
+
+One game event. `{ event, at }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `event` | text | A declared game event. |
+| `at` | integer | Host monotonic clock in ms. |
+
+#### `Session`
+
+Duration of the active game session. `{ elapsedMs, at }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `elapsedMs` | integer | Time since the game process started. |
+| `at` | integer | Host monotonic clock in ms at which `elapsedMs` was measured. |
+
+#### `Telemetry`
+
+Resource use of the active game. `{ cpu, ram, cpuTemperature, gpuTemperature, sources }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `cpu` | number or `null` | The game's share of the whole machine in %, 0–100. |
+| `ram` | integer or `null` | Resident bytes of the game. |
+| `cpuTemperature` | number or `null` | °C. |
+| `gpuTemperature` | number or `null` | °C. |
+| `sources` | `{ cpuTemperature, gpuTemperature }` | Sensors the host has. |
+| `sources.cpuTemperature` | boolean | The host has a CPU sensor. |
+| `sources.gpuTemperature` | boolean | The host has a GPU sensor. |
+
+#### `Fps`
+
+Frame rate of the active game. `{ fps, stale, status }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `fps` | integer or `null` | Frames per second. |
+| `stale` | boolean | No sample for 3 s. |
+| `status` | `ready` \| `waiting` \| `unsupported` \| `permission_denied` \| `ambiguous` \| `events_lost` \| `unavailable` | Measurement state. |
+
+#### `Stopwatch`
+
+The manual stopwatch. `{ running, elapsedMs, at, shortcuts }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `running` | boolean | Counting. |
+| `elapsedMs` | integer | Elapsed time at `at`. |
+| `at` | integer | Host monotonic clock in ms at which `elapsedMs` was measured. |
+| `shortcuts` | `{ toggle, reset, bound }` | Stopwatch shortcuts. |
+| `shortcuts.toggle` | text | Host-formatted key chord. |
+| `shortcuts.reset` | text | Host-formatted key chord. |
+| `shortcuts.bound` | boolean | The shortcuts are active. |
+
+#### `Media`
+
+The current media player. `{ player, title, artists, playing, canPrevious, canPlayPause, canNext, cover }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `player` | text | Opaque ID of the current player. |
+| `title` | text or `null` | Track title. |
+| `artists` | list of text | Artists. |
+| `playing` | boolean | Playing. |
+| `canPrevious` | boolean | The player supports previous. |
+| `canPlayPause` | boolean | The player supports play/pause. |
+| `canNext` | boolean | The player supports next. |
+| `cover` | `asset:` handle or `null` | Cover art, at most 512 px. |
+
+#### `NoteItem`
+
+One checklist item. `{ id, text, checked }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `id` | text or `null` | Item ID. |
+| `text` | text | Text. |
+| `checked` | boolean | Checked. |
+
+#### `Note`
+
+One note. `{ id, title, body, items }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `id` | text or `null` | Note ID. |
+| `title` | text | Title. |
+| `body` | text | Body text. |
+| `items` | list of `NoteItem` | Checklist. |
+
+#### `Notes`
+
+The user's notes document. `{ active, notes }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `active` | text or `null` | ID of the active note. |
+| `notes` | list of `Note` | Notes. |
+
+#### `CreatedNote`
+
+Answer of `notes.create`. `{ note }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `note` | `Note` | The new note. |
+
+#### `Score`
+
+PlayerVox score of the active game. `{ state, name, score, grade, ratingsCount, criteria }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `state` | `ready` \| `no_ratings` \| `not_found` \| `unavailable` | Score state. |
+| `name` | text or `null` | Game name. |
+| `score` | number or `null` | 0–100. |
+| `grade` | `S+` \| `S` \| `A` \| `B` \| `C` \| `D` \| `F` \| `--` | Grade of the score. |
+| `ratingsCount` | integer | Number of ratings. |
+| `criteria` | `{ gameplay, art, tech }` | Criteria scores. |
+| `criteria.gameplay` | number or `null` | 0–100. |
+| `criteria.art` | number or `null` | 0–100. |
+| `criteria.tech` | number or `null` | 0–100. |
+
+#### `Rating`
+
+The user's PlayerVox rating of the active game. `{ gameplay, art, tech, review, publishedAt, offsetMinutes }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `gameplay` | integer | 0–100. |
+| `art` | integer | 0–100. |
+| `tech` | integer | 0–100. |
+| `review` | text or `null` | Review text. |
+| `publishedAt` | integer or `null` | Unix ms. |
+| `offsetMinutes` | integer or `null` | UTC offset in minutes to show the timestamp with. |
+
+#### `Review`
+
+One player review. `{ id, author, grade, score, text, original, publishedAt, offsetMinutes }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `id` | text | Review ID. |
+| `author` | text | Author name. |
+| `grade` | `S+` \| `S` \| `A` \| `B` \| `C` \| `D` \| `F` \| `--` | Grade. |
+| `score` | integer | 0–100. |
+| `text` | text or `null` | Text, translated when a translation exists. |
+| `original` | text or `null` | Untranslated text. |
+| `publishedAt` | integer | Unix ms. |
+| `offsetMinutes` | integer | UTC offset in minutes to show the timestamp with. |
+
+#### `ReviewsPage`
+
+A page of player reviews. `{ items, page, totalPages, count }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `items` | list of `Review` | Reviews. |
+| `page` | integer | Page number. |
+| `totalPages` | integer | Number of pages. |
+| `count` | integer | Number of reviews. |
+
+#### `JournalSession`
+
+One journal session. `{ id, startedAt, offsetMinutes, durationMs, source }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `id` | text | Session ID. |
+| `startedAt` | integer | Unix ms. |
+| `offsetMinutes` | integer | UTC offset in minutes to show the timestamp with. |
+| `durationMs` | integer | Duration. |
+| `source` | `local` \| `cloud` | Where the session is stored. |
+
+#### `JournalPage`
+
+A page of the game journal. `{ gameName, items, next, previous }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `gameName` | text | Active game. |
+| `items` | list of `JournalSession` | Sessions, newest first. |
+| `next` | text or `null` | Cursor of the next page. |
+| `previous` | text or `null` | Cursor of the previous page. |
+
+#### `ChatFragment`
+
+A text run or an emote of a chat message. `{ text }` or `{ emote, alt }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `text` | text | Text run. |
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `emote` | `asset:` handle | Emote image. |
+| `alt` | text | Emote name. |
+
+#### `ChatMessage`
+
+One chat message. `{ id, author, color, badges, fragments, reply, deleted }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `id` | text | Message ID. |
+| `author` | text | Author name. |
+| `color` | text or `null` | Author colour `#rrggbb`. |
+| `badges` | list of `asset:` handle | Badge images. |
+| `fragments` | list of `ChatFragment` | Content runs. |
+| `reply` | `{ author, text }` or `null` | The message replied to. |
+| `reply.author` | text | Author replied to. |
+| `reply.text` | text | Text replied to. |
+| `deleted` | boolean | Deleted by a moderator. |
+
+#### `TwitchChat`
+
+Twitch chat state. `{ account, channel, joinState, favorites, canSend, generation, reset, messages, removed }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `account` | `signed_out` \| `pending` \| `connected` \| `expired` | Twitch account state; sign-in is host chrome. |
+| `channel` | text or `null` | Joined channel login. |
+| `joinState` | `idle` \| `connecting` \| `joined` \| `reconnecting` \| `failed` | Channel connection state. |
+| `favorites` | list of text | Favorite channels. |
+| `canSend` | boolean | A message can be sent now. |
+| `generation` | integer | Changes with the channel or account. |
+| `reset` | boolean | `messages` replaces the whole list. |
+| `messages` | list of `ChatMessage` | Messages, oldest first. |
+| `removed` | list of text | IDs of removed messages. |
 
 Service error codes: `invalid_request`, `permission_denied`, `gesture_required`, `not_connected`, `stale_context`, `unavailable`, `busy`, `cancelled`, `quota_exceeded`, `unsupported`, `url_invalid`, `resolve_failed`, `address_denied`, `too_many_addresses`, `peer_mismatch`, `redirect_denied`, `encoding_denied`, `content_type_denied`, `response_metadata_limit`, `request_body_limit`, `response_body_limit`, `image_invalid`, `timeout`, `transport_failed`.
 

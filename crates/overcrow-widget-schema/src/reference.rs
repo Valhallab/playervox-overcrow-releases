@@ -24,6 +24,7 @@ use crate::package::FILE_CLASSES;
 use crate::permissions::{
     CAPABILITIES, NETWORK_RULE_FIELDS, PARAMETER_CONSTRAINTS, PERMISSIONS, SensitiveRule,
 };
+use crate::results::{SHAPES, Shape};
 use crate::services::{Requirement, SERVICE_ERRORS, SERVICES, ServiceKind, Target, WRITE_INTENTS};
 use crate::style::{DEFAULT_SIZES, PROPERTIES, SELECTORS, SHEET_RULES, SyntaxEntry, VALUE_SYNTAX};
 use crate::tokens::TOKENS;
@@ -269,9 +270,9 @@ value; any other element, `canvas` included, is sized by style only.\n\n\
 | Element | When | Width | Height | Status |\n| --- | --- | --- | --- | --- |\n",
     );
     for row in DEFAULT_SIZES {
-        let when = row
-            .when
-            .map_or("—".to_owned(), |(name, value)| format!("`{name}=\"{value}\"`"));
+        let when = row.when.map_or("—".to_owned(), |(name, value)| {
+            format!("`{name}=\"{value}\"`")
+        });
         let _ = writeln!(
             out,
             "| `{}` | {} | {} | {} | {} |",
@@ -489,12 +490,49 @@ requires consent recorded by the host.\n\n\
     }
 }
 
+/// Member tables of a record shape, nested records and alternatives
+/// flattened with a dotted prefix.
+fn shape_members(out: &mut String, shape: &Shape, prefix: &str) {
+    match shape {
+        Shape::Record(members) => {
+            if prefix.is_empty() {
+                out.push_str("| Member | Shape | Meaning |\n| --- | --- | --- |\n");
+            }
+            for member in *members {
+                let name = format!("{prefix}{}", member.name);
+                let _ = writeln!(
+                    out,
+                    "| `{name}` | {} | {} |",
+                    member.shape.describe(),
+                    member.summary
+                );
+                let inner = match member.shape {
+                    Shape::Nullable(inner) => *inner,
+                    other => other,
+                };
+                if let Shape::Record(_) = inner {
+                    shape_members(out, &inner, &format!("{name}."));
+                }
+            }
+            if prefix.is_empty() {
+                out.push('\n');
+            }
+        }
+        Shape::OneOf(shapes) => {
+            for shape in *shapes {
+                shape_members(out, shape, prefix);
+            }
+        }
+        _ => {}
+    }
+}
+
 fn services_section(out: &mut String) {
     out.push_str(
         "\n## Services\n\nAuthority is checked by the host at every call, immediately before \
 acting. Gesture services also require the `cause` of a gesture event of the current Interactive \
-epoch.\n\n| Service | Requires | Kind | Gesture | Confirmation | Parameters | Result | Status |\n\
-| --- | --- | --- | --- | --- | --- | --- | --- |\n",
+epoch.\n\n| Service | Requires | Kind | Gesture | Confirmation | Parameters | Result | Shape | Status |\n\
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n",
     );
     for service in SERVICES {
         let requires = match service.requires {
@@ -521,13 +559,29 @@ epoch.\n\n| Service | Requires | Kind | Gesture | Confirmation | Parameters | Re
         };
         let _ = writeln!(
             out,
-            "| `{}` | {requires} | {kind} | {} | {} | {params} | {} | {} |",
+            "| `{}` | {requires} | {kind} | {} | {} | {params} | {} | {} | {} |",
             service.name,
             yes(service.gesture),
             yes(service.confirm),
             service.result,
+            service.returns.describe(),
             status(service.status)
         );
+    }
+    out.push_str(
+        "\n### Result shapes\n\nThe shape of each result and subscription update, and of \
+`ServiceError`. Records are exact: every member is present, a nullable one as `null`, and no \
+other key is. Integers stay below 2^53.\n\n",
+    );
+    for named in SHAPES {
+        let _ = write!(
+            out,
+            "#### `{}`\n\n{} {}\n\n",
+            named.name,
+            named.summary,
+            named.shape.describe()
+        );
+        shape_members(out, &named.shape, "");
     }
     let _ = write!(
         out,

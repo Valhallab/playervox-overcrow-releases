@@ -13,6 +13,7 @@ use crate::limits::{
     MAX_REVIEW_CHARS, MAX_STORAGE_KEY_BYTES, MIN_TIMER_INTERVAL_MS,
 };
 use crate::model::{Field, Status, ValueType};
+use crate::results::Shape;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Requirement {
@@ -42,7 +43,16 @@ pub struct Service {
     pub confirm: bool,
     pub params: &'static [Field],
     pub result: &'static str,
+    /// Shape of the result value and of every subscription update.
+    pub returns: Shape,
     pub status: Status,
+}
+
+impl Service {
+    const fn returning(mut self, shape: Shape) -> Self {
+        self.returns = shape;
+        self
+    }
 }
 
 const OBJECT_ID: ValueType = ValueType::Text(&MAX_OBJECT_ID_BYTES);
@@ -74,6 +84,7 @@ const fn call(
         confirm: false,
         params,
         result,
+        returns: Shape::Json,
         status,
     }
 }
@@ -92,6 +103,7 @@ const fn subscribe(
         confirm: false,
         params: NONE,
         result,
+        returns: Shape::Json,
         status,
     }
 }
@@ -122,7 +134,8 @@ pub const SERVICES: &[Service] = &[
         )],
         "`null`",
         Status::Fixed,
-    ),
+    )
+    .returning(Shape::Null),
     call(
         "timer.start",
         Requirement::None,
@@ -144,21 +157,24 @@ pub const SERVICES: &[Service] = &[
         ],
         "`null`; ticks arrive as `timer` events, never while hidden",
         Status::Fixed,
-    ),
+    )
+    .returning(Shape::Null),
     call(
         "timer.cancel",
         Requirement::None,
         &[Field::required("timer", ValueType::Id, "Timer ID.")],
         "`null`",
         Status::Fixed,
-    ),
+    )
+    .returning(Shape::Null),
     call(
         "storage.get",
         Requirement::Permission("storage"),
         &[Field::required("key", STORAGE_KEY, "Key.")],
         "stored JSON value or `null`",
         Status::Fixed,
-    ),
+    )
+    .returning(Shape::Json),
     call(
         "storage.set",
         Requirement::Permission("storage"),
@@ -172,21 +188,24 @@ pub const SERVICES: &[Service] = &[
         ],
         "`null`; `quota_exceeded` beyond `STORAGE_QUOTA_BYTES`",
         Status::Fixed,
-    ),
+    )
+    .returning(Shape::Null),
     call(
         "storage.remove",
         Requirement::Permission("storage"),
         &[Field::required("key", STORAGE_KEY, "Key.")],
         "`null`",
         Status::Fixed,
-    ),
+    )
+    .returning(Shape::Null),
     call(
         "storage.keys",
         Requirement::Permission("storage"),
         NONE,
         "list of keys",
         Status::Fixed,
-    ),
+    )
+    .returning(Shape::List(&Shape::Text)),
     call(
         "http.fetch",
         Requirement::Permission("network"),
@@ -214,7 +233,8 @@ pub const SERVICES: &[Service] = &[
         ],
         "`{ status, contentType }` with the body as raw payload ≤ `MAX_HTTP_RESPONSE_BYTES`, or `{ status, asset }`",
         Status::Fixed,
-    ),
+    )
+    .returning(Shape::Named("HttpResponse")),
     gesture(call(
         "clipboard.writeText",
         Requirement::Permission("clipboardWrite"),
@@ -225,7 +245,8 @@ pub const SERVICES: &[Service] = &[
         )],
         "`null`",
         Status::Fixed,
-    )),
+    ))
+    .returning(Shape::Null),
     Service {
         name: "gameEvents.subscribe",
         requires: Requirement::Permission("gameEvents"),
@@ -234,26 +255,31 @@ pub const SERVICES: &[Service] = &[
         confirm: false,
         params: NONE,
         result: "`{ event, at }` for each declared event",
+        returns: Shape::Json,
         status: Status::Fixed,
-    },
+    }
+    .returning(Shape::Named("GameEvent")),
     subscribe(
         "session.subscribe",
         "session.read",
         "`{ elapsedMs, at }` counted from the start of the game process, or `null` without an active game",
         Status::Fixed,
-    ),
+    )
+    .returning(Shape::Nullable(&Shape::Named("Session"))),
     subscribe(
         "telemetry.subscribe",
         "telemetry.read",
         "`{ cpu, ram, cpuTemperature, gpuTemperature, sources }`, or `null` without an active game: `cpu` is the game's share of the whole machine in % (0–100), `ram` its resident bytes, temperatures are °C or `null`, `sources` `{ cpuTemperature, gpuTemperature }` says whether the host has each sensor",
         Status::Fixed,
-    ),
+    )
+    .returning(Shape::Nullable(&Shape::Named("Telemetry"))),
     subscribe(
         "fps.subscribe",
         "fps.read",
         "`{ fps, stale, status }`: `fps` a number or `null`; the host sets `stale` 3 s after the last sample; `status` is `ready`, `waiting`, `unsupported`, `permission_denied`, `ambiguous`, `events_lost` or `unavailable`",
         Status::Fixed,
-    ),
+    )
+    .returning(Shape::Named("Fps")),
     Service {
         name: "media.subscribe",
         requires: Requirement::Capability("media.read"),
@@ -266,69 +292,80 @@ pub const SERVICES: &[Service] = &[
             "Request the cover art; default `true`. `false` stops the host from loading it.",
         )],
         result: "`null` without a player, or `{ player, title, artists, playing, canPrevious, canPlayPause, canNext, cover }`: `player` an opaque ID, `artists` a list, `cover` an `asset:` handle of at most 512 px or `null`",
+        returns: Shape::Json,
         status: Status::Fixed,
-    },
+    }
+    .returning(Shape::Nullable(&Shape::Named("Media"))),
     gesture(call(
         "media.previous",
         cap("media.control"),
         MEDIA_PLAYER,
         "`null`; `stale_context` when `player` is no longer current",
         Status::Fixed,
-    )),
+    ))
+    .returning(Shape::Null),
     gesture(call(
         "media.playPause",
         cap("media.control"),
         MEDIA_PLAYER,
         "`null`; `stale_context` when `player` is no longer current",
         Status::Fixed,
-    )),
+    ))
+    .returning(Shape::Null),
     gesture(call(
         "media.next",
         cap("media.control"),
         MEDIA_PLAYER,
         "`null`; `stale_context` when `player` is no longer current",
         Status::Fixed,
-    )),
+    ))
+    .returning(Shape::Null),
     subscribe(
         "stopwatch.subscribe",
         "stopwatch.read",
         "`{ running, elapsedMs, at, shortcuts }`, or `null` without an active game; `shortcuts` `{ toggle, reset, bound }` holds host-formatted key chords",
         Status::Fixed,
-    ),
+    )
+    .returning(Shape::Nullable(&Shape::Named("Stopwatch"))),
     gesture(call(
         "stopwatch.toggle",
         cap("stopwatch.control"),
         NONE,
         "the new state, as in `stopwatch.subscribe`; `unavailable` when the host cannot act",
         Status::Fixed,
-    )),
+    ))
+    .returning(Shape::Nullable(&Shape::Named("Stopwatch"))),
     gesture(call(
         "stopwatch.reset",
         cap("stopwatch.control"),
         NONE,
         "the new state, as in `stopwatch.subscribe`; `unavailable` when the host cannot act",
         Status::Fixed,
-    )),
+    ))
+    .returning(Shape::Nullable(&Shape::Named("Stopwatch"))),
     subscribe(
         "notes.subscribe",
         "notes.read",
         "`{ active, notes }` of the user's single notes document; each note `{ id, title, body, items }`, each item `{ id, text, checked }`",
         Status::Fixed,
-    ),
+    )
+    .returning(Shape::Named("Notes")),
     gesture(call(
         "notes.create",
         cap("notes.write"),
         NONE,
         "`{ note }`, a new empty active note titled `Note {n}` in the user's language; `quota_exceeded` beyond `MAX_NOTES`",
         Status::Fixed,
-    )),
+    ))
+    .returning(Shape::Named("CreatedNote")),
     gesture(call(
         "notes.select",
         cap("notes.write"),
         &[Field::required("note", OBJECT_ID, "Note ID.")],
         "`null`; the host stores the active note",
         Status::Fixed,
-    )),
+    ))
+    .returning(Shape::Null),
     gesture(call(
         "notes.setItem",
         cap("notes.write"),
@@ -339,26 +376,30 @@ pub const SERVICES: &[Service] = &[
         ],
         "`null`",
         Status::Fixed,
-    )),
+    ))
+    .returning(Shape::Null),
     confirmed(call(
         "notes.delete",
         cap("notes.write"),
         &[Field::required("note", OBJECT_ID, "Note ID.")],
         "`null`, or `cancelled` when the user declines",
         Status::Fixed,
-    )),
+    ))
+    .returning(Shape::Null),
     subscribe(
         "playervox.score.subscribe",
         "playervox.score.read",
         "`{ state, name, score, grade, ratingsCount, criteria }`: `state` is `ready`, `no_ratings`, `not_found` or `unavailable`; `criteria` `{ gameplay, art, tech }`, each 0–100 or `null`",
         Status::Fixed,
-    ),
+    )
+    .returning(Shape::Named("Score")),
     subscribe(
         "playervox.rating.subscribe",
         "playervox.rating.read",
         "`null` before the user's first rating, or `{ gameplay, art, tech, review, publishedAt, offsetMinutes }`; `unsupported` outside the PlayerVox catalogue; the host seeds the `playervox.rating.publish` controls from it",
         Status::Fixed,
-    ),
+    )
+    .returning(Shape::Nullable(&Shape::Named("Rating"))),
     call(
         "playervox.reviews.page",
         cap("playervox.reviews.read"),
@@ -379,27 +420,31 @@ pub const SERVICES: &[Service] = &[
         ],
         "`{ items, page, totalPages, count }`; each item `{ id, author, grade, score, text, original, publishedAt, offsetMinutes }`, `text` in the user's language when a translation exists, `original` the untranslated text or `null`, both cut by the host to `MAX_NODE_TEXT_BYTES`",
         Status::Fixed,
-    ),
+    )
+    .returning(Shape::Named("ReviewsPage")),
     call(
         "journal.page",
         cap("journal.read"),
         CURSOR,
         "`{ gameName, items, next, previous }`: local and cloud sessions of the active game, merged and deduplicated, newest first; each item `{ id, startedAt, offsetMinutes, durationMs, source }`; cursors are host handles",
         Status::Fixed,
-    ),
+    )
+    .returning(Shape::Named("JournalPage")),
     confirmed(call(
         "journal.delete",
         cap("journal.delete"),
         &[Field::required("session", OBJECT_ID, "Journal session ID.")],
         "`null`, or `cancelled` when the user declines; `not_connected` for a cloud session while PlayerVox is disconnected",
         Status::Fixed,
-    )),
+    ))
+    .returning(Shape::Null),
     subscribe(
         "twitch.chat.subscribe",
         "twitch.chat.read",
         "`{ account, channel, joinState, favorites, canSend, generation, reset, messages, removed }`: `account` is `signed_out`, `pending`, `connected` or `expired` (sign-in is host chrome); messages arrive as deltas, with `reset` after subscribing, a generation change or a show; each message `{ id, author, color, badges, fragments, reply, deleted }` with at most `MAX_CHAT_FRAGMENTS` fragments, emotes and badges as `asset:` handles for the current theme and scale",
         Status::Fixed,
-    ),
+    )
+    .returning(Shape::Named("TwitchChat")),
     gesture(call(
         "twitch.chat.join",
         cap("twitch.chat.read"),
@@ -410,14 +455,16 @@ pub const SERVICES: &[Service] = &[
         )],
         "`null`; the host remembers the channel and rejoins it when the widget starts",
         Status::Fixed,
-    )),
+    ))
+    .returning(Shape::Null),
     gesture(call(
         "twitch.chat.leave",
         cap("twitch.chat.read"),
         NONE,
         "`null`; the host forgets the channel",
         Status::Fixed,
-    )),
+    ))
+    .returning(Shape::Null),
     gesture(call(
         "twitch.chat.favorite",
         cap("twitch.chat.read"),
@@ -431,7 +478,8 @@ pub const SERVICES: &[Service] = &[
         ],
         "`null`; `quota_exceeded` beyond `MAX_CHAT_FAVORITES`",
         Status::Fixed,
-    )),
+    ))
+    .returning(Shape::Null),
 ];
 
 /// Closed failure codes of `ServiceResult`; network codes are the broker's.
