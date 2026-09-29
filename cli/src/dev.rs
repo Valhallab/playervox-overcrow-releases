@@ -249,9 +249,9 @@ impl Session {
 
     fn handle(&mut self, message: ServerMessage) -> Result<(), End> {
         if self.json() {
-            // The protocol's own JSON; strings are escaped by the encoder.
+            // The protocol's own JSON, with nothing a terminal would act on.
             if let Ok(line) = serde_json::to_string(&message) {
-                println!("{line}");
+                println!("{}", sanitize::json(&line));
             }
         }
         match message {

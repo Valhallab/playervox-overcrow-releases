@@ -168,9 +168,10 @@ same user, while you edit it:
 4. prints what the overlay reports: installs, the widget's states
    (`starting`, `running`, `restarting` with the failure, `failed`…) and the
    logs of its logic (`log.info(…)` of the [SDK](sdk-reference.md)). Log
-   texts come from the widget: control characters, terminal escape sequences
-   and bidirectional controls are shown escaped (`\u{1b}`), never
-   interpreted, and each line is cut at 512 characters;
+   texts come from the widget: control characters, terminal escape sequences,
+   line separators and bidirectional controls are shown escaped (`\u{1b}`),
+   never interpreted, and each line is cut at 512 characters (with
+   `--format json`, they are `\uXXXX` escapes of the JSON strings);
 5. on **Ctrl+C**, removes the widget from the overlay and exits with status
    0. If `dev` dies instead, the overlay removes the widget itself when the
    connection ends.

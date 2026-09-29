@@ -7,13 +7,29 @@
 pub const MAX_LINE_CHARS: usize = 512;
 
 /// Whether `c` could steer a terminal or reorder what it shows: C0 controls
-/// (ESC included) but tab, DEL, C1 controls, and the bidirectional
-/// embeddings, overrides, isolates and marks.
+/// (ESC included) but tab, DEL, C1 controls, the line and paragraph
+/// separators, and the bidirectional embeddings, overrides, isolates and
+/// marks.
 fn is_unsafe(c: char) -> bool {
     matches!(c,
         '\u{0}'..='\u{8}' | '\u{a}'..='\u{1f}' | '\u{7f}'..='\u{9f}'
-        | '\u{200e}' | '\u{200f}' | '\u{202a}'..='\u{202e}' | '\u{2066}'..='\u{2069}'
-        | '\u{61c}')
+        | '\u{200e}' | '\u{200f}' | '\u{2028}' | '\u{2029}'
+        | '\u{202a}'..='\u{202e}' | '\u{2066}'..='\u{2069}' | '\u{61c}')
+}
+
+/// A line of JSON for a terminal: `serde_json` escapes C0 controls only;
+/// every other unsafe character becomes a `\uXXXX` escape, which JSON
+/// readers decode to the same text.
+pub fn json(line: &str) -> String {
+    let mut out = String::with_capacity(line.len());
+    for c in line.chars() {
+        if is_unsafe(c) {
+            out.push_str(&format!("\\u{:04x}", u32::from(c)));
+        } else {
+            out.push(c);
+        }
+    }
+    out
 }
 
 /// One line of untrusted text for a terminal: every unsafe character shown
@@ -72,6 +88,16 @@ mod tests {
         assert_eq!(line("\u{1b}[31mred"), "\\u{1b}[31mred");
         assert_eq!(line("tab\tkept"), "tab\tkept");
         assert_eq!(line("é ✓ 日本"), "é ✓ 日本");
+    }
+
+    #[test]
+    fn json_lines_decode_to_the_same_text() {
+        let text = "\u{1b}]0;x\u{7}\u{9b}\u{202e}\u{2028}ok";
+        let encoded = serde_json::to_string(&serde_json::json!({ "text": text })).expect("JSON");
+        let shown = json(&encoded);
+        assert!(shown.chars().all(|c| !is_unsafe(c)), "{shown:?}");
+        let decoded: serde_json::Value = serde_json::from_str(&shown).expect("still JSON");
+        assert_eq!(decoded["text"], text);
     }
 
     #[test]

@@ -41,11 +41,12 @@ the other.
 | | Linux | Windows |
 | --- | --- | --- |
 | Address | `$XDG_RUNTIME_DIR/overcrow-widget-development.sock` | `\\.\pipe\overcrow-widget-development-<SID>`, the user's SID string (`S-1-5-21-…`) |
-| Overlay side | The runtime directory must be the user's, not a link, mode `0700`; the socket is `0600`. A stale socket of an overlay that ended is replaced; a live one means another overlay has the channel. | The first pipe instance is created exclusively (`FILE_FLAG_FIRST_PIPE_INSTANCE`), so an existing name (another overlay, or anyone squatting it) means no channel. Its DACL grants read and write to the user's SID only, which excludes AppContainers; remote clients are refused; the default mandatory label (medium, no write-up) applies. |
-| Client checked by the overlay | `SO_PEERCRED`: the peer's user ID is the overlay's. | The client's token (by impersonation): the same user SID, integrity medium or above, not an AppContainer, not restricted. |
-| Overlay checked by the client | The socket is a socket (not a link) owned by the user, and `SO_PEERCRED` of the connection is the user. | `GetNamedPipeServerProcessId`: the server process's token is the user's SID. The client opens the pipe at the identification level: the overlay can check the client, not act as it. |
+| Overlay side | The runtime directory must be the user's, not a link, mode `0700`. An exclusive lock on `overcrow-widget-development.sock.lock` (a `0600` file of the user, never a link) is held while the channel lives; a stale socket of an overlay that ended is then replaced. The socket is `0600`. | The first pipe instance is created exclusively (`FILE_FLAG_FIRST_PIPE_INSTANCE`), so an existing name (another overlay, or anyone squatting it) means no channel. Its DACL grants read and write to the user's SID only, which excludes AppContainers; remote clients are refused; its mandatory label is medium, no write-up and no read-up, so lower integrity levels cannot open it. |
+| Client checked by the overlay | `SO_PEERCRED`: the peer's user ID is the overlay's. | Before the session starts, once the client's first byte arrived (within the `hello` delay): the client's token, by impersonation, is the same user SID, integrity medium or above, not an AppContainer, not restricted. |
+| Overlay checked by the client | The socket is a socket (not a link) owned by the user, and `SO_PEERCRED` of the connection is the user. | `GetNamedPipeServerProcessId`: the server process's token is the user's SID, integrity medium or above, not an AppContainer, not restricted. The client opens the pipe at the identification level: the overlay can check the client, not act as it. |
 
-A refused client is disconnected without an answer. By design, any process
+A refused client is disconnected without an answer; nothing is written to a
+client before its identity is checked. By design, any process
 of the same user may use the channel: the user chose to allow development
 installs, and such a process could already act as the user. Widgets cannot:
 their sandbox has no runtime directory on Linux, and no access to the pipe
@@ -118,8 +119,9 @@ the overlay relays, may carry terminal escape sequences, bidirectional
 controls or anything else a widget chose. A client must neutralize them
 before display, as `overcrow-widget` does: C0 controls but tab (escape,
 carriage return and newline included), DEL, C1 controls, and U+061C,
-U+200E, U+200F, U+202A to U+202E, U+2066 to U+2069 are shown escaped, and
-each line is cut at 512 characters.
+U+200E, U+200F, U+2028, U+2029, U+202A to U+202E, U+2066 to U+2069 are
+shown escaped, and each line is cut at 512 characters. JSON output is no
+exception: a JSON encoder escapes C0 controls only.
 
 ### Refusal and failure codes
 
@@ -152,7 +154,7 @@ are.
 | `hello` | within 2 s of the connection |
 | A frame that started | complete within 10 s (an idle session has no deadline) |
 | An overlay message | written within 5 s, or the session is closed |
-| Messages waiting for a client | 512, 2 MiB; beyond, events, states and logs are dropped and counted (`dropped`); an answer that no longer fits closes the session |
+| Messages waiting for a client | 512, 2 MiB; beyond, events, states and logs are dropped and counted (`dropped`, sent only after `welcome`, to sessions that own a widget); an answer that no longer fits closes the session |
 
 ## Versions
 

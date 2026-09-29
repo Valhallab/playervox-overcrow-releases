@@ -315,3 +315,42 @@ fn doctor_reports_the_overlay_and_the_project() {
     assert_eq!(facts["development"]["active"], true, "{stdout}");
     assert_eq!(facts["development"]["overlay"], "overcrow 9.9.9-test");
 }
+
+#[test]
+fn dev_json_output_is_safe_for_a_terminal_too() {
+    let runtime = runtime_dir();
+    let listener = UnixListener::bind(runtime.path().join(SOCKET_NAME)).expect("socket");
+    let server = overlay(listener);
+    let root = project(runtime.path());
+    let mut child = Command::new(BIN)
+        .args([
+            "dev",
+            root.to_str().expect("UTF-8"),
+            "--no-typecheck",
+            "--format",
+            "json",
+        ])
+        .env("XDG_RUNTIME_DIR", runtime.path())
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .spawn()
+        .expect("dev");
+    let output = lines(&mut child);
+    let mut all = Vec::new();
+    wait_line(&output, &mut all, r#""type":"log""#);
+    // SAFETY: a signal to our own child.
+    unsafe { libc::kill(child.id() as libc::pid_t, libc::SIGINT) };
+    assert!(child.wait().expect("dev ends").success());
+    server.join().expect("overlay");
+    let log = all
+        .iter()
+        .find(|line| line.contains(r#""type":"log""#))
+        .expect("the log line");
+    assert!(!log.contains(['\u{1b}', '\u{7}', '\u{202e}']), "{log:?}");
+    let value: serde_json::Value = serde_json::from_str(log).expect("JSON");
+    assert_eq!(
+        value["text"],
+        "\u{1b}]52;c;aGk=\u{7}evil\u{202e}txt\n\u{1b}[2Jsecond"
+    );
+}
