@@ -2,7 +2,7 @@
   "name": "@overcrow/sdk",
   "version": "1.0.0",
   "description": "TypeScript API of OverCrow widget logic (widget API v1).",
-  "license": "MIT",
+  "license": "MIT-0",
   "type": "module",
   "sideEffects": false,
   "types": "./dist/index.d.ts",

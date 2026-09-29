@@ -120,6 +120,7 @@ Neither a pull request nor a merge signs or publishes a widget. See
 [contributing](CONTRIBUTING.md), [security](SECURITY.md), and
 [maintenance](docs/github-maintenance.md).
 
-The public sources are MIT-licensed, with the scopes in [LICENSING.md](LICENSING.md).
+The public sources are MIT-licensed, except `@overcrow/sdk` (MIT-0, no
+attribution required), with the scopes in [LICENSING.md](LICENSING.md).
 Desktop installers remain proprietary under their own included license; the MIT
 license does not grant rights to OverCrow's private application source or branding.

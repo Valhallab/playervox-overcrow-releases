@@ -2,8 +2,9 @@
 
 Copyright (c) 2026 Valhallab SASU.
 
-This repository's widget schema and format crates, SDK, creator tools, reference widgets, and
-documentation are open source under the [MIT License](LICENSE). This license covers the public source files;
+This repository's widget schema and format crates, creator tools, templates, reference widgets, and
+documentation are open source under the [MIT License](LICENSE), except `@overcrow/sdk`
+(`sdk/`), which is under the [MIT No Attribution License](sdk/LICENSE) (MIT-0). These licenses cover the public source files;
 it does not cover the separate OverCrow application. OverCrow's Control Center,
 core, overlay, built-in widgets, native tools, and desktop integrations remain
 private, proprietary software.
@@ -16,10 +17,13 @@ PlayerVox packages carry their own notices:
 - [Warframe Market](widgets/warframe-market/LICENSE).
 - [Hello Web example](fixtures/hello-web/LICENSE).
 
-The JavaScript widget SDK is also MIT-licensed. Its bundled copies include the
-copyright and permission notice. Preserve the applicable notices when copying
-or distributing these components; include the widget's LICENSE in its manifest
-file ledger so the notice travels inside the package.
+`@overcrow/sdk`, the SDK of widget API v1, is MIT-0: the copy of it that the
+widget CLI links into every `logic.js` requires no notice. The CLI still keeps
+a one-line courtesy comment naming the SDK version at the top of the bundle.
+The Web runtime JavaScript SDK 1.3 (`content/sdk/`) stays MIT-licensed, and its
+bundled copies include the copyright and permission notice. Preserve the
+applicable notices when copying or distributing MIT components; include the
+widget's LICENSE in its package so the widget's own notice travels with it.
 
 Third-party creators' widgets are separate works. Their licensing policy remains
 undecided. The marketplace's MIT license does not automatically apply to them,

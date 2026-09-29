@@ -125,7 +125,7 @@ fn every_template_checks_packages_and_reads_back() {
         validate_package_style(&package).expect("style accepted");
         assert_eq!(package.manifest.id, format!("com.example.{template}"));
         let logic = package.file("logic.js").expect("logic.js");
-        assert!(logic.starts_with(b"/*! @overcrow/sdk 1.0.0 | MIT License"));
+        assert!(logic.starts_with(b"/*! @overcrow/sdk 1.0.0 | MIT-0 |"));
         assert!(
             package.file("view.ocml").is_none(),
             "the view source is not shipped"
