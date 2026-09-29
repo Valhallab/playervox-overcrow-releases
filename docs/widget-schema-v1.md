@@ -644,6 +644,7 @@ Every icon of the pinned `egui-lucide 0.1.0` crate (Lucide 1.34.0, 1777 names) i
 | `vm` | `VmRequest` | no | VM budget request; absent means the defaults. |
 | `permissions` | `Permissions` | no | Requested permissions; absent means none. |
 | `wrapper` | `wrapper` | no | Widget rows of the host options menu. |
+| `requires` | `host features` | no | Distinct host data sources the widget cannot work without, as in a `wrapper.menu` row's `requires`. On a machine that lacks one, the host neither starts nor shows the widget and keeps its layout; the widget comes back when the source does. |
 
 ### `WidgetName`
 

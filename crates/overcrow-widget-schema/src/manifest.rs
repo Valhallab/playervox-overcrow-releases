@@ -23,7 +23,7 @@ use crate::permissions::{
     CAPABILITIES, NETWORK_RULE_FIELDS, PARAMETER_CONSTRAINTS, capability_named,
 };
 use crate::version::Version;
-use crate::wrapper::{valid_label_text, validate_wrapper};
+use crate::wrapper::{HOST_FEATURES, valid_label_text, validate_wrapper};
 
 const MIB: u64 = 1024 * 1024;
 const MAX_SAFE_INTEGER: i64 = (1 << 53) - 1;
@@ -81,6 +81,11 @@ pub const MANIFEST_FIELDS: &[Field] = &[
         "wrapper",
         ValueType::Record("wrapper"),
         "Widget rows of the host options menu.",
+    ),
+    Field::optional(
+        "requires",
+        ValueType::Record("host features"),
+        "Distinct host data sources the widget cannot work without, as in a `wrapper.menu` row's `requires`. On a machine that lacks one, the host neither starts nor shows the widget and keeps its layout; the widget comes back when the source does.",
     ),
 ];
 
@@ -180,6 +185,8 @@ pub enum ManifestError {
     /// A sensitive capability together with `network` or `clipboardWrite`.
     SensitiveEgress,
     Wrapper,
+    /// `requires` is not a list of distinct host features.
+    Requires,
 }
 
 impl ManifestError {
@@ -200,6 +207,7 @@ impl ManifestError {
             Self::Capability => "capability",
             Self::SensitiveEgress => "sensitive_egress",
             Self::Wrapper => "wrapper",
+            Self::Requires => "requires",
         }
     }
 }
@@ -213,6 +221,8 @@ pub struct Manifest {
     /// Heap ceiling granted to the VM: the request, or `VM_HEAP_BYTES`.
     pub heap_bytes: u64,
     pub permissions: Permissions,
+    /// Host data sources the widget needs (`requires`); empty when absent.
+    pub requires: BTreeSet<&'static str>,
     pub value: Value,
 }
 
@@ -301,13 +311,38 @@ pub fn validate_manifest_value(value: Value) -> Result<Manifest, ManifestError> 
     if let Some(wrapper) = object.get("wrapper") {
         validate_wrapper(wrapper).map_err(|_| ManifestError::Wrapper)?;
     }
+    let requires = match object.get("requires") {
+        Some(requires) => validate_requires(requires)?,
+        None => BTreeSet::new(),
+    };
     Ok(Manifest {
         id: id.to_owned(),
         version,
         heap_bytes,
         permissions,
+        requires,
         value,
     })
+}
+
+/// `requires`: a non-empty list of distinct host features.
+fn validate_requires(requires: &Value) -> Result<BTreeSet<&'static str>, ManifestError> {
+    let list = requires.as_array().ok_or(ManifestError::Shape)?;
+    if list.is_empty() || list.len() > HOST_FEATURES.len() {
+        return Err(ManifestError::Requires);
+    }
+    let mut features = BTreeSet::new();
+    for feature in list {
+        let feature = feature.as_str().ok_or(ManifestError::Requires)?;
+        let known = HOST_FEATURES
+            .iter()
+            .find(|known| **known == feature)
+            .ok_or(ManifestError::Requires)?;
+        if !features.insert(*known) {
+            return Err(ManifestError::Requires);
+        }
+    }
+    Ok(features)
 }
 
 /// Reverse-DNS widget ID, the grammar of the Web runtime kept unchanged.

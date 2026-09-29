@@ -112,6 +112,21 @@ fn manifest_fixtures() {
 }
 
 #[test]
+fn manifest_requires_lists_the_host_features_the_widget_needs() {
+    let requires = |name: &str| {
+        let path = fixtures_root().join("manifest/valid").join(name);
+        validate_manifest(&read(&path)).expect(name).requires
+    };
+    assert!(requires("minimal.json").is_empty(), "absent: nothing");
+    assert_eq!(
+        requires("requires-fps.json")
+            .into_iter()
+            .collect::<Vec<_>>(),
+        ["fps"]
+    );
+}
+
+#[test]
 fn manifest_heap_request_is_whole_mib_between_16_and_48() {
     let heap = |name: &str| {
         let path = fixtures_root().join("manifest/valid").join(name);
