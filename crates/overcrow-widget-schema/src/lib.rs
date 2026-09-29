@@ -23,6 +23,7 @@ pub mod results;
 pub mod services;
 pub mod style;
 pub mod tokens;
+pub mod typescript;
 pub mod version;
 pub mod view;
 pub mod wrapper;
