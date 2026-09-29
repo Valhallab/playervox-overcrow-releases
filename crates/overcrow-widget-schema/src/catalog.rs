@@ -699,7 +699,9 @@ fn immutable_url(
     )
 }
 
-fn validate_listing(value: &Value) -> Result<(), CatalogError> {
+/// Validates a target's `listing` object (the Listing fields). Admission and
+/// the catalog pipeline check a submitted listing with it before signing.
+pub fn validate_listing(value: &Value) -> Result<(), CatalogError> {
     let invalid = CatalogError::Listing;
     let object = value.as_object().ok_or(invalid)?;
     if !has_exact_fields(object, &[LISTING_FIELDS]) {
@@ -1007,7 +1009,8 @@ pub fn seed_use(seed: &Seed, accepted_catalog_sequence: Option<u64>) -> SeedUse 
 
 #[cfg(test)]
 mod tests {
-    use super::{is_production_key_id, parse_timestamp};
+    use super::{CatalogError, is_production_key_id, parse_timestamp, validate_listing};
+    use serde_json::json;
 
     #[test]
     fn timestamps_are_canonical_utc_seconds() {
@@ -1041,6 +1044,33 @@ mod tests {
             "overcrow-widgets-2026-001",
         ] {
             assert!(!is_production_key_id(id), "{id}");
+        }
+    }
+
+    #[test]
+    fn a_listing_is_plain_text_with_a_canonical_source() {
+        let valid = json!({
+            "author": "PlayerVox",
+            "spdxLicense": "MIT",
+            "sourceUrl": "https://github.com/valhallab/playervox-overcrow-releases",
+            "defaultLocale": "en",
+            "localizations": [{"locale": "en", "name": "Clock", "description": "Local time."}]
+        });
+        assert_eq!(validate_listing(&valid), Ok(()));
+        for (field, value) in [
+            ("author", json!("<b>PlayerVox</b>")),
+            ("spdxLicense", json!("MIT OR Apache-2.0")),
+            ("sourceUrl", json!("https://example.com:8443/widget")),
+            ("defaultLocale", json!("fr")),
+            ("preview", json!("assets/preview.png")),
+        ] {
+            let mut listing = valid.clone();
+            listing[field] = value;
+            assert_eq!(
+                validate_listing(&listing),
+                Err(CatalogError::Listing),
+                "{field}"
+            );
         }
     }
 }
