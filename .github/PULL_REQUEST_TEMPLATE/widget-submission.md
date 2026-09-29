@@ -1,17 +1,19 @@
-## Extension submission
+## Widget submission
 
-Directory: `widgets/<extension-id>/` (or another reviewed web directory)
+Directory: `widgets/<dir>/` (widget API v1 sources and `listing.json`)
 
-Describe the extension, its intended game or use, and the exact revision tested.
+Describe the widget, its intended game or use, and the exact revision tested.
 
 ## Review declarations
 
-- [ ] The package is a Web API v1 web app (`manifest.json` + `listing.json` + declared files).
-- [ ] There is no WIT, Wasmtime component, native executable module, or provider graph; any declared browser `.wasm` is page-only computation.
-- [ ] Every HTTPS grant is exact (`origin`, `method`, `pathPrefix`) and contains no credentials or wildcards.
-- [ ] Source, assets, fonts, preview, and third-party licenses have documented provenance.
-- [ ] English listing metadata is present; every additional locale is listed.
-- [ ] `marketplace-tool package` and `inspect` succeed on this directory.
+- [ ] `overcrow-widget admit widgets/<dir>` passes on this revision (paste its
+      report or `--format json` output below).
+- [ ] The widget ID is under a domain I control; it is not `com.playervox.*`.
+- [ ] Every network route, capability, clipboard write and storage use serves
+      the widget's stated purpose.
+- [ ] Source, assets, fonts, preview, and third-party licenses have documented
+      provenance; `LICENSE` matches `spdxLicense`.
+- [ ] Listing text is present in every declared locale.
 - [ ] This PR targets `candidate` and does not modify `published/`.
 
 ## Evidence

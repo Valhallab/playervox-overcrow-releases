@@ -58,6 +58,7 @@ repository's `sdk/` in the meantime.
 | `LICENSE` | The package's license text. The templates start with MIT; choose your own. |
 | `assets/` | Optional PNG, JPEG or WebP images. |
 | `package.json`, `tsconfig.json` | Tooling only: TypeScript and the SDK types. Never packaged. |
+| `listing.json` | The marketplace text of a submission ([publishing](publishing.md)); read by `admit`, never packaged. |
 | `tests/<name>.scenario.json`, `tests/reference/` | Test scenarios and their reference images, played by [`test`](#test-dir) ([testing guide](widget-testing.md)). Never packaged; `tests/output/` holds the images of failed runs and is ignored by Git. |
 
 ## Commands
@@ -280,6 +281,47 @@ Options: `--format json` (the diagnostics, then one
 status as for `check`: 0 without errors (warnings allowed unless
 `--deny-warnings`), 1 with errors, 2 on a usage error.
 
+### `admit [dir]`
+
+The static admission a marketplace submission goes through, exactly as the
+marketplace CI runs it ([publishing](publishing.md), [review
+policy](review-policy.md)). It never runs `tsc` or the widget's code:
+
+1. the directory is built with the `package` pipeline;
+2. with `--package FILE`, that archive's `view.json` must be byte for byte
+   what `view.ocml` compiles to; other differences are a warning, since the
+   catalog ships the rebuild from the reviewed sources;
+3. the reserved `com.playervox.*` IDs, `listing.json`, its preview (a
+   packaged PNG under `assets/`, at most 256 KiB) and, for PlayerVox
+   widgets, the MIT license;
+4. the authority the widget requests, listed for the reviewer: capabilities
+   (sensitive ones marked), network routes, clipboard writes, storage and
+   game events.
+
+| Code | Severity | Meaning |
+| --- | --- | --- |
+| `admission.reserved_id` | error | A `com.playervox.*` ID without `--publisher playervox`. |
+| `admission.listing_missing`, `admission.listing` | error | No `listing.json`, or one the catalog's Listing rules refuse. |
+| `admission.preview` | error | `preview` does not name a packaged PNG within bounds. |
+| `admission.license` | error | A PlayerVox widget whose `spdxLicense` is not MIT. |
+| `admission.view_not_reproducible` | error | The submitted `view.json` differs from the compiled `view.ocml`. |
+| `admission.package_rebuilt` | warning | The submitted archive differs from the rebuild in other files. |
+| `admission.not_rebuilt` | warning | A bare archive was admitted without its sources. |
+
+Options: `--package FILE`, `--publisher playervox` (the marketplace CI
+passes it only for this repository's own revisions), `--out DIR` (writes an
+admission bundle: `package.ocpkg`, `listing.json`, `report.json`, into a
+missing or empty directory), `--format json` (one report object: verdict,
+identity, package digest and files, reproducibility, listing, review list,
+diagnostics), `--deny-warnings`. `admit <file.ocpkg> --listing FILE` checks
+a bare archive. Text from the package and the listing is shown with
+terminal controls neutralized. Exit status: 0 admitted, 1 refused, 2 on a
+usage or I/O error.
+
+`snapshot-plan --repository PATH --revision SHA` is a maintenance command of
+the marketplace CI: the validated file list of a Git revision
+(`scripts/materialize-git-snapshot.sh`). Creators do not need it.
+
 ## Diagnostics
 
 Every problem is one diagnostic:
@@ -296,7 +338,7 @@ check: 1 error(s), 0 warning(s)
 
 - The code is `<domain>.<category>`. Domains: `project`, `manifest`,
   `view`, `style`, `locales`, `logic`, `typecheck`, `package`, `init`,
-  `doctor`.
+  `doctor`, `admission`.
   Categories of `manifest`, `view`, `style` and `package` are the stable
   names of the public validators ([source formats](widget-source-formats.md#error-categories),
   [schema reference](widget-schema-v1.md)); the lint's are listed above;

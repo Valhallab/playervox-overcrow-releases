@@ -28,12 +28,12 @@ are outside the SDK. Update both documentation languages together.
 ```sh
 python3 scripts/package-docs-examples.py published/docs/downloads
 node --test tests/creator-kit/*.test.mjs tests/warframe-market/*.test.mjs
-cargo test -p marketplace-tool --locked
+cargo test -p overcrow-widget-cli --locked
 cargo test -p overcrow-widget-schema --locked
 cargo test -p overcrow-widget-format --locked
 sh scripts/check-policy.sh
 ```
 
 See [creator guidance](docs/creator-guide.md), [testing](docs/testing.md),
-[review policy](docs/review-policy.md), and [maintenance](docs/github-maintenance.md).
+[publishing](docs/publishing.md) and the [review policy](docs/review-policy.md).
 The website is maintained in a separate private repository.

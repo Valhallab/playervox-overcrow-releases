@@ -1,47 +1,66 @@
 # Review policy
 
-Reviewers admit one Web API v1 artifact.
-Hosted pull-request admission first treats the exact proposed tree as data,
-packages every widget with the base-reviewed tool, and emits an ephemeral
-digest receipt. It does not execute proposed code. A maintainer sandbox is the
-future boundary that may build and test proposed code once. Today, a trusted
-push runs the repository checks and packages each committed widget once; an
-operator may explicitly ingest those exact packages into a private store.
+Reviewers admit widget API v1 source directories. Web API widgets are no
+longer admitted: `widgets/warframe-market` is kept as a legacy Web widget,
+recorded but never admitted to the v1 catalog.
 
-- Reject WIT, Wasmtime components, native executable modules, providers, and
-  undeclared files. A declared browser `.wasm` asset is ordinary sandboxed page
-  code and receives no native authority.
-- Do not impose a suffix allowlist on declared regular Web data. The host maps
-  known UI formats and serves unknown formats as non-sniffed opaque bytes;
-  native suffixes and executable signatures remain rejected.
-- Confirm the manifest file ledger matches the packaged bytes.
-- Require `"apiVersion": "1"` and reject capabilities outside `telemetry.read`,
-  `fps.read`, `media.read` and `media.control`. Media grants cannot coexist with
-  network or raw clipboard writes and force temporary storage. Widget data must
-  remain separate from built-in notes, stopwatch state, journals and accounts.
-- When `listing.json` selects a `preview`, require a declared static PNG within
-  the screenshot limits. Admission binds the selected path to its listing receipt
-  and the image bytes to the package ledger; publication signs its fixed URL,
-  size, media type, and SHA-256 alongside the widget version.
-- Confirm listing locales, declared license, and source URL are exact and
-  non-executable. Check that required license notices are packaged. Metadata
-  validity does not approve a license for publication. PlayerVox widgets use
-  MIT; the policy for third-party creators' widgets remains undecided. Do not
-  infer a universal MIT requirement from the marketplace's own license; see
-  [licensing scope](../LICENSING.md).
-- Until the generic maintainer sandbox exists, require built web files in the
-  reviewed tree; do not execute an extension-defined `build.command`.
-- At ingestion, re-inspect every package and listing and require identity,
-  version, both SHA-256 values, both sizes, and the exact-revision receipt to
-  agree. Write the receipt last.
-- Permit exact idempotent replay, but reject same-version replacement and
-  downgrade relative to completed admissions.
-- Sign catalog identity, version, digest, and size. Do not rebuild or
-  retest after ingestion.
+## Static admission (CI)
 
-The development stager proves that last step locally from a completed
-admission, using only the public fixture key and loopback origin. Production
-signing remains a separate offline boundary.
+The `marketplace-ci` workflow runs on pull requests to `main` and
+`candidate` (`pull_request_target`) and on pushes to them:
 
-Publication remains a separate offline step. This document does not
-authorize a push or deployment.
+- the admission tool, `overcrow-widget`, is built offline from the reviewed
+  base revision, never from the proposed one;
+- the proposed tree is fetched as a Git object and materialized as data; a
+  base-built plan compares every file with the tree (mode, size, object ID,
+  portable path), so archive attributes cannot hide or rewrite bytes;
+- a pull request may not change the admission's own implementation:
+  `.github/`, `scripts/`, `tests/`, `tools/`, `cli/`, `sdk/`, `crates/`,
+  `fuzz/`, the Cargo workspace and toolchain files, `.gitattributes`,
+  `.gitignore`, `docs/widget-schema-v1.md`, `keys/` and `fixtures/keys/`;
+  `candidate` may not change `published/`;
+- each `widgets/<dir>` goes through `overcrow-widget admit` (see
+  [publishing](publishing.md)), with warnings denied. Proposed JavaScript,
+  TypeScript, build commands, tests and scripts are never executed;
+- reserved `com.playervox.*` IDs are admitted only on a trusted push, on a
+  pull request from this repository itself, or in a directory a fork's pull
+  request leaves unchanged;
+- the receipt (version 3) binds the trusted and proposed commits and the
+  proposed tree to each widget's directory, publisher, ID, version, and the
+  SHA-256 and size of its package, listing and admission report.
+
+A trusted push also runs the repository's checks, then may write the
+admission bundles for the maintainers. Nothing in CI signs or publishes.
+
+## What reviewers check
+
+- **Identity.** A new ID under a domain the author controls; never
+  `com.playervox.*` for a third party. A new version for any change:
+  published versions are immutable, and a lower version than a listed one is
+  refused.
+- **Reproducibility.** The package is rebuilt from the reviewed sources;
+  a submitted archive's `view.json` must be what `view.ocml` compiles to.
+- **Authority.** Read the admission report's review list:
+  - capabilities, and above all the sensitive ones (marked in the report):
+    a sensitive capability excludes network and clipboard writes, and its
+    storage lasts the VM process only;
+  - every network route (method, origin, path, parameter constraints): each
+    must serve the widget's stated purpose; OverCrow's broker enforces them
+    exactly, over HTTPS, without redirects or credentials;
+  - clipboard writes, storage and game events.
+- **Listing.** Exact, plain text in every locale; a canonical source URL;
+  a preview that shows the widget.
+- **License.** The `LICENSE` file matches `spdxLicense`, and every bundled
+  asset, font or third-party code keeps its notice. PlayerVox widgets use
+  MIT. The policy for third-party creators' licenses is not decided: do not
+  infer an MIT requirement from this repository's own license
+  ([licensing](../LICENSING.md)).
+
+## Security decisions
+
+A listed version suspected of compromise is suspended (`security-suspended`,
+reversible) or revoked (`revoked`, permanent) in a newer signed catalog.
+OverCrow then refuses it for installation and update and stops an installed
+copy. Omitting a version from a catalog never changes its status. A catalog
+signature never bypasses package validation, the user's consent or the
+widget sandbox.
