@@ -577,6 +577,46 @@ pub const VM_ARGUMENTS: &[Field] = &[Field::required(
     "QuickJS heap ceiling in MiB: the manifest `vm.heapMiB`, or 16 when it requests none. Written `--heap-mib <N>`, `N` a canonical decimal.",
 )];
 
+/// The argument that puts a VM on virtual time, for the creator test
+/// runtime (`overcrow-widget-headless`) only. It follows the
+/// [`VM_ARGUMENTS`]: `--heap-mib <N> --virtual-clock`. A production runtime
+/// never accepts it: its VM is built without this code, so the argument is
+/// unknown there and stops the VM.
+pub const HEADLESS_VM_ARGUMENTS: &[Field] = &[Field::required(
+    "--virtual-clock",
+    ValueType::Bool,
+    "Headless test runtime only; never accepted by a production runtime. Written alone, after `--heap-mib <N>`. `Date` reads the time of the last `Clock` message and `Math.random` is seeded with a fixed value.",
+)];
+
+/// Host → VM messages of the creator test runtime only. A production
+/// runtime never accepts them: they are unknown to its VM, which stops with
+/// `protocol_violation`.
+pub const HEADLESS_HOST_MESSAGES: &[Message] = &[Message {
+    name: "Clock",
+    frame: 1,
+    fields: &[Field::required(
+        "nowMs",
+        ValueType::Integer {
+            min: 0,
+            max: 9_007_199_254_740_991,
+        },
+        "Unix milliseconds `Date` returns from now on; never lower than the previous `Clock`.",
+    )],
+    summary: "Headless test runtime only; never accepted by a production runtime. Sets the virtual time. The first one follows `Init` before any other message; the host sends another one before each event it delivers at a new virtual time.",
+}];
+
+/// Parses the VM command line of the headless test runtime: the
+/// [`VM_ARGUMENTS`], then `--virtual-clock` alone.
+pub fn parse_headless_vm_arguments<S: AsRef<str>>(arguments: &[S]) -> Result<u64, IpcError> {
+    let [heap @ .., flag] = arguments else {
+        return Err(IpcError::Argument);
+    };
+    if flag.as_ref() != HEADLESS_VM_ARGUMENTS[0].name {
+        return Err(IpcError::Argument);
+    }
+    parse_vm_arguments(heap)
+}
+
 /// Fixed reasons a VM message or argument is rejected; every one is a
 /// `protocol_violation` for the host.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

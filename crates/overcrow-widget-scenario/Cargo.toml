@@ -1,0 +1,20 @@
+[package]
+name = "overcrow-widget-scenario"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+# Test scenarios of widget API v1 (docs/widget-testing.md): the declarative
+# file `overcrow-widget test` plays through the headless runtime, its bounds
+# and checks, and the report the runtime answers with. No I/O: the CLI and
+# the OverCrow headless runtime share this code, so both read a scenario the
+# same way.
+#
+# The OverCrow host pins this crate by Git revision and resolves these
+# requirements with its own lockfile, so they stay semver ranges.
+[dependencies]
+overcrow-widget-schema = { path = "../overcrow-widget-schema" }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.150"

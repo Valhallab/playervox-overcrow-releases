@@ -681,6 +681,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "overcrow-widget-scenario"
+version = "0.1.0"
+dependencies = [
+ "overcrow-widget-schema",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "overcrow-widget-schema"
 version = "0.1.0"
 dependencies = [

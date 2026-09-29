@@ -1373,6 +1373,22 @@ The VM reports a failure it detected. No text and no stack. After a fatal fault 
 | `fatal` | boolean | yes | Must equal the category's `fatal`. |
 | `handler` | integer 0..=4095 | no | Expression index of the event handler that threw; required for `handler_exception`, rejected otherwise. |
 
+### Headless test runtime
+
+The creator test runtime (`overcrow-widget test`) runs the VM on virtual time. It adds this argument and this message, which a production runtime never accepts: its VM is built without them and stops on either.
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `--virtual-clock` | boolean | yes | Headless test runtime only; never accepted by a production runtime. Written alone, after `--heap-mib <N>`. `Date` reads the time of the last `Clock` message and `Math.random` is seeded with a fixed value. |
+
+#### `Clock` (frame 1)
+
+Headless test runtime only; never accepted by a production runtime. Sets the virtual time. The first one follows `Init` before any other message; the host sends another one before each event it delivers at a new virtual time.
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `nowMs` | integer 0..=9007199254740991 | yes | Unix milliseconds `Date` returns from now on; never lower than the previous `Clock`. |
+
 ### Scene patch operations
 
 #### `create` (frame 6)
