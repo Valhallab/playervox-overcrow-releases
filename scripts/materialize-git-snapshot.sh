@@ -123,7 +123,7 @@ fi
 file_count=$(/usr/bin/find "$work" -xdev -type f -printf . | /usr/bin/wc -c)
 byte_count=$(/usr/bin/find "$work" -xdev -type f -printf '%s\n' \
     | /usr/bin/awk '{ total += $1 } END { print total + 0 }')
-if test "$file_count" -eq 0 || test "$file_count" -gt 1000 \
+if test "$file_count" -eq 0 || test "$file_count" -gt 4000 \
         || test "$byte_count" -gt 16777216 \
         || test -n "$(/usr/bin/find "$work" -xdev ! -type d ! -type f -print -quit)" \
         || test -n "$(/usr/bin/find "$work" -xdev ! -user "$invoking_uid" -print -quit)" \
@@ -159,7 +159,7 @@ if test "$mode" = --validated; then
         fi
         checked_entries=$((checked_entries + 1))
         checked_bytes=$((checked_bytes + expected_size))
-        if test "$checked_entries" -gt 1000 || test "$checked_bytes" -gt 16777216; then
+        if test "$checked_entries" -gt 4000 || test "$checked_bytes" -gt 16777216; then
             printf '%s\n' 'error: trusted Git snapshot is unavailable' >&2
             exit 1
         fi

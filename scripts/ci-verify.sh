@@ -1,10 +1,21 @@
 #!/bin/sh
+# Static admission of the marketplace CI (docs/review-policy.md): the
+# reviewed base builds `overcrow-widget` offline, the exact candidate tree is
+# materialized as data, and every widget directory goes through
+# `overcrow-widget admit`. Nothing of the candidate is built or executed.
+#
+#   ci-verify.sh                      local checks of this checkout
+#   ci-verify.sh REPOSITORY TRUST-SHA REVIEW-SHA EVENT REPOSITORY-NAME \
+#       BASE-REF HEAD-REPOSITORY HEAD-REF PRIVATE-PARENT admission [OUTPUT]
+#
+# OUTPUT (trusted pushes only) receives the receipt and one admission bundle
+# per widget, for the maintainers' private catalog tooling.
 set -eu
 umask 077
 
 usage() {
     printf '%s\n' \
-        'usage: ci-verify.sh [REPOSITORY TRUST-SHA REVIEW-SHA EVENT REPOSITORY-NAME BASE-REF HEAD-REPOSITORY HEAD-REF PRIVATE-PARENT admission [ACCEPTED-STORE]]' >&2
+        'usage: ci-verify.sh [REPOSITORY TRUST-SHA REVIEW-SHA EVENT REPOSITORY-NAME BASE-REF HEAD-REPOSITORY HEAD-REF PRIVATE-PARENT admission [OUTPUT]]' >&2
 }
 
 fail() {
@@ -15,23 +26,29 @@ fail() {
 script_dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P)
 trusted_root=$(/usr/bin/dirname -- "$script_dir")
 
+# Web API widgets of the retired runtime, kept until P4.3 decides their
+# future. They are never admitted to the v1 catalog; any other directory
+# that is not a v1 source project fails admission.
+legacy_widget() {
+    case "$1" in
+        warframe-market) return 0 ;;
+    esac
+    return 1
+}
+
 run_local_checks() {
     local_root=$1
     (
         CDPATH='' cd -- "$local_root"
-        cargo test -p marketplace-tool --locked
         node --test tests/warframe-market/market.test.mjs
-        local_tmp=$(mktemp -d)
-        trap 'rm -rf "$local_tmp"' EXIT HUP INT TERM
-        cargo run -p marketplace-tool --locked --quiet -- \
-            package fixtures/hello-web "$local_tmp/hello.ocpkg"
-        cargo run -p marketplace-tool --locked --quiet -- \
-            inspect "$local_tmp/hello.ocpkg" >/dev/null
-        cargo run -p marketplace-tool --locked --quiet -- \
-            package widgets/warframe-market \
-            "$local_tmp/warframe-market.ocpkg"
-        cargo run -p marketplace-tool --locked --quiet -- \
-            inspect "$local_tmp/warframe-market.ocpkg" >/dev/null
+        for directory in widgets/*/; do
+            directory=${directory%/}
+            if legacy_widget "${directory#widgets/}"; then
+                continue
+            fi
+            cargo run -p overcrow-widget-cli --locked --quiet -- \
+                admit "$directory" --publisher playervox >/dev/null
+        done
     )
 }
 
@@ -54,7 +71,7 @@ base_ref=$6
 head_repository=$7
 head_ref=$8
 private_parent=$9
-accepted_store=${11:-}
+admission_output=${11:-}
 
 valid_revision() {
     case "$1" in '' | *[!0-9a-f]*) return 1 ;; esac
@@ -98,19 +115,21 @@ if test "$repository" = / || test "$trusted_root" = / \
         || ! safe_owned_directory "$private_parent" 700; then
     fail 'CI trust roots are unsafe'
 fi
-if test -n "$accepted_store"; then
-    case "$accepted_store" in /*) ;; *)
-        fail 'accepted artifact store is unsafe'
+if test -n "$admission_output"; then
+    case "$admission_output" in /*) ;; *)
+        fail 'admission output is unsafe'
         ;;
     esac
-    case "$accepted_store" in
+    case "$admission_output" in
         "$repository" | "$repository"/* | "$trusted_root" | "$trusted_root"/*)
-            fail 'accepted artifact store is unsafe'
+            fail 'admission output is unsafe'
             ;;
     esac
     if test "$event_name" != push \
-            || ! safe_owned_directory "$accepted_store" 700; then
-        fail 'accepted artifact store is unsafe'
+            || ! safe_owned_directory "$admission_output" 700 \
+            || test -n "$(/usr/bin/find "$admission_output" -mindepth 1 \
+                -print -quit)"; then
+        fail 'admission output is unsafe'
     fi
 fi
 if test "$event_name" = push \
@@ -118,20 +137,20 @@ if test "$event_name" = push \
             || test "$repository_name" != "$head_repository"; }; then
     fail 'CI trust metadata is invalid'
 fi
+# Reserved com.playervox.* IDs: reviewed pushes and pull requests from the
+# releases repository itself. A fork's pull request is a third party, except
+# for widget directories it leaves unchanged (already reviewed and merged).
+if test "$repository_name" = "$head_repository"; then
+    same_repository=yes
+else
+    same_repository=no
+fi
 for required in Cargo.lock Cargo.toml rust-toolchain.toml \
-        fixtures/keys/development-ed25519.pub \
+        cli/Cargo.toml cli/src/main.rs cli/src/admit.rs cli/src/snapshot.rs \
         scripts/ci-verify.sh scripts/materialize-git-snapshot.sh \
         scripts/resolve-pinned-rust.sh \
         scripts/resolve-system-node.sh \
-        tests/reject-published-change.sh tests/reject-trusted-change.sh \
-        tools/marketplace-tool/Cargo.toml \
-        tools/marketplace-tool/src/admission.rs \
-        tools/marketplace-tool/src/catalog.rs \
-        tools/marketplace-tool/src/main.rs \
-        tools/marketplace-tool/src/package.rs \
-        tools/marketplace-tool/src/preview.rs \
-        tools/marketplace-tool/src/private_fs.rs \
-        tools/marketplace-tool/src/snapshot.rs; do
+        tests/reject-published-change.sh tests/reject-trusted-change.sh; do
     if test ! -f "$trusted_root/$required" \
             || test -L "$trusted_root/$required"; then
         fail 'trusted CI driver is incomplete'
@@ -197,7 +216,7 @@ fi
 
 resolved_rust=$(sh "$trusted_root/scripts/resolve-pinned-rust.sh" \
     "$trusted_root") || {
-    fail 'trusted marketplace tool is unavailable'
+    fail 'trusted admission tool is unavailable'
 }
 tab=$(printf '\t')
 IFS="$tab" read -r toolchain_root cargo_path rustc_path \
@@ -205,23 +224,33 @@ IFS="$tab" read -r toolchain_root cargo_path rustc_path \
 $resolved_rust
 EOF
 if test -z "$cargo_sources"; then
-    fail 'trusted marketplace tool is unavailable'
+    fail 'trusted admission tool is unavailable'
 fi
 tool_home="$work/home"
 tool_cargo_home="$work/cargo-home"
 tool_rustup_home="$work/rustup-home"
-tool_target="$work/target"
+# The trusted build's target directory. CI_VERIFY_TOOL_TARGET lets the local
+# smoke test reuse one private cache across its runs; it only ever holds
+# builds of the reviewed base, never candidate code.
+tool_target=${CI_VERIFY_TOOL_TARGET:-"$work/target"}
+case "$tool_target" in /*) ;; *)
+    fail 'trusted admission tool is unavailable'
+    ;;
+esac
 if ! /usr/bin/install -d -m 0700 \
         "$tool_home" "$tool_cargo_home/registry" \
         "$tool_rustup_home" "$tool_target" \
+        || ! safe_owned_directory "$tool_target" 700 \
         || ! /usr/bin/ln -s -- "$cargo_index" \
             "$tool_cargo_home/registry/index" \
         || ! /usr/bin/ln -s -- "$cargo_cache" \
             "$tool_cargo_home/registry/cache" \
         || ! /usr/bin/ln -s -- "$cargo_sources" \
             "$tool_cargo_home/registry/src"; then
-    fail 'trusted marketplace tool is unavailable'
+    fail 'trusted admission tool is unavailable'
 fi
+# The CLI links oxc: a cold debug build took 57 s with two jobs locally
+# (943 MB of target). The limits bound it, not the admission itself.
 trusted_cargo() {
     (CDPATH='' cd / && \
         /usr/bin/env -i \
@@ -230,37 +259,35 @@ trusted_cargo() {
             RUSTUP_HOME="$tool_rustup_home" RUSTC="$rustc_path" \
             CARGO_NET_OFFLINE=true CARGO_INCREMENTAL=0 \
             CARGO_TARGET_DIR="$tool_target" LC_ALL=C.UTF-8 LANG=C.UTF-8 \
-            /usr/bin/timeout --signal=TERM --kill-after=5 180 \
-            /usr/bin/prlimit --cpu=120 --as=4294967296 --nproc=4096 \
-                --nofile=256 --fsize=268435456 -- \
+            /usr/bin/timeout --signal=TERM --kill-after=5 600 \
+            /usr/bin/prlimit --cpu=600 --as=8589934592 --nproc=4096 \
+                --nofile=1024 --fsize=1073741824 -- \
             "$cargo_path" "$@")
 }
 if test "$event_name" = push; then
     node_path=$(sh "$trusted_root/scripts/resolve-system-node.sh") || {
         fail 'trusted source checks failed'
     }
-    if ! trusted_cargo test --manifest-path \
-            "$trusted_root/tools/marketplace-tool/Cargo.toml" \
-            --package marketplace-tool --locked --offline --quiet \
-            || ! /usr/bin/env -i PATH=/usr/bin:/bin LC_ALL=C.UTF-8 LANG=C.UTF-8 \
-                /usr/bin/timeout --signal=TERM --kill-after=5 60 \
-                "$node_path" --test \
-                    "$trusted_root/tests/warframe-market/market.test.mjs"; then
+    # Test output goes to the log (stderr): stdout is the receipt only.
+    if ! /usr/bin/env -i PATH=/usr/bin:/bin LC_ALL=C.UTF-8 LANG=C.UTF-8 \
+            /usr/bin/timeout --signal=TERM --kill-after=5 60 \
+            "$node_path" --test \
+                "$trusted_root/tests/warframe-market/market.test.mjs" >&2; then
         fail 'trusted source checks failed'
     fi
 fi
-if ! trusted_cargo build --manifest-path \
-        "$trusted_root/tools/marketplace-tool/Cargo.toml" \
-        --package marketplace-tool --locked --offline --quiet; then
-    fail 'trusted marketplace tool is unavailable'
+if ! trusted_cargo build --manifest-path "$trusted_root/cli/Cargo.toml" \
+        --package overcrow-widget-cli --bin overcrow-widget \
+        --locked --offline --quiet; then
+    fail 'trusted admission tool is unavailable'
 fi
-built_tool="$tool_target/debug/marketplace-tool"
-trusted_tool="$work/marketplace-tool"
+built_tool="$tool_target/debug/overcrow-widget"
+trusted_tool="$work/overcrow-widget"
 if test ! -f "$built_tool" || test -L "$built_tool" \
         || ! /usr/bin/install -m 0700 -- "$built_tool" "$trusted_tool" \
         || test "$(/usr/bin/stat -c '%u:%a:%h' "$trusted_tool")" \
             != "$(/usr/bin/id -u):700:1"; then
-    fail 'trusted marketplace tool is unavailable'
+    fail 'trusted admission tool is unavailable'
 fi
 
 candidate_root="$work/candidate"
@@ -284,13 +311,24 @@ if test "$widget_count" -eq 0 || test "$widget_count" -gt 512 \
     fail 'candidate artifact admission failed'
 fi
 
-artifact_root="$work/artifacts"
+# The admission tool reads only the materialized snapshot; it runs with an
+# empty environment and bounded resources, like Git above.
+admit() {
+    /usr/bin/env -i PATH=/usr/bin:/bin LC_ALL=C.UTF-8 LANG=C.UTF-8 \
+        HOME="$tool_home" \
+        /usr/bin/timeout --signal=KILL 60 \
+        /usr/bin/prlimit --cpu=30 --as=4294967296 --nofile=256 \
+            --fsize=67108864 -- \
+        "$trusted_tool" admit "$@"
+}
+
+bundles="$work/bundles"
 receipt="$work/admission-receipt.tsv"
 identities="$work/identities"
-/usr/bin/install -d -m 0700 -- "$artifact_root"
+/usr/bin/install -d -m 0700 -- "$bundles"
 /usr/bin/install -m 0600 /dev/null "$receipt"
 /usr/bin/install -m 0600 /dev/null "$identities"
-printf 'admission\t2\t%s\t%s\t%s\n' \
+printf 'admission\t3\t%s\t%s\t%s\n' \
     "$trust_sha" "$review_sha" "$review_tree" >"$receipt"
 artifact_index=0
 while IFS= read -r directory; do
@@ -299,53 +337,65 @@ while IFS= read -r directory; do
             fail 'candidate artifact admission failed'
             ;;
     esac
-    artifact_index=$((artifact_index + 1))
     source="$widgets_root/$directory"
-    artifact="$artifact_root/$artifact_index.ocpkg"
-    listing="$artifact_root/$artifact_index.listing.json"
-    package_output="$work/package-$artifact_index.out"
-    inspect_output="$work/inspect-$artifact_index.out"
-    if ! "$trusted_tool" package "$source" "$artifact" \
-            >"$package_output" 2>/dev/null \
-            || ! "$trusted_tool" inspect "$artifact" \
-                >"$inspect_output" 2>/dev/null \
-            || ! /usr/bin/install -m 0600 -- "$source/listing.json" \
-                "$listing"; then
+    if legacy_widget "$directory"; then
+        printf 'legacy\twidgets/%s\n' "$directory" >>"$receipt"
+        continue
+    fi
+    artifact_index=$((artifact_index + 1))
+    bundle="$bundles/$artifact_index"
+    summary="$work/admit-$artifact_index.out"
+    publisher=playervox
+    if test "$same_repository" = no \
+            && /usr/bin/tr '\000' '\n' <"$changed_paths" \
+                | /usr/bin/awk -v prefix="widgets/$directory" '
+                    $0 == prefix || index($0, prefix "/") == 1 { found = 1 }
+                    END { exit found ? 0 : 1 }'; then
+        publisher=third-party
+    fi
+    if test "$publisher" = playervox; then
+        admit "$source" --publisher playervox --deny-warnings --out "$bundle" \
+            >"$summary" 2>"$work/admit.err" || admitted=no
+    else
+        admit "$source" --deny-warnings --out "$bundle" \
+            >"$summary" 2>"$work/admit.err" || admitted=no
+    fi
+    if test "${admitted:-yes}" = no; then
+        # The report is sanitized by the tool: it is safe for the CI log.
+        /usr/bin/head -c 65536 -- "$work/admit.err" >&2 || :
+        /usr/bin/head -c 65536 -- "$summary" >&2 || :
         fail 'candidate artifact admission failed'
     fi
-    package_digest=$(/usr/bin/awk 'NR == 1 { print $1 }' "$package_output")
-    package_path=$(/usr/bin/cut -d ' ' -f 2- "$package_output")
-    digest=$(/usr/bin/sha256sum "$artifact" | /usr/bin/cut -d ' ' -f 1)
-    bytes=$(/usr/bin/stat -c '%s' "$artifact")
-    listing_digest=$(/usr/bin/sha256sum "$listing" | /usr/bin/cut -d ' ' -f 1)
-    listing_bytes=$(/usr/bin/stat -c '%s' "$listing")
-    IFS=' ' read -r extension_id extension_version extra <<EOF
-$(/usr/bin/cat "$inspect_output")
-EOF
-    if test -n "${extra:-}" || test -z "${extension_id:-}" \
-            || test -z "${extension_version:-}" \
-            || test "$package_digest" != "$digest" \
-            || test "$package_path" != "$artifact"; then
-        fail 'candidate artifact admission failed'
-    fi
-    printf '%s\n' "$extension_id" >>"$identities"
-    printf 'artifact\twidgets/%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-        "$directory" "$extension_id" "$extension_version" \
-        "$digest" "$bytes" "$listing_digest" "$listing_bytes" >>"$receipt"
+    IFS=' ' read -r widget_id widget_version _rest <"$summary"
+    case "$widget_id:$widget_version" in
+        *[!A-Za-z0-9.:+-]* | :* | *:)
+            fail 'candidate artifact admission failed'
+            ;;
+    esac
+    line="widgets/$directory$tab$publisher$tab$widget_id$tab$widget_version"
+    for file in package.ocpkg listing.json report.json; do
+        if test ! -f "$bundle/$file" || test -L "$bundle/$file"; then
+            fail 'candidate artifact admission failed'
+        fi
+        digest=$(/usr/bin/sha256sum "$bundle/$file" | /usr/bin/cut -d ' ' -f 1)
+        bytes=$(/usr/bin/stat -c '%s' "$bundle/$file")
+        line="$line$tab$digest$tab$bytes"
+    done
+    printf '%s\n' "$widget_id" >>"$identities"
+    printf 'artifact\t%s\n' "$line" >>"$receipt"
 done <"$widget_list"
-if test "$artifact_index" -ne "$widget_count" \
+if test "$artifact_index" -eq 0 \
         || test -n "$(LC_ALL=C /usr/bin/sort "$identities" \
             | /usr/bin/uniq -d)"; then
     fail 'candidate artifact admission failed'
 fi
 
-if test -n "$accepted_store" \
-        && ! "$trusted_tool" ingest \
-            --receipt "$receipt" --artifacts "$artifact_root" \
-            --store "$accepted_store" --trust-sha "$trust_sha" \
-            --review-sha "$review_sha" --review-tree "$review_tree" \
-            >/dev/null; then
-    fail 'accepted artifact ingestion failed'
+if test -n "$admission_output"; then
+    if ! /usr/bin/cp -R -- "$bundles" "$admission_output/bundles" \
+            || ! /usr/bin/install -m 0600 -- "$receipt" \
+                "$admission_output/receipt.tsv"; then
+        fail 'admission output could not be written'
+    fi
 fi
 
 /usr/bin/cat "$receipt"
