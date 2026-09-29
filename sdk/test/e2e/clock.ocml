@@ -1,0 +1,13 @@
+<!-- End-to-end fixture of @overcrow/sdk: a Clock written against the SDK.
+     clock.view.json is its compiled view, clock.view.js its expression table. -->
+<box class="clock" label={t("clock")}>
+  <text class="time">{clockTime(state.now, state.seconds)}</text>
+  <if test={state.showDate}>
+    <text class="date">{clockDate(state.now)}</text>
+  </if>
+  <for each={state.zones} as="zone" key={zone.id}>
+    <text class="zone">{zoneTime(state.now, zone.offset)}</text>
+  </for>
+  <toggle label={t("seconds")} checked={state.seconds} on:change={setSeconds}/>
+  <canvas ref="dial" class="dial"/>
+</box>

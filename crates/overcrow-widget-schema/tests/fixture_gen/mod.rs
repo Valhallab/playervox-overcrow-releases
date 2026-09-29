@@ -543,6 +543,19 @@ fn catalogs(out: &mut BTreeMap<String, Vec<u8>>, packages: &BTreeMap<&str, Built
         "valid/suspended-built-in",
         envelope(CATALOG_DOMAIN, &catalog_payload(vec![suspended])),
     );
+    let previewed = edit(&weather, |target| {
+        let digest = "ab".repeat(32);
+        target["preview"] = json!({
+            "url": format!("{PRODUCTION_BASE_URL}previews/com.example.weather/2.3.0-beta.1/{digest}.png"),
+            "mediaType": "image/png",
+            "size": 4096,
+            "sha256": digest,
+        });
+    });
+    put(
+        "valid/preview",
+        envelope(CATALOG_DOMAIN, &catalog_payload(vec![previewed])),
+    );
 
     // Envelope and signature.
     put(

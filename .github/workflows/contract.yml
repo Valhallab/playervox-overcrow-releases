@@ -43,11 +43,12 @@ jobs:
         run: |
           cargo test -p overcrow-widget-schema -p overcrow-widget-format \
             --all-targets --locked
-      - name: Require regenerated reference and fixtures
+      - name: Require regenerated reference, fixtures and SDK types
         run: |
           cargo run -p overcrow-widget-schema --locked --example reference \
             > docs/widget-schema-v1.md
           cargo run -p overcrow-widget-schema --locked --example fixtures
           cargo run -p overcrow-widget-format --locked --example fixtures
-          git diff --exit-code -- docs/widget-schema-v1.md crates
-          test -z "$(git status --porcelain -- crates)"
+          cargo run -p overcrow-widget-schema --locked --example sdk-types
+          git diff --exit-code -- docs/widget-schema-v1.md crates sdk/src/generated
+          test -z "$(git status --porcelain -- crates sdk/src/generated)"

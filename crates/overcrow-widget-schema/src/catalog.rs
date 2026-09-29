@@ -455,6 +455,8 @@ pub struct Target {
     pub built_in: bool,
     pub status: TargetStatus,
     pub package: PackageRef,
+    /// The signed PNG preview, when the entry lists one (always `image/png`).
+    pub preview: Option<PackageRef>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -664,9 +666,10 @@ fn target_entry(value: &Value, origin: Origin) -> Result<Target, CatalogError> {
     }
 
     validate_listing(&object["listing"])?;
-    if let Some(preview) = object.get("preview") {
-        validate_preview(preview, origin, &manifest.id, &version)?;
-    }
+    let preview = object
+        .get("preview")
+        .map(|preview| validate_preview(preview, origin, &manifest.id, &version))
+        .transpose()?;
 
     Ok(Target {
         built_in,
@@ -676,6 +679,7 @@ fn target_entry(value: &Value, origin: Origin) -> Result<Target, CatalogError> {
             size,
             sha256: digest,
         },
+        preview,
         manifest,
     })
 }
@@ -755,7 +759,7 @@ fn validate_preview(
     origin: Origin,
     id: &str,
     version: &str,
-) -> Result<(), CatalogError> {
+) -> Result<PackageRef, CatalogError> {
     let invalid = CatalogError::Preview;
     let object = value.as_object().ok_or(invalid)?;
     let digest = object
@@ -770,7 +774,14 @@ fn validate_preview(
             .is_some_and(|size| (1..=MAX_PREVIEW_BYTES.value).contains(&size))
         && object["url"].as_str()
             == Some(immutable_url(origin, "previews", id, version, &digest, "png").as_str());
-    valid.then_some(()).ok_or(invalid)
+    if !valid {
+        return Err(invalid);
+    }
+    Ok(PackageRef {
+        url: object["url"].as_str().ok_or(invalid)?.to_owned(),
+        size: object["size"].as_u64().ok_or(invalid)?,
+        sha256: digest,
+    })
 }
 
 /// Trimmed plain text without markup characters, as today.
