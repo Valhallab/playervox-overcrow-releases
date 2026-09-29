@@ -1,0 +1,40 @@
+[package]
+name = "overcrow-widget-cli"
+version = "0.1.0"
+description = "overcrow-widget: the creator CLI of OverCrow widget API v1"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[[bin]]
+name = "overcrow-widget"
+path = "src/main.rs"
+
+# The public validators are reused, never copied. oxc parses, strips the
+# TypeScript, minifies and prints the logic bundle; the module linker, the
+# lint and the view table are this crate's own. oxc is pre-1.0 and breaks its
+# API with each minor release: every oxc crate is pinned to the same exact
+# version, and an upgrade is an explicit change with new measurements
+# (docs/cli.md).
+[dependencies]
+overcrow-widget-format = { path = "../crates/overcrow-widget-format" }
+overcrow-widget-schema = { path = "../crates/overcrow-widget-schema" }
+oxc_allocator = "=0.152.0"
+oxc_ast = "=0.152.0"
+oxc_ast_visit = "=0.152.0"
+oxc_codegen = "=0.152.0"
+oxc_compat = "=0.152.0"
+oxc_diagnostics = "=0.152.0"
+oxc_ecmascript = "=0.152.0"
+oxc_minifier = "=0.152.0"
+oxc_parser = "=0.152.0"
+oxc_semantic = "=0.152.0"
+oxc_span = "=0.152.0"
+oxc_str = "=0.152.0"
+oxc_syntax = "=0.152.0"
+oxc_transformer = "=0.152.0"
+serde_json = { workspace = true, features = ["std"] }
+
+[dev-dependencies]
+tempfile.workspace = true

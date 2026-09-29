@@ -1,0 +1,7 @@
+error[manifest.shape]: `nmae` is not a manifest field
+  --> manifest.json:6:3
+   |
+ 6 |   "nmae": {
+   |   ^
+   = help: did you mean `name`?
+check: 1 error(s), 0 warning(s)

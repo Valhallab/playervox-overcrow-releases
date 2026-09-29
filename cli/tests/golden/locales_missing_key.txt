@@ -1,0 +1,7 @@
+error[locales.keys]: `decrement` is in locales/en.json but not in locales/fr.json
+  --> locales/en.json:2:3
+   |
+ 2 |   "decrement": "Decrease",
+   |   ^
+   = help: both locale files have exactly the same keys
+check: 1 error(s), 0 warning(s)

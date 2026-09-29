@@ -1,0 +1,7 @@
+error[manifest.id]: `id` is not a valid widget ID
+  --> manifest.json:4:3
+   |
+ 4 |   "id": "Counter",
+   |   ^
+   = help: reverse-DNS, lowercase letters, digits and `-`, at least two labels: `com.example.clock`
+check: 1 error(s), 0 warning(s)

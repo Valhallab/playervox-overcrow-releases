@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "{{id}}",
+  "version": "0.1.0",
+  "name": {
+    "en": "{{name}}",
+    "fr": "{{name}}"
+  },
+  "sizing": {
+    "fit": "none",
+    "preferred": { "width": 220, "height": 80 },
+    "min": { "width": 120, "height": 48 },
+    "max": { "width": 640, "height": 640 }
+  }
+}

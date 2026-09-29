@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "cli",
     "crates/overcrow-widget-format",
     "crates/overcrow-widget-schema",
     "tools/marketplace-tool",
@@ -24,3 +25,10 @@ serde_json = { version = "=1.0.151", default-features = false, features = ["allo
 semver = "=1.0.28"
 sha2 = { version = "=0.10.9", default-features = false }
 tempfile = "=3.23.0"
+
+# Distribution builds of the creator CLI (`cargo build --profile dist`):
+# smaller binaries without changing the default release profile.
+[profile.dist]
+inherits = "release"
+lto = "thin"
+strip = true

@@ -1,0 +1,43 @@
+error[logic.import]: `lodash` cannot be imported
+  --> logic.ts:2:26
+   |
+ 2 | import { debounce } from "lodash";
+   |                          ^
+   = help: a widget has one logic module: move the code into it, or import it from @overcrow/sdk
+error[logic.unavailable_global]: `console` does not exist in the widget VM
+  --> logic.ts:8:3
+   |
+ 8 |   console.log(new Intl.NumberFormat().format(state.count));
+   |   ^
+   = help: use log.debug, log.info, log.warn or log.error of @overcrow/sdk
+error[logic.unavailable_global]: `Intl` does not exist in the widget VM
+  --> logic.ts:8:19
+   |
+ 8 |   console.log(new Intl.NumberFormat().format(state.count));
+   |                   ^
+   = help: the VM has no Intl: use formatNumber, formatDate, formatTime and formatDuration of @overcrow/sdk
+error[logic.unavailable_global]: `setTimeout` does not exist in the widget VM
+  --> logic.ts:9:3
+   |
+ 9 |   setTimeout(() => eval("1"), 10);
+   |   ^
+   = help: use timers.after or timers.every of @overcrow/sdk
+error[logic.eval]: `eval` does not exist in the widget VM
+  --> logic.ts:9:20
+   |
+ 9 |   setTimeout(() => eval("1"), 10);
+   |                    ^
+   = help: the VM has no eval
+error[logic.top_level_await]: top-level `await` is not supported: logic.js runs as one script
+  --> logic.ts:13:1
+    |
+ 13 | await Promise.resolve();
+    | ^
+   = help: start the work from an async function: `void start();`
+error[logic.missing_export]: the view calls `decrement`, which logic.ts does not export
+  --> view.ocml:6:62
+   |
+ 6 |     <button class="step" label={t("decrement")} on:activate={decrement}>
+   |                                                              ^
+   = help: add `export function decrement(...)` to logic.ts
+check: 7 error(s), 0 warning(s)

@@ -15,3 +15,10 @@
 # Conformance fixtures and the generated references are compared byte for byte.
 /crates/overcrow-widget-schema/fixtures/** -text
 /docs/widget-schema-v1.md text eol=lf
+# The widget CLI embeds the SDK sources and the templates: identical bytes on
+# every checkout keep logic.js and new projects identical across systems.
+/sdk/src/** text eol=lf
+/sdk/LICENSE text eol=lf
+/sdk/test/e2e/** text eol=lf
+/templates/** text eol=lf
+/cli/tests/golden/** text eol=lf

@@ -1,0 +1,17 @@
+<!-- A checklist: <for> repeats a row per item, keyed by its ID; handlers
+     that take arguments are written as calls. -->
+<box class="checklist">
+  <text class="title">{t("title")}</text>
+  <list class="items" item-height="32">
+    <for each={state.items} as="item" key={item.id}>
+      <box class="row">
+        <checkbox label={item.text} checked={item.done} on:change={setDone(item.id, event.value)}/>
+        <text class={item.done ? "text done" : "text"}>{item.text}</text>
+        <button class="remove" label={t("remove")} on:activate={remove(item.id)}>
+          <icon name="x"/>
+        </button>
+      </box>
+    </for>
+  </list>
+  <text class="summary">{t("remaining", { count: remaining(state.items) })}</text>
+</box>

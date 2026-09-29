@@ -1,0 +1,9 @@
+/* The style subset (docs/widget-source-formats.md); tokens follow the theme. */
+.root {
+  padding: var(--space-3);
+}
+
+.title {
+  font-size: var(--font-size-title);
+  color: var(--color-text);
+}
