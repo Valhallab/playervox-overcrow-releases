@@ -39,4 +39,5 @@ root; never edit it by hand. `npm test` packages the end-to-end Clock of
 `cargo build -p overcrow-widget-cli` at the repository root) and runs its
 `logic.js` over a stand-in of the runtime surface.
 
-MIT licensed.
+MIT No Attribution (MIT-0): use, copy and bundle it without keeping any
+notice.

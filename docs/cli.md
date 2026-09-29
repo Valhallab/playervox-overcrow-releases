@@ -201,8 +201,9 @@ found, 2 usage or I/O error.
    minified: unused SDK code is removed (the SDK marks its pure
    initializers `/* @__PURE__ */`), local names are shortened. Globals
    (`overcrow`, `globalThis`, `Date`, `Math`…) are never renamed or removed.
-5. The SDK's MIT notice is kept on the first line:
-   `/*! @overcrow/sdk 1.0.0 | MIT License | Copyright (c) 2026 Valhallab SASU */`.
+5. The SDK is MIT-0 and needs no notice; a one-line courtesy comment names
+   it on the first line:
+   `/*! @overcrow/sdk 1.0.0 | MIT-0 | Copyright (c) 2026 Valhallab SASU */`.
 
 The SDK linked is the one embedded in the CLI, from `sdk/src/` at the
 revision the CLI was built from: a bundle depends only on the widget's

@@ -51,7 +51,7 @@ const bundle = entries(archive).get("logic.js").toString("utf8");
 
 test("the package is reproducible and its logic has no module syntax", () => {
   assert.ok(first.equals(archive), "two runs give identical bytes");
-  assert.match(bundle, /^\/\*! @overcrow\/sdk 1\.0\.0 \| MIT License/);
+  assert.match(bundle, /^\/\*! @overcrow\/sdk 1\.0\.0 \| MIT-0 \|/);
   assert.doesNotMatch(bundle, /(^|[;})\s])(import|export)[\s{*]/);
   assert.doesNotThrow(() => new vm.Script(bundle));
   assert.ok(bundle.includes("globalThis.overcrow"), "the runtime global is never renamed");
