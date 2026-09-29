@@ -94,6 +94,8 @@ complete widget packaged this way by the SDK's tests.
 | --- | --- | --- |
 | `host` | constant | Frozen object whose members always read the latest host values. |
 | `HostData` | interface | `locale`, `messages`, `theme`, `region`, `scale` (‰), `viewport`, `mode`, `visible`, `options`, `grants`. |
+| `onHost(listener)` | function | Calls `listener` with the names of the `host` members each host message sent (`options` after a menu change, `visible` when shown or hidden, `region`…), before the view is evaluated again; returns `{ cancel() }`. |
+| `HostKey`, `HostListener` | types | A member name of `HostData`, and an `onHost` listener. |
 | `Viewport` | interface | `{ width, height }`, logical px. |
 | `hasGrant(capability)` | function | Whether the user granted a capability. |
 | `option(id, fallback)` | function | Stored value of a `wrapper.menu` row, or `fallback` when missing or of another type. |

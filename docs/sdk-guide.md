@@ -118,7 +118,10 @@ useful state when it is missing.
   checks and draws them.
 - `wrapper.menu` rows declared in the manifest are stored by the host:
   read them with `option(id, fallback)`; `onMenu(handler)` receives the
-  `action` rows.
+  `action` rows. A toggle or choice row changes `host.options`:
+  `onHost(listener)` runs your code when it does (and when the widget is
+  shown again, the language, theme or region changes), for example to
+  re-arm a timer.
 - `t(key, { name })` reads `locales/en.json` or `locales/fr.json` for the
   active language and fills `{name}`.
 - `log.info(text)` shows in development installs only. Never log user data.

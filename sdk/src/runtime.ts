@@ -41,6 +41,7 @@ export interface RuntimeSurface {
   cancelTimer(id: number): void;
   draw(ref: string, commands: readonly unknown[]): void;
   onMenu(handler: (row: string) => void): void;
+  onHost(handler: (changed: readonly string[]) => void): void;
   log(level: string, text: string): void;
 }
 
@@ -52,6 +53,7 @@ const FUNCTIONS = [
   "cancelTimer",
   "draw",
   "onMenu",
+  "onHost",
   "log",
 ] as const;
 

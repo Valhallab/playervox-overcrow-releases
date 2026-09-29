@@ -38,6 +38,16 @@ test("atEach wakes at each boundary and at nextChangeAt", () => {
   assert.equal(vm.timers.length, 0);
 });
 
+test("setHost calls the logic's onHost listeners with the changed names", async () => {
+  const { onHost, option } = await import("../dist/index.js");
+  const seen = [];
+  const listener = onHost((changed) => seen.push([...changed, option("seconds", false)]));
+  vm.setHost({ options: { seconds: true } });
+  listener.cancel();
+  vm.setHost({ options: {} });
+  assert.deepEqual(seen, [["options", true]]);
+});
+
 test("repeating timers re-arm, in order, and short ones are refused", () => {
   const ticks = [];
   const every = timers.every(400, () => ticks.push(`every@${Date.now() - vm.now}`));

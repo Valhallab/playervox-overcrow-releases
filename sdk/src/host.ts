@@ -79,6 +79,49 @@ export const host: HostData = /* @__PURE__ */ Object.freeze({
   },
 });
 
+/** The name of a member of {@link HostData}. */
+export type HostKey = keyof HostData;
+
+/** Receives the members of {@link HostData} a host message just sent. */
+export type HostListener = (changed: readonly HostKey[]) => void;
+
+const listeners = /* @__PURE__ */ new Set<HostListener>();
+let dispatching = false;
+
+/**
+ * Calls `listener` after each host message that changes {@link host}
+ * (`Snapshot`, `Visibility`, `Locale`, `Theme`, `Region`), with the names
+ * of the members it sent, before the VM evaluates the view again. A member
+ * may be sent unchanged: compare with the value you kept when it matters.
+ * `wrapper.menu` values arrive as `options`; a widget that is shown again
+ * gets `visible`.
+ *
+ * @example
+ * ```ts
+ * onHost((changed) => {
+ *   if (changed.includes("options")) restartClock();
+ * });
+ * ```
+ *
+ * @returns a handle whose `cancel()` removes the listener.
+ */
+export function onHost(listener: HostListener): { cancel(): void } {
+  if (!dispatching) {
+    dispatching = true;
+    runtime().onHost((changed) => {
+      for (const each of [...listeners]) {
+        each(changed as readonly HostKey[]);
+      }
+    });
+  }
+  listeners.add(listener);
+  return {
+    cancel() {
+      listeners.delete(listener);
+    },
+  };
+}
+
 /** Whether the user granted `capability`. */
 export function hasGrant(capability: Capability): boolean {
   return host.grants.includes(capability);

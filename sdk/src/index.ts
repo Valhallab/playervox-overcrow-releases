@@ -25,8 +25,11 @@ export {
 export {
   host,
   hasGrant,
+  onHost,
   option,
   type HostData,
+  type HostKey,
+  type HostListener,
   type MenuValue,
   type Viewport,
   type Widened,
