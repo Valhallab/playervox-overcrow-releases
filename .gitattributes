@@ -18,6 +18,7 @@
 # The widget CLI embeds the SDK sources and the templates: identical bytes on
 # every checkout keep logic.js and new projects identical across systems.
 /sdk/src/** text eol=lf
+/sdk/testing/** text eol=lf
 /sdk/LICENSE text eol=lf
 /sdk/test/e2e/** text eol=lf
 /templates/** text eol=lf

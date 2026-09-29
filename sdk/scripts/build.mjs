@@ -12,3 +12,6 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const tsc = createRequire(import.meta.url).resolve("typescript/lib/tsc.js");
 rmSync(join(root, "dist"), { recursive: true, force: true });
 execFileSync(process.execPath, [tsc, "-p", join(root, "tsconfig.json")], { stdio: "inherit" });
+// The test helper (`@overcrow/sdk/testing`) builds apart, under dist/testing/:
+// no widget bundle ever reaches it.
+execFileSync(process.execPath, [tsc, "-p", join(root, "tsconfig.testing.json")], { stdio: "inherit" });
