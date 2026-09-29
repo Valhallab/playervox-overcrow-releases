@@ -1,0 +1,14 @@
+{
+  "scenarioVersion": 1,
+  "name": "hidden",
+  "description": "Hidden, the clock gets no tick; shown again, it catches up at once.",
+  "host": { "zone": { "offsetMinutes": 0 }, "startAt": 1767268800000 },
+  "steps": [
+    { "expect": { "text": ["12:00"], "image": "shown" } },
+    { "host": { "visible": false } },
+    { "advance": { "ms": 300000 } },
+    { "expect": { "text": ["12:00"], "noText": ["12:05"] } },
+    { "host": { "visible": true } },
+    { "expect": { "text": ["12:05"], "image": "shown-again", "fault": "none" } }
+  ]
+}

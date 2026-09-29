@@ -30,3 +30,6 @@ node_modules/
 sdk/dist/
 sdk/build/
 *.tgz
+
+# Actual and diff images of failed widget tests (overcrow-widget test).
+**/tests/output/

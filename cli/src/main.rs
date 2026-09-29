@@ -13,9 +13,11 @@ mod interrupt;
 mod jsonpos;
 mod lint;
 mod project;
+mod runtime;
 mod sanitize;
 mod sdk;
 mod sources;
+mod test;
 mod typecheck;
 mod watch;
 
@@ -39,9 +41,11 @@ Usage:
   overcrow-widget inspect <file.ocpkg> [--format human|json]
   overcrow-widget dev [dir] [--format human|json] [--no-typecheck]
   overcrow-widget doctor [dir] [--format human|json] [--deny-warnings]
+  overcrow-widget test [dir] [--runtime PATH] [--scenario NAME] [--update] [--format human|json] [--no-typecheck]
   overcrow-widget --version | --help
 
 Exit status: 0 success (warnings allowed), 1 errors found, 2 usage or I/O error.
+`test` ends with 1 when a scenario fails, 2 when no runtime can run.
 `dev` runs until Ctrl+C (0), or ends with 1 when the overlay ends the session.
 Guide: docs/cli.md in https://github.com/Valhallab/playervox-overcrow-releases";
 
@@ -59,7 +63,15 @@ struct Arguments {
 }
 
 /// Options that take a value.
-const VALUED: &[&str] = &["--template", "--id", "--name", "--out", "--format"];
+const VALUED: &[&str] = &[
+    "--template",
+    "--id",
+    "--name",
+    "--out",
+    "--format",
+    "--runtime",
+    "--scenario",
+];
 
 fn parse(mut args: impl Iterator<Item = String>) -> Result<Arguments, String> {
     let command = args.next().ok_or("missing command")?;
@@ -157,6 +169,7 @@ fn main() -> ExitCode {
         "inspect" => run_inspect(&arguments),
         "dev" => run_dev(&arguments),
         "doctor" => run_doctor(&arguments),
+        "test" => run_test(&arguments),
         other => Err(format!("unknown command `{other}`")),
     };
     result.unwrap_or_else(|message| usage(&message))
@@ -185,6 +198,34 @@ fn run_doctor(arguments: &Arguments) -> Result<ExitCode, String> {
         &arguments.directory(),
         format,
         arguments.flag("--deny-warnings"),
+    ))
+}
+
+fn run_test(arguments: &Arguments) -> Result<ExitCode, String> {
+    arguments.expect(
+        &[
+            "--format",
+            "--no-typecheck",
+            "--runtime",
+            "--scenario",
+            "--update",
+        ],
+        1,
+    )?;
+    let format = arguments.format()?;
+    let root = arguments.directory();
+    if !root.is_dir() {
+        return Err(format!("{} is not a directory", root.display()));
+    }
+    Ok(test::run(
+        &root,
+        &test::Options {
+            typecheck: !arguments.flag("--no-typecheck"),
+            format,
+            runtime: arguments.value("--runtime").map(Path::new),
+            update: arguments.flag("--update"),
+            only: arguments.value("--scenario"),
+        },
     ))
 }
 

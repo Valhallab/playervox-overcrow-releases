@@ -510,10 +510,17 @@ pub enum Step {
     Expect(Box<Expect>),
 }
 
+/// Moves the virtual clock by `ms`. By default every timer due on the way
+/// fires in order, as on a running machine; the runtime paces the ticks to
+/// stay within the host's real-time message rate, so hours of minute ticks
+/// take seconds. With `jump`, the time moves at once, as on a machine
+/// waking from sleep: each due timer fires once, late.
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct Advance {
     pub ms: u64,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub jump: bool,
 }
 
 /// Host changes; absent members keep their value.

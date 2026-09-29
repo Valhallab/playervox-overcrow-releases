@@ -386,6 +386,12 @@
       }
      },
      {
+      "advance": {
+       "ms": 3600000,
+       "jump": true
+      }
+     },
+     {
       "host": {
        "visible": false
       }
@@ -1267,6 +1273,22 @@
      {
       "expect": {
        "state": "paused"
+      }
+     }
+    ]
+   },
+   "path": ""
+  },
+  {
+   "name": "jump that is not a boolean",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "advance": {
+       "ms": 1,
+       "jump": 1
       }
      }
     ]

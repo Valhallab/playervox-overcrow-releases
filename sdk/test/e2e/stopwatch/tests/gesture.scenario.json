@@ -1,0 +1,24 @@
+{
+  "scenarioVersion": 1,
+  "name": "gesture",
+  "description": "No input reaches a Passive widget, and a menu row is not a gesture: the host answers gesture_required.",
+  "host": { "mode": "passive" },
+  "fixtures": {
+    "calls": { "stopwatch.toggle": [{ "value": {"running": true, "elapsedMs": 1200, "at": 0, "shortcuts": {"toggle": "F9", "reset": "F10", "bound": true}} }] },
+    "subscriptions": { "stopwatch.subscribe": {"running": false, "elapsedMs": 0, "at": 0, "shortcuts": {"toggle": "F9", "reset": "F10", "bound": true}} }
+  },
+  "steps": [
+    { "pointer": { "click": { "label": "Start or stop" } } },
+    { "expect": { "text": ["idle"], "calls": [{ "service": "stopwatch.subscribe" }] } },
+    { "menu": { "id": "toggle" } },
+    {
+      "expect": {
+        "text": ["gesture_required"],
+        "calls": [{ "service": "stopwatch.toggle", "outcome": "gesture_required" }]
+      }
+    },
+    { "host": { "mode": "interactive" } },
+    { "pointer": { "click": { "label": "Start or stop" } } },
+    { "expect": { "text": ["running"], "calls": [{ "service": "stopwatch.toggle", "outcome": "ok" }] } }
+  ]
+}
