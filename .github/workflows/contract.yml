@@ -43,6 +43,10 @@ jobs:
         run: |
           cargo test -p overcrow-widget-schema -p overcrow-widget-format \
             --all-targets --locked
+      - name: Install cargo-deny
+        run: cargo install cargo-deny --locked --version 0.20.2
+      - name: Dependency policy (advisories, bans, licenses, sources)
+        run: cargo deny --locked check advisories bans sources licenses
       - name: Require regenerated reference, fixtures and SDK types
         run: |
           cargo run -p overcrow-widget-schema --locked --example reference \

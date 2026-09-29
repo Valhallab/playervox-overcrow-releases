@@ -34,7 +34,9 @@ npm run pack:check
 
 `src/generated/` is written from the widget schema by
 `cargo run -p overcrow-widget-schema --example sdk-types` at the repository
-root; never edit it by hand. `npm run bundle:e2e` builds the end-to-end
-Clock of `test/e2e/` into `build/e2e/clock.logic.js`.
+root; never edit it by hand. `npm test` packages the end-to-end Clock of
+`test/e2e/clock/` with the widget CLI (build it first with
+`cargo build -p overcrow-widget-cli` at the repository root) and runs its
+`logic.js` over a stand-in of the runtime surface.
 
 MIT licensed.

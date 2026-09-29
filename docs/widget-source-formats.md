@@ -153,8 +153,8 @@ also returns the sorted list of logic functions the expressions call.
 `logic.js` registers the table with `registerView` of `@overcrow/sdk`, in the
 calling convention of the [SDK reference](sdk-reference.md#calling-convention-of-the-view-table):
 one function per index, the names in scope bound from `scope`, a handler's
-`event` bound to the event detail. The check that the logic module exports
-each called function belongs to the CLI (P2.2).
+`event` bound to the event detail. `overcrow-widget check` verifies that the
+logic module exports each called function ([CLI guide](cli.md)).
 `cargo run -p overcrow-widget-format --example compile < view.ocml` prints
 the compiled view, the expression table and the called functions.
 

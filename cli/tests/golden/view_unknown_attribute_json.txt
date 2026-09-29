@@ -1,0 +1,1 @@
+{"code":"view.unknown_attribute","column":9,"file":"view.ocml","help":"did you mean `class`?","line":4,"message":"`clas` is not an attribute of <text>","severity":"error"}

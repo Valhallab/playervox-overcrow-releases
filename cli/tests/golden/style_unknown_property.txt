@@ -1,0 +1,7 @@
+error[style.unknown_property]: `gpa` is not a property of the style subset
+  --> style.ocss:4:3
+   |
+ 4 |   gpa: var(--space-2);
+   |   ^
+   = help: did you mean `gap`?
+check: 1 error(s), 0 warning(s)

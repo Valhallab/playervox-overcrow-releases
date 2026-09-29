@@ -1,9 +1,11 @@
-// The end-to-end Clock bundle: reproducible, a classic script without
-// imports, and working over the runtime surface in a fresh realm. The host
-// repository runs the same bundle in the real widget VM.
+// The end-to-end Clock, packaged by the widget CLI: reproducible, a classic
+// script without imports, and working over the runtime surface in a fresh
+// realm. The host repository runs the same logic.js in the real widget VM.
+// The CLI is built first (`cargo build -p overcrow-widget-cli`); set
+// OVERCROW_WIDGET to use another binary.
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
@@ -12,19 +14,47 @@ import vm from "node:vm";
 import { HOST, installRuntime } from "./fake-runtime.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const bundlePath = join(root, "build", "e2e", "clock.logic.js");
-const build = () => {
-  execFileSync(process.execPath, [join(root, "scripts", "bundle-e2e.mjs")], { stdio: "ignore" });
-  return readFileSync(bundlePath, "utf8");
-};
+const executable = process.platform === "win32" ? "overcrow-widget.exe" : "overcrow-widget";
+const cli = process.env.OVERCROW_WIDGET ?? join(root, "..", "target", "debug", executable);
+const out = join(root, "build", "e2e");
 
-const first = build();
-const bundle = build();
+/** The entries of a stored (uncompressed) zip, as `.ocpkg` v1 is. */
+function entries(archive) {
+  const files = new Map();
+  let at = 0;
+  while (archive.readUInt32LE(at) === 0x04034b50) {
+    const size = archive.readUInt32LE(at + 18);
+    const nameLength = archive.readUInt16LE(at + 26);
+    const extraLength = archive.readUInt16LE(at + 28);
+    const name = archive.toString("utf8", at + 30, at + 30 + nameLength);
+    const start = at + 30 + nameLength + extraLength;
+    files.set(name, archive.subarray(start, start + size));
+    at = start + size;
+  }
+  return files;
+}
 
-test("the bundle is reproducible and has no module syntax", () => {
-  assert.equal(first, bundle);
-  assert.doesNotMatch(bundle, /^\s*(import|export)\s/m);
+function build(name) {
+  assert.ok(existsSync(cli), `build the widget CLI first: cargo build -p overcrow-widget-cli (${cli})`);
+  mkdirSync(out, { recursive: true });
+  const target = join(out, name);
+  rmSync(target, { force: true });
+  execFileSync(cli, ["package", join(root, "test", "e2e", "clock"), "--no-typecheck", "--out", target], {
+    stdio: "ignore",
+  });
+  return readFileSync(target);
+}
+
+const first = build("clock-1.ocpkg");
+const archive = build("clock-2.ocpkg");
+const bundle = entries(archive).get("logic.js").toString("utf8");
+
+test("the package is reproducible and its logic has no module syntax", () => {
+  assert.ok(first.equals(archive), "two runs give identical bytes");
+  assert.match(bundle, /^\/\*! @overcrow\/sdk 1\.0\.0 \| MIT License/);
+  assert.doesNotMatch(bundle, /(^|[;})\s])(import|export)[\s{*]/);
   assert.doesNotThrow(() => new vm.Script(bundle));
+  assert.ok(bundle.includes("globalThis.overcrow"), "the runtime global is never renamed");
 });
 
 test("the Clock runs over the runtime surface", () => {

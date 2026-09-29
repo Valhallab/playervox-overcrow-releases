@@ -1,0 +1,14 @@
+{
+  "name": "{{package}}",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "overcrow-widget check",
+    "package": "overcrow-widget package"
+  },
+  "devDependencies": {
+    "@overcrow/sdk": "{{sdk}}",
+    "typescript": "6.0.3"
+  }
+}

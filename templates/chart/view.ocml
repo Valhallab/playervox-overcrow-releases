@@ -1,0 +1,10 @@
+<!-- A live chart drawn by the host: the logic only updates the values. -->
+<box class="panel">
+  <box class="header">
+    <text class="title">{t("title")}</text>
+    <text class="value">{latest(state.values)}</text>
+  </box>
+  <chart class="plot" kind="area" min="0" max="100">
+    <series class="series" values={state.values}/>
+  </chart>
+</box>

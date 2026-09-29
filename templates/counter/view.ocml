@@ -1,0 +1,13 @@
+<!-- A counter: the value, and two buttons whose handlers are exported by
+     logic.ts. -->
+<box class="counter">
+  <text class="value">{state.count}</text>
+  <box class="actions">
+    <button class="step" label={t("decrement")} on:activate={decrement}>
+      <icon name="minus"/>
+    </button>
+    <button class="step" label={t("increment")} on:activate={increment}>
+      <icon name="plus"/>
+    </button>
+  </box>
+</box>

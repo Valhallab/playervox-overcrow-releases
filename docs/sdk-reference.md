@@ -82,8 +82,11 @@ registerView([
 - The table has exactly the `expressions` count of `view.json`; the VM
   refuses the bundle otherwise.
 
-`sdk/test/e2e/` holds a complete example; overcrow-widget-format's tests
-check it against the compiler.
+The widget CLI writes this module and links it after the logic module
+([CLI guide](cli.md#how-logicjs-is-built)). It names the second and third
+parameters `__scope` and `__raw`, which no view name can be, so they never
+shadow a called function or a name in scope. `sdk/test/e2e/clock/` is a
+complete widget packaged this way by the SDK's tests.
 
 ## Host data
 

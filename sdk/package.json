@@ -32,8 +32,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p test/tsconfig.json",
     "test": "node --test --test-concurrency=2 \"test/*.test.mjs\"",
     "pack:check": "node scripts/pack-check.mjs",
-    "prepack": "node scripts/build.mjs",
-    "bundle:e2e": "node scripts/bundle-e2e.mjs"
+    "prepack": "node scripts/build.mjs"
   },
   "devDependencies": {
     "typescript": "6.0.3"

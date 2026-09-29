@@ -1,0 +1,7 @@
+error[view.unknown_attribute]: `clas` is not an attribute of <text>
+  --> view.ocml:4:9
+   |
+ 4 |   <text clas="value">{state.count}</text>
+   |         ^
+   = help: did you mean `class`?
+check: 1 error(s), 0 warning(s)

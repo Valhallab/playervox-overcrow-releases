@@ -1,0 +1,4 @@
+error[package.asset]: an image under assets/ is not a PNG, JPEG or WebP matching its extension
+  --> assets
+   = help: asset paths are lowercase `[a-z0-9_-]` segments ending in .png, .jpg, .jpeg or .webp
+check: 1 error(s), 0 warning(s)
