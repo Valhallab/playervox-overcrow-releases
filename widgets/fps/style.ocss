@@ -1,0 +1,31 @@
+/* One line; the wrapper draws the panel, the content keeps the built-in's
+   10 × 8 px margin. */
+.fps {
+  flex-direction: column;
+  align-items: start;
+  padding: 8px 10px;
+}
+
+.line {
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* A fresh value is primary; no value, or an old one, is muted. */
+.value {
+  font-size: var(--font-size-value);
+  color: var(--color-text);
+}
+
+.value.muted {
+  color: var(--color-text-muted);
+}
+
+/* The marker and the unit: 12 px semibold, between the small and button
+   sizes, as the built-in drew them. */
+.small {
+  font-size: 12px;
+  font-weight: 600;
+}

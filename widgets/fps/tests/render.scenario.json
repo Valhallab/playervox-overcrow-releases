@@ -1,0 +1,96 @@
+{
+  "scenarioVersion": 1,
+  "name": "render",
+  "description": "A fresh reading of 144 with the unit, in both themes, both languages, at 100 % and 150 %.",
+  "fixtures": {
+    "subscriptions": {
+      "fps.subscribe": {
+        "fps": 144,
+        "stale": false,
+        "status": "ready"
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "144"
+        ],
+        "image": "fresh-dark-en-100"
+      }
+    },
+    {
+      "host": {
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "fresh-light-en-100"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "expect": {
+        "image": "fresh-light-fr-100"
+      }
+    },
+    {
+      "host": {
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fresh-dark-fr-100"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "fresh-dark-fr-150"
+      }
+    },
+    {
+      "host": {
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "fresh-light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "locale": "en"
+      }
+    },
+    {
+      "expect": {
+        "image": "fresh-light-en-150"
+      }
+    },
+    {
+      "host": {
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fresh-dark-en-150",
+        "fault": "none"
+      }
+    }
+  ]
+}

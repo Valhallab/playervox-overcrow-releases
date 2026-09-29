@@ -1,0 +1,14 @@
+{
+  "old": "old",
+  "label": "{fps} frames per second",
+  "label-old": "{fps} frames per second, last reading",
+  "label-none": "Frame rate unavailable",
+  "hint-old": "Last FPS reading. No new measurement has arrived for at least three seconds.",
+  "hint-ready": "Frames the game presented, observed from outside the game: its presentation rate, not the refresh rate of the display.",
+  "hint-waiting": "Waiting for frames from the game window. A paused game keeps this value unavailable.",
+  "hint-unsupported": "The frame rate of this game window cannot be measured on this system.",
+  "hint-permission_denied": "OverCrow was denied access to the game's frame events.",
+  "hint-ambiguous": "Several presentation sources prevent a reliable FPS measurement.",
+  "hint-events_lost": "Frame events were lost. No reliable FPS measurement is available.",
+  "hint-unavailable": "FPS capture is not available. See Diagnostics in the Control Center."
+}

@@ -1,0 +1,63 @@
+{
+  "scenarioVersion": 1,
+  "name": "label",
+  "description": "The “Show FPS label” menu row: the value alone, fresh and old, then the unit back.",
+  "fixtures": {
+    "subscriptions": {
+      "fps.subscribe": {
+        "fps": 144,
+        "stale": false,
+        "status": "ready"
+      }
+    }
+  },
+  "steps": [
+    {
+      "menu": {
+        "id": "show-label",
+        "value": false
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "144"
+        ],
+        "noText": [
+          "  FPS"
+        ],
+        "image": "value-only"
+      }
+    },
+    {
+      "publish": {
+        "service": "fps.subscribe",
+        "value": {
+          "fps": 144,
+          "stale": true,
+          "status": "ready"
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "value-only-old"
+      }
+    },
+    {
+      "menu": {
+        "id": "show-label",
+        "value": true
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "  FPS"
+        ],
+        "image": "old-with-label",
+        "fault": "none"
+      }
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "scenarioVersion": 1,
+  "name": "stale",
+  "description": "The host marks the reading stale 3 s after the last sample: the number stays, muted, with “old” (“ancien” in French); a new sample makes it fresh again.",
+  "fixtures": {
+    "subscriptions": {
+      "fps.subscribe": {
+        "fps": 144,
+        "stale": false,
+        "status": "ready"
+      }
+    }
+  },
+  "steps": [
+    {
+      "publish": {
+        "service": "fps.subscribe",
+        "value": {
+          "fps": 144,
+          "stale": true,
+          "status": "ready"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "144"
+        ],
+        "image": "old-dark-en"
+      }
+    },
+    {
+      "host": {
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "old-light-en"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "old-dark-fr"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500,
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "old-light-fr-150"
+      }
+    },
+    {
+      "publish": {
+        "service": "fps.subscribe",
+        "value": {
+          "fps": 60,
+          "stale": false,
+          "status": "ready"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "60"
+        ],
+        "noText": [
+          "144"
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}
