@@ -1,0 +1,16 @@
+/* One value; the wrapper draws the panel, the content keeps the built-in's
+   10 × 8 px margin. */
+.session {
+  flex-direction: column;
+  align-items: start;
+  padding: 8px 10px;
+}
+
+/* The UI font with tabular figures: the value never shifts. */
+.value {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-value);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  white-space: nowrap;
+}

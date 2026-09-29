@@ -1,0 +1,20 @@
+{
+  "scenarioVersion": 1,
+  "name": "refused",
+  "description": "Without the session.read grant the widget asks nothing and shows --:--:--.",
+  "host": {
+    "grants": []
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "--:--:--"
+        ],
+        "calls": [],
+        "fault": "none"
+      }
+    }
+  ]
+}
