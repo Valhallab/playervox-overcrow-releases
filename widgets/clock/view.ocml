@@ -1,0 +1,8 @@
+<!-- Clock: the local time of day and, optionally, the date on a second line
+     (parity sheet: playervox-overcrow docs/builtin-parity/clock.md). -->
+<box class="clock" label={clockLabel(state.now, state.seconds, state.showDate, state.order)}>
+  <text class="time">{clockTime(state.now, state.seconds)}</text>
+  <if test={state.showDate}>
+    <text class="date">{clockDate(state.now, state.order)}</text>
+  </if>
+</box>

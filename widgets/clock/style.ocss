@@ -1,0 +1,25 @@
+/* One compact column: the time over the date, 1 px apart. The wrapper
+   draws the panel; the content keeps the built-in's 10 × 8 px margin. */
+.clock {
+  flex-direction: column;
+  align-items: start;
+  row-gap: 1px;
+  padding: 8px 10px;
+}
+
+/* Values use the UI font with tabular figures, so they never shift. */
+.time {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-value);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.date {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}

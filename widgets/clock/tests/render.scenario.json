@@ -1,0 +1,94 @@
+{
+  "scenarioVersion": 1,
+  "name": "render",
+  "description": "Default menu values (date on, day/month/year, no seconds) at 14:08:42 local time (UTC+2), in both themes, both languages, at 100 % and 150 %.",
+  "host": {
+    "zone": {
+      "offsetMinutes": 120
+    },
+    "startAt": 1784290122000
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "14:08",
+          "17/07/2026"
+        ],
+        "image": "default-dark-en-100"
+      }
+    },
+    {
+      "host": {
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "default-light-en-100"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "expect": {
+        "image": "default-light-fr-100"
+      }
+    },
+    {
+      "host": {
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "default-dark-fr-100"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "default-dark-fr-150"
+      }
+    },
+    {
+      "host": {
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "default-light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "locale": "en"
+      }
+    },
+    {
+      "expect": {
+        "image": "default-light-en-150"
+      }
+    },
+    {
+      "host": {
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "default-dark-en-150",
+        "fault": "none"
+      }
+    }
+  ]
+}

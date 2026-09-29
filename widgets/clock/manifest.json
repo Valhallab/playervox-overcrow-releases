@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.playervox.overcrow.clock",
+  "version": "1.0.0",
+  "name": {
+    "en": "Clock",
+    "fr": "Horloge"
+  },
+  "sizing": {
+    "fit": "both",
+    "preferred": { "width": 110, "height": 60 },
+    "min": { "width": 40, "height": 24 },
+    "max": { "width": 480, "height": 240 }
+  },
+  "wrapper": {
+    "menu": [
+      {
+        "type": "toggle",
+        "id": "show-seconds",
+        "label": { "en": "Show seconds", "fr": "Afficher les secondes" },
+        "default": false
+      },
+      {
+        "type": "toggle",
+        "id": "show-date",
+        "label": { "en": "Show date", "fr": "Afficher la date" },
+        "default": true
+      },
+      {
+        "type": "choice",
+        "id": "date-format",
+        "label": { "en": "Date format", "fr": "Format de date" },
+        "visibleWhen": "show-date",
+        "choices": [
+          { "value": "day-month-year", "label": { "en": "dd/mm/yyyy", "fr": "jj/mm/aaaa" } },
+          { "value": "year-month-day", "label": { "en": "yyyy-mm-dd", "fr": "aaaa-mm-jj" } },
+          { "value": "month-day-year", "label": { "en": "mm/dd/yyyy", "fr": "mm/jj/aaaa" } }
+        ],
+        "default": "day-month-year"
+      }
+    ]
+  }
+}
