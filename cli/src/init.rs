@@ -53,6 +53,10 @@ pub const TEMPLATES: &[(&str, &str, Files)] = &[
                 "locales/fr.json",
                 include_str!("../../templates/blank/locales/fr.json"),
             ),
+            (
+                "tests/example.scenario.json",
+                include_str!("../../templates/blank/tests/example.scenario.json"),
+            ),
         ],
     ),
     (
@@ -80,6 +84,10 @@ pub const TEMPLATES: &[(&str, &str, Files)] = &[
                 "locales/fr.json",
                 include_str!("../../templates/counter/locales/fr.json"),
             ),
+            (
+                "tests/example.scenario.json",
+                include_str!("../../templates/counter/tests/example.scenario.json"),
+            ),
         ],
     ),
     (
@@ -103,6 +111,10 @@ pub const TEMPLATES: &[(&str, &str, Files)] = &[
             (
                 "locales/fr.json",
                 include_str!("../../templates/list/locales/fr.json"),
+            ),
+            (
+                "tests/example.scenario.json",
+                include_str!("../../templates/list/tests/example.scenario.json"),
             ),
         ],
     ),
@@ -128,7 +140,48 @@ pub const TEMPLATES: &[(&str, &str, Files)] = &[
                 "locales/fr.json",
                 include_str!("../../templates/chart/locales/fr.json"),
             ),
+            (
+                "tests/example.scenario.json",
+                include_str!("../../templates/chart/tests/example.scenario.json"),
+            ),
         ],
+    ),
+];
+
+/// Reference images of the templates' example scenarios: (template, path
+/// in the project, PNG bytes). Written as they are; `blank` has none, since
+/// its greeting shows the project's name. Regenerate them with the pinned
+/// runtime (docs/widget-testing.md, "Maintaining the templates").
+pub const REFERENCES: &[(&str, &str, &[u8])] = &[
+    (
+        "counter",
+        "tests/reference/example/initial.png",
+        include_bytes!("../../templates/counter/tests/reference/example/initial.png"),
+    ),
+    (
+        "counter",
+        "tests/reference/example/increased.png",
+        include_bytes!("../../templates/counter/tests/reference/example/increased.png"),
+    ),
+    (
+        "list",
+        "tests/reference/example/initial.png",
+        include_bytes!("../../templates/list/tests/reference/example/initial.png"),
+    ),
+    (
+        "list",
+        "tests/reference/example/french-light.png",
+        include_bytes!("../../templates/list/tests/reference/example/french-light.png"),
+    ),
+    (
+        "chart",
+        "tests/reference/example/initial.png",
+        include_bytes!("../../templates/chart/tests/reference/example/initial.png"),
+    ),
+    (
+        "chart",
+        "tests/reference/example/ten-seconds.png",
+        include_bytes!("../../templates/chart/tests/reference/example/ten-seconds.png"),
     ),
 ];
 
@@ -196,6 +249,17 @@ pub fn init(directory: &Path, options: &Options<'_>) -> Result<Vec<String>, Diag
             fs::create_dir_all(parent).map_err(|error| io_error(&target, error))?;
         }
         fs::write(&target, content).map_err(|error| io_error(&target, error))?;
+        written.push((*path).to_owned());
+    }
+    for (_, path, bytes) in REFERENCES
+        .iter()
+        .filter(|(template, _, _)| *template == options.template)
+    {
+        let target = directory.join(path);
+        if let Some(parent) = target.parent() {
+            fs::create_dir_all(parent).map_err(|error| io_error(&target, error))?;
+        }
+        fs::write(&target, bytes).map_err(|error| io_error(&target, error))?;
         written.push((*path).to_owned());
     }
     written.sort();

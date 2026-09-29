@@ -1,0 +1,10 @@
+{
+  "scenarioVersion": 1,
+  "name": "example",
+  "description": "The widget starts and shows its greeting. `overcrow-widget test` plays it (docs/widget-testing.md); add an `image` to an `expect` step and run `overcrow-widget test --update` to record a reference image.",
+  "steps": [
+    { "expect": { "state": "running", "text": ["Hello from {{name}}"], "fault": "none" } },
+    { "host": { "locale": "fr" } },
+    { "expect": { "state": "running" } }
+  ]
+}

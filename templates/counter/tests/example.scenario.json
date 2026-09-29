@@ -1,0 +1,11 @@
+{
+  "scenarioVersion": 1,
+  "name": "example",
+  "description": "The counter starts at 0 and Increase adds one. `overcrow-widget test` plays it and compares the images with tests/reference/example/; `--update` records them again (docs/widget-testing.md).",
+  "host": { "mode": "interactive" },
+  "steps": [
+    { "expect": { "state": "running", "text": ["0"], "image": "initial" } },
+    { "pointer": { "click": { "label": "Increase" } } },
+    { "expect": { "text": ["1"], "noText": ["0"], "image": "increased", "fault": "none" } }
+  ]
+}
