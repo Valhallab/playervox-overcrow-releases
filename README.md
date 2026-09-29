@@ -59,9 +59,10 @@ stopwatch state, journals or connected accounts.
 | `crates/overcrow-widget-schema/` | Widget API v1 schema and validators, shared with OverCrow |
 | `crates/overcrow-widget-format/` | `view.ocml` compiler and `style.ocss` parser, shared with OverCrow |
 | `crates/overcrow-widget-devchannel/` | [Development channel](docs/dev-channel.md) between `overcrow-widget dev` and a running overlay, shared with OverCrow |
+| `crates/overcrow-widget-scenario/` | [Test scenarios](docs/widget-testing.md) of `overcrow-widget test` and the headless runtime's interface, shared with OverCrow |
 | `fuzz/` | Fuzz targets of every parser and package verifier |
-| `sdk/` | `@overcrow/sdk` 1.0, the TypeScript API of widget API v1 logic ([guide](docs/sdk-guide.md), [reference](docs/sdk-reference.md)) |
-| `cli/` | `overcrow-widget`, the widget API v1 CLI: `init`, `check`, `package`, `inspect` ([guide](docs/cli.md)) |
+| `sdk/` | `@overcrow/sdk` 1.0, the TypeScript API of widget API v1 logic ([guide](docs/sdk-guide.md), [reference](docs/sdk-reference.md), [testing](docs/widget-testing.md)) |
+| `cli/` | `overcrow-widget`, the widget API v1 CLI: `init`, `check`, `package`, `inspect`, `dev`, `doctor`, `test` ([guide](docs/cli.md)) |
 | `templates/` | Widget API v1 templates of `overcrow-widget init`: blank, counter, list, chart |
 | `content/sdk/` | Web runtime JavaScript SDK 1.3 and TypeScript definitions |
 | `content/templates/` | Blank, Counter, and Checklist examples |
@@ -105,6 +106,7 @@ it, so build it first:
 
 ```sh
 cargo test -p overcrow-widget-cli --locked
+cargo test -p overcrow-widget-scenario --locked
 cargo build -p overcrow-widget-cli --locked
 cargo deny --locked check advisories bans sources licenses
 ```
