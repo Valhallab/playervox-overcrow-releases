@@ -7,10 +7,11 @@ use std::{
     time::{Duration, Instant},
 };
 
-const MAX_PLAN_BYTES: usize = 1024 * 1024;
-const MAX_ENTRIES: usize = 1_000;
+// 4,000 records of at most 300 bytes (a 240-byte path and its header).
+const MAX_PLAN_BYTES: usize = 2 * 1024 * 1024;
+const MAX_ENTRIES: usize = 4_000;
 const MAX_FILE_BYTES: u64 = 8 * 1024 * 1024;
-const MAX_AGGREGATE_BYTES: u64 = 16 * 1024 * 1024;
+const MAX_AGGREGATE_BYTES: u64 = 32 * 1024 * 1024;
 const GIT_TIMEOUT: Duration = Duration::from_secs(10);
 
 #[derive(Debug)]
@@ -193,7 +194,7 @@ fn valid_path(value: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{SnapshotError, validate_plan};
+    use super::{MAX_AGGREGATE_BYTES, MAX_ENTRIES, MAX_PLAN_BYTES, SnapshotError, validate_plan};
 
     const OBJECT: &str = "0123456789abcdef0123456789abcdef01234567";
 
@@ -214,5 +215,32 @@ mod tests {
                 Err(SnapshotError)
             ));
         }
+    }
+
+    /// The repository outgrew 1,000 files with the built-in pilots' sources
+    /// and reference images (P2.4): the plan takes up to `MAX_ENTRIES`
+    /// files and `MAX_AGGREGATE_BYTES`, and refuses one more.
+    #[test]
+    fn plan_bounds_entries_and_aggregate_size() {
+        let plan = |count: usize, size: u64| -> String {
+            (0..count)
+                .map(|index| {
+                    format!(
+                        "100644 blob {OBJECT} {size}\twidgets/w/tests/reference/{index:05}.png\0"
+                    )
+                })
+                .collect()
+        };
+        let full = plan(MAX_ENTRIES, 1);
+        assert!(full.len() <= MAX_PLAN_BYTES);
+        assert_eq!(
+            validate_plan(full.as_bytes()).expect("at the bound").len(),
+            MAX_ENTRIES
+        );
+        assert!(validate_plan(plan(MAX_ENTRIES + 1, 1).as_bytes()).is_err());
+        let per_file = 8 * 1024 * 1024;
+        let count = (MAX_AGGREGATE_BYTES / per_file) as usize;
+        assert!(validate_plan(plan(count, per_file).as_bytes()).is_ok());
+        assert!(validate_plan(plan(count + 1, per_file).as_bytes()).is_err());
     }
 }
