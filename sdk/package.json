@@ -10,6 +10,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./testing": {
+      "types": "./dist/testing/index.d.ts",
+      "default": "./dist/testing/index.js"
     }
   },
   "files": [
@@ -29,7 +33,7 @@
   ],
   "scripts": {
     "build": "node scripts/build.mjs",
-    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p test/tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.testing.json --noEmit && tsc -p test/tsconfig.json",
     "test": "node --test --test-concurrency=2 \"test/*.test.mjs\"",
     "pack:check": "node scripts/pack-check.mjs",
     "prepack": "node scripts/build.mjs"

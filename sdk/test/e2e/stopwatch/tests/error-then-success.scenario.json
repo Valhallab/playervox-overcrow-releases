@@ -1,0 +1,39 @@
+{
+  "scenarioVersion": 1,
+  "name": "error-then-success",
+  "description": "stopwatch.toggle fails (unavailable), then succeeds; the subscription updates.",
+  "host": { "mode": "interactive" },
+  "fixtures": {
+    "calls": {
+      "stopwatch.toggle": [
+        { "error": "unavailable" },
+        { "value": {"running": true, "elapsedMs": 1200, "at": 0, "shortcuts": {"toggle": "F9", "reset": "F10", "bound": true}} }
+      ]
+    },
+    "subscriptions": { "stopwatch.subscribe": {"running": false, "elapsedMs": 0, "at": 0, "shortcuts": {"toggle": "F9", "reset": "F10", "bound": true}} }
+  },
+  "steps": [
+    { "expect": { "state": "running", "text": ["idle", "0 ms"], "image": "idle" } },
+    { "pointer": { "click": { "label": "Start or stop" } } },
+    {
+      "expect": {
+        "text": ["unavailable"],
+        "calls": [
+          { "service": "stopwatch.subscribe", "outcome": "ok" },
+          { "service": "stopwatch.toggle", "params": {}, "outcome": "unavailable" }
+        ],
+        "image": "failed"
+      }
+    },
+    { "pointer": { "click": { "label": "Start or stop" } } },
+    { "publish": { "service": "stopwatch.subscribe", "value": {"running": true, "elapsedMs": 1200, "at": 0, "shortcuts": {"toggle": "F9", "reset": "F10", "bound": true}} } },
+    {
+      "expect": {
+        "text": ["running", "1200 ms"],
+        "calls": [{ "service": "stopwatch.toggle", "outcome": "ok" }],
+        "fault": "none",
+        "image": "running"
+      }
+    }
+  ]
+}

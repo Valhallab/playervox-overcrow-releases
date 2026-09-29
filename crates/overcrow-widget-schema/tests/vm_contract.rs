@@ -11,8 +11,9 @@ use std::path::{Path, PathBuf};
 use overcrow_widget_schema::compiled_view::static_value;
 use overcrow_widget_schema::compiled_view::{ViewSummary, inspect_compiled_view};
 use overcrow_widget_schema::ipc::{
-    FAILURES, FAULT_CATEGORIES, FAULT_CATEGORY_NAMES, IpcError, parse_vm_arguments, validate_draw,
-    validate_fault, validate_patch_attribute,
+    FAILURES, FAULT_CATEGORIES, FAULT_CATEGORY_NAMES, HEADLESS_HOST_MESSAGES, HOST_MESSAGES,
+    IpcError, parse_headless_vm_arguments, parse_vm_arguments, validate_draw, validate_fault,
+    validate_patch_attribute,
 };
 use overcrow_widget_schema::json::parse_strict;
 use overcrow_widget_schema::limits::{VM_HEAP_BYTES, VM_MAX_HEAP_BYTES};
@@ -159,6 +160,43 @@ fn heap_argument_is_whole_mib_within_the_vm_bounds() {
             parse_vm_arguments(&arguments),
             Err(IpcError::Argument),
             "{arguments:?}"
+        );
+    }
+}
+
+#[test]
+fn virtual_clock_is_a_separate_headless_argument() {
+    const MIB: u64 = 1024 * 1024;
+    assert_eq!(
+        parse_headless_vm_arguments(&["--heap-mib", "16", "--virtual-clock"]),
+        Ok(16 * MIB)
+    );
+    for arguments in [
+        vec!["--heap-mib", "16"],
+        vec!["--virtual-clock", "--heap-mib", "16"],
+        vec!["--heap-mib", "16", "--virtual-clock", "--virtual-clock"],
+        vec!["--heap-mib", "15", "--virtual-clock"],
+        vec!["--heap-mib", "16", "--virtual-clock=1"],
+        vec!["--virtual-clock"],
+        vec![],
+    ] {
+        assert_eq!(
+            parse_headless_vm_arguments(&arguments),
+            Err(IpcError::Argument),
+            "{arguments:?}"
+        );
+    }
+    // The production parser never accepts it.
+    assert_eq!(
+        parse_vm_arguments(&["--heap-mib", "16", "--virtual-clock"]),
+        Err(IpcError::Argument)
+    );
+    // `Clock` is not a production host message.
+    for message in HEADLESS_HOST_MESSAGES {
+        assert!(
+            HOST_MESSAGES.iter().all(|host| host.name != message.name),
+            "{}",
+            message.name
         );
     }
 }

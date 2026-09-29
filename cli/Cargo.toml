@@ -20,7 +20,13 @@ path = "src/main.rs"
 [dependencies]
 overcrow-widget-devchannel = { path = "../crates/overcrow-widget-devchannel" }
 overcrow-widget-format = { path = "../crates/overcrow-widget-format" }
+overcrow-widget-scenario = { path = "../crates/overcrow-widget-scenario" }
 overcrow-widget-schema = { path = "../crates/overcrow-widget-schema" }
+# `test`: reference images (PNG within the scenario bounds) and the
+# runtime's work directory. Both already locked for the marketplace tool.
+image.workspace = true
+sha2.workspace = true
+tempfile.workspace = true
 oxc_allocator = "=0.152.0"
 oxc_ast = "=0.152.0"
 oxc_ast_visit = "=0.152.0"
@@ -54,4 +60,3 @@ windows-sys = { version = "=0.61.2", features = [
 ] }
 
 [dev-dependencies]
-tempfile.workspace = true

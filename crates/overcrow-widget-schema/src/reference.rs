@@ -650,6 +650,20 @@ arguments; anything else stops the VM before it reads a frame.\n\n",
     fields_table(out, ipc::VM_ARGUMENTS);
     messages(out, "Host → VM messages", HOST_MESSAGES);
     messages(out, "VM → host messages", VM_MESSAGES);
+    out.push_str(
+        "\n### Headless test runtime\n\nThe creator test runtime (`overcrow-widget test`) runs \
+the VM on virtual time. It adds this argument and this message, which a production runtime \
+never accepts: its VM is built without them and stops on either.\n\n",
+    );
+    fields_table(out, ipc::HEADLESS_VM_ARGUMENTS);
+    for message in ipc::HEADLESS_HOST_MESSAGES {
+        let _ = write!(
+            out,
+            "#### `{}` (frame {})\n\n{}\n\n",
+            message.name, message.frame, message.summary
+        );
+        fields_table(out, message.fields);
+    }
     messages(out, "Scene patch operations", PATCH_OPS);
     out.push_str(
         "\nIn `create` and `setAttrs`, `on` is a JSON array of event names of the element, \

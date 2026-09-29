@@ -1,7 +1,8 @@
 # The widget CLI: `overcrow-widget`
 
 `overcrow-widget` creates, checks and packages widgets for widget API v1,
-and runs them in a local OverCrow while they are written. It is one Rust
+runs them in a local OverCrow while they are written, and tests them in
+OverCrow's headless runtime. It is one Rust
 binary for Linux and Windows, built from `cli/` in this
 repository (MIT). It compiles the same public validators the OverCrow host
 runs at admission and at every activation (`crates/overcrow-widget-schema`
@@ -17,6 +18,7 @@ overcrow-widget package  # dist/<id>-<version>.ocpkg
 overcrow-widget inspect dist/com.example.my-widget-0.1.0.ocpkg
 overcrow-widget doctor   # what the setup has and lacks
 overcrow-widget dev      # run it in OverCrow, reload on save (Ctrl+C to stop)
+overcrow-widget test --runtime path/to/overcrow-widget-headless  # scenarios and images
 ```
 
 ## Installing
@@ -56,6 +58,7 @@ repository's `sdk/` in the meantime.
 | `LICENSE` | The package's license text. The templates start with MIT; choose your own. |
 | `assets/` | Optional PNG, JPEG or WebP images. |
 | `package.json`, `tsconfig.json` | Tooling only: TypeScript and the SDK types. Never packaged. |
+| `tests/<name>.scenario.json`, `tests/reference/` | Test scenarios and their reference images, played by [`test`](#test-dir) ([testing guide](widget-testing.md)). Never packaged; `tests/output/` holds the images of failed runs and is ignored by Git. |
 
 ## Commands
 
@@ -70,6 +73,12 @@ never overwrites a file. Templates (`templates/` in this repository):
 | `counter` | A value and two buttons whose handlers the logic exports. |
 | `list` | A keyed checklist: `<for>`, handlers with arguments, `t()` with parameters. |
 | `chart` | A live chart updated by a host timer. |
+
+Every template has a test scenario, `tests/example.scenario.json`; `counter`,
+`list` and `chart` also have its reference images in
+`tests/reference/example/`, so `overcrow-widget test` passes on a new
+project. The `blank` greeting shows the project's name: its example checks
+the text only, and `test --update` records its images once you add some.
 
 The ID defaults to `com.example.<dir>`; use `--id` with a reverse-DNS ID you
 control (`com.playervox.*` is reserved). `package.json` pins the embedded
@@ -190,8 +199,55 @@ diagnostics, `{"type":"built",…}` for each build, then the overlay's
 Exit status: 0 after Ctrl+C, 1 when the overlay ends the session (it quit,
 or refused the session), 2 when no overlay is reachable or on a usage error.
 
-Event replay and service fixtures (simulated game events and service
-answers) come with the widget test harness, in a later release.
+Simulated service answers, virtual time and replayed input belong to
+[`test`](#test-dir), which plays scenarios in the headless runtime.
+
+### `test [dir]`
+
+Plays the project's test scenarios in OverCrow's headless runtime and
+compares the images it renders with the references
+([testing guide](widget-testing.md)):
+
+1. builds the package as `package` does, printing the same diagnostics;
+2. reads every `tests/<name>.scenario.json` (the name is the file's) and
+   checks it, and its grants, menu values and fixtures against the
+   manifest, before anything runs: a scenario error is a diagnostic
+   (`test.scenario`) in its file;
+3. finds the runtime: `--runtime <path>`, or the version this CLI pins,
+   found in the cache (`$XDG_CACHE_HOME` or `~/.cache`, `%LOCALAPPDATA%` on
+   Windows, under `overcrow-widget/runtime/<version>/`) and checked against
+   its pinned SHA-256 before every run. It prints the runtime's version and
+   SHA-256, and whether it is the pinned one. No runtime is pinned yet:
+   `--runtime` is required until an OverCrow release publishes it, and
+   downloading it comes with that release. The CLI never builds it;
+4. runs each scenario in the runtime, which validates the package as the
+   overlay does and runs the widget's code in the same OS sandbox;
+5. compares each captured image with `tests/reference/<name>/<image>.png`
+   within the schema's parity bounds (`PARITY_CHANNEL_TOLERANCE` per
+   channel, `PARITY_MAX_DIFFERENT_PIXELS` of the pixels). A difference, a
+   size change or a missing reference fails the scenario and writes
+   `tests/output/<name>/<image>.actual.png` and, for a difference,
+   `<image>.diff.png` (differing pixels in red over the reference, dimmed).
+
+The widget's texts (expectation details, logs, call parameters) are shown
+neutralized, as in [`dev`](#dev-dir).
+
+Options:
+
+- `--runtime <path>`: the `overcrow-widget-headless` executable to run;
+- `--update`: writes the captured images as the references instead of
+  comparing them (review them before committing);
+- `--scenario <name>`: plays only `tests/<name>.scenario.json`;
+- `--format json`: one JSON object per line: `{"type":"runtime",…}`, one
+  `{"type":"scenario",…}` per scenario (its images with their status,
+  `ppm` and `maxDelta`, its failed expectations, errors, faults and logs),
+  then `{"type":"summary","passed":…,"failed":…}`;
+- `--no-typecheck`.
+
+Exit status: 0 when every scenario passed, 1 when one failed (or the
+project or a scenario has an error), 2 when no runtime can run (none given
+or pinned, a digest mismatch, an incompatible runtime, the sandbox not
+available on this machine) or on a usage error.
 
 ### `doctor [dir]`
 

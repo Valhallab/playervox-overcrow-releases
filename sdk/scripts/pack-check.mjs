@@ -37,7 +37,11 @@ try {
   const unexpected = first.files.filter(
     (file) => !/^(dist\/.+\.(js|d\.ts)|README\.md|LICENSE|package\.json)$/.test(file),
   );
-  if (unexpected.length > 0 || !first.files.includes("dist/index.d.ts")) {
+  if (
+    unexpected.length > 0 ||
+    !first.files.includes("dist/index.d.ts") ||
+    !first.files.includes("dist/testing/index.js")
+  ) {
     throw new Error(`unexpected package content: ${unexpected.join(", ")}`);
   }
   console.log(`reproducible: ${first.sha256} (${first.size} bytes, ${first.files.length} files)`);

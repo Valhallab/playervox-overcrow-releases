@@ -1,0 +1,9 @@
+<!-- Test fixture of the headless runtime (docs/widget-testing.md): a
+     stopwatch button whose call the scenarios answer from fixtures. -->
+<box class="stopwatch">
+  <text class="status">{state.status}</text>
+  <text class="elapsed">{state.elapsed}</text>
+  <button class="toggle" label={t("toggle")} on:activate={toggle}>
+    <icon name="play"/>
+  </button>
+</box>

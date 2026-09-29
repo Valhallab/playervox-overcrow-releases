@@ -1,0 +1,23 @@
+{
+  "scenarioVersion": 1,
+  "name": "refused",
+  "description": "The user granted stopwatch.read only: the host refuses stopwatch.toggle, whatever the fixtures.",
+  "host": { "mode": "interactive", "grants": ["stopwatch.read"] },
+  "fixtures": {
+    "calls": { "stopwatch.toggle": [{ "value": {"running": true, "elapsedMs": 1200, "at": 0, "shortcuts": {"toggle": "F9", "reset": "F10", "bound": true}} }] },
+    "subscriptions": { "stopwatch.subscribe": {"running": false, "elapsedMs": 0, "at": 0, "shortcuts": {"toggle": "F9", "reset": "F10", "bound": true}} }
+  },
+  "steps": [
+    { "pointer": { "click": { "label": "Start or stop" } } },
+    {
+      "expect": {
+        "text": ["permission_denied"],
+        "calls": [
+          { "service": "stopwatch.subscribe", "outcome": "ok" },
+          { "service": "stopwatch.toggle", "outcome": "permission_denied" }
+        ],
+        "image": "refused"
+      }
+    }
+  ]
+}

@@ -18,7 +18,13 @@
 # The widget CLI embeds the SDK sources and the templates: identical bytes on
 # every checkout keep logic.js and new projects identical across systems.
 /sdk/src/** text eol=lf
+/sdk/testing/** text eol=lf
 /sdk/LICENSE text eol=lf
 /sdk/test/e2e/** text eol=lf
 /templates/** text eol=lf
 /cli/tests/golden/** text eol=lf
+# Reference images of widget tests (overcrow-widget test) are compared
+# pixel by pixel: never converted as text.
+/sdk/test/e2e/**/*.png binary
+/templates/**/*.png binary
+/cli/tests/**/*.png binary

@@ -131,6 +131,11 @@ useful state when it is missing.
   `tsc`: the SDK types catch wrong service parameters, unknown icons, draw
   commands and capabilities.
 - The helpers take their region values as options, so they run in a unit
-  test outside the VM; the rest of the SDK needs the VM and throws a clear
-  error elsewhere.
+  test outside the VM. The rest of the SDK needs the VM's runtime: in a unit
+  test, `@overcrow/sdk/testing` installs a stand-in with virtual time
+  (`installRuntime`, `advance`, `push`, `lastCall`…), and elsewhere the SDK
+  throws a clear error.
+- `overcrow-widget test` plays scenarios in OverCrow's headless runtime:
+  the real VM and renderer, simulated services, reference images. See
+  [Testing a widget](widget-testing.md).
 - The host remains the authority: the SDK only helps you call it right.

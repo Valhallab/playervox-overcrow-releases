@@ -1,0 +1,1501 @@
+{
+ "comment": "Widget test scenario v1 vectors (docs/widget-testing.md). `valid` scenarios parse; `derived` gives values both readers must compute: `pixels` is the image size at the scale (round to nearest of size × scale / 1000), `zone` lists [now, offsetMinutes, nextChangeAt]. `invalid` scenarios are refused with the error at `path` (\"\" for a format error). `againstManifest` cases are checked against `manifest`; `path` null means accepted.",
+ "manifest": {
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.example.vectors",
+  "version": "1.0.0",
+  "name": {
+   "en": "Vectors",
+   "fr": "Vecteurs"
+  },
+  "sizing": {
+   "fit": "none",
+   "preferred": {
+    "width": 200,
+    "height": 120
+   },
+   "min": {
+    "width": 100,
+    "height": 60
+   },
+   "max": {
+    "width": 400,
+    "height": 240
+   }
+  },
+  "permissions": {
+   "network": [
+    {
+     "origin": "https://api.example.com",
+     "method": "GET",
+     "path": "/v1/items"
+    }
+   ],
+   "storage": true,
+   "capabilities": [
+    "stopwatch.read",
+    "stopwatch.control"
+   ]
+  },
+  "wrapper": {
+   "menu": [
+    {
+     "type": "toggle",
+     "id": "seconds",
+     "label": {
+      "en": "Seconds",
+      "fr": "Secondes"
+     },
+     "default": false
+    },
+    {
+     "type": "slider",
+     "id": "size",
+     "label": {
+      "en": "Size",
+      "fr": "Taille"
+     },
+     "min": 1,
+     "max": 5,
+     "step": 1,
+     "default": 3
+    },
+    {
+     "type": "choice",
+     "id": "style",
+     "label": {
+      "en": "Style",
+      "fr": "Style"
+     },
+     "choices": [
+      {
+       "value": "plain",
+       "label": {
+        "en": "Plain",
+        "fr": "Simple"
+       }
+      },
+      {
+       "value": "bold",
+       "label": {
+        "en": "Bold",
+        "fr": "Gras"
+       }
+      }
+     ],
+     "default": "plain"
+    },
+    {
+     "type": "action",
+     "id": "add-zone",
+     "label": {
+      "en": "Add",
+      "fr": "Ajouter"
+     }
+    }
+   ]
+  }
+ },
+ "valid": [
+  {
+   "name": "minimal",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "derived": {
+    "scale": 1000,
+    "size": [
+     200,
+     120
+    ],
+    "pixels": [
+     200,
+     120
+    ],
+    "startAt": 1767225600000,
+    "grantsDeclared": true
+   }
+  },
+  {
+   "name": "scale 150 % in thousandths",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "host": {
+     "scale": 1500,
+     "size": {
+      "width": 201,
+      "height": 121
+     }
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "derived": {
+    "scale": 1500,
+    "size": [
+     201,
+     121
+    ],
+    "pixels": [
+     302,
+     182
+    ]
+   }
+  },
+  {
+   "name": "scale 50 % and 175 % bounds",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "host": {
+     "scale": 500
+    },
+    "steps": [
+     {
+      "host": {
+       "scale": 1750
+      }
+     },
+     {
+      "expect": {
+       "image": "large"
+      }
+     }
+    ]
+   },
+   "derived": {
+    "scale": 500,
+    "size": [
+     200,
+     120
+    ],
+    "pixels": [
+     100,
+     60
+    ]
+   }
+  },
+  {
+   "name": "full host",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "host": {
+     "locale": "fr",
+     "theme": "light",
+     "scale": 1000,
+     "size": {
+      "width": 180,
+      "height": 72
+     },
+     "mode": "interactive",
+     "visible": false,
+     "frame": true,
+     "background": "#101820",
+     "region": {
+      "numberFormat": "fr"
+     },
+     "zone": {
+      "offsetMinutes": 60,
+      "transitions": [
+       {
+        "at": 1774746000000,
+        "offsetMinutes": 120
+       },
+       {
+        "at": 1792890000000,
+        "offsetMinutes": 60
+       }
+      ]
+     },
+     "startAt": 1774745940000,
+     "options": {
+      "seconds": true,
+      "size": 4,
+      "style": "bold"
+     },
+     "grants": [
+      "stopwatch.read"
+     ],
+     "accounts": {
+      "playervox": "disconnected",
+      "twitch": "connected"
+     },
+     "features": [
+      "fps"
+     ],
+     "storage": {
+      "zones": [
+       {
+        "id": "utc",
+        "offset": 0
+       }
+      ]
+     }
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "derived": {
+    "dateOrder": "dmy",
+    "zone": [
+     [
+      1774745940000,
+      60,
+      1774746000000
+     ],
+     [
+      1774746000000,
+      120,
+      1792890000000
+     ],
+     [
+      1792890000000,
+      60,
+      null
+     ]
+    ]
+   }
+  },
+  {
+   "name": "fixtures",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "fixtures": {
+     "calls": {
+      "stopwatch.toggle": [
+       {
+        "error": "unavailable"
+       },
+       {
+        "value": {
+         "running": false,
+         "elapsedMs": 0,
+         "at": 0,
+         "shortcuts": {
+          "toggle": "F9",
+          "reset": "F10",
+          "bound": true
+         }
+        }
+       },
+       {
+        "value": null
+       }
+      ]
+     },
+     "subscriptions": {
+      "stopwatch.subscribe": {
+       "running": false,
+       "elapsedMs": 0,
+       "at": 0,
+       "shortcuts": {
+        "toggle": "F9",
+        "reset": "F10",
+        "bound": true
+       }
+      }
+     },
+     "http": [
+      {
+       "request": {
+        "method": "GET",
+        "url": "https://api.example.com/v1/items"
+       },
+       "response": {
+        "status": 200,
+        "contentType": "application/json",
+        "body": "{\"items\":[]}"
+       }
+      },
+      {
+       "request": {
+        "method": "GET",
+        "url": "https://api.example.com/v1/items"
+       },
+       "response": {
+        "status": 404,
+        "bodyBase64": "Zm9v"
+       }
+      },
+      {
+       "request": {
+        "method": "GET",
+        "url": "https://api.example.com/v1/items"
+       },
+       "error": "timeout"
+      }
+     ],
+     "confirmations": [
+      "accept",
+      "cancel"
+     ]
+    },
+    "steps": [
+     {
+      "pointer": {
+       "click": {
+        "label": "Start"
+       }
+      }
+     },
+     {
+      "expect": {
+       "calls": [
+        {
+         "service": "stopwatch.toggle",
+         "outcome": "unavailable"
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "derived": {}
+  },
+  {
+   "name": "every step",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "advance": {
+       "ms": 60000
+      }
+     },
+     {
+      "advance": {
+       "ms": 3600000,
+       "jump": true
+      }
+     },
+     {
+      "host": {
+       "visible": false
+      }
+     },
+     {
+      "host": {
+       "visible": true,
+       "locale": "fr",
+       "region": {
+        "numberFormat": "de",
+        "dateOrder": "ymd"
+       }
+      }
+     },
+     {
+      "host": {
+       "mode": "interactive"
+      }
+     },
+     {
+      "pointer": {
+       "click": {
+        "at": [
+         10,
+         12.5
+        ]
+       }
+      }
+     },
+     {
+      "pointer": {
+       "rightClick": {
+        "text": "12:00"
+       }
+      }
+     },
+     {
+      "pointer": {
+       "move": {
+        "label": "Dial"
+       }
+      }
+     },
+     {
+      "pointer": "leave"
+     },
+     {
+      "pointer": {
+       "wheel": {
+        "target": {
+         "at": [
+          5,
+          5
+         ]
+        },
+        "dy": -3
+       }
+      }
+     },
+     {
+      "key": {
+       "key": "Enter",
+       "modifiers": [
+        "shift",
+        "ctrl"
+       ]
+      }
+     },
+     {
+      "key": {
+       "key": "Tab"
+      }
+     },
+     {
+      "text": "héllo"
+     },
+     {
+      "menu": {
+       "id": "seconds",
+       "value": true
+      }
+     },
+     {
+      "menu": {
+       "id": "add-zone"
+      }
+     },
+     {
+      "publish": {
+       "service": "stopwatch.subscribe",
+       "value": {
+        "running": false,
+        "elapsedMs": 0,
+        "at": 0,
+        "shortcuts": {
+         "toggle": "F9",
+         "reset": "F10",
+         "bound": true
+        }
+       }
+      }
+     },
+     {
+      "expect": {
+       "image": "after",
+       "text": [
+        "12:01"
+       ],
+       "noText": [
+        "12:00"
+       ],
+       "calls": [],
+       "state": "running",
+       "fault": "none",
+       "clipboard": "x"
+      }
+     }
+    ]
+   },
+   "derived": {}
+  }
+ ],
+ "invalid": [
+  {
+   "name": "future version",
+   "scenario": {
+    "scenarioVersion": 2,
+    "name": "x",
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "scenarioVersion"
+  },
+  {
+   "name": "unknown field",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "extra": 1,
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": ""
+  },
+  {
+   "name": "unknown host field",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "host": {
+     "dpi": 2
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": ""
+  },
+  {
+   "name": "scale in percent",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "host": {
+     "scale": 150
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "host.scale"
+  },
+  {
+   "name": "scale above 175 %",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "host": {
+     "scale": 1751
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "host.scale"
+  },
+  {
+   "name": "size too large",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "host": {
+     "size": {
+      "width": 1025,
+      "height": 10
+     }
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "host.size"
+  },
+  {
+   "name": "bad name",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "Clock",
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "name"
+  },
+  {
+   "name": "no steps",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": []
+   },
+   "path": "steps"
+  },
+  {
+   "name": "bad background",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "host": {
+     "background": "red"
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "host.background"
+  },
+  {
+   "name": "transitions not increasing",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "host": {
+     "zone": {
+      "transitions": [
+       {
+        "at": 5,
+        "offsetMinutes": 60
+       },
+       {
+        "at": 5,
+        "offsetMinutes": 0
+       }
+      ]
+     }
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "host.zone.transitions[1].at"
+  },
+  {
+   "name": "offset out of range",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "host": {
+     "zone": {
+      "offsetMinutes": 900
+     }
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "host.zone.offsetMinutes"
+  },
+  {
+   "name": "unknown grant",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "host": {
+     "grants": [
+      "files.read"
+     ]
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "host.grants"
+  },
+  {
+   "name": "unknown feature",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "host": {
+     "features": [
+      "gpu"
+     ]
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "host.features"
+  },
+  {
+   "name": "fixture of a host service",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "fixtures": {
+     "calls": {
+      "storage.get": [
+       {
+        "value": 1
+       }
+      ]
+     }
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "fixtures.calls.storage.get"
+  },
+  {
+   "name": "fixture of the wrong shape",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "fixtures": {
+     "calls": {
+      "stopwatch.toggle": [
+       {
+        "value": {
+         "running": true
+        }
+       }
+      ]
+     }
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "fixtures.calls.stopwatch.toggle[0].value"
+  },
+  {
+   "name": "fixture answering a host check",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "fixtures": {
+     "calls": {
+      "stopwatch.toggle": [
+       {
+        "error": "permission_denied"
+       }
+      ]
+     }
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "fixtures.calls.stopwatch.toggle[0].error"
+  },
+  {
+   "name": "unknown error code",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "fixtures": {
+     "calls": {
+      "stopwatch.toggle": [
+       {
+        "error": "oops"
+       }
+      ]
+     }
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "fixtures.calls.stopwatch.toggle[0].error"
+  },
+  {
+   "name": "reply with two members",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "fixtures": {
+     "calls": {
+      "stopwatch.toggle": [
+       {
+        "value": null,
+        "error": "busy"
+       }
+      ]
+     }
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": ""
+  },
+  {
+   "name": "subscription of the wrong shape",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "fixtures": {
+     "subscriptions": {
+      "stopwatch.subscribe": {
+       "running": 1
+      }
+     }
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "fixtures.subscriptions.stopwatch.subscribe"
+  },
+  {
+   "name": "http redirect",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "fixtures": {
+     "http": [
+      {
+       "request": {
+        "method": "GET",
+        "url": "https://a.example/"
+       },
+       "response": {
+        "status": 302
+       }
+      }
+     ]
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "fixtures.http[0].response.status"
+  },
+  {
+   "name": "http plain URL",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "fixtures": {
+     "http": [
+      {
+       "request": {
+        "method": "GET",
+        "url": "http://a.example/"
+       },
+       "error": "timeout"
+      }
+     ]
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "fixtures.http[0].request.url"
+  },
+  {
+   "name": "http content type with control",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "fixtures": {
+     "http": [
+      {
+       "request": {
+        "method": "GET",
+        "url": "https://a.example/"
+       },
+       "response": {
+        "status": 200,
+        "contentType": "text/plain\n"
+       }
+      }
+     ]
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "fixtures.http[0].response.contentType"
+  },
+  {
+   "name": "http rule error",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "fixtures": {
+     "http": [
+      {
+       "request": {
+        "method": "GET",
+        "url": "https://a.example/"
+       },
+       "error": "url_invalid"
+      }
+     ]
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "fixtures.http[0].error"
+  },
+  {
+   "name": "http both answers",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "fixtures": {
+     "http": [
+      {
+       "request": {
+        "method": "GET",
+        "url": "https://a.example/"
+       },
+       "error": "timeout",
+       "response": {
+        "status": 200
+       }
+      }
+     ]
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "fixtures.http[0]"
+  },
+  {
+   "name": "http bad base64",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "fixtures": {
+     "http": [
+      {
+       "request": {
+        "method": "GET",
+        "url": "https://a.example/"
+       },
+       "response": {
+        "status": 200,
+        "bodyBase64": "Zm9"
+       }
+      }
+     ]
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "fixtures.http[0].response.bodyBase64"
+  },
+  {
+   "name": "zero advance",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "advance": {
+       "ms": 0
+      }
+     }
+    ]
+   },
+   "path": "steps[0].advance.ms"
+  },
+  {
+   "name": "advance beyond 400 days",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "advance": {
+       "ms": 34560000000
+      }
+     },
+     {
+      "advance": {
+       "ms": 1
+      }
+     }
+    ]
+   },
+   "path": "steps[1].advance.ms"
+  },
+  {
+   "name": "empty host change",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "host": {}
+     }
+    ]
+   },
+   "path": "steps[0].host"
+  },
+  {
+   "name": "target with two members",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "pointer": {
+       "click": {
+        "at": [
+         1,
+         1
+        ],
+        "text": "x"
+       }
+      }
+     }
+    ]
+   },
+   "path": "steps[0].pointer"
+  },
+  {
+   "name": "target outside",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "pointer": {
+       "click": {
+        "at": [
+         -1,
+         1
+        ]
+       }
+      }
+     }
+    ]
+   },
+   "path": "steps[0].pointer.at"
+  },
+  {
+   "name": "unknown key",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "key": {
+       "key": "F13"
+      }
+     }
+    ]
+   },
+   "path": "steps[0].key.key"
+  },
+  {
+   "name": "text with control",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "text": "a\u0007"
+     }
+    ]
+   },
+   "path": "steps[0].text"
+  },
+  {
+   "name": "publish to a call",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "publish": {
+       "service": "stopwatch.toggle",
+       "value": null
+      }
+     }
+    ]
+   },
+   "path": "steps[0].publish.service"
+  },
+  {
+   "name": "empty expectation",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "expect": {}
+     }
+    ]
+   },
+   "path": "steps[0].expect"
+  },
+  {
+   "name": "duplicate image",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "expect": {
+       "image": "a"
+      }
+     },
+     {
+      "expect": {
+       "image": "a"
+      }
+     }
+    ]
+   },
+   "path": "steps[1].expect.image"
+  },
+  {
+   "name": "unknown fault",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "expect": {
+       "fault": "crash"
+      }
+     }
+    ]
+   },
+   "path": "steps[0].expect.fault"
+  },
+  {
+   "name": "expected timer call",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "expect": {
+       "calls": [
+        {
+         "service": "timer.start"
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "path": "steps[0].expect.calls[0].service"
+  },
+  {
+   "name": "unknown state",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "expect": {
+       "state": "paused"
+      }
+     }
+    ]
+   },
+   "path": ""
+  },
+  {
+   "name": "jump that is not a boolean",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "advance": {
+       "ms": 1,
+       "jump": 1
+      }
+     }
+    ]
+   },
+   "path": ""
+  }
+ ],
+ "againstManifest": [
+  {
+   "name": "declared grants and rows",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "host": {
+     "grants": [
+      "stopwatch.read",
+      "storage"
+     ],
+     "options": {
+      "seconds": true,
+      "style": "bold"
+     }
+    },
+    "fixtures": {
+     "subscriptions": {
+      "stopwatch.subscribe": {
+       "running": false,
+       "elapsedMs": 0,
+       "at": 0,
+       "shortcuts": {
+        "toggle": "F9",
+        "reset": "F10",
+        "bound": true
+       }
+      }
+     },
+     "http": [
+      {
+       "request": {
+        "method": "GET",
+        "url": "https://api.example.com/v1/items"
+       },
+       "error": "timeout"
+      }
+     ]
+    },
+    "steps": [
+     {
+      "menu": {
+       "id": "size",
+       "value": 5
+      }
+     },
+     {
+      "menu": {
+       "id": "add-zone"
+      }
+     }
+    ]
+   },
+   "path": null
+  },
+  {
+   "name": "undeclared grant",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "host": {
+     "grants": [
+      "fps.read"
+     ]
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "host.grants"
+  },
+  {
+   "name": "unknown option",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "host": {
+     "options": {
+      "zones": 1
+     }
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "host.options.zones"
+  },
+  {
+   "name": "option of the wrong type",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "host": {
+     "options": {
+      "seconds": 1
+     }
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "host.options.seconds"
+  },
+  {
+   "name": "slider out of range",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "menu": {
+       "id": "size",
+       "value": 9
+      }
+     }
+    ]
+   },
+   "path": "steps[0].menu.value"
+  },
+  {
+   "name": "action with a value",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "menu": {
+       "id": "add-zone",
+       "value": true
+      }
+     }
+    ]
+   },
+   "path": "steps[0].menu.value"
+  },
+  {
+   "name": "toggle without a value",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "menu": {
+       "id": "seconds"
+      }
+     }
+    ]
+   },
+   "path": "steps[0].menu.value"
+  },
+  {
+   "name": "unknown row",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "menu": {
+       "id": "nope"
+      }
+     }
+    ]
+   },
+   "path": "steps[0].menu.id"
+  },
+  {
+   "name": "fixture of an undeclared capability",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "fixtures": {
+     "subscriptions": {
+      "fps.subscribe": {
+       "fps": 60,
+       "stale": false,
+       "status": "ready"
+      }
+     }
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "fixtures.fps.subscribe"
+  }
+ ]
+}
