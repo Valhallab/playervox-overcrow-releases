@@ -215,7 +215,8 @@ repository identically, pixel for pixel; the tolerance is a guard.
 `overcrow-widget-headless` is built by OverCrow's release pipeline with the
 same code as the application, for Linux and Windows x86-64; the CLI pins a
 version and its SHA-256 and never builds it. It validates the package as the
-overlay does (a `com.playervox.*` ID is refused, as for any local install)
+overlay does (a reserved `com.playervox.*` ID is accepted only in its
+ephemeral test registry, never as a built-in: the scenario sets every grant)
 and runs the widget's code in the same OS sandbox as the overlay: Bubblewrap
 and seccomp on Linux, a Less Privileged AppContainer and a Job on Windows.
 Without the sandbox it refuses to run and says so. On a Linux session
