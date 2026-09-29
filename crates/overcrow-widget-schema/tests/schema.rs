@@ -204,6 +204,35 @@ fn tokens_are_unique_and_well_formed() {
                 );
             }
         }
+        if token.ty == tokens::TokenType::Shadow {
+            for value in [token.dark, token.light] {
+                assert!(
+                    tokens::parse_shadow(value).is_some(),
+                    "{}: {value}",
+                    token.name
+                );
+            }
+        }
+    }
+    assert_eq!(
+        tokens::parse_shadow("0px 4px 16px 0px #00000066"),
+        Some(tokens::TokenShadow {
+            x: 0.0,
+            y: 4.0,
+            blur: 16.0,
+            spread: 0.0,
+            rgba: [0, 0, 0, 0x66],
+        })
+    );
+    for invalid in [
+        "0px 4px 16px #00000066",
+        "0px 4px -1px 0px #00000066",
+        "0 4px 16px 0px #00000066",
+        "0px 4px 16px 0px #000000",
+        "0px  4px 16px 0px #00000066",
+        "0px 4px 16px 0px #0000006G",
+    ] {
+        assert_eq!(tokens::parse_shadow(invalid), None, "{invalid}");
     }
 }
 
@@ -494,4 +523,36 @@ fn reference_tables_have_consistent_columns() {
         let expected = *columns.get_or_insert(count);
         assert_eq!(count, expected, "line {}: {line}", number + 1);
     }
+}
+
+#[test]
+fn default_sizes_name_host_drawn_elements_and_keyword_conditions() {
+    use overcrow_widget_schema::model::{field, is_keyword};
+    use overcrow_widget_schema::style::{DEFAULT_SIZES, default_size};
+    for (index, row) in DEFAULT_SIZES.iter().enumerate() {
+        let element = view::element(row.element).expect("known element");
+        match row.when {
+            Some((attribute, value)) => {
+                assert!(
+                    field(element.attributes, attribute).is_some(),
+                    "{attribute}"
+                );
+                assert!(is_keyword(element.attributes, attribute, value), "{value}");
+            }
+            // The unconditional row of an element comes after its conditions,
+            // and there is one.
+            None => assert!(
+                DEFAULT_SIZES[index + 1..]
+                    .iter()
+                    .all(|later| later.element != row.element),
+                "{}",
+                row.element
+            ),
+        }
+    }
+    let arc = default_size("gauge", |name| (name == "shape").then_some("arc"));
+    assert_eq!(arc.map(|row| row.height), Some(style::Extent::Px(32)));
+    let ring = default_size("gauge", |_| None);
+    assert_eq!(ring.map(|row| row.height), Some(style::Extent::Px(48)));
+    assert_eq!(default_size("canvas", |_| None), None);
 }

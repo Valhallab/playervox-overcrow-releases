@@ -393,6 +393,7 @@ fn every_keyword_token_selector_and_state_of_the_schema_is_accepted() {
             TokenType::FontSize => "font-size",
             TokenType::FontFamily => "font-family",
             TokenType::Time => "transition",
+            TokenType::Shadow => "box-shadow",
         };
         let value = if token.ty == TokenType::Time {
             format!("opacity var({})", token.name)
@@ -577,5 +578,23 @@ fn canonical_expression_text_parses_again_at_the_depth_bound() {
     ] {
         let parsed = expr::parse(&source).unwrap_or_else(|error| panic!("{source}: {error:?}"));
         assert_eq!(expr::parse(&parsed.to_js()), Ok(parsed), "{source}");
+    }
+}
+
+#[test]
+fn a_shadow_token_is_a_whole_box_shadow_value_only() {
+    let sheet = ocss::parse(b".a { box-shadow: var(--shadow-panel); }").expect("shadow token");
+    let token = overcrow_widget_schema::tokens::token("--shadow-panel").expect("token");
+    assert_eq!(
+        sheet.rules[0].declarations[0].value,
+        Value::ShadowToken(token)
+    );
+    for invalid in [
+        ".a { box-shadow: var(--shadow-panel), 0 1px #000; }",
+        ".a { box-shadow: inset var(--shadow-panel); }",
+        ".a { color: var(--shadow-panel); }",
+        ".a { box-shadow: var(--color-text); }",
+    ] {
+        assert!(style_error(invalid).is_err(), "{invalid}");
     }
 }

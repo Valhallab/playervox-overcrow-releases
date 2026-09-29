@@ -12,6 +12,9 @@ pub enum TokenType {
     FontSize,
     FontFamily,
     Time,
+    /// One outer shadow, written `<x>px <y>px <blur>px <spread>px #rrggbbaa`;
+    /// usable only as the whole `box-shadow` value.
+    Shadow,
 }
 
 impl TokenType {
@@ -22,6 +25,7 @@ impl TokenType {
             Self::FontSize => "font size",
             Self::FontFamily => "font family",
             Self::Time => "time",
+            Self::Shadow => "shadow",
         }
     }
 }
@@ -98,6 +102,12 @@ pub const TOKENS: &[Token] = &[
         status: Status::Fixed,
         summary: "Text and icons drawn on the accent and its hover state.",
     },
+    color(
+        "--color-surface-panel",
+        "#111114ee",
+        "#fafafaee",
+        "Widget panel background, drawn by the host wrapper behind the content.",
+    ),
     color(
         "--color-surface-raised",
         "#1e1e22e0",
@@ -275,8 +285,55 @@ pub const TOKENS: &[Token] = &[
         "240ms",
         "Panels and popovers.",
     ),
+    Token {
+        name: "--shadow-panel",
+        ty: TokenType::Shadow,
+        dark: "0px 4px 16px 0px #00000066",
+        light: "0px 4px 16px 0px #0000001f",
+        status: Status::P2_4,
+        summary: "Shadow of the widget panel and of floating host surfaces.",
+    },
 ];
 
 pub fn token(name: &str) -> Option<&'static Token> {
     TOKENS.iter().find(|token| token.name == name)
+}
+
+/// The value of a [`TokenType::Shadow`] token for one theme.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct TokenShadow {
+    pub x: f64,
+    pub y: f64,
+    pub blur: f64,
+    pub spread: f64,
+    pub rgba: [u8; 4],
+}
+
+/// Parses a shadow token value: exactly four whole or decimal `px`
+/// lengths (blur non-negative) and one `#rrggbbaa` colour, separated by one
+/// space. The table is trusted data; a test parses every entry.
+pub fn parse_shadow(text: &str) -> Option<TokenShadow> {
+    let parts: Vec<&str> = text.split(' ').collect();
+    let [x, y, blur, spread, color] = parts.as_slice() else {
+        return None;
+    };
+    let px = |part: &str| {
+        part.strip_suffix("px")
+            .and_then(|number| number.parse::<f64>().ok())
+            .filter(|value| value.is_finite())
+    };
+    let hex = color.strip_prefix('#').filter(|hex| {
+        hex.len() == 8
+            && hex
+                .bytes()
+                .all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase())
+    })?;
+    let channel = |index: usize| u8::from_str_radix(&hex[index..index + 2], 16).ok();
+    Some(TokenShadow {
+        x: px(x)?,
+        y: px(y)?,
+        blur: px(blur).filter(|blur| *blur >= 0.0)?,
+        spread: px(spread)?,
+        rgba: [channel(0)?, channel(2)?, channel(4)?, channel(6)?],
+    })
 }

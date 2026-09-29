@@ -173,7 +173,8 @@ A style sheet is a list of rules and `@keyframes` blocks, at most
 - **Values.** Each property accepts the grammar of the reference. Lengths
   are `px` (`0` may omit it) and, where allowed, percentages; tokens
   `var(--name)` of the expected type may stand for any colour, length, font
-  size, font family or time. Shorthands expand as in CSS: one to four sides
+  size, font family or time, and a shadow token `var(--shadow-…)` may be
+  the whole `box-shadow` value. Shorthands expand as in CSS: one to four sides
   or corners, one or two gaps; `repeat()` expands its tracks.
 - **Animations.** `@keyframes name { from { … } 50% { … } to { … } }` holds
   at most `MAX_KEYFRAME_STOPS` stops of animatable properties only; a stop

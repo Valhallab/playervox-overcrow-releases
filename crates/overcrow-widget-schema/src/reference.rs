@@ -25,7 +25,7 @@ use crate::permissions::{
     CAPABILITIES, NETWORK_RULE_FIELDS, PARAMETER_CONSTRAINTS, PERMISSIONS, SensitiveRule,
 };
 use crate::services::{Requirement, SERVICE_ERRORS, SERVICES, ServiceKind, Target, WRITE_INTENTS};
-use crate::style::{PROPERTIES, SELECTORS, SHEET_RULES, SyntaxEntry, VALUE_SYNTAX};
+use crate::style::{DEFAULT_SIZES, PROPERTIES, SELECTORS, SHEET_RULES, SyntaxEntry, VALUE_SYNTAX};
 use crate::tokens::TOKENS;
 use crate::view::{
     COMMON_ATTRIBUTES, Content, ELEMENTS, EVENTS, EXPRESSION_SUMMARY, Focus, NAMED_KEYS,
@@ -262,6 +262,26 @@ animation and restarts when the text changes.\n\n| Property | Group | Value | In
     syntax_table(out, "Syntax", VALUE_SYNTAX);
     out.push_str("### Sheet rules\n\n");
     syntax_table(out, "Rule", SHEET_RULES);
+    out.push_str(
+        "### Default sizes\n\nHost-drawn leaves take these sizes, in logical px at 100 %, \
+unless `width` or `height` is set. A row with a condition applies when the attribute has that \
+value; any other element, `canvas` included, is sized by style only.\n\n\
+| Element | When | Width | Height | Status |\n| --- | --- | --- | --- | --- |\n",
+    );
+    for row in DEFAULT_SIZES {
+        let when = row
+            .when
+            .map_or("—".to_owned(), |(name, value)| format!("`{name}=\"{value}\"`"));
+        let _ = writeln!(
+            out,
+            "| `{}` | {} | {} | {} | {} |",
+            row.element,
+            when,
+            row.width.describe(),
+            row.height.describe(),
+            status(row.status)
+        );
+    }
 }
 
 fn tokens_section(out: &mut String) {

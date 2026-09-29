@@ -368,6 +368,21 @@ fn catalog_targets_bind_the_package_fixtures() {
 }
 
 #[test]
+fn catalog_targets_keep_their_signed_preview() {
+    let targets =
+        catalog(&read(&fixtures_root().join("catalog/valid/preview.json"))).expect("valid catalog");
+    let preview = targets[0].preview.as_ref().expect("preview kept");
+    assert_eq!(preview.size, 4096);
+    assert_eq!(preview.sha256, [0xab; 32]);
+    assert!(preview.url.ends_with(&format!("/{}.png", "ab".repeat(32))));
+    let targets = catalog(&read(
+        &fixtures_root().join("catalog/valid/built-in-and-third-party.json"),
+    ))
+    .expect("valid catalog");
+    assert!(targets.iter().all(|target| target.preview.is_none()));
+}
+
+#[test]
 fn a_seed_never_verifies_as_a_catalog() {
     let seed = read(&fixtures_root().join("seed/valid/built-in-clock/seed.json"));
     assert_eq!(catalog(&seed).unwrap_err(), "signature");

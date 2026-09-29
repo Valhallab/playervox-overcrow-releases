@@ -564,6 +564,12 @@ pub const MAX_GLOBAL_TEXTURE_BYTES: Limit = fixed(
     Unit::Bytes,
     "Decoded image textures cached for all widgets (LRU).",
 );
+pub const MAX_GLYPH_ATLAS_BYTES: Limit = fixed(
+    "MAX_GLYPH_ATLAS_BYTES",
+    4 * MIB,
+    Unit::Bytes,
+    "Glyph atlas shared by all widgets: four 512 × 512 RGBA8 pages; the least recently used page is cleared when none has room.",
+);
 pub const MAX_WIDGET_EDGE_PX: Limit = fixed(
     "MAX_WIDGET_EDGE_PX",
     4096,
@@ -1114,6 +1120,7 @@ pub const ALL: &[&Limit] = &[
     &MAX_IMAGE_ENCODED_BYTES,
     &MAX_WIDGET_TEXTURE_BYTES,
     &MAX_GLOBAL_TEXTURE_BYTES,
+    &MAX_GLYPH_ATLAS_BYTES,
     &MAX_WIDGET_EDGE_PX,
     &MIN_CONTENT_SCALE,
     &MAX_CONTENT_SCALE,

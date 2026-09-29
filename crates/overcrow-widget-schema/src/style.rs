@@ -4,7 +4,7 @@
 use crate::limits::{
     MAX_GRADIENT_STOPS, MAX_GRID_TRACKS, MAX_SHADOWS, MAX_TRANSFORM_FUNCTIONS, MAX_TRANSITIONS,
 };
-use crate::model::Limit;
+use crate::model::{Limit, Status};
 
 /// Grammar of a property value. Every length is bounded by `MAX_LENGTH_PX`,
 /// every duration by `MAX_ANIMATION_MS`.
@@ -116,7 +116,7 @@ impl StyleValue {
             ),
             Self::Border => "`<px>` (`solid` \\| `none`)? `<color>`?".into(),
             Self::Shadow(limit) => format!(
-                "`none` \\| list ≤ `{}` of `inset`? `<px> <px> <px>? <px>? <color>`",
+                "`none` \\| `var(--shadow-…)` alone \\| list ≤ `{}` of `inset`? `<px> <px> <px>? <px>? <color>`",
                 limit.key
             ),
             Self::Transform(limit) => format!(
@@ -701,6 +701,108 @@ pub const SHEET_RULES: &[SyntaxEntry] = &[
         summary: "`!important`, `@media`, `@import`, `@font-face`, `url()`, `calc()`, custom property declarations, attribute and ID selectors, `*`, sibling combinators, unknown properties or values. Any of them rejects the whole sheet.",
     },
 ];
+
+/// One axis of a host-drawn leaf's default size.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Extent {
+    /// Logical pixels at 100 % content scale.
+    Px(u32),
+    /// The element's computed `font-size`.
+    FontSize,
+    /// The larger of `--control-height` and the line height.
+    ControlHeight,
+    /// `rows` line heights (`textarea`, default 3).
+    Rows,
+    /// The decoded image size, set by the renderer; else this many pixels.
+    Image(u32),
+    /// Measured from the element's own text (option labels, `elapsed` format).
+    Text,
+}
+
+impl Extent {
+    pub fn describe(self) -> String {
+        match self {
+            Self::Px(px) => format!("{px}"),
+            Self::FontSize => "`font-size`".into(),
+            Self::ControlHeight => "max(`--control-height`, line height)".into(),
+            Self::Rows => "`rows` line heights".into(),
+            Self::Image(px) => format!("decoded image, else {px}"),
+            Self::Text => "its text".into(),
+        }
+    }
+}
+
+/// Default size of a host-drawn leaf, before `width` and `height` from style.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct DefaultSize {
+    pub element: &'static str,
+    /// `(attribute, value)` selecting this row; `None` is the element's default.
+    pub when: Option<(&'static str, &'static str)>,
+    pub width: Extent,
+    pub height: Extent,
+    pub status: Status,
+}
+
+const fn size(
+    element: &'static str,
+    when: Option<(&'static str, &'static str)>,
+    width: Extent,
+    height: Extent,
+) -> DefaultSize {
+    DefaultSize {
+        element,
+        when,
+        width,
+        height,
+        status: Status::P2_4,
+    }
+}
+
+/// Default sizes of the host-drawn leaves, in logical pixels at 100 %. Rows
+/// with a condition come first; any other element (`canvas` included) has
+/// no default size and is sized by style only. Provisional until the P2.4
+/// reference images check them.
+pub const DEFAULT_SIZES: &[DefaultSize] = &[
+    size("icon", None, Extent::FontSize, Extent::FontSize),
+    size("image", None, Extent::Image(0), Extent::Image(0)),
+    size("avatar", None, Extent::Image(28), Extent::Image(28)),
+    size("toggle", None, Extent::Px(32), Extent::Px(18)),
+    size("checkbox", None, Extent::Px(16), Extent::Px(16)),
+    size("slider", None, Extent::Px(120), Extent::Px(18)),
+    size("progress", None, Extent::Px(120), Extent::Px(6)),
+    size(
+        "gauge",
+        Some(("shape", "arc")),
+        Extent::Px(48),
+        Extent::Px(32),
+    ),
+    size("gauge", None, Extent::Px(48), Extent::Px(48)),
+    size("chart", None, Extent::Px(160), Extent::Px(48)),
+    size("field", None, Extent::Px(160), Extent::ControlHeight),
+    size("textarea", None, Extent::Px(160), Extent::Rows),
+    size(
+        "separator",
+        Some(("axis", "vertical")),
+        Extent::Px(1),
+        Extent::Px(0),
+    ),
+    size("separator", None, Extent::Px(0), Extent::Px(1)),
+    size("select", None, Extent::Text, Extent::Text),
+    size("elapsed", None, Extent::Text, Extent::Text),
+];
+
+/// The default size of `element` whose attribute values are read by `value`.
+pub fn default_size(
+    element: &str,
+    value: impl Fn(&str) -> Option<&str>,
+) -> Option<&'static DefaultSize> {
+    DEFAULT_SIZES.iter().find(|row| {
+        row.element == element
+            && row
+                .when
+                .is_none_or(|(attribute, expected)| value(attribute) == Some(expected))
+    })
+}
 
 pub fn property(name: &str) -> Option<&'static Property> {
     PROPERTIES.iter().find(|property| property.name == name)

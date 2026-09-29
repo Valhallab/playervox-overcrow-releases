@@ -299,6 +299,8 @@ pub enum Value {
     Border(Border),
     /// Empty for `none`.
     Shadows(Vec<Shadow>),
+    /// `var(--shadow-…)`: a shadow token, resolved for the host theme.
+    ShadowToken(&'static Token),
     /// Empty for `none`.
     Transform(Vec<TransformFn>),
     TransformOrigin([Length; 2]),
@@ -1508,6 +1510,12 @@ fn typed_value(grammar: StyleValue, groups: &Groups) -> Typed<Value> {
         StyleValue::Shadow(limit) => {
             if is_none(groups) {
                 return Ok(Value::Shadows(Vec::new()));
+            }
+            if let [group] = groups.as_slice()
+                && let [value] = group.as_slice()
+                && let Some(token) = token_of(value, TokenType::Shadow)
+            {
+                return token.map(Value::ShadowToken);
             }
             if groups.len() as u64 > limit.value {
                 return Err(INVALID);

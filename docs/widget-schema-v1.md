@@ -98,6 +98,7 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MAX_IMAGE_ENCODED_BYTES` | 2 MiB | fixed | Encoded size of one PNG, JPEG or WebP image before decoding. |
 | `MAX_WIDGET_TEXTURE_BYTES` | 16 MiB | fixed | Decoded image textures cached for one widget (LRU). |
 | `MAX_GLOBAL_TEXTURE_BYTES` | 128 MiB | fixed | Decoded image textures cached for all widgets (LRU). |
+| `MAX_GLYPH_ATLAS_BYTES` | 4 MiB | fixed | Glyph atlas shared by all widgets: four 512 × 512 RGBA8 pages; the least recently used page is cleared when none has room. |
 | `MAX_WIDGET_EDGE_PX` | 4096 px | fixed | Width or height of a widget container. |
 | `MIN_CONTENT_SCALE` | 500 ‰ | fixed | Smallest content scale (50 %). |
 | `MAX_CONTENT_SCALE` | 1750 ‰ | fixed | Largest content scale (175 %). |
@@ -489,7 +490,7 @@ Animatable properties change paint only, so transitions and animations never rer
 | `border-style` | Visual | `solid` \| `none` | `none` | no | no |
 | `border-color` | Visual | `<color>` | `currentColor` | no | yes |
 | `border-radius` | Visual | 1–4 × (`<px>` \| `<percent>`) | `0` | no | no |
-| `box-shadow` | Visual | `none` \| list ≤ `MAX_SHADOWS` of `inset`? `<px> <px> <px>? <px>? <color>` | `none` | no | no |
+| `box-shadow` | Visual | `none` \| `var(--shadow-…)` alone \| list ≤ `MAX_SHADOWS` of `inset`? `<px> <px> <px>? <px>? <color>` | `none` | no | no |
 | `opacity` | Visual | number 0..=1 | `1` | no | yes |
 | `visibility` | Visual | `visible` \| `hidden` | `visible` | yes | no |
 | `object-fit` | Visual | `contain` \| `cover` \| `fill` \| `none` | `contain` | no | no |
@@ -550,6 +551,28 @@ Animatable properties change paint only, so transitions and animations never rer
 | `/* comment */` | Comments are allowed and ignored. |
 | `rejected` | `!important`, `@media`, `@import`, `@font-face`, `url()`, `calc()`, custom property declarations, attribute and ID selectors, `*`, sibling combinators, unknown properties or values. Any of them rejects the whole sheet. |
 
+### Default sizes
+
+Host-drawn leaves take these sizes, in logical px at 100 %, unless `width` or `height` is set. A row with a condition applies when the attribute has that value; any other element, `canvas` included, is sized by style only.
+
+| Element | When | Width | Height | Status |
+| --- | --- | --- | --- | --- |
+| `icon` | — | `font-size` | `font-size` | **provisional (P2.4)** |
+| `image` | — | decoded image, else 0 | decoded image, else 0 | **provisional (P2.4)** |
+| `avatar` | — | decoded image, else 28 | decoded image, else 28 | **provisional (P2.4)** |
+| `toggle` | — | 32 | 18 | **provisional (P2.4)** |
+| `checkbox` | — | 16 | 16 | **provisional (P2.4)** |
+| `slider` | — | 120 | 18 | **provisional (P2.4)** |
+| `progress` | — | 120 | 6 | **provisional (P2.4)** |
+| `gauge` | `shape="arc"` | 48 | 32 | **provisional (P2.4)** |
+| `gauge` | — | 48 | 48 | **provisional (P2.4)** |
+| `chart` | — | 160 | 48 | **provisional (P2.4)** |
+| `field` | — | 160 | max(`--control-height`, line height) | **provisional (P2.4)** |
+| `textarea` | — | 160 | `rows` line heights | **provisional (P2.4)** |
+| `separator` | `axis="vertical"` | 1 | 0 | **provisional (P2.4)** |
+| `separator` | — | 0 | 1 | **provisional (P2.4)** |
+| `select` | — | its text | its text | **provisional (P2.4)** |
+| `elapsed` | — | its text | its text | **provisional (P2.4)** |
 ## Design tokens
 
 Dark values are the current overlay palette. The built-ins have no light theme yet, so no capture can check the light colours: apart from the fixed `--color-on-accent`, they remain a proposal.
@@ -560,6 +583,7 @@ Dark values are the current overlay palette. The built-ins have no light theme y
 | `--color-accent-hover` | color | `#b5f153` | `#3f6212` | **provisional (P2.4)** | Accent under the pointer. |
 | `--color-accent-soft` | color | `#a3e6351c` | `#4d7c0f1f` | **provisional (P2.4)** | Accent wash behind selected content. |
 | `--color-on-accent` | color | `#09090b` | `#ffffff` | fixed | Text and icons drawn on the accent and its hover state. |
+| `--color-surface-panel` | color | `#111114ee` | `#fafafaee` | **provisional (P2.4)** | Widget panel background, drawn by the host wrapper behind the content. |
 | `--color-surface-raised` | color | `#1e1e22e0` | `#f4f4f5eb` | **provisional (P2.4)** | Raised surface inside the panel. |
 | `--color-surface-hover` | color | `#28282deb` | `#e4e4e7f0` | **provisional (P2.4)** | Surface under the pointer. |
 | `--color-surface-field` | color | `#0f0f12` | `#ffffff` | **provisional (P2.4)** | Text input background. |
@@ -597,6 +621,7 @@ Dark values are the current overlay palette. The built-ins have no light theme y
 | `--font-display` | font family | `display` | `display` | fixed | Space Grotesk, for grades and scores. |
 | `--duration-fast` | time | `120ms` | `120ms` | fixed | State transitions. |
 | `--duration-medium` | time | `240ms` | `240ms` | fixed | Panels and popovers. |
+| `--shadow-panel` | shadow | `0px 4px 16px 0px #00000066` | `0px 4px 16px 0px #0000001f` | **provisional (P2.4)** | Shadow of the widget panel and of floating host surfaces. |
 
 ## Icons
 
