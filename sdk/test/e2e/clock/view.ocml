@@ -1,5 +1,5 @@
-<!-- End-to-end fixture of @overcrow/sdk: a Clock written against the SDK.
-     clock.view.json is its compiled view, clock.view.js its expression table. -->
+<!-- End-to-end fixture of @overcrow/sdk: a Clock written against the SDK,
+     packaged by overcrow-widget (sdk/test/e2e.test.mjs). -->
 <box class="clock" label={t("clock")}>
   <text class="time">{clockTime(state.now, state.seconds)}</text>
   <if test={state.showDate}>

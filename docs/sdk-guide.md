@@ -8,10 +8,19 @@ against `@overcrow/sdk` 1.0; the [reference](sdk-reference.md) lists the
 whole API and the [source formats](widget-source-formats.md) describe the
 view and the style.
 
-The widget CLI (P2.2) bundles the logic module and the SDK into
-`logic.js`. Until it ships, `sdk/test/e2e/` shows the complete shape of a
-widget: `clock.ocml`, its compiled `clock.view.json`, the logic
-`clock.ts` and the generated table `clock.view.js`.
+The widget CLI, `overcrow-widget`, creates a project, checks it and links
+the logic module, the SDK and the view table into `logic.js`
+([CLI guide](cli.md)):
+
+```sh
+overcrow-widget init my-clock --template counter
+cd my-clock && npm install
+overcrow-widget check
+overcrow-widget package
+```
+
+`templates/` holds the starting points (`blank`, `counter`, `list`,
+`chart`) and `sdk/test/e2e/clock/` a complete Clock.
 
 ## The runtime model
 
@@ -116,8 +125,11 @@ useful state when it is missing.
 
 ## Checking and testing
 
-- Type your logic with the SDK: `tsc --noEmit` catches wrong service
-  parameters, unknown icons, draw commands and capabilities.
+- `overcrow-widget check` validates the manifest, the view, the style and
+  the locales, lints the logic against what the VM runs (one module, no
+  `eval`, no `Intl`, `setTimeout` or `console`…) and runs the project's
+  `tsc`: the SDK types catch wrong service parameters, unknown icons, draw
+  commands and capabilities.
 - The helpers take their region values as options, so they run in a unit
   test outside the VM; the rest of the SDK needs the VM and throws a clear
   error elsewhere.

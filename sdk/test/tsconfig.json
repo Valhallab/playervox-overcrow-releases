@@ -5,5 +5,5 @@
     "rootDir": "..",
     "paths": { "@overcrow/sdk": ["../src/index.ts"] }
   },
-  "include": ["types.ts", "e2e/*.ts"]
+  "include": ["types.ts", "e2e/clock/logic.ts"]
 }

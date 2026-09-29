@@ -2,8 +2,8 @@
 //! canonical `view.json`, the expression table (role, names in scope,
 //! canonical JavaScript) and the logic functions it calls:
 //! `cargo run -p overcrow-widget-format --example compile < view.ocml`.
-//! A development aid until the widget CLI (P2.2); `assets/` references are
-//! not resolved.
+//! A development aid for the compiler itself; widget authors use
+//! `overcrow-widget check`. `assets/` references are not resolved.
 
 use std::collections::BTreeSet;
 use std::io::{self, Read, Write};
