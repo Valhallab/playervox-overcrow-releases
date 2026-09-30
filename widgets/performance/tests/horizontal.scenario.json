@@ -47,7 +47,7 @@
     {
       "expect": {
         "text": [
-          "TEMP CPU"
+          "CPU°"
         ],
         "image": "line-light-fr-100"
       }

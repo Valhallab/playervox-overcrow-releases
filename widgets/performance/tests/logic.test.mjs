@@ -5,7 +5,7 @@ import { installRuntime } from "@overcrow/sdk/testing";
 
 import { loadLogic } from "./load-logic.mjs";
 
-const MESSAGES = {"label": "Performance", "waiting": "Waiting for game data…", "no-metric": "No metric selected", "cpu": "CPU", "ram": "RAM", "cpu-temperature": "CPU TEMP", "gpu-temperature": "GPU TEMP", "fps": "FPS", "old": "old", "hint-cpu": "Game CPU use across all logical processors.", "hint-ram": "Game resident memory.", "hint-cpu-temperature": "Host CPU temperature.", "hint-gpu-temperature": "Host GPU temperature.", "hint-fps": "Observed presentation rate.", "hint-fps-old": "Last FPS reading. No new measurement has arrived for at least three seconds.", "name-cpu": "Game CPU use {value} {unit}", "name-ram": "Game memory {value} {unit}", "name-cpu-temperature": "CPU temperature {value} {unit}", "name-gpu-temperature": "GPU temperature {value} {unit}", "name-fps": "{value} frames per second", "name-fps-old": "{value} frames per second, last reading"};
+const MESSAGES = {"label": "Performance", "waiting": "Waiting for game data…", "no-metric": "No metric selected", "cpu": "CPU", "ram": "RAM", "cpu-temperature": "CPU°", "gpu-temperature": "GPU°", "fps": "FPS", "old": "old", "hint-cpu": "Game CPU use across all logical processors.", "hint-ram": "Game resident memory.", "hint-cpu-temperature": "Host CPU temperature.", "hint-gpu-temperature": "Host GPU temperature.", "hint-fps": "Observed presentation rate.", "hint-fps-old": "Last FPS reading. No new measurement has arrived for at least three seconds.", "name-cpu": "Game CPU use {value} {unit}", "name-ram": "Game memory {value} {unit}", "name-cpu-temperature": "CPU temperature {value} {unit}", "name-gpu-temperature": "GPU temperature {value} {unit}", "name-fps": "{value} frames per second", "name-fps-old": "{value} frames per second, last reading"};
 const GB = 1024 ** 3;
 const ALL = { cpu: true, ram: true, cpuTemperature: true, gpuTemperature: true, fps: true, fahrenheit: false };
 const sample = (fields = {}) => ({
@@ -35,8 +35,8 @@ test("rows in the fixed order, each value with its unit", () => {
   assert.deepEqual(shown(logic.rows(sample(), FRESH, ALL)), [
     "CPU 23.0\u2009%",
     "RAM 3.0\u2009GB",
-    "CPU TEMP 61.0\u2009°C",
-    "GPU TEMP 67.0\u2009°C",
+    "CPU° 61.0\u2009°C",
+    "GPU° 67.0\u2009°C",
     "FPS 144",
   ]);
   const rows = logic.rows(sample(), FRESH, ALL);
@@ -54,7 +54,7 @@ test("rows in the fixed order, each value with its unit", () => {
 
 test("a row needs its toggle and a reading; nothing is shown as unavailable", () => {
   const partial = sample({ cpu: null, cpuTemperature: null, sources: { cpuTemperature: false, gpuTemperature: true } });
-  assert.deepEqual(shown(logic.rows(partial, { fps: null, stale: false }, ALL)), ["RAM 3.0\u2009GB", "GPU TEMP 67.0\u2009°C"]);
+  assert.deepEqual(shown(logic.rows(partial, { fps: null, stale: false }, ALL)), ["RAM 3.0\u2009GB", "GPU° 67.0\u2009°C"]);
   assert.deepEqual(logic.rows(sample(), FRESH, { ...ALL, cpu: false, ram: false, fps: false }).map((row) => row.key), [
     "cpu-temperature",
     "gpu-temperature",
@@ -126,8 +126,8 @@ test("numbers follow the host's number format, not the language", () => {
   assert.deepEqual(shown(logic.rows(sample({ ram: 1234.56 * GB }), { fps: 1200, stale: false }, ALL)), [
     "CPU 23,0\u2009%",
     "RAM 1\u00a0234,6\u2009GB",
-    "CPU TEMP 61,0\u2009°C",
-    "GPU TEMP 67,0\u2009°C",
+    "CPU° 61,0\u2009°C",
+    "GPU° 67,0\u2009°C",
     "FPS 1\u00a0200",
   ]);
   vm.setHost({ region: { numberFormat: "de", dateOrder: "dmy", offsetMinutes: 0 } });

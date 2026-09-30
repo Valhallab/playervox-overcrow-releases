@@ -46,10 +46,10 @@
     {
       "expect": {
         "noText": [
-          "CPU TEMP"
+          "CPU°"
         ],
         "text": [
-          "GPU TEMP"
+          "GPU°"
         ],
         "image": "windows-dark"
       }
@@ -89,8 +89,8 @@
     {
       "expect": {
         "noText": [
-          "CPU TEMP",
-          "GPU TEMP"
+          "CPU°",
+          "GPU°"
         ],
         "image": "no-sensors"
       }
@@ -117,7 +117,7 @@
         ],
         "text": [
           "RAM",
-          "CPU TEMP"
+          "CPU°"
         ],
         "image": "warm-up"
       }

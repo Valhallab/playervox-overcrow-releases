@@ -52,11 +52,11 @@
       "expect": {
         "noText": [
           "CPU",
-          "GPU TEMP"
+          "GPU°"
         ],
         "text": [
           "RAM",
-          "CPU TEMP",
+          "CPU°",
           "144"
         ],
         "image": "some-off"

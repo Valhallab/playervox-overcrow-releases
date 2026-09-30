@@ -14,8 +14,8 @@ default) or on one line separated by `·` (horizontal):
 | --- | --- | --- | --- | --- |
 | Game CPU | CPU | share of all logical processors, `23.0 %`, at most 100 | ≥ 80 % | ≥ 95 % |
 | Game memory | RAM | resident memory in binary gigabytes, `3.0 GB` | never | never |
-| CPU temperature | CPU TEMP / TEMP CPU | `61.0 °C` or `141.8 °F` | ≥ 80 °C | ≥ 90 °C |
-| GPU temperature | GPU TEMP / TEMP GPU | the same | ≥ 80 °C | ≥ 90 °C |
+| CPU temperature | CPU° | `61.0 °C` or `141.8 °F` | ≥ 80 °C | ≥ 90 °C |
+| GPU temperature | GPU° | the same | ≥ 80 °C | ≥ 90 °C |
 | Frame rate | FPS | an integer, `144` | never | never |
 
 - A row shows only when its menu toggle is on **and** OverCrow has a
