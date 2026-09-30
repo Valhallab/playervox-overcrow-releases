@@ -1,9 +1,10 @@
 # Testing
 
-Build portable downloads with `python3 scripts/package-docs-examples.py
-published/docs/downloads`, then run `npm test`. Creator-kit tests run on Windows
-and Linux; native-host tests use controlled test executables, not the live overlay.
-Website rendering and browser isolation tests belong to the separate web repository.
+How this repository is tested. Testing a widget of your own is described in
+[testing a widget](widget-testing.md). Website rendering and browser tests
+belong to the separate web repository.
+
+## Widget contract
 
 Run the widget schema checks; the tests fail if the committed reference or a
 generated conformance fixture is stale:
@@ -24,6 +25,8 @@ expression table under `fixtures/ocml/compiled/` is stale:
 cargo test -p overcrow-widget-format --locked
 cargo run -p overcrow-widget-format --example fixtures
 ```
+
+## Fuzzing
 
 The fuzz targets cover every parser and package verifier of the widget
 contract: `ocml`, `ocss`, `expression`, `validate_manifest`, `read_package`,
@@ -49,6 +52,39 @@ JavaScript of an expression parses back to the same tree, that an accepted
 manifest revalidates from its own value, and that `write_package` reproduces
 any accepted archive byte for byte.
 
+## SDK, CLI and reference widgets
+
+The `sdk-cli` workflow builds and tests the CLI, type-checks, builds and
+tests the SDK, requires a reproducible npm package and `.ocpkg`, and checks,
+packages and unit-tests the reference widgets of `widgets/`; see the
+[SDK README](../sdk/README.md) and the [CLI guide](cli.md):
+
+```sh
+cargo test -p overcrow-widget-cli --all-targets --locked
+(cd sdk && npm ci --ignore-scripts && npm run typecheck && npm run build && npm test)
+node scripts/prepare-widgets.mjs
+node --test --test-concurrency=2 widgets/*/tests/*.test.mjs
+```
+
+## Creator documentation
+
+The creator documentation (`docs/content/`) is checked by the `sdk-cli`
+workflow, after the CLI and the SDK are built: its generated tables are
+current, both languages have the same code blocks, each code block is an
+excerpt of a project that the CLI checks, packages and admits, and each
+`overcrow-widget` command it shows exists. The `policy` workflow checks the
+links of every Markdown file:
+
+```sh
+node scripts/build-docs-content.mjs --check
+node --test --test-concurrency=2 tests/docs-content.test.mjs tests/check-links.test.mjs
+node scripts/check-links.mjs
+```
+
+See the [documentation content README](content/README.md).
+
+## Admission
+
 Run the admission checks: the CLI's `admit` tests, the marketplace CI driver
 end to end on a throwaway clone (it builds the admission tool once into a
 private cache; set `TMPDIR` to a large disk), and the local driver mode, which
@@ -58,57 +94,44 @@ admits every v1 widget of `widgets/`:
 cargo test -p overcrow-widget-cli --test admit --locked
 tests/ci-admission-smoke.sh
 sh scripts/ci-verify.sh
-node --test tests/warframe-market/market.test.mjs
 ```
 
 `admit` requires MIT for PlayerVox widgets (`com.playervox.*` IDs) and a
 `LICENSE` inside every package.
 
-These prove strict manifest/listing validation, inventory, native executable
-rejection, optional browser-WASM admission, deterministic ZIP bytes, durable
-receipt-last ingestion with exclusive admission, bounded reads that reject
-special files, catalog search over 3840 structured items, and controller/query
-state across view and controller restart. Warframe tests also cover reversed
-response order, failed refresh with a valid cache, messages during startup,
-and IndexedDB transaction aborts after a successful request. They do not prove
-live compositor or game behavior.
-
-The catalog-stage smoke removes the temporary build outputs after admission,
-then proves that the CLI can produce a signed development catalog and the exact
-content-addressed `.ocpkg` from the independently verified private store. Rust
-tests verify the Ed25519 signature against the compiled development public key,
-reject another seed, and cover the envelope, listing, manifest, URL, size, and
-digest contract.
-
 The admission smoke uses real temporary Git revisions. It proves that an
 undeclared file present only in the proposed revision is rejected, that a
-proposal changing the widget schema crate is rejected by the trusted-path
-policy, that a valid
-proposal emits a receipt v2 bound to its revision, tree, identity, version, and
-the SHA-256 and byte length of its package and listing, and that tests from an
-exact trusted push cannot be silently skipped. Pull-request admission never
-executes proposed JavaScript or build scripts; it validates and packages those
-bytes with the tool compiled from the target-base commit. Push admission runs
-the now-trusted revision's
-Rust and Warframe Market tests once. The Ubuntu CI runner installs
-the distribution's Node package before these checks: the runner's preinstalled
-Node lives under a writable directory and is intentionally rejected by the
-system-Node resolver. The smoke is repeated only
-on trusted pushes because pull requests cannot modify the CI trust boundary.
-When a private accepted store is explicitly supplied, the smoke also proves
-that the exact package and listing remain independently verifiable after the
-driver's temporary artifact directory has been removed. Package or same-size
-listing tampering, unreceipted files, same-version replacement, and downgrade
-are covered by the Rust admission tests.
+proposal changing a trusted path (the widget schema crate, the CLI, the CI
+drivers) is rejected by the trusted-path policy, that a valid proposal emits
+a version 3 receipt bound to its revision, tree, identity, version, and the
+SHA-256 and byte length of its package, listing and admission report, and
+that tests from an exact trusted push cannot be silently skipped.
+Pull-request admission never executes proposed JavaScript or build scripts;
+it validates and packages those bytes with the tool compiled from the
+target-base commit. Push admission runs the now-trusted revision's checks
+once. The Ubuntu CI runner installs the distribution's Node package before
+these checks: the runner's preinstalled Node lives under a writable
+directory and is intentionally rejected by the system-Node resolver.
 
-Production retirement tests cover explicit removal of a superseded verified
-version, the resulting signed inventory, and rejection of unknown, duplicate,
-current, unreplaced, suspended, revoked, or conflicting removals without state
-mutation.
+## Repository policy
 
-Production tests cover offline preparation, detached signature verification,
-sequence reservations, interrupted finalization, and retained version statuses.
-The public CLI smoke rejects untrusted signatures against the compiled production
-key. Private signing remains external; the generic maintainer sandbox is still
-pending. Catalog publication and OverCrow runtime reuse admitted bytes and never
-rerun their tests.
+The `policy` workflow runs the secret scanner and its regression smoke:
+
+```sh
+sh scripts/check-policy.sh
+sh tests/check-policy-smoke.sh
+```
+
+## Legacy Web widget
+
+`widgets/warframe-market` is a widget of the retired Web runtime, kept until
+it is rewritten or withdrawn. Its unit tests still run, locally and on a
+trusted push:
+
+```sh
+node --test --test-concurrency=2 tests/warframe-market/market.test.mjs
+```
+
+The admission records it as `legacy` and never admits it to the v1 catalog.
+Catalog preparation, signing and publication are maintainer operations
+outside this repository; their tests are not run here.

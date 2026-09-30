@@ -4,7 +4,8 @@ name: sdk-cli
 # npm pack) and the widget CLI `overcrow-widget` (build, tests, init → check
 # → package → read_package end to end, deterministic .ocpkg), on Linux and
 # Windows. The SDK's end-to-end test packages its Clock with the CLI, and
-# the reference widgets of widgets/ are checked, packaged and unit-tested.
+# the reference widgets of widgets/ are checked, packaged and unit-tested,
+# and so are the examples of the creator documentation.
 on:
   push:
     branches: [main]
@@ -91,6 +92,14 @@ jobs:
             "$cli" inspect "$work/$name.ocpkg"
           done
           node --test --test-concurrency=2 widgets/*/tests/*.test.mjs
+      - name: Check the creator documentation
+        # Generated tables current, both languages aligned, every code block
+        # an excerpt of a project the CLI checks, packages and admits
+        # (docs/content/README.md). Runs after prepare-widgets above.
+        run: |
+          set -eu
+          node scripts/build-docs-content.mjs --check
+          node --test --test-concurrency=2 tests/docs-content.test.mjs
       - name: Require a deterministic .ocpkg and a type-checked template
         run: |
           set -eu

@@ -1,10 +1,11 @@
 # OverCrow releases
 
 Public distribution repository for PlayerVox OverCrow on Windows and Linux.
-Application source code and build history are maintained separately in a private
-repository. This repository also owns the public SDK, creator tools, templates, documentation
-content, reference widgets, and signed marketplace distribution. Installers and
-packages for the desktop application belong in GitHub Release assets.
+Application source code and build history are maintained separately in a
+private repository. This repository also owns the public widget contract,
+SDK, CLI, templates, documentation content, reference widgets, and signed
+marketplace distribution. Installers and packages for the desktop
+application belong in GitHub Release assets.
 
 ## Downloads
 
@@ -45,39 +46,36 @@ archives contain this distribution repository, not the application source.
 
 ## Create widgets
 
-Start with the [SDK documentation](https://overcrow.playervox.com/docs/en/),
-[Widget Studio](https://overcrow.playervox.com/studio/en/), or
-[portable creator kit](https://overcrow.playervox.com/docs/downloads/creator-kit.zip).
-The Studio runs without an account; export your work locally.
+Widgets are small packages that OverCrow draws over the game: a view in
+markup (`view.ocml`), a bounded style sheet (`style.ocss`) and logic in
+TypeScript against `@overcrow/sdk`, run in a sandboxed VM. Start with the
+[creator documentation](docs/content/en/index.md)
+([français](docs/content/fr/index.md)): the [creator guide](docs/content/en/guide.md)
+goes from `overcrow-widget init` to a submission, and the
+[reference widgets](docs/content/en/widgets.md) are OverCrow's own built-ins.
 
-SDK 1.3.0 uses Web API v1. Host services expose telemetry, FPS and system media.
-Widgets keep their own data in isolated storage and cannot access built-in notes,
-stopwatch state, journals or connected accounts.
+Widget API v1 replaces the Web runtime: the JavaScript SDK 1.3, the Web
+creator kit, its templates, references and downloads were removed. The
+website's documentation is realigned on this content separately.
 
-| Source | Purpose |
+## Repository map
+
+| Path | Content |
 | --- | --- |
-| `crates/overcrow-widget-schema/` | Widget API v1 schema and validators, shared with OverCrow |
-| `crates/overcrow-widget-format/` | `view.ocml` compiler and `style.ocss` parser, shared with OverCrow |
-| `crates/overcrow-widget-devchannel/` | [Development channel](docs/dev-channel.md) between `overcrow-widget dev` and a running overlay, shared with OverCrow |
-| `crates/overcrow-widget-scenario/` | [Test scenarios](docs/widget-testing.md) of `overcrow-widget test` and the headless runtime's interface, shared with OverCrow |
+| `crates/` | The public widget contract, shared with OverCrow at a pinned revision: `overcrow-widget-schema` (schema and validators), `overcrow-widget-format` (`view.ocml` compiler, `style.ocss` parser), `overcrow-widget-devchannel` ([development channel](docs/dev-channel.md)), `overcrow-widget-scenario` ([test scenarios](docs/widget-testing.md)) |
+| `sdk/` | `@overcrow/sdk` 1.0, the TypeScript API of widget logic, with types generated from the schema ([guide](docs/sdk-guide.md), [reference](docs/sdk-reference.md)) |
+| `cli/` | `overcrow-widget`: `init`, `check`, `package`, `inspect`, `dev`, `doctor`, `test`, `admit` ([guide](docs/cli.md)) |
+| `templates/` | The templates of `overcrow-widget init`: blank, counter, list, chart |
+| `docs/content/` | The creator documentation, in English and French: guide, reference, security, publishing |
+| `docs/` | The technical manuals and specifications: [CLI](docs/cli.md), SDK, [schema reference](docs/widget-schema-v1.md) (generated), [source formats](docs/widget-source-formats.md), [package and catalog format](docs/widget-package-v1.md), [review policy](docs/review-policy.md), [testing](docs/testing.md) |
+| `widgets/` | The built-in widgets on the public SDK, each with its tests and reference page ([list](docs/content/en/widgets.md)); `warframe-market`, a legacy Web widget until it is rewritten or withdrawn |
+| `scripts/`, `tests/` | Public CI drivers and their smoke tests |
 | `fuzz/` | Fuzz targets of every parser and package verifier |
-| `sdk/` | `@overcrow/sdk` 1.0, the TypeScript API of widget API v1 logic ([guide](docs/sdk-guide.md), [reference](docs/sdk-reference.md), [testing](docs/widget-testing.md)) |
-| `cli/` | `overcrow-widget`, the widget API v1 CLI: `init`, `check`, `package`, `inspect`, `dev`, `doctor`, `test`, `admit` ([guide](docs/cli.md)) |
-| `templates/` | Widget API v1 templates of `overcrow-widget init`: blank, counter, list, chart |
-| `content/sdk/` | Web runtime JavaScript SDK 1.3 and TypeScript definitions |
-| `content/templates/` | Blank, Counter, and Checklist examples |
-| `content/docs/` | English and French SDK articles |
-| `tools/creator-kit/` | Portable CLI, packaging, and preview |
-| `widgets/` | Public reference widgets: the built-ins on widget API v1 (`clock`, `session`, `fps`, each with its tests and reference page) and the Web-format Warframe Market |
-| `published/marketplace/v1/` | Existing signed catalog and immutable packages of the Web runtime |
 | `keys/` | Public catalog keys |
+| `published/` | Signed catalogs and immutable packages; `marketplace/v1/` is the existing catalog of the Web runtime |
+| `fixtures/` | The public development key pair |
 
-Use Node.js 22.18+ and Python 3. Downloaded creator projects need only Node.js.
-
-```sh
-python3 scripts/package-docs-examples.py published/docs/downloads
-node --test tests/creator-kit/*.test.mjs tests/warframe-market/*.test.mjs
-```
+## Build and test
 
 The widget API v1 contract lives in `crates/overcrow-widget-schema/`: elements,
 style, tokens, icons, permissions, services, IPC, bounds, and the manifest,
@@ -86,8 +84,8 @@ pinned revision. The [schema reference](docs/widget-schema-v1.md) is generated
 from it, and the [package and catalog format](docs/widget-package-v1.md)
 specifies the `.ocpkg` v1 container. `crates/overcrow-widget-format/` parses
 the [view and style sources](docs/widget-source-formats.md) against the same
-tables. After a change, regenerate the reference
-and the conformance fixtures:
+tables. After a change, regenerate the reference, the conformance fixtures
+and the SDK types:
 
 ```sh
 cargo run -p overcrow-widget-schema --example reference > docs/widget-schema-v1.md
@@ -110,17 +108,19 @@ cargo build -p overcrow-widget-cli --locked
 cargo deny --locked check advisories bans sources licenses
 ```
 
-The website consumes a reviewed, revision-pinned snapshot from this repository.
-Edit creator sources here, then update that snapshot in the private web repository.
-Do not publish SDK or creator-kit releases as GitHub Releases: the desktop updater
-uses this repository's stable-release API. Creator downloads stay under
-`https://overcrow.playervox.com/docs/downloads/` and can be versioned with Git tags
-that have no associated GitHub Release.
+The creator documentation's tables are generated with
+`node scripts/build-docs-content.mjs`; [testing](docs/testing.md) lists every
+check, including the documentation examples and the link check. Use Node.js
+22.18 or later.
+
+The website consumes a reviewed, revision-pinned snapshot of this repository.
+Do not publish SDK or CLI releases as GitHub Releases: the desktop updater
+uses this repository's stable-release API.
 
 Widget submissions target `candidate`; tooling and documentation target `main`.
 Neither a pull request nor a merge signs or publishes a widget. See
-[contributing](CONTRIBUTING.md), [security](SECURITY.md),
-[publishing](docs/publishing.md) and the [review policy](docs/review-policy.md).
+[contributing](CONTRIBUTING.md), [security](SECURITY.md) and
+[publishing and review](docs/content/en/publishing.md).
 
 The public sources are MIT-licensed, except `@overcrow/sdk` (MIT-0, no
 attribution required), with the scopes in [LICENSING.md](LICENSING.md).

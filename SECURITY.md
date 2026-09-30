@@ -63,11 +63,13 @@ SDK vulnerabilities through this repository's private vulnerability reporting
 entry point, identifying the affected component. Never include widget drafts,
 account data, signing keys, or credentials in a report.
 
-The SDK exposes only four host capabilities: `telemetry.read`, `fps.read`,
-`media.read` and `media.control`. Widget storage is isolated from other widgets
-and built-in application data. Notes, stopwatch state, journals and connected
-accounts have no public service bridge. Media grants cannot coexist with network
-or raw clipboard writes and require temporary browser storage.
+Widgets run in a sandboxed VM process per widget, with no direct access to
+files, the network, other widgets or the game. Their permissions and
+capabilities are declared in the manifest, granted only with the user's
+consent and checked by OverCrow at each call; a sensitive capability
+excludes network and clipboard writes and keeps storage for the process
+lifetime only. The creator documentation describes the model:
+[security](docs/content/en/security.md).
 
 If a listed package is suspected of compromise, maintainers may publish a
 signed suspension or revocation in a newer monotonic catalog. Clients must

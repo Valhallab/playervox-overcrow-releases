@@ -32,7 +32,7 @@ cargo build -p overcrow-widget-cli --profile dist --locked
 
 The binary needs nothing else to check and package a widget. Type checking
 uses the project's own TypeScript through Node.js 22 or later, when they are
-installed (see [`check`](#check)).
+installed (see [`check`](#check-dir)).
 
 **npm distribution (planned).** The binary will also ship through npm as a
 thin wrapper package, so `npx overcrow-widget` works in a widget project:

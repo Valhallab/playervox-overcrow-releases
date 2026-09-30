@@ -12,8 +12,7 @@ for changed_path in "$@"; do
     case "$changed_path" in
         '' | -* | /* | */ | . | .. | ./* | ../* | */./* | */../* | */. | */.. | \
             *//* | *\\* | *[!A-Za-z0-9._+@/-]*) reject ;;
-        .github | .github/* | scripts | scripts/* | tests | tests/* | \
-            tools | tools/*) reject ;;
+        .github | .github/* | scripts | scripts/* | tests | tests/*) reject ;;
         # The admission tool is built from the reviewed base: the CLI and
         # the SDK it embeds in every bundle.
         cli | cli/* | sdk | sdk/*) reject ;;

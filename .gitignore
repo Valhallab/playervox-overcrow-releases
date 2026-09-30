@@ -23,7 +23,6 @@ node_modules/
 .superpowers/
 !fixtures/keys/development-ed25519.key
 !published/marketplace/v1/**/*.ocpkg
-!published/docs/downloads/*.zip
 !crates/overcrow-widget-schema/fixtures/**/*.ocpkg
 
 # SDK build output and packed tarballs.

@@ -1,16 +1,5 @@
-# SDK sources retain exact bytes across Windows and Linux checkouts.
-/content/sdk/*.js text eol=lf
-/content/sdk/*.ts text eol=lf
-/content/sdk/LICENSE text eol=lf
-/content/templates/** text=auto eol=lf
-/content/references/** text=auto eol=lf
-/tools/creator-kit/** text=auto eol=lf
 # Manifest ledgers describe exact package bytes on every operating system.
 /widgets/** -text
-/published/docs/downloads/*.zip binary
-# Generated Vite assets retain exact bytes on every host.
-/published/assets/*.js binary
-/published/assets/*.css binary
 # Conformance fixtures and the generated references are compared byte for byte.
 /crates/overcrow-widget-schema/fixtures/** -text
 /docs/widget-schema-v1.md text eol=lf
@@ -21,6 +10,8 @@
 /sdk/LICENSE text eol=lf
 /sdk/test/e2e/** text eol=lf
 /templates/** text eol=lf
+# The creator documentation quotes its examples byte for byte.
+/docs/content/** text eol=lf
 /cli/tests/golden/** text eol=lf
 # Reference images of widget tests (overcrow-widget test) are compared
 # pixel by pixel: never converted as text.

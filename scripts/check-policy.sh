@@ -31,7 +31,7 @@ fi
 for required in \
         .gitignore Cargo.toml rust-toolchain.toml README.md LICENSE \
         TRADEMARKS.md CONTRIBUTING.md SECURITY.md \
-        docs/review-policy.md docs/publishing.md docs/creator-guide.md \
+        docs/review-policy.md docs/publishing.md docs/content/en/guide.md \
         docs/testing.md scripts/check-policy.sh; do
     if ! test -f "$repo_root/$required" || test -L "$repo_root/$required"; then
         printf '%s\n' "error: missing or symlinked policy file: $required" >&2

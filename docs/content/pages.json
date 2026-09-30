@@ -1,0 +1,43 @@
+{
+  "pagesVersion": 1,
+  "locales": ["en", "fr"],
+  "defaultLocale": "en",
+  "pages": [
+    {
+      "slug": "",
+      "file": "index.md",
+      "group": "start",
+      "label": { "en": "Overview", "fr": "Présentation" }
+    },
+    {
+      "slug": "guide",
+      "file": "guide.md",
+      "group": "start",
+      "label": { "en": "Creator guide", "fr": "Guide du créateur" }
+    },
+    {
+      "slug": "widgets",
+      "file": "widgets.md",
+      "group": "start",
+      "label": { "en": "Reference widgets", "fr": "Widgets de référence" }
+    },
+    {
+      "slug": "reference",
+      "file": "reference.md",
+      "group": "reference",
+      "label": { "en": "Reference", "fr": "Référence" }
+    },
+    {
+      "slug": "security",
+      "file": "security.md",
+      "group": "reference",
+      "label": { "en": "Security", "fr": "Sécurité" }
+    },
+    {
+      "slug": "publishing",
+      "file": "publishing.md",
+      "group": "publish",
+      "label": { "en": "Publishing and review", "fr": "Publication et revue" }
+    }
+  ]
+}

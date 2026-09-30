@@ -167,7 +167,7 @@ expect_refusal "$fork" "$(candidate archive hide_file)" \
     'candidate snapshot admission failed' 'Git archive bytes that differ from the tree'
 
 touch_docs() {
-    printf '\n' >>"$repository/docs/creator-guide.md"
+    printf '\n' >>"$repository/docs/content/en/guide.md"
     widget new-third-party com.example.new-counter
 }
 valid_sha=$(candidate valid touch_docs)
