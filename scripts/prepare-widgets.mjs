@@ -1,6 +1,7 @@
 // Links this checkout's @overcrow/sdk (built with `npm run build` in sdk/)
-// and its pinned TypeScript into each reference widget of widgets/ that is a
-// widget API v1 project (it has a view.ocml), as `npm install` would once
+// and its pinned TypeScript into each widget API v1 project (it has a
+// view.ocml) of widgets/ and of the documentation examples
+// (docs/content/examples/), as `npm install` would once
 // @overcrow/sdk is published. `overcrow-widget check` and the widgets' unit
 // tests then run against the SDK of this revision. Links are directory
 // junctions on Windows.
@@ -36,15 +37,16 @@ const isLink = (path) => {
   }
 };
 
-const widgets = join(root, "widgets");
 let count = 0;
-for (const name of readdirSync(widgets).sort()) {
-  const project = join(widgets, name);
-  if (!existsSync(join(project, "view.ocml"))) {
-    continue;
+for (const parent of [join(root, "widgets"), join(root, "docs", "content", "examples")]) {
+  for (const name of readdirSync(parent).sort()) {
+    const project = join(parent, name);
+    if (!existsSync(join(project, "view.ocml"))) {
+      continue;
+    }
+    link(sdk, join(project, "node_modules", "@overcrow", "sdk"));
+    link(typescript, join(project, "node_modules", "typescript"));
+    count += 1;
   }
-  link(sdk, join(project, "node_modules", "@overcrow", "sdk"));
-  link(typescript, join(project, "node_modules", "typescript"));
-  count += 1;
 }
 console.log(`prepare-widgets: ${count} widget projects linked to sdk/`);

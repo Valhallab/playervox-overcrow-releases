@@ -10,6 +10,8 @@
 /sdk/LICENSE text eol=lf
 /sdk/test/e2e/** text eol=lf
 /templates/** text eol=lf
+# The creator documentation quotes its examples byte for byte.
+/docs/content/** text eol=lf
 /cli/tests/golden/** text eol=lf
 # Reference images of widget tests (overcrow-widget test) are compared
 # pixel by pixel: never converted as text.

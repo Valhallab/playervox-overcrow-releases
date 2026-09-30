@@ -1,0 +1,10 @@
+{
+  "author": "Example Studio",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/example/weather-widget",
+  "defaultLocale": "en",
+  "localizations": [
+    { "locale": "en", "name": "Weather", "description": "The temperature of a city, refreshed every 30 minutes." },
+    { "locale": "fr", "name": "Météo", "description": "La température d’une ville, actualisée toutes les 30 minutes." }
+  ]
+}

@@ -1,0 +1,12 @@
+<!-- The forecast of the city chosen in the widget menu, and a button that
+     fetches it again. -->
+<box class="weather">
+  <text class="city">{t(state.city)}</text>
+  <text class="temperature">{temperatureText(state.temperature, state.units)}</text>
+  <box class="footer">
+    <text class="status">{t(state.status)}</text>
+    <button class="refresh" label={t("refresh")} on:activate={refresh}>
+      <icon name="refresh-cw"/>
+    </button>
+  </box>
+</box>

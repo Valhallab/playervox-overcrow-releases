@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.example.weather",
+  "version": "1.0.0",
+  "name": { "en": "Weather", "fr": "Météo" },
+  "sizing": {
+    "fit": "none",
+    "preferred": { "width": 220, "height": 120 },
+    "min": { "width": 160, "height": 96 },
+    "max": { "width": 480, "height": 320 }
+  },
+  "permissions": {
+    "network": [
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/forecast/{city}",
+        "pathParams": { "city": { "type": "slug", "maxLength": 32 } },
+        "queryParams": {
+          "units": { "type": "enum", "values": ["metric", "imperial"], "required": true }
+        }
+      }
+    ],
+    "storage": true
+  },
+  "wrapper": {
+    "menu": [
+      {
+        "type": "choice",
+        "id": "city",
+        "label": { "en": "City", "fr": "Ville" },
+        "choices": [
+          { "value": "paris", "label": { "en": "Paris", "fr": "Paris" } },
+          { "value": "tokyo", "label": { "en": "Tokyo", "fr": "Tokyo" } }
+        ],
+        "default": "paris"
+      },
+      {
+        "type": "choice",
+        "id": "units",
+        "label": { "en": "Units", "fr": "Unités" },
+        "choices": [
+          { "value": "metric", "label": { "en": "°C", "fr": "°C" } },
+          { "value": "imperial", "label": { "en": "°F", "fr": "°F" } }
+        ],
+        "default": "metric"
+      }
+    ]
+  }
+}
