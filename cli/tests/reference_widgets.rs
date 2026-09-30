@@ -60,7 +60,7 @@ fn the_pilots_are_here() {
         .iter()
         .map(|path| path.file_name().unwrap().to_string_lossy().into_owned())
         .collect();
-    for pilot in ["clock", "fps", "session"] {
+    for pilot in ["clock", "fps", "session", "stopwatch"] {
         assert!(names.iter().any(|name| name == pilot), "widgets/{pilot}");
     }
 }
@@ -247,5 +247,12 @@ fn service_fixtures_follow_the_result_shapes() {
             exercised.insert(capability.clone());
         }
     }
-    assert!(exercised.contains("session.read") && exercised.contains("fps.read"));
+    for capability in [
+        "session.read",
+        "fps.read",
+        "stopwatch.read",
+        "stopwatch.control",
+    ] {
+        assert!(exercised.contains(capability), "{capability}");
+    }
 }
