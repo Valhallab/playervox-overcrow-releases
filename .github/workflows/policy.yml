@@ -1,7 +1,8 @@
 name: policy
 
 # ADR 0004, section 8: the repository policy checks, split out of the retired
-# creator-kit workflow. The secret scanner and its regression smoke.
+# creator-kit workflow: the secret scanner and its regression smoke, and
+# the links of every Markdown file.
 on:
   push:
     branches: [main, candidate]
@@ -25,3 +26,10 @@ jobs:
           persist-credentials: false
       - name: Verify public repository policy and scanner regressions
         run: sh tests/check-policy-smoke.sh
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Test the link check
+        run: node --test tests/check-links.test.mjs
+      - name: Check the links of every Markdown file
+        run: node scripts/check-links.mjs
