@@ -1,0 +1,121 @@
+{
+  "scenarioVersion": 1,
+  "name": "errors",
+  "description": "A command the host cannot apply (unavailable, or stale_context after a game change) changes nothing on screen; the next one succeeds.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "calls": {
+      "stopwatch.toggle": [
+        {
+          "error": "unavailable"
+        },
+        {
+          "value": {
+            "running": true,
+            "elapsedMs": 5000,
+            "at": 0,
+            "shortcuts": {
+              "toggle": "Super+Alt+P",
+              "reset": "Super+Alt+R",
+              "bound": true
+            }
+          }
+        }
+      ],
+      "stopwatch.reset": [
+        {
+          "error": "stale_context"
+        }
+      ]
+    },
+    "subscriptions": {
+      "stopwatch.subscribe": {
+        "running": false,
+        "elapsedMs": 5000,
+        "at": 0,
+        "shortcuts": {
+          "toggle": "Super+Alt+P",
+          "reset": "Super+Alt+R",
+          "bound": true
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "pointer": {
+        "click": {
+          "label": "Start"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00:05.00"
+        ],
+        "calls": [
+          {
+            "service": "stopwatch.subscribe",
+            "outcome": "ok"
+          },
+          {
+            "service": "stopwatch.toggle",
+            "outcome": "unavailable"
+          }
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Reset"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00:05.00"
+        ],
+        "calls": [
+          {
+            "service": "stopwatch.reset",
+            "outcome": "stale_context"
+          }
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Start"
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 250
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00:05.25"
+        ],
+        "calls": [
+          {
+            "service": "stopwatch.toggle",
+            "outcome": "ok"
+          }
+        ],
+        "image": "after-errors",
+        "fault": "none"
+      }
+    }
+  ]
+}

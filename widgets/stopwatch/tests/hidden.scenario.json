@@ -1,0 +1,57 @@
+{
+  "scenarioVersion": 1,
+  "name": "hidden",
+  "description": "Hidden, nothing is repainted; shown again, the running time is current at once.",
+  "fixtures": {
+    "subscriptions": {
+      "stopwatch.subscribe": {
+        "running": true,
+        "elapsedMs": 60000,
+        "at": 0,
+        "shortcuts": {
+          "toggle": "Super+Alt+P",
+          "reset": "Super+Alt+R",
+          "bound": true
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "00:01:00.00"
+        ]
+      }
+    },
+    {
+      "host": {
+        "visible": false
+      }
+    },
+    {
+      "advance": {
+        "ms": 600125
+      }
+    },
+    {
+      "host": {
+        "visible": true
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:11:00.12"
+        ],
+        "calls": [
+          {
+            "service": "stopwatch.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

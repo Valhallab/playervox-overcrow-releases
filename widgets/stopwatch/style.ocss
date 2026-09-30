@@ -1,0 +1,48 @@
+/* The time, the buttons beside it in Interactive mode, the shortcut
+   reminder below; the wrapper draws the panel, the content keeps the
+   built-in's 10 × 8 px margin and 3 px between the lines. */
+.stopwatch {
+  flex-direction: column;
+  align-items: start;
+  gap: 3px;
+  padding: 8px 10px;
+}
+
+.row {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+/* The UI font with tabular figures: the hundredths never shift. */
+.value {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-value);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  white-space: nowrap;
+  margin-right: 2px;
+}
+
+/* The built-in's compact icon buttons: a raised surface, lighter under
+   the pointer or with the keyboard focus. */
+.control {
+  width: var(--icon-button-size);
+  height: var(--icon-button-size);
+  padding: 5px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+}
+
+.control:hover,
+.control:focus {
+  background: var(--color-surface-hover);
+}
+
+.reminder {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}

@@ -1,0 +1,8 @@
+{
+  "label": "Chronomètre",
+  "start": "Démarrer",
+  "pause": "Pause",
+  "reset": "Réinitialiser",
+  "with-chord": "{label} ({chord})",
+  "reminder": "{toggle}  Démarrer / pause  ·  {reset}  Réinitialiser"
+}

@@ -1,0 +1,18 @@
+{
+  "author": "PlayerVox",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/stopwatch",
+  "defaultLocale": "en",
+  "localizations": [
+    {
+      "locale": "en",
+      "name": "Manual stopwatch",
+      "description": "A stopwatch to the hundredth of a second, started, paused and reset with its buttons or the host’s shortcuts."
+    },
+    {
+      "locale": "fr",
+      "name": "Chronomètre",
+      "description": "Un chronomètre au centième de seconde, démarré, mis en pause et réinitialisé par ses boutons ou les raccourcis de l’hôte."
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.playervox.overcrow.stopwatch",
+  "version": "1.0.0",
+  "name": {
+    "en": "Manual stopwatch",
+    "fr": "Chronomètre"
+  },
+  "sizing": {
+    "fit": "both",
+    "preferred": { "width": 330, "height": 72 },
+    "min": { "width": 60, "height": 24 },
+    "max": { "width": 640, "height": 240 }
+  },
+  "permissions": {
+    "capabilities": ["stopwatch.read", "stopwatch.control"]
+  }
+}

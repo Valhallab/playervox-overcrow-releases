@@ -1,0 +1,22 @@
+{
+  "scenarioVersion": 1,
+  "name": "refused",
+  "description": "Without its grants the widget asks nothing and shows --:--:--.--, without buttons.",
+  "host": {
+    "grants": [],
+    "mode": "interactive"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "--:--:--.--"
+        ],
+        "calls": [],
+        "image": "refused",
+        "fault": "none"
+      }
+    }
+  ]
+}

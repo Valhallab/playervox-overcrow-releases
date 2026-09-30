@@ -1,0 +1,29 @@
+<!-- Manual stopwatch: the host's single stopwatch, advanced by the host from
+     the service's anchor to the hundredth (parity sheet: playervox-overcrow
+     docs/builtin-parity/manual-stopwatch.md). -->
+<box class="stopwatch" label={t("label")}>
+  <box class="row">
+    <if test={state.stopwatch}>
+      <elapsed class="value" base={state.stopwatch.elapsedMs} at={state.stopwatch.at} running={state.stopwatch.running} format="hh:mm:ss.cc"/>
+    </if>
+    <else>
+      <text class="value">--:--:--.--</text>
+    </else>
+    <if test={showControls(state.interactive, state.stopwatch)}>
+      <button class="control" label={toggleLabel(state.stopwatch.running)} tooltip={withChord(toggleLabel(state.stopwatch.running), state.stopwatch.shortcuts.toggle)} on:activate={toggle}>
+        <if test={state.stopwatch.running}>
+          <icon name="pause"/>
+        </if>
+        <else>
+          <icon name="play"/>
+        </else>
+      </button>
+      <button class="control" label={t("reset")} tooltip={withChord(t("reset"), state.stopwatch.shortcuts.reset)} on:activate={reset}>
+        <icon name="rotate-ccw"/>
+      </button>
+    </if>
+  </box>
+  <if test={state.stopwatch}>
+    <text class="reminder">{reminder(state.stopwatch.shortcuts)}</text>
+  </if>
+</box>
