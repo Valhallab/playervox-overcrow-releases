@@ -13,7 +13,7 @@
     "check:templates": "prettier --check \"content/templates/**/*.{html,css,js,mjs,json}\""
   },
   "devDependencies": {
-    "lucide-static": "1.47.0",
+    "lucide-static": "1.48.0",
     "prettier": "3.9.8"
   }
 }
