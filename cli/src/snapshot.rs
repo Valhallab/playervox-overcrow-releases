@@ -1,3 +1,8 @@
+//! `snapshot-plan`: the validated `git ls-tree` of a revision that the
+//! marketplace CI materializes (`scripts/materialize-git-snapshot.sh`): only
+//! bounded regular files with portable paths. Maintenance command, not for
+//! creators; Git runs with a fixed, isolated environment.
+
 use std::{
     collections::BTreeSet,
     fmt, fs,

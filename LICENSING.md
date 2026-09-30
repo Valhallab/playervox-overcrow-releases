@@ -15,7 +15,6 @@ PlayerVox widgets distributed separately are open source under MIT. The current
 PlayerVox packages carry their own notices:
 
 - [Warframe Market](widgets/warframe-market/LICENSE).
-- [Hello Web example](fixtures/hello-web/LICENSE).
 
 `@overcrow/sdk`, the SDK of widget API v1, is MIT-0: the copy of it that the
 widget CLI links into every `logic.js` requires no notice. The CLI still keeps

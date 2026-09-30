@@ -44,8 +44,8 @@ pub fn legacy_development_key() -> Ed25519KeyPair {
     Ed25519KeyPair::from_seed_unchecked(&seed).expect("development seed is 32 bytes")
 }
 
-/// A Web API v1 catalog in its original envelope, signed the way
-/// `marketplace-tool stage-development-catalog` signs (see
+/// A Web API v1 catalog in its original envelope, signed the way the
+/// retired `marketplace-tool stage-development-catalog` signed (see
 /// `fixtures/legacy-web/README.md`).
 pub fn legacy_web_catalog() -> Vec<u8> {
     let payload =

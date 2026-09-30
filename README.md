@@ -62,22 +62,21 @@ stopwatch state, journals or connected accounts.
 | `crates/overcrow-widget-scenario/` | [Test scenarios](docs/widget-testing.md) of `overcrow-widget test` and the headless runtime's interface, shared with OverCrow |
 | `fuzz/` | Fuzz targets of every parser and package verifier |
 | `sdk/` | `@overcrow/sdk` 1.0, the TypeScript API of widget API v1 logic ([guide](docs/sdk-guide.md), [reference](docs/sdk-reference.md), [testing](docs/widget-testing.md)) |
-| `cli/` | `overcrow-widget`, the widget API v1 CLI: `init`, `check`, `package`, `inspect`, `dev`, `doctor`, `test` ([guide](docs/cli.md)) |
+| `cli/` | `overcrow-widget`, the widget API v1 CLI: `init`, `check`, `package`, `inspect`, `dev`, `doctor`, `test`, `admit` ([guide](docs/cli.md)) |
 | `templates/` | Widget API v1 templates of `overcrow-widget init`: blank, counter, list, chart |
 | `content/sdk/` | Web runtime JavaScript SDK 1.3 and TypeScript definitions |
 | `content/templates/` | Blank, Counter, and Checklist examples |
 | `content/docs/` | English and French SDK articles |
 | `tools/creator-kit/` | Portable CLI, packaging, and preview |
-| `tools/marketplace-tool/` | Rust package validation and static admission |
 | `widgets/` | Public reference widgets: the built-ins on widget API v1 (`clock`, `session`, `fps`, each with its tests and reference page) and the Web-format Warframe Market |
-| `published/marketplace/v1/` | Existing signed catalog and immutable packages |
+| `published/marketplace/v1/` | Existing signed catalog and immutable packages of the Web runtime |
+| `keys/` | Public catalog keys |
 
 Use Node.js 22.18+ and Python 3. Downloaded creator projects need only Node.js.
 
 ```sh
 python3 scripts/package-docs-examples.py published/docs/downloads
 node --test tests/creator-kit/*.test.mjs tests/warframe-market/*.test.mjs
-cargo test -p marketplace-tool --locked
 ```
 
 The widget API v1 contract lives in `crates/overcrow-widget-schema/`: elements,
@@ -120,8 +119,8 @@ that have no associated GitHub Release.
 
 Widget submissions target `candidate`; tooling and documentation target `main`.
 Neither a pull request nor a merge signs or publishes a widget. See
-[contributing](CONTRIBUTING.md), [security](SECURITY.md), and
-[maintenance](docs/github-maintenance.md).
+[contributing](CONTRIBUTING.md), [security](SECURITY.md),
+[publishing](docs/publishing.md) and the [review policy](docs/review-policy.md).
 
 The public sources are MIT-licensed, except `@overcrow/sdk` (MIT-0, no
 attribution required), with the scopes in [LICENSING.md](LICENSING.md).

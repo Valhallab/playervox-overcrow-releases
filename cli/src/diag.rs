@@ -75,13 +75,15 @@ impl Diagnostic {
 
     /// Human form. `source` is the text of `file`, used to show the line.
     pub fn render(&self, source: Option<&str>) -> String {
+        // Messages may quote the project's sources: never raw to a terminal.
         let mut out = format!(
             "{}[{}]: {}\n",
             self.severity.as_str(),
             self.code,
-            self.message
+            crate::sanitize::line(&self.message)
         );
         if let Some(file) = &self.file {
+            let file = crate::sanitize::line(file);
             if self.position.line == 0 {
                 let _ = writeln!(out, "  --> {file}");
             } else {
@@ -101,7 +103,7 @@ impl Diagnostic {
             }
         }
         if let Some(help) = &self.help {
-            let _ = writeln!(out, "   = help: {help}");
+            let _ = writeln!(out, "   = help: {}", crate::sanitize::line(help));
         }
         out
     }
@@ -113,7 +115,7 @@ impl Diagnostic {
         } else {
             (Some(self.position.line), Some(self.position.column))
         };
-        json!({
+        let line = json!({
             "severity": self.severity.as_str(),
             "code": self.code,
             "file": self.file,
@@ -122,7 +124,8 @@ impl Diagnostic {
             "message": self.message,
             "help": self.help,
         })
-        .to_string()
+        .to_string();
+        crate::sanitize::json(&line)
     }
 }
 
@@ -134,7 +137,13 @@ fn source_line(text: &str, number: u32) -> Option<String> {
     Some(
         line.chars()
             .take(160)
-            .map(|c| if c == '\t' || c.is_control() { ' ' } else { c })
+            .map(|c| {
+                if c == '\t' || c.is_control() || crate::sanitize::is_unsafe(c) {
+                    ' '
+                } else {
+                    c
+                }
+            })
             .collect(),
     )
 }

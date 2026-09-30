@@ -10,7 +10,7 @@ pub const MAX_LINE_CHARS: usize = 512;
 /// (ESC included) but tab, DEL, C1 controls, the line and paragraph
 /// separators, and the bidirectional embeddings, overrides, isolates and
 /// marks.
-fn is_unsafe(c: char) -> bool {
+pub fn is_unsafe(c: char) -> bool {
     matches!(c,
         '\u{0}'..='\u{8}' | '\u{a}'..='\u{1f}' | '\u{7f}'..='\u{9f}'
         | '\u{200e}' | '\u{200f}' | '\u{2028}' | '\u{2029}'

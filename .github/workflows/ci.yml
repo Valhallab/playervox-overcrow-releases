@@ -56,7 +56,7 @@ jobs:
     needs: pending
     if: ${{ always() && (github.event_name == 'push' || needs.pending.result == 'success') }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
@@ -99,7 +99,7 @@ jobs:
           # This coarse short-circuit saves setup time. The materialized-base
           # admission below remains the authoritative policy gate.
           if ! git -c diff.external= diff --quiet --no-ext-diff \
-              "$BASE_SHA" "$HEAD_SHA" -- .github scripts tests tools \
+              "$BASE_SHA" "$HEAD_SHA" -- .github scripts tests tools cli sdk \
               crates Cargo.toml Cargo.lock rust-toolchain.toml rust-toolchain \
               .cargo rustfmt.toml .rustfmt.toml clippy.toml .clippy.toml \
               deny.toml .gitattributes .gitignore docs/widget-schema-v1.md \
@@ -231,8 +231,7 @@ jobs:
           (
             CDPATH='' cd -- "$trusted_root"
             /usr/bin/timeout --signal=TERM --kill-after=5 300 \
-              cargo fetch --locked \
-                --manifest-path tools/marketplace-tool/Cargo.toml
+              cargo fetch --locked --manifest-path cli/Cargo.toml
           )
           if test ! -f "$trusted_root/scripts/ci-verify.sh" \
               || test -L "$trusted_root/scripts/ci-verify.sh"; then

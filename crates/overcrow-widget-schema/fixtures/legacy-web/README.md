@@ -1,13 +1,13 @@
 # Legacy Web API v1 catalog
 
 `payload.json` is the payload of a real Web API v1 development catalog, staged
-by `marketplace-tool stage-development-catalog` for the Hello OverCrow example
-(`fixtures/hello-web/` at the repository root). Its bytes are unchanged except
+by the retired `marketplace-tool stage-development-catalog` for the Hello
+OverCrow Web example (both removed in P4.2). Its bytes are unchanged except
 `listing.sourceUrl`, replaced with this repository's URL.
 
 The fixture generator re-signs it with the repository's intentionally public
 development key (`fixtures/keys/development-ed25519.key`, key ID
-`overcrow-development-2026`) exactly as that command signs: Ed25519 over the
+`overcrow-development-2026`) exactly as that command signed: Ed25519 over the
 payload bytes, unpadded base64url, in the Web envelope. The result is
 `catalog/invalid/format_version--legacy-web-catalog.json`.
 

@@ -35,35 +35,24 @@ Git tree's mode, size, object ID, and portable path, so archive attributes
 cannot omit or rewrite proposed bytes. The proposed tree is treated only as
 data and is never selected as the Actions checkout or a shell-script source.
 
-Admission validates listing metadata, the strict Web API v1 manifest, and its
-complete file ledger with the base-built `marketplace-tool`, packages every
-widget directory once, then inspects the stored-zip `.ocpkg`. A machine-readable
-receipt v2 binds the trust revision, proposed revision, proposed tree, source
-directory, extension identity, version, and the SHA-256 and byte length of both
-the package and validated listing. No proposed JavaScript, build command, test,
-Cargo manifest, or shell script is
-executed by `pull_request_target`. Browser WebAssembly is allowed only as
-verified page code. Declared regular assets are not constrained by an arbitrary
-suffix allowlist: OverCrow assigns known Web MIME types and serves other data
-as `application/octet-stream` with content sniffing disabled. Same-bundle reads
-remain on the verified private scheme; external browser HTTP(S) is denied. WIT,
-Wasmtime, native executable modules, native suffixes or signatures, and
-provider graphs are rejected. Push CI executes the exact now-trusted revision's
-Rust and JavaScript tests once. Only that trusted-push mode may receive an
-explicit private accepted-store path. It re-inspects and commits the already
-produced package and listing bytes under their identity, version, and SHA-256,
-then writes the exact-revision receipt last. Incomplete artifacts have no
-receipt and are not accepted. The generic sandbox for extension-defined build
-or test commands is not implemented; publication must copy admitted bytes
-without rebuilding or retesting them.
+Admission builds `overcrow-widget` offline from the reviewed base and runs
+`overcrow-widget admit` on every widget directory of the proposed tree: the
+package pipeline and the host's own package reader, the reproducible compiled
+view, the schema bounds, the reserved `com.playervox.*` IDs, the listing, the
+license and a review list of the requested authority. A machine-readable
+receipt (version 3) binds the trust revision, proposed revision, proposed
+tree, source directory, publisher, widget identity, version, and the SHA-256
+and byte length of the package, listing and admission report. No proposed
+JavaScript, TypeScript, build command, test, Cargo manifest, or shell script
+is executed by `pull_request_target`. Push CI executes the exact now-trusted
+revision's checks once; only that trusted-push mode may write admission
+bundles to an explicit private output for the maintainers. Publication copies
+admitted bytes without rebuilding or retesting them.
 
-Development catalog staging consumes one completed receipt, re-verifies every
-referenced byte sequence, copies the content-addressed packages, signs the
-bounded catalog, and commits the envelope last. It accepts only the compiled
-development key identity and loopback origin. The deterministic development
-seed in `fixtures/keys` is intentionally public and grants no production trust;
-production builds of OverCrow reject it. No production private key, sequence
-state, deployment credential, or signing path exists in this repository.
+The deterministic development key in `fixtures/keys` is intentionally public
+and grants no production trust; release builds of OverCrow refuse it. No
+production private key, sequence state, deployment credential, or signing
+path exists in this repository: the catalog is signed offline.
 
 The marketplace website cannot install software. The Control Center validates
 packages and user consent; local unverified packages install disabled and stay
@@ -85,6 +74,6 @@ signed suspension or revocation in a newer monotonic catalog. Clients must
 reject that package for new installation or update, immediately disable an
 installed copy, and offer its removal. An absent or stale catalog never invents
 a revocation. A catalog signature never bypasses package validation, user
-consent, or runtime sandboxing. Follow the authoritative
-[production operations runbook](docs/production-operations.md) for key
-recovery, loss, compromise, suspension, revocation, and corrective rollback.
+consent, or runtime sandboxing. Key recovery, loss and compromise follow the
+maintainers' private catalog procedure; a compromised catalog key is removed
+from OverCrow's trust anchors by an application update.

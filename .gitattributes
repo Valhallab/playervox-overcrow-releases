@@ -7,7 +7,6 @@
 /tools/creator-kit/** text=auto eol=lf
 # Manifest ledgers describe exact package bytes on every operating system.
 /widgets/** -text
-/fixtures/hello-web/** -text
 /published/docs/downloads/*.zip binary
 # Generated Vite assets retain exact bytes on every host.
 /published/assets/*.js binary

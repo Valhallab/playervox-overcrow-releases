@@ -1,5 +1,5 @@
-# Dependency policy of the public crates (contract crates, the widget CLI and
-# marketplace-tool), on the model of the OverCrow host: known advisories,
+# Dependency policy of the public crates (contract crates and the widget
+# CLI), on the model of the OverCrow host: known advisories,
 # permissive licenses only, crates.io as the only source.
 [advisories]
 ignore = []

@@ -49,20 +49,20 @@ JavaScript of an expression parses back to the same tree, that an accepted
 manifest revalidates from its own value, and that `write_package` reproduces
 any accepted archive byte for byte.
 
-Run the packaging and admission checks:
+Run the admission checks: the CLI's `admit` tests, the marketplace CI driver
+end to end on a throwaway clone (it builds the admission tool once into a
+private cache; set `TMPDIR` to a large disk), and the local driver mode, which
+admits every v1 widget of `widgets/`:
 
 ```sh
-tests/admission-store-smoke.sh
+cargo test -p overcrow-widget-cli --test admit --locked
 tests/ci-admission-smoke.sh
-tests/catalog-stage-smoke.sh
-cargo test -p marketplace-tool --locked
+sh scripts/ci-verify.sh
 node --test tests/warframe-market/market.test.mjs
-cargo run -p marketplace-tool --locked -- package widgets/warframe-market /tmp/warframe-market.ocpkg
-cargo run -p marketplace-tool --locked -- inspect /tmp/warframe-market.ocpkg
 ```
 
-The CLI package tests also verify that PlayerVox listings declare MIT and the
-complete MIT notice is carried inside each validated `.ocpkg`.
+`admit` requires MIT for PlayerVox widgets (`com.playervox.*` IDs) and a
+`LICENSE` inside every package.
 
 These prove strict manifest/listing validation, inventory, native executable
 rejection, optional browser-WASM admission, deterministic ZIP bytes, durable

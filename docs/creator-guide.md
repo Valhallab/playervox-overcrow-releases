@@ -1,6 +1,8 @@
 # Creator guide
 
-An OverCrow extension is a local web app.
+An OverCrow extension is a local web app. This guide covers the Web runtime,
+which the marketplace no longer admits; widget API v1 widgets start with
+[the CLI](cli.md) and are published as described in [publishing](publishing.md).
 
 The marketplace and separately distributed PlayerVox widgets use MIT. The
 JavaScript SDK is also MIT-licensed; preserve its notice in bundled copies.
@@ -38,21 +40,9 @@ assets in the manifest ledger. See [licensing scope](../LICENSING.md).
    and use `overcrow-widget dev --url http://127.0.0.1:4173`. The served ledger
    must match its bytes; `localhost` is not accepted. Keep source code, build
    tooling, and listing metadata outside the runtime directory.
-5. Copy the prepared bundle into a separate review directory, then add your
-   reviewed public listing metadata as root `listing.json`:
-
-   ```sh
-   cp -R /absolute/path/to/widget-output/build-1 /absolute/path/to/widget-output/review-1
-   cp /absolute/path/to/reviewed-listing.json /absolute/path/to/widget-output/review-1/listing.json
-   marketplace-tool package /absolute/path/to/widget-output/review-1 /absolute/path/to/widget-output/widget.ocpkg
-   ```
-
-   Marketplace packaging validates this sidecar and omits it from the
-   deterministic `.ocpkg`. If the original static build contains a regular
-   root `listing.json` of at most 64 KiB, `prepare` excludes it without
-   interpreting or approving it; review and marketplace validation remain
-   explicit. A nested `listing.json` is an ordinary runtime asset and enters
-   the generated ledger. Marketplace admission reuses the validated archive.
+5. The marketplace no longer admits Web API extensions: its catalog v1 lists
+   widget API v1 packages only. To publish, port the widget to widget API v1
+   and follow [publishing](publishing.md) (`overcrow-widget admit`).
    Development requires no packaging, signing, or publication.
 
 Preparation retains the runtime package ceilings: 128 MiB and 4,096 entries
