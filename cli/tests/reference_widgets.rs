@@ -269,3 +269,109 @@ fn service_fixtures_follow_the_result_shapes() {
         assert!(exercised.contains(capability), "{capability}");
     }
 }
+
+/// The icon buttons of the reference widgets that have them: in every
+/// reference image, each button (a 22 px square at 100 %, 33 px at 150 %)
+/// has its icon's pixels centred on the button, within half a physical
+/// pixel (P3.3: the icons were drawn 1–3 px right of centre, larger than
+/// the button's content box).
+#[test]
+fn icon_buttons_centre_their_icons() {
+    let mut checked = 0;
+    for widget in ["media", "stopwatch"] {
+        let reference = repository()
+            .join("widgets")
+            .join(widget)
+            .join("tests/reference");
+        for scenario in fs::read_dir(&reference).expect("reference/") {
+            let scenario = scenario.expect("entry").path();
+            for file in fs::read_dir(&scenario).expect("scenario images") {
+                let file = file.expect("entry").path();
+                let image = image::open(&file).expect("reference image").to_rgb8();
+                for (dx, dy) in icon_offsets(&image) {
+                    assert!(
+                        dx.abs() <= 0.5 && dy.abs() <= 0.5,
+                        "{}: icon off centre by ({dx}, {dy}) px",
+                        file.display()
+                    );
+                    checked += 1;
+                }
+            }
+        }
+    }
+    // The render scenarios alone hold 8 × 3 Media and 8 × 2 stopwatch
+    // buttons: the detection is not vacuous.
+    assert!(checked >= 40, "{checked} buttons checked");
+}
+
+/// For each icon button found in `image`, the offset in physical pixels of
+/// its icon's pixel box centre from the button's centre. A button is a
+/// 4-connected region that differs from the panel colour and is a square
+/// of 22 or 33 px; its icon, the pixels far from the button's own fill
+/// colour, away from its edge.
+fn icon_offsets(image: &image::RgbImage) -> Vec<(f32, f32)> {
+    let (width, height) = image.dimensions();
+    let panel = image.get_pixel(1, 1).0;
+    let distance = |a: [u8; 3], b: [u8; 3]| -> u32 {
+        a.iter().zip(b).map(|(a, b)| u32::from(a.abs_diff(b))).sum()
+    };
+    let differs = |x: u32, y: u32| distance(image.get_pixel(x, y).0, panel) > 6;
+    let mut seen = vec![false; (width * height) as usize];
+    let mut offsets = Vec::new();
+    for start_y in 0..height {
+        for start_x in 0..width {
+            let index = (start_y * width + start_x) as usize;
+            if seen[index] || !differs(start_x, start_y) {
+                continue;
+            }
+            seen[index] = true;
+            let (mut x0, mut y0, mut x1, mut y1) = (start_x, start_y, start_x, start_y);
+            let mut stack = vec![(start_x, start_y)];
+            while let Some((x, y)) = stack.pop() {
+                (x0, y0, x1, y1) = (x0.min(x), y0.min(y), x1.max(x), y1.max(y));
+                let neighbours = [
+                    (x.wrapping_sub(1), y),
+                    (x + 1, y),
+                    (x, y.wrapping_sub(1)),
+                    (x, y + 1),
+                ];
+                for (nx, ny) in neighbours {
+                    if nx < width && ny < height {
+                        let next = (ny * width + nx) as usize;
+                        if !seen[next] && differs(nx, ny) {
+                            seen[next] = true;
+                            stack.push((nx, ny));
+                        }
+                    }
+                }
+            }
+            let (side_x, side_y) = (x1 - x0 + 1, y1 - y0 + 1);
+            let Some(scale) = [(22, 1.0_f32), (33, 1.5)]
+                .into_iter()
+                .find(|(side, _)| side_x == *side && side_y == *side)
+                .map(|(_, scale)| scale)
+            else {
+                continue;
+            };
+            let edge = (2.0 * scale).round() as u32;
+            let fill = image.get_pixel(x0 + edge, y0 + side_y / 2).0;
+            let (mut ix0, mut iy0, mut ix1, mut iy1) = (u32::MAX, u32::MAX, 0, 0);
+            for y in y0 + edge..=y1 - edge {
+                for x in x0 + edge..=x1 - edge {
+                    if distance(image.get_pixel(x, y).0, fill) > 90 {
+                        (ix0, iy0, ix1, iy1) = (ix0.min(x), iy0.min(y), ix1.max(x), iy1.max(y));
+                    }
+                }
+            }
+            if ix0 == u32::MAX {
+                continue;
+            }
+            let centre = |low: u32, high: u32| (low + high + 1) as f32 / 2.0;
+            offsets.push((
+                centre(ix0, ix1) - centre(x0, x1),
+                centre(iy0, iy1) - centre(y0, y1),
+            ));
+        }
+    }
+    offsets
+}

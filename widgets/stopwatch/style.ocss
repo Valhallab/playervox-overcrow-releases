@@ -30,6 +30,11 @@
   width: var(--icon-button-size);
   height: var(--icon-button-size);
   padding: 5px;
+  /* The icon (sized by `font-size`) fills the 12 px content box exactly
+     and is centred in it. */
+  font-size: 12px;
+  justify-content: center;
+  align-items: center;
   border-radius: var(--radius-sm);
   background: var(--color-surface-raised);
   color: var(--color-text);
