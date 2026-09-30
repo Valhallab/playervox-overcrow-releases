@@ -118,12 +118,17 @@
 }
 
 /* The built-in's compact icon buttons: raised with a border, lighter under
-   the pointer or with the keyboard focus, the accent while pressed. */
+   the pointer or with the keyboard focus, the accent while pressed. The
+   icon (sized by `font-size`) fills the 12 px content box exactly and is
+   centred in it. */
 .control {
   width: var(--icon-button-size);
   height: var(--icon-button-size);
-  padding: 5px;
+  padding: 4px;
   border: 1px solid var(--color-border);
+  font-size: 12px;
+  justify-content: center;
+  align-items: center;
   border-radius: var(--radius-sm);
   background: var(--color-surface-raised);
   color: var(--color-text-secondary);
