@@ -12,6 +12,7 @@ partez-en.
 | **Horloge** | Affiche l’heure locale et, en option, la date, au format 24 heures. | `com.playervox.overcrow.clock` | aucune | [clock/README.md](../../../widgets/clock/README.md) |
 | **FPS** | Affiche la fréquence d’images présentée par le jeu, quand l’hôte dispose d’une source. | `com.playervox.overcrow.fps` | `fps.read` | [fps/README.md](../../../widgets/fps/README.md) |
 | **Session** | Affiche la durée de la session de jeu en cours. | `com.playervox.overcrow.session` | `session.read` | [session/README.md](../../../widgets/session/README.md) |
+| **Chronomètre** | Un chronomètre au centième de seconde, démarré, mis en pause et réinitialisé par ses boutons ou les raccourcis de l’hôte. | `com.playervox.overcrow.stopwatch` | `stopwatch.read`, `stopwatch.control` | [stopwatch/README.md](../../../widgets/stopwatch/README.md) |
 <!-- /generated:widgets -->
 
 Chaque dossier de widget contient :
