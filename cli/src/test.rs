@@ -260,6 +260,7 @@ fn scenarios(
         };
         let checked = overcrow_widget_scenario::parse(&bytes).and_then(|scenario| {
             scenario.check_against(&built.manifest)?;
+            overcrow_widget_scenario::load_assets(root, &scenario.assets)?;
             Ok(scenario)
         });
         match checked {
@@ -299,7 +300,9 @@ fn play(
         images: Vec::new(),
         stale: Vec::new(),
     };
-    let (code, stdout, stderr) = execute(runtime, package, path, out)?;
+    // The runtime reads the scenario's images from the project itself.
+    let project = (!scenario.assets.is_empty()).then_some(root);
+    let (code, stdout, stderr) = execute(runtime, package, path, project, out)?;
     let reason = || sanitize::line(stderr.trim());
     match code {
         Some(code) if code == i32::from(exit::PLAYED) => {}
@@ -353,10 +356,15 @@ fn execute(
     runtime: &Runtime,
     package: &Path,
     scenario: &Path,
+    project: Option<&Path>,
     out: &Path,
 ) -> Result<(Option<i32>, Vec<u8>, String), Fatal> {
-    let mut child = Command::new(&runtime.path)
-        .arg("run")
+    let mut command = Command::new(&runtime.path);
+    command.arg("run");
+    if let Some(project) = project {
+        command.arg("--project").arg(project);
+    }
+    let mut child = command
         .args(["--interface", &report::INTERFACE_VERSION.to_string()])
         .arg("--package")
         .arg(package)

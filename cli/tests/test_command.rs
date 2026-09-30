@@ -62,6 +62,7 @@ if [ "$1" = "--version" ]; then
     printf '%s\n' '{version}'
     exit 0
 fi
+printf '%s\n' "$*" >> '{fake}/args'
 out=
 while [ "$#" -gt 0 ]; do
     case $1 in
@@ -322,4 +323,56 @@ fn every_template_has_an_example_scenario_and_its_references() {
             );
         }
     }
+}
+
+/// A scenario's images (`assets`) are checked in the project before any run
+/// (no link, PNG or JPEG within the bounds), and the runtime gets the project
+/// to read them from.
+#[test]
+fn scenario_images_are_checked_and_the_runtime_gets_the_project() {
+    let (_directory, root) = project(&["start"]);
+    fs::create_dir_all(root.join("tests/assets")).expect("assets directory");
+    image(200)
+        .save(root.join("tests/assets/cover.png"))
+        .expect("cover");
+    let scenario = |path: &str| {
+        json!({"scenarioVersion": 1, "name": "main", "assets": {"cover": path},
+               "steps": [{"expect": {"image": "start"}}]})
+    };
+    fs::write(
+        root.join("tests/main.scenario.json"),
+        scenario("tests/assets/cover.png").to_string(),
+    )
+    .expect("scenario");
+    let fake = fake(100);
+    report(fake.path(), &["start"], &[]);
+    let runtime = runtime(fake.path(), 1, 0);
+    let output = cli(&root, &["--runtime", runtime.to_str().unwrap(), "--update"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    let args = fs::read_to_string(fake.path().join("args")).expect("recorded arguments");
+    assert!(
+        args.contains(&format!("--project {}", root.display())),
+        "{args}"
+    );
+
+    // A link, even to an image of the project, is refused before any run.
+    std::os::unix::fs::symlink(
+        root.join("tests/assets/cover.png"),
+        root.join("tests/assets/link.png"),
+    )
+    .expect("link");
+    fs::write(
+        root.join("tests/main.scenario.json"),
+        scenario("tests/assets/link.png").to_string(),
+    )
+    .expect("scenario");
+    let before = runs(fake.path());
+    let output = cli(&root, &["--runtime", runtime.to_str().unwrap()]);
+    assert!(!output.status.success());
+    assert!(
+        stderr(&output).contains("assets.cover"),
+        "{}",
+        stderr(&output)
+    );
+    assert_eq!(runs(fake.path()), before, "nothing ran");
 }
