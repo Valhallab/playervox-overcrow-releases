@@ -1,0 +1,22 @@
+{
+  "scenarioVersion": 1,
+  "name": "refused",
+  "description": "Without its grants the widget asks nothing: no player, the cover placeholder, no button.",
+  "host": {
+    "grants": [],
+    "mode": "interactive"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "No active media"
+        ],
+        "calls": [],
+        "image": "refused",
+        "fault": "none"
+      }
+    }
+  ]
+}

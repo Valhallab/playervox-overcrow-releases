@@ -1,0 +1,53 @@
+{
+  "scenarioVersion": 1,
+  "name": "read-only",
+  "description": "With media.read alone the track shows without buttons, even in Interactive mode.",
+  "host": {
+    "grants": [
+      "media.read"
+    ],
+    "mode": "interactive"
+  },
+  "assets": {
+    "aurora": "tests/assets/aurora.png",
+    "horizon": "tests/assets/horizon.png",
+    "tiles": "tests/assets/tiles.png"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "media.subscribe": {
+        "player": "p1",
+        "title": "Beyond the northern lights",
+        "artists": [
+          "The Quiet Expedition"
+        ],
+        "playing": true,
+        "canPrevious": true,
+        "canPlayPause": true,
+        "canNext": true,
+        "cover": "fixture:aurora"
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "Beyond the northern lights"
+        ],
+        "calls": [
+          {
+            "service": "media.subscribe",
+            "params": {
+              "cover": true
+            },
+            "outcome": "ok"
+          }
+        ],
+        "image": "read-only",
+        "fault": "none"
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "label": "Media",
+  "no-media": "No active media",
+  "unavailable": "Media is temporarily unavailable.",
+  "unknown-title": "Unknown title",
+  "cover": "Cover artwork",
+  "previous": "Previous",
+  "play": "Play",
+  "pause": "Pause",
+  "next": "Next"
+}

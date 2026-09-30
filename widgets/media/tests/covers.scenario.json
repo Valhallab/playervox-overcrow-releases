@@ -1,0 +1,144 @@
+{
+  "scenarioVersion": 1,
+  "name": "covers",
+  "description": "The host's cover, square or cropped to its centre, a new track's cover, then the cover option off (no slot, and the widget asks the host for none) and on again.",
+  "host": {
+    "mode": "interactive"
+  },
+  "assets": {
+    "aurora": "tests/assets/aurora.png",
+    "horizon": "tests/assets/horizon.png",
+    "tiles": "tests/assets/tiles.png"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "media.subscribe": {
+        "player": "p1",
+        "title": "Beyond the northern lights",
+        "artists": [
+          "The Quiet Expedition"
+        ],
+        "playing": true,
+        "canPrevious": true,
+        "canPlayPause": true,
+        "canNext": true,
+        "cover": "fixture:aurora"
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "calls": [
+          {
+            "service": "media.subscribe",
+            "params": {
+              "cover": true
+            },
+            "outcome": "ok"
+          }
+        ],
+        "image": "square"
+      }
+    },
+    {
+      "publish": {
+        "service": "media.subscribe",
+        "value": {
+          "player": "p1",
+          "title": "Horizon line",
+          "artists": [
+            "The Quiet Expedition"
+          ],
+          "playing": true,
+          "canPrevious": true,
+          "canPlayPause": true,
+          "canNext": true,
+          "cover": "fixture:horizon"
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "cropped"
+      }
+    },
+    {
+      "publish": {
+        "service": "media.subscribe",
+        "value": {
+          "player": "p1",
+          "title": "Next track",
+          "artists": [
+            "Another band",
+            "A guest"
+          ],
+          "playing": true,
+          "canPrevious": true,
+          "canPlayPause": true,
+          "canNext": true,
+          "cover": "fixture:tiles"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Next track",
+          "Another band, A guest"
+        ],
+        "image": "next-track"
+      }
+    },
+    {
+      "menu": {
+        "id": "show-cover",
+        "value": false
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "subscription.cancel",
+            "outcome": "ok"
+          },
+          {
+            "service": "media.subscribe",
+            "params": {
+              "cover": false
+            },
+            "outcome": "ok"
+          }
+        ],
+        "image": "cover-off"
+      }
+    },
+    {
+      "menu": {
+        "id": "show-cover",
+        "value": true
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "subscription.cancel",
+            "outcome": "ok"
+          },
+          {
+            "service": "media.subscribe",
+            "params": {
+              "cover": true
+            },
+            "outcome": "ok"
+          }
+        ],
+        "image": "cover-on",
+        "fault": "none"
+      }
+    }
+  ]
+}

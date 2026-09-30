@@ -1,0 +1,41 @@
+<!-- Media: the cover, the title and artists, and the transport buttons in
+     Interactive mode (parity sheet: playervox-overcrow
+     docs/builtin-parity/media.md). The cover is a host asset; the host
+     scrolls an overflowing title. -->
+<box class={rootClass(state.showCover)} label={t("label")}>
+  <if test={state.showCover}>
+    <if test={state.media && state.media.cover}>
+      <image class={coverClass(state.media, state.media.cover)} src={state.media.cover} label={t("cover")}/>
+    </if>
+    <else>
+      <box class={coverClass(state.media, null)} label={t("cover")}>
+        <icon class="cover-icon" name="music"/>
+      </box>
+    </else>
+  </if>
+  <if test={state.media}>
+    <box class="meta">
+      <text class={titleClass(state.scrollTitle)} label={title(state.media)} tooltip={title(state.media)}>{title(state.media)}</text>
+      <if test={artists(state.media) != ""}>
+        <text class="artist" tooltip={artists(state.media)}>{artists(state.media)}</text>
+      </if>
+    </box>
+    <if test={controls(state.media, state.interactive).length > 0}>
+      <box class="controls">
+        <for each={controls(state.media, state.interactive)} as="control" key={control.key}>
+          <button class="control" label={control.label} tooltip={control.label} on:activate={activate(control.key)}>
+            <icon name={control.icon}/>
+          </button>
+        </for>
+      </box>
+    </if>
+  </if>
+  <else>
+    <box class="meta">
+      <text class="empty">{t("no-media")}</text>
+    </box>
+    <if test={state.unavailable}>
+      <text class="message" tooltip={t("unavailable")}>{t("unavailable")}</text>
+    </if>
+  </else>
+</box>

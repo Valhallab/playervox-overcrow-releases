@@ -1,0 +1,257 @@
+{
+  "scenarioVersion": 1,
+  "name": "states",
+  "description": "No player, then a paused track (play button), a track without artist (one-row cover), an unknown title, a player with only play/pause, a track without cover (placeholder), then the player gone.",
+  "host": {
+    "mode": "interactive"
+  },
+  "assets": {
+    "aurora": "tests/assets/aurora.png",
+    "horizon": "tests/assets/horizon.png",
+    "tiles": "tests/assets/tiles.png"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "media.subscribe": null
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "No active media"
+        ],
+        "noText": [
+          "Media is temporarily unavailable."
+        ],
+        "image": "no-player-dark-en"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Aucun média actif"
+        ],
+        "image": "no-player-light-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark"
+      }
+    },
+    {
+      "publish": {
+        "service": "media.subscribe",
+        "value": {
+          "player": "p1",
+          "title": "Beyond the northern lights",
+          "artists": [
+            "The Quiet Expedition"
+          ],
+          "playing": false,
+          "canPrevious": true,
+          "canPlayPause": true,
+          "canNext": true,
+          "cover": "fixture:aurora"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Beyond the northern lights"
+        ],
+        "image": "paused-dark-en"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "expect": {
+        "image": "paused-dark-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en"
+      }
+    },
+    {
+      "publish": {
+        "service": "media.subscribe",
+        "value": {
+          "player": "p1",
+          "title": "Beyond the northern lights",
+          "artists": [],
+          "playing": true,
+          "canPrevious": true,
+          "canPlayPause": true,
+          "canNext": true,
+          "cover": "fixture:aurora"
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "The Quiet Expedition"
+        ],
+        "image": "no-artist"
+      }
+    },
+    {
+      "publish": {
+        "service": "media.subscribe",
+        "value": {
+          "player": "p1",
+          "title": null,
+          "artists": [
+            "The Quiet Expedition"
+          ],
+          "playing": true,
+          "canPrevious": true,
+          "canPlayPause": true,
+          "canNext": true,
+          "cover": "fixture:aurora"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Unknown title"
+        ],
+        "image": "unknown-title-en"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Titre inconnu"
+        ],
+        "image": "unknown-title-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en"
+      }
+    },
+    {
+      "publish": {
+        "service": "media.subscribe",
+        "value": {
+          "player": "p1",
+          "title": "Beyond the northern lights",
+          "artists": [
+            "The Quiet Expedition"
+          ],
+          "playing": false,
+          "canPrevious": false,
+          "canPlayPause": true,
+          "canNext": false,
+          "cover": "fixture:aurora"
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "only-play"
+      }
+    },
+    {
+      "publish": {
+        "service": "media.subscribe",
+        "value": {
+          "player": "p1",
+          "title": "Beyond the northern lights",
+          "artists": [
+            "The Quiet Expedition"
+          ],
+          "playing": true,
+          "canPrevious": false,
+          "canPlayPause": false,
+          "canNext": false,
+          "cover": "fixture:aurora"
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "no-control"
+      }
+    },
+    {
+      "publish": {
+        "service": "media.subscribe",
+        "value": {
+          "player": "p1",
+          "title": "Beyond the northern lights",
+          "artists": [
+            "The Quiet Expedition"
+          ],
+          "playing": true,
+          "canPrevious": true,
+          "canPlayPause": true,
+          "canNext": true,
+          "cover": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "no-cover-dark"
+      }
+    },
+    {
+      "host": {
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "no-cover-light"
+      }
+    },
+    {
+      "host": {
+        "theme": "dark"
+      }
+    },
+    {
+      "publish": {
+        "service": "media.subscribe",
+        "value": null
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "No active media"
+        ],
+        "noText": [
+          "Beyond the northern lights"
+        ],
+        "image": "player-gone",
+        "fault": "none"
+      }
+    }
+  ]
+}

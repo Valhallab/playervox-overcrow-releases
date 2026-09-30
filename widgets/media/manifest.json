@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.playervox.overcrow.media",
+  "version": "1.0.0",
+  "name": {
+    "en": "Media",
+    "fr": "Média"
+  },
+  "sizing": {
+    "fit": "height",
+    "preferred": { "width": 320, "height": 160 },
+    "min": { "width": 160, "height": 24 },
+    "max": { "width": 900, "height": 240 }
+  },
+  "permissions": {
+    "capabilities": ["media.read", "media.control"]
+  },
+  "wrapper": {
+    "menu": [
+      {
+        "type": "toggle",
+        "id": "show-cover",
+        "label": { "en": "Show cover artwork", "fr": "Afficher la pochette" },
+        "default": true
+      },
+      {
+        "type": "toggle",
+        "id": "scroll-title",
+        "label": { "en": "Scroll long titles", "fr": "Faire défiler les titres longs" },
+        "default": true
+      }
+    ]
+  }
+}
