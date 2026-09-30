@@ -1,0 +1,73 @@
+/* The wrapper draws the panel; the content keeps the built-in's 10 × 8 px
+   margin. Labels are uppercase captions, values the UI font with tabular
+   figures, coloured past their thresholds; units stay muted. */
+.performance {
+  padding: 8px 10px;
+}
+
+/* Vertical: a label column as wide as the widest label, then the values,
+   each row on one baseline; the built-in's 6 px inner margin and 3 px above
+   and below each row. */
+.vertical {
+  display: grid;
+  grid-template-columns: max-content max-content;
+  column-gap: 12px;
+  row-gap: 6px;
+  align-items: baseline;
+  padding: 11px 16px;
+}
+
+/* Horizontal: one line of label, value and unit, separated by a dot. */
+.horizontal {
+  flex-direction: row;
+  align-items: baseline;
+}
+
+.horizontal .label {
+  margin-right: 4px;
+}
+
+.label {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-caption);
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.value {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-button);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.value.warning {
+  color: var(--color-warning);
+}
+
+.value.critical {
+  color: var(--color-danger);
+}
+
+.unit {
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.separator {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  color: var(--color-text-subtle);
+  margin: 0 5px;
+}
+
+.empty {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}

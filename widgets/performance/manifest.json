@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.playervox.overcrow.performance",
+  "version": "1.0.0",
+  "name": {
+    "en": "Performance",
+    "fr": "Performances"
+  },
+  "sizing": {
+    "fit": "both",
+    "preferred": { "width": 180, "height": 150 },
+    "min": { "width": 24, "height": 24 },
+    "max": { "width": 800, "height": 400 }
+  },
+  "permissions": {
+    "capabilities": ["telemetry.read", "fps.read"]
+  },
+  "wrapper": {
+    "menu": [
+      {
+        "type": "choice",
+        "id": "layout",
+        "label": { "en": "Layout", "fr": "Disposition" },
+        "choices": [
+          { "value": "vertical", "label": { "en": "Vertical", "fr": "Verticale" } },
+          { "value": "horizontal", "label": { "en": "Horizontal", "fr": "Horizontale" } }
+        ],
+        "default": "vertical"
+      },
+      {
+        "type": "toggle",
+        "id": "show-cpu",
+        "label": { "en": "Show CPU", "fr": "Afficher le CPU" },
+        "default": true
+      },
+      {
+        "type": "toggle",
+        "id": "show-ram",
+        "label": { "en": "Show RAM", "fr": "Afficher la RAM" },
+        "default": true
+      },
+      {
+        "type": "toggle",
+        "id": "show-cpu-temperature",
+        "label": { "en": "Show CPU temperature", "fr": "Afficher la température CPU" },
+        "requires": "telemetry.cpuTemperature",
+        "default": true
+      },
+      {
+        "type": "toggle",
+        "id": "show-gpu-temperature",
+        "label": { "en": "Show GPU temperature", "fr": "Afficher la température GPU" },
+        "requires": "telemetry.gpuTemperature",
+        "default": true
+      },
+      {
+        "type": "toggle",
+        "id": "show-fps",
+        "label": { "en": "Show FPS", "fr": "Afficher les FPS" },
+        "requires": "fps",
+        "default": true
+      },
+      {
+        "type": "choice",
+        "id": "temperature-unit",
+        "label": { "en": "Temperature", "fr": "Température" },
+        "choices": [
+          { "value": "celsius", "label": { "en": "Celsius (°C)", "fr": "Celsius (°C)" } },
+          { "value": "fahrenheit", "label": { "en": "Fahrenheit (°F)", "fr": "Fahrenheit (°F)" } }
+        ],
+        "default": "celsius"
+      }
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+<!-- Performance: the game's CPU and memory, the host's temperatures and the
+     game's frame rate, as a two-column list or on one line (parity sheet:
+     playervox-overcrow docs/builtin-parity/performance.md). Each value keeps
+     its unit in one text, so both share a baseline with the label. -->
+<box class={rootClass(state.layout)} label={t("label")}>
+  <if test={rows(state.telemetry, state.rate, state.shown).length == 0}>
+    <text class="empty">{emptyMessage(state.shown)}</text>
+  </if>
+  <else>
+    <for each={rows(state.telemetry, state.rate, state.shown)} as="row" key={row.key}>
+      <if test={state.layout == "horizontal" && !row.first}>
+        <text class="separator">·</text>
+      </if>
+      <text class="label" tooltip={row.hint}>{row.label}</text>
+      <text class={row.valueClass} label={row.name} tooltip={row.hint}><span>{row.value}</span><if test={row.unit != ""}><span class="unit">{row.unit}</span></if></text>
+    </for>
+  </else>
+</box>

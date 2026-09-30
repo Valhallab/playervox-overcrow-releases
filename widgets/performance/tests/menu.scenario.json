@@ -1,0 +1,170 @@
+{
+  "scenarioVersion": 1,
+  "name": "menu",
+  "description": "Each toggle hides its row at once, the layout and unit choices apply at once; with every metric off, “No metric selected”. Switching the FPS row off ends its subscription, so the host stops measuring; switching it on subscribes again.",
+  "fixtures": {
+    "subscriptions": {
+      "telemetry.subscribe": {
+        "cpu": 23.0,
+        "ram": 3221225472,
+        "cpuTemperature": 61.0,
+        "gpuTemperature": 67.0,
+        "sources": {
+          "cpuTemperature": true,
+          "gpuTemperature": true
+        }
+      },
+      "fps.subscribe": {
+        "fps": 144,
+        "stale": false,
+        "status": "ready"
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "telemetry.subscribe",
+            "outcome": "ok"
+          },
+          {
+            "service": "fps.subscribe",
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "menu": {
+        "id": "show-cpu",
+        "value": false
+      }
+    },
+    {
+      "menu": {
+        "id": "show-gpu-temperature",
+        "value": false
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "CPU",
+          "GPU TEMP"
+        ],
+        "text": [
+          "RAM",
+          "CPU TEMP",
+          "144"
+        ],
+        "image": "some-off"
+      }
+    },
+    {
+      "menu": {
+        "id": "show-fps",
+        "value": false
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "144"
+        ],
+        "calls": [
+          {
+            "service": "subscription.cancel",
+            "params": {
+              "call": 2
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "menu": {
+        "id": "show-ram",
+        "value": false
+      }
+    },
+    {
+      "menu": {
+        "id": "show-cpu-temperature",
+        "value": false
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "No metric selected"
+        ],
+        "image": "none-selected-dark-en"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Aucune mesure sélectionnée"
+        ],
+        "image": "none-selected-light-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark"
+      }
+    },
+    {
+      "menu": {
+        "id": "show-fps",
+        "value": true
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "144"
+        ],
+        "calls": [
+          {
+            "service": "fps.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "image": "fps-only"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "horizontal"
+      }
+    },
+    {
+      "menu": {
+        "id": "show-cpu",
+        "value": true
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "CPU",
+          "144"
+        ],
+        "image": "line-cpu-fps",
+        "fault": "none"
+      }
+    }
+  ]
+}

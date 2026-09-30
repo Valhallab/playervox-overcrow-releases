@@ -1,0 +1,147 @@
+{
+  "scenarioVersion": 1,
+  "name": "thresholds",
+  "description": "CPU turns amber at 80 % and red at 95 %, temperatures at 80 °C and 90 °C, compared in °C even in °F; RAM and FPS never change colour.",
+  "fixtures": {
+    "subscriptions": {
+      "telemetry.subscribe": {
+        "cpu": 23.0,
+        "ram": 3221225472,
+        "cpuTemperature": 61.0,
+        "gpuTemperature": 67.0,
+        "sources": {
+          "cpuTemperature": true,
+          "gpuTemperature": true
+        }
+      },
+      "fps.subscribe": {
+        "fps": 144,
+        "stale": false,
+        "status": "ready"
+      }
+    }
+  },
+  "steps": [
+    {
+      "publish": {
+        "service": "telemetry.subscribe",
+        "value": {
+          "cpu": 79.99,
+          "ram": 3221225472,
+          "cpuTemperature": 79.9,
+          "gpuTemperature": 79.999,
+          "sources": {
+            "cpuTemperature": true,
+            "gpuTemperature": true
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "80.0",
+          "79.9"
+        ],
+        "image": "below-dark"
+      }
+    },
+    {
+      "publish": {
+        "service": "telemetry.subscribe",
+        "value": {
+          "cpu": 80.0,
+          "ram": 3221225472,
+          "cpuTemperature": 80.0,
+          "gpuTemperature": 89.9,
+          "sources": {
+            "cpuTemperature": true,
+            "gpuTemperature": true
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "warning-dark"
+      }
+    },
+    {
+      "host": {
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "warning-light"
+      }
+    },
+    {
+      "publish": {
+        "service": "telemetry.subscribe",
+        "value": {
+          "cpu": 95.0,
+          "ram": 42949672960,
+          "cpuTemperature": 90.0,
+          "gpuTemperature": 104.5,
+          "sources": {
+            "cpuTemperature": true,
+            "gpuTemperature": true
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "95.0",
+          "40.0",
+          "90.0",
+          "104.5"
+        ],
+        "image": "critical-light"
+      }
+    },
+    {
+      "host": {
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "critical-dark"
+      }
+    },
+    {
+      "menu": {
+        "id": "temperature-unit",
+        "value": "fahrenheit"
+      }
+    },
+    {
+      "publish": {
+        "service": "telemetry.subscribe",
+        "value": {
+          "cpu": 50.0,
+          "ram": 3221225472,
+          "cpuTemperature": 80.0,
+          "gpuTemperature": 79.9,
+          "sources": {
+            "cpuTemperature": true,
+            "gpuTemperature": true
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "176.0",
+          "175.8"
+        ],
+        "image": "fahrenheit-warning-dark",
+        "fault": "none"
+      }
+    }
+  ]
+}

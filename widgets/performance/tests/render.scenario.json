@@ -1,0 +1,112 @@
+{
+  "scenarioVersion": 1,
+  "name": "render",
+  "description": "Every row, vertical, in both themes, both languages, at 100 % and 150 %: CPU 23.0 %, RAM 3.0 GB, CPU 61.0 °C, GPU 67.0 °C, 144 FPS.",
+  "fixtures": {
+    "subscriptions": {
+      "telemetry.subscribe": {
+        "cpu": 23.0,
+        "ram": 3221225472,
+        "cpuTemperature": 61.0,
+        "gpuTemperature": 67.0,
+        "sources": {
+          "cpuTemperature": true,
+          "gpuTemperature": true
+        }
+      },
+      "fps.subscribe": {
+        "fps": 144,
+        "stale": false,
+        "status": "ready"
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "CPU",
+          "23.0",
+          "RAM",
+          "3.0",
+          "61.0",
+          "67.0",
+          "144"
+        ],
+        "image": "all-dark-en-100"
+      }
+    },
+    {
+      "host": {
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "all-light-en-100"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "expect": {
+        "image": "all-light-fr-100"
+      }
+    },
+    {
+      "host": {
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "all-dark-fr-100"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "all-dark-fr-150"
+      }
+    },
+    {
+      "host": {
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "all-light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "locale": "en"
+      }
+    },
+    {
+      "expect": {
+        "image": "all-light-en-150"
+      }
+    },
+    {
+      "host": {
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "all-dark-en-150",
+        "fault": "none"
+      }
+    }
+  ]
+}

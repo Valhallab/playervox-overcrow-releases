@@ -1,0 +1,110 @@
+{
+  "scenarioVersion": 1,
+  "name": "fahrenheit",
+  "description": "°F converts the sensor's reading before rounding to one decimal: 0 → 32.0, 62.345 → 62.3 °C / 144.2 °F, 37.677 → 37.7 / 99.8, −12.678 → −12.7 / 9.2.",
+  "fixtures": {
+    "subscriptions": {
+      "telemetry.subscribe": {
+        "cpu": 23.0,
+        "ram": 3221225472,
+        "cpuTemperature": 61.0,
+        "gpuTemperature": 67.0,
+        "sources": {
+          "cpuTemperature": true,
+          "gpuTemperature": true
+        }
+      },
+      "fps.subscribe": {
+        "fps": 144,
+        "stale": false,
+        "status": "ready"
+      }
+    }
+  },
+  "steps": [
+    {
+      "publish": {
+        "service": "telemetry.subscribe",
+        "value": {
+          "cpu": 23.0,
+          "ram": 3221225472,
+          "cpuTemperature": 62.345,
+          "gpuTemperature": 37.677,
+          "sources": {
+            "cpuTemperature": true,
+            "gpuTemperature": true
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "62.3",
+          "37.7"
+        ]
+      }
+    },
+    {
+      "menu": {
+        "id": "temperature-unit",
+        "value": "fahrenheit"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "144.2",
+          "99.8"
+        ],
+        "noText": [
+          "144.1",
+          "99.9"
+        ],
+        "image": "fahrenheit-dark-en"
+      }
+    },
+    {
+      "publish": {
+        "service": "telemetry.subscribe",
+        "value": {
+          "cpu": 23.0,
+          "ram": 3221225472,
+          "cpuTemperature": -12.678,
+          "gpuTemperature": 0,
+          "sources": {
+            "cpuTemperature": true,
+            "gpuTemperature": true
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "9.2",
+          "32.0"
+        ],
+        "noText": [
+          "9.1"
+        ]
+      }
+    },
+    {
+      "menu": {
+        "id": "temperature-unit",
+        "value": "celsius"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "-12.7",
+          "0.0"
+        ],
+        "image": "celsius-negative-dark-en",
+        "fault": "none"
+      }
+    }
+  ]
+}

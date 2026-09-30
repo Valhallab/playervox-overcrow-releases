@@ -1,0 +1,47 @@
+{
+  "scenarioVersion": 1,
+  "name": "no-fps-source",
+  "description": "A host without an FPS source: the FPS row stays away, the subscription reports it unavailable.",
+  "host": {
+    "features": [
+      "telemetry.cpuTemperature",
+      "telemetry.gpuTemperature"
+    ]
+  },
+  "fixtures": {
+    "subscriptions": {
+      "telemetry.subscribe": {
+        "cpu": 23.0,
+        "ram": 3221225472,
+        "cpuTemperature": 61.0,
+        "gpuTemperature": 67.0,
+        "sources": {
+          "cpuTemperature": true,
+          "gpuTemperature": true
+        }
+      },
+      "fps.subscribe": {
+        "fps": null,
+        "stale": false,
+        "status": "unavailable"
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "CPU",
+          "RAM",
+          "CPU TEMP",
+          "GPU TEMP"
+        ],
+        "noText": [
+          "FPS"
+        ],
+        "image": "no-fps",
+        "fault": "none"
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "overcrow-widget-performance",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "check": "overcrow-widget check",
+    "package": "overcrow-widget package",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "devDependencies": {
+    "@overcrow/sdk": "1.0.0",
+    "typescript": "6.0.3"
+  }
+}

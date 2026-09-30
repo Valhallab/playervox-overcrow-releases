@@ -1,0 +1,89 @@
+{
+  "scenarioVersion": 1,
+  "name": "region",
+  "description": "Numbers follow the host's number format, not the language: `us` 23.0 and 1,234.6 GB by default, `fr` 23,0 and 1 234,6, `de` 23,0 and 1.234,6.",
+  "host": {
+    "locale": "fr"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "telemetry.subscribe": {
+        "cpu": 23.0,
+        "ram": 3221225472,
+        "cpuTemperature": 61.0,
+        "gpuTemperature": 67.0,
+        "sources": {
+          "cpuTemperature": true,
+          "gpuTemperature": true
+        }
+      },
+      "fps.subscribe": {
+        "fps": 144,
+        "stale": false,
+        "status": "ready"
+      }
+    }
+  },
+  "steps": [
+    {
+      "publish": {
+        "service": "telemetry.subscribe",
+        "value": {
+          "cpu": 23.0,
+          "ram": 1325598706237,
+          "cpuTemperature": 61.0,
+          "gpuTemperature": 67.0,
+          "sources": {
+            "cpuTemperature": true,
+            "gpuTemperature": true
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "23.0",
+          "1,234.6"
+        ],
+        "image": "us-fr"
+      }
+    },
+    {
+      "host": {
+        "region": {
+          "numberFormat": "fr"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "23,0",
+          "1 234,6",
+          "61,0"
+        ],
+        "image": "fr-fr"
+      }
+    },
+    {
+      "host": {
+        "region": {
+          "numberFormat": "de"
+        },
+        "locale": "en",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "23,0",
+          "1.234,6"
+        ],
+        "image": "de-light-en",
+        "fault": "none"
+      }
+    }
+  ]
+}

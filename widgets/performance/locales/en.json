@@ -1,0 +1,23 @@
+{
+  "label": "Performance",
+  "waiting": "Waiting for game data…",
+  "no-metric": "No metric selected",
+  "cpu": "CPU",
+  "ram": "RAM",
+  "cpu-temperature": "CPU TEMP",
+  "gpu-temperature": "GPU TEMP",
+  "fps": "FPS",
+  "old": "old",
+  "hint-cpu": "Game CPU use across all logical processors.",
+  "hint-ram": "Game resident memory.",
+  "hint-cpu-temperature": "Host CPU temperature.",
+  "hint-gpu-temperature": "Host GPU temperature.",
+  "hint-fps": "Observed presentation rate.",
+  "hint-fps-old": "Last FPS reading. No new measurement has arrived for at least three seconds.",
+  "name-cpu": "Game CPU use {value} {unit}",
+  "name-ram": "Game memory {value} {unit}",
+  "name-cpu-temperature": "CPU temperature {value} {unit}",
+  "name-gpu-temperature": "GPU temperature {value} {unit}",
+  "name-fps": "{value} frames per second",
+  "name-fps-old": "{value} frames per second, last reading"
+}
