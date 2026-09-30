@@ -54,9 +54,12 @@ and grants no production trust; release builds of OverCrow refuse it. No
 production private key, sequence state, deployment credential, or signing
 path exists in this repository: the catalog is signed offline.
 
-The marketplace website cannot install software. The Control Center validates
-packages and user consent; local unverified packages install disabled and stay
-disabled until explicitly enabled.
+The marketplace website cannot install software. OverCrow installs widgets
+from the signed catalog and validates every package in full before it runs,
+with the user's consent to its permissions. A development package
+(`overcrow-widget dev`) is accepted only by a debug build or by an OverCrow
+started with development installs allowed; it runs marked as unverified, with
+its declared permissions for that session only, and nothing of it persists.
 
 The website and its isolated Studio are maintained separately. Report website or
 SDK vulnerabilities through this repository's private vulnerability reporting
