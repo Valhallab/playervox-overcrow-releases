@@ -107,6 +107,25 @@ does so only while this widget subscribes.
   | `refused` | no grant: no call, "Score unavailable" |
   | `signed-out` | signed out of PlayerVox: the score, no account panel |
 
-## Measurements
+## Cost
 
-See [Measurements](#measurements-p34) below.
+Measured on 2026-09-30 with OverCrow's release build, on an AMD Ryzen 7
+5800X3D Linux workstation and in a Windows 11 virtual machine (2 vCPU),
+with a rated game and the default rows:
+
+| | Linux | Windows (VM) |
+| --- | --- | --- |
+| Widget start, warm, into the overlay's runtime | 8.5 ms (p50), 12.4 ms at most | VM ready in 16–20 ms (p50) |
+| VM memory | 0.73 MiB private, 0.91 MiB PSS | 1.08 MiB private working set, 1.36 MiB private commit |
+| Private memory in all (VM, sandbox helpers, overlay share) | 6.5–8.6 MB | — |
+| CPU, a score held | 0.03 % of one core, no frame | — |
+| CPU, a new score and its pulse every 2 s | 0.23 % of one core: about 36 frames of 0.05 ms per pulse, then none | — |
+| CPU, hidden, a new score every 2 s | 0.05–0.07 % of one core: no pulse frame | — |
+| VM CPU | one short turn per score; none during the pulse | — |
+
+Scores change only when PlayerVox publishes an update or at the five-minute
+refresh: the 2 s load is a stress. The egui widget it replaces had no pulse
+and painted in the overlay's own process (0.04 ms a frame); OverCrow fetched
+the score whenever that widget was enabled, and now only while this widget
+subscribes. Scenarios render the same images on Linux and Windows, pixel
+for pixel.
