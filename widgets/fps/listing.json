@@ -1,0 +1,18 @@
+{
+  "author": "PlayerVox",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/fps",
+  "defaultLocale": "en",
+  "localizations": [
+    {
+      "locale": "en",
+      "name": "FPS",
+      "description": "Shows the game’s presented frame rate, when the host has a frame rate source."
+    },
+    {
+      "locale": "fr",
+      "name": "FPS",
+      "description": "Affiche la fréquence d’images présentée par le jeu, quand l’hôte dispose d’une source."
+    }
+  ]
+}

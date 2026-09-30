@@ -1,0 +1,18 @@
+{
+  "author": "PlayerVox",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/session",
+  "defaultLocale": "en",
+  "localizations": [
+    {
+      "locale": "en",
+      "name": "Session",
+      "description": "Shows how long the current game session has lasted."
+    },
+    {
+      "locale": "fr",
+      "name": "Session",
+      "description": "Affiche la durée de la session de jeu en cours."
+    }
+  ]
+}

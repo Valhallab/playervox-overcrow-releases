@@ -1,0 +1,18 @@
+{
+  "author": "PlayerVox",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/clock",
+  "defaultLocale": "en",
+  "localizations": [
+    {
+      "locale": "en",
+      "name": "Clock",
+      "description": "Shows the local time of day and, optionally, the date, in a 24-hour format."
+    },
+    {
+      "locale": "fr",
+      "name": "Horloge",
+      "description": "Affiche l’heure locale et, en option, la date, au format 24 heures."
+    }
+  ]
+}
