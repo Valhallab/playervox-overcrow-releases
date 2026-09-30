@@ -1,0 +1,120 @@
+{
+  "scenarioVersion": 1,
+  "name": "unavailable",
+  "description": "The host's media source fails: the subscription ends with unavailable, the widget shows it, subscribes again 5 s later and shows the player the restarted source reports.",
+  "host": {
+    "mode": "interactive"
+  },
+  "assets": {
+    "aurora": "tests/assets/aurora.png",
+    "horizon": "tests/assets/horizon.png",
+    "tiles": "tests/assets/tiles.png"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "media.subscribe": {
+        "player": "p1",
+        "title": "Beyond the northern lights",
+        "artists": [
+          "The Quiet Expedition"
+        ],
+        "playing": true,
+        "canPrevious": true,
+        "canPlayPause": true,
+        "canNext": true,
+        "cover": "fixture:aurora"
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "calls": [
+          {
+            "service": "media.subscribe",
+            "params": {
+              "cover": true
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "media.subscribe",
+        "error": "unavailable"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "No active media",
+          "Media is temporarily unavailable."
+        ],
+        "noText": [
+          "Beyond the northern lights"
+        ],
+        "image": "unavailable-dark-en"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Aucun média actif",
+          "Le média est temporairement indisponible."
+        ],
+        "image": "unavailable-light-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark"
+      }
+    },
+    {
+      "advance": {
+        "ms": 4999
+      }
+    },
+    {
+      "expect": {
+        "calls": []
+      }
+    },
+    {
+      "advance": {
+        "ms": 1
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "media.subscribe",
+            "params": {
+              "cover": true
+            },
+            "outcome": "ok"
+          }
+        ],
+        "text": [
+          "Beyond the northern lights"
+        ],
+        "noText": [
+          "Media is temporarily unavailable."
+        ],
+        "image": "recovered",
+        "fault": "none"
+      }
+    }
+  ]
+}

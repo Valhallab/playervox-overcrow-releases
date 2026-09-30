@@ -1,0 +1,136 @@
+{
+  "scenarioVersion": 1,
+  "name": "render",
+  "description": "A playing track with its cover, in Interactive mode with its three buttons, in both themes and languages at 100 and 150 %; Passive shows no button.",
+  "host": {
+    "mode": "interactive"
+  },
+  "assets": {
+    "aurora": "tests/assets/aurora.png",
+    "horizon": "tests/assets/horizon.png",
+    "tiles": "tests/assets/tiles.png"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "media.subscribe": {
+        "player": "p1",
+        "title": "Beyond the northern lights",
+        "artists": [
+          "The Quiet Expedition"
+        ],
+        "playing": true,
+        "canPrevious": true,
+        "canPlayPause": true,
+        "canNext": true,
+        "cover": "fixture:aurora"
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "Beyond the northern lights",
+          "The Quiet Expedition"
+        ],
+        "calls": [
+          {
+            "service": "media.subscribe",
+            "params": {
+              "cover": true
+            },
+            "outcome": "ok"
+          }
+        ],
+        "image": "playing-dark-en-100"
+      }
+    },
+    {
+      "host": {
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "playing-light-en-100"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "expect": {
+        "image": "playing-light-fr-100"
+      }
+    },
+    {
+      "host": {
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "playing-dark-fr-100"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "playing-dark-fr-150"
+      }
+    },
+    {
+      "host": {
+        "theme": "light",
+        "locale": "en"
+      }
+    },
+    {
+      "expect": {
+        "image": "playing-light-en-150"
+      }
+    },
+    {
+      "host": {
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "playing-dark-en-150"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "playing-light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "theme": "dark",
+        "locale": "en"
+      }
+    },
+    {
+      "expect": {
+        "image": "passive-dark-en-100",
+        "fault": "none"
+      }
+    }
+  ]
+}

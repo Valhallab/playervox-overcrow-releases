@@ -1,0 +1,142 @@
+/* The cover on the left, as tall as the title and artist rows and centred
+   on them; the text column beside it, the buttons and the source message
+   under the text. The wrapper draws the panel; the content keeps the
+   built-in's 10 × 8 px margin, 8 px beside the cover and 2 px between the
+   rows. The width is the user's: long text never widens the panel. */
+.media {
+  display: grid;
+  grid-template-columns: minmax(0px, 1fr);
+  column-gap: 8px;
+  row-gap: 2px;
+  padding: 8px 10px;
+}
+
+.with-cover {
+  grid-template-columns: auto minmax(0px, 1fr);
+}
+
+.with-cover .cover {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.with-cover .meta,
+.with-cover .controls,
+.with-cover .message {
+  grid-column: 2;
+}
+
+.with-cover .meta {
+  grid-row: 1;
+}
+
+/* Fixed line heights keep the cover exactly as tall as the rows beside
+   it: 18 px for the title, 2 px, 16 px for the artists. */
+.cover {
+  align-self: center;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  overflow: hidden;
+}
+
+.cover.tall {
+  width: 36px;
+  height: 36px;
+}
+
+.cover.short {
+  width: 18px;
+  height: 18px;
+}
+
+/* No cover: the music icon on a raised square, inset by 28 %. */
+.placeholder {
+  background: var(--color-surface-raised);
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+}
+
+.cover-icon {
+  width: 44%;
+  height: 44%;
+}
+
+.meta {
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0px;
+}
+
+.title {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+  font-weight: 700;
+  line-height: 18px;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.title.scrolling {
+  text-overflow: marquee;
+}
+
+.artist {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.empty {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+  line-height: 18px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.message {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.controls {
+  flex-direction: row;
+  gap: 3px;
+}
+
+/* The built-in's compact icon buttons: raised with a border, lighter under
+   the pointer or with the keyboard focus, the accent while pressed. */
+.control {
+  width: var(--icon-button-size);
+  height: var(--icon-button-size);
+  padding: 5px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-raised);
+  color: var(--color-text-secondary);
+}
+
+.control:hover,
+.control:focus {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.control:active {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent-hover);
+}

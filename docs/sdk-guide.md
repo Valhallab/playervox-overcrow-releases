@@ -104,7 +104,12 @@ useful state when it is missing.
 - Calls return promises that reject with a `ServiceError` whose `code` says
   why (`permission_denied`, `gesture_required`, `quota_exceeded`…).
 - Subscriptions call your listener with the current value, then each
-  update, until you `cancel()` them or a final error arrives.
+  update, until you `cancel()` them or a final error arrives. A host
+  source can fail while the widget runs (the media player's session, for
+  example): the subscription then ends with `unavailable`. Show it, and
+  subscribe again after a few seconds with `timers.after`; the host
+  restarts a source when a widget subscribes, and sends nothing until it
+  answers. The [Media widget](../widgets/media/logic.ts) retries after 5 s.
 - Actions that change user data (`notes.create`, `media.next`,
   `twitch.chat.join`…) need a user gesture: call them from an `activate`,
   `keydown`, `change`… handler, not from a timer or a menu action.

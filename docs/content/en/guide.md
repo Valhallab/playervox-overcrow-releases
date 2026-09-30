@@ -205,6 +205,13 @@ complete path, with typed parameters:
     const { status, body } = await http.fetch(url, { as: "json" });
 ```
 
+Game and system data come from subscriptions (`fps.subscribe`,
+`media.subscribe`…), which update your state until you cancel them. A
+subscription ends with a failure when the host's source fails, `unavailable`
+for a media player that stopped answering: show it and subscribe again
+after a few seconds with `timers.after`, as the
+[Media widget](../../../widgets/media/logic.ts) does.
+
 The complete example is in
 [`docs/content/examples/weather`](../examples/weather/). Read
 [security](security.md) for what each permission allows and what a widget

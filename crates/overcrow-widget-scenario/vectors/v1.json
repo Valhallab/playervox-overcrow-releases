@@ -1,5 +1,5 @@
 {
- "comment": "Widget test scenario v1 vectors (docs/widget-testing.md). `valid` scenarios parse; `derived` gives values both readers must compute: `pixels` is the image size at the scale (round to nearest of size × scale / 1000), `zone` lists [now, offsetMinutes, nextChangeAt]. `invalid` scenarios are refused with the error at `path` (\"\" for a format error). `againstManifest` cases are checked against `manifest`; `path` null means accepted.",
+ "comment": "Widget test scenario v1 vectors (docs/widget-testing.md). `valid` scenarios parse; `derived` gives values both readers must compute: `pixels` is the image size at the scale (round to nearest of size × scale / 1000), `zone` lists [now, offsetMinutes, nextChangeAt]. `assets` files are not read here (`load_assets`). `invalid` scenarios are refused with the error at `path` (\"\" for a format error). `againstManifest` cases are checked against `manifest`; `path` null means accepted.",
  "manifest": {
   "schemaVersion": 1,
   "apiVersion": 1,
@@ -507,6 +507,87 @@
        "state": "running",
        "fault": "none",
        "clipboard": "x"
+      }
+     }
+    ]
+   },
+   "derived": {}
+  },
+  {
+   "name": "fixture images and publish errors",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "assets": {
+     "cover": "tests/assets/cover.png",
+     "cover-2": "tests/assets/cover-2.jpg"
+    },
+    "fixtures": {
+     "subscriptions": {
+      "media.subscribe": {
+       "player": "p1",
+       "title": "T",
+       "artists": [
+        "A"
+       ],
+       "playing": true,
+       "canPrevious": true,
+       "canPlayPause": true,
+       "canNext": true,
+       "cover": "fixture:cover"
+      }
+     }
+    },
+    "steps": [
+     {
+      "publish": {
+       "service": "media.subscribe",
+       "value": {
+        "player": "p1",
+        "title": "T",
+        "artists": [
+         "A"
+        ],
+        "playing": true,
+        "canPrevious": true,
+        "canPlayPause": true,
+        "canNext": true,
+        "cover": "fixture:cover-2"
+       }
+      }
+     },
+     {
+      "publish": {
+       "service": "media.subscribe",
+       "value": {
+        "player": "p1",
+        "title": "fixture:cover",
+        "artists": [
+         "A"
+        ],
+        "playing": true,
+        "canPrevious": true,
+        "canPlayPause": true,
+        "canNext": true,
+        "cover": null
+       }
+      }
+     },
+     {
+      "publish": {
+       "service": "media.subscribe",
+       "value": null
+      }
+     },
+     {
+      "publish": {
+       "service": "media.subscribe",
+       "error": "unavailable"
+      }
+     },
+     {
+      "expect": {
+       "state": "running"
       }
      }
     ]
@@ -1294,6 +1375,260 @@
     ]
    },
    "path": ""
+  },
+  {
+   "name": "undeclared fixture image",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "assets": {
+     "cover": "tests/cover.png"
+    },
+    "fixtures": {
+     "subscriptions": {
+      "media.subscribe": {
+       "player": "p1",
+       "title": "T",
+       "artists": [
+        "A"
+       ],
+       "playing": true,
+       "canPrevious": true,
+       "canPlayPause": true,
+       "canNext": true,
+       "cover": "fixture:other"
+      }
+     }
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "fixtures.subscriptions.media.subscribe"
+  },
+  {
+   "name": "literal asset handle",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "fixtures": {
+     "subscriptions": {
+      "media.subscribe": {
+       "player": "p1",
+       "title": "T",
+       "artists": [
+        "A"
+       ],
+       "playing": true,
+       "canPrevious": true,
+       "canPlayPause": true,
+       "canNext": true,
+       "cover": "asset:0000000000000001"
+      }
+     }
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "fixtures.subscriptions.media.subscribe"
+  },
+  {
+   "name": "fixture image without assets",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "publish": {
+       "service": "media.subscribe",
+       "value": {
+        "player": "p1",
+        "title": "T",
+        "artists": [
+         "A"
+        ],
+        "playing": true,
+        "canPrevious": true,
+        "canPlayPause": true,
+        "canNext": true,
+        "cover": "fixture:cover"
+       }
+      }
+     }
+    ]
+   },
+   "path": "steps[0].publish.value"
+  },
+  {
+   "name": "too many assets",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "assets": {
+     "a0": "tests/a0.png",
+     "a1": "tests/a1.png",
+     "a2": "tests/a2.png",
+     "a3": "tests/a3.png",
+     "a4": "tests/a4.png",
+     "a5": "tests/a5.png",
+     "a6": "tests/a6.png",
+     "a7": "tests/a7.png",
+     "a8": "tests/a8.png"
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "assets"
+  },
+  {
+   "name": "asset path leaving the project",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "assets": {
+     "cover": "../cover.png"
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "assets.cover"
+  },
+  {
+   "name": "absolute asset path",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "assets": {
+     "cover": "/tmp/cover.png"
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "assets.cover"
+  },
+  {
+   "name": "asset path with backslashes",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "assets": {
+     "cover": "tests\\cover.png"
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "assets.cover"
+  },
+  {
+   "name": "bad asset name",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "assets": {
+     "Cover": "tests/cover.png"
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "assets.Cover"
+  },
+  {
+   "name": "publish with a value and an error",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "publish": {
+       "service": "media.subscribe",
+       "value": null,
+       "error": "unavailable"
+      }
+     }
+    ]
+   },
+   "path": "steps[0].publish"
+  },
+  {
+   "name": "publish with neither",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "publish": {
+       "service": "media.subscribe"
+      }
+     }
+    ]
+   },
+   "path": "steps[0].publish"
+  },
+  {
+   "name": "publish error the host answers itself",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "publish": {
+       "service": "media.subscribe",
+       "error": "permission_denied"
+      }
+     }
+    ]
+   },
+   "path": "steps[0].publish.error"
+  },
+  {
+   "name": "publish unknown error",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "publish": {
+       "service": "media.subscribe",
+       "error": "nope"
+      }
+     }
+    ]
+   },
+   "path": "steps[0].publish.error"
   }
  ],
  "againstManifest": [

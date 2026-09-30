@@ -1,0 +1,127 @@
+{
+  "scenarioVersion": 1,
+  "name": "marquee",
+  "description": "A title wider than its column scrolls back and forth: 2 s at the start, 18 px/s to the end, 2 s there, then back; the artists never scroll. With the option off the title ends with an ellipsis; at 150 % it scrolls too.",
+  "assets": {
+    "aurora": "tests/assets/aurora.png",
+    "horizon": "tests/assets/horizon.png",
+    "tiles": "tests/assets/tiles.png"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "media.subscribe": {
+        "player": "p1",
+        "title": "Beyond the northern lights, and the long road back",
+        "artists": [
+          "The Quiet Expedition",
+          "An Orchestra of Many Distant Places",
+          "Guest"
+        ],
+        "playing": true,
+        "canPrevious": true,
+        "canPlayPause": true,
+        "canNext": true,
+        "cover": "fixture:aurora"
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "Beyond the northern lights, and the long road back"
+        ],
+        "image": "start"
+      }
+    },
+    {
+      "advance": {
+        "ms": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "still-in-pause"
+      }
+    },
+    {
+      "advance": {
+        "ms": 2500
+      }
+    },
+    {
+      "expect": {
+        "image": "moving"
+      }
+    },
+    {
+      "advance": {
+        "ms": 4500
+      }
+    },
+    {
+      "expect": {
+        "image": "at-the-end"
+      }
+    },
+    {
+      "advance": {
+        "ms": 3500
+      }
+    },
+    {
+      "expect": {
+        "image": "coming-back"
+      }
+    },
+    {
+      "advance": {
+        "ms": 4500
+      }
+    },
+    {
+      "expect": {
+        "image": "back-at-the-start"
+      }
+    },
+    {
+      "menu": {
+        "id": "scroll-title",
+        "value": false
+      }
+    },
+    {
+      "expect": {
+        "image": "ellipsis"
+      }
+    },
+    {
+      "menu": {
+        "id": "scroll-title",
+        "value": true
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "start-150"
+      }
+    },
+    {
+      "advance": {
+        "ms": 5000
+      }
+    },
+    {
+      "expect": {
+        "image": "moving-150",
+        "fault": "none"
+      }
+    }
+  ]
+}

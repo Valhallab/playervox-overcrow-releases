@@ -8,8 +8,9 @@ publish = false
 
 # Test scenarios of widget API v1 (docs/widget-testing.md): the declarative
 # file `overcrow-widget test` plays through the headless runtime, its bounds
-# and checks, and the report the runtime answers with. No I/O: the CLI and
-# the OverCrow headless runtime share this code, so both read a scenario the
+# and checks, and the report the runtime answers with. No I/O but the
+# bounded read of a scenario's images (`load_assets`): the CLI and the
+# OverCrow headless runtime share this code, so both read a scenario the
 # same way.
 #
 # The OverCrow host pins this crate by Git revision and resolves these

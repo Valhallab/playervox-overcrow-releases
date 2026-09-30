@@ -1,0 +1,173 @@
+{
+  "scenarioVersion": 1,
+  "name": "gesture",
+  "description": "Passive clicks call nothing. In Interactive mode each button makes one call for the player shown, by click, Enter or Space; a refusal (another player, an action the player dropped) changes nothing.",
+  "assets": {
+    "aurora": "tests/assets/aurora.png",
+    "horizon": "tests/assets/horizon.png",
+    "tiles": "tests/assets/tiles.png"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "media.subscribe": {
+        "player": "p1",
+        "title": "Beyond the northern lights",
+        "artists": [
+          "The Quiet Expedition"
+        ],
+        "playing": true,
+        "canPrevious": true,
+        "canPlayPause": true,
+        "canNext": true,
+        "cover": "fixture:aurora"
+      }
+    },
+    "calls": {
+      "media.previous": [
+        {
+          "value": null
+        }
+      ],
+      "media.playPause": [
+        {
+          "value": null
+        }
+      ],
+      "media.next": [
+        {
+          "error": "stale_context"
+        },
+        {
+          "error": "unsupported"
+        }
+      ]
+    }
+  },
+  "steps": [
+    {
+      "pointer": {
+        "click": {
+          "at": [
+            60,
+            44
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "media.subscribe",
+            "params": {
+              "cover": true
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Previous"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "media.previous",
+            "params": {
+              "player": "p1"
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Pause"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "media.playPause",
+            "params": {
+              "player": "p1"
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "media.next",
+            "params": {
+              "player": "p1"
+            },
+            "outcome": "stale_context"
+          }
+        ]
+      }
+    },
+    {
+      "key": {
+        "key": "Space"
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "media.next",
+            "params": {
+              "player": "p1"
+            },
+            "outcome": "unsupported"
+          }
+        ],
+        "text": [
+          "Beyond the northern lights"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "pointer": {
+        "move": {
+          "label": "Next"
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "tooltip"
+      }
+    }
+  ]
+}

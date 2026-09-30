@@ -5,8 +5,13 @@
 //! ```text
 //! overcrow-widget-headless --version --format json      → RuntimeInfo
 //! overcrow-widget-headless run --interface 1 --package <file.ocpkg>
-//!     --scenario <file.scenario.json> --out <directory>  → Report
+//!     --scenario <file.scenario.json> --out <directory>
+//!     [--project <directory>]                            → Report
 //! ```
+//!
+//! `--project` is the widget project a scenario with `assets` reads its
+//! images from ([`crate::load_assets`]); it is required then, and ignored
+//! otherwise.
 //!
 //! `run` validates the package as the overlay does, plays the scenario in
 //! the sandboxed VM, writes each captured image as `<out>/<image>.png` and

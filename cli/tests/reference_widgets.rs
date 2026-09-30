@@ -60,7 +60,14 @@ fn the_pilots_are_here() {
         .iter()
         .map(|path| path.file_name().unwrap().to_string_lossy().into_owned())
         .collect();
-    for pilot in ["clock", "fps", "performance", "session", "stopwatch"] {
+    for pilot in [
+        "clock",
+        "fps",
+        "media",
+        "performance",
+        "session",
+        "stopwatch",
+    ] {
         assert!(names.iter().any(|name| name == pilot), "widgets/{pilot}");
     }
 }
@@ -117,6 +124,9 @@ fn every_scenario_is_valid_with_exactly_its_reference_images() {
             );
             scenario
                 .check_against(&manifest)
+                .unwrap_or_else(|error| panic!("{}: {error}", path.display()));
+            // Its fixture images are in the project, within the bounds.
+            overcrow_widget_scenario::load_assets(&project, &scenario.assets)
                 .unwrap_or_else(|error| panic!("{}: {error}", path.display()));
             for image in scenario.images() {
                 let file = project.join(format!("tests/reference/{name}/{image}.png"));
@@ -253,6 +263,8 @@ fn service_fixtures_follow_the_result_shapes() {
         "telemetry.read",
         "stopwatch.read",
         "stopwatch.control",
+        "media.read",
+        "media.control",
     ] {
         assert!(exercised.contains(capability), "{capability}");
     }

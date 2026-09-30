@@ -27,12 +27,17 @@ use overcrow_widget_schema::limits::{
 };
 use overcrow_widget_schema::manifest::Manifest;
 use overcrow_widget_schema::permissions::capability_named;
+use overcrow_widget_schema::results::{self, Shape};
 use overcrow_widget_schema::services::{Requirement, SERVICE_ERRORS, ServiceKind, service};
 use overcrow_widget_schema::wrapper::HOST_FEATURES;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
+mod assets;
 pub mod report;
+
+use assets::asset_components;
+pub use assets::load_assets;
 
 /// The scenario format this crate reads.
 pub const SCENARIO_VERSION: u32 = 1;
@@ -52,6 +57,13 @@ pub const MAX_DESCRIPTION_CHARS: usize = 1024;
 pub const MAX_STEPS: usize = 512;
 /// Reference images of one scenario.
 pub const MAX_CAPTURES: usize = 64;
+/// Fixture images of one scenario, at most.
+pub const MAX_ASSETS: usize = 8;
+/// A fixture value names a scenario image as `fixture:<name>` where its
+/// service returns an `asset:` handle.
+pub const FIXTURE_ASSET_PREFIX: &str = "fixture:";
+/// Longest asset path, bytes.
+pub const MAX_ASSET_PATH_BYTES: usize = 256;
 /// Fixture answers of one scenario: call answers, HTTP answers and
 /// confirmations together.
 pub const MAX_FIXTURES: usize = 256;
@@ -179,6 +191,11 @@ pub struct Scenario {
     pub description: Option<String>,
     #[serde(default)]
     pub host: Host,
+    /// Images a fixture value gives the widget as `fixture:<name>` where
+    /// its service returns an `asset:` handle: name → path of a PNG or JPEG
+    /// file relative to the project ([`load_assets`]). Not packaged.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub assets: BTreeMap<String, String>,
     #[serde(default)]
     pub fixtures: Fixtures,
     pub steps: Vec<Step>,
@@ -619,11 +636,26 @@ pub struct MenuStep {
     pub value: Option<Value>,
 }
 
+/// The next update of a capability subscription: a `value` (`null`
+/// included), or an `error` code that ends it as the host ends a
+/// subscription whose source failed.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct Publish {
     pub service: String,
-    pub value: Value,
+    #[serde(
+        default,
+        deserialize_with = "present",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub value: Option<Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+}
+
+/// A member that is present, `null` included (`Some(Value::Null)`).
+fn present<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Option<Value>, D::Error> {
+    Value::deserialize(deserializer).map(Some)
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -903,15 +935,91 @@ fn data_subscription(name: &str) -> Option<&'static overcrow_widget_schema::serv
     })
 }
 
-fn check_value(path: &str, service: &str, value: &Value) -> Checked {
+fn check_value(
+    path: &str,
+    service: &str,
+    value: &Value,
+    assets: &BTreeMap<String, String>,
+) -> Checked {
+    // A declared fixture image stands for a handle the host issues.
+    let mut issue = |name: &str| {
+        assets
+            .contains_key(name)
+            .then(|| "asset:0000000000000000".to_owned())
+    };
     let expected = service_returns(service);
-    if !expected.is_some_and(|shape| shape.matches(value)) {
+    let resolved = expected.and_then(|shape| resolve_assets(&shape, value, &mut issue));
+    if !expected
+        .zip(resolved)
+        .is_some_and(|(shape, resolved)| shape.matches(&resolved))
+    {
         return Err(ScenarioError::new(
             path,
             format!("the value does not have the shape of the `{service}` result"),
         ));
     }
     Ok(())
+}
+
+/// `value` with each `fixture:<name>` where `shape` has an `asset:` handle
+/// replaced by `issue(name)`; `None` when `issue` knows no such image or
+/// when a text there is not a `fixture:` name (a literal handle). Other
+/// values are unchanged, so a `fixture:` text elsewhere stays text; the
+/// caller then checks the result against `shape`. The headless runtime
+/// issues real handles for the scenario's images this way.
+pub fn resolve_assets(
+    shape: &Shape,
+    value: &Value,
+    issue: &mut dyn FnMut(&str) -> Option<String>,
+) -> Option<Value> {
+    Some(match shape {
+        // A handle is the host's to issue: a fixture names an image.
+        Shape::Asset => match value.as_str() {
+            Some(text) => Value::String(issue(text.strip_prefix(FIXTURE_ASSET_PREFIX)?)?),
+            None => value.clone(),
+        },
+        Shape::Nullable(inner) if !value.is_null() => resolve_assets(inner, value, issue)?,
+        Shape::List(item) => match value.as_array() {
+            Some(items) => Value::Array(
+                items
+                    .iter()
+                    .map(|entry| resolve_assets(item, entry, issue))
+                    .collect::<Option<_>>()?,
+            ),
+            None => value.clone(),
+        },
+        Shape::Record(members) => match value.as_object() {
+            Some(object) => Value::Object(
+                object
+                    .iter()
+                    .map(|(key, entry)| {
+                        let resolved = match members.iter().find(|member| member.name == key) {
+                            Some(member) => resolve_assets(&member.shape, entry, issue)?,
+                            None => entry.clone(),
+                        };
+                        Some((key.clone(), resolved))
+                    })
+                    .collect::<Option<Map<_, _>>>()?,
+            ),
+            None => value.clone(),
+        },
+        // The one alternative the resolved value matches.
+        Shape::OneOf(shapes) => {
+            let mut matching = shapes.iter().filter_map(|alternative| {
+                resolve_assets(alternative, value, issue)
+                    .filter(|resolved| alternative.matches(resolved))
+            });
+            match (matching.next(), matching.next()) {
+                (Some(resolved), None) => resolved,
+                _ => value.clone(),
+            }
+        }
+        Shape::Named(name) => match results::shape(name) {
+            Some(named) => resolve_assets(&named.shape, value, issue)?,
+            None => value.clone(),
+        },
+        _ => value.clone(),
+    })
 }
 
 fn service_returns(name: &str) -> Option<overcrow_widget_schema::results::Shape> {
@@ -947,6 +1055,7 @@ impl Scenario {
             ));
         }
         self.check_host()?;
+        self.check_assets()?;
         self.check_fixtures()?;
         self.check_steps()
     }
@@ -1017,6 +1126,31 @@ impl Scenario {
         Ok(())
     }
 
+    fn check_assets(&self) -> Checked {
+        if self.assets.len() > MAX_ASSETS {
+            return Err(ScenarioError::new(
+                "assets",
+                format!("at most {MAX_ASSETS} images"),
+            ));
+        }
+        for (name, path) in &self.assets {
+            let here = format!("assets.{}", report::neutral(name));
+            if !valid_name(name) {
+                return Err(ScenarioError::new(
+                    here,
+                    format!("a name is [a-z0-9][a-z0-9-]*, at most {MAX_NAME_BYTES} bytes"),
+                ));
+            }
+            if asset_components(path).is_none() {
+                return Err(ScenarioError::new(
+                    here,
+                    "a relative path inside the project, with `/` between names, without `.` or `..`",
+                ));
+            }
+        }
+        Ok(())
+    }
+
     fn check_fixtures(&self) -> Checked {
         let fixtures = &self.fixtures;
         let count = fixtures.calls.values().map(Vec::len).sum::<usize>()
@@ -1040,7 +1174,9 @@ impl Scenario {
             for (index, reply) in replies.iter().enumerate() {
                 let here = format!("{path}[{index}]");
                 match reply {
-                    Reply::Value(value) => check_value(&format!("{here}.value"), name, value)?,
+                    Reply::Value(value) => {
+                        check_value(&format!("{here}.value"), name, value, &self.assets)?;
+                    }
                     Reply::Error(code) => check_error_code(&format!("{here}.error"), code)?,
                 }
             }
@@ -1050,7 +1186,7 @@ impl Scenario {
             if data_subscription(name).is_none() {
                 return Err(ScenarioError::new(path, "not a data subscription"));
             }
-            check_value(&path, name, value)?;
+            check_value(&path, name, value, &self.assets)?;
         }
         for (index, fixture) in fixtures.http.iter().enumerate() {
             check_http(&format!("fixtures.http[{index}]"), fixture)?;
@@ -1124,7 +1260,21 @@ impl Scenario {
                             "not a data subscription",
                         ));
                     }
-                    check_value(&format!("{here}.value"), &publish.service, &publish.value)?;
+                    match (&publish.value, &publish.error) {
+                        (Some(value), None) => check_value(
+                            &format!("{here}.value"),
+                            &publish.service,
+                            value,
+                            &self.assets,
+                        )?,
+                        (None, Some(code)) => check_error_code(&format!("{here}.error"), code)?,
+                        _ => {
+                            return Err(ScenarioError::new(
+                                here,
+                                "give exactly one of `value` and `error`",
+                            ));
+                        }
+                    }
                 }
                 Step::Expect(expect) => {
                     check_expect(&format!("{path}.expect"), expect)?;

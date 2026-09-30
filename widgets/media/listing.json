@@ -1,0 +1,18 @@
+{
+  "author": "PlayerVox",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/media",
+  "defaultLocale": "en",
+  "localizations": [
+    {
+      "locale": "en",
+      "name": "Media",
+      "description": "The track your music player is playing, with its cover, and previous, play/pause and next buttons in Interactive mode."
+    },
+    {
+      "locale": "fr",
+      "name": "Média",
+      "description": "Le morceau que joue votre lecteur de musique, avec sa pochette, et les boutons précédent, lecture/pause et suivant en mode interactif."
+    }
+  ]
+}

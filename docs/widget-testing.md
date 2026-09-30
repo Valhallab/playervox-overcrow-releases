@@ -149,6 +149,22 @@ Everything is optional.
 | `features` | all | Host data sources of `requires` rows. |
 | `storage` | empty | The widget's storage before it starts (within the quota). |
 
+### `assets`
+
+Images a fixture value hands to the widget, as the host hands it a media
+cover or an emote: `{ "<name>": "<path>" }`, at most 8. A name is
+`[a-z0-9][a-z0-9-]*`; a path is relative to the widget project, made of
+plain names separated by `/` (`tests/assets/cover.png`), without `.` or
+`..`, and no link on the way. Each file is a PNG or JPEG of at most
+`MAX_IMAGE_ENCODED_BYTES` and `MAX_IMAGE_EDGE_PX` per side, decoded by the
+runtime with the host's decoder. They are test files: the package leaves
+`tests/` out.
+
+Where a service result has an `asset:` handle (`Media.cover`, a chat
+emote…), a fixture value writes `"fixture:<name>"`; the runtime issues the
+widget a real handle for that image, as the host does. A literal
+`asset:` handle is refused: handles are the host's to issue.
+
 ### `fixtures`
 
 The simulator replaces where data comes from, never the host's checks. A
@@ -179,6 +195,7 @@ Storage, timers and the clipboard are the host's own.
 | `{ "text": "…" }` | Committed text input for the focused field. |
 | `{ "menu": { "id": "row", "value": … } }` | A `wrapper.menu` row: the value of a toggle, slider or choice, none for an action. A menu row is never a gesture. |
 | `{ "publish": { "service": "fps.subscribe", "value": … } }` | The next value of a subscription. |
+| `{ "publish": { "service": "media.subscribe", "error": "unavailable" } }` | Ends the subscription with this failure, as the host ends one whose source failed; the widget receives the code as the subscription's last update. |
 | `{ "expect": { … } }` | What must hold once the previous steps settled. |
 
 Each step settles before the next: the VM has answered everything it was
@@ -235,7 +252,8 @@ before each change is merged.
 `overcrow-widget test` talks to it through a versioned interface
 (`overcrow_widget_scenario::report`): `--version --format json`, then `run
 --interface 1 --package … --scenario … --out …`, which writes the images and
-prints a report.
+prints a report. For a scenario with `assets`, `--project …` gives the
+project the runtime reads them from, with the same checks as the CLI.
 
 ## Maintaining the templates
 

@@ -10,6 +10,7 @@ under the MIT license: read them, copy them, and use them as a starting point.
 | --- | --- | --- | --- | --- |
 | **Clock** | Shows the local time of day and, optionally, the date, in a 24-hour format. | `com.playervox.overcrow.clock` | none | [clock/README.md](../../../widgets/clock/README.md) |
 | **FPS** | Shows the game’s presented frame rate, when the host has a frame rate source. | `com.playervox.overcrow.fps` | `fps.read` | [fps/README.md](../../../widgets/fps/README.md) |
+| **Media** | The track your music player is playing, with its cover, and previous, play/pause and next buttons in Interactive mode. | `com.playervox.overcrow.media` | `media.read`, `media.control` | [media/README.md](../../../widgets/media/README.md) |
 | **Performance** | Game CPU and memory, plus the temperatures this computer exposes. | `com.playervox.overcrow.performance` | `telemetry.read`, `fps.read` | [performance/README.md](../../../widgets/performance/README.md) |
 | **Session** | Shows how long the current game session has lasted. | `com.playervox.overcrow.session` | `session.read` | [session/README.md](../../../widgets/session/README.md) |
 | **Manual stopwatch** | A stopwatch to the hundredth of a second, started, paused and reset with its buttons or the host’s shortcuts. | `com.playervox.overcrow.stopwatch` | `stopwatch.read`, `stopwatch.control` | [stopwatch/README.md](../../../widgets/stopwatch/README.md) |
