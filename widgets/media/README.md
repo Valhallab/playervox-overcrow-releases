@@ -134,12 +134,12 @@ at 320 px wide with a 256 px cover:
 
 | | Linux | Windows (VM) |
 | --- | --- | --- |
-| Widget start, warm, into the overlay's runtime | 6.9 ms (p50), 8.2 ms at most | VM ready in 14 ms (p50) |
+| Widget start, warm, into the overlay's runtime | 6.9 ms (p50), 8.0 ms at most | VM ready in 14 ms (p50) |
 | VM memory, cover included | 0.64 MiB private, 0.82 MiB PSS: the VM holds the cover's handle, not its pixels | 0.90 MiB private working set, 1.18 MiB private commit |
 | Private memory in all (VM, sandbox helpers, overlay share with the cover) | under 7 MB | — |
 | CPU, a track held | 0.03 % of one core, no frame | — |
-| CPU, a long title scrolling | 0.53–0.57 % of one core: up to 60 frames a second of 0.06 ms while it moves, none during its pauses | — |
-| CPU, a new track and cover every 2 s | 0.05–0.07 % of one core: about three frames per track | — |
+| CPU, a long title scrolling | 0.15 % of one core: one frame per physical pixel it moves (18 a second at 100 %), 0.07 ms each, none during its pauses | — |
+| CPU, a new track and cover every 2 s | 0.05 % of one core: one frame per track | — |
 | VM CPU | one short turn per track; none while a title scrolls | — |
 
 The egui widget it replaces repainted a scrolling title at 30 Hz (0.04 ms
