@@ -1,8 +1,9 @@
 //! Design-system tokens available to `var(--name)`. The dark values are the
 //! current overlay palette. The built-ins had no light theme: the reference
 //! images of the P2.4 pilots (Clock, Session, FPS, in both themes) fixed the
-//! panel and the primary and muted text; the colours the pilots do not
-//! draw stay provisional until a built-in that draws them checks them.
+//! panel and the primary and muted text, the Performance rewrite (P3.2) the
+//! warning and danger colours; the other colours stay provisional until a
+//! built-in that draws them checks them.
 
 use crate::model::Status;
 
@@ -177,7 +178,9 @@ pub const TOKENS: &[Token] = &[
         "#71717a",
         "Placeholders and disabled text.",
     ),
-    color(
+    // Fixed by P3.2: the Performance built-in's critical values, at WCAG AA
+    // on the panel in both themes (a schema test enforces it).
+    checked(
         "--color-danger",
         "#fb7185",
         "#e11d48",
@@ -189,7 +192,8 @@ pub const TOKENS: &[Token] = &[
         "#e11d481a",
         "Danger wash behind destructive confirmations and errors.",
     ),
-    color("--color-warning", "#fbbf24", "#b45309", "Warnings."),
+    // Fixed by P3.2: the Performance built-in's warning values.
+    checked("--color-warning", "#fbbf24", "#b45309", "Warnings."),
     color(
         "--color-success",
         "#86efac",

@@ -288,9 +288,10 @@ value; any other element, `canvas` included, is sized by style only.\n\n\
 fn tokens_section(out: &mut String) {
     out.push_str(
         "## Design tokens\n\nDark values are the current overlay palette. The reference images of \
-the P2.4 built-in pilots, in both themes, fixed the panel and the primary and muted text; \
-with `--color-on-accent`, fixed by the P0.6 audit, the other colours remain a proposal until \
-a built-in that draws them checks them.\n\n\
+the P2.4 built-in pilots, in both themes, fixed the panel and the primary and muted text, \
+those of the Performance built-in (P3.2) the warning and danger colours; with \
+`--color-on-accent`, fixed by the P0.6 audit, the other colours remain a proposal until a \
+built-in that draws them checks them.\n\n\
 | Token | Type | Dark | Light | Status | Meaning |\n| --- | --- | --- | --- | --- | --- |\n",
     );
     for token in TOKENS {
