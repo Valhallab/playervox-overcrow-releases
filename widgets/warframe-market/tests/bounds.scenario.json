@@ -1,0 +1,60 @@
+{
+  "scenarioVersion": 1,
+  "name": "bounds",
+  "description": "Each route has its own response bound: a version answer beyond 4 KiB fails as `response_body_limit`, and the stored catalog stays in use.",
+  "host": {
+    "storage": {
+      "catalog": {
+        "version": "v1",
+        "chunks": 1
+      },
+      "catalog-0": "Arcane Energize\nArcane Grace\nArcane Guardian\nForma Blueprint\nPrimed Flow\nSoma Prime Set\nHell's Chamber\thells_chamber\nSilva & Aegis Prime Guard\tsilva_and_aegis_prime_guard",
+      "state": {
+        "query": "forma"
+      }
+    }
+  },
+  "fixtures": {
+    "http": [
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.warframe.market/v2/versions"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 "
+        }
+      }
+    ]
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Forma Blueprint"
+        ],
+        "calls": [
+          {
+            "service": "storage.get",
+            "outcome": "ok"
+          },
+          {
+            "service": "storage.get",
+            "outcome": "ok"
+          },
+          {
+            "service": "storage.get",
+            "outcome": "ok"
+          },
+          {
+            "service": "http.fetch",
+            "outcome": "response_body_limit"
+          }
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

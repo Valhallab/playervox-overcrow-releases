@@ -1,0 +1,74 @@
+{
+  "scenarioVersion": 1,
+  "name": "refused",
+  "description": "Without `network`, the stored catalog still searches and offers fail; without `clipboardWrite`, a copy fails and says so.",
+  "host": {
+    "mode": "interactive",
+    "grants": [
+      "storage"
+    ],
+    "storage": {
+      "catalog": {
+        "version": "v1",
+        "chunks": 1
+      },
+      "catalog-0": "Arcane Energize\nArcane Grace\nArcane Guardian\nForma Blueprint\nPrimed Flow\nSoma Prime Set\nHell's Chamber\thells_chamber\nSilva & Aegis Prime Guard\tsilva_and_aegis_prime_guard",
+      "state": {
+        "query": "grace"
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Arcane Grace"
+        ],
+        "calls": [
+          {
+            "service": "storage.get",
+            "outcome": "ok"
+          },
+          {
+            "service": "storage.get",
+            "outcome": "ok"
+          },
+          {
+            "service": "storage.get",
+            "outcome": "ok"
+          },
+          {
+            "service": "http.fetch",
+            "outcome": "permission_denied"
+          }
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Arcane Grace"
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 400
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Orders unavailable · select an item to retry"
+        ],
+        "calls": [
+          {
+            "service": "http.fetch",
+            "outcome": "permission_denied"
+          }
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

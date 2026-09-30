@@ -113,3 +113,52 @@ fn oversized_files_are_refused_before_parsing() {
     let bytes = vec![b' '; overcrow_widget_scenario::MAX_SCENARIO_BYTES + 1];
     assert!(parse(&bytes).is_err());
 }
+
+#[test]
+fn http_fixture_bodies_stay_within_the_largest_rule_bound() {
+    let manifest = |bound: Option<u64>| {
+        let mut rule = serde_json::json!({
+            "origin": "https://api.example.com", "method": "GET", "path": "/v1/items",
+        });
+        if let Some(bound) = bound {
+            rule["maxResponseBytes"] = bound.into();
+        }
+        validate_manifest_value(serde_json::json!({
+            "schemaVersion": 1, "apiVersion": 1, "id": "com.example.market",
+            "version": "1.0.0", "name": {"en": "Market", "fr": "Marché"},
+            "sizing": {"fit": "none", "preferred": {"width": 200, "height": 200},
+                       "min": {"width": 100, "height": 100}, "max": {"width": 400, "height": 400}},
+            "permissions": {"network": [rule]},
+        }))
+        .expect("manifest")
+    };
+    let scenario = |bytes: usize| {
+        parse(
+            &serde_json::to_vec(&serde_json::json!({
+                "scenarioVersion": 1, "name": "large",
+                "fixtures": {"http": [{
+                    "request": {"method": "GET", "url": "https://api.example.com/v1/items"},
+                    "response": {"status": 200, "contentType": "application/json",
+                                 "body": "a".repeat(bytes)},
+                }]},
+                "steps": [{"expect": {"fault": "none"}}],
+            }))
+            .expect("scenario bytes"),
+        )
+    };
+    const MIB: usize = 1024 * 1024;
+    let over_default = scenario(MIB + 1).expect("within the declared ceiling");
+    let error = over_default
+        .check_against(&manifest(None))
+        .expect_err("beyond the default bound");
+    assert_eq!(error.path, "fixtures.http[0].response");
+    over_default
+        .check_against(&manifest(Some(2 * MIB as u64)))
+        .expect("within the rule's bound");
+    scenario(MIB)
+        .expect("at the default bound")
+        .check_against(&manifest(None))
+        .expect("at the default bound");
+    let error = scenario(3 * MIB + 1).expect_err("beyond the declared ceiling");
+    assert_eq!(error.path, "fixtures.http[0].response");
+}

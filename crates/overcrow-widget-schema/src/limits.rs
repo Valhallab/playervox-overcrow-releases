@@ -816,7 +816,25 @@ pub const MAX_HTTP_RESPONSE_BYTES: Limit = fixed(
     "MAX_HTTP_RESPONSE_BYTES",
     MIB,
     Unit::Bytes,
-    "Body of one response delivered to the VM; must fit the VM heap.",
+    "Body of one response delivered to the VM when its network rule declares no `maxResponseBytes`, and of every `as: \"image\"` response; must fit the VM heap.",
+);
+pub const MAX_HTTP_DECLARED_RESPONSE_BYTES: Limit = fixed(
+    "MAX_HTTP_DECLARED_RESPONSE_BYTES",
+    3 * MIB,
+    Unit::Bytes,
+    "Largest `maxResponseBytes` of one network rule: the body of one response the rule allows, delivered to the VM; must fit the VM heap and, with its control part, the frame queue.",
+);
+pub const MAX_HTTP_RESPONSE_BYTES_PER_WIDGET: Limit = fixed(
+    "MAX_HTTP_RESPONSE_BYTES_PER_WIDGET",
+    4 * MIB,
+    Unit::Bytes,
+    "Response bytes one widget's requests in flight may reserve, each the bound of its rule; `busy` beyond. Equals `MAX_HTTP_CONCURRENT_PER_WIDGET` × `MAX_HTTP_RESPONSE_BYTES`, so rules without `maxResponseBytes` never reach it.",
+);
+pub const MAX_HTTP_RESPONSE_BYTES_GLOBAL: Limit = fixed(
+    "MAX_HTTP_RESPONSE_BYTES_GLOBAL",
+    64 * MIB,
+    Unit::Bytes,
+    "Response bytes all widgets' requests in flight may reserve; `busy` beyond. Equals `MAX_HTTP_CONCURRENT_GLOBAL` × `MAX_HTTP_RESPONSE_BYTES`, the worst case before declared bounds existed.",
 );
 pub const MAX_HTTP_CONCURRENT_PER_WIDGET: Limit = fixed(
     "MAX_HTTP_CONCURRENT_PER_WIDGET",
@@ -1161,6 +1179,9 @@ pub const ALL: &[&Limit] = &[
     &MAX_REQUEST_URL_BYTES,
     &MAX_HTTP_REQUEST_BYTES,
     &MAX_HTTP_RESPONSE_BYTES,
+    &MAX_HTTP_DECLARED_RESPONSE_BYTES,
+    &MAX_HTTP_RESPONSE_BYTES_PER_WIDGET,
+    &MAX_HTTP_RESPONSE_BYTES_GLOBAL,
     &MAX_HTTP_CONCURRENT_PER_WIDGET,
     &MAX_HTTP_CONCURRENT_GLOBAL,
     &HTTP_TIMEOUT_MS,
@@ -1206,12 +1227,28 @@ const _: () = {
     assert!(VM_HEAP_BYTES.value <= VM_MAX_HEAP_BYTES.value);
     // The largest heap leaves room for the runtime and the largest frames.
     assert!(VM_MAX_HEAP_BYTES.value + MAX_QUEUED_BYTES.value < VM_PROCESS_MEMORY_BYTES.value);
-    assert!(MAX_HTTP_RESPONSE_BYTES.value < VM_HEAP_BYTES.value);
+    assert!(MAX_HTTP_RESPONSE_BYTES.value <= MAX_HTTP_DECLARED_RESPONSE_BYTES.value);
+    assert!(MAX_HTTP_DECLARED_RESPONSE_BYTES.value < VM_HEAP_BYTES.value);
+    // Response budgets: the largest declared bound fits one widget's budget,
+    // and undeclared rules alone never reach either budget, so the worst
+    // case of bytes in flight is the one before declared bounds.
+    assert!(MAX_HTTP_DECLARED_RESPONSE_BYTES.value <= MAX_HTTP_RESPONSE_BYTES_PER_WIDGET.value);
+    assert!(
+        MAX_HTTP_CONCURRENT_PER_WIDGET.value * MAX_HTTP_RESPONSE_BYTES.value
+            == MAX_HTTP_RESPONSE_BYTES_PER_WIDGET.value
+    );
+    assert!(
+        MAX_HTTP_CONCURRENT_GLOBAL.value * MAX_HTTP_RESPONSE_BYTES.value
+            == MAX_HTTP_RESPONSE_BYTES_GLOBAL.value
+    );
     assert!(MAX_LOGIC_BYTES.value < VM_HEAP_BYTES.value);
     assert!(VM_PROCESS_MEMORY_BYTES.value < VM_ADDRESS_SPACE_BYTES.value);
     assert!(VM_MESSAGES_PER_TURN.value <= MAX_VM_MESSAGE_BURST.value);
     // The queue holds the largest frame: control JSON plus the largest raw payload.
-    assert!(MAX_CONTROL_JSON_BYTES.value + MAX_HTTP_RESPONSE_BYTES.value <= MAX_QUEUED_BYTES.value);
+    assert!(
+        MAX_CONTROL_JSON_BYTES.value + MAX_HTTP_DECLARED_RESPONSE_BYTES.value
+            <= MAX_QUEUED_BYTES.value
+    );
     assert!(MAX_CONTROL_JSON_BYTES.value + MAX_LOGIC_BYTES.value <= MAX_QUEUED_BYTES.value);
     assert!(MAX_CONTROL_JSON_BYTES.value + MAX_PATCH_BYTES.value <= MAX_QUEUED_BYTES.value);
     assert!(HEARTBEAT_INTERVAL_MS.value < HEARTBEAT_DEADLINE_MS.value);

@@ -231,7 +231,7 @@ pub const SERVICES: &[Service] = &[
                 "`image` decodes the body in the host and returns an `asset:` handle.",
             ),
         ],
-        "`{ status, contentType }` with the body as raw payload ≤ `MAX_HTTP_RESPONSE_BYTES`, or `{ status, asset }`",
+        "`{ status, contentType }` with the body as raw payload ≤ the rule's `maxResponseBytes` (`MAX_HTTP_RESPONSE_BYTES` when absent), or `{ status, asset }` from a body ≤ `MAX_HTTP_RESPONSE_BYTES`",
         Status::Fixed,
     )
     .returning(Shape::Named("HttpResponse")),

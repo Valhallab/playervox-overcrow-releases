@@ -60,7 +60,11 @@ Permissions :
   typés. La requête sort par le broker d’OverCrow, qui refuse tout le reste,
   ne suit aucune redirection, n’envoie ni cookie ni identifiant, refuse les
   adresses locales et privées, et borne la taille et la durée de chaque
-  échange.
+  échange. Une réponse fait au plus 1 Mio, sauf si la règle déclare un
+  `maxResponseBytes` plus grand (jusqu’à 3 Mio) : cette borne apparaît à la
+  revue et dans le panneau des permissions. Les requêtes en cours partagent
+  un budget d’octets par widget et pour tous les widgets : une borne plus
+  grande n’élève jamais le pire cas d’OverCrow.
 - **`storage`** est un stockage clé-valeur tenu par OverCrow pour votre seul
   widget, dans un quota. Il n’y a aucun accès aux fichiers.
 - **`clipboardWrite`** écrit du texte, seulement pendant que l’utilisateur

@@ -132,7 +132,7 @@ function widgets(locale, file) {
   const rows = [];
   for (const dir of readdirSync(base).sort()) {
     const project = join(base, dir);
-    // Widget API v1 projects only; the legacy Web widget has no view.ocml.
+    // Widget API v1 projects only (they have a view.ocml).
     if (!existsSync(join(project, "view.ocml"))) {
       continue;
     }

@@ -1,0 +1,92 @@
+{
+  "scenarioVersion": 1,
+  "name": "errors",
+  "description": "The version check times out: the stored catalog stays in use. An item's offers fail, then a retry shows an item without offers.",
+  "host": {
+    "mode": "interactive",
+    "storage": {
+      "catalog": {
+        "version": "v0",
+        "chunks": 1
+      },
+      "catalog-0": "Arcane Energize\nArcane Grace\nArcane Guardian\nForma Blueprint\nPrimed Flow\nSoma Prime Set\nHell's Chamber\thells_chamber\nSilva & Aegis Prime Guard\tsilva_and_aegis_prime_guard",
+      "state": {
+        "query": "flow"
+      }
+    }
+  },
+  "fixtures": {
+    "http": [
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.warframe.market/v2/versions"
+        },
+        "error": "timeout"
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.warframe.market/v2/orders/item/primed_flow/top"
+        },
+        "error": "transport_failed"
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.warframe.market/v2/orders/item/primed_flow/top"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"apiVersion\":\"0.25.0\",\"data\":{\"sell\":[],\"buy\":[]},\"error\":null}"
+        }
+      }
+    ]
+  },
+  "steps": [
+    {
+      "pointer": {
+        "click": {
+          "label": "Primed Flow"
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 400
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Orders unavailable · select an item to retry"
+        ],
+        "image": "orders-unavailable"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Primed Flow"
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 400
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "No sell offers available.",
+          "No buy offers available.",
+          "—"
+        ],
+        "image": "no-offers",
+        "fault": "none"
+      }
+    }
+  ]
+}

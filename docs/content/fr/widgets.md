@@ -13,6 +13,7 @@ partez-en.
 | **FPS** | Affiche la fréquence d’images présentée par le jeu, quand l’hôte dispose d’une source. | `com.playervox.overcrow.fps` | `fps.read` | [fps/README.md](../../../widgets/fps/README.md) |
 | **Session** | Affiche la durée de la session de jeu en cours. | `com.playervox.overcrow.session` | `session.read` | [session/README.md](../../../widgets/session/README.md) |
 | **Chronomètre** | Un chronomètre au centième de seconde, démarré, mis en pause et réinitialisé par ses boutons ou les raccourcis de l’hôte. | `com.playervox.overcrow.stopwatch` | `stopwatch.read`, `stopwatch.control` | [stopwatch/README.md](../../../widgets/stopwatch/README.md) |
+| **Marché Warframe** | Recherche les objets PC publics dans un catalogue en cache, affiche les meilleures offres d’achat et de vente d’un objet et copie un message d’échange sur un clic. | `com.playervox.overcrow.warframe.market` | `network`, `storage`, `clipboardWrite` | [warframe-market/README.md](../../../widgets/warframe-market/README.md) |
 <!-- /generated:widgets -->
 
 Chaque dossier de widget contient :
@@ -40,5 +41,7 @@ node --test widgets/clock/tests/logic.test.mjs
 `prepare-widgets.mjs` demande que le SDK soit construit d’abord (`npm ci`
 puis `npm run build` dans `sdk/`). Les autres widgets intégrés sont réécrits
 un par un sur le même SDK et rejoignent cette liste à leur arrivée.
-`widgets/warframe-market` est un widget de l’ancien runtime Web, conservé
-jusqu’à sa réécriture ou son retrait ; ce n’est pas une référence.
+Marché Warframe n’est pas un widget intégré : widget PlayerVox du catalogue,
+installé à la demande, il montre des routes réseau avec une borne de réponse
+déclarée, le stockage de l’hôte pour un catalogue en cache et une copie dans
+le presse-papiers sur un clic.

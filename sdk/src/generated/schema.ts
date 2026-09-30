@@ -852,7 +852,7 @@ export interface ServiceResultMap {
   readonly "storage.remove": null;
   /** `storage.keys`: list of keys. */
   readonly "storage.keys": ReadonlyArray<string>;
-  /** `http.fetch`: `{ status, contentType }` with the body as raw payload ≤ `MAX_HTTP_RESPONSE_BYTES`, or `{ status, asset }`. */
+  /** `http.fetch`: `{ status, contentType }` with the body as raw payload ≤ the rule's `maxResponseBytes` (`MAX_HTTP_RESPONSE_BYTES` when absent), or `{ status, asset }` from a body ≤ `MAX_HTTP_RESPONSE_BYTES`. */
   readonly "http.fetch": HttpResponse;
   /** `clipboard.writeText`: `null`. */
   readonly "clipboard.writeText": null;

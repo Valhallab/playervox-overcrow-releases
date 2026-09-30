@@ -1,0 +1,226 @@
+{
+  "scenarioVersion": 1,
+  "name": "detail",
+  "description": "Interactive: select a result, compare the offers (a hidden offer and a total price for three items), copy a whisper.",
+  "host": {
+    "mode": "interactive",
+    "size": {
+      "width": 380,
+      "height": 760
+    },
+    "storage": {
+      "state": {
+        "query": "arcane"
+      }
+    }
+  },
+  "fixtures": {
+    "http": [
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.warframe.market/v2/versions"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"apiVersion\":\"0.25.0\",\"data\":{\"id\":\"synthetic\",\"collections\":{\"items\":\"v1\"},\"updatedAt\":\"2026-09-28T16:09:39Z\"},\"error\":null}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.warframe.market/v2/items"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"apiVersion\":\"0.25.0\",\"data\":[{\"id\":\"000000000000000000000000\",\"slug\":\"arcane_energize\",\"gameRef\":\"/Lotus/Synthetic/0\",\"tags\":[\"synthetic\"],\"i18n\":{\"en\":{\"name\":\"Arcane Energize\",\"icon\":\"items/images/en/arcane_energize.png\",\"thumb\":\"items/images/en/thumbs/arcane_energize.128x128.png\"}}},{\"id\":\"000000000000000000000001\",\"slug\":\"arcane_grace\",\"gameRef\":\"/Lotus/Synthetic/1\",\"tags\":[\"synthetic\"],\"i18n\":{\"en\":{\"name\":\"Arcane Grace\",\"icon\":\"items/images/en/arcane_grace.png\",\"thumb\":\"items/images/en/thumbs/arcane_grace.128x128.png\"}}},{\"id\":\"000000000000000000000002\",\"slug\":\"arcane_guardian\",\"gameRef\":\"/Lotus/Synthetic/2\",\"tags\":[\"synthetic\"],\"i18n\":{\"en\":{\"name\":\"Arcane Guardian\",\"icon\":\"items/images/en/arcane_guardian.png\",\"thumb\":\"items/images/en/thumbs/arcane_guardian.128x128.png\"}}},{\"id\":\"000000000000000000000003\",\"slug\":\"forma_blueprint\",\"gameRef\":\"/Lotus/Synthetic/3\",\"tags\":[\"synthetic\"],\"i18n\":{\"en\":{\"name\":\"Forma Blueprint\",\"icon\":\"items/images/en/forma_blueprint.png\",\"thumb\":\"items/images/en/thumbs/forma_blueprint.128x128.png\"}}},{\"id\":\"000000000000000000000004\",\"slug\":\"primed_flow\",\"gameRef\":\"/Lotus/Synthetic/4\",\"tags\":[\"synthetic\"],\"i18n\":{\"en\":{\"name\":\"Primed Flow\",\"icon\":\"items/images/en/primed_flow.png\",\"thumb\":\"items/images/en/thumbs/primed_flow.128x128.png\"}}},{\"id\":\"000000000000000000000005\",\"slug\":\"soma_prime_set\",\"gameRef\":\"/Lotus/Synthetic/5\",\"tags\":[\"synthetic\"],\"i18n\":{\"en\":{\"name\":\"Soma Prime Set\",\"icon\":\"items/images/en/soma_prime_set.png\",\"thumb\":\"items/images/en/thumbs/soma_prime_set.128x128.png\"}}},{\"id\":\"000000000000000000000006\",\"slug\":\"hells_chamber\",\"gameRef\":\"/Lotus/Synthetic/6\",\"tags\":[\"synthetic\"],\"i18n\":{\"en\":{\"name\":\"Hell's Chamber\",\"icon\":\"items/images/en/hells_chamber.png\",\"thumb\":\"items/images/en/thumbs/hells_chamber.128x128.png\"}}},{\"id\":\"000000000000000000000007\",\"slug\":\"silva_and_aegis_prime_guard\",\"gameRef\":\"/Lotus/Synthetic/7\",\"tags\":[\"synthetic\"],\"i18n\":{\"en\":{\"name\":\"Silva & Aegis Prime Guard\",\"icon\":\"items/images/en/silva_and_aegis_prime_guard.png\",\"thumb\":\"items/images/en/thumbs/silva_and_aegis_prime_guard.128x128.png\"}}}],\"error\":null}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.warframe.market/v2/orders/item/arcane_energize/top"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"apiVersion\":\"0.25.0\",\"data\":{\"sell\":[{\"id\":\"order-sell-1\",\"type\":\"sell\",\"platinum\":18,\"quantity\":3,\"perTrade\":1,\"visible\":true,\"createdAt\":\"2026-09-30T07:54:17Z\",\"updatedAt\":\"2026-09-30T07:54:17Z\",\"itemId\":\"000000000000000000000000\",\"user\":{\"id\":\"user-sell-1\",\"ingameName\":\"Tenno_Trader\",\"slug\":\"tenno_trader\",\"reputation\":3,\"platform\":\"pc\",\"crossplay\":true,\"locale\":\"en\",\"status\":\"ingame\",\"activity\":{\"type\":\"UNKNOWN\",\"details\":\"unknown\"},\"lastSeen\":\"2026-09-30T08:11:41Z\"},\"rank\":0},{\"id\":\"order-sell-2\",\"type\":\"sell\",\"platinum\":60,\"quantity\":3,\"perTrade\":3,\"visible\":true,\"createdAt\":\"2026-09-30T07:54:17Z\",\"updatedAt\":\"2026-09-30T07:54:17Z\",\"itemId\":\"000000000000000000000000\",\"user\":{\"id\":\"user-sell-2\",\"ingameName\":\"VoidMerchant\",\"slug\":\"voidmerchant\",\"reputation\":3,\"platform\":\"pc\",\"crossplay\":true,\"locale\":\"en\",\"status\":\"online\",\"activity\":{\"type\":\"UNKNOWN\",\"details\":\"unknown\"},\"lastSeen\":\"2026-09-30T08:11:41Z\"},\"rank\":0},{\"id\":\"order-sell-3\",\"type\":\"sell\",\"platinum\":1,\"quantity\":3,\"perTrade\":1,\"visible\":false,\"createdAt\":\"2026-09-30T07:54:17Z\",\"updatedAt\":\"2026-09-30T07:54:17Z\",\"itemId\":\"000000000000000000000000\",\"user\":{\"id\":\"user-sell-3\",\"ingameName\":\"HiddenSeller\",\"slug\":\"hiddenseller\",\"reputation\":3,\"platform\":\"pc\",\"crossplay\":true,\"locale\":\"en\",\"status\":\"ingame\",\"activity\":{\"type\":\"UNKNOWN\",\"details\":\"unknown\"},\"lastSeen\":\"2026-09-30T08:11:41Z\"}},{\"id\":\"order-sell-4\",\"type\":\"sell\",\"platinum\":22,\"quantity\":3,\"perTrade\":1,\"visible\":true,\"createdAt\":\"2026-09-30T07:54:17Z\",\"updatedAt\":\"2026-09-30T07:54:17Z\",\"itemId\":\"000000000000000000000000\",\"user\":{\"id\":\"user-sell-4\",\"ingameName\":\"LotusBroker\",\"slug\":\"lotusbroker\",\"reputation\":3,\"platform\":\"pc\",\"crossplay\":true,\"locale\":\"en\",\"status\":\"offline\",\"activity\":{\"type\":\"UNKNOWN\",\"details\":\"unknown\"},\"lastSeen\":\"2026-09-30T08:11:41Z\"},\"rank\":5}],\"buy\":[{\"id\":\"order-buy-5\",\"type\":\"buy\",\"platinum\":15,\"quantity\":3,\"perTrade\":1,\"visible\":true,\"createdAt\":\"2026-09-30T07:54:17Z\",\"updatedAt\":\"2026-09-30T07:54:17Z\",\"itemId\":\"000000000000000000000000\",\"user\":{\"id\":\"user-buy-5\",\"ingameName\":\"OrokinBuyer\",\"slug\":\"orokinbuyer\",\"reputation\":3,\"platform\":\"pc\",\"crossplay\":true,\"locale\":\"en\",\"status\":\"ingame\",\"activity\":{\"type\":\"UNKNOWN\",\"details\":\"unknown\"},\"lastSeen\":\"2026-09-30T08:11:41Z\"},\"rank\":0},{\"id\":\"order-buy-6\",\"type\":\"buy\",\"platinum\":12,\"quantity\":3,\"perTrade\":1,\"visible\":true,\"createdAt\":\"2026-09-30T07:54:17Z\",\"updatedAt\":\"2026-09-30T07:54:17Z\",\"itemId\":\"000000000000000000000000\",\"user\":{\"id\":\"user-buy-6\",\"ingameName\":\"RelicHunter\",\"slug\":\"relichunter\",\"reputation\":3,\"platform\":\"pc\",\"crossplay\":true,\"locale\":\"en\",\"status\":\"online\",\"activity\":{\"type\":\"UNKNOWN\",\"details\":\"unknown\"},\"lastSeen\":\"2026-09-30T08:11:41Z\"},\"rank\":0}]},\"error\":null}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.warframe.market/v2/orders/item/arcane_energize/top"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"apiVersion\":\"0.25.0\",\"data\":{\"sell\":[{\"id\":\"order-sell-1\",\"type\":\"sell\",\"platinum\":18,\"quantity\":3,\"perTrade\":1,\"visible\":true,\"createdAt\":\"2026-09-30T07:54:17Z\",\"updatedAt\":\"2026-09-30T07:54:17Z\",\"itemId\":\"000000000000000000000000\",\"user\":{\"id\":\"user-sell-1\",\"ingameName\":\"Tenno_Trader\",\"slug\":\"tenno_trader\",\"reputation\":3,\"platform\":\"pc\",\"crossplay\":true,\"locale\":\"en\",\"status\":\"ingame\",\"activity\":{\"type\":\"UNKNOWN\",\"details\":\"unknown\"},\"lastSeen\":\"2026-09-30T08:11:41Z\"},\"rank\":0},{\"id\":\"order-sell-2\",\"type\":\"sell\",\"platinum\":60,\"quantity\":3,\"perTrade\":3,\"visible\":true,\"createdAt\":\"2026-09-30T07:54:17Z\",\"updatedAt\":\"2026-09-30T07:54:17Z\",\"itemId\":\"000000000000000000000000\",\"user\":{\"id\":\"user-sell-2\",\"ingameName\":\"VoidMerchant\",\"slug\":\"voidmerchant\",\"reputation\":3,\"platform\":\"pc\",\"crossplay\":true,\"locale\":\"en\",\"status\":\"online\",\"activity\":{\"type\":\"UNKNOWN\",\"details\":\"unknown\"},\"lastSeen\":\"2026-09-30T08:11:41Z\"},\"rank\":0},{\"id\":\"order-sell-3\",\"type\":\"sell\",\"platinum\":1,\"quantity\":3,\"perTrade\":1,\"visible\":false,\"createdAt\":\"2026-09-30T07:54:17Z\",\"updatedAt\":\"2026-09-30T07:54:17Z\",\"itemId\":\"000000000000000000000000\",\"user\":{\"id\":\"user-sell-3\",\"ingameName\":\"HiddenSeller\",\"slug\":\"hiddenseller\",\"reputation\":3,\"platform\":\"pc\",\"crossplay\":true,\"locale\":\"en\",\"status\":\"ingame\",\"activity\":{\"type\":\"UNKNOWN\",\"details\":\"unknown\"},\"lastSeen\":\"2026-09-30T08:11:41Z\"}},{\"id\":\"order-sell-4\",\"type\":\"sell\",\"platinum\":22,\"quantity\":3,\"perTrade\":1,\"visible\":true,\"createdAt\":\"2026-09-30T07:54:17Z\",\"updatedAt\":\"2026-09-30T07:54:17Z\",\"itemId\":\"000000000000000000000000\",\"user\":{\"id\":\"user-sell-4\",\"ingameName\":\"LotusBroker\",\"slug\":\"lotusbroker\",\"reputation\":3,\"platform\":\"pc\",\"crossplay\":true,\"locale\":\"en\",\"status\":\"offline\",\"activity\":{\"type\":\"UNKNOWN\",\"details\":\"unknown\"},\"lastSeen\":\"2026-09-30T08:11:41Z\"},\"rank\":5}],\"buy\":[{\"id\":\"order-buy-5\",\"type\":\"buy\",\"platinum\":15,\"quantity\":3,\"perTrade\":1,\"visible\":true,\"createdAt\":\"2026-09-30T07:54:17Z\",\"updatedAt\":\"2026-09-30T07:54:17Z\",\"itemId\":\"000000000000000000000000\",\"user\":{\"id\":\"user-buy-5\",\"ingameName\":\"OrokinBuyer\",\"slug\":\"orokinbuyer\",\"reputation\":3,\"platform\":\"pc\",\"crossplay\":true,\"locale\":\"en\",\"status\":\"ingame\",\"activity\":{\"type\":\"UNKNOWN\",\"details\":\"unknown\"},\"lastSeen\":\"2026-09-30T08:11:41Z\"},\"rank\":0},{\"id\":\"order-buy-6\",\"type\":\"buy\",\"platinum\":12,\"quantity\":3,\"perTrade\":1,\"visible\":true,\"createdAt\":\"2026-09-30T07:54:17Z\",\"updatedAt\":\"2026-09-30T07:54:17Z\",\"itemId\":\"000000000000000000000000\",\"user\":{\"id\":\"user-buy-6\",\"ingameName\":\"RelicHunter\",\"slug\":\"relichunter\",\"reputation\":3,\"platform\":\"pc\",\"crossplay\":true,\"locale\":\"en\",\"status\":\"online\",\"activity\":{\"type\":\"UNKNOWN\",\"details\":\"unknown\"},\"lastSeen\":\"2026-09-30T08:11:41Z\"},\"rank\":0}]},\"error\":null}"
+        }
+      }
+    ]
+  },
+  "steps": [
+    {
+      "advance": {
+        "ms": 400
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Arcane Energize"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Loading offers…"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 400
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Arcane Energize",
+          "18p",
+          "Tenno_Trader",
+          "VoidMerchant",
+          "60p",
+          "3 items · total price · Rank 0",
+          "LotusBroker",
+          "OrokinBuyer",
+          "RelicHunter",
+          "In game",
+          "Offline"
+        ],
+        "noText": [
+          "HiddenSeller"
+        ]
+      }
+    },
+    {
+      "expect": {
+        "image": "offers-dark-en-100"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Copy whisper to VoidMerchant"
+        }
+      }
+    },
+    {
+      "expect": {
+        "clipboard": "/w VoidMerchant Hi, WTB 3 x Arcane Energize (Rank 0) for 60p total",
+        "text": [
+          "Copied",
+          "Whisper copied. Paste it into Warframe chat."
+        ],
+        "image": "copied-dark-en-100"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Copy whisper to OrokinBuyer"
+        }
+      }
+    },
+    {
+      "expect": {
+        "clipboard": "/w OrokinBuyer Hi, WTS Arcane Energize (Rank 0) for 15p"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Back to results"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Arcane Grace"
+        ],
+        "noText": [
+          "Sellers"
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Arcane Energize"
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 400
+      }
+    },
+    {
+      "host": {
+        "theme": "light",
+        "locale": "fr",
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Vendeurs",
+          "Acheteurs",
+          "Vente min. / objet"
+        ],
+        "image": "offers-light-fr-150"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Copier le message pour RelicHunter"
+        }
+      }
+    },
+    {
+      "expect": {
+        "clipboard": "/w RelicHunter Hi, WTS Arcane Energize (Rank 0) for 12p",
+        "text": [
+          "Copié",
+          "Message copié. Collez-le dans le chat de Warframe."
+        ],
+        "image": "copied-light-fr-150"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Retour aux résultats"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Arcane Grace"
+        ],
+        "noText": [
+          "Vendeurs"
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

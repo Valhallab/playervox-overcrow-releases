@@ -1,8 +1,8 @@
 # Review policy
 
 Reviewers admit widget API v1 source directories. Web API widgets are no
-longer admitted: `widgets/warframe-market` is kept as a legacy Web widget,
-recorded but never admitted to the v1 catalog.
+longer admitted: any directory of `widgets/` that is not a v1 source
+project fails admission.
 
 ## Static admission (CI)
 

@@ -1,23 +1,40 @@
 {
   "schemaVersion": 1,
+  "apiVersion": 1,
   "id": "com.playervox.overcrow.warframe.market",
-  "version": "2.0.6",
-  "apiVersion": "1",
-  "entrypoints": {
-    "view": "index.html",
-    "controller": "controller.html"
+  "version": "3.0.0",
+  "name": {
+    "en": "Warframe Market",
+    "fr": "Marché Warframe"
+  },
+  "sizing": {
+    "fit": "none",
+    "preferred": {
+      "width": 360,
+      "height": 480
+    },
+    "min": {
+      "width": 240,
+      "height": 220
+    },
+    "max": {
+      "width": 800,
+      "height": 1200
+    }
   },
   "permissions": {
     "network": [
       {
         "origin": "https://api.warframe.market",
         "method": "GET",
-        "path": "/v2/items"
+        "path": "/v2/versions",
+        "maxResponseBytes": 4096
       },
       {
         "origin": "https://api.warframe.market",
         "method": "GET",
-        "path": "/v2/versions"
+        "path": "/v2/items",
+        "maxResponseBytes": 3145728
       },
       {
         "origin": "https://api.warframe.market",
@@ -28,56 +45,11 @@
             "type": "slug",
             "maxLength": 96
           }
-        }
+        },
+        "maxResponseBytes": 131072
       }
     ],
     "storage": true,
     "clipboardWrite": true
-  },
-  "files": {
-    "LICENSE": {
-      "sha256": "c159eef41245fe20d4cd29fc33a0e88a85f47b53ac321f266abfb7b707aee8c3",
-      "bytes": 1071
-    },
-    "catalog.mjs": {
-      "sha256": "f52c79bc483147956711fb4e6da6ff2d23aa606caf4847187e34cdf2396337de",
-      "bytes": 2073
-    },
-    "controller.html": {
-      "sha256": "0192f78e538b71e93e79013818d2a2ce9035535725d7744cc1d873e675eaaf13",
-      "bytes": 205
-    },
-    "controller.js": {
-      "sha256": "97c4b5189a62d277b55019685bb03229d589a3b3fa24f8395ab41aac4eab0816",
-      "bytes": 871
-    },
-    "index.html": {
-      "sha256": "3d9881a88227fc74d1191955d77e909ed03d88cdf199d980cf6f01935292b5fb",
-      "bytes": 2066
-    },
-    "orders.mjs": {
-      "sha256": "9989e6f4cb0e9240645c2fd2322d01758ad4a3e73ab8856fdf90ac808cfd59f8",
-      "bytes": 3272
-    },
-    "overcrow.js": {
-      "sha256": "000a7dee2a010fe21994baf113a024ecc3f9630db72d2f95550efa7b83cbfb28",
-      "bytes": 33633
-    },
-    "requests.mjs": {
-      "sha256": "b2262459996f25e8039df0f7d6a03a471e04d091e0caf7204c6e513eb9d36c59",
-      "bytes": 1224
-    },
-    "session.mjs": {
-      "sha256": "be023486a9bbd343a2c10ca7096d9cda10ab3f8736a0e1f528eaf18d063eb925",
-      "bytes": 5919
-    },
-    "styles.css": {
-      "sha256": "322b104c2e5afcbf193ede9c5aefcfd4180a55dfd67e3cd8948fb2990f4b5a32",
-      "bytes": 6594
-    },
-    "view.js": {
-      "sha256": "9605d493794dd1f170a540b40af95ee87e930332fff0695cd64ceb1e7f673966",
-      "bytes": 9102
-    }
   }
 }

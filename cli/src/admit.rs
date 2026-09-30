@@ -21,7 +21,9 @@ use std::path::{Path, PathBuf};
 
 use overcrow_widget_schema::catalog::validate_listing;
 use overcrow_widget_schema::json::parse_strict;
-use overcrow_widget_schema::limits::{MAX_PACKAGE_BYTES, MAX_PREVIEW_BYTES};
+use overcrow_widget_schema::limits::{
+    MAX_HTTP_RESPONSE_BYTES, MAX_PACKAGE_BYTES, MAX_PREVIEW_BYTES,
+};
 use overcrow_widget_schema::manifest::Manifest;
 use overcrow_widget_schema::package::{Package, hex, read_package, sha256};
 use overcrow_widget_schema::permissions::capability_named;
@@ -401,6 +403,10 @@ fn review(manifest: &Manifest) -> Vec<Value> {
                 "path": rule["path"],
                 "pathParams": rule.get("pathParams"),
                 "queryParams": rule.get("queryParams"),
+                "maxResponseBytes": rule
+                    .get("maxResponseBytes")
+                    .cloned()
+                    .unwrap_or(json!(MAX_HTTP_RESPONSE_BYTES.value)),
             }));
         }
     }
@@ -526,10 +532,11 @@ pub fn render_human(report: &Value) -> String {
                 )
             }
             Some("network") => format!(
-                "network         {} {}{}",
+                "network         {} {}{}, responses up to {} bytes",
                 text(&item["method"]),
                 text(&item["origin"]),
-                text(&item["path"])
+                text(&item["path"]),
+                text(&item["maxResponseBytes"])
             ),
             Some("clipboardWrite") => "clipboardWrite  text on a user gesture".to_owned(),
             Some("storage") => {

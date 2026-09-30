@@ -1,0 +1,54 @@
+{
+  "scenarioVersion": 1,
+  "name": "unavailable",
+  "description": "No stored catalog and the download fails: the catalog is unavailable, in both themes.",
+  "fixtures": {
+    "http": [
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.warframe.market/v2/versions"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"apiVersion\":\"0.25.0\",\"data\":{\"id\":\"synthetic\",\"collections\":{\"items\":\"v1\"},\"updatedAt\":\"2026-09-28T16:09:39Z\"},\"error\":null}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.warframe.market/v2/items"
+        },
+        "error": "transport_failed"
+      }
+    ]
+  },
+  "steps": [
+    {
+      "advance": {
+        "ms": 400
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Catalog unavailable",
+          "The item catalog could not be loaded. Reopen the widget later to try again."
+        ],
+        "image": "unavailable-dark"
+      }
+    },
+    {
+      "host": {
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "unavailable-light",
+        "fault": "none"
+      }
+    }
+  ]
+}

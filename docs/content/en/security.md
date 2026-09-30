@@ -56,7 +56,11 @@ Permissions:
   complete path per rule, with typed path and query parameters. The request
   leaves through OverCrow's broker, which refuses anything else, follows no
   redirect, sends no cookie or credential, refuses local and private
-  addresses, and bounds the size and duration of each exchange.
+  addresses, and bounds the size and duration of each exchange. A response
+  is at most 1 MiB, unless the rule declares a larger `maxResponseBytes`
+  (up to 3 MiB): the bound shows in the review and in the permission
+  panel. Requests in flight share a byte budget per widget and for all
+  widgets, so a larger bound never raises OverCrow's worst case.
 - **`storage`** is a key-value store kept by OverCrow for your widget only,
   within a quota. There is no file access.
 - **`clipboardWrite`** writes text, only while the user interacts with the

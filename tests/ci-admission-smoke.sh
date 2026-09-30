@@ -177,8 +177,8 @@ pull_request "$fork" "$valid_sha" \
 tab=$(printf '\t')
 /usr/bin/grep -F -x "admission${tab}3${tab}$trust_sha${tab}$valid_sha${tab}$valid_tree" \
     "$stdout" >/dev/null || report_failure 'the receipt header is wrong'
-/usr/bin/grep -F -x "legacy${tab}widgets/warframe-market" "$stdout" >/dev/null \
-    || report_failure 'the legacy widget is not recorded'
+! /usr/bin/grep -q "^legacy${tab}" "$stdout" \
+    || report_failure 'a legacy widget is still recorded'
 /usr/bin/awk -F '\t' '
     function digest(value) { return length(value) == 64 && value !~ /[^0-9a-f]/ }
     function count(value) { return value ~ /^[1-9][0-9]*$/ }
@@ -192,16 +192,16 @@ tab=$(printf '\t')
             && ("widgets/playervox-counter playervox com.playervox.overcrow.smoke-counter 0.1.0" in seen)) ? 0 : 1
     }' "$stdout" || report_failure 'the receipt artifacts are wrong'
 # The header, one artifact per v1 widget (the three fixtures above and the
-# repository's own reference widgets), the legacy line and the verdict.
+# repository's own reference widgets) and the verdict.
 reference_widgets=$(/usr/bin/find "$repo_root/widgets" -mindepth 2 -maxdepth 2 \
     -name view.ocml -type f | /usr/bin/wc -l)
 test "$(/usr/bin/tail -n 1 "$stdout")" = 'Hosted static admission passed' \
-    && test "$(/usr/bin/wc -l <"$stdout")" -eq $((6 + reference_widgets)) \
+    && test "$(/usr/bin/wc -l <"$stdout")" -eq $((5 + reference_widgets)) \
     || report_failure 'the receipt is incomplete'
 
 failing_test() {
     printf '%s\n' 'throw new Error("trusted push tests must execute");' \
-        >"$repository/tests/warframe-market/market.test.mjs"
+        >"$repository/tests/check-links.test.mjs"
 }
 push_sha=$(candidate push failing_test)
 # A push is its own trusted revision: run the driver of that checkout.

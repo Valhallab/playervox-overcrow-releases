@@ -10,8 +10,8 @@ use crate::compiled_view::{ViewSummary, static_value};
 use crate::json::{has_exact_fields, integer_in};
 use crate::limits::{
     MAX_ATTRIBUTE_TEXT_BYTES, MAX_CHILDREN, MAX_CONTENT_SCALE, MAX_DRAW_COMMANDS, MAX_FONT_SIZE_PX,
-    MAX_HTTP_REQUEST_BYTES, MAX_HTTP_RESPONSE_BYTES, MAX_LENGTH_PX, MAX_LOG_BYTES, MAX_LOGIC_BYTES,
-    MAX_NODE_TEXT_BYTES, MAX_PACKAGE_PATH_BYTES, MAX_PATCH_BYTES, MAX_PATCH_OPS,
+    MAX_HTTP_DECLARED_RESPONSE_BYTES, MAX_HTTP_REQUEST_BYTES, MAX_LENGTH_PX, MAX_LOG_BYTES,
+    MAX_LOGIC_BYTES, MAX_NODE_TEXT_BYTES, MAX_PACKAGE_PATH_BYTES, MAX_PATCH_BYTES, MAX_PATCH_OPS,
     MAX_VIEW_EXPRESSIONS, MIN_CONTENT_SCALE, MIN_FONT_SIZE_PX, VM_HEAP_BYTES, VM_MAX_HEAP_BYTES,
 };
 use crate::model::{Field, Limit, Status, ValueType, field};
@@ -141,8 +141,8 @@ pub const FRAME_KINDS: &[FrameKind] = &[
         code: 4,
         name: "host-service-result",
         direction: Direction::HostToVm,
-        raw: Some(&MAX_HTTP_RESPONSE_BYTES),
-        summary: "`ServiceResult`; raw payload is an HTTP response body when one is returned.",
+        raw: Some(&MAX_HTTP_DECLARED_RESPONSE_BYTES),
+        summary: "`ServiceResult`; raw payload is an HTTP response body when one is returned, within the bound of the rule that allowed the request.",
     },
     FrameKind {
         code: 5,

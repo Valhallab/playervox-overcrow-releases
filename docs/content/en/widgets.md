@@ -12,6 +12,7 @@ under the MIT license: read them, copy them, and use them as a starting point.
 | **FPS** | Shows the game’s presented frame rate, when the host has a frame rate source. | `com.playervox.overcrow.fps` | `fps.read` | [fps/README.md](../../../widgets/fps/README.md) |
 | **Session** | Shows how long the current game session has lasted. | `com.playervox.overcrow.session` | `session.read` | [session/README.md](../../../widgets/session/README.md) |
 | **Manual stopwatch** | A stopwatch to the hundredth of a second, started, paused and reset with its buttons or the host’s shortcuts. | `com.playervox.overcrow.stopwatch` | `stopwatch.read`, `stopwatch.control` | [stopwatch/README.md](../../../widgets/stopwatch/README.md) |
+| **Warframe Market** | Searches public PC items from a cached catalog, shows the best buy and sell offers of an item, and copies a trade whisper when you click. | `com.playervox.overcrow.warframe.market` | `network`, `storage`, `clipboardWrite` | [warframe-market/README.md](../../../widgets/warframe-market/README.md) |
 <!-- /generated:widgets -->
 
 Each widget directory holds:
@@ -37,6 +38,7 @@ node --test widgets/clock/tests/logic.test.mjs
 
 `prepare-widgets.mjs` needs the SDK built first (`npm ci` then
 `npm run build` in `sdk/`). The other built-ins are rewritten one by one on
-the same SDK and join this list as they land. `widgets/warframe-market` is a
-widget of the retired Web runtime, kept until it is rewritten or withdrawn;
-it is not a reference.
+the same SDK and join this list as they land. Warframe Market is not a
+built-in: a PlayerVox widget of the catalog, installed on request, it shows
+network routes with a declared response bound, host storage for a cached
+catalog and a clipboard copy on a click.

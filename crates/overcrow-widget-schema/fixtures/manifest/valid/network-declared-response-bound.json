@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.example.weather",
+  "version": "2.3.0-beta.1",
+  "name": {
+    "en": "Minimal",
+    "fr": "Minimal"
+  },
+  "sizing": {
+    "fit": "height",
+    "defaultMode": "manual",
+    "preferred": {
+      "width": 280,
+      "height": 160
+    },
+    "min": {
+      "width": 200,
+      "height": 80
+    },
+    "max": {
+      "width": 640,
+      "height": 640
+    }
+  },
+  "vm": {
+    "heapMiB": 32
+  },
+  "permissions": {
+    "network": [
+      {
+        "origin": "https://api.example.com",
+        "method": "GET",
+        "path": "/v1/forecast/{city}",
+        "pathParams": {
+          "city": {
+            "type": "slug",
+            "maxLength": 64
+          }
+        },
+        "queryParams": {
+          "units": {
+            "type": "enum",
+            "values": [
+              "metric",
+              "imperial"
+            ],
+            "required": true
+          },
+          "days": {
+            "type": "integer",
+            "min": 1,
+            "max": 7
+          }
+        },
+        "maxResponseBytes": 3145728
+      }
+    ],
+    "storage": true,
+    "gameEvents": [
+      "overcrow.game.match.started.v1"
+    ],
+    "capabilities": [
+      "telemetry.read",
+      "fps.read"
+    ]
+  }
+}

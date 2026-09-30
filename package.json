@@ -8,6 +8,6 @@
     "node": ">=22.18.0"
   },
   "scripts": {
-    "test": "node --test --test-concurrency=2 tests/warframe-market/*.test.mjs"
+    "test": "node --test --test-concurrency=2 tests/check-links.test.mjs tests/docs-content.test.mjs"
   }
 }

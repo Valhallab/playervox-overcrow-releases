@@ -33,6 +33,9 @@ fn network_rule(rule: &Value) -> String {
         text(&rule["origin"]),
         text(&rule["path"])
     );
+    if let Some(bound) = rule.get("maxResponseBytes") {
+        let _ = write!(out, "\n      responses up to {bound} bytes");
+    }
     for (key, label) in [("pathParams", "path"), ("queryParams", "query")] {
         if let Some(params) = rule.get(key).and_then(Value::as_object) {
             for (name, constraint) in params {

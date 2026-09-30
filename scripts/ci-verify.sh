@@ -26,26 +26,14 @@ fail() {
 script_dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P)
 trusted_root=$(/usr/bin/dirname -- "$script_dir")
 
-# Web API widgets of the retired runtime, kept until P4.3 decides their
-# future. They are never admitted to the v1 catalog; any other directory
-# that is not a v1 source project fails admission.
-legacy_widget() {
-    case "$1" in
-        warframe-market) return 0 ;;
-    esac
-    return 1
-}
-
 run_local_checks() {
     local_root=$1
     (
         CDPATH='' cd -- "$local_root"
-        node --test tests/warframe-market/market.test.mjs
+        node --test --test-concurrency=2 \
+            tests/check-links.test.mjs tests/docs-content.test.mjs
         for directory in widgets/*/; do
             directory=${directory%/}
-            if legacy_widget "${directory#widgets/}"; then
-                continue
-            fi
             cargo run -p overcrow-widget-cli --locked --quiet -- \
                 admit "$directory" --publisher playervox >/dev/null
         done
@@ -268,11 +256,12 @@ if test "$event_name" = push; then
     node_path=$(sh "$trusted_root/scripts/resolve-system-node.sh") || {
         fail 'trusted source checks failed'
     }
-    # Test output goes to the log (stderr): stdout is the receipt only.
+    # Test output goes to the log (stderr): stdout is the receipt only. Only
+    # tests that need nothing built run here.
     if ! /usr/bin/env -i PATH=/usr/bin:/bin LC_ALL=C.UTF-8 LANG=C.UTF-8 \
             /usr/bin/timeout --signal=TERM --kill-after=5 60 \
             "$node_path" --test \
-                "$trusted_root/tests/warframe-market/market.test.mjs" >&2; then
+                "$trusted_root/tests/check-links.test.mjs" >&2; then
         fail 'trusted source checks failed'
     fi
 fi
@@ -338,10 +327,6 @@ while IFS= read -r directory; do
             ;;
     esac
     source="$widgets_root/$directory"
-    if legacy_widget "$directory"; then
-        printf 'legacy\twidgets/%s\n' "$directory" >>"$receipt"
-        continue
-    fi
     artifact_index=$((artifact_index + 1))
     bundle="$bundles/$artifact_index"
     summary="$work/admit-$artifact_index.out"

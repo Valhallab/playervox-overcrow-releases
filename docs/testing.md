@@ -122,16 +122,5 @@ sh scripts/check-policy.sh
 sh tests/check-policy-smoke.sh
 ```
 
-## Legacy Web widget
-
-`widgets/warframe-market` is a widget of the retired Web runtime, kept until
-it is rewritten or withdrawn. Its unit tests still run, locally and on a
-trusted push:
-
-```sh
-node --test --test-concurrency=2 tests/warframe-market/market.test.mjs
-```
-
-The admission records it as `legacy` and never admits it to the v1 catalog.
 Catalog preparation, signing and publication are maintainer operations
 outside this repository; their tests are not run here.

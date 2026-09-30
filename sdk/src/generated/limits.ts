@@ -85,8 +85,11 @@ export const MAX_REQUEST_URL_BYTES = 2048;
 /** Body of one outgoing request. (bytes) */
 export const MAX_HTTP_REQUEST_BYTES = 262144;
 
-/** Body of one response delivered to the VM; must fit the VM heap. (bytes) */
+/** Body of one response delivered to the VM when its network rule declares no `maxResponseBytes`, and of every `as: "image"` response; must fit the VM heap. (bytes) */
 export const MAX_HTTP_RESPONSE_BYTES = 1048576;
+
+/** Largest `maxResponseBytes` of one network rule: the body of one response the rule allows, delivered to the VM; must fit the VM heap and, with its control part, the frame queue. (bytes) */
+export const MAX_HTTP_DECLARED_RESPONSE_BYTES = 3145728;
 
 /** Opaque object ID or cursor exchanged with a capability service. (bytes) */
 export const MAX_OBJECT_ID_BYTES = 128;

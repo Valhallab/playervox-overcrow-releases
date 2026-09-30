@@ -68,7 +68,7 @@ website's documentation is realigned on this content separately.
 | `templates/` | The templates of `overcrow-widget init`: blank, counter, list, chart |
 | `docs/content/` | The creator documentation, in English and French: guide, reference, security, publishing |
 | `docs/` | The technical manuals and specifications: [CLI](docs/cli.md), SDK, [schema reference](docs/widget-schema-v1.md) (generated), [source formats](docs/widget-source-formats.md), [package and catalog format](docs/widget-package-v1.md), [review policy](docs/review-policy.md), [testing](docs/testing.md) |
-| `widgets/` | The built-in widgets on the public SDK, each with its tests and reference page ([list](docs/content/en/widgets.md)); `warframe-market`, a legacy Web widget until it is rewritten or withdrawn |
+| `widgets/` | The built-in widgets on the public SDK, each with its tests and reference page ([list](docs/content/en/widgets.md)), and Warframe Market, a PlayerVox catalog widget |
 | `scripts/`, `tests/` | Public CI drivers and their smoke tests |
 | `fuzz/` | Fuzz targets of every parser and package verifier |
 | `keys/` | Public catalog keys |
