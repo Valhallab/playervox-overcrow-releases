@@ -191,8 +191,12 @@ tab=$(printf '\t')
             && ("widgets/new-third-party third-party com.example.new-counter 0.1.0" in seen) \
             && ("widgets/playervox-counter playervox com.playervox.overcrow.smoke-counter 0.1.0" in seen)) ? 0 : 1
     }' "$stdout" || report_failure 'the receipt artifacts are wrong'
+# The header, one artifact per v1 widget (the three fixtures above and the
+# repository's own reference widgets), the legacy line and the verdict.
+reference_widgets=$(/usr/bin/find "$repo_root/widgets" -mindepth 2 -maxdepth 2 \
+    -name view.ocml -type f | /usr/bin/wc -l)
 test "$(/usr/bin/tail -n 1 "$stdout")" = 'Hosted static admission passed' \
-    && test "$(/usr/bin/wc -l <"$stdout")" -eq 6 \
+    && test "$(/usr/bin/wc -l <"$stdout")" -eq $((6 + reference_widgets)) \
     || report_failure 'the receipt is incomplete'
 
 failing_test() {
@@ -231,7 +235,7 @@ while read -r package listing report; do
     check_digest "$output/bundles/$index/listing.json" "$listing"
     check_digest "$output/bundles/$index/report.json" "$report"
 done <"$scratch/digests"
-test "$index" -eq 2 || report_failure 'the output does not hold one bundle per widget'
+test "$index" -eq $((2 + reference_widgets)) || report_failure 'the output does not hold one bundle per widget'
 /usr/bin/find "$private_parent" -mindepth 1 -maxdepth 1 -name 'verification.*' \
     -print -quit | /usr/bin/grep . >/dev/null \
     && report_failure 'a verification directory was left behind'
