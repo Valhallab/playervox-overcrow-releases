@@ -278,6 +278,24 @@ fn on_accent_keeps_aa_contrast_on_the_accent_in_both_themes() {
     }
 }
 
+/// The panel and text colours fixed by the P2.4 pilots keep WCAG AA
+/// contrast for text in both themes (compared with the panel's colour).
+#[test]
+fn text_keeps_aa_contrast_on_the_panel_in_both_themes() {
+    let panel = tokens::token("--color-surface-panel").expect("panel token");
+    for name in ["--color-text", "--color-text-muted"] {
+        let text = tokens::token(name).expect("text token");
+        assert!(text.status.is_fixed() && panel.status.is_fixed(), "{name}");
+        for (foreground, fill) in [(text.dark, panel.dark), (text.light, panel.light)] {
+            let ratio = contrast(foreground, &fill[..7]);
+            assert!(
+                ratio >= 4.5,
+                "{name}: {foreground} on {fill} is {ratio:.2}:1"
+            );
+        }
+    }
+}
+
 #[test]
 fn icons_are_the_pinned_crate_names() {
     assert_eq!(icons::ICON_CRATE, "egui-lucide 0.1.0");

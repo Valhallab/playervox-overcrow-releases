@@ -1,7 +1,8 @@
 //! Design-system tokens available to `var(--name)`. The dark values are the
-//! current overlay palette. The
-//! built-ins have no light theme today, so the other colours stay provisional
-//! until the light reference images of the P2.4 pilots check them.
+//! current overlay palette. The built-ins had no light theme: the reference
+//! images of the P2.4 pilots (Clock, Session, FPS, in both themes) fixed the
+//! panel and the primary and muted text; the colours the pilots do not
+//! draw stay provisional until a built-in that draws them checks them.
 
 use crate::model::Status;
 
@@ -38,6 +39,19 @@ pub struct Token {
     pub light: &'static str,
     pub status: Status,
     pub summary: &'static str,
+}
+
+/// A colour the pilots' reference images checked in both themes (P2.4).
+const fn checked(
+    name: &'static str,
+    dark: &'static str,
+    light: &'static str,
+    summary: &'static str,
+) -> Token {
+    Token {
+        status: Status::Fixed,
+        ..color(name, dark, light, summary)
+    }
 }
 
 const fn color(
@@ -102,7 +116,7 @@ pub const TOKENS: &[Token] = &[
         status: Status::Fixed,
         summary: "Text and icons drawn on the accent and its hover state.",
     },
-    color(
+    checked(
         "--color-surface-panel",
         "#111114ee",
         "#fafafaee",
@@ -144,14 +158,14 @@ pub const TOKENS: &[Token] = &[
         "#0000002e",
         "Emphasized border and separator.",
     ),
-    color("--color-text", "#f7f7f8", "#18181b", "Primary text."),
+    checked("--color-text", "#f7f7f8", "#18181b", "Primary text."),
     color(
         "--color-text-secondary",
         "#d4d4d8",
         "#3f3f46",
         "Secondary text.",
     ),
-    color(
+    checked(
         "--color-text-muted",
         "#a1a1aa",
         "#52525b",

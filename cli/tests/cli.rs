@@ -328,3 +328,31 @@ fn golden_package() {
     fs::write(root.join("assets/logo.png"), b"not a PNG").expect("asset");
     golden_check("package_asset", &root, &[]);
 }
+
+/// `check <dir>` with a relative `dir` runs the project's TypeScript: tsc
+/// runs in the project directory, so its path must not repeat `dir`.
+#[test]
+fn a_relative_project_directory_runs_its_typescript() {
+    if Command::new("node").arg("--version").output().is_err() {
+        return;
+    }
+    let (temporary, root) = project("counter");
+    // A stand-in tsc that records it ran, in the project directory.
+    let tsc = root.join("node_modules/typescript/lib/tsc.js");
+    fs::create_dir_all(tsc.parent().expect("lib")).expect("node_modules");
+    fs::write(
+        &tsc,
+        "require('fs').writeFileSync('tsc-ran', process.argv.slice(2).join(' '));\n",
+    )
+    .expect("tsc stand-in");
+    let output = Command::new(env!("CARGO_BIN_EXE_overcrow-widget"))
+        .args(["check", "counter"])
+        .current_dir(temporary.path())
+        .output()
+        .expect("the CLI runs");
+    assert!(output.status.success(), "{}", text(&output.stderr));
+    assert_eq!(
+        fs::read_to_string(root.join("tsc-ran")).expect("tsc ran in the project"),
+        "--noEmit --pretty false -p tsconfig.json"
+    );
+}

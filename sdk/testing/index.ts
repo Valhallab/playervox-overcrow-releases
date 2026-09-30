@@ -118,7 +118,8 @@ export interface TestRuntime {
   /** Moves the virtual time by `ms`, firing each due timer in order (a
    * repeating one re-arms). Returns the number of ticks. */
   advance(ms: number): number;
-  /** Replaces the host with these changes, as a host message does. */
+  /** Replaces the host with these changes, as a host message does, then
+   * calls the logic's `onHost` listeners with the changed member names. */
   setHost(changes: Partial<TestHost>): void;
   /** Sends the next value of the service's running subscriptions. */
   push(service: string, value: unknown): number;
@@ -169,6 +170,7 @@ export function installRuntime(options: InstallOptions = {}): TestRuntime {
   let order = 0;
   let table: unknown[] | undefined;
   let menuHandler: ((row: string) => void) | undefined;
+  let hostHandler: ((changed: readonly string[]) => void) | undefined;
   const calls: TestCall[] = [];
   const subscriptions: SubscriptionEntry[] = [];
   const timers = new Map<number, TimerEntry>();
@@ -241,6 +243,9 @@ export function installRuntime(options: InstallOptions = {}): TestRuntime {
     onMenu(handler: (row: string) => void) {
       menuHandler = handler;
     },
+    onHost(handler: (changed: readonly string[]) => void) {
+      hostHandler = handler;
+    },
     log(level: string, text: string) {
       logs.push({ level, text });
     },
@@ -302,6 +307,7 @@ export function installRuntime(options: InstallOptions = {}): TestRuntime {
     },
     setHost(changes) {
       host = Object.freeze({ ...host, ...changes });
+      hostHandler?.(Object.freeze(Object.keys(changes)));
     },
     push(service, value) {
       const targets = running(service);

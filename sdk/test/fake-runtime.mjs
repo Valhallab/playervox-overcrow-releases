@@ -75,6 +75,9 @@ export function installRuntime(host = HOST) {
     onMenu(handler) {
       control.menu = handler;
     },
+    onHost(handler) {
+      control.onHost = handler;
+    },
     log(level, text) {
       control.logs.push({ level, text });
     },
@@ -89,6 +92,11 @@ export function installRuntime(host = HOST) {
       control.timers.delete(id);
     }
     timer.callback();
+  };
+  // A host message: the new host, then the logic's listener.
+  control.setHost = (changes) => {
+    control.host = { ...control.host, ...changes };
+    control.onHost?.(Object.freeze(Object.keys(changes)));
   };
   control.onlyTimer = () => {
     const entries = [...control.timers];

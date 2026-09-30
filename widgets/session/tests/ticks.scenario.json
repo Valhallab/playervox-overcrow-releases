@@ -1,0 +1,139 @@
+{
+  "scenarioVersion": 1,
+  "name": "ticks",
+  "description": "The host advances the value each whole second, without VM timers; hours never wrap; a new anchor re-anchors the display at once.",
+  "fixtures": {
+    "subscriptions": {
+      "session.subscribe": {
+        "elapsedMs": 1999,
+        "at": 0
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "00:00:01"
+        ],
+        "calls": [
+          {
+            "service": "session.subscribe",
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 1
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00:02"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 998
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00:02"
+        ],
+        "noText": [
+          "00:00:03"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 2
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00:03"
+        ],
+        "calls": []
+      }
+    },
+    {
+      "publish": {
+        "service": "session.subscribe",
+        "value": {
+          "elapsedMs": 90061000,
+          "at": 1001
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "25:01:01"
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "session.subscribe",
+        "value": {
+          "elapsedMs": 359999000,
+          "at": 1001
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 1000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "100:00:00"
+        ],
+        "image": "hundred-hours"
+      }
+    },
+    {
+      "publish": {
+        "service": "session.subscribe",
+        "value": {
+          "elapsedMs": 0,
+          "at": 2001
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00:00"
+        ],
+        "noText": [
+          "100:00:00"
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "session.subscribe",
+        "value": null
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "--:--:--"
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

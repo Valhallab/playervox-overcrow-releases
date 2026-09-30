@@ -1,0 +1,111 @@
+{
+  "scenarioVersion": 1,
+  "name": "unavailable",
+  "description": "No value: an em dash, muted, for each status without a reading, including the service stopping mid-session (W.2).",
+  "fixtures": {
+    "subscriptions": {
+      "fps.subscribe": {
+        "fps": null,
+        "stale": false,
+        "status": "waiting"
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "—"
+        ],
+        "image": "none-dark"
+      }
+    },
+    {
+      "host": {
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "none-light"
+      }
+    },
+    {
+      "host": {
+        "theme": "dark"
+      }
+    },
+    {
+      "publish": {
+        "service": "fps.subscribe",
+        "value": {
+          "fps": 33,
+          "stale": false,
+          "status": "ready"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "33"
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "fps.subscribe",
+        "value": {
+          "fps": null,
+          "stale": false,
+          "status": "unavailable"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "—"
+        ],
+        "noText": [
+          "33"
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "fps.subscribe",
+        "value": {
+          "fps": null,
+          "stale": false,
+          "status": "unsupported"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "—"
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "fps.subscribe",
+        "value": {
+          "fps": null,
+          "stale": false,
+          "status": "ambiguous"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "—"
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

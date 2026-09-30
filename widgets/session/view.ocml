@@ -1,0 +1,11 @@
+<!-- Session: the time since the game process started, advanced by the host
+     from the service's anchor (parity sheet: playervox-overcrow
+     docs/builtin-parity/session.md). -->
+<box class="session" label={t("label")}>
+  <if test={state.session}>
+    <elapsed class="value" base={state.session.elapsedMs} at={state.session.at} running={true} format="hh:mm:ss"/>
+  </if>
+  <else>
+    <text class="value">--:--:--</text>
+  </else>
+</box>

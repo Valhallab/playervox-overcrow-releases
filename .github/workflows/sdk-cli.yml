@@ -3,7 +3,8 @@ name: sdk-cli
 # ADR 0004, M4–M5: the @overcrow/sdk package (typecheck, tests, reproducible
 # npm pack) and the widget CLI `overcrow-widget` (build, tests, init → check
 # → package → read_package end to end, deterministic .ocpkg), on Linux and
-# Windows. The SDK's end-to-end test packages its Clock with the CLI.
+# Windows. The SDK's end-to-end test packages its Clock with the CLI, and
+# the reference widgets of widgets/ are checked, packaged and unit-tested.
 on:
   push:
     branches: [main]
@@ -70,6 +71,26 @@ jobs:
       - name: Require a reproducible npm package
         working-directory: sdk
         run: npm run pack:check
+      - name: Check, package and unit-test the reference widgets
+        # Built-in widgets on the public SDK (P2.4): type-checked against
+        # this revision's SDK, packaged, and their logic unit-tested. Their
+        # scenarios, fixtures and images are checked by the CLI's
+        # reference_widgets test above; they play in OverCrow's headless
+        # runtime, which this workflow runs once the CLI pins a published
+        # one (docs/widget-testing.md).
+        run: |
+          set -eu
+          node scripts/prepare-widgets.mjs
+          cli=$PWD/target/debug/overcrow-widget
+          work=$(mktemp -d)
+          for widget in widgets/*/; do
+            test -f "$widget/view.ocml" || continue
+            name=$(basename "$widget")
+            "$cli" check "$widget" --deny-warnings
+            "$cli" package "$widget" --out "$work/$name.ocpkg"
+            "$cli" inspect "$work/$name.ocpkg"
+          done
+          node --test --test-concurrency=2 widgets/*/tests/*.test.mjs
       - name: Require a deterministic .ocpkg and a type-checked template
         run: |
           set -eu

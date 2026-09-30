@@ -35,41 +35,85 @@ test("after and every start host timers and cancel them", () => {
   assert.equal(vm.timers.size, 0);
 });
 
-test("atEach wakes at each local boundary", () => {
+test("atEach keeps seconds and minutes on one aligned repeating timer", () => {
   clear();
   vm.host = { ...HOST, region: { numberFormat: "us", dateOrder: "mdy", offsetMinutes: 330 } };
   now = Date.UTC(2026, 6, 17, 14, 8, 42, 250);
   const seen = [];
   const clock = timers.atEach("minute", () => seen.push(now));
-  assert.equal(vm.onlyTimer().intervalMs, 17_750);
+  assert.deepEqual(
+    { intervalMs: vm.onlyTimer().intervalMs, repeat: vm.onlyTimer().repeat },
+    { intervalMs: 17_750, repeat: false },
+    "first to the boundary",
+  );
   now += 17_750;
   vm.fire(vm.onlyTimer().id);
   assert.deepEqual(seen, [now]);
-  assert.equal(vm.onlyTimer().intervalMs, 60_000, "re-armed from the current time");
-  // A late tick (the host was busy) re-aligns on the next boundary.
+  const steady = vm.onlyTimer();
+  assert.deepEqual({ intervalMs: steady.intervalMs, repeat: steady.repeat }, { intervalMs: 60_000, repeat: true });
+  // Each boundary is one tick of the same timer, a little late as a host
+  // timer is: nothing is re-armed.
+  now += 40;
+  for (let minute = 0; minute < 3; minute += 1) {
+    now += 60_000;
+    vm.fire(steady.id);
+  }
+  assert.equal(seen.length, 4);
+  assert.equal(vm.onlyTimer().id, steady.id, "still the same repeating timer");
+  // A tick that drifted past the alignment bound re-aligns on the next boundary.
   now += 60_000 + 1_200;
-  vm.fire(vm.onlyTimer().id);
-  assert.equal(vm.onlyTimer().intervalMs, 58_800);
+  vm.fire(steady.id);
+  assert.equal(seen.length, 5, "the late tick still shows the time");
+  assert.deepEqual(
+    { intervalMs: vm.onlyTimer().intervalMs, repeat: vm.onlyTimer().repeat },
+    { intervalMs: 58_760, repeat: false },
+  );
   clock.cancel();
   assert.equal(vm.timers.size, 0);
 });
 
-test("atEach ticks once after a hidden period, then realigns", () => {
+test("an early tick waits for its boundary", () => {
+  clear();
+  vm.host = HOST;
+  now = Date.UTC(2026, 6, 17, 14, 8, 0);
+  const seen = [];
+  const clock = timers.atEach("second", () => seen.push(now));
+  now += 1000;
+  vm.fire(vm.onlyTimer().id);
+  const steady = vm.onlyTimer();
+  // The monotonic timer ran ahead of the wall clock by 30 ms.
+  now += 970;
+  vm.fire(steady.id);
+  assert.deepEqual(
+    { intervalMs: vm.onlyTimer().intervalMs, repeat: vm.onlyTimer().repeat },
+    { intervalMs: 100, repeat: false },
+    "one-shot to the boundary, raised to the minimum",
+  );
+  clock.cancel();
+  assert.equal(seen.length, 2);
+});
+
+test("atEach ticks once when shown again, keeping its timer", () => {
   clear();
   vm.host = HOST;
   now = Date.UTC(2026, 6, 17, 14, 8, 30);
   const seen = [];
   const clock = timers.atEach("minute", () => seen.push(now));
-  const due = vm.onlyTimer();
-  assert.equal(due.intervalMs, 30_000);
-  // Hidden for five minutes: the host holds the due one-shot, then
-  // delivers it once when the widget is shown again.
+  now += 30_000;
+  vm.fire(vm.onlyTimer().id);
+  const steady = vm.onlyTimer();
+  // Hidden for five minutes: the host drops the repeating ticks.
+  vm.setHost({ visible: false });
   now += 5 * 60_000 + 12_345;
-  vm.fire(due.id);
-  assert.equal(seen.length, 1, "one tick for the whole hidden period");
-  assert.equal(vm.onlyTimer().intervalMs, 60_000 - 42_345 % 60_000);
-  assert.equal(vm.timers.size, 1, "one timer, no burst");
+  vm.setHost({ visible: true });
+  assert.equal(seen.length, 2, "one tick for the whole hidden period");
+  assert.equal(vm.onlyTimer().id, steady.id, "the aligned timer is kept");
+  vm.setHost({ visible: true });
+  assert.equal(seen.length, 2, "an unchanged visibility does not tick");
   clock.cancel();
+  vm.setHost({ visible: false });
+  vm.setHost({ visible: true });
+  assert.equal(seen.length, 2, "a cancelled clock ignores the host");
 });
 
 test("atEach wakes at the offset change and uses the new offset", () => {

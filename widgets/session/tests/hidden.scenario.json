@@ -1,0 +1,45 @@
+{
+  "scenarioVersion": 1,
+  "name": "hidden",
+  "description": "Hidden, nothing is repainted; shown again, the value is current at once.",
+  "fixtures": {
+    "subscriptions": {
+      "session.subscribe": {
+        "elapsedMs": 60000,
+        "at": 0
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "00:01:00"
+        ]
+      }
+    },
+    {
+      "host": {
+        "visible": false
+      }
+    },
+    {
+      "advance": {
+        "ms": 600000
+      }
+    },
+    {
+      "host": {
+        "visible": true
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:11:00"
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

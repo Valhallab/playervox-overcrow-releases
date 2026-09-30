@@ -760,8 +760,9 @@ const fn size(
 
 /// Default sizes of the host-drawn leaves, in logical pixels at 100 %. Rows
 /// with a condition come first; any other element (`canvas` included) has
-/// no default size and is sized by style only. Provisional until the P2.4
-/// reference images check them.
+/// no default size and is sized by style only. `elapsed` is fixed by the
+/// Session pilot's reference images (P2.4); the others stay provisional
+/// until a built-in that draws them checks them.
 pub const DEFAULT_SIZES: &[DefaultSize] = &[
     size("icon", None, Extent::FontSize, Extent::FontSize),
     size("image", None, Extent::Image(0), Extent::Image(0)),
@@ -788,7 +789,10 @@ pub const DEFAULT_SIZES: &[DefaultSize] = &[
     ),
     size("separator", None, Extent::Px(0), Extent::Px(1)),
     size("select", None, Extent::Text, Extent::Text),
-    size("elapsed", None, Extent::Text, Extent::Text),
+    DefaultSize {
+        status: Status::Fixed,
+        ..size("elapsed", None, Extent::Text, Extent::Text)
+    },
 ];
 
 /// The default size of `element` whose attribute values are read by `value`.

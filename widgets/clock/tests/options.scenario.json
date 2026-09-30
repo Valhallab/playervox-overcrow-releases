@@ -1,0 +1,108 @@
+{
+  "scenarioVersion": 1,
+  "name": "options",
+  "description": "Each menu row, applied from the menu at 14:08:42 local time: seconds, the three date orders, the date hidden.",
+  "host": {
+    "zone": {
+      "offsetMinutes": 120
+    },
+    "startAt": 1784290122000
+  },
+  "steps": [
+    {
+      "menu": {
+        "id": "show-seconds",
+        "value": true
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "14:08:42",
+          "17/07/2026"
+        ],
+        "image": "seconds-dark"
+      }
+    },
+    {
+      "host": {
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "seconds-light"
+      }
+    },
+    {
+      "host": {
+        "theme": "dark"
+      }
+    },
+    {
+      "menu": {
+        "id": "show-seconds",
+        "value": false
+      }
+    },
+    {
+      "menu": {
+        "id": "date-format",
+        "value": "year-month-day"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "14:08",
+          "2026-07-17"
+        ],
+        "image": "year-month-day"
+      }
+    },
+    {
+      "menu": {
+        "id": "date-format",
+        "value": "month-day-year"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "14:08",
+          "07/17/2026"
+        ],
+        "image": "month-day-year"
+      }
+    },
+    {
+      "menu": {
+        "id": "show-date",
+        "value": false
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "14:08"
+        ],
+        "noText": [
+          "07/17/2026"
+        ],
+        "image": "time-only-dark"
+      }
+    },
+    {
+      "host": {
+        "theme": "light",
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "time-only-light-150",
+        "fault": "none"
+      }
+    }
+  ]
+}

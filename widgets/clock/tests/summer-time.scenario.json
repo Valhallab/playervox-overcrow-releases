@@ -1,0 +1,74 @@
+{
+  "scenarioVersion": 1,
+  "name": "summer-time",
+  "description": "Central European summer time: 01:59 becomes 03:00 at 01:00 UTC on 2026-03-29, and 02:59 becomes 02:00 at 01:00 UTC on 2026-10-25.",
+  "host": {
+    "zone": {
+      "offsetMinutes": 60,
+      "transitions": [
+        {
+          "at": 1774746000000,
+          "offsetMinutes": 120
+        },
+        {
+          "at": 1792890000000,
+          "offsetMinutes": 60
+        }
+      ]
+    },
+    "startAt": 1774745970000
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "01:59",
+          "29/03/2026"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 30000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "03:00"
+        ],
+        "noText": [
+          "02:00"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 18143970000,
+        "jump": true
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "02:59",
+          "25/10/2026"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 30000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "02:00",
+          "25/10/2026"
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "scenarioVersion": 1,
+  "name": "hidden",
+  "description": "Hidden, the clock gets no tick; shown again, it shows the current time at once.",
+  "host": {
+    "zone": {
+      "offsetMinutes": 120
+    },
+    "startAt": 1784290122000,
+    "options": {
+      "show-seconds": true
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "14:08:42"
+        ]
+      }
+    },
+    {
+      "host": {
+        "visible": false
+      }
+    },
+    {
+      "advance": {
+        "ms": 300000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "14:08:42"
+        ],
+        "noText": [
+          "14:13:42"
+        ]
+      }
+    },
+    {
+      "host": {
+        "visible": true
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "14:13:42"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 1000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "14:13:43"
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

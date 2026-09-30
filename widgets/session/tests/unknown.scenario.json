@@ -1,0 +1,37 @@
+{
+  "scenarioVersion": 1,
+  "name": "unknown",
+  "description": "The game is present but its duration is unknown (null): --:--:--.",
+  "fixtures": {
+    "subscriptions": {
+      "session.subscribe": null
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "--:--:--"
+        ],
+        "image": "unknown-dark"
+      }
+    },
+    {
+      "host": {
+        "theme": "light",
+        "locale": "fr",
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "--:--:--"
+        ],
+        "image": "unknown-light-fr-150",
+        "fault": "none"
+      }
+    }
+  ]
+}

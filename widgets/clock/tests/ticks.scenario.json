@@ -1,0 +1,120 @@
+{
+  "scenarioVersion": 1,
+  "name": "ticks",
+  "description": "The time changes at each local minute, or each second with seconds on, and the date at local midnight; turning seconds on or off applies at once.",
+  "host": {
+    "zone": {
+      "offsetMinutes": 60
+    },
+    "startAt": 1798757998000
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "23:59",
+          "31/12/2026"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 1999
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "23:59"
+        ],
+        "noText": [
+          "00:00"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 1
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00",
+          "01/01/2027"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 5000
+      }
+    },
+    {
+      "menu": {
+        "id": "show-seconds",
+        "value": true
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00:05"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 1000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00:06"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 58000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:01:04"
+        ]
+      }
+    },
+    {
+      "menu": {
+        "id": "show-seconds",
+        "value": false
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:01"
+        ],
+        "noText": [
+          "00:01:04"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 56000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:02"
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

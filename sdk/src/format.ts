@@ -9,7 +9,8 @@ import type { DateOrder, NumberFormat, Region } from "./generated/schema.js";
 // the same outside the VM (tests, the Studio).
 
 const MINUTE = 60_000;
-const PERIODS = { second: 1000, minute: MINUTE, hour: 60 * MINUTE, day: 24 * 60 * MINUTE };
+/** Length of each {@link TimeUnit}, ms. */
+export const PERIODS = { second: 1000, minute: MINUTE, hour: 60 * MINUTE, day: 24 * 60 * MINUTE };
 
 /** A boundary of local time. */
 export type TimeUnit = keyof typeof PERIODS;

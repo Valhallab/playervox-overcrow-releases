@@ -1,0 +1,95 @@
+{
+  "scenarioVersion": 1,
+  "name": "render",
+  "description": "A session of 1 h 27 min 43 s, in both themes, both languages, at 100 % and 150 %.",
+  "fixtures": {
+    "subscriptions": {
+      "session.subscribe": {
+        "elapsedMs": 5263000,
+        "at": 0
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "01:27:43"
+        ],
+        "image": "running-dark-en-100"
+      }
+    },
+    {
+      "host": {
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "running-light-en-100"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "expect": {
+        "image": "running-light-fr-100"
+      }
+    },
+    {
+      "host": {
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "running-dark-fr-100"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "running-dark-fr-150"
+      }
+    },
+    {
+      "host": {
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "running-light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "locale": "en"
+      }
+    },
+    {
+      "expect": {
+        "image": "running-light-en-150"
+      }
+    },
+    {
+      "host": {
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "running-dark-en-150",
+        "fault": "none"
+      }
+    }
+  ]
+}

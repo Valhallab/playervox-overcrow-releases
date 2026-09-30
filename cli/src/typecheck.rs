@@ -24,8 +24,9 @@ pub fn run(root: &Path, logic_path: &str, report: &mut Report) {
     if logic_path != "logic.ts" {
         return;
     }
-    let tsc = root.join("node_modules/typescript/lib/tsc.js");
-    if !tsc.is_file() {
+    // tsc runs in the project directory: relative to it, whatever `root` is.
+    let tsc = Path::new("node_modules/typescript/lib/tsc.js");
+    if !root.join(tsc).is_file() {
         report.push(
             Diagnostic::warning(
                 "typecheck.skipped",
@@ -37,7 +38,7 @@ pub fn run(root: &Path, logic_path: &str, report: &mut Report) {
     }
     let mut command = Command::new("node");
     command
-        .arg(&tsc)
+        .arg(tsc)
         .args(["--noEmit", "--pretty", "false", "-p", "tsconfig.json"])
         .current_dir(root)
         .stdin(Stdio::null())

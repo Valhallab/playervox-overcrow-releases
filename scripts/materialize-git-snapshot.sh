@@ -63,7 +63,7 @@ trusted_git() {
         GIT_OPTIONAL_LOCKS=0 GIT_TERMINAL_PROMPT=0 \
         /usr/bin/timeout --signal=KILL 15 \
         /usr/bin/prlimit --cpu=10 --as=1073741824 --nofile=128 \
-            --fsize=33554432 -- \
+            --fsize=50331648 -- \
         /usr/bin/git --no-replace-objects \
             -c core.fsmonitor=false -c core.hooksPath=/dev/null \
             -c core.attributesFile=/dev/null -c core.excludesFile=/dev/null \
@@ -109,11 +109,11 @@ if ! trusted_git archive --format=tar --output="$archive" "$revision" \
         || test ! -f "$archive" || test -L "$archive" \
         || test "$(/usr/bin/stat -c '%u:%a:%h' "$archive")" \
             != "$invoking_uid:600:1" \
-        || test "$(/usr/bin/stat -c '%s' "$archive")" -gt 33554432 \
+        || test "$(/usr/bin/stat -c '%s' "$archive")" -gt 50331648 \
         || ! /usr/bin/env -i PATH=/usr/bin:/bin LC_ALL=C \
             /usr/bin/timeout --signal=KILL 15 \
             /usr/bin/prlimit --cpu=10 --as=1073741824 --nofile=128 \
-                --fsize=33554432 -- \
+                --fsize=50331648 -- \
             /usr/bin/tar --extract --file="$archive" --directory="$work" \
                 --no-same-owner --no-same-permissions --delay-directory-restore; then
     printf '%s\n' 'error: trusted Git snapshot is unavailable' >&2
@@ -123,8 +123,8 @@ fi
 file_count=$(/usr/bin/find "$work" -xdev -type f -printf . | /usr/bin/wc -c)
 byte_count=$(/usr/bin/find "$work" -xdev -type f -printf '%s\n' \
     | /usr/bin/awk '{ total += $1 } END { print total + 0 }')
-if test "$file_count" -eq 0 || test "$file_count" -gt 1000 \
-        || test "$byte_count" -gt 16777216 \
+if test "$file_count" -eq 0 || test "$file_count" -gt 4000 \
+        || test "$byte_count" -gt 33554432 \
         || test -n "$(/usr/bin/find "$work" -xdev ! -type d ! -type f -print -quit)" \
         || test -n "$(/usr/bin/find "$work" -xdev ! -user "$invoking_uid" -print -quit)" \
         || test -n "$(/usr/bin/find "$work" -xdev -type f -size +8388608c -print -quit)" \
@@ -159,7 +159,7 @@ if test "$mode" = --validated; then
         fi
         checked_entries=$((checked_entries + 1))
         checked_bytes=$((checked_bytes + expected_size))
-        if test "$checked_entries" -gt 1000 || test "$checked_bytes" -gt 16777216; then
+        if test "$checked_entries" -gt 4000 || test "$checked_bytes" -gt 33554432; then
             printf '%s\n' 'error: trusted Git snapshot is unavailable' >&2
             exit 1
         fi

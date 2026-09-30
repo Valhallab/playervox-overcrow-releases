@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.playervox.overcrow.fps",
+  "version": "1.0.0",
+  "name": {
+    "en": "FPS",
+    "fr": "FPS"
+  },
+  "sizing": {
+    "fit": "both",
+    "preferred": { "width": 110, "height": 44 },
+    "min": { "width": 40, "height": 24 },
+    "max": { "width": 480, "height": 240 }
+  },
+  "requires": ["fps"],
+  "permissions": {
+    "capabilities": ["fps.read"]
+  },
+  "wrapper": {
+    "menu": [
+      {
+        "type": "toggle",
+        "id": "show-label",
+        "label": { "en": "Show “FPS” label", "fr": "Afficher le libellé « FPS »" },
+        "default": true
+      }
+    ]
+  }
+}

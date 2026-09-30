@@ -175,6 +175,20 @@ test("the view table, drawings, the menu and logs reach the runtime", () => {
   vm.menu("refresh");
   assert.deepEqual(rows, ["refresh"]);
 
+  const changes = [];
+  const first = overcrow.onHost((changed) => changes.push(["first", ...changed]));
+  overcrow.onHost((changed) => changes.push(["second", ...changed]));
+  vm.setHost({ options: { seconds: false }, visible: true });
+  assert.equal(overcrow.host.options.seconds, false, "the host is current in the listener's turn");
+  first.cancel();
+  first.cancel();
+  vm.setHost({ region: HOST.region });
+  assert.deepEqual(changes, [
+    ["first", "options", "visible"],
+    ["second", "options", "visible"],
+    ["second", "region"],
+  ]);
+
   overcrow.log.info("started");
   overcrow.log.error("failed");
   assert.deepEqual(vm.logs, [

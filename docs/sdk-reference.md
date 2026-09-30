@@ -94,6 +94,8 @@ complete widget packaged this way by the SDK's tests.
 | --- | --- | --- |
 | `host` | constant | Frozen object whose members always read the latest host values. |
 | `HostData` | interface | `locale`, `messages`, `theme`, `region`, `scale` (‰), `viewport`, `mode`, `visible`, `options`, `grants`. |
+| `onHost(listener)` | function | Calls `listener` with the names of the `host` members each host message sent (`options` after a menu change, `visible` when shown or hidden, `region`…), before the view is evaluated again; returns `{ cancel() }`. |
+| `HostKey`, `HostListener` | types | A member name of `HostData`, and an `onHost` listener. |
 | `Viewport` | interface | `{ width, height }`, logical px. |
 | `hasGrant(capability)` | function | Whether the user granted a capability. |
 | `option(id, fallback)` | function | Stored value of a `wrapper.menu` row, or `fallback` when missing or of another type. |
@@ -174,9 +176,12 @@ Timers are host timers: at most `MAX_TIMERS`, never shorter than
 ticks while the widget is hidden. A repeating timer skips hidden ticks; a
 one-shot timer that fell due while hidden ticks once when the widget is
 shown again. `atEach("second" | "minute" | "hour" | "day", callback)` calls
-`callback` at each boundary of local time, re-arming from the current time
-after each call; it also wakes at `host.region.nextChangeAt`, when the host
-sends the new UTC offset.
+`callback` at each boundary of local time, and once when the widget is
+shown again. Seconds and minutes run on one repeating host timer aligned on
+the boundaries (a UTC offset is a whole number of minutes): one VM turn per
+tick; a tick more than `MIN_TIMER_INTERVAL_MS` late or early re-aligns it.
+Hours and days re-arm from the current time after each call and also wake
+at `host.region.nextChangeAt`, when the host sends the new UTC offset.
 
 ## Drawing, menu, messages and log
 

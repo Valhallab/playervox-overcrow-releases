@@ -572,10 +572,10 @@ Host-drawn leaves take these sizes, in logical px at 100 %, unless `width` or `h
 | `separator` | `axis="vertical"` | 1 | 0 | **provisional (P2.4)** |
 | `separator` | — | 0 | 1 | **provisional (P2.4)** |
 | `select` | — | its text | its text | **provisional (P2.4)** |
-| `elapsed` | — | its text | its text | **provisional (P2.4)** |
+| `elapsed` | — | its text | its text | fixed |
 ## Design tokens
 
-Dark values are the current overlay palette. The built-ins have no light theme yet, so no capture can check the light colours: apart from the fixed `--color-on-accent`, they remain a proposal.
+Dark values are the current overlay palette. The reference images of the P2.4 built-in pilots, in both themes, fixed the panel and the primary and muted text; with `--color-on-accent`, fixed by the P0.6 audit, the other colours remain a proposal until a built-in that draws them checks them.
 
 | Token | Type | Dark | Light | Status | Meaning |
 | --- | --- | --- | --- | --- | --- |
@@ -583,16 +583,16 @@ Dark values are the current overlay palette. The built-ins have no light theme y
 | `--color-accent-hover` | color | `#b5f153` | `#3f6212` | **provisional (P2.4)** | Accent under the pointer. |
 | `--color-accent-soft` | color | `#a3e6351c` | `#4d7c0f1f` | **provisional (P2.4)** | Accent wash behind selected content. |
 | `--color-on-accent` | color | `#09090b` | `#ffffff` | fixed | Text and icons drawn on the accent and its hover state. |
-| `--color-surface-panel` | color | `#111114ee` | `#fafafaee` | **provisional (P2.4)** | Widget panel background, drawn by the host wrapper behind the content. |
+| `--color-surface-panel` | color | `#111114ee` | `#fafafaee` | fixed | Widget panel background, drawn by the host wrapper behind the content. |
 | `--color-surface-raised` | color | `#1e1e22e0` | `#f4f4f5eb` | **provisional (P2.4)** | Raised surface inside the panel. |
 | `--color-surface-hover` | color | `#28282deb` | `#e4e4e7f0` | **provisional (P2.4)** | Surface under the pointer. |
 | `--color-surface-field` | color | `#0f0f12` | `#ffffff` | **provisional (P2.4)** | Text input background. |
 | `--color-surface-popover` | color | `#18181c` | `#ffffff` | **provisional (P2.4)** | Popover and drop-down background. |
 | `--color-border` | color | `#ffffff18` | `#0000001a` | **provisional (P2.4)** | Default border. |
 | `--color-border-strong` | color | `#ffffff2a` | `#0000002e` | **provisional (P2.4)** | Emphasized border and separator. |
-| `--color-text` | color | `#f7f7f8` | `#18181b` | **provisional (P2.4)** | Primary text. |
+| `--color-text` | color | `#f7f7f8` | `#18181b` | fixed | Primary text. |
 | `--color-text-secondary` | color | `#d4d4d8` | `#3f3f46` | **provisional (P2.4)** | Secondary text. |
-| `--color-text-muted` | color | `#a1a1aa` | `#52525b` | **provisional (P2.4)** | Captions and metadata. |
+| `--color-text-muted` | color | `#a1a1aa` | `#52525b` | fixed | Captions and metadata. |
 | `--color-text-subtle` | color | `#71717a` | `#71717a` | **provisional (P2.4)** | Placeholders and disabled text. |
 | `--color-danger` | color | `#fb7185` | `#e11d48` | **provisional (P2.4)** | Errors and destructive actions. |
 | `--color-danger-soft` | color | `#fb71851a` | `#e11d481a` | **provisional (P2.4)** | Danger wash behind destructive confirmations and errors. |
@@ -644,6 +644,7 @@ Every icon of the pinned `egui-lucide 0.1.0` crate (Lucide 1.34.0, 1777 names) i
 | `vm` | `VmRequest` | no | VM budget request; absent means the defaults. |
 | `permissions` | `Permissions` | no | Requested permissions; absent means none. |
 | `wrapper` | `wrapper` | no | Widget rows of the host options menu. |
+| `requires` | `host features` | no | Distinct host data sources the widget cannot work without, as in a `wrapper.menu` row's `requires`. On a machine that lacks one, the host neither starts nor shows the widget and keeps its layout; the widget comes back when the source does. |
 
 ### `WidgetName`
 

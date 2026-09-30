@@ -174,6 +174,14 @@ pub fn manifest_diagnostic(error: ManifestError, source: &str) -> Diagnostic {
             "`wrapper.menu` is invalid".into(),
             Some("see the Wrapper menu section of docs/widget-schema-v1.md".into()),
         ),
+        ManifestError::Requires => (
+            "requires",
+            "`requires` must list distinct host features".into(),
+            Some(format!(
+                "host features: {}",
+                overcrow_widget_schema::wrapper::HOST_FEATURES.join(", ")
+            )),
+        ),
     };
     let mut diagnostic = Diagnostic::error(code, message).in_file("manifest.json");
     if !path.is_empty()
