@@ -89,7 +89,7 @@ data cannot leave the machine through the widget.
 | `playervox.rating.read` | **yes** | `playervox.rating.subscribe` | — |
 | `playervox.rating.write` | **yes** | none (host-bound intent) | — |
 | `playervox.reviews.read` | **yes** | `playervox.reviews.page` | — |
-| `journal.read` | **yes** | `journal.page` | — |
+| `journal.read` | **yes** | `journal.subscribe`, `journal.page` | — |
 | `journal.delete` | **yes** | — | `journal.delete` |
 | `twitch.chat.read` | **yes** | `twitch.chat.subscribe` | `twitch.chat.join`, `twitch.chat.leave`, `twitch.chat.favorite` |
 | `twitch.chat.compose` | **yes** | none (host-bound intent) | — |

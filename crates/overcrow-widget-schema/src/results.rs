@@ -333,14 +333,38 @@ pub const SHAPES: &[NamedShape] = &[
         "One journal session.",
     ),
     named(
+        "JournalState",
+        Shape::Record(&[
+            member(
+                "revision",
+                Shape::Integer,
+                "Changes whenever the merged journal of the active game changes.",
+            ),
+            member(
+                "notice",
+                Shape::Nullable(&Shape::Keyword(&[
+                    "offline",
+                    "storage_unavailable",
+                    "full",
+                    "expired",
+                    "busy",
+                    "unavailable",
+                ])),
+                "Journal condition to show above the sessions: `offline` sync is offline (local sessions remain), `storage_unavailable` the local journal cannot be read, `full` the local journal is full, `expired` the PlayerVox sign-in expired, `busy` PlayerVox asks to retry later, `unavailable` any other failure; `null` when none.",
+            ),
+        ]),
+        "The journal of the active game.",
+    ),
+    named(
         "JournalPage",
         Shape::Record(&[
-            member("gameName", Shape::Text, "Active game."),
+            member("gameName", Shape::Text, "Active game; empty when the host has no name."),
             member(
                 "items",
                 Shape::List(&Shape::Named("JournalSession")),
                 "Sessions, newest first.",
             ),
+            member("page", Shape::Integer, "Page number, from 1."),
             member("next", NULLABLE_TEXT, "Cursor of the next page."),
             member("previous", NULLABLE_TEXT, "Cursor of the previous page."),
         ]),

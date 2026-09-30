@@ -34,14 +34,16 @@ export const gameEvents: GameEventsServices = /* @__PURE__ */ group("gameEvents"
 
 /** The `journal.*` services. */
 export interface JournalServices {
-  /** `journal.page`. Requires the `journal.read` capability, granted by the user. Result: `{ gameName, items, next, previous }`: local and cloud sessions of the active game, merged and deduplicated, newest first; each item `{ id, startedAt, offsetMinutes, durationMs, source }`; cursors are host handles. */
+  /** `journal.subscribe`. Requires the `journal.read` capability, granted by the user. Updates: `null` without an active game, or `{ revision, notice }`: `revision` changes whenever the merged journal of the active game changes (a session recorded or deleted, cloud sessions merged, the PlayerVox account or sync changed), so the widget reads its page again; `notice` is `null`, `offline`, `storage_unavailable`, `full`, `expired`, `busy` or `unavailable`. Holding this subscription is what keeps the host's journal source running. */
+  subscribe(listener: Listener<R["journal.subscribe"]>): Subscription;
+  /** `journal.page`. Requires the `journal.read` capability, granted by the user. Result: `{ gameName, items, page, next, previous }`: five local and cloud sessions of the active game, merged and deduplicated, newest first; without `cursor`, the first page; each item `{ id, startedAt, offsetMinutes, durationMs, source }`; cursors are host handles that stay valid for the widget whatever other widgets read, and a cursor past the end answers the last page. */
   page(params?: P["journal.page"]): Promise<R["journal.page"]>;
   /** `journal.delete`. Requires the `journal.delete` capability, granted by the user. Call it while handling a gesture event (`activate`, `keydown`…), or it fails with `gesture_required`. The host asks the user to confirm first. Result: `null`, or `cancelled` when the user declines; `not_connected` for a cloud session while PlayerVox is disconnected. */
   delete(params: P["journal.delete"]): Promise<R["journal.delete"]>;
 }
 
 /** The `journal.*` services. */
-export const journal: JournalServices = /* @__PURE__ */ group("journal", ["page", "delete"]);
+export const journal: JournalServices = /* @__PURE__ */ group("journal", ["subscribe", "page", "delete"]);
 
 /** The `media.*` services. */
 export interface MediaServices {

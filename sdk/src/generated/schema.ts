@@ -121,7 +121,7 @@ export interface CapabilityServices {
   /** Paged player reviews of the active game, optionally from followed players only. */
   readonly "playervox.reviews.read": "playervox.reviews.page";
   /** Play sessions of the active game: local ones, plus cloud ones while PlayerVox is connected. */
-  readonly "journal.read": "journal.page";
+  readonly "journal.read": "journal.subscribe" | "journal.page";
   /** Delete a journal session after native confirmation; cloud rows need PlayerVox. */
   readonly "journal.delete": "journal.delete";
   /** Join, read and leave a Twitch channel chat, and keep favourite channels. */
@@ -611,12 +611,22 @@ export interface JournalSession {
   readonly source: "local" | "cloud";
 }
 
+/** The journal of the active game. */
+export interface JournalState {
+  /** Changes whenever the merged journal of the active game changes. */
+  readonly revision: number;
+  /** Journal condition to show above the sessions: `offline` sync is offline (local sessions remain), `storage_unavailable` the local journal cannot be read, `full` the local journal is full, `expired` the PlayerVox sign-in expired, `busy` PlayerVox asks to retry later, `unavailable` any other failure; `null` when none. */
+  readonly notice: "offline" | "storage_unavailable" | "full" | "expired" | "busy" | "unavailable" | null;
+}
+
 /** A page of the game journal. */
 export interface JournalPage {
-  /** Active game. */
+  /** Active game; empty when the host has no name. */
   readonly gameName: string;
   /** Sessions, newest first. */
   readonly items: ReadonlyArray<JournalSession>;
+  /** Page number, from 1. */
+  readonly page: number;
   /** Cursor of the next page. */
   readonly next: string | null;
   /** Cursor of the previous page. */
@@ -808,6 +818,8 @@ export interface ServiceParamsMap {
     /** Only reviews of followed players; default `false`. */
     readonly followedOnly?: boolean;
   };
+  /** Parameters of `journal.subscribe`. */
+  readonly "journal.subscribe": Record<string, never>;
   /** Parameters of `journal.page`. */
   readonly "journal.page": {
     /** Opaque page cursor; absent for the first page. */
@@ -894,7 +906,9 @@ export interface ServiceResultMap {
   readonly "playervox.rating.subscribe": Rating | null;
   /** `playervox.reviews.page`: `{ items, page, totalPages, count }`; each item `{ id, author, grade, score, text, original, publishedAt, offsetMinutes }`, `text` in the user's language when a translation exists, `original` the untranslated text or `null`, both cut by the host to `MAX_NODE_TEXT_BYTES`. */
   readonly "playervox.reviews.page": ReviewsPage;
-  /** `journal.page`: `{ gameName, items, next, previous }`: local and cloud sessions of the active game, merged and deduplicated, newest first; each item `{ id, startedAt, offsetMinutes, durationMs, source }`; cursors are host handles. */
+  /** `journal.subscribe`: `null` without an active game, or `{ revision, notice }`: `revision` changes whenever the merged journal of the active game changes (a session recorded or deleted, cloud sessions merged, the PlayerVox account or sync changed), so the widget reads its page again; `notice` is `null`, `offline`, `storage_unavailable`, `full`, `expired`, `busy` or `unavailable`. Holding this subscription is what keeps the host's journal source running. */
+  readonly "journal.subscribe": JournalState | null;
+  /** `journal.page`: `{ gameName, items, page, next, previous }`: five local and cloud sessions of the active game, merged and deduplicated, newest first; without `cursor`, the first page; each item `{ id, startedAt, offsetMinutes, durationMs, source }`; cursors are host handles that stay valid for the widget whatever other widgets read, and a cursor past the end answers the last page. */
   readonly "journal.page": JournalPage;
   /** `journal.delete`: `null`, or `cancelled` when the user declines; `not_connected` for a cloud session while PlayerVox is disconnected. */
   readonly "journal.delete": null;
@@ -946,6 +960,7 @@ export type SubscribeServiceName =
   | "notes.subscribe"
   | "playervox.score.subscribe"
   | "playervox.rating.subscribe"
+  | "journal.subscribe"
   | "twitch.chat.subscribe";
 
 /** Services accepted only while a gesture event is handled. */
