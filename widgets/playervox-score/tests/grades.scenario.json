@@ -1,0 +1,279 @@
+{
+  "scenarioVersion": 1,
+  "name": "grades",
+  "description": "The seven grades with the three criteria shown: each badge colour, the S+ glow, a real zero (F), missing criteria (--) and bars in each value's own grade colour; light theme; 89.6 shows 90 with grade S and 72.5 rounds to 73, at 150 % in French.",
+  "host": {
+    "options": {
+      "show-criteria": true
+    }
+  },
+  "fixtures": {
+    "subscriptions": {
+      "playervox.score.subscribe": {
+        "state": "ready",
+        "name": "Portal 2",
+        "score": 94.2,
+        "grade": "S+",
+        "ratingsCount": 1284,
+        "criteria": {
+          "gameplay": 97.4,
+          "art": 90.1,
+          "tech": 94.6
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "score": 94.2,
+          "grade": "S+",
+          "ratingsCount": 1284,
+          "criteria": {
+            "gameplay": 94.2,
+            "art": 74.2,
+            "tech": 99.2
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "grade-s-plus"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "score": 84,
+          "grade": "S",
+          "ratingsCount": 1284,
+          "criteria": {
+            "gameplay": 84,
+            "art": 64,
+            "tech": 89
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "grade-s"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "score": 74,
+          "grade": "A",
+          "ratingsCount": 1284,
+          "criteria": {
+            "gameplay": 74,
+            "art": 54,
+            "tech": 79
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "grade-a"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "score": 64,
+          "grade": "B",
+          "ratingsCount": 1284,
+          "criteria": {
+            "gameplay": 64,
+            "art": 44,
+            "tech": 69
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "grade-b"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "score": 54,
+          "grade": "C",
+          "ratingsCount": 1284,
+          "criteria": {
+            "gameplay": 54,
+            "art": 34,
+            "tech": 59
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "grade-c"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "score": 24,
+          "grade": "D",
+          "ratingsCount": 1284,
+          "criteria": {
+            "gameplay": 24,
+            "art": 4,
+            "tech": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "grade-d"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "score": 0,
+          "grade": "F",
+          "ratingsCount": 1,
+          "criteria": {
+            "gameplay": 0,
+            "art": 0,
+            "tech": 5
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "grade-f"
+      }
+    },
+    {
+      "host": {
+        "theme": "light"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "score": 94.2,
+          "grade": "S+",
+          "ratingsCount": 1284,
+          "criteria": {
+            "gameplay": 97.4,
+            "art": 90.1,
+            "tech": 94.6
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "grade-s-plus-light"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "score": 0,
+          "grade": "F",
+          "ratingsCount": 1,
+          "criteria": {
+            "gameplay": 0,
+            "art": null,
+            "tech": 72.5
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "0",
+          "1 rating",
+          "73",
+          "--"
+        ],
+        "image": "grade-f-light"
+      }
+    },
+    {
+      "host": {
+        "theme": "dark",
+        "scale": 1500,
+        "locale": "fr"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "score": 89.6,
+          "grade": "S",
+          "ratingsCount": 1284,
+          "criteria": {
+            "gameplay": 72.5,
+            "art": 0,
+            "tech": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "90",
+          "Artistique",
+          "Technique",
+          "73",
+          "0",
+          "--"
+        ],
+        "image": "grade-s-dark-fr-150"
+      }
+    }
+  ]
+}

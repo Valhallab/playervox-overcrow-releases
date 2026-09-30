@@ -1,0 +1,450 @@
+{
+  "scenarioVersion": 1,
+  "name": "states",
+  "description": "Every state of the default display (score, title, votes): loading, no game, a game without a Steam app ID, not found, unavailable, not rated yet and rated, in dark English and light French, then at 150 %. A game switch is loading, never the previous score.",
+  "fixtures": {
+    "subscriptions": {
+      "playervox.score.subscribe": {
+        "state": "loading",
+        "name": null,
+        "score": null,
+        "grade": "--",
+        "ratingsCount": 0,
+        "criteria": {
+          "gameplay": null,
+          "art": null,
+          "tech": null
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Community rating",
+          "Loading…"
+        ],
+        "state": "running",
+        "calls": [
+          {
+            "service": "playervox.score.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "image": "loading-dark-en"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "idle",
+          "name": null,
+          "score": null,
+          "grade": "--",
+          "ratingsCount": 0,
+          "criteria": {
+            "gameplay": null,
+            "art": null,
+            "tech": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Waiting for a game"
+        ],
+        "image": "idle-dark-en"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "unsupported",
+          "name": null,
+          "score": null,
+          "grade": "--",
+          "ratingsCount": 0,
+          "criteria": {
+            "gameplay": null,
+            "art": null,
+            "tech": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Game not linked",
+          "Steam game required"
+        ],
+        "image": "unsupported-dark-en"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "not_found",
+          "name": null,
+          "score": null,
+          "grade": "--",
+          "ratingsCount": 0,
+          "criteria": {
+            "gameplay": null,
+            "art": null,
+            "tech": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Game not found",
+          "On PlayerVox"
+        ],
+        "image": "not-found-dark-en"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "unavailable",
+          "name": null,
+          "score": null,
+          "grade": "--",
+          "ratingsCount": 0,
+          "criteria": {
+            "gameplay": null,
+            "art": null,
+            "tech": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Score unavailable",
+          "Retrying automatically"
+        ],
+        "image": "unavailable-dark-en"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "no_ratings",
+          "name": "Portal 2",
+          "score": null,
+          "grade": "--",
+          "ratingsCount": 0,
+          "criteria": {
+            "gameplay": null,
+            "art": null,
+            "tech": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "Not rated yet",
+          "No ratings yet"
+        ],
+        "image": "no-ratings-dark-en"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "score": 94.2,
+          "grade": "S+",
+          "ratingsCount": 1284,
+          "criteria": {
+            "gameplay": 97.4,
+            "art": 90.1,
+            "tech": 94.6
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "1,284 ratings"
+        ],
+        "image": "ready-dark-en"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "score": 94.2,
+          "grade": "S+",
+          "ratingsCount": 1284,
+          "criteria": {
+            "gameplay": 97.4,
+            "art": 90.1,
+            "tech": 94.6
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "1 284 votes"
+        ],
+        "image": "ready-light-fr"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "no_ratings",
+          "name": "Portal 2",
+          "score": null,
+          "grade": "--",
+          "ratingsCount": 0,
+          "criteria": {
+            "gameplay": null,
+            "art": null,
+            "tech": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "Pas encore noté",
+          "Aucun vote"
+        ],
+        "image": "no-ratings-light-fr"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "unavailable",
+          "name": null,
+          "score": null,
+          "grade": "--",
+          "ratingsCount": 0,
+          "criteria": {
+            "gameplay": null,
+            "art": null,
+            "tech": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Note indisponible",
+          "Nouvel essai automatique"
+        ],
+        "image": "unavailable-light-fr"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "not_found",
+          "name": null,
+          "score": null,
+          "grade": "--",
+          "ratingsCount": 0,
+          "criteria": {
+            "gameplay": null,
+            "art": null,
+            "tech": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Jeu introuvable",
+          "Sur PlayerVox"
+        ],
+        "image": "not-found-light-fr"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "unsupported",
+          "name": null,
+          "score": null,
+          "grade": "--",
+          "ratingsCount": 0,
+          "criteria": {
+            "gameplay": null,
+            "art": null,
+            "tech": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Jeu non associé",
+          "Jeu Steam requis"
+        ],
+        "image": "unsupported-light-fr"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "idle",
+          "name": null,
+          "score": null,
+          "grade": "--",
+          "ratingsCount": 0,
+          "criteria": {
+            "gameplay": null,
+            "art": null,
+            "tech": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "En attente du jeu"
+        ],
+        "image": "idle-light-fr"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "loading",
+          "name": null,
+          "score": null,
+          "grade": "--",
+          "ratingsCount": 0,
+          "criteria": {
+            "gameplay": null,
+            "art": null,
+            "tech": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Chargement…"
+        ],
+        "image": "loading-light-fr"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "score": 94.2,
+          "grade": "S+",
+          "ratingsCount": 1284,
+          "criteria": {
+            "gameplay": 97.4,
+            "art": 90.1,
+            "tech": 94.6
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "ready-light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark",
+        "region": {
+          "numberFormat": "us",
+          "dateOrder": "mdy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "ready-dark-en-150"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "unavailable",
+          "name": null,
+          "score": null,
+          "grade": "--",
+          "ratingsCount": 0,
+          "criteria": {
+            "gameplay": null,
+            "art": null,
+            "tech": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "unavailable-dark-en-150"
+      }
+    }
+  ]
+}

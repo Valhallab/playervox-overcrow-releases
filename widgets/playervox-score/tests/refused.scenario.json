@@ -1,0 +1,21 @@
+{
+  "scenarioVersion": 1,
+  "name": "refused",
+  "description": "Without its grant the widget asks nothing and shows the score as unavailable.",
+  "host": {
+    "grants": []
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Score unavailable"
+        ],
+        "state": "running",
+        "calls": [],
+        "fault": "none",
+        "image": "refused"
+      }
+    }
+  ]
+}

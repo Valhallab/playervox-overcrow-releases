@@ -89,7 +89,7 @@ export interface PlayervoxServices {
   };
   /** The `playervox.score.*` services. */
   readonly score: {
-    /** `playervox.score.subscribe`. Requires the `playervox.score.read` capability, granted by the user. Updates: `{ state, name, score, grade, ratingsCount, criteria }`: `state` is `ready`, `no_ratings`, `not_found` or `unavailable`; `criteria` `{ gameplay, art, tech }`, each 0–100 or `null`. */
+    /** `playervox.score.subscribe`. Requires the `playervox.score.read` capability, granted by the user. Updates: `{ state, name, score, grade, ratingsCount, criteria }`: `state` is `idle`, `unsupported`, `loading`, `ready`, `no_ratings`, `not_found` or `unavailable`; `criteria` `{ gameplay, art, tech }`, each 0–100 or `null`. */
     subscribe(listener: Listener<R["playervox.score.subscribe"]>): Subscription;
   };
 }

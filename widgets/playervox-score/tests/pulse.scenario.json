@@ -1,0 +1,157 @@
+{
+  "scenarioVersion": 1,
+  "name": "pulse",
+  "description": "One pulse of the badge, animated by the host, when a score shows or changes: 1 → 1.08 → 1 over 600 ms, at its peak 240 ms in, then settled; a new rating count with the same score does not pulse, a new score does, a status never does.",
+  "fixtures": {
+    "subscriptions": {
+      "playervox.score.subscribe": {
+        "state": "loading",
+        "name": null,
+        "score": null,
+        "grade": "--",
+        "ratingsCount": 0,
+        "criteria": {
+          "gameplay": null,
+          "art": null,
+          "tech": null
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "image": "loading"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "score": 94.2,
+          "grade": "S+",
+          "ratingsCount": 1284,
+          "criteria": {
+            "gameplay": 97.4,
+            "art": 90.1,
+            "tech": 94.6
+          }
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 240
+      }
+    },
+    {
+      "expect": {
+        "image": "pulse-peak"
+      }
+    },
+    {
+      "advance": {
+        "ms": 400
+      }
+    },
+    {
+      "expect": {
+        "image": "pulse-settled"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "score": 94.2,
+          "grade": "S+",
+          "ratingsCount": 1290,
+          "criteria": {
+            "gameplay": 97.4,
+            "art": 90.1,
+            "tech": 94.6
+          }
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 240
+      }
+    },
+    {
+      "expect": {
+        "image": "same-score-no-pulse"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "score": 84,
+          "grade": "S",
+          "ratingsCount": 1284,
+          "criteria": {
+            "gameplay": 97.4,
+            "art": 90.1,
+            "tech": 94.6
+          }
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 240
+      }
+    },
+    {
+      "expect": {
+        "image": "new-score-pulse-peak"
+      }
+    },
+    {
+      "advance": {
+        "ms": 400
+      }
+    },
+    {
+      "expect": {
+        "image": "new-score-settled"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "value": {
+          "state": "unavailable",
+          "name": null,
+          "score": null,
+          "grade": "--",
+          "ratingsCount": 0,
+          "criteria": {
+            "gameplay": null,
+            "art": null,
+            "tech": null
+          }
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 240
+      }
+    },
+    {
+      "expect": {
+        "image": "status-no-pulse"
+      }
+    }
+  ]
+}

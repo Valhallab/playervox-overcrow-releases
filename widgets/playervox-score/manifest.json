@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.playervox.overcrow.playervox.score",
+  "version": "1.0.0",
+  "name": {
+    "en": "PlayerVox score",
+    "fr": "Note PlayerVox"
+  },
+  "sizing": {
+    "fit": "both",
+    "preferred": { "width": 240, "height": 104 },
+    "min": { "width": 24, "height": 24 },
+    "max": { "width": 480, "height": 240 }
+  },
+  "permissions": {
+    "capabilities": ["playervox.score.read"]
+  },
+  "wrapper": {
+    "menu": [
+      {
+        "type": "toggle",
+        "id": "show-score",
+        "label": { "en": "Show overall score", "fr": "Afficher le score global" },
+        "default": true
+      },
+      {
+        "type": "toggle",
+        "id": "show-criteria",
+        "label": { "en": "Show three criteria", "fr": "Afficher les trois critères" },
+        "default": false
+      },
+      {
+        "type": "toggle",
+        "id": "show-title",
+        "label": { "en": "Show game title", "fr": "Afficher le nom du jeu" },
+        "default": true
+      },
+      {
+        "type": "toggle",
+        "id": "show-votes",
+        "label": { "en": "Show rating count", "fr": "Afficher le nombre de notes" },
+        "default": true
+      }
+    ]
+  }
+}

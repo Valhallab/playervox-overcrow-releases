@@ -69,6 +69,7 @@ website's documentation is realigned on this content separately.
 | `docs/content/` | The creator documentation, in English and French: guide, reference, security, publishing |
 | `docs/` | The technical manuals and specifications: [CLI](docs/cli.md), SDK, [schema reference](docs/widget-schema-v1.md) (generated), [source formats](docs/widget-source-formats.md), [package and catalog format](docs/widget-package-v1.md), [review policy](docs/review-policy.md), [testing](docs/testing.md) |
 | `widgets/` | The built-in widgets on the public SDK, each with its tests and reference page ([list](docs/content/en/widgets.md)), and Warframe Market, a PlayerVox catalog widget |
+| `widgets-shared/` | Sources several built-ins share, copied into each of them by `scripts/sync-shared-widgets.mjs` ([how](widgets-shared/README.md)) |
 | `scripts/`, `tests/` | Public CI drivers and their smoke tests |
 | `fuzz/` | Fuzz targets of every parser and package verifier |
 | `keys/` | Public catalog keys |

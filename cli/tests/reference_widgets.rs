@@ -65,6 +65,7 @@ fn the_pilots_are_here() {
         "fps",
         "media",
         "performance",
+        "playervox-score",
         "session",
         "stopwatch",
     ] {
@@ -265,6 +266,7 @@ fn service_fixtures_follow_the_result_shapes() {
         "stopwatch.control",
         "media.read",
         "media.control",
+        "playervox.score.read",
     ] {
         assert!(exercised.contains(capability), "{capability}");
     }

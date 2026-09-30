@@ -861,7 +861,7 @@ Authority is checked by the host at every call, immediately before acting. Gestu
 | `notes.select` | capability `notes.write` | call | yes | no | `note`: text ≤ `MAX_OBJECT_ID_BYTES` | `null`; the host stores the active note | `null` | fixed |
 | `notes.setItem` | capability `notes.write` | call | yes | no | `note`: text ≤ `MAX_OBJECT_ID_BYTES`; `item`: text ≤ `MAX_OBJECT_ID_BYTES`; `checked`: boolean | `null` | `null` | fixed |
 | `notes.delete` | capability `notes.write` | call | yes | yes | `note`: text ≤ `MAX_OBJECT_ID_BYTES` | `null`, or `cancelled` when the user declines | `null` | fixed |
-| `playervox.score.subscribe` | capability `playervox.score.read` | subscribe | no | no | none | `{ state, name, score, grade, ratingsCount, criteria }`: `state` is `ready`, `no_ratings`, `not_found` or `unavailable`; `criteria` `{ gameplay, art, tech }`, each 0–100 or `null` | `Score` | fixed |
+| `playervox.score.subscribe` | capability `playervox.score.read` | subscribe | no | no | none | `{ state, name, score, grade, ratingsCount, criteria }`: `state` is `idle`, `unsupported`, `loading`, `ready`, `no_ratings`, `not_found` or `unavailable`; `criteria` `{ gameplay, art, tech }`, each 0–100 or `null` | `Score` | fixed |
 | `playervox.rating.subscribe` | capability `playervox.rating.read` | subscribe | no | no | none | `null` before the user's first rating, or `{ gameplay, art, tech, review, publishedAt, offsetMinutes }`; `unsupported` outside the PlayerVox catalogue; the host seeds the `playervox.rating.publish` controls from it | `Rating` or `null` | fixed |
 | `playervox.reviews.page` | capability `playervox.reviews.read` | call | no | no | `page?`: integer 1..=100000; `followedOnly?`: boolean | `{ items, page, totalPages, count }`; each item `{ id, author, grade, score, text, original, publishedAt, offsetMinutes }`, `text` in the user's language when a translation exists, `original` the untranslated text or `null`, both cut by the host to `MAX_NODE_TEXT_BYTES` | `ReviewsPage` | fixed |
 | `journal.page` | capability `journal.read` | call | no | no | `cursor?`: text ≤ `MAX_OBJECT_ID_BYTES` | `{ gameName, items, next, previous }`: local and cloud sessions of the active game, merged and deduplicated, newest first; each item `{ id, startedAt, offsetMinutes, durationMs, source }`; cursors are host handles | `JournalPage` | fixed |
@@ -1012,7 +1012,7 @@ PlayerVox score of the active game. `{ state, name, score, grade, ratingsCount, 
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
-| `state` | `ready` \| `no_ratings` \| `not_found` \| `unavailable` | Score state. |
+| `state` | `idle` \| `unsupported` \| `loading` \| `ready` \| `no_ratings` \| `not_found` \| `unavailable` | Score state: `idle` without an active game, `unsupported` for a game without a Steam app ID, `loading` until the game's first answer (never the previous game's score), `ready` and `no_ratings` with the score, `not_found` for a game PlayerVox cannot match, `unavailable` while the host retries. Every state but `ready` and `no_ratings` has a `null` name and score, grade `--`, no ratings and `null` criteria. |
 | `name` | text or `null` | Game name. |
 | `score` | number or `null` | 0–100. |
 | `grade` | `S+` \| `S` \| `A` \| `B` \| `C` \| `D` \| `F` \| `--` | Grade of the score. |

@@ -1,0 +1,246 @@
+/* The built-in's layout at 100 %: a 24 px header (game name, PlayerVox
+   mark), a 64 px row (badge, score or status), and three 26 px criterion
+   rows. The wrapper draws the panel; the content keeps the built-in's
+   10 × 8 px margin. It fits between 64 and 220 px of content, the criteria
+   take the full 220 px, and the badge alone is a 76 px square. */
+.score {
+  flex-direction: column;
+  padding: 8px 10px;
+  max-width: 240px;
+}
+
+.with-criteria {
+  width: 240px;
+}
+
+.badge-only {
+  padding: 6px;
+}
+
+.header {
+  flex-direction: row;
+  align-items: start;
+  column-gap: 6px;
+  height: 24px;
+  min-width: 64px;
+}
+
+.title {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The mark keeps the header's right corner, the title shown or not. */
+.mark {
+  width: 16px;
+  height: 18px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.main {
+  flex-direction: row;
+  column-gap: 14px;
+  height: 64px;
+}
+
+.centred {
+  justify-content: center;
+}
+
+.slot {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+
+.side {
+  flex-direction: column;
+  min-width: 0px;
+  flex-shrink: 1;
+}
+
+.value {
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 30px;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.max {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.votes {
+  margin-top: 6px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  line-height: 14px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.votes.alone {
+  margin-top: 25px;
+}
+
+.status {
+  margin-top: 18px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hint {
+  margin-top: 11px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  line-height: 14px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.criteria {
+  flex-direction: column;
+  row-gap: 8px;
+  margin-top: 9px;
+}
+
+.criterion {
+  flex-direction: column;
+}
+
+.criterion-head {
+  flex-direction: row;
+  justify-content: space-between;
+  height: 15px;
+}
+
+.criterion-name {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  line-height: 14px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.criterion-value {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 14px;
+  color: var(--color-text);
+}
+
+/* A 3 px track of the border colour, filled in the value's grade colour. */
+.bar {
+  width: 100%;
+  height: 3px;
+  border-radius: 2px;
+}
+
+/* <shared:playervox-badge/badge.ocss> */
+/* The PlayerVox grade badge, shared by the Score and Rating built-ins.
+   scripts/sync-shared-widgets.mjs copies this file, as is, into their
+   style.ocss between the markers `<shared:playervox-badge/badge.ocss>`;
+   edit it here, never in a copy.
+
+   The badge canvas is 76 px square around a 56 px badge: the rotation and
+   the S+ glow reach past the badge, so the canvas overlaps its 64 px slot
+   by 6 px on each side. */
+.badge {
+  width: 76px;
+  height: 76px;
+  margin: -6px;
+}
+
+/* One pulse when a score shows or changes (badge.ts `nextPulse`): the
+   host animates the transform, so the widget sends one class change and
+   no frame is drawn once it ends or while the widget is hidden. Two
+   identical keyframes let the next change restart it. */
+@keyframes badge-pulse-a {
+  from {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes badge-pulse-b {
+  from {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.badge.pulse-a {
+  animation: badge-pulse-a 600ms ease-out 1;
+}
+
+.badge.pulse-b {
+  animation: badge-pulse-b 600ms ease-out 1;
+}
+
+/* Grade colours (badge.ts `GRADE_COLORS`), for text and bars. */
+.grade-s-plus {
+  color: #9ae600;
+}
+
+.grade-s {
+  color: #7ccf00;
+}
+
+.grade-a {
+  color: #00d3f3;
+}
+
+.grade-b {
+  color: #fdc700;
+}
+
+.grade-c {
+  color: #fe9a00;
+}
+
+.grade-d {
+  color: #e7000b;
+}
+
+.grade-f,
+.grade-none {
+  color: #52525c;
+}
+/* </shared:playervox-badge/badge.ocss> */

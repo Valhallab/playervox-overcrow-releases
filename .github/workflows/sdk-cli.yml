@@ -82,6 +82,8 @@ jobs:
         run: |
           set -eu
           node scripts/prepare-widgets.mjs
+          # The built-ins' copies of widgets-shared/ are current.
+          node scripts/sync-shared-widgets.mjs --check
           cli=$PWD/target/debug/overcrow-widget
           work=$(mktemp -d)
           for widget in widgets/*/; do
