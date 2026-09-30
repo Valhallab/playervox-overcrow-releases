@@ -89,7 +89,7 @@ pub const PARAMETER_CONSTRAINTS: &[Field] = &[
     Field::required(
         "slug",
         ValueType::Record("{ maxLength }"),
-        "`[a-z0-9-]`, not starting or ending with `-`; `maxLength` 1..=`MAX_SLUG_PARAMETER_BYTES`.",
+        "ASCII letters of either case, digits, `_` and `-`, at least one character, as the broker matches it; `maxLength` 1..=`MAX_SLUG_PARAMETER_BYTES`.",
     ),
     Field::required(
         "enum",

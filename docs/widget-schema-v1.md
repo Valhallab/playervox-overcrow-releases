@@ -800,7 +800,7 @@ Declaring a permission or capability grants nothing: activation requires consent
 | Type | Shape | Accepts |
 | --- | --- | --- |
 | `integer` | `{ min, max }` | Decimal without leading zero, 0..=2^53 - 1. |
-| `slug` | `{ maxLength }` | `[a-z0-9-]`, not starting or ending with `-`; `maxLength` 1..=`MAX_SLUG_PARAMETER_BYTES`. |
+| `slug` | `{ maxLength }` | ASCII letters of either case, digits, `_` and `-`, at least one character, as the broker matches it; `maxLength` 1..=`MAX_SLUG_PARAMETER_BYTES`. |
 | `enum` | list of `literal segment` ≤ `MAX_ENUM_VALUES` | One of the listed values, each ≤ `MAX_ENUM_VALUE_BYTES`. |
 | `string` | `{ maxLength }` | Query parameters only; any text without control characters; `maxLength` 1..=`MAX_STRING_PARAMETER_BYTES`. |
 
