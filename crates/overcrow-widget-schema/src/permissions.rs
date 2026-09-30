@@ -1,7 +1,7 @@
 //! Manifest permissions and host capabilities (ADR 0001, D7). Declaring either
 //! grants nothing: activation requires consent recorded by the host.
 
-use crate::limits::{MAX_ENUM_VALUES, MAX_NETWORK_PATH_BYTES};
+use crate::limits::{MAX_ENUM_VALUES, MAX_HTTP_DECLARED_RESPONSE_BYTES, MAX_NETWORK_PATH_BYTES};
 use crate::model::{Field, Status, ValueType};
 
 /// How a permission combines with a sensitive capability.
@@ -76,6 +76,14 @@ pub const NETWORK_RULE_FIELDS: &[Field] = &[
         "queryParams",
         ValueType::Record("name → ParameterConstraint"),
         "Allowed query parameters, at most `MAX_QUERY_PARAMS`, each optionally `required`; others are refused.",
+    ),
+    Field::optional(
+        "maxResponseBytes",
+        ValueType::Integer {
+            min: 1,
+            max: MAX_HTTP_DECLARED_RESPONSE_BYTES.value as i64,
+        },
+        "Largest response body of this route, 1..=`MAX_HTTP_DECLARED_RESPONSE_BYTES`; `MAX_HTTP_RESPONSE_BYTES` when absent. Not for `as: \"image\"`, which keeps `MAX_HTTP_RESPONSE_BYTES`. When several rules allow a request, the largest bound applies.",
     ),
 ];
 

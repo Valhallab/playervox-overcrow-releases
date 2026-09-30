@@ -157,7 +157,13 @@ through a call: a `form` with an `intent` sends its host-owned controls.
 
 `http.fetch` sends a string body as `text/plain` and any other body as JSON,
 unless `contentType` says otherwise, and decodes the answer as `as` asks; a
-response without a body gives `null`, `""` or an empty `ArrayBuffer`.
+response without a body gives `null`, `""` or an empty `ArrayBuffer`. A body
+longer than the bound of the network rule that allows the request
+(`maxResponseBytes`, up to `MAX_HTTP_DECLARED_RESPONSE_BYTES`, or
+`MAX_HTTP_RESPONSE_BYTES` without it and for `as: "image"`) fails with
+`response_body_limit`. Requests in flight reserve their bound from a
+per-widget and a host-wide budget; a request that does not fit fails with
+`busy` at once.
 
 The namespace types are generated: `ClipboardServices`, `FpsServices`,
 `GameEventsServices`, `JournalServices`, `MediaServices`, `NotesServices`,
@@ -258,7 +264,8 @@ The limits a widget works against are constants: `MAX_TIMERS`,
 `MIN_TIMER_INTERVAL_MS`, `MAX_SERVICE_CALLS_IN_FLIGHT`,
 `MAX_SUBSCRIPTIONS`, `MAX_STORAGE_KEYS`, `MAX_STORAGE_KEY_BYTES`,
 `MAX_STORAGE_VALUE_BYTES`, `STORAGE_QUOTA_BYTES`, `MAX_REQUEST_URL_BYTES`,
-`MAX_HTTP_REQUEST_BYTES`, `MAX_HTTP_RESPONSE_BYTES`, `MAX_CLIPBOARD_BYTES`,
+`MAX_HTTP_REQUEST_BYTES`, `MAX_HTTP_RESPONSE_BYTES`,
+`MAX_HTTP_DECLARED_RESPONSE_BYTES`, `MAX_CLIPBOARD_BYTES`,
 `MAX_OBJECT_ID_BYTES`, `MAX_NOTES`, `MAX_NOTE_ITEMS`,
 `MAX_NOTE_TITLE_BYTES`, `MAX_NOTE_BODY_BYTES`, `MAX_NOTE_ITEM_BYTES`,
 `MAX_REVIEW_CHARS`, `MAX_CHAT_CHANNEL_BYTES`, `MAX_CHAT_MESSAGE_CHARS`,

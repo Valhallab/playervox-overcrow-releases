@@ -21,9 +21,9 @@ use std::fmt;
 
 use overcrow_widget_schema::ipc::FAULT_CATEGORY_NAMES;
 use overcrow_widget_schema::limits::{
-    MAX_CLIPBOARD_BYTES, MAX_CONTENT_SCALE, MAX_HTTP_RESPONSE_BYTES, MAX_REQUEST_URL_BYTES,
-    MAX_STORAGE_KEY_BYTES, MAX_STORAGE_KEYS, MAX_STORAGE_VALUE_BYTES, MIN_CONTENT_SCALE,
-    STORAGE_QUOTA_BYTES,
+    MAX_CLIPBOARD_BYTES, MAX_CONTENT_SCALE, MAX_HTTP_DECLARED_RESPONSE_BYTES,
+    MAX_HTTP_RESPONSE_BYTES, MAX_REQUEST_URL_BYTES, MAX_STORAGE_KEY_BYTES, MAX_STORAGE_KEYS,
+    MAX_STORAGE_VALUE_BYTES, MIN_CONTENT_SCALE, STORAGE_QUOTA_BYTES,
 };
 use overcrow_widget_schema::manifest::Manifest;
 use overcrow_widget_schema::permissions::capability_named;
@@ -42,8 +42,9 @@ pub const SUPPORTED_SCENARIO_VERSIONS: &[u32] = &[SCENARIO_VERSION];
 /// The file suffix of a scenario in a project's `tests/` directory.
 pub const SCENARIO_SUFFIX: &str = ".scenario.json";
 
-/// A scenario file, in bytes.
-pub const MAX_SCENARIO_BYTES: usize = 2 * 1024 * 1024;
+/// A scenario file, in bytes: room for an HTTP fixture at
+/// `MAX_HTTP_DECLARED_RESPONSE_BYTES` and beyond it, in base64.
+pub const MAX_SCENARIO_BYTES: usize = 8 * 1024 * 1024;
 /// Scenario and capture names (`[a-z0-9][a-z0-9-]*`).
 pub const MAX_NAME_BYTES: usize = 64;
 /// The description, in characters.
@@ -1227,6 +1228,21 @@ impl Scenario {
                 "the manifest does not declare `network`",
             ));
         }
+        // No rule of the manifest allows a larger body; the runtime applies
+        // the bound of the rule that allows each request.
+        let largest = largest_response_bound(manifest);
+        for (index, fixture) in self.fixtures.http.iter().enumerate() {
+            if let Some(response) = &fixture.response
+                && response
+                    .body_bytes()
+                    .is_some_and(|body| body.len() as u64 > largest)
+            {
+                return Err(ScenarioError::new(
+                    format!("fixtures.http[{index}].response"),
+                    "the body is beyond every network rule's bound (`error: response_body_limit`)",
+                ));
+            }
+        }
         Ok(())
     }
 
@@ -1240,6 +1256,22 @@ impl Scenario {
             })
         })
     }
+}
+
+/// The largest response body a network rule of the manifest allows:
+/// its `maxResponseBytes`, or `MAX_HTTP_RESPONSE_BYTES` without one.
+fn largest_response_bound(manifest: &Manifest) -> u64 {
+    manifest.value["permissions"]["network"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .map(|rule| {
+            rule["maxResponseBytes"]
+                .as_u64()
+                .unwrap_or(MAX_HTTP_RESPONSE_BYTES.value)
+        })
+        .max()
+        .unwrap_or(MAX_HTTP_RESPONSE_BYTES.value)
 }
 
 fn check_change(path: &str, change: &HostChange) -> Checked {
@@ -1310,7 +1342,7 @@ fn check_http(path: &str, fixture: &HttpFixture) -> Checked {
                     format!("{here}.bodyBase64"),
                     "invalid base64",
                 )),
-                Some(body) if body.len() as u64 > MAX_HTTP_RESPONSE_BYTES.value => {
+                Some(body) if body.len() as u64 > MAX_HTTP_DECLARED_RESPONSE_BYTES.value => {
                     Err(ScenarioError::new(
                         here,
                         "the body is beyond the broker's bound (`error: response_body_limit`)",

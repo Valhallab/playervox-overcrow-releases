@@ -13,10 +13,10 @@ use serde_json::{Map, Value};
 use crate::json::{has_exact_fields, integer_in, parse_strict};
 use crate::limits::{
     MAX_DNS_LABEL_BYTES, MAX_DNS_NAME_BYTES, MAX_ENUM_VALUE_BYTES, MAX_ENUM_VALUES,
-    MAX_GAME_EVENTS, MAX_MANIFEST_BYTES, MAX_NETWORK_PATH_BYTES, MAX_NETWORK_RULES,
-    MAX_PARAMETER_NAME_BYTES, MAX_PATH_PARAMS, MAX_QUERY_PARAMS, MAX_SLUG_PARAMETER_BYTES,
-    MAX_STRING_PARAMETER_BYTES, MAX_WIDGET_EDGE_PX, MAX_WIDGET_ID_BYTES, MAX_WIDGET_NAME_CHARS,
-    MIN_WIDGET_ID_BYTES, VM_HEAP_BYTES, VM_MAX_HEAP_BYTES,
+    MAX_GAME_EVENTS, MAX_HTTP_DECLARED_RESPONSE_BYTES, MAX_MANIFEST_BYTES, MAX_NETWORK_PATH_BYTES,
+    MAX_NETWORK_RULES, MAX_PARAMETER_NAME_BYTES, MAX_PATH_PARAMS, MAX_QUERY_PARAMS,
+    MAX_SLUG_PARAMETER_BYTES, MAX_STRING_PARAMETER_BYTES, MAX_WIDGET_EDGE_PX, MAX_WIDGET_ID_BYTES,
+    MAX_WIDGET_NAME_CHARS, MIN_WIDGET_ID_BYTES, VM_HEAP_BYTES, VM_MAX_HEAP_BYTES,
 };
 use crate::model::{Field, ValueType, field, is_keyword};
 use crate::permissions::{
@@ -516,6 +516,11 @@ fn validate_network_rule(rule: &Value) -> Result<(), ManifestError> {
     };
     let path_params = parameters("pathParams", MAX_PATH_PARAMS.value)?;
     let query_params = parameters("queryParams", MAX_QUERY_PARAMS.value)?;
+    if let Some(bound) = object.get("maxResponseBytes")
+        && integer_in(bound, 1, MAX_HTTP_DECLARED_RESPONSE_BYTES.value as i64).is_none()
+    {
+        return Err(invalid);
+    }
     let path = object["path"].as_str().ok_or(invalid)?;
     validate_route_path(path, &path_params)?;
     for constraint in path_params.values() {

@@ -265,6 +265,24 @@ fn the_review_lists_every_requested_authority() {
         ]
     );
     assert_eq!(report["review"][1]["origin"], "https://api.example.com");
+    assert_eq!(report["review"][1]["maxResponseBytes"], 1_048_576);
+
+    // A declared response bound is shown to the reviewer.
+    edit_manifest(&root, |manifest| {
+        manifest["permissions"] = json!({"network": [{
+            "origin": "https://api.example.com", "method": "GET", "path": "/v1/count",
+            "maxResponseBytes": 3_145_728
+        }]});
+    });
+    let (output, report) = admit_json(&[path(&root)]);
+    assert_eq!(output.status.code(), Some(0), "{report}");
+    assert_eq!(report["review"][0]["maxResponseBytes"], 3_145_728);
+    let output = cli(&["admit", path(&root)]);
+    let shown = text(&output.stdout);
+    assert!(
+        shown.contains("/v1/count, responses up to 3145728 bytes"),
+        "{shown}"
+    );
 
     // A sensitive capability keeps storage for the process lifetime only.
     edit_manifest(&root, |manifest| {

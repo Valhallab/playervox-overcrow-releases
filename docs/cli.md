@@ -153,8 +153,8 @@ written.
 Validates a package with the host's reader, then shows, for its author or a
 reviewer: the ID, version and names; the archive size and SHA-256; the SDK
 version its `logic.js` links; the VM heap; each permission in words
-(network routes with their parameter constraints, storage, clipboard, game
-events); each capability with its summary and whether it is sensitive or
+(network routes with their parameter constraints and declared response
+bound, storage, clipboard, game events); each capability with its summary and whether it is sensitive or
 needs an account; the number of menu rows; and every file with its size and
 SHA-256 (the ledger). A package the host would refuse is reported instead,
 with the refusing category.
@@ -295,8 +295,9 @@ policy](review-policy.md)). It never runs `tsc` or the widget's code:
    packaged PNG under `assets/`, at most 256 KiB) and, for PlayerVox
    widgets, the MIT license;
 4. the authority the widget requests, listed for the reviewer: capabilities
-   (sensitive ones marked), network routes, clipboard writes, storage and
-   game events.
+   (sensitive ones marked), network routes with the response bound each
+   allows (`maxResponseBytes`, 1 MiB by default), clipboard writes, storage
+   and game events.
 
 | Code | Severity | Meaning |
 | --- | --- | --- |

@@ -138,7 +138,10 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MAX_NETWORK_RULES` | 32 | fixed | Network rules declared by one package. |
 | `MAX_REQUEST_URL_BYTES` | 2 KiB | fixed | Original URL text of one request, as today. |
 | `MAX_HTTP_REQUEST_BYTES` | 256 KiB | fixed | Body of one outgoing request. |
-| `MAX_HTTP_RESPONSE_BYTES` | 1 MiB | fixed | Body of one response delivered to the VM; must fit the VM heap. |
+| `MAX_HTTP_RESPONSE_BYTES` | 1 MiB | fixed | Body of one response delivered to the VM when its network rule declares no `maxResponseBytes`, and of every `as: "image"` response; must fit the VM heap. |
+| `MAX_HTTP_DECLARED_RESPONSE_BYTES` | 3 MiB | fixed | Largest `maxResponseBytes` of one network rule: the body of one response the rule allows, delivered to the VM; must fit the VM heap and, with its control part, the frame queue. |
+| `MAX_HTTP_RESPONSE_BYTES_PER_WIDGET` | 4 MiB | fixed | Response bytes one widget's requests in flight may reserve, each the bound of its rule; `busy` beyond. Equals `MAX_HTTP_CONCURRENT_PER_WIDGET` × `MAX_HTTP_RESPONSE_BYTES`, so rules without `maxResponseBytes` never reach it. |
+| `MAX_HTTP_RESPONSE_BYTES_GLOBAL` | 64 MiB | fixed | Response bytes all widgets' requests in flight may reserve; `busy` beyond. Equals `MAX_HTTP_CONCURRENT_GLOBAL` × `MAX_HTTP_RESPONSE_BYTES`, the worst case before declared bounds existed. |
 | `MAX_HTTP_CONCURRENT_PER_WIDGET` | 4 | fixed | Requests in flight for one widget. |
 | `MAX_HTTP_CONCURRENT_GLOBAL` | 64 | fixed | Requests in flight for all widgets. |
 | `HTTP_TIMEOUT_MS` | 30000 ms | fixed | Total duration of one request, as today. |
@@ -794,6 +797,7 @@ Declaring a permission or capability grants nothing: activation requires consent
 | `path` | text ≤ `MAX_NETWORK_PATH_BYTES` | yes | Complete path; `{name}` segments are typed path parameters. |
 | `pathParams` | `name → ParameterConstraint` | no | Constraint of every `{name}` segment, at most `MAX_PATH_PARAMS`. |
 | `queryParams` | `name → ParameterConstraint` | no | Allowed query parameters, at most `MAX_QUERY_PARAMS`, each optionally `required`; others are refused. |
+| `maxResponseBytes` | integer 1..=3145728 | no | Largest response body of this route, 1..=`MAX_HTTP_DECLARED_RESPONSE_BYTES`; `MAX_HTTP_RESPONSE_BYTES` when absent. Not for `as: "image"`, which keeps `MAX_HTTP_RESPONSE_BYTES`. When several rules allow a request, the largest bound applies. |
 
 ### `ParameterConstraint` types
 
@@ -839,7 +843,7 @@ Authority is checked by the host at every call, immediately before acting. Gestu
 | `storage.set` | permission `storage` | call | no | no | `key`: text ≤ `MAX_STORAGE_KEY_BYTES`; `value`: JSON | `null`; `quota_exceeded` beyond `STORAGE_QUOTA_BYTES` | `null` | fixed |
 | `storage.remove` | permission `storage` | call | no | no | `key`: text ≤ `MAX_STORAGE_KEY_BYTES` | `null` | `null` | fixed |
 | `storage.keys` | permission `storage` | call | no | no | none | list of keys | list of text | fixed |
-| `http.fetch` | permission `network` | call | no | no | `url`: text ≤ `MAX_REQUEST_URL_BYTES`; `method`: `GET` \| `POST` \| `PUT` \| `PATCH` \| `DELETE`; `contentType?`: `application/json` \| `text/plain`; `as`: `json` \| `text` \| `bytes` \| `image` | `{ status, contentType }` with the body as raw payload ≤ `MAX_HTTP_RESPONSE_BYTES`, or `{ status, asset }` | `HttpResponse` | fixed |
+| `http.fetch` | permission `network` | call | no | no | `url`: text ≤ `MAX_REQUEST_URL_BYTES`; `method`: `GET` \| `POST` \| `PUT` \| `PATCH` \| `DELETE`; `contentType?`: `application/json` \| `text/plain`; `as`: `json` \| `text` \| `bytes` \| `image` | `{ status, contentType }` with the body as raw payload ≤ the rule's `maxResponseBytes` (`MAX_HTTP_RESPONSE_BYTES` when absent), or `{ status, asset }` from a body ≤ `MAX_HTTP_RESPONSE_BYTES` | `HttpResponse` | fixed |
 | `clipboard.writeText` | permission `clipboardWrite` | call | yes | no | `text`: text ≤ `MAX_CLIPBOARD_BYTES` | `null` | `null` | fixed |
 | `gameEvents.subscribe` | permission `gameEvents` | subscribe | no | no | none | `{ event, at }` for each declared event | `GameEvent` | fixed |
 | `session.subscribe` | capability `session.read` | subscribe | no | no | none | `{ elapsedMs, at }` counted from the start of the game process, or `null` without an active game | `Session` or `null` | fixed |
@@ -1183,7 +1187,7 @@ OCWV v1 runs over one inherited pipe or socket pair per widget; the VM never ope
 | 1 | `host-control` | host → VM | none | One control message. |
 | 2 | `vm-control` | VM → host | none | One control message. |
 | 3 | `host-init` | host → VM | ≤ `MAX_LOGIC_BYTES` | `Init`; raw payload is the ledger-checked `logic.js`. Always the first host frame, sent once. |
-| 4 | `host-service-result` | host → VM | ≤ `MAX_HTTP_RESPONSE_BYTES` | `ServiceResult`; raw payload is an HTTP response body when one is returned. |
+| 4 | `host-service-result` | host → VM | ≤ `MAX_HTTP_DECLARED_RESPONSE_BYTES` | `ServiceResult`; raw payload is an HTTP response body when one is returned, within the bound of the rule that allowed the request. |
 | 5 | `vm-service-call` | VM → host | ≤ `MAX_HTTP_REQUEST_BYTES` | `ServiceCall`; raw payload is an HTTP request body when one is sent. |
 | 6 | `vm-scene-patch` | VM → host | ≤ `MAX_PATCH_BYTES` | `ScenePatch`; raw payload holds the operations. |
 | 7 | `vm-draw` | VM → host | ≤ `MAX_PATCH_BYTES` | `Draw`; raw payload holds the command list. |
