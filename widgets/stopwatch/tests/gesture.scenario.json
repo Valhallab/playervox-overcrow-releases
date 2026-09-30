@@ -1,0 +1,154 @@
+{
+  "scenarioVersion": 1,
+  "name": "gesture",
+  "description": "No input reaches a Passive widget: a click where the buttons would be calls nothing. In Interactive mode a click and Enter or Space on a focused button each make one call.",
+  "fixtures": {
+    "calls": {
+      "stopwatch.toggle": [
+        {
+          "value": {
+            "running": true,
+            "elapsedMs": 0,
+            "at": 0,
+            "shortcuts": {
+              "toggle": "Super+Alt+P",
+              "reset": "Super+Alt+R",
+              "bound": true
+            }
+          }
+        },
+        {
+          "value": {
+            "running": false,
+            "elapsedMs": 0,
+            "at": 0,
+            "shortcuts": {
+              "toggle": "Super+Alt+P",
+              "reset": "Super+Alt+R",
+              "bound": true
+            }
+          }
+        }
+      ],
+      "stopwatch.reset": [
+        {
+          "value": {
+            "running": false,
+            "elapsedMs": 0,
+            "at": 0,
+            "shortcuts": {
+              "toggle": "Super+Alt+P",
+              "reset": "Super+Alt+R",
+              "bound": true
+            }
+          }
+        }
+      ]
+    },
+    "subscriptions": {
+      "stopwatch.subscribe": {
+        "running": false,
+        "elapsedMs": 0,
+        "at": 0,
+        "shortcuts": {
+          "toggle": "Super+Alt+P",
+          "reset": "Super+Alt+R",
+          "bound": true
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "pointer": {
+        "click": {
+          "at": [
+            160,
+            20
+          ]
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "at": [
+            190,
+            20
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00:00.00"
+        ],
+        "calls": [
+          {
+            "service": "stopwatch.subscribe",
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Start"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "stopwatch.toggle",
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "stopwatch.toggle",
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "key": {
+        "key": "Space"
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "stopwatch.reset",
+            "outcome": "ok"
+          }
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

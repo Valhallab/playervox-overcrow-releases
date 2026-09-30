@@ -1,0 +1,246 @@
+{
+  "scenarioVersion": 1,
+  "name": "states",
+  "description": "Zero, running, paused and reset through the buttons in Interactive mode; Passive mode shows no buttons; the host's shortcuts reach the widget as subscription updates; Windows chords.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "calls": {
+      "stopwatch.toggle": [
+        {
+          "value": {
+            "running": true,
+            "elapsedMs": 0,
+            "at": 1000,
+            "shortcuts": {
+              "toggle": "Super+Alt+P",
+              "reset": "Super+Alt+R",
+              "bound": true
+            }
+          }
+        },
+        {
+          "value": {
+            "running": false,
+            "elapsedMs": 1234,
+            "at": 2234,
+            "shortcuts": {
+              "toggle": "Super+Alt+P",
+              "reset": "Super+Alt+R",
+              "bound": true
+            }
+          }
+        }
+      ],
+      "stopwatch.reset": [
+        {
+          "value": {
+            "running": false,
+            "elapsedMs": 0,
+            "at": 7234,
+            "shortcuts": {
+              "toggle": "Super+Alt+P",
+              "reset": "Super+Alt+R",
+              "bound": true
+            }
+          }
+        }
+      ]
+    },
+    "subscriptions": {
+      "stopwatch.subscribe": {
+        "running": false,
+        "elapsedMs": 0,
+        "at": 0,
+        "shortcuts": {
+          "toggle": "Super+Alt+P",
+          "reset": "Super+Alt+R",
+          "bound": true
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "00:00:00.00"
+        ],
+        "image": "zero-dark"
+      }
+    },
+    {
+      "advance": {
+        "ms": 1000
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Start"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "stopwatch.subscribe",
+            "outcome": "ok"
+          },
+          {
+            "service": "stopwatch.toggle",
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 1234
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00:01.23"
+        ],
+        "image": "running-dark"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Pause"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00:01.23"
+        ],
+        "calls": [
+          {
+            "service": "stopwatch.toggle",
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 5000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00:01.23"
+        ],
+        "noText": [
+          "00:00:06.23"
+        ],
+        "image": "paused-dark"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Reset"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00:00.00"
+        ],
+        "noText": [
+          "00:00:01.23"
+        ],
+        "calls": [
+          {
+            "service": "stopwatch.reset",
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00:00.00"
+        ],
+        "image": "passive-dark"
+      }
+    },
+    {
+      "publish": {
+        "service": "stopwatch.subscribe",
+        "value": {
+          "running": true,
+          "elapsedMs": 0,
+          "at": 7234,
+          "shortcuts": {
+            "toggle": "Super+Alt+P",
+            "reset": "Super+Alt+R",
+            "bound": true
+          }
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 500
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00:00.50"
+        ],
+        "calls": []
+      }
+    },
+    {
+      "publish": {
+        "service": "stopwatch.subscribe",
+        "value": {
+          "running": false,
+          "elapsedMs": 750,
+          "at": 7984,
+          "shortcuts": {
+            "toggle": "Ctrl+Shift+P",
+            "reset": "Ctrl+Shift+R",
+            "bound": true
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "theme": "light",
+        "locale": "fr",
+        "mode": "interactive"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00:00.75",
+          "Ctrl+Shift+P  Démarrer / pause  ·  Ctrl+Shift+R  Réinitialiser"
+        ],
+        "image": "windows-light-fr",
+        "fault": "none"
+      }
+    }
+  ]
+}

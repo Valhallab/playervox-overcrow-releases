@@ -1,0 +1,8 @@
+{
+  "label": "Stopwatch",
+  "start": "Start",
+  "pause": "Pause",
+  "reset": "Reset",
+  "with-chord": "{label} ({chord})",
+  "reminder": "{toggle}  Start / pause  ·  {reset}  Reset"
+}

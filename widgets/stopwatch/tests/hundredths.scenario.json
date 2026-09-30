@@ -1,0 +1,173 @@
+{
+  "scenarioVersion": 1,
+  "name": "hundredths",
+  "description": "The host advances the hundredths, truncated, with no VM timer or call; a paused stopwatch never moves; hours grow past 99; a new anchor applies at once; without a game the time is unknown.",
+  "fixtures": {
+    "subscriptions": {
+      "stopwatch.subscribe": {
+        "running": true,
+        "elapsedMs": 1999,
+        "at": 0,
+        "shortcuts": {
+          "toggle": "Super+Alt+P",
+          "reset": "Super+Alt+R",
+          "bound": true
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "00:00:01.99"
+        ],
+        "calls": [
+          {
+            "service": "stopwatch.subscribe",
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 1
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00:02.00"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 9
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00:02.00"
+        ],
+        "noText": [
+          "00:00:02.01"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 1
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00:02.01"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 988
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:00:02.99"
+        ],
+        "calls": []
+      }
+    },
+    {
+      "publish": {
+        "service": "stopwatch.subscribe",
+        "value": {
+          "running": true,
+          "elapsedMs": 359999990,
+          "at": 999,
+          "shortcuts": {
+            "toggle": "Super+Alt+P",
+            "reset": "Super+Alt+R",
+            "bound": true
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "99:59:59.99"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 10
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "100:00:00.00"
+        ],
+        "image": "hundred-hours"
+      }
+    },
+    {
+      "publish": {
+        "service": "stopwatch.subscribe",
+        "value": {
+          "running": false,
+          "elapsedMs": 3661250,
+          "at": 1009,
+          "shortcuts": {
+            "toggle": "Super+Alt+P",
+            "reset": "Super+Alt+R",
+            "bound": true
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "01:01:01.25"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 60000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "01:01:01.25"
+        ],
+        "calls": []
+      }
+    },
+    {
+      "publish": {
+        "service": "stopwatch.subscribe",
+        "value": null
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "--:--:--.--"
+        ],
+        "noText": [
+          "01:01:01.25"
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

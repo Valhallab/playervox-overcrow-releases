@@ -1,0 +1,42 @@
+{
+  "scenarioVersion": 1,
+  "name": "read-only",
+  "description": "With stopwatch.read only, the time and the reminder show, never the buttons.",
+  "host": {
+    "grants": [
+      "stopwatch.read"
+    ],
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "stopwatch.subscribe": {
+        "running": false,
+        "elapsedMs": 42420,
+        "at": 0,
+        "shortcuts": {
+          "toggle": "Super+Alt+P",
+          "reset": "Super+Alt+R",
+          "bound": true
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "00:00:42.42"
+        ],
+        "calls": [
+          {
+            "service": "stopwatch.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "image": "read-only",
+        "fault": "none"
+      }
+    }
+  ]
+}

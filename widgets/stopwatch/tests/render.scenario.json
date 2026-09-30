@@ -1,0 +1,105 @@
+{
+  "scenarioVersion": 1,
+  "name": "render",
+  "description": "A running stopwatch at 00:02:03.45 with its buttons in Interactive mode, in both themes, both languages, at 100 % and 150 %.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "stopwatch.subscribe": {
+        "running": true,
+        "elapsedMs": 123450,
+        "at": 0,
+        "shortcuts": {
+          "toggle": "Super+Alt+P",
+          "reset": "Super+Alt+R",
+          "bound": true
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "00:02:03.45",
+          "Super+Alt+P  Start / pause  ·  Super+Alt+R  Reset"
+        ],
+        "image": "running-dark-en-100"
+      }
+    },
+    {
+      "host": {
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "running-light-en-100"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "expect": {
+        "image": "running-light-fr-100"
+      }
+    },
+    {
+      "host": {
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "running-dark-fr-100"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "running-dark-fr-150"
+      }
+    },
+    {
+      "host": {
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "running-light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "locale": "en"
+      }
+    },
+    {
+      "expect": {
+        "image": "running-light-en-150"
+      }
+    },
+    {
+      "host": {
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "running-dark-en-150",
+        "fault": "none"
+      }
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "scenarioVersion": 1,
+  "name": "unknown",
+  "description": "Without a known state the time reads --:--:--.--, with no buttons and no reminder, even in Interactive mode.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "stopwatch.subscribe": null
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "--:--:--.--"
+        ],
+        "image": "unknown-dark"
+      }
+    },
+    {
+      "host": {
+        "theme": "light",
+        "locale": "fr",
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "--:--:--.--"
+        ],
+        "image": "unknown-light-fr-150",
+        "fault": "none"
+      }
+    }
+  ]
+}
