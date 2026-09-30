@@ -15,7 +15,7 @@ The `marketplace-ci` workflow runs on pull requests to `main` and
   base-built plan compares every file with the tree (mode, size, object ID,
   portable path), so archive attributes cannot hide or rewrite bytes;
 - a pull request may not change the admission's own implementation:
-  `.github/`, `scripts/`, `tests/`, `tools/`, `cli/`, `sdk/`, `crates/`,
+  `.github/`, `scripts/`, `tests/`, `cli/`, `sdk/`, `crates/`,
   `fuzz/`, the Cargo workspace and toolchain files, `.gitattributes`,
   `.gitignore`, `docs/widget-schema-v1.md`, `keys/` and `fixtures/keys/`;
   `candidate` may not change `published/`;
