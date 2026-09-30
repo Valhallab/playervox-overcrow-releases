@@ -1,0 +1,96 @@
+{
+  "scenarioVersion": 1,
+  "name": "horizontal",
+  "description": "The one-line layout: label, value and unit per metric, a dot between them, on one baseline; both themes and languages, 100 % and 150 %.",
+  "host": {
+    "options": {
+      "layout": "horizontal"
+    }
+  },
+  "fixtures": {
+    "subscriptions": {
+      "telemetry.subscribe": {
+        "cpu": 23.0,
+        "ram": 3221225472,
+        "cpuTemperature": 61.0,
+        "gpuTemperature": 67.0,
+        "sources": {
+          "cpuTemperature": true,
+          "gpuTemperature": true
+        }
+      },
+      "fps.subscribe": {
+        "fps": 144,
+        "stale": false,
+        "status": "ready"
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "CPU",
+          "23.0",
+          "·",
+          "144"
+        ],
+        "image": "line-dark-en-100"
+      }
+    },
+    {
+      "host": {
+        "theme": "light",
+        "locale": "fr"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "CPU°"
+        ],
+        "image": "line-light-fr-100"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "line-light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "theme": "dark",
+        "locale": "en"
+      }
+    },
+    {
+      "expect": {
+        "image": "line-dark-en-150"
+      }
+    },
+    {
+      "publish": {
+        "service": "fps.subscribe",
+        "value": {
+          "fps": 144,
+          "stale": true,
+          "status": "ready"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          " old"
+        ],
+        "image": "line-old-dark-en-150",
+        "fault": "none"
+      }
+    }
+  ]
+}

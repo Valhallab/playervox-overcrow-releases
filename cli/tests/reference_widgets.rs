@@ -60,7 +60,7 @@ fn the_pilots_are_here() {
         .iter()
         .map(|path| path.file_name().unwrap().to_string_lossy().into_owned())
         .collect();
-    for pilot in ["clock", "fps", "session", "stopwatch"] {
+    for pilot in ["clock", "fps", "performance", "session", "stopwatch"] {
         assert!(names.iter().any(|name| name == pilot), "widgets/{pilot}");
     }
 }
@@ -250,6 +250,7 @@ fn service_fixtures_follow_the_result_shapes() {
     for capability in [
         "session.read",
         "fps.read",
+        "telemetry.read",
         "stopwatch.read",
         "stopwatch.control",
     ] {

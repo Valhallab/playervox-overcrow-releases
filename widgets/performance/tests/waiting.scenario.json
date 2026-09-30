@@ -1,0 +1,105 @@
+{
+  "scenarioVersion": 1,
+  "name": "waiting",
+  "description": "Without game data, “Waiting for game data…” (FR “En attente des données du jeu…”), also when the game goes and nothing is left to show.",
+  "fixtures": {
+    "subscriptions": {
+      "telemetry.subscribe": null,
+      "fps.subscribe": {
+        "fps": null,
+        "stale": false,
+        "status": "waiting"
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Waiting for game data…"
+        ],
+        "image": "waiting-dark-en"
+      }
+    },
+    {
+      "host": {
+        "theme": "light",
+        "locale": "fr"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "En attente des données du jeu…"
+        ],
+        "image": "waiting-light-fr"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "waiting-light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "theme": "dark",
+        "locale": "en"
+      }
+    },
+    {
+      "publish": {
+        "service": "telemetry.subscribe",
+        "value": {
+          "cpu": 23.0,
+          "ram": 3221225472,
+          "cpuTemperature": 61.0,
+          "gpuTemperature": 67.0,
+          "sources": {
+            "cpuTemperature": true,
+            "gpuTemperature": true
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "23.0"
+        ],
+        "noText": [
+          "Waiting for game data…"
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "telemetry.subscribe",
+        "value": null
+      }
+    },
+    {
+      "publish": {
+        "service": "fps.subscribe",
+        "value": {
+          "fps": null,
+          "stale": false,
+          "status": "unavailable"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Waiting for game data…"
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

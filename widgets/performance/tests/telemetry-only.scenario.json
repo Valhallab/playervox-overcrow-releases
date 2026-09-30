@@ -1,0 +1,44 @@
+{
+  "scenarioVersion": 1,
+  "name": "telemetry-only",
+  "description": "With telemetry.read but not fps.read: the metrics without an FPS row, and no FPS subscription.",
+  "host": {
+    "grants": [
+      "telemetry.read"
+    ]
+  },
+  "fixtures": {
+    "subscriptions": {
+      "telemetry.subscribe": {
+        "cpu": 23.0,
+        "ram": 3221225472,
+        "cpuTemperature": 61.0,
+        "gpuTemperature": 67.0,
+        "sources": {
+          "cpuTemperature": true,
+          "gpuTemperature": true
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "CPU",
+          "GPU°"
+        ],
+        "noText": [
+          "FPS"
+        ],
+        "calls": [
+          {
+            "service": "telemetry.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

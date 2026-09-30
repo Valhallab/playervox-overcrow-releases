@@ -278,12 +278,18 @@ fn on_accent_keeps_aa_contrast_on_the_accent_in_both_themes() {
     }
 }
 
-/// The panel and text colours fixed by the P2.4 pilots keep WCAG AA
+/// The panel and text colours fixed by the P2.4 pilots, and the warning and
+/// danger colours fixed by the Performance rewrite (P3.2), keep WCAG AA
 /// contrast for text in both themes (compared with the panel's colour).
 #[test]
 fn text_keeps_aa_contrast_on_the_panel_in_both_themes() {
     let panel = tokens::token("--color-surface-panel").expect("panel token");
-    for name in ["--color-text", "--color-text-muted"] {
+    for name in [
+        "--color-text",
+        "--color-text-muted",
+        "--color-warning",
+        "--color-danger",
+    ] {
         let text = tokens::token(name).expect("text token");
         assert!(text.status.is_fixed() && panel.status.is_fixed(), "{name}");
         for (foreground, fill) in [(text.dark, panel.dark), (text.light, panel.light)] {

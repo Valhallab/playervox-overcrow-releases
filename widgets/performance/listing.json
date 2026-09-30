@@ -1,0 +1,18 @@
+{
+  "author": "PlayerVox",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/performance",
+  "defaultLocale": "en",
+  "localizations": [
+    {
+      "locale": "en",
+      "name": "Performance",
+      "description": "Game CPU and memory, plus the temperatures this computer exposes."
+    },
+    {
+      "locale": "fr",
+      "name": "Performances",
+      "description": "CPU et mémoire du jeu, et les températures que cet ordinateur expose."
+    }
+  ]
+}

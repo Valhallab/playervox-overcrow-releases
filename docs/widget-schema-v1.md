@@ -578,7 +578,7 @@ Host-drawn leaves take these sizes, in logical px at 100 %, unless `width` or `h
 | `elapsed` | — | its text | its text | fixed |
 ## Design tokens
 
-Dark values are the current overlay palette. The reference images of the P2.4 built-in pilots, in both themes, fixed the panel and the primary and muted text; with `--color-on-accent`, fixed by the P0.6 audit, the other colours remain a proposal until a built-in that draws them checks them.
+Dark values are the current overlay palette. The reference images of the P2.4 built-in pilots, in both themes, fixed the panel and the primary and muted text, those of the Performance built-in (P3.2) the warning and danger colours; with `--color-on-accent`, fixed by the P0.6 audit, the other colours remain a proposal until a built-in that draws them checks them.
 
 | Token | Type | Dark | Light | Status | Meaning |
 | --- | --- | --- | --- | --- | --- |
@@ -597,9 +597,9 @@ Dark values are the current overlay palette. The reference images of the P2.4 bu
 | `--color-text-secondary` | color | `#d4d4d8` | `#3f3f46` | **provisional (P2.4)** | Secondary text. |
 | `--color-text-muted` | color | `#a1a1aa` | `#52525b` | fixed | Captions and metadata. |
 | `--color-text-subtle` | color | `#71717a` | `#71717a` | **provisional (P2.4)** | Placeholders and disabled text. |
-| `--color-danger` | color | `#fb7185` | `#e11d48` | **provisional (P2.4)** | Errors and destructive actions. |
+| `--color-danger` | color | `#fb7185` | `#e11d48` | fixed | Errors and destructive actions. |
 | `--color-danger-soft` | color | `#fb71851a` | `#e11d481a` | **provisional (P2.4)** | Danger wash behind destructive confirmations and errors. |
-| `--color-warning` | color | `#fbbf24` | `#b45309` | **provisional (P2.4)** | Warnings. |
+| `--color-warning` | color | `#fbbf24` | `#b45309` | fixed | Warnings. |
 | `--color-success` | color | `#86efac` | `#15803d` | **provisional (P2.4)** | Success and healthy states. |
 | `--space-1` | length | `2px` | `2px` | fixed | Spacing step 1. |
 | `--space-2` | length | `4px` | `4px` | fixed | Spacing step 2. |

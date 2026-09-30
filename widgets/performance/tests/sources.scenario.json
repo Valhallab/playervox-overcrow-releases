@@ -1,0 +1,151 @@
+{
+  "scenarioVersion": 1,
+  "name": "sources",
+  "description": "Rows follow what the host publishes: Windows has no CPU temperature, a host without matched sensors no temperature, a host without an FPS source no FPS row; the first sample after attaching has no CPU yet.",
+  "host": {
+    "features": [
+      "telemetry.gpuTemperature",
+      "fps"
+    ]
+  },
+  "fixtures": {
+    "subscriptions": {
+      "telemetry.subscribe": {
+        "cpu": 23.0,
+        "ram": 3221225472,
+        "cpuTemperature": 61.0,
+        "gpuTemperature": 67.0,
+        "sources": {
+          "cpuTemperature": true,
+          "gpuTemperature": true
+        }
+      },
+      "fps.subscribe": {
+        "fps": 144,
+        "stale": false,
+        "status": "ready"
+      }
+    }
+  },
+  "steps": [
+    {
+      "publish": {
+        "service": "telemetry.subscribe",
+        "value": {
+          "cpu": 23.0,
+          "ram": 3221225472,
+          "cpuTemperature": null,
+          "gpuTemperature": 67.0,
+          "sources": {
+            "cpuTemperature": false,
+            "gpuTemperature": true
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "CPU°"
+        ],
+        "text": [
+          "GPU°"
+        ],
+        "image": "windows-dark"
+      }
+    },
+    {
+      "host": {
+        "theme": "light",
+        "locale": "fr"
+      }
+    },
+    {
+      "expect": {
+        "image": "windows-light-fr"
+      }
+    },
+    {
+      "host": {
+        "theme": "dark",
+        "locale": "en"
+      }
+    },
+    {
+      "publish": {
+        "service": "telemetry.subscribe",
+        "value": {
+          "cpu": 23.0,
+          "ram": 3221225472,
+          "cpuTemperature": null,
+          "gpuTemperature": null,
+          "sources": {
+            "cpuTemperature": false,
+            "gpuTemperature": false
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "CPU°",
+          "GPU°"
+        ],
+        "image": "no-sensors"
+      }
+    },
+    {
+      "publish": {
+        "service": "telemetry.subscribe",
+        "value": {
+          "cpu": null,
+          "ram": 3221225472,
+          "cpuTemperature": 61.0,
+          "gpuTemperature": 67.0,
+          "sources": {
+            "cpuTemperature": true,
+            "gpuTemperature": true
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "CPU"
+        ],
+        "text": [
+          "RAM",
+          "CPU°"
+        ],
+        "image": "warm-up"
+      }
+    },
+    {
+      "publish": {
+        "service": "telemetry.subscribe",
+        "value": {
+          "cpu": null,
+          "ram": 3221225472,
+          "cpuTemperature": null,
+          "gpuTemperature": null,
+          "sources": {
+            "cpuTemperature": false,
+            "gpuTemperature": false
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "RAM",
+          "144"
+        ],
+        "image": "warm-up-windows",
+        "fault": "none"
+      }
+    }
+  ]
+}

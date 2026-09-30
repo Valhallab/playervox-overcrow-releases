@@ -1,0 +1,109 @@
+{
+  "scenarioVersion": 1,
+  "name": "stale",
+  "description": "The host marks the frame rate stale 3 s after its last sample: the number stays with “old” (“ancien”), then a new sample makes it fresh again.",
+  "fixtures": {
+    "subscriptions": {
+      "telemetry.subscribe": {
+        "cpu": 23.0,
+        "ram": 3221225472,
+        "cpuTemperature": 61.0,
+        "gpuTemperature": 67.0,
+        "sources": {
+          "cpuTemperature": true,
+          "gpuTemperature": true
+        }
+      },
+      "fps.subscribe": {
+        "fps": 144,
+        "stale": false,
+        "status": "ready"
+      }
+    }
+  },
+  "steps": [
+    {
+      "publish": {
+        "service": "fps.subscribe",
+        "value": {
+          "fps": 144,
+          "stale": true,
+          "status": "ready"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "144",
+          " old"
+        ],
+        "image": "old-dark-en"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          " ancien"
+        ],
+        "image": "old-light-fr"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "old-light-fr-150"
+      }
+    },
+    {
+      "publish": {
+        "service": "fps.subscribe",
+        "value": {
+          "fps": 60,
+          "stale": false,
+          "status": "ready"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "60"
+        ],
+        "noText": [
+          "144",
+          " ancien"
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "fps.subscribe",
+        "value": {
+          "fps": null,
+          "stale": false,
+          "status": "unavailable"
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "FPS",
+          "60"
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

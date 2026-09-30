@@ -1,0 +1,23 @@
+{
+  "label": "Performances",
+  "waiting": "En attente des données du jeu…",
+  "no-metric": "Aucune mesure sélectionnée",
+  "cpu": "CPU",
+  "ram": "RAM",
+  "cpu-temperature": "CPU°",
+  "gpu-temperature": "GPU°",
+  "fps": "FPS",
+  "old": "ancien",
+  "hint-cpu": "Utilisation du CPU par le jeu sur l’ensemble des processeurs logiques.",
+  "hint-ram": "Mémoire résidente du jeu.",
+  "hint-cpu-temperature": "Température du CPU de l’ordinateur.",
+  "hint-gpu-temperature": "Température du GPU de l’ordinateur.",
+  "hint-fps": "Rythme de présentation observé.",
+  "hint-fps-old": "Dernière mesure FPS. Aucune nouvelle mesure reçue depuis au moins trois secondes.",
+  "name-cpu": "Utilisation du CPU par le jeu {value} {unit}",
+  "name-ram": "Mémoire du jeu {value} {unit}",
+  "name-cpu-temperature": "Température CPU {value} {unit}",
+  "name-gpu-temperature": "Température GPU {value} {unit}",
+  "name-fps": "{value} images par seconde",
+  "name-fps-old": "{value} images par seconde, dernière mesure"
+}
