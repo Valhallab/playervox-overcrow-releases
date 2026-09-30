@@ -1,0 +1,27 @@
+name: policy
+
+# ADR 0004, section 8: the repository policy checks, split out of the retired
+# creator-kit workflow. The secret scanner and its regression smoke.
+on:
+  push:
+    branches: [main, candidate]
+  pull_request:
+    branches: [main, candidate]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: policy-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  policy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify public repository policy and scanner regressions
+        run: sh tests/check-policy-smoke.sh
