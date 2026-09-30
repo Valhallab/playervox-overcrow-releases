@@ -1,0 +1,70 @@
+{
+  "scenarioVersion": 1,
+  "name": "cached",
+  "description": "The stored catalog is current: only the version is read, no catalog download.",
+  "host": {
+    "storage": {
+      "catalog": {
+        "version": "v1",
+        "chunks": 1
+      },
+      "catalog-0": "Arcane Energize\nArcane Grace\nArcane Guardian\nForma Blueprint\nPrimed Flow\nSoma Prime Set\nHell's Chamber\thells_chamber\nSilva & Aegis Prime Guard\tsilva_and_aegis_prime_guard",
+      "state": {
+        "query": "soma"
+      }
+    }
+  },
+  "fixtures": {
+    "http": [
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.warframe.market/v2/versions"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"apiVersion\":\"0.25.0\",\"data\":{\"id\":\"synthetic\",\"collections\":{\"items\":\"v1\"},\"updatedAt\":\"2026-09-28T16:09:39Z\"},\"error\":null}"
+        }
+      }
+    ]
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Soma Prime Set",
+          "8 items cached · select an item to view offers"
+        ],
+        "calls": [
+          {
+            "service": "storage.get",
+            "params": {
+              "key": "state"
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "storage.get",
+            "params": {
+              "key": "catalog"
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "storage.get",
+            "params": {
+              "key": "catalog-0"
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "http.fetch",
+            "outcome": "ok"
+          }
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

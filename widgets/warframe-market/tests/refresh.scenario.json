@@ -1,0 +1,56 @@
+{
+  "scenarioVersion": 1,
+  "name": "refresh",
+  "description": "A new catalog version replaces the stored catalog; a failed download keeps the stored one.",
+  "host": {
+    "storage": {
+      "catalog": {
+        "version": "v0",
+        "chunks": 1
+      },
+      "catalog-0": "Arcane Energize\nArcane Grace\nArcane Guardian\nForma Blueprint\nPrimed Flow\nSoma Prime Set\nHell's Chamber\thells_chamber\nSilva & Aegis Prime Guard\tsilva_and_aegis_prime_guard",
+      "state": {
+        "query": "guardian"
+      }
+    }
+  },
+  "fixtures": {
+    "http": [
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.warframe.market/v2/versions"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"apiVersion\":\"0.25.0\",\"data\":{\"id\":\"synthetic\",\"collections\":{\"items\":\"v1\"},\"updatedAt\":\"2026-09-28T16:09:39Z\"},\"error\":null}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.warframe.market/v2/items"
+        },
+        "error": "transport_failed"
+      }
+    ]
+  },
+  "steps": [
+    {
+      "advance": {
+        "ms": 400
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Arcane Guardian",
+          "Catalog refresh unavailable · using cached items"
+        ],
+        "image": "stale",
+        "fault": "none"
+      }
+    }
+  ]
+}
