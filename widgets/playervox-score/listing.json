@@ -1,0 +1,18 @@
+{
+  "author": "PlayerVox",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/playervox-score",
+  "defaultLocale": "en",
+  "localizations": [
+    {
+      "locale": "en",
+      "name": "PlayerVox score",
+      "description": "The PlayerVox community grade of your Steam game, with its score, rating count and three criteria. No account needed; the badge is always shown."
+    },
+    {
+      "locale": "fr",
+      "name": "Note PlayerVox",
+      "description": "La note de la communauté PlayerVox pour votre jeu Steam, avec son score, son nombre de votes et trois critères. Sans compte ; le badge reste toujours visible."
+    }
+  ]
+}

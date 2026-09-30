@@ -1,0 +1,23 @@
+{
+  "label": "Note PlayerVox",
+  "community": "Note communautaire",
+  "mark": "PlayerVox",
+  "waiting": "En attente du jeu",
+  "unsupported": "Jeu non associé",
+  "steam-required": "Jeu Steam requis",
+  "loading": "Chargement…",
+  "unrated": "Pas encore noté",
+  "no-votes": "Aucun vote",
+  "not-found": "Jeu introuvable",
+  "on-playervox": "Sur PlayerVox",
+  "unavailable": "Note indisponible",
+  "retrying": "Nouvel essai automatique",
+  "votes-one": "{count} vote",
+  "votes-other": "{count} votes",
+  "gameplay": "Gameplay",
+  "art": "Artistique",
+  "tech": "Technique",
+  "grade": "Note",
+  "no-grade": "Pas de note",
+  "criterion": "{name} : {value}"
+}

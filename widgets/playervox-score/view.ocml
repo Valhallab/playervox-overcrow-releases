@@ -1,0 +1,51 @@
+<!-- PlayerVox Score: the community grade badge of the active Steam game,
+     its rounded score, rating count, game name and three criteria
+     (parity sheet: playervox-overcrow docs/builtin-parity/playervox-score.md).
+     The badge and the PlayerVox mark are canvases drawn from
+     widgets-shared/playervox-badge; the host animates the badge's pulse. -->
+<box class={rootClass(state)} label={t("label")} tooltip={tooltip(state.score)}>
+  <if test={!badgeOnly(state)}>
+    <box class="header">
+      <if test={state.showTitle}>
+        <text class="title">{title(state.score)}</text>
+      </if>
+      <canvas ref="mark" class="mark" label={t("mark")}/>
+    </box>
+  </if>
+  <box class={mainClass(state)}>
+    <box class="slot">
+      <canvas ref="badge" class={state.badgeClass} label={badgeName(state.score)}/>
+    </box>
+    <if test={hasSide(state)}>
+      <box class="side">
+        <if test={rated(state.score)}>
+          <if test={state.showScore}>
+            <text class="value"><span>{scoreText(state.score)}</span><span class="max">/100</span></text>
+          </if>
+          <if test={state.showVotes}>
+            <text class={votesClass(state.showScore)}>{votes(state.score)}</text>
+          </if>
+        </if>
+        <else>
+          <text class="status">{t(status(state.score).label)}</text>
+          <if test={state.showVotes && status(state.score).hint != ""}>
+            <text class="hint">{t(status(state.score).hint)}</text>
+          </if>
+        </else>
+      </box>
+    </if>
+  </box>
+  <if test={state.showCriteria}>
+    <box class="criteria">
+      <for each={criteria(state.score)} as="criterion" key={criterion.key}>
+        <box class="criterion">
+          <box class="criterion-head">
+            <text class="criterion-name">{criterion.name}</text>
+            <text class="criterion-value">{criterion.text}</text>
+          </box>
+          <progress class={criterion.bar} value={criterion.value} max="100" label={criterion.label}/>
+        </box>
+      </for>
+    </box>
+  </if>
+</box>

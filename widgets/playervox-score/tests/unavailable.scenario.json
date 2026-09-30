@@ -1,0 +1,84 @@
+{
+  "scenarioVersion": 1,
+  "name": "unavailable",
+  "description": "The host's score source fails: the subscription ends with unavailable, the widget shows it, subscribes again 5 s later and shows the score the restarted source reports.",
+  "fixtures": {
+    "subscriptions": {
+      "playervox.score.subscribe": {
+        "state": "ready",
+        "name": "Portal 2",
+        "score": 94.2,
+        "grade": "S+",
+        "ratingsCount": 1284,
+        "criteria": {
+          "gameplay": 97.4,
+          "art": 90.1,
+          "tech": 94.6
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Portal 2"
+        ],
+        "state": "running",
+        "calls": [
+          {
+            "service": "playervox.score.subscribe",
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.score.subscribe",
+        "error": "unavailable"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Score unavailable",
+          "Retrying automatically"
+        ],
+        "noText": [
+          "Portal 2"
+        ],
+        "image": "unavailable"
+      }
+    },
+    {
+      "advance": {
+        "ms": 4999
+      }
+    },
+    {
+      "expect": {
+        "calls": []
+      }
+    },
+    {
+      "advance": {
+        "ms": 1
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Portal 2"
+        ],
+        "calls": [
+          {
+            "service": "playervox.score.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "image": "recovered"
+      }
+    }
+  ]
+}

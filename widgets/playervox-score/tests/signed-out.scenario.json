@@ -1,0 +1,46 @@
+{
+  "scenarioVersion": 1,
+  "name": "signed-out",
+  "description": "The score is public: signed out of PlayerVox, the widget shows it, with no account panel.",
+  "host": {
+    "accounts": {
+      "playervox": "disconnected",
+      "twitch": "disconnected"
+    },
+    "frame": true
+  },
+  "fixtures": {
+    "subscriptions": {
+      "playervox.score.subscribe": {
+        "state": "ready",
+        "name": "Portal 2",
+        "score": 94.2,
+        "grade": "S+",
+        "ratingsCount": 1284,
+        "criteria": {
+          "gameplay": 97.4,
+          "art": 90.1,
+          "tech": 94.6
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "94"
+        ],
+        "state": "running",
+        "calls": [
+          {
+            "service": "playervox.score.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "image": "signed-out"
+      }
+    }
+  ]
+}

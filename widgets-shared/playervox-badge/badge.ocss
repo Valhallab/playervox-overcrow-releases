@@ -1,0 +1,79 @@
+/* The PlayerVox grade badge, shared by the Score and Rating built-ins.
+   scripts/sync-shared-widgets.mjs copies this file, as is, into their
+   style.ocss between the markers `<shared:playervox-badge/badge.ocss>`;
+   edit it here, never in a copy.
+
+   The badge canvas is 76 px square around a 56 px badge: the rotation and
+   the S+ glow reach past the badge, so the canvas overlaps its 64 px slot
+   by 6 px on each side. */
+.badge {
+  width: 76px;
+  height: 76px;
+  margin: -6px;
+}
+
+/* One pulse when a score shows or changes (badge.ts `nextPulse`): the
+   host animates the transform, so the widget sends one class change and
+   no frame is drawn once it ends or while the widget is hidden. Two
+   identical keyframes let the next change restart it. */
+@keyframes badge-pulse-a {
+  from {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes badge-pulse-b {
+  from {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.badge.pulse-a {
+  animation: badge-pulse-a 600ms ease-out 1;
+}
+
+.badge.pulse-b {
+  animation: badge-pulse-b 600ms ease-out 1;
+}
+
+/* Grade colours (badge.ts `GRADE_COLORS`), for text and bars. */
+.grade-s-plus {
+  color: #9ae600;
+}
+
+.grade-s {
+  color: #7ccf00;
+}
+
+.grade-a {
+  color: #00d3f3;
+}
+
+.grade-b {
+  color: #fdc700;
+}
+
+.grade-c {
+  color: #fe9a00;
+}
+
+.grade-d {
+  color: #e7000b;
+}
+
+.grade-f,
+.grade-none {
+  color: #52525c;
+}

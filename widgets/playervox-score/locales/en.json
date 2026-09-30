@@ -1,0 +1,23 @@
+{
+  "label": "PlayerVox score",
+  "community": "Community rating",
+  "mark": "PlayerVox",
+  "waiting": "Waiting for a game",
+  "unsupported": "Game not linked",
+  "steam-required": "Steam game required",
+  "loading": "Loading…",
+  "unrated": "Not rated yet",
+  "no-votes": "No ratings yet",
+  "not-found": "Game not found",
+  "on-playervox": "On PlayerVox",
+  "unavailable": "Score unavailable",
+  "retrying": "Retrying automatically",
+  "votes-one": "{count} rating",
+  "votes-other": "{count} ratings",
+  "gameplay": "Gameplay",
+  "art": "Art",
+  "tech": "Technology",
+  "grade": "Grade",
+  "no-grade": "No grade",
+  "criterion": "{name}: {value}"
+}
