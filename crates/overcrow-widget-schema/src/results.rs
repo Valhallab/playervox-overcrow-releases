@@ -250,8 +250,16 @@ pub const SHAPES: &[NamedShape] = &[
         Shape::Record(&[
             member(
                 "state",
-                Shape::Keyword(&["ready", "no_ratings", "not_found", "unavailable"]),
-                "Score state.",
+                Shape::Keyword(&[
+                    "idle",
+                    "unsupported",
+                    "loading",
+                    "ready",
+                    "no_ratings",
+                    "not_found",
+                    "unavailable",
+                ]),
+                "Score state: `idle` without an active game, `unsupported` for a game without a Steam app ID, `loading` until the game's first answer (never the previous game's score), `ready` and `no_ratings` with the score, `not_found` for a game PlayerVox cannot match, `unavailable` while the host retries. Every state but `ready` and `no_ratings` has a `null` name and score, grade `--`, no ratings and `null` criteria.",
             ),
             member("name", NULLABLE_TEXT, "Game name."),
             member("score", NULLABLE_NUMBER, "0–100."),

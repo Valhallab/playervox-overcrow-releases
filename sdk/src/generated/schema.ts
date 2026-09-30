@@ -528,8 +528,8 @@ export interface CreatedNote {
 
 /** PlayerVox score of the active game. */
 export interface Score {
-  /** Score state. */
-  readonly state: "ready" | "no_ratings" | "not_found" | "unavailable";
+  /** Score state: `idle` without an active game, `unsupported` for a game without a Steam app ID, `loading` until the game's first answer (never the previous game's score), `ready` and `no_ratings` with the score, `not_found` for a game PlayerVox cannot match, `unavailable` while the host retries. Every state but `ready` and `no_ratings` has a `null` name and score, grade `--`, no ratings and `null` criteria. */
+  readonly state: "idle" | "unsupported" | "loading" | "ready" | "no_ratings" | "not_found" | "unavailable";
   /** Game name. */
   readonly name: string | null;
   /** 0–100. */
@@ -888,7 +888,7 @@ export interface ServiceResultMap {
   readonly "notes.setItem": null;
   /** `notes.delete`: `null`, or `cancelled` when the user declines. */
   readonly "notes.delete": null;
-  /** `playervox.score.subscribe`: `{ state, name, score, grade, ratingsCount, criteria }`: `state` is `ready`, `no_ratings`, `not_found` or `unavailable`; `criteria` `{ gameplay, art, tech }`, each 0–100 or `null`. */
+  /** `playervox.score.subscribe`: `{ state, name, score, grade, ratingsCount, criteria }`: `state` is `idle`, `unsupported`, `loading`, `ready`, `no_ratings`, `not_found` or `unavailable`; `criteria` `{ gameplay, art, tech }`, each 0–100 or `null`. */
   readonly "playervox.score.subscribe": Score;
   /** `playervox.rating.subscribe`: `null` before the user's first rating, or `{ gameplay, art, tech, review, publishedAt, offsetMinutes }`; `unsupported` outside the PlayerVox catalogue; the host seeds the `playervox.rating.publish` controls from it. */
   readonly "playervox.rating.subscribe": Rating | null;

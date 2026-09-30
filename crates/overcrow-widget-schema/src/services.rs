@@ -389,7 +389,7 @@ pub const SERVICES: &[Service] = &[
     subscribe(
         "playervox.score.subscribe",
         "playervox.score.read",
-        "`{ state, name, score, grade, ratingsCount, criteria }`: `state` is `ready`, `no_ratings`, `not_found` or `unavailable`; `criteria` `{ gameplay, art, tech }`, each 0–100 or `null`",
+        "`{ state, name, score, grade, ratingsCount, criteria }`: `state` is `idle`, `unsupported`, `loading`, `ready`, `no_ratings`, `not_found` or `unavailable`; `criteria` `{ gameplay, art, tech }`, each 0–100 or `null`",
         Status::Fixed,
     )
     .returning(Shape::Named("Score")),
