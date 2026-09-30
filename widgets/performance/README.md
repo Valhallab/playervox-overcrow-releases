@@ -100,3 +100,20 @@ row off also stops the measurement.
   - `waiting`, `menu` (every toggle, both choices, "No metric selected",
     the FPS subscription ending and starting again), `refused`,
     `telemetry-only`.
+
+## Cost
+
+Measured on 2026-09-30 with OverCrow's release build, on an AMD Ryzen 7
+5800X3D Linux workstation and in a Windows 11 virtual machine (2 vCPU):
+
+| | Linux | Windows (VM) |
+| --- | --- | --- |
+| Widget start, warm, into the overlay's runtime | 7.0 ms (p50), 8.1 ms at most | VM ready in 15–19 ms (p50) |
+| VM memory | 0.59 MiB private, 0.78 MiB PSS | 0.88 MiB private working set, 1.16 MiB private commit |
+| Private memory in all (VM, sandbox helpers, overlay share) | under 6 MB | — |
+| CPU, readings held | 0.03 % of one core, no frame | — |
+| CPU, a telemetry sample and an FPS reading each second | 0.08 % of one core: 3 frames a second, 0.26 ms at p95 | — |
+| VM CPU | one short turn per sample | — |
+
+The egui panel it replaces drew one frame per sample too (0.05 ms each,
+painting only), inside the overlay's own process.
