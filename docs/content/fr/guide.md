@@ -214,6 +214,13 @@ paramètres typés :
     const { status, body } = await http.fetch(url, { as: "json" });
 ```
 
+Les données du jeu et du système viennent d’abonnements (`fps.subscribe`,
+`media.subscribe`…), qui mettent votre état à jour jusqu’à ce que vous les
+annuliez. Un abonnement se termine par un échec quand la source de l’hôte
+échoue, `unavailable` pour un lecteur multimédia qui ne répond plus :
+affichez-le et abonnez-vous de nouveau quelques secondes plus tard avec
+`timers.after`, comme le fait le [widget Média](../../../widgets/media/logic.ts).
+
 L’exemple complet se trouve dans
 [`docs/content/examples/weather`](../examples/weather/). Lisez
 [sécurité](security.md) pour savoir ce que chaque permission autorise et ce
