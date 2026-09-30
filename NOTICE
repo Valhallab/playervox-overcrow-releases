@@ -1,11 +1,12 @@
 PlayerVox OverCrow public creator sources
 Copyright (c) 2026 Valhallab SASU.
 
-SDK, tooling, documentation and first-party reference widgets are MIT-licensed.
-See LICENSE and LICENSING.md. The desktop application and its release binaries
-are separate proprietary works; see the notices shipped with those packages.
+The widget contract, CLI, templates, documentation and first-party reference
+widgets are MIT-licensed; @overcrow/sdk is MIT-0. See LICENSE, sdk/LICENSE
+and LICENSING.md. The desktop application and its release binaries are
+separate proprietary works; see the notices shipped with those packages.
 
-Lucide icons retain tools/creator-kit/preview/lucide-LICENSE.txt.
-The bundled Noto font retains tools/creator-kit/preview/NotoSans-OFL.txt.
+Icon names come from Lucide (ISC License), as listed by the egui-lucide
+crate; no icon artwork is distributed here.
 Dependencies retain their own licenses. PlayerVox branding is governed by
 TRADEMARKS.md and is not licensed by the MIT software license.
