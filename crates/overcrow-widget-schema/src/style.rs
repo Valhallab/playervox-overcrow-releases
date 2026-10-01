@@ -529,6 +529,13 @@ pub const PROPERTIES: &[Property] = &[
         StyleValue::Keywords(&["normal", "nowrap", "pre-wrap"]),
         "normal",
     ),
+    // Of an inline box (`icon`, `image`) in a text, not of the text.
+    prop(
+        TEXT,
+        "vertical-align",
+        StyleValue::Keywords(&["baseline", "middle"]),
+        "baseline",
+    ),
     prop(
         TEXT,
         "text-overflow",

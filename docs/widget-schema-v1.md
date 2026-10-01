@@ -434,7 +434,7 @@ Named `keydown` keys: `Enter`, `Escape`, `Backspace`, `Delete`, `ArrowUp`, `Arro
 
 ### Properties
 
-Animatable properties change paint only, so transitions and animations never rerun layout. `text-overflow: marquee` scrolls one overflowing line back and forth at a host-defined speed, pausing at each end; it runs only while the widget is visible, counts as an active animation and restarts when the text changes.
+Animatable properties change paint only, so transitions and animations never rerun layout. `text-overflow: marquee` scrolls one overflowing line back and forth at a host-defined speed, pausing at each end; it runs only while the widget is visible, counts as an active animation and restarts when the text changes. `vertical-align` places an inline `icon` or `image` in its line of text: `baseline` stands it on the text's baseline, and the line is as tall as it needs above that baseline; `middle` centres it on the line, which grows only when the box is taller than the text's own line.
 
 | Property | Group | Value | Initial | Inherited | Animatable |
 | --- | --- | --- | --- | --- | --- |
@@ -510,6 +510,7 @@ Animatable properties change paint only, so transitions and animations never rer
 | `text-decoration` | Text | `none` \| `underline` \| `line-through` | `none` | no | no |
 | `text-transform` | Text | `none` \| `uppercase` \| `lowercase` \| `capitalize` | `none` | yes | no |
 | `white-space` | Text | `normal` \| `nowrap` \| `pre-wrap` | `normal` | yes | no |
+| `vertical-align` | Text | `baseline` \| `middle` | `baseline` | no | no |
 | `text-overflow` | Text | `clip` \| `ellipsis` \| `marquee` | `clip` | no | no |
 | `line-clamp` | Text | integer 0..=64 | `0` | no | no |
 | `overflow-wrap` | Text | `normal` \| `anywhere` | `normal` | yes | no |

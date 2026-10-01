@@ -77,6 +77,7 @@ box > .second:hover {
   text-transform: uppercase;
   white-space: pre-wrap;
   text-overflow: ellipsis;
+  vertical-align: middle;
   line-clamp: 2;
   overflow-wrap: anywhere;
   transform: translate(4px, -50%) scale(1.2, 0.8) rotate(-0.25turn) translateY(2px);
