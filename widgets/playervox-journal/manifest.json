@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.playervox.overcrow.playervox.journal",
+  "version": "1.0.0",
+  "name": {
+    "en": "Session journal",
+    "fr": "Journal de sessions"
+  },
+  "sizing": {
+    "fit": "height",
+    "preferred": { "width": 350, "height": 320 },
+    "min": { "width": 280, "height": 60 },
+    "max": { "width": 900, "height": 480 }
+  },
+  "permissions": {
+    "capabilities": ["journal.read", "journal.delete"]
+  }
+}

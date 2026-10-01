@@ -1,0 +1,39 @@
+{
+  "scenarioVersion": 1,
+  "name": "refused",
+  "description": "Without its grants the widget asks nothing and says the journal needs the permission.",
+  "host": {
+    "grants": []
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "The journal needs your permission."
+        ],
+        "state": "running",
+        "calls": [],
+        "fault": "none",
+        "image": "refused"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Le journal a besoin de votre autorisation."
+        ],
+        "image": "refused-light-fr"
+      }
+    }
+  ]
+}

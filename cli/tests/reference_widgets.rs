@@ -65,6 +65,7 @@ fn the_pilots_are_here() {
         "fps",
         "media",
         "performance",
+        "playervox-journal",
         "playervox-score",
         "session",
         "stopwatch",
@@ -267,6 +268,8 @@ fn service_fixtures_follow_the_result_shapes() {
         "media.read",
         "media.control",
         "playervox.score.read",
+        "journal.read",
+        "journal.delete",
     ] {
         assert!(exercised.contains(capability), "{capability}");
     }
@@ -280,7 +283,7 @@ fn service_fixtures_follow_the_result_shapes() {
 #[test]
 fn icon_buttons_centre_their_icons() {
     let mut checked = 0;
-    for widget in ["media", "stopwatch"] {
+    for widget in ["media", "playervox-journal", "stopwatch"] {
         let reference = repository()
             .join("widgets")
             .join(widget)

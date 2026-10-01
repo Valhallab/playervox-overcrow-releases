@@ -94,7 +94,7 @@ machine par le widget.
 | `playervox.rating.read` | **oui** | `playervox.rating.subscribe` | — |
 | `playervox.rating.write` | **oui** | aucun (intent lié à l’hôte) | — |
 | `playervox.reviews.read` | **oui** | `playervox.reviews.page` | — |
-| `journal.read` | **oui** | `journal.page` | — |
+| `journal.read` | **oui** | `journal.subscribe`, `journal.page` | — |
 | `journal.delete` | **oui** | — | `journal.delete` |
 | `twitch.chat.read` | **oui** | `twitch.chat.subscribe` | `twitch.chat.join`, `twitch.chat.leave`, `twitch.chat.favorite` |
 | `twitch.chat.compose` | **oui** | aucun (intent lié à l’hôte) | — |

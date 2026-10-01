@@ -864,7 +864,8 @@ Authority is checked by the host at every call, immediately before acting. Gestu
 | `playervox.score.subscribe` | capability `playervox.score.read` | subscribe | no | no | none | `{ state, name, score, grade, ratingsCount, criteria }`: `state` is `idle`, `unsupported`, `loading`, `ready`, `no_ratings`, `not_found` or `unavailable`; `criteria` `{ gameplay, art, tech }`, each 0–100 or `null` | `Score` | fixed |
 | `playervox.rating.subscribe` | capability `playervox.rating.read` | subscribe | no | no | none | `null` before the user's first rating, or `{ gameplay, art, tech, review, publishedAt, offsetMinutes }`; `unsupported` outside the PlayerVox catalogue; the host seeds the `playervox.rating.publish` controls from it | `Rating` or `null` | fixed |
 | `playervox.reviews.page` | capability `playervox.reviews.read` | call | no | no | `page?`: integer 1..=100000; `followedOnly?`: boolean | `{ items, page, totalPages, count }`; each item `{ id, author, grade, score, text, original, publishedAt, offsetMinutes }`, `text` in the user's language when a translation exists, `original` the untranslated text or `null`, both cut by the host to `MAX_NODE_TEXT_BYTES` | `ReviewsPage` | fixed |
-| `journal.page` | capability `journal.read` | call | no | no | `cursor?`: text ≤ `MAX_OBJECT_ID_BYTES` | `{ gameName, items, next, previous }`: local and cloud sessions of the active game, merged and deduplicated, newest first; each item `{ id, startedAt, offsetMinutes, durationMs, source }`; cursors are host handles | `JournalPage` | fixed |
+| `journal.subscribe` | capability `journal.read` | subscribe | no | no | none | `null` without an active game, or `{ revision, notice }`: `revision` changes whenever the merged journal of the active game changes (a session recorded or deleted, cloud sessions merged, the PlayerVox account or sync changed), so the widget reads its page again; `notice` is `null`, `offline`, `storage_unavailable`, `full`, `expired`, `busy` or `unavailable`. Holding this subscription is what keeps the host's journal source running | `JournalState` or `null` | fixed |
+| `journal.page` | capability `journal.read` | call | no | no | `cursor?`: text ≤ `MAX_OBJECT_ID_BYTES` | `{ gameName, items, page, next, previous }`: five local and cloud sessions of the active game, merged and deduplicated, newest first; without `cursor`, the first page; each item `{ id, startedAt, offsetMinutes, durationMs, source }`; cursors are host handles that stay valid for the widget whatever other widgets read, and a cursor past the end answers the last page | `JournalPage` | fixed |
 | `journal.delete` | capability `journal.delete` | call | yes | yes | `session`: text ≤ `MAX_OBJECT_ID_BYTES` | `null`, or `cancelled` when the user declines; `not_connected` for a cloud session while PlayerVox is disconnected | `null` | fixed |
 | `twitch.chat.subscribe` | capability `twitch.chat.read` | subscribe | no | no | none | `{ account, channel, joinState, favorites, canSend, generation, reset, messages, removed }`: `account` is `signed_out`, `pending`, `connected` or `expired` (sign-in is host chrome); messages arrive as deltas, with `reset` after subscribing, a generation change or a show; each message `{ id, author, color, badges, fragments, reply, deleted }` with at most `MAX_CHAT_FRAGMENTS` fragments, emotes and badges as `asset:` handles for the current theme and scale | `TwitchChat` | fixed |
 | `twitch.chat.join` | capability `twitch.chat.read` | call | yes | no | `channel`: text ≤ `MAX_CHAT_CHANNEL_BYTES` | `null`; the host remembers the channel and rejoins it when the widget starts | `null` | fixed |
@@ -1073,14 +1074,24 @@ One journal session. `{ id, startedAt, offsetMinutes, durationMs, source }`
 | `durationMs` | integer | Duration. |
 | `source` | `local` \| `cloud` | Where the session is stored. |
 
-#### `JournalPage`
+#### `JournalState`
 
-A page of the game journal. `{ gameName, items, next, previous }`
+The journal of the active game. `{ revision, notice }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
-| `gameName` | text | Active game. |
+| `revision` | integer | Changes whenever the merged journal of the active game changes. |
+| `notice` | `offline` \| `storage_unavailable` \| `full` \| `expired` \| `busy` \| `unavailable` or `null` | Journal condition to show above the sessions: `offline` sync is offline (local sessions remain), `storage_unavailable` the local journal cannot be read, `full` the local journal is full, `expired` the PlayerVox sign-in expired, `busy` PlayerVox asks to retry later, `unavailable` any other failure; `null` when none. |
+
+#### `JournalPage`
+
+A page of the game journal. `{ gameName, items, page, next, previous }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `gameName` | text | Active game; empty when the host has no name. |
 | `items` | list of `JournalSession` | Sessions, newest first. |
+| `page` | integer | Page number, from 1. |
 | `next` | text or `null` | Cursor of the next page. |
 | `previous` | text or `null` | Cursor of the previous page. |
 

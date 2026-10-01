@@ -1,0 +1,142 @@
+/* The built-in's layout at 100 %: a 24 px header (title, PlayerVox mark),
+   the journal's message, the game's name, then one 22 px row per session
+   under a rule, and the paging footer. The wrapper draws the panel; the
+   content keeps the built-in's 10 × 8 px margin. The width is the user's:
+   a long message or name never widens the panel. */
+.journal {
+  display: grid;
+  grid-template-columns: minmax(0px, 1fr);
+  /* A taller panel leaves its free space below the rows. */
+  align-content: start;
+  width: 100%;
+  padding: 8px 10px;
+}
+
+.header {
+  flex-direction: row;
+  align-items: start;
+  column-gap: 6px;
+  height: 24px;
+}
+
+.title {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The mark keeps the header's right corner. */
+.mark {
+  width: 16px;
+  height: 18px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* The journal's condition or the last failed action: wrapped, muted. */
+.message,
+.status {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  line-height: 15px;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+
+.game {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 17px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.rule {
+  height: 1px;
+  background: var(--color-border);
+  margin: 3px 0px;
+}
+
+/* The start on the left takes the free width; the duration and the trash
+   keep the right edge. */
+.row {
+  flex-direction: row;
+  align-items: center;
+  column-gap: 6px;
+  min-height: 22px;
+}
+
+.start {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+.duration {
+  flex-shrink: 0;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+/* The built-in's compact icon buttons: a raised surface, lighter under
+   the pointer or with the keyboard focus, dimmed while a request runs. */
+.control {
+  width: var(--icon-button-size);
+  height: var(--icon-button-size);
+  padding: 5px;
+  /* The icon (sized by `font-size`) fills the 12 px content box exactly
+     and is centred in it. */
+  font-size: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+}
+
+.control:hover,
+.control:focus {
+  background: var(--color-surface-hover);
+}
+
+.control:disabled {
+  color: var(--color-text-subtle);
+  background: var(--color-surface-raised);
+}
+
+.footer {
+  flex-direction: row;
+  align-items: center;
+  column-gap: 6px;
+  margin-top: 6px;
+  min-height: 22px;
+}
+
+.page {
+  margin-left: auto;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}

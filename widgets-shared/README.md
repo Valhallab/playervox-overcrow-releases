@@ -1,7 +1,8 @@
 # Shared sources of the built-in widgets
 
 Some built-ins draw the same thing: the PlayerVox grade badge and mark of
-[PlayerVox Score](../widgets/playervox-score/README.md) and PlayerVox Rating.
+[PlayerVox Score](../widgets/playervox-score/README.md) and PlayerVox Rating,
+and the mark alone of the [Session journal](../widgets/playervox-journal/README.md).
 Their one source lives here, and `scripts/sync-shared-widgets.mjs` copies it
 into each widget that uses it, between marker lines:
 

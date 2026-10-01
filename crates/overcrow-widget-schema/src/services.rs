@@ -422,11 +422,18 @@ pub const SERVICES: &[Service] = &[
         Status::Fixed,
     )
     .returning(Shape::Named("ReviewsPage")),
+    subscribe(
+        "journal.subscribe",
+        "journal.read",
+        "`null` without an active game, or `{ revision, notice }`: `revision` changes whenever the merged journal of the active game changes (a session recorded or deleted, cloud sessions merged, the PlayerVox account or sync changed), so the widget reads its page again; `notice` is `null`, `offline`, `storage_unavailable`, `full`, `expired`, `busy` or `unavailable`. Holding this subscription is what keeps the host's journal source running",
+        Status::Fixed,
+    )
+    .returning(Shape::Nullable(&Shape::Named("JournalState"))),
     call(
         "journal.page",
         cap("journal.read"),
         CURSOR,
-        "`{ gameName, items, next, previous }`: local and cloud sessions of the active game, merged and deduplicated, newest first; each item `{ id, startedAt, offsetMinutes, durationMs, source }`; cursors are host handles",
+        "`{ gameName, items, page, next, previous }`: five local and cloud sessions of the active game, merged and deduplicated, newest first; without `cursor`, the first page; each item `{ id, startedAt, offsetMinutes, durationMs, source }`; cursors are host handles that stay valid for the widget whatever other widgets read, and a cursor past the end answers the last page",
         Status::Fixed,
     )
     .returning(Shape::Named("JournalPage")),
