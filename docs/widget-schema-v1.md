@@ -199,8 +199,8 @@ Expressions: Literals, state and prop paths, `!`, `&&`, `||`, `??`, comparison a
 | Element | Content | Parents | Focus | Role | Events | Meaning |
 | --- | --- | --- | --- | --- | --- | --- |
 | `box` | flow | any flow | when subscribed | group | `activate`, `contextmenu`, `wheel`, `keydown`, `focus`, `blur` | Generic container; flex or grid layout comes from style. The scene root (node 0) is a `box`. |
-| `scroll` | flow | any flow | never | scroll-view | `reachend`, `contextmenu` | Clipping container scrolled by the host with wheel, drag and keyboard. |
-| `list` | flow | any flow | never | list | `reachend`, `contextmenu` | Vertical scrolling list whose children are laid out and painted only when visible. |
+| `scroll` | flow | any flow | never | scroll-view | `reachend`, `stick`, `contextmenu` | Clipping container scrolled by the host with wheel, drag and keyboard. |
+| `list` | flow | any flow | never | list | `reachend`, `stick`, `contextmenu` | Vertical scrolling list whose children are laid out and painted only when visible. |
 | `text` | inline: `span`, `icon`, `image` | any flow | when subscribed | label | `activate`, `contextmenu`, `wheel`, `keydown`, `focus`, `blur` | Block of wrapped text; its inline children flow with it (chat line with emotes). |
 | `span` | text | `text` | never | label | none | Styled run of text inside `text`. |
 | `icon` | empty | any flow | when subscribed | image | `activate`, `contextmenu`, `wheel`, `keydown`, `focus`, `blur` | Lucide icon tinted with `color`, sized by `font-size` unless `width`/`height` are set. |
@@ -240,7 +240,7 @@ Expressions: Literals, state and prop paths, `!`, `&&`, `||`, `??`, comparison a
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
 | `axis` | `vertical` \| `horizontal` | no | Scroll direction; default `vertical`. |
-| `stick-to-end` | boolean | no | Stay at the end while content grows, until the user scrolls away (chat). |
+| `stick-to-end` | boolean | no | Stay at the end while content grows, until the user scrolls away (chat). Setting it again after it was off scrolls to the end. |
 
 #### `list` attributes
 
@@ -425,6 +425,7 @@ A gesture event authorizes gesture-bound service calls made while the VM handles
 | `focus` | no | none | Node gained keyboard focus. |
 | `blur` | no | none | Node lost keyboard focus. |
 | `reachend` | no | none | Scrolled within one viewport of the end (load more, history). |
+| `stick` | no | `stuck` | The user scrolled a container away from its end, or back to it (unread count, return to the latest). Content growing never sends it. |
 | `dismiss` | no | none | The host closed a popover (Escape, outside click, anchor removed). |
 
 Named `keydown` keys: `Enter`, `Escape`, `Backspace`, `Delete`, `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight`, `Home`, `End`, `PageUp`, `PageDown`. Any other `key` is one printable grapheme.

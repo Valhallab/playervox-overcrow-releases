@@ -232,6 +232,7 @@ export type EventName =
   | "focus"
   | "blur"
   | "reachend"
+  | "stick"
   | "dismiss";
 
 /** Events that are user gestures: gesture-bound services accept a call made while one is handled. */
@@ -319,6 +320,11 @@ export interface EventDetailMap {
   readonly blur: Record<string, never>;
   /** Scrolled within one viewport of the end (load more, history). */
   readonly reachend: Record<string, never>;
+  /** The user scrolled a container away from its end, or back to it (unread count, return to the latest). Content growing never sends it. */
+  readonly stick: {
+    /** The container is at its end. */
+    readonly stuck: boolean;
+  };
   /** The host closed a popover (Escape, outside click, anchor removed). */
   readonly dismiss: Record<string, never>;
 }
