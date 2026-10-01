@@ -1,0 +1,142 @@
+{
+  "scenarioVersion": 1,
+  "name": "offline",
+  "description": "PlayerVox unreachable: the last rating read still shows, OverCrow draws its notice under the content, the form keeps the draft but takes no input and cannot publish.",
+  "host": {
+    "mode": "interactive",
+    "frame": true,
+    "accounts": {
+      "playervox": "offline"
+    }
+  },
+  "fixtures": {
+    "subscriptions": {
+      "playervox.rating.subscribe": {
+        "state": "ready",
+        "name": "Portal 2",
+        "offline": true,
+        "rating": {
+          "gameplay": 96,
+          "art": 88,
+          "tech": 94,
+          "review": "Great.",
+          "publishedAt": null,
+          "offsetMinutes": null
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "93",
+          "Offline · Your changes stay here until you save them."
+        ],
+        "image": "interactive-dark-en"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Update my rating"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Gameplay"
+        }
+      }
+    },
+    {
+      "expect": {
+        "intents": [],
+        "text": [
+          "96"
+        ]
+      }
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Your published rating"
+        ],
+        "noText": [
+          "Offline · Your changes stay here until you save them."
+        ],
+        "image": "passive-dark-en"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Hors ligne · Vos modifications restent ici jusqu’à leur enregistrement."
+        ],
+        "image": "interactive-light-fr"
+      }
+    },
+    {
+      "host": {
+        "accounts": {
+          "playervox": "connected"
+        },
+        "locale": "en",
+        "theme": "dark"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "offline": false,
+          "rating": {
+            "gameplay": 96,
+            "art": 88,
+            "tech": 94,
+            "review": "Great.",
+            "publishedAt": null,
+            "offsetMinutes": null
+          }
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "at": [
+            150,
+            131
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Unpublished draft"
+        ],
+        "noText": [
+          "Offline · Your changes stay here until you save them."
+        ],
+        "image": "online-again"
+      }
+    }
+  ]
+}

@@ -1,0 +1,199 @@
+{
+  "scenarioVersion": 1,
+  "name": "draft",
+  "description": "OverCrow keeps the draft: through Passive mode, where only the published rating shows, and through a rating published elsewhere; an untouched form follows the new rating; another game starts from that game's rating.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "playervox.rating.subscribe": {
+        "state": "ready",
+        "name": "Portal 2",
+        "offline": false,
+        "rating": {
+          "gameplay": 96,
+          "art": 88,
+          "tech": 94,
+          "review": "Great.",
+          "publishedAt": null,
+          "offsetMinutes": null
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "pointer": {
+        "move": {
+          "text": "My rating"
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "key": {
+        "key": "PageDown"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "86",
+          "Unpublished draft"
+        ]
+      }
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "93",
+          "Your published rating"
+        ],
+        "noText": [
+          "Unpublished draft",
+          "Update my rating"
+        ],
+        "image": "passive-hides-the-draft"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "86",
+          "Unpublished draft"
+        ],
+        "image": "draft-kept"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "offline": false,
+          "rating": {
+            "gameplay": 96,
+            "art": 70,
+            "tech": 94,
+            "review": "Edited on the site.",
+            "publishedAt": null,
+            "offsetMinutes": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "86",
+          "88",
+          "Unpublished draft"
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Half-Life 2",
+          "offline": false,
+          "rating": {
+            "gameplay": 40,
+            "art": 55,
+            "tech": 61,
+            "review": null,
+            "publishedAt": null,
+            "offsetMinutes": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Half-Life 2",
+          "40",
+          "55",
+          "61",
+          "52",
+          "Your published rating"
+        ],
+        "image": "another-game"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "offline": false,
+          "rating": {
+            "gameplay": 96,
+            "art": 70,
+            "tech": 94,
+            "review": "Edited on the site.",
+            "publishedAt": null,
+            "offsetMinutes": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "96",
+          "70",
+          "94",
+          "Your published rating"
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "offline": false,
+          "rating": {
+            "gameplay": 96,
+            "art": 71,
+            "tech": 94,
+            "review": "Edited again.",
+            "publishedAt": null,
+            "offsetMinutes": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "71",
+          "Your published rating"
+        ],
+        "intents": [],
+        "image": "follows"
+      }
+    }
+  ]
+}

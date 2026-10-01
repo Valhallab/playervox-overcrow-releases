@@ -1,0 +1,221 @@
+{
+  "scenarioVersion": 1,
+  "name": "publish-keyboard",
+  "description": "Publishing with the keyboard alone: Tab to the first slider, an arrow key changes it, Tab to the button, Enter publishes. The form sends OverCrow's own values; the unchanged review is left out. The subscription then sends the stored rating and the button says Saved. Ctrl+Enter in the review publishes too.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "playervox.rating.subscribe": {
+        "state": "ready",
+        "name": "Portal 2",
+        "offline": false,
+        "rating": {
+          "gameplay": 96,
+          "art": 88,
+          "tech": 94,
+          "review": "Great.",
+          "publishedAt": null,
+          "offsetMinutes": null
+        }
+      }
+    },
+    "intents": {
+      "playervox.rating.publish": [
+        "accepted",
+        "accepted"
+      ]
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Update my rating",
+          "Your published rating"
+        ],
+        "intents": []
+      }
+    },
+    {
+      "pointer": {
+        "move": {
+          "text": "My rating"
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "key": {
+        "key": "ArrowLeft"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "95",
+          "Unpublished draft",
+          "Update my rating"
+        ],
+        "image": "draft"
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "playervox.rating.publish",
+            "fields": {
+              "gameplay": 95,
+              "art": 88,
+              "tech": 94
+            },
+            "outcome": "accepted"
+          }
+        ],
+        "calls": [
+          {
+            "service": "playervox.rating.subscribe",
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "offline": false,
+          "rating": {
+            "gameplay": 95,
+            "art": 88,
+            "tech": 94,
+            "review": "Great.",
+            "publishedAt": null,
+            "offsetMinutes": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Saved on PlayerVox",
+          "Your published rating",
+          "92"
+        ],
+        "calls": [],
+        "image": "saved"
+      }
+    },
+    {
+      "key": {
+        "key": "Tab",
+        "modifiers": [
+          "shift"
+        ]
+      }
+    },
+    {
+      "key": {
+        "key": "End",
+        "modifiers": [
+          "ctrl"
+        ]
+      }
+    },
+    {
+      "text": " Twice."
+    },
+    {
+      "expect": {
+        "text": [
+          "Unpublished draft",
+          "Update my rating"
+        ],
+        "image": "review-draft"
+      }
+    },
+    {
+      "key": {
+        "key": "Enter",
+        "modifiers": [
+          "ctrl"
+        ]
+      }
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "playervox.rating.publish",
+            "fields": {
+              "gameplay": 95,
+              "art": 88,
+              "tech": 94,
+              "review": "Great. Twice."
+            },
+            "outcome": "accepted"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "offline": false,
+          "rating": {
+            "gameplay": 95,
+            "art": 88,
+            "tech": 94,
+            "review": "Great. Twice.",
+            "publishedAt": null,
+            "offsetMinutes": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Saved on PlayerVox"
+        ]
+      }
+    }
+  ]
+}

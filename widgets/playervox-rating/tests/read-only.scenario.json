@@ -1,0 +1,70 @@
+{
+  "scenarioVersion": 1,
+  "name": "read-only",
+  "description": "With the read grant alone the widget shows the published rating in both modes and never the form: nothing can be published.",
+  "host": {
+    "mode": "interactive",
+    "grants": [
+      "playervox.rating.read"
+    ]
+  },
+  "fixtures": {
+    "subscriptions": {
+      "playervox.rating.subscribe": {
+        "state": "ready",
+        "name": "Portal 2",
+        "offline": false,
+        "rating": {
+          "gameplay": 96,
+          "art": 88,
+          "tech": 94,
+          "review": "Great.",
+          "publishedAt": null,
+          "offsetMinutes": null
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "93",
+          "Your published rating"
+        ],
+        "calls": [
+          {
+            "service": "playervox.rating.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "image": "read-only"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "at": [
+            175,
+            60
+          ]
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "Enter",
+        "modifiers": [
+          "ctrl"
+        ]
+      }
+    },
+    {
+      "expect": {
+        "intents": [],
+        "fault": "none"
+      }
+    }
+  ]
+}

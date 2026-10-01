@@ -1,0 +1,18 @@
+{
+  "author": "PlayerVox",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/playervox-rating",
+  "defaultLocale": "en",
+  "localizations": [
+    {
+      "locale": "en",
+      "name": "My rating",
+      "description": "Your own PlayerVox rating of the Steam game you play: its grade and score, and in Interactive mode three criteria and an optional review to publish or update. Needs your PlayerVox account."
+    },
+    {
+      "locale": "fr",
+      "name": "Ma note",
+      "description": "Votre note PlayerVox du jeu Steam auquel vous jouez : son grade et son score, et en mode interactif trois critères et un avis facultatif à publier ou mettre à jour. Nécessite votre compte PlayerVox."
+    }
+  ]
+}
