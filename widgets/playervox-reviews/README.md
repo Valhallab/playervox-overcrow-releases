@@ -157,3 +157,38 @@ dropped.
   | `bounds` | an 8000-character review folded, unfolded and scrolled; 120 and 121 characters; four short lines; a blank review; the count in both number formats |
 
   The reviews and the player names of every fixture are synthetic.
+
+## Cost
+
+Measured on 2026-10-01 with OverCrow's release build, on an AMD Ryzen 7
+5800X3D Linux workstation and in a Windows 11 virtual machine (2 vCPU),
+over synthetic pages of three reviews of 8000 characters each, the longest
+PlayerVox answers:
+
+| | Linux | Windows (VM) |
+| --- | --- | --- |
+| Widget start, warm, into the overlay's runtime | 8.3–9.3 ms (p50), 10.0 ms at most | VM ready in 14.7–16.1 ms (p50) |
+| VM memory, twenty pages read | 0.88 MiB private, 1.05 MiB PSS | 1.39–1.41 MiB private working set, 1.74–1.77 MiB private commit |
+| Private memory in all (VM, sandbox helpers, overlay share), reviews folded | 6.8–8.3 MB | — |
+| The same with an 8000-character review unfolded, at rest / scrolling | 10.4–12.2 MB / 13.6–15.7 MB | — |
+| CPU, a page held, folded or unfolded | 0.03–0.07 % of one core, no frame | — |
+| CPU, a page read every 2 s | 0.12–0.13 % of one core: one frame of 1.6 ms (p95 1.9 ms) per page | — |
+| CPU, hidden, a page read every 2 s | 0.10 % of one core | — |
+| CPU, an unfolded review scrolled without pause | 1.1 % of one core: frames of 0.10 ms while the wheel turns | — |
+| Unfolding an 8000-character review | one frame of 8 ms | — |
+| VM CPU | 0.07 % of one core while a page is read every 2 s; none at rest or while scrolling | — |
+
+The widget keeps the page it shows, never the list: its memory does not
+grow with the number of reviews or of pages read. A page is read on a click
+or when the reviews change; the 2 s load is a stress. Scrolling is
+OverCrow's: it never reaches the widget's code. OverCrow lays out every
+character of a text it is given, so a folded review is given as its first
+450 characters (three folded 8000-character reviews cost a 12 ms frame
+otherwise), and unfolding the longest review takes one 8 ms frame, above
+the 2 ms a frame should take; a review that is not a translation is at
+most 2000 characters, about 2 ms. The egui widget it replaces painted its
+page at every overlay frame (0.09–0.10 ms a frame); OverCrow followed the
+game's reviews whenever that widget was enabled, with one page and one
+filter for every reader, and now only while this widget subscribes, each
+widget reading its own page. Scenarios render the same images on Linux and
+Windows, pixel for pixel.
