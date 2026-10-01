@@ -713,10 +713,12 @@ export interface TwitchChat {
   readonly generation: number;
   /** `messages` replaces the whole list. */
   readonly reset: boolean;
-  /** Messages, oldest first. */
+  /** Messages, oldest first: the whole list with `reset`; otherwise the new messages, to append, and the changed ones, which replace the message of the same `id` in place. */
   readonly messages: ReadonlyArray<ChatMessage>;
   /** IDs of removed messages. */
   readonly removed: ReadonlyArray<string>;
+  /** New messages the host left out since the previous update, because the chat is faster than it delivers; 0 with `reset`. A removal is never left out. */
+  readonly skipped: number;
 }
 
 // Services.
@@ -946,7 +948,7 @@ export interface ServiceResultMap {
   readonly "journal.page": JournalPage;
   /** `journal.delete`: `null`, or `cancelled` when the user declines; `not_connected` for a cloud session while PlayerVox is disconnected. */
   readonly "journal.delete": null;
-  /** `twitch.chat.subscribe`: `{ account, channel, joinState, failure, favorites, canSend, generation, reset, messages, removed }`: `account` is `signed_out`, `pending`, `connected` or `expired` (sign-in is host chrome); `failure` is the fixed category of a `failed` join; messages arrive as deltas, with `reset` after subscribing, a generation change or a show; each message `{ id, author, color, badges, fragments, reply, deleted, receivedAt }` with at most `MAX_CHAT_FRAGMENTS` fragments, emotes and badges as `asset:` handles for the current theme and scale. */
+  /** `twitch.chat.subscribe`: `{ account, channel, joinState, failure, favorites, canSend, generation, reset, messages, removed, skipped }`: `account` is `signed_out`, `pending`, `connected` or `expired` (sign-in is host chrome); `failure` is the fixed category of a `failed` join; messages arrive as deltas, at most one update per 100 ms, with `reset` after subscribing, a generation change or a show, and nothing while the widget is hidden; a faster chat is sampled, `skipped` counting the new messages left out; each message `{ id, author, color, badges, fragments, reply, deleted, receivedAt }` with at most `MAX_CHAT_FRAGMENTS` fragments, emotes and badges as `asset:` handles for the current theme and scale. */
   readonly "twitch.chat.subscribe": TwitchChat;
   /** `twitch.chat.join`: `null`; the host remembers the channel and rejoins it when the widget starts. */
   readonly "twitch.chat.join": null;

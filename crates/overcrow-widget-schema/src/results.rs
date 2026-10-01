@@ -502,12 +502,17 @@ pub const SHAPES: &[NamedShape] = &[
             member(
                 "messages",
                 Shape::List(&Shape::Named("ChatMessage")),
-                "Messages, oldest first.",
+                "Messages, oldest first: the whole list with `reset`; otherwise the new messages, to append, and the changed ones, which replace the message of the same `id` in place.",
             ),
             member(
                 "removed",
                 Shape::List(&Shape::Text),
                 "IDs of removed messages.",
+            ),
+            member(
+                "skipped",
+                Shape::Integer,
+                "New messages the host left out since the previous update, because the chat is faster than it delivers; 0 with `reset`. A removal is never left out.",
             ),
         ]),
         "Twitch chat state.",

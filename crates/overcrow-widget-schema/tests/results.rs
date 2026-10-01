@@ -226,6 +226,7 @@ fn chat_state() -> serde_json::Value {
         "account": "connected", "channel": "juniper_plays", "joinState": "joined",
         "failure": null, "favorites": ["juniper_plays"], "canSend": true,
         "generation": 3, "reset": true, "messages": [chat_message()], "removed": [],
+        "skipped": 0,
     })
 }
 
@@ -254,6 +255,22 @@ fn a_failed_join_names_a_fixed_category() {
     let mut without = chat_state();
     without.as_object_mut().expect("object").remove("failure");
     assert!(!chat.matches(&without), "failure is always present");
+}
+
+/// A chat faster than the host delivers is sampled, and every update says
+/// how many new messages it left out.
+#[test]
+fn a_chat_update_counts_the_messages_left_out() {
+    let chat = shape("TwitchChat").expect("shape").shape;
+    let mut update = chat_state();
+    update["reset"] = json!(false);
+    update["skipped"] = json!(37);
+    assert!(chat.matches(&update));
+    let mut without = chat_state();
+    without.as_object_mut().expect("object").remove("skipped");
+    assert!(!chat.matches(&without), "skipped is always present");
+    update["skipped"] = json!("many");
+    assert!(!chat.matches(&update));
 }
 
 #[test]
