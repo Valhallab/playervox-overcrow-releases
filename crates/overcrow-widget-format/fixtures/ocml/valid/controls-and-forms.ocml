@@ -1,14 +1,19 @@
 <form intent="notes.save" target={state.noteId} on:submit={saved}>
   <textarea name="body" rows="6" max-length="4000" placeholder="Write a note"/>
-  <field name="title" value={state.title} on:input={titleChanged} on:keydown={keys(event.key, event.ctrl)}/>
+  <field name="title" on:input={titleChanged} on:keydown={keys(event.key, event.ctrl)}/>
   <select name="kind" value="plain" on:change={kindChanged}>
     <option value="plain">Plain</option>
     <option value="list" disabled>List</option>
   </select>
   <toggle name="pinned" checked={state.pinned}/>
   <checkbox checked disabled/>
-  <slider name="size" min="-10" max="10.5" step="0.5" value={state.size ?? 0}/>
+  <slider name="size" min="-10" max="10.5" step="0.5" on:input={sized(event.value)}/>
   <button submit><icon name="save" label="Save"/></button>
+  <form on:submit={searched}>
+    <field name="query" value={state.query}/>
+    <textarea value="Free text"/>
+    <slider min="0" max="100" value={state.size ?? 0}/>
+  </form>
 </form>
 <box on:contextmenu={openMenu(event.x, event.y)} class="anchor">
   <popover anchor={state.anchor} open={state.menuOpen} placement="pointer" on:dismiss={closeMenu}>

@@ -119,9 +119,10 @@ A call from a timer, a service answer or a widget menu row is refused with
 mode; in passive mode they are click-through. Deleting a note or a journal
 session also asks the user to confirm in a dialog drawn by OverCrow.
 
-Text the user writes to notes, ratings and chat never passes through your
-logic: a `form` with an `intent` sends the text of its own controls, which
-OverCrow edits and submits itself.
+What the user writes to notes, ratings and chat never passes through your
+logic: a `form` with an `intent` sends the values of its own text fields and
+sliders, which OverCrow fills, edits and submits itself. Your logic can read
+them, not set them.
 
 ## What a widget cannot do
 

@@ -1,22 +1,24 @@
 0	Attribute	[]	state.noteId
 1	Handler	[event]	saved(event)
-2	Attribute	[]	state.title
-3	Handler	[event]	titleChanged(event)
-4	Handler	[event]	keys(event.key, event.ctrl)
-5	Handler	[event]	kindChanged(event)
-6	Attribute	[]	state.pinned
-7	Attribute	[]	(state.size ?? 0)
-8	Handler	[event]	openMenu(event.x, event.y)
-9	Attribute	[]	state.anchor
-10	Attribute	[]	state.menuOpen
-11	Handler	[event]	closeMenu(event)
-12	Handler	[event]	remove(state.selected)
-13	Attribute	[]	state.history
-14	Attribute	[]	state.base
-15	Attribute	[]	state.at
-16	Attribute	[]	state.running
-17	Attribute	[]	(state.done / state.total)
-18	Attribute	[]	state.avatar
-19	Handler	[event]	more(event)
-20	Handler	[event]	zoom(event.dy)
-functions	closeMenu, keys, kindChanged, more, openMenu, remove, saved, titleChanged, zoom
+2	Handler	[event]	titleChanged(event)
+3	Handler	[event]	keys(event.key, event.ctrl)
+4	Handler	[event]	kindChanged(event)
+5	Attribute	[]	state.pinned
+6	Handler	[event]	sized(event.value)
+7	Handler	[event]	searched(event)
+8	Attribute	[]	state.query
+9	Attribute	[]	(state.size ?? 0)
+10	Handler	[event]	openMenu(event.x, event.y)
+11	Attribute	[]	state.anchor
+12	Attribute	[]	state.menuOpen
+13	Handler	[event]	closeMenu(event)
+14	Handler	[event]	remove(state.selected)
+15	Attribute	[]	state.history
+16	Attribute	[]	state.base
+17	Attribute	[]	state.at
+18	Attribute	[]	state.running
+19	Attribute	[]	(state.done / state.total)
+20	Attribute	[]	state.avatar
+21	Handler	[event]	more(event)
+22	Handler	[event]	zoom(event.dy)
+functions	closeMenu, keys, kindChanged, more, openMenu, remove, saved, searched, sized, titleChanged, zoom

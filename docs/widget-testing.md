@@ -145,7 +145,7 @@ Everything is optional.
 | `startAt` | 2026-01-01T00:00:00Z | Virtual Unix milliseconds when the widget starts. |
 | `options` | the rows' defaults | Values of `wrapper.menu` rows. |
 | `grants` | `"declared"` | Or the exact list of granted items (`storage`, `network`, `fps.read`…): the others are refused by the host. |
-| `accounts` | connected | `{ playervox, twitch }`: `connected` or `disconnected`. |
+| `accounts` | connected | `{ playervox, twitch }`: `connected`, `disconnected` (signed out), `pending` (a sign-in step is open in the browser), `expired` or `offline`. Only `connected` passes the host's account check (`not_connected` otherwise). When the widget's grants need the account, OverCrow draws its account panel over the content for `disconnected`, `pending` and `expired`, and no input reaches the widget; for `offline` it draws a notice at the bottom and the widget keeps its input. Capture them with `frame`. |
 | `features` | all | Host data sources of `requires` rows. |
 | `storage` | empty | The widget's storage before it starts (within the quota). |
 
@@ -180,6 +180,7 @@ an error of the scenario, not of the widget.
 | `subscriptions` | The value of a capability subscription (`fps.subscribe`…) when it starts; `publish` steps send the next ones. No data when absent. |
 | `http` | `http.fetch` answers, each used once: `{ "request": { method, url }, "response": { status, contentType, body or bodyBase64 } }` or `{ "request": …, "error": code }`. The manifest's network rules apply first. Responses are bounded as the broker bounds them: no redirection (use `redirect_denied`), a printable content type of at most 128 bytes, a body within the largest `maxResponseBytes` of the manifest's rules (`MAX_HTTP_RESPONSE_BYTES` for a rule without one). The runtime then applies the bound of the rule that allows each request, as the broker does: a longer body reaches the widget as `response_body_limit`, and so does an `as: "image"` body beyond `MAX_HTTP_RESPONSE_BYTES`. Errors are the broker's (`timeout`, `transport_failed`…). |
 | `confirmations` | `accept` or `cancel`, in order, for the host's native confirmation of `notes.delete` and `journal.delete`. |
+| `intents` | The provider's answer to each submitted write intent (`notes.save`, `playervox.rating.publish`, `twitch.chat.send`), in order: `"accepted"`, `{ "error": code }`, or `"pending"` for a provider that does not answer while the scenario lasts (the form gets no `submit` event). A submission first passes the host's checks (the capability, a gesture of the current Interactive mode, the account, the fields); one beyond the answers is an error of the scenario and reaches the widget as `unavailable`. The codes the host gives itself are refused here too. The fixture does not change what a subscription says: `publish` the new value, as the host's subscription sends it after a write. |
 
 Storage, timers and the clipboard are the host's own.
 
@@ -211,6 +212,7 @@ sent and nothing is in flight. There is no wall-clock wait.
 | `state` | `starting`, `running`, `restarting`, `failed`, `refused` or `stopped`. |
 | `fault` | The last fault of the VM (`handler_exception`, `resource_limit`…) or `none`. |
 | `clipboard` | The last text the widget wrote to the clipboard. |
+| `intents` | Exactly these write intents were submitted since the previous `intents` expectation, in order: `{ intent, fields?, outcome? }`. `fields` are the exact values the host's form sent (they come from its own controls, never from the logic); `outcome` is `accepted`, the error code the widget received in its `submit` event, or `pending` for a submission not answered yet. |
 
 ## Time and determinism
 

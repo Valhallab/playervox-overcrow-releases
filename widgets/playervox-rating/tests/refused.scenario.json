@@ -1,0 +1,27 @@
+{
+  "scenarioVersion": 1,
+  "name": "refused",
+  "description": "Without its grants the widget asks nothing and says that it cannot read the rating.",
+  "host": {
+    "mode": "interactive",
+    "grants": []
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Rating unavailable",
+          "Permission needed to read your rating"
+        ],
+        "noText": [
+          "Publish my rating",
+          "Update my rating"
+        ],
+        "state": "running",
+        "calls": [],
+        "fault": "none",
+        "image": "refused"
+      }
+    }
+  ]
+}

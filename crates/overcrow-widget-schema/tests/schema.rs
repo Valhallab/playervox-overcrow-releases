@@ -4,8 +4,8 @@
 use std::collections::BTreeSet;
 
 use overcrow_widget_schema::{
-    Status, Unit, icons, ipc, is_supported_api_version, limits, permissions, reference, services,
-    style, tokens, view, wrapper,
+    Status, Unit, ValueType, icons, ipc, is_supported_api_version, limits, permissions, reference,
+    services, style, tokens, view, wrapper,
 };
 
 fn assert_unique<'a>(what: &str, names: impl IntoIterator<Item = &'a str>) {
@@ -431,6 +431,24 @@ fn services_reference_declared_authority() {
             permissions::capability_named(intent.capability).expect("intent capability");
         assert!(capability.sensitive, "{}", intent.name);
         reached.insert(intent.capability);
+        // The host owns the controls an intent takes its values from:
+        // `field`, `textarea` and `slider`, whose `value` it refuses from
+        // the VM. A field of another type (a `toggle`, a `select`) needs
+        // that rule extended to its control first.
+        for field in intent.fields {
+            assert!(
+                matches!(
+                    field.ty,
+                    ValueType::Text(_)
+                        | ValueType::Chars(_)
+                        | ValueType::Integer { .. }
+                        | ValueType::ListOf("NoteItem", _)
+                ),
+                "{}.{}: not a host-owned text or slider value",
+                intent.name,
+                field.name
+            );
+        }
     }
     for capability in permissions::CAPABILITIES {
         assert!(

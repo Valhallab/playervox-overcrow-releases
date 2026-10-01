@@ -1,0 +1,333 @@
+/* The built-in's layout at 100 %: a 24 px header (title, PlayerVox mark),
+   the game's name, a 64 px row (badge, score and caption, or a status),
+   and in Interactive mode the form: three 24 px criterion rows, the
+   review, the button and its hint. The wrapper draws the panel; the
+   content keeps the built-in's 10 × 8 px margin. The width is the user's;
+   the height fits the content. */
+.rating {
+  flex-direction: column;
+  padding: 8px 10px;
+  width: 100%;
+}
+
+/* OverCrow draws its offline notice over the last 22 px of the content. */
+.offline {
+  padding-bottom: 30px;
+}
+
+.header {
+  flex-direction: row;
+  align-items: start;
+  column-gap: 6px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.title {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mark {
+  width: 16px;
+  height: 18px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.game {
+  height: 18px;
+  flex-shrink: 0;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.summary {
+  flex-direction: row;
+  column-gap: 14px;
+  height: 64px;
+  flex-shrink: 0;
+}
+
+.slot {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+
+.side {
+  flex-direction: column;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0px;
+}
+
+.value {
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 30px;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.max {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.caption {
+  margin-top: 6px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  line-height: 14px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status {
+  margin-top: 18px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hint {
+  margin-top: 4px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  line-height: 14px;
+  color: var(--color-text-muted);
+}
+
+/* The form: shown in Interactive mode only. Hidden, it stays in the view
+   and OverCrow keeps the draft its controls hold. */
+.form {
+  flex-direction: column;
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+
+.hidden {
+  display: none;
+}
+
+.notice {
+  margin-bottom: 6px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  line-height: 14px;
+  color: var(--color-warning);
+}
+
+.criterion {
+  flex-direction: row;
+  align-items: center;
+  column-gap: 8px;
+  height: 24px;
+}
+
+.criterion-name {
+  width: 80px;
+  flex-shrink: 0;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.criterion-slider {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 30px;
+}
+
+.criterion-value {
+  width: 30px;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 16px;
+  text-align: end;
+  color: var(--color-text);
+}
+
+.eyebrow {
+  margin-top: 8px;
+  margin-bottom: 4px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-caption);
+  line-height: 14px;
+  letter-spacing: 0.6px;
+  color: var(--color-text-muted);
+}
+
+.review {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-field);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-text);
+}
+
+.review:focus {
+  border: 1px solid var(--color-border-strong);
+}
+
+.error {
+  margin-top: 6px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  line-height: 14px;
+  color: var(--color-warning);
+}
+
+.publish {
+  margin-top: 8px;
+  height: var(--control-height);
+  padding: 0px 12px;
+  justify-content: center;
+  align-items: center;
+  align-self: start;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-strong);
+}
+
+.publish:hover,
+.publish:focus {
+  background: var(--color-surface-hover);
+}
+
+.publish-label {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-button);
+  font-weight: 700;
+  line-height: 16px;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.publish:disabled .publish-label {
+  color: var(--color-text-muted);
+}
+
+.publish-hint {
+  margin-top: 6px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  line-height: 14px;
+  color: var(--color-text-muted);
+}
+
+/* <shared:playervox-badge/badge.ocss> */
+/* The PlayerVox grade badge, shared by the Score and Rating built-ins.
+   scripts/sync-shared-widgets.mjs copies this file, as is, into their
+   style.ocss between the markers `<shared:playervox-badge/badge.ocss>`;
+   edit it here, never in a copy.
+
+   The badge canvas is 76 px square around a 56 px badge: the rotation and
+   the S+ glow reach past the badge, so the canvas overlaps its 64 px slot
+   by 6 px on each side. */
+.badge {
+  width: 76px;
+  height: 76px;
+  margin: -6px;
+}
+
+/* One pulse when a score shows or changes (badge.ts `nextPulse`): the
+   host animates the transform, so the widget sends one class change and
+   no frame is drawn once it ends or while the widget is hidden. Two
+   identical keyframes let the next change restart it. */
+@keyframes badge-pulse-a {
+  from {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes badge-pulse-b {
+  from {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.badge.pulse-a {
+  animation: badge-pulse-a 600ms ease-out 1;
+}
+
+.badge.pulse-b {
+  animation: badge-pulse-b 600ms ease-out 1;
+}
+
+/* Grade colours (badge.ts `GRADE_COLORS`), for text and bars. */
+.grade-s-plus {
+  color: #9ae600;
+}
+
+.grade-s {
+  color: #7ccf00;
+}
+
+.grade-a {
+  color: #00d3f3;
+}
+
+.grade-b {
+  color: #fdc700;
+}
+
+.grade-c {
+  color: #fe9a00;
+}
+
+.grade-d {
+  color: #e7000b;
+}
+
+.grade-f,
+.grade-none {
+  color: #52525c;
+}
+/* </shared:playervox-badge/badge.ocss> */

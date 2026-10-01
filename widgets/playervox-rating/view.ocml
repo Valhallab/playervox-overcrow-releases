@@ -1,0 +1,62 @@
+<!-- PlayerVox Rating: the user's own grade and score of the active Steam
+     game, and in Interactive mode the form that publishes it (parity
+     sheet: playervox-overcrow docs/builtin-parity/playervox-rating.md).
+     The form's sliders and review belong to OverCrow, which fills them,
+     keeps the draft and sends their values: they take no `value` here. The
+     badge and the PlayerVox mark are canvases drawn from
+     widgets-shared/playervox-badge. -->
+<box class={rootClass(state)} label={t("label")}>
+  <box class="header">
+    <text class="title">{t("title")}</text>
+    <canvas ref="mark" class="mark" label={t("mark")} tooltip={t("mark")}/>
+  </box>
+  <if test={ready(state.rating)}>
+    <text class="game">{gameName(state.rating)}</text>
+  </if>
+  <box class="summary">
+    <box class="slot">
+      <canvas ref="badge" class={state.badgeClass} label={badgeName(state)}/>
+    </box>
+    <box class="side">
+      <if test={ready(state.rating)}>
+        <text class="value"><span>{scoreText(state)}</span><span class="max">/100</span></text>
+        <text class="caption">{t(caption(state))}</text>
+      </if>
+      <else>
+        <text class="status">{t(status(state.rating).label)}</text>
+        <if test={status(state.rating).hint != ""}>
+          <text class="hint">{t(status(state.rating).hint)}</text>
+        </if>
+      </else>
+    </box>
+  </box>
+  <form class={formClass(state)} intent="playervox.rating.publish" on:submit={submitted(event.outcome, event.error)}>
+    <if test={state.rating && state.rating.offline}>
+      <text class="notice">{t("offline")}</text>
+    </if>
+    <box class="criterion">
+      <text class="criterion-name">{t("gameplay")}</text>
+      <slider class="criterion-slider" name="gameplay" min="0" max="100" step="1" label={t("gameplay")} disabled={!editable(state)} on:input={scored("gameplay", event.value)}/>
+      <text class="criterion-value">{valueText(state.gameplay)}</text>
+    </box>
+    <box class="criterion">
+      <text class="criterion-name">{t("art")}</text>
+      <slider class="criterion-slider" name="art" min="0" max="100" step="1" label={t("art")} disabled={!editable(state)} on:input={scored("art", event.value)}/>
+      <text class="criterion-value">{valueText(state.art)}</text>
+    </box>
+    <box class="criterion">
+      <text class="criterion-name">{t("tech")}</text>
+      <slider class="criterion-slider" name="tech" min="0" max="100" step="1" label={t("tech")} disabled={!editable(state)} on:input={scored("tech", event.value)}/>
+      <text class="criterion-value">{valueText(state.tech)}</text>
+    </box>
+    <text class="eyebrow">{t("review-optional")}</text>
+    <textarea class="review" name="review" rows="3" placeholder={t("review-hint")} label={t("review-label")} disabled={!editable(state)} on:input={reviewed(event.value)} on:keydown={keyed(event.key, event.ctrl)}/>
+    <if test={state.error != ""}>
+      <text class="error">{t(state.error)}</text>
+    </if>
+    <button class="publish" submit disabled={!canPublish(state)} on:activate={publishing}>
+      <text class="publish-label">{t(buttonLabel(state))}</text>
+    </button>
+    <text class="publish-hint">{t("publish-hint")}</text>
+  </form>
+</box>

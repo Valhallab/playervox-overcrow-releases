@@ -1,0 +1,73 @@
+{
+  "scenarioVersion": 1,
+  "name": "bounds",
+  "description": "A long game name stays on one line; the review is bounded at 2000 characters by OverCrow's field, whatever is typed, and the submission carries exactly that text.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "playervox.rating.subscribe": {
+        "state": "ready",
+        "name": "An Unreasonably Long Game Title: The Definitive Remastered Collector's Edition",
+        "offline": false,
+        "rating": null
+      }
+    },
+    "intents": {
+      "playervox.rating.publish": [
+        "accepted"
+      ]
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "An Unreasonably Long Game Title: The Definitive Remastered Collector's Edition"
+        ],
+        "image": "long-name"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Review, optional"
+        }
+      }
+    },
+    {
+      "text": "A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review t"
+    },
+    {
+      "text": "A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review t"
+    },
+    {
+      "text": "A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review t"
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Publish my rating"
+        }
+      }
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "playervox.rating.publish",
+            "fields": {
+              "gameplay": 50,
+              "art": 50,
+              "tech": 50,
+              "review": "A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review tA review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review that goes on and on. A review t"
+            },
+            "outcome": "accepted"
+          }
+        ],
+        "image": "long-review"
+      }
+    }
+  ]
+}

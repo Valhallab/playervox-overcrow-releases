@@ -3,9 +3,10 @@
 //! A scenario is one JSON file of a widget project, `tests/<name>.scenario.json`.
 //! It fixes the host (locale, theme, scale, size, mode, region and time
 //! zone, virtual start time, grants, accounts), the answers of the services
-//! (fixtures), then plays steps: host changes, input, menu rows, service
-//! updates, virtual time, and expectations (reference images, visible text,
-//! service calls, state, fault).
+//! and of the write intents (fixtures), then plays steps: host changes,
+//! input, menu rows, service updates, virtual time, and expectations
+//! (reference images, visible text, service calls, submitted write intents,
+//! state, fault).
 //!
 //! `overcrow-widget test` checks a scenario with [`parse`] and
 //! [`Scenario::check_against`] before it starts the headless runtime, which
@@ -28,7 +29,9 @@ use overcrow_widget_schema::limits::{
 use overcrow_widget_schema::manifest::Manifest;
 use overcrow_widget_schema::permissions::capability_named;
 use overcrow_widget_schema::results::{self, Shape};
-use overcrow_widget_schema::services::{Requirement, SERVICE_ERRORS, ServiceKind, service};
+use overcrow_widget_schema::services::{
+    Requirement, SERVICE_ERRORS, ServiceKind, service, write_intent,
+};
 use overcrow_widget_schema::wrapper::HOST_FEATURES;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
@@ -64,8 +67,8 @@ pub const MAX_ASSETS: usize = 8;
 pub const FIXTURE_ASSET_PREFIX: &str = "fixture:";
 /// Longest asset path, bytes.
 pub const MAX_ASSET_PATH_BYTES: usize = 256;
-/// Fixture answers of one scenario: call answers, HTTP answers and
-/// confirmations together.
+/// Fixture answers of one scenario: call answers, write intent answers,
+/// HTTP answers and confirmations together.
 pub const MAX_FIXTURES: usize = 256;
 /// Texts of a `text` step, of a `text` or `noText` expectation, a target's
 /// text or label, in characters.
@@ -74,6 +77,11 @@ pub const MAX_TEXT_CHARS: usize = 1024;
 pub const MAX_EXPECTED_TEXTS: usize = 32;
 /// Calls listed by one expectation.
 pub const MAX_EXPECTED_CALLS: usize = 64;
+/// Submitted write intents listed by one expectation.
+pub const MAX_EXPECTED_INTENTS: usize = 16;
+/// The `fields` of one expected write intent, as compact JSON: a review or
+/// a note at its bound fits.
+pub const MAX_EXPECTED_FIELDS_BYTES: usize = 64 * 1024;
 /// One `advance`, and every `advance` of a scenario together: 400 days, the
 /// horizon of `region.nextChangeAt`.
 pub const MAX_ADVANCE_MS: u64 = 400 * 86_400_000;
@@ -328,12 +336,32 @@ impl Default for Grants {
     }
 }
 
+/// One account of the host. Only `connected` passes the services' account
+/// check. The wrapper draws its account panel over the content of a widget
+/// whose grants need a `disconnected`, `pending` or `expired` account (no
+/// input reaches the widget then), and a compact notice for an `offline`
+/// one, whose widget keeps its input.
 #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum AccountState {
     #[default]
     Connected,
+    /// Signed out.
     Disconnected,
+    /// A sign-in step is open in the browser.
+    Pending,
+    /// The session expired: the user must sign in again.
+    Expired,
+    /// Signed in, but the service is unreachable.
+    Offline,
+}
+
+impl AccountState {
+    /// Whether calls and write intents that need this account pass the
+    /// host's account check.
+    pub const fn connected(self) -> bool {
+        matches!(self, Self::Connected)
+    }
 }
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
@@ -452,6 +480,22 @@ pub struct Fixtures {
     /// Answers to the host's native confirmations, in order.
     #[serde(default)]
     pub confirmations: Vec<Confirmation>,
+    /// Write intents (`playervox.rating.publish`…): the provider's answer
+    /// to each submission that passed the host's checks, in order. A
+    /// submission beyond them is an error of the scenario.
+    #[serde(default)]
+    pub intents: BTreeMap<String, Vec<IntentReply>>,
+}
+
+/// The provider's answer to a submitted write intent: `"accepted"`,
+/// `{ "error": code }`, or `"pending"` for a provider that does not answer
+/// while the scenario lasts (the form gets no `submit` event).
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub enum IntentReply {
+    Accepted,
+    Pending,
+    Error(String),
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
@@ -707,6 +751,25 @@ pub struct Expect {
     /// The last text written to the clipboard.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub clipboard: Option<String>,
+    /// Exactly the write intents submitted since the previous `intents`
+    /// expectation (or the start), in order.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub intents: Option<Vec<ExpectedIntent>>,
+}
+
+/// A write intent the user submitted: the values come from the form's
+/// host-owned controls, never from the widget's logic.
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct ExpectedIntent {
+    pub intent: String,
+    /// The exact submitted fields, when given.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fields: Option<Map<String, Value>>,
+    /// `accepted`, the error code the widget received, or `pending` for a
+    /// submission not answered yet, when given.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub outcome: Option<String>,
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
@@ -1154,6 +1217,7 @@ impl Scenario {
     fn check_fixtures(&self) -> Checked {
         let fixtures = &self.fixtures;
         let count = fixtures.calls.values().map(Vec::len).sum::<usize>()
+            + fixtures.intents.values().map(Vec::len).sum::<usize>()
             + fixtures.http.len()
             + fixtures.confirmations.len()
             + fixtures.subscriptions.len();
@@ -1190,6 +1254,17 @@ impl Scenario {
         }
         for (index, fixture) in fixtures.http.iter().enumerate() {
             check_http(&format!("fixtures.http[{index}]"), fixture)?;
+        }
+        for (name, replies) in &fixtures.intents {
+            let path = format!("fixtures.intents.{}", report::neutral(name));
+            if write_intent(name).is_none() {
+                return Err(ScenarioError::new(path, "not a write intent"));
+            }
+            for (index, reply) in replies.iter().enumerate() {
+                if let IntentReply::Error(code) = reply {
+                    check_error_code(&format!("{path}[{index}].error"), code)?;
+                }
+            }
         }
         Ok(())
     }
@@ -1369,6 +1444,16 @@ impl Scenario {
                 return Err(ScenarioError::new(
                     format!("fixtures.{}", report::neutral(name)),
                     format!("the manifest does not declare `{item}`"),
+                ));
+            }
+        }
+        for name in self.fixtures.intents.keys() {
+            if let Some(intent) = write_intent(name)
+                && !declared.contains(intent.capability)
+            {
+                return Err(ScenarioError::new(
+                    format!("fixtures.intents.{}", report::neutral(name)),
+                    format!("the manifest does not declare `{}`", intent.capability),
                 ));
             }
         }
@@ -1587,6 +1672,48 @@ fn check_expect(path: &str, expect: &Expect) -> Checked {
         && text.len() as u64 > MAX_CLIPBOARD_BYTES.value
     {
         return Err(ScenarioError::new(format!("{path}.clipboard"), "too long"));
+    }
+    if let Some(intents) = &expect.intents {
+        if intents.len() > MAX_EXPECTED_INTENTS {
+            return Err(ScenarioError::new(
+                format!("{path}.intents"),
+                format!("at most {MAX_EXPECTED_INTENTS} write intents"),
+            ));
+        }
+        for (index, expected) in intents.iter().enumerate() {
+            let here = format!("{path}.intents[{index}]");
+            let Some(intent) = write_intent(&expected.intent) else {
+                return Err(ScenarioError::new(
+                    format!("{here}.intent"),
+                    "not a write intent",
+                ));
+            };
+            if let Some(fields) = &expected.fields {
+                if let Some(name) = fields
+                    .keys()
+                    .find(|name| !intent.fields.iter().any(|field| field.name == *name))
+                {
+                    return Err(ScenarioError::new(
+                        format!("{here}.fields"),
+                        format!("`{}` is not a field of this intent", report::neutral(name)),
+                    ));
+                }
+                let bytes = serde_json::to_vec(fields).map_or(usize::MAX, |bytes| bytes.len());
+                if bytes > MAX_EXPECTED_FIELDS_BYTES {
+                    return Err(ScenarioError::new(format!("{here}.fields"), "too large"));
+                }
+            }
+            if let Some(outcome) = &expected.outcome
+                && outcome != "accepted"
+                && outcome != "pending"
+                && !SERVICE_ERRORS.contains(&outcome.as_str())
+            {
+                return Err(ScenarioError::new(
+                    format!("{here}.outcome"),
+                    "`accepted`, `pending` or a service error code",
+                ));
+            }
+        }
     }
     Ok(())
 }

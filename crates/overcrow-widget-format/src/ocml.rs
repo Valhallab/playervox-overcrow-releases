@@ -79,6 +79,10 @@ pub enum OcmlErrorKind {
     InvalidRef,
     /// A reference to a `ref` the view does not declare.
     UnknownRef,
+    /// A `value` on a `field`, `textarea` or `slider` of a `form` with an
+    /// `intent`: the host owns those controls and stops a widget that sets
+    /// one.
+    BoundValue,
     TooManyElements,
     TooManyComponents,
     TooManyChildren,
@@ -117,6 +121,7 @@ impl OcmlErrorKind {
             Self::MissingAsset => "missing_asset",
             Self::InvalidRef => "invalid_ref",
             Self::UnknownRef => "unknown_ref",
+            Self::BoundValue => "bound_value",
             Self::TooManyElements => "too_many_elements",
             Self::TooManyComponents => "too_many_components",
             Self::TooManyChildren => "too_many_children",
@@ -809,6 +814,11 @@ struct Place<'s> {
     /// Inside a `for` or a component body, where a node may exist several
     /// times and cannot carry a `ref`.
     repeated: bool,
+    /// Inside a `form` with an `intent` (the nearest `form` decides): the
+    /// host owns the text controls and sliders there. A component body is
+    /// checked where it is declared, not where it is used; the host
+    /// refuses the value at run time in every case.
+    bound: bool,
 }
 
 impl<'s> Place<'s> {
@@ -819,6 +829,7 @@ impl<'s> Place<'s> {
             scope,
             slots: self.slots.as_deref_mut(),
             repeated: self.repeated,
+            bound: self.bound,
         }
     }
 }
@@ -868,6 +879,7 @@ impl Checker<'_> {
                             scope: &props,
                             slots: Some(&mut slots),
                             repeated: true,
+                            bound: false,
                         },
                     )?;
                     if slots > 1 {
@@ -890,6 +902,7 @@ impl Checker<'_> {
                 scope: &[],
                 slots: None,
                 repeated: false,
+                bound: false,
             },
         )?;
         Ok(Document {
@@ -1206,6 +1219,12 @@ impl Checker<'_> {
             {
                 return Err(self.error(OcmlErrorKind::DuplicateAttribute, offset));
             }
+            if field.name == "value"
+                && place.bound
+                && matches!(element.name, "field" | "textarea" | "slider")
+            {
+                return Err(self.error(OcmlErrorKind::BoundValue, offset));
+            }
             // A `ref` is one static name for one node of the view.
             if field.ty == ValueType::Ref {
                 let RawValue::Quoted(name) = &attribute.value else {
@@ -1271,7 +1290,11 @@ impl Checker<'_> {
             Content::Text => return Err(self.error(OcmlErrorKind::InvalidParent, tag.offset)),
             Content::Inline | Content::Flow | Content::Only(_) => {
                 let scope = place.scope.to_vec();
-                children = self.children(tag.children, place.nested(element, &scope))?;
+                let mut nested = place.nested(element, &scope);
+                if element.name == "form" {
+                    nested.bound = attributes.iter().any(|(name, _)| *name == "intent");
+                }
+                children = self.children(tag.children, nested)?;
             }
         }
         Ok(ElementNode {

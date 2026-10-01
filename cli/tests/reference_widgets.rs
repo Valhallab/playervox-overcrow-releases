@@ -66,6 +66,7 @@ fn the_pilots_are_here() {
         "media",
         "performance",
         "playervox-journal",
+        "playervox-rating",
         "playervox-score",
         "session",
         "stopwatch",
@@ -270,6 +271,8 @@ fn service_fixtures_follow_the_result_shapes() {
         "playervox.score.read",
         "journal.read",
         "journal.delete",
+        "playervox.rating.read",
+        "playervox.rating.write",
     ] {
         assert!(exercised.contains(capability), "{capability}");
     }

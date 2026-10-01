@@ -387,6 +387,10 @@ pub fn view_diagnostic(kind: OcmlErrorKind, position: Position, source: &str) ->
             Some("a `ref` is a quoted identifier, unique, and not inside <for> or a component".into()),
         ),
         OcmlErrorKind::UnknownRef => ("this names a `ref` the view does not declare".into(), None),
+        OcmlErrorKind::BoundValue => (
+            "`value` on a control of a form with an `intent`".into(),
+            Some("the host owns the fields, text areas and sliders of such a form and stops a widget that sets one: remove `value` and read the control's `input` events".into()),
+        ),
         OcmlErrorKind::TooManyElements
         | OcmlErrorKind::TooManyComponents
         | OcmlErrorKind::TooManyChildren

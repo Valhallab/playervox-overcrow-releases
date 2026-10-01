@@ -319,7 +319,11 @@ pub const ELEMENTS: &[Element] = &[
             Field::required("min", NUMBER, "Lower bound."),
             Field::required("max", NUMBER, "Upper bound, greater than `min`."),
             Field::optional("step", NUMBER, "Positive increment; default 1."),
-            Field::optional("value", NUMBER, "Current value, clamped to the range."),
+            Field::optional(
+                "value",
+                NUMBER,
+                "Current value, clamped to the range; rejected on a slider bound to a write intent.",
+            ),
             DISABLED,
             Field::optional("name", IDENTIFIER, "Field name inside a `form`."),
         ],

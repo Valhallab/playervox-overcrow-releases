@@ -1,8 +1,9 @@
 # Shared sources of the built-in widgets
 
 Some built-ins draw the same thing: the PlayerVox grade badge and mark of
-[PlayerVox Score](../widgets/playervox-score/README.md) and PlayerVox Rating,
-and the mark alone of the [Session journal](../widgets/playervox-journal/README.md).
+[PlayerVox Score](../widgets/playervox-score/README.md) and
+[PlayerVox Rating](../widgets/playervox-rating/README.md), and the mark
+alone of the [Session journal](../widgets/playervox-journal/README.md).
 Their one source lives here, and `scripts/sync-shared-widgets.mjs` copies it
 into each widget that uses it, between marker lines:
 
@@ -38,7 +39,7 @@ under the same publisher rule as any change to that built-in.
 
 | Source | Used by | Holds |
 | --- | --- | --- |
-| [`playervox-badge/badge.ts`](playervox-badge/badge.ts) | `playervox-score` | The grade thresholds for criteria, the grade colours, the badge's and the PlayerVox mark's draw commands, the badge's accessible name, rounding half away from zero, the pulse class |
-| [`playervox-badge/badge.ocss`](playervox-badge/badge.ocss) | `playervox-score` | The badge canvas's size, its one-shot pulse (`@keyframes`, animated by the host) and the grade colour classes |
+| [`playervox-badge/badge.ts`](playervox-badge/badge.ts) | `playervox-score`, `playervox-rating` | The grade thresholds for criteria, the grade colours, the badge's and the PlayerVox mark's draw commands, the badge's accessible name, rounding half away from zero, the pulse class |
+| [`playervox-badge/badge.ocss`](playervox-badge/badge.ocss) | `playervox-score`, `playervox-rating` | The badge canvas's size, its one-shot pulse (`@keyframes`, animated by the host) and the grade colour classes |
 
 MIT, like the widgets ([LICENSING.md](../LICENSING.md)).

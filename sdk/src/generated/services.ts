@@ -81,7 +81,7 @@ export const notes: NotesServices = /* @__PURE__ */ group("notes", ["subscribe",
 export interface PlayervoxServices {
   /** The `playervox.rating.*` services. */
   readonly rating: {
-    /** `playervox.rating.subscribe`. Requires the `playervox.rating.read` capability, granted by the user. Updates: `null` before the user's first rating, or `{ gameplay, art, tech, review, publishedAt, offsetMinutes }`; `unsupported` outside the PlayerVox catalogue; the host seeds the `playervox.rating.publish` controls from it. */
+    /** `playervox.rating.subscribe`. Requires the `playervox.rating.read` capability, granted by the user. Updates: `{ state, name, offline, rating }`: `state` is `idle`, `unsupported`, `loading`, `ready` or `unavailable`; `rating` is `null` before the user's first rating, or `{ gameplay, art, tech, review, publishedAt, offsetMinutes }`. Nothing is sent while the PlayerVox account is signed out, pending or expired. A published rating is sent again by the subscription. The host seeds the `playervox.rating.publish` controls from it. */
     subscribe(listener: Listener<R["playervox.rating.subscribe"]>): Subscription;
   };
   /** The `playervox.reviews.*` services. */

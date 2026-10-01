@@ -1,0 +1,142 @@
+{
+  "scenarioVersion": 1,
+  "name": "form",
+  "description": "The form in Interactive mode: OverCrow fills the three sliders and the review from the published rating, or with 50 and an empty review before the first one; dark English and light French, 100 % and 150 %, and at the smallest width.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "playervox.rating.subscribe": {
+        "state": "ready",
+        "name": "Portal 2",
+        "offline": false,
+        "rating": {
+          "gameplay": 96,
+          "art": 88,
+          "tech": 94,
+          "review": "Great.",
+          "publishedAt": null,
+          "offsetMinutes": null
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "93",
+          "Your published rating",
+          "96",
+          "88",
+          "94",
+          "Update my rating"
+        ],
+        "intents": [],
+        "image": "published-dark-en"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Half-Life 2",
+          "offline": false,
+          "rating": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Half-Life 2",
+          "50",
+          "Unpublished draft",
+          "Publish my rating"
+        ],
+        "image": "unrated-dark-en"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Brouillon non publié",
+          "Publier ma note",
+          "AVIS · FACULTATIF"
+        ],
+        "image": "unrated-light-fr"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "offline": false,
+          "rating": {
+            "gameplay": 96,
+            "art": 88,
+            "tech": 94,
+            "review": "Great.",
+            "publishedAt": null,
+            "offsetMinutes": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Votre note publiée",
+          "Mettre à jour ma note"
+        ],
+        "image": "published-light-fr"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "published-light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "published-dark-en-150"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 280,
+          "height": 360
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "narrow-dark-en"
+      }
+    }
+  ]
+}

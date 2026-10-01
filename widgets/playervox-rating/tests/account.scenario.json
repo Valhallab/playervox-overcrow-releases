@@ -1,0 +1,125 @@
+{
+  "scenarioVersion": 1,
+  "name": "account",
+  "description": "Without a PlayerVox session the widget shows nothing of its own: OverCrow covers it with its account panel (link or create an account, the browser step, an expired session), in both modes, and no input reaches the widget.",
+  "host": {
+    "mode": "interactive",
+    "frame": true,
+    "accounts": {
+      "playervox": "disconnected"
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "calls": [
+          {
+            "service": "playervox.rating.subscribe"
+          }
+        ],
+        "noText": [
+          "Portal 2"
+        ],
+        "image": "signed-out-interactive"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "at": [
+            175,
+            60
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "intents": []
+      }
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "image": "signed-out-passive"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "accounts": {
+          "playervox": "pending"
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "pending"
+      }
+    },
+    {
+      "host": {
+        "accounts": {
+          "playervox": "expired"
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "expired"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "expired-light-fr"
+      }
+    },
+    {
+      "host": {
+        "accounts": {
+          "playervox": "connected"
+        },
+        "locale": "en",
+        "theme": "dark"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "offline": false,
+          "rating": {
+            "gameplay": 96,
+            "art": 88,
+            "tech": 94,
+            "review": "Great.",
+            "publishedAt": null,
+            "offsetMinutes": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "Update my rating"
+        ],
+        "image": "connected"
+      }
+    }
+  ]
+}

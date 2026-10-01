@@ -112,6 +112,40 @@ fn records_are_exact() {
     );
 }
 
+/// `playervox.rating.subscribe` always says its state: a rating, or
+/// `null` before the first one, only shows with `ready`.
+#[test]
+fn the_rating_subscription_carries_its_state() {
+    let returns = overcrow_widget_schema::services::service("playervox.rating.subscribe")
+        .map(|service| service.returns)
+        .expect("service");
+    let rating = json!({
+        "gameplay": 96, "art": 88, "tech": 94, "review": "Great.",
+        "publishedAt": null, "offsetMinutes": null,
+    });
+    for state in ["idle", "unsupported", "loading", "ready", "unavailable"] {
+        assert!(
+            returns
+                .matches(&json!({"state": state, "name": null, "offline": false, "rating": null})),
+            "{state}"
+        );
+    }
+    assert!(returns.matches(
+        &json!({"state": "ready", "name": "Portal 2", "offline": true, "rating": rating})
+    ));
+    assert!(!returns.matches(&json!(null)), "never a bare null");
+    assert!(!returns.matches(&rating), "never a bare rating");
+    assert!(
+        !returns.matches(&json!({"state": "ready", "name": null, "rating": null})),
+        "offline is always present"
+    );
+    assert!(
+        !returns.matches(
+            &json!({"state": "signed_out", "name": null, "offline": false, "rating": null})
+        )
+    );
+}
+
 #[test]
 fn scalars_are_checked() {
     assert!(Shape::Integer.matches(&json!(9_007_199_254_740_991_u64)));

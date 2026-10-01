@@ -310,7 +310,7 @@ Expressions: Literals, state and prop paths, `!`, `&&`, `||`, `??`, comparison a
 | `min` | number -1000000000..=1000000000 | yes | Lower bound. |
 | `max` | number -1000000000..=1000000000 | yes | Upper bound, greater than `min`. |
 | `step` | number -1000000000..=1000000000 | no | Positive increment; default 1. |
-| `value` | number -1000000000..=1000000000 | no | Current value, clamped to the range. |
+| `value` | number -1000000000..=1000000000 | no | Current value, clamped to the range; rejected on a slider bound to a write intent. |
 | `disabled` | boolean | no | Rejects input; matches `:disabled`. |
 | `name` | identifier ≤ `MAX_IDENTIFIER_BYTES` | no | Field name inside a `form`. |
 
@@ -862,7 +862,7 @@ Authority is checked by the host at every call, immediately before acting. Gestu
 | `notes.setItem` | capability `notes.write` | call | yes | no | `note`: text ≤ `MAX_OBJECT_ID_BYTES`; `item`: text ≤ `MAX_OBJECT_ID_BYTES`; `checked`: boolean | `null` | `null` | fixed |
 | `notes.delete` | capability `notes.write` | call | yes | yes | `note`: text ≤ `MAX_OBJECT_ID_BYTES` | `null`, or `cancelled` when the user declines | `null` | fixed |
 | `playervox.score.subscribe` | capability `playervox.score.read` | subscribe | no | no | none | `{ state, name, score, grade, ratingsCount, criteria }`: `state` is `idle`, `unsupported`, `loading`, `ready`, `no_ratings`, `not_found` or `unavailable`; `criteria` `{ gameplay, art, tech }`, each 0–100 or `null` | `Score` | fixed |
-| `playervox.rating.subscribe` | capability `playervox.rating.read` | subscribe | no | no | none | `null` before the user's first rating, or `{ gameplay, art, tech, review, publishedAt, offsetMinutes }`; `unsupported` outside the PlayerVox catalogue; the host seeds the `playervox.rating.publish` controls from it | `Rating` or `null` | fixed |
+| `playervox.rating.subscribe` | capability `playervox.rating.read` | subscribe | no | no | none | `{ state, name, offline, rating }`: `state` is `idle`, `unsupported`, `loading`, `ready` or `unavailable`; `rating` is `null` before the user's first rating, or `{ gameplay, art, tech, review, publishedAt, offsetMinutes }`. Nothing is sent while the PlayerVox account is signed out, pending or expired. A published rating is sent again by the subscription. The host seeds the `playervox.rating.publish` controls from it | `RatingState` | fixed |
 | `playervox.reviews.page` | capability `playervox.reviews.read` | call | no | no | `page?`: integer 1..=100000; `followedOnly?`: boolean | `{ items, page, totalPages, count }`; each item `{ id, author, grade, score, text, original, publishedAt, offsetMinutes }`, `text` in the user's language when a translation exists, `original` the untranslated text or `null`, both cut by the host to `MAX_NODE_TEXT_BYTES` | `ReviewsPage` | fixed |
 | `journal.subscribe` | capability `journal.read` | subscribe | no | no | none | `null` without an active game, or `{ revision, notice }`: `revision` changes whenever the merged journal of the active game changes (a session recorded or deleted, cloud sessions merged, the PlayerVox account or sync changed), so the widget reads its page again; `notice` is `null`, `offline`, `storage_unavailable`, `full`, `expired`, `busy` or `unavailable`. Holding this subscription is what keeps the host's journal source running | `JournalState` or `null` | fixed |
 | `journal.page` | capability `journal.read` | call | no | no | `cursor?`: text ≤ `MAX_OBJECT_ID_BYTES` | `{ gameName, items, page, next, previous }`: five local and cloud sessions of the active game, merged and deduplicated, newest first; without `cursor`, the first page; each item `{ id, startedAt, offsetMinutes, durationMs, source }`; cursors are host handles that stay valid for the widget whatever other widgets read, and a cursor past the end answers the last page | `JournalPage` | fixed |
@@ -1036,6 +1036,17 @@ The user's PlayerVox rating of the active game. `{ gameplay, art, tech, review, 
 | `publishedAt` | integer or `null` | Unix ms. |
 | `offsetMinutes` | integer or `null` | UTC offset in minutes to show the timestamp with. |
 
+#### `RatingState`
+
+The user's own rating of the active game, with its state. `{ state, name, offline, rating }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `state` | `idle` \| `unsupported` \| `loading` \| `ready` \| `unavailable` | Rating state: `idle` without an active game, `unsupported` for a game without a Steam app ID, `loading` until the first answer for this game and account (never the previous game's rating), `ready` with the rating, `unavailable` while the host retries a failed read. Every state but `ready` has a `null` name and rating. |
+| `name` | text or `null` | Game name on PlayerVox. |
+| `offline` | boolean | PlayerVox is unreachable: the rating is the last one read, and `playervox.rating.publish` answers `not_connected`. |
+| `rating` | `Rating` or `null` | The user's rating; `null` before the first one. |
+
 #### `Review`
 
 One player review. `{ id, author, grade, score, text, original, publishedAt, offsetMinutes }`
@@ -1144,7 +1155,7 @@ Service error codes: `invalid_request`, `permission_denied`, `gesture_required`,
 
 ### Write intents
 
-A `form` with an `intent` sends the values of its named host-owned controls straight to the service when the user submits it; the VM receives a `submit` event with the outcome but never supplies the body. Named controls not listed are rejected.
+A `form` with an `intent` sends the values of its named host-owned controls straight to the service when the user submits it; the VM receives a `submit` event with the outcome but never supplies the body. Named controls not listed are rejected. Every `field`, `textarea` and `slider` of such a form belongs to the host: a `value` from the VM is rejected, the host seeds the controls where the intent says so and keeps what the user entered. A seed sends the control's `input` event with the new value; that event is not a gesture.
 
 #### `notes.save`
 
@@ -1162,10 +1173,10 @@ Capability `playervox.rating.write`; `target` attribute refused. Status: fixed.
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `gameplay` | integer 0..=100 | yes | `slider`. |
-| `art` | integer 0..=100 | yes | `slider`. |
-| `tech` | integer 0..=100 | yes | `slider`. |
-| `review` | text ≤ `MAX_REVIEW_CHARS` | no | `textarea`. |
+| `gameplay` | integer 0..=100 | yes | `slider`; seeded from the user's rating, 50 before the first one. |
+| `art` | integer 0..=100 | yes | `slider`; seeded like `gameplay`. |
+| `tech` | integer 0..=100 | yes | `slider`; seeded like `gameplay`. |
+| `review` | text ≤ `MAX_REVIEW_CHARS` | no | `textarea`; seeded from the published review. An unchanged review is not sent again; an emptied one removes it. |
 
 #### `twitch.chat.send`
 

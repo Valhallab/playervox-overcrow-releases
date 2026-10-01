@@ -1,0 +1,5 @@
+<form intent="playervox.rating.publish">
+  <box>
+    <textarea name="review" value="Great."/>
+  </box>
+</form>

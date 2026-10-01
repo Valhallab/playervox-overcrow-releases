@@ -1,0 +1,362 @@
+{
+  "scenarioVersion": 1,
+  "name": "states",
+  "description": "Every state in Passive mode: loading, no game, a game without a Steam app ID, a failed read, not rated yet and the published rating, in dark English and light French, then at 150 %. The form never shows in Passive mode.",
+  "fixtures": {
+    "subscriptions": {
+      "playervox.rating.subscribe": {
+        "state": "loading",
+        "name": null,
+        "offline": false,
+        "rating": null
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "calls": [
+          {
+            "service": "playervox.rating.subscribe",
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "loading",
+          "name": null,
+          "offline": false,
+          "rating": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "My rating",
+          "Loading…"
+        ],
+        "image": "loading-dark-en"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "idle",
+          "name": null,
+          "offline": false,
+          "rating": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Waiting for a game"
+        ],
+        "image": "idle-dark-en"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "unsupported",
+          "name": null,
+          "offline": false,
+          "rating": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Game not linked",
+          "Steam game required"
+        ],
+        "image": "unsupported-dark-en"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "unavailable",
+          "name": null,
+          "offline": false,
+          "rating": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Rating unavailable",
+          "PlayerVox is unavailable for this game right now."
+        ],
+        "image": "unavailable-dark-en"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "offline": false,
+          "rating": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "--",
+          "Not rated yet"
+        ],
+        "image": "unrated-dark-en"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "offline": false,
+          "rating": {
+            "gameplay": 96,
+            "art": 88,
+            "tech": 94,
+            "review": "Great.",
+            "publishedAt": null,
+            "offsetMinutes": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "93",
+          "Your published rating"
+        ],
+        "noText": [
+          "Update my rating",
+          "Mettre à jour ma note"
+        ],
+        "image": "published-dark-en"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "loading",
+          "name": null,
+          "offline": false,
+          "rating": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Ma note",
+          "Chargement…"
+        ],
+        "image": "loading-light-fr"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "idle",
+          "name": null,
+          "offline": false,
+          "rating": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "En attente du jeu"
+        ],
+        "image": "idle-light-fr"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "unsupported",
+          "name": null,
+          "offline": false,
+          "rating": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Jeu non associé",
+          "Jeu Steam requis"
+        ],
+        "image": "unsupported-light-fr"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "unavailable",
+          "name": null,
+          "offline": false,
+          "rating": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Note indisponible",
+          "PlayerVox est indisponible pour ce jeu pour le moment."
+        ],
+        "image": "unavailable-light-fr"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "offline": false,
+          "rating": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "--",
+          "Pas encore noté"
+        ],
+        "image": "unrated-light-fr"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "offline": false,
+          "rating": {
+            "gameplay": 96,
+            "art": 88,
+            "tech": 94,
+            "review": "Great.",
+            "publishedAt": null,
+            "offsetMinutes": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "93",
+          "Votre note publiée"
+        ],
+        "noText": [
+          "Update my rating",
+          "Mettre à jour ma note"
+        ],
+        "image": "published-light-fr"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "published-light-fr-150"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "offline": false,
+          "rating": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "unrated-light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "unrated-dark-en-150"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Half-Life 2",
+          "offline": false,
+          "rating": {
+            "gameplay": 72,
+            "art": 61,
+            "tech": 55,
+            "review": null,
+            "publishedAt": null,
+            "offsetMinutes": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Half-Life 2",
+          "63"
+        ],
+        "image": "published-dark-en-150"
+      }
+    }
+  ]
+}

@@ -1,0 +1,314 @@
+{
+  "scenarioVersion": 1,
+  "name": "publish-pointer",
+  "description": "A first rating published with the pointer: a click on a slider's track, a review typed in the field, a click on the button. Then every failure a publication can meet: a service error, a busy service, no answer for 30 s, no answer at all, and a session that ended. The draft stays in the form each time.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "playervox.rating.subscribe": {
+        "state": "ready",
+        "name": "Half-Life 2",
+        "offline": false,
+        "rating": null
+      }
+    },
+    "intents": {
+      "playervox.rating.publish": [
+        "pending",
+        {
+          "error": "unavailable"
+        },
+        {
+          "error": "busy"
+        },
+        {
+          "error": "timeout"
+        },
+        {
+          "error": "stale_context"
+        },
+        "accepted"
+      ]
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Half-Life 2",
+          "50",
+          "Unpublished draft",
+          "Publish my rating"
+        ],
+        "intents": []
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Gameplay"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "at": [
+            262,
+            131
+          ]
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Review, optional"
+        }
+      }
+    },
+    {
+      "text": "Solid port."
+    },
+    {
+      "expect": {
+        "text": [
+          "80",
+          "60",
+          "Unpublished draft",
+          "Publish my rating"
+        ],
+        "image": "draft"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Publish my rating"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Saving…"
+        ],
+        "noText": [
+          "Publish my rating"
+        ],
+        "intents": [
+          {
+            "intent": "playervox.rating.publish",
+            "fields": {
+              "gameplay": 80,
+              "art": 50,
+              "tech": 50,
+              "review": "Solid port."
+            },
+            "outcome": "pending"
+          }
+        ],
+        "image": "saving"
+      }
+    },
+    {
+      "advance": {
+        "ms": 40000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "PlayerVox is unavailable for this game right now.",
+          "Publish my rating"
+        ],
+        "image": "no-answer"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Publish my rating"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "PlayerVox is unavailable for this game right now.",
+          "Publish my rating",
+          "Unpublished draft"
+        ],
+        "intents": [
+          {
+            "intent": "playervox.rating.publish",
+            "outcome": "unavailable"
+          }
+        ],
+        "image": "error-unavailable"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Publish my rating"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "An operation is already in progress. Please try again shortly."
+        ],
+        "intents": [
+          {
+            "intent": "playervox.rating.publish",
+            "outcome": "busy"
+          }
+        ],
+        "image": "error-busy"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Publish my rating"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "PlayerVox is unavailable for this game right now."
+        ],
+        "intents": [
+          {
+            "intent": "playervox.rating.publish",
+            "outcome": "timeout"
+          }
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Publish my rating"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "The account or game changed. Review your changes before saving."
+        ],
+        "intents": [
+          {
+            "intent": "playervox.rating.publish",
+            "outcome": "stale_context"
+          }
+        ]
+      }
+    },
+    {
+      "host": {
+        "accounts": {
+          "playervox": "offline"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Publish my rating"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Your connection expired. Link your account again.",
+          "Publish my rating"
+        ],
+        "intents": [
+          {
+            "intent": "playervox.rating.publish",
+            "outcome": "not_connected"
+          }
+        ],
+        "image": "error-not-connected"
+      }
+    },
+    {
+      "host": {
+        "accounts": {
+          "playervox": "connected"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Publish my rating"
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "Your connection expired. Link your account again."
+        ]
+      }
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "playervox.rating.publish",
+            "fields": {
+              "gameplay": 80,
+              "art": 50,
+              "tech": 50,
+              "review": "Solid port."
+            },
+            "outcome": "accepted"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Half-Life 2",
+          "offline": false,
+          "rating": {
+            "gameplay": 80,
+            "art": 50,
+            "tech": 50,
+            "review": "Solid port.",
+            "publishedAt": null,
+            "offsetMinutes": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Saved on PlayerVox",
+          "Your published rating"
+        ],
+        "calls": [
+          {
+            "service": "playervox.rating.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "image": "saved"
+      }
+    }
+  ]
+}
