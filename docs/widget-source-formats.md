@@ -210,6 +210,8 @@ activation.
 `expression_too_long`, `expression_too_deep`, `expression_too_many_entries`,
 `reserved_name`, `unknown_name`, `invalid_text`, `recursive_component`, `invalid_component`, `invalid_slot`,
 `invalid_construct`, `missing_asset`, `invalid_ref`, `unknown_ref`,
+`bound_value` (a `value` on a `field`, `textarea` or `slider` inside a
+`form` with an `intent`, whose controls the host owns),
 `too_many_elements`,
 `too_many_components`, `too_many_children`, `too_many_expressions`,
 `too_deep`.

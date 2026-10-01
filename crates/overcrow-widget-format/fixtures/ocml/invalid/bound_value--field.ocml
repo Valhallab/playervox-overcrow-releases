@@ -1,0 +1,3 @@
+<form intent="notes.save" target="n1">
+  <field name="title" value={state.title}/>
+</form>
