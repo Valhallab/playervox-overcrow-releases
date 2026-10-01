@@ -1,0 +1,18 @@
+{
+  "author": "PlayerVox",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/playervox-journal",
+  "defaultLocale": "en",
+  "localizations": [
+    {
+      "locale": "en",
+      "name": "Session journal",
+      "description": "The finished play sessions of your game, newest first: date, start time and duration, five per page. Recorded on your device without an account, merged with your PlayerVox journal when you sync. Delete a session after confirmation."
+    },
+    {
+      "locale": "fr",
+      "name": "Journal de sessions",
+      "description": "Les sessions de jeu terminées de votre jeu, de la plus récente à la plus ancienne : date, heure de début et durée, cinq par page. Enregistrées sur votre appareil sans compte, fusionnées avec votre journal PlayerVox si vous synchronisez. Supprimez une session après confirmation."
+    }
+  ]
+}

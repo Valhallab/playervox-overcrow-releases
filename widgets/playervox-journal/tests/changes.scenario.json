@@ -1,0 +1,482 @@
+{
+  "scenarioVersion": 1,
+  "name": "changes",
+  "description": "A game switch: on page 2 of a game, no game clears the journal, and the next game starts on its first page, never the last game's cursor. A busy host, then a read made stale by a change, are read again one second later; a third refusal shows above the page, and the next revision clears it.",
+  "fixtures": {
+    "calls": {
+      "journal.page": [
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000013",
+                "startedAt": 1789929000000,
+                "offsetMinutes": 120,
+                "durationMs": 2700000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000012",
+                "startedAt": 1789844700000,
+                "offsetMinutes": 120,
+                "durationMs": 7920000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000011",
+                "startedAt": 1789629300000,
+                "offsetMinutes": 120,
+                "durationMs": 480000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000010",
+                "startedAt": 1789214400000,
+                "offsetMinutes": 120,
+                "durationMs": 14400000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000009",
+                "startedAt": 1788640920000,
+                "offsetMinutes": 120,
+                "durationMs": 3660000,
+                "source": "local"
+              }
+            ],
+            "page": 1,
+            "next": "c2",
+            "previous": null
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000008",
+                "startedAt": 1788106200000,
+                "offsetMinutes": 120,
+                "durationMs": 5700000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000007",
+                "startedAt": 1787435700000,
+                "offsetMinutes": 120,
+                "durationMs": 1020000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000006",
+                "startedAt": 1786784400000,
+                "offsetMinutes": 120,
+                "durationMs": 36000000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000005",
+                "startedAt": 1785677460000,
+                "offsetMinutes": 120,
+                "durationMs": 4440000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000004",
+                "startedAt": 1784052000000,
+                "offsetMinutes": 120,
+                "durationMs": 1800000,
+                "source": "cloud"
+              }
+            ],
+            "page": 2,
+            "next": "c3",
+            "previous": "c1"
+          }
+        },
+        {
+          "value": {
+            "gameName": "Hades",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000013",
+                "startedAt": 1789929000000,
+                "offsetMinutes": 120,
+                "durationMs": 2700000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000012",
+                "startedAt": 1789844700000,
+                "offsetMinutes": 120,
+                "durationMs": 7920000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000011",
+                "startedAt": 1789629300000,
+                "offsetMinutes": 120,
+                "durationMs": 480000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000010",
+                "startedAt": 1789214400000,
+                "offsetMinutes": 120,
+                "durationMs": 14400000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000009",
+                "startedAt": 1788640920000,
+                "offsetMinutes": 120,
+                "durationMs": 3660000,
+                "source": "local"
+              }
+            ],
+            "page": 1,
+            "next": "c2",
+            "previous": null
+          }
+        },
+        {
+          "error": "busy"
+        },
+        {
+          "error": "stale_context"
+        },
+        {
+          "value": {
+            "gameName": "Hades",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000013",
+                "startedAt": 1789929000000,
+                "offsetMinutes": 120,
+                "durationMs": 2700000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000012",
+                "startedAt": 1789844700000,
+                "offsetMinutes": 120,
+                "durationMs": 7920000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000011",
+                "startedAt": 1789629300000,
+                "offsetMinutes": 120,
+                "durationMs": 480000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000010",
+                "startedAt": 1789214400000,
+                "offsetMinutes": 120,
+                "durationMs": 14400000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000009",
+                "startedAt": 1788640920000,
+                "offsetMinutes": 120,
+                "durationMs": 3660000,
+                "source": "local"
+              }
+            ],
+            "page": 1,
+            "next": "c2",
+            "previous": null
+          }
+        },
+        {
+          "error": "busy"
+        },
+        {
+          "error": "busy"
+        },
+        {
+          "error": "busy"
+        },
+        {
+          "error": "busy"
+        },
+        {
+          "value": {
+            "gameName": "Hades",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000013",
+                "startedAt": 1789929000000,
+                "offsetMinutes": 120,
+                "durationMs": 2700000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000012",
+                "startedAt": 1789844700000,
+                "offsetMinutes": 120,
+                "durationMs": 7920000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000011",
+                "startedAt": 1789629300000,
+                "offsetMinutes": 120,
+                "durationMs": 480000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000010",
+                "startedAt": 1789214400000,
+                "offsetMinutes": 120,
+                "durationMs": 14400000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000009",
+                "startedAt": 1788640920000,
+                "offsetMinutes": 120,
+                "durationMs": 3660000,
+                "source": "local"
+              }
+            ],
+            "page": 1,
+            "next": "c2",
+            "previous": null
+          }
+        }
+      ]
+    },
+    "subscriptions": {
+      "journal.subscribe": {
+        "revision": 1,
+        "notice": null
+      }
+    }
+  },
+  "steps": [
+    {
+      "host": {
+        "mode": "interactive"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Next page"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "Page 2"
+        ],
+        "calls": [
+          {
+            "service": "journal.subscribe",
+            "outcome": "ok"
+          },
+          {
+            "service": "journal.page",
+            "outcome": "ok"
+          },
+          {
+            "service": "journal.page",
+            "params": {
+              "cursor": "c2"
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": null
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Waiting for a game"
+        ],
+        "noText": [
+          "Portal 2",
+          "Page 2"
+        ],
+        "calls": []
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": {
+          "revision": 7,
+          "notice": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Hades",
+          "Page 1"
+        ],
+        "noText": [
+          "Portal 2"
+        ],
+        "calls": [
+          {
+            "service": "journal.page",
+            "params": {},
+            "outcome": "ok"
+          }
+        ],
+        "image": "next-game"
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": {
+          "revision": 8,
+          "notice": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Hades"
+        ],
+        "noText": [
+          "The journal is unavailable right now."
+        ],
+        "calls": [
+          {
+            "service": "journal.page",
+            "outcome": "busy"
+          }
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 1000
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "journal.page",
+            "params": {},
+            "outcome": "stale_context"
+          }
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 1000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Hades",
+          "Page 1"
+        ],
+        "calls": [
+          {
+            "service": "journal.page",
+            "params": {},
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": {
+          "revision": 9,
+          "notice": null
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 3000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "The journal is unavailable right now.",
+          "Hades"
+        ],
+        "calls": [
+          {
+            "service": "journal.page",
+            "outcome": "busy"
+          },
+          {
+            "service": "journal.page",
+            "outcome": "busy"
+          },
+          {
+            "service": "journal.page",
+            "outcome": "busy"
+          },
+          {
+            "service": "journal.page",
+            "outcome": "busy"
+          }
+        ],
+        "image": "read-failed"
+      }
+    },
+    {
+      "advance": {
+        "ms": 60000
+      }
+    },
+    {
+      "expect": {
+        "calls": []
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": {
+          "revision": 10,
+          "notice": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Hades"
+        ],
+        "noText": [
+          "The journal is unavailable right now."
+        ],
+        "calls": [
+          {
+            "service": "journal.page",
+            "outcome": "ok"
+          }
+        ]
+      }
+    }
+  ]
+}

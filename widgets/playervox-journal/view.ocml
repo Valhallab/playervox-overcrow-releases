@@ -1,0 +1,52 @@
+<!-- PlayerVox Journal: the finished sessions of the active game, five per
+     page, with the trash and paging buttons in Interactive mode (parity
+     sheet: playervox-overcrow docs/builtin-parity/playervox-journal.md).
+     The host confirms a deletion in its own chrome. -->
+<box class="journal" label={t("label")}>
+  <box class="header">
+    <text class="title">{t("label")}</text>
+    <canvas ref="mark" class="mark" label={t("mark")}/>
+  </box>
+  <if test={message(state.problem, state.notice) != ""}>
+    <text class="message">{message(state.problem, state.notice)}</text>
+  </if>
+  <if test={state.phase == "loading"}>
+    <text class="status">{t("loading")}</text>
+  </if>
+  <if test={state.phase == "idle"}>
+    <text class="status">{t("waiting")}</text>
+  </if>
+  <if test={state.phase == "ready"}>
+    <if test={gameName(state.page) != ""}>
+      <text class="game" tooltip={cutBytes(gameName(state.page), 256)}>{gameName(state.page)}</text>
+    </if>
+    <if test={state.page.items.length == 0}>
+      <text class="status">{t("empty")}</text>
+    </if>
+    <for each={rows(state.page)} as="row" key={row.id}>
+      <separator class="rule"/>
+      <box class="row" label={row.label}>
+        <text class="start">{row.start}</text>
+        <text class="duration">{row.duration}</text>
+        <if test={canRemove(state.interactive)}>
+          <button class="control" label={t("delete")} tooltip={t("delete")} disabled={state.busy} on:activate={remove(row.id)}>
+            <icon name="trash"/>
+          </button>
+        </if>
+      </box>
+    </for>
+    <if test={paged(state.page)}>
+      <box class="footer">
+        <if test={state.interactive}>
+          <button class="control" label={t("previous")} tooltip={t("previous")} disabled={state.busy || state.page.previous == null} on:activate={turn("previous")}>
+            <icon name="chevron-left"/>
+          </button>
+          <button class="control" label={t("next")} tooltip={t("next")} disabled={state.busy || state.page.next == null} on:activate={turn("next")}>
+            <icon name="chevron-right"/>
+          </button>
+        </if>
+        <text class="page">{pageLabel(state.page)}</text>
+      </box>
+    </if>
+  </if>
+</box>

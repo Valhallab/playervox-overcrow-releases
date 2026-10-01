@@ -1,0 +1,741 @@
+{
+  "scenarioVersion": 1,
+  "name": "states",
+  "description": "Every state in dark English then light French, Passive: loading, the list, no game, an empty journal, the offline, full and expired conditions above the local sessions (signed out or offline, a local game has no name), an unreadable local journal, a failed read, and the last page; a winter session keeps its own UTC offset. Then the last page in Interactive mode.",
+  "fixtures": {
+    "calls": {
+      "journal.page": [
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000013",
+                "startedAt": 1789929000000,
+                "offsetMinutes": 120,
+                "durationMs": 2700000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000012",
+                "startedAt": 1789844700000,
+                "offsetMinutes": 120,
+                "durationMs": 7920000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000011",
+                "startedAt": 1789629300000,
+                "offsetMinutes": 120,
+                "durationMs": 480000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000010",
+                "startedAt": 1789214400000,
+                "offsetMinutes": 120,
+                "durationMs": 14400000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000009",
+                "startedAt": 1788640920000,
+                "offsetMinutes": 120,
+                "durationMs": 3660000,
+                "source": "local"
+              }
+            ],
+            "page": 1,
+            "next": "c2",
+            "previous": null
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [],
+            "page": 1,
+            "next": null,
+            "previous": null
+          }
+        },
+        {
+          "value": {
+            "gameName": "",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000013",
+                "startedAt": 1789929000000,
+                "offsetMinutes": 120,
+                "durationMs": 2700000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000011",
+                "startedAt": 1789629300000,
+                "offsetMinutes": 120,
+                "durationMs": 480000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000002",
+                "startedAt": 1768474800000,
+                "offsetMinutes": 60,
+                "durationMs": 3540000,
+                "source": "local"
+              }
+            ],
+            "page": 1,
+            "next": null,
+            "previous": null
+          }
+        },
+        {
+          "error": "unavailable"
+        },
+        {
+          "error": "unavailable"
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000003",
+                "startedAt": 1772403600000,
+                "offsetMinutes": 60,
+                "durationMs": 7500000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000002",
+                "startedAt": 1768474800000,
+                "offsetMinutes": 60,
+                "durationMs": 3540000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000001",
+                "startedAt": 1767220200000,
+                "offsetMinutes": 60,
+                "durationMs": 10800000,
+                "source": "local"
+              }
+            ],
+            "page": 3,
+            "next": null,
+            "previous": "c2"
+          }
+        }
+      ]
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Session journal",
+          "Loading…"
+        ],
+        "image": "loading-dark-en",
+        "state": "running",
+        "calls": [
+          {
+            "service": "journal.subscribe"
+          }
+        ]
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Journal de sessions",
+          "Chargement…"
+        ],
+        "image": "loading-light-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark",
+        "region": {
+          "numberFormat": "us",
+          "dateOrder": "mdy"
+        }
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": {
+          "revision": 1,
+          "notice": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "09/20/2026 · 20:30",
+          "0 h 45 min",
+          "2 h 12 min",
+          "Page 1"
+        ],
+        "image": "list-dark-en",
+        "noText": [
+          "Loading…"
+        ],
+        "calls": [
+          {
+            "service": "journal.page",
+            "params": {},
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "20/09/2026 · 20:30",
+          "0 h 45 min",
+          "Page 1"
+        ],
+        "image": "list-light-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark",
+        "region": {
+          "numberFormat": "us",
+          "dateOrder": "mdy"
+        }
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": null
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Waiting for a game"
+        ],
+        "image": "idle-dark-en",
+        "noText": [
+          "Portal 2",
+          "Page 1"
+        ]
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "En attente du jeu"
+        ],
+        "image": "idle-light-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark",
+        "region": {
+          "numberFormat": "us",
+          "dateOrder": "mdy"
+        }
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": {
+          "revision": 2,
+          "notice": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "Your next sessions will appear here."
+        ],
+        "image": "empty-dark-en",
+        "noText": [
+          "Page 1"
+        ]
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Vos prochaines sessions apparaîtront ici."
+        ],
+        "image": "empty-light-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark",
+        "region": {
+          "numberFormat": "us",
+          "dateOrder": "mdy"
+        }
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": {
+          "revision": 3,
+          "notice": "offline"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Sync is offline. Your sessions stay on this device.",
+          "09/20/2026 · 20:30",
+          "01/15/2026 · 12:00"
+        ],
+        "image": "offline-dark-en",
+        "noText": [
+          "Portal 2",
+          "Page 1"
+        ]
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Synchronisation hors ligne. Vos sessions restent sur cet appareil.",
+          "15/01/2026 · 12:00"
+        ],
+        "image": "offline-light-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark",
+        "region": {
+          "numberFormat": "us",
+          "dateOrder": "mdy"
+        }
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": {
+          "revision": 3,
+          "notice": "full"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Journal storage is full. Delete local sessions or synchronize pending deletions."
+        ],
+        "image": "full-dark-en",
+        "calls": [
+          {
+            "service": "journal.page",
+            "outcome": "ok"
+          },
+          {
+            "service": "journal.page",
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Le journal est plein. Supprimez des sessions locales ou synchronisez les suppressions en attente."
+        ],
+        "image": "full-light-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark",
+        "region": {
+          "numberFormat": "us",
+          "dateOrder": "mdy"
+        }
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": {
+          "revision": 3,
+          "notice": "expired"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Your connection expired. Link your account again.",
+          "09/20/2026 · 20:30"
+        ],
+        "image": "expired-dark-en",
+        "calls": []
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Votre connexion a expiré. Reliez votre compte."
+        ],
+        "image": "expired-light-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark",
+        "region": {
+          "numberFormat": "us",
+          "dateOrder": "mdy"
+        }
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": {
+          "revision": 3,
+          "notice": "busy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "An operation is already in progress. Please try again shortly."
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": {
+          "revision": 3,
+          "notice": "unavailable"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "PlayerVox is unavailable for this game right now."
+        ],
+        "calls": []
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": null
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": {
+          "revision": 4,
+          "notice": "storage_unavailable"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Local session storage is unavailable."
+        ],
+        "image": "storage-dark-en",
+        "noText": [
+          "Loading…",
+          "09/20/2026 · 20:30"
+        ],
+        "calls": [
+          {
+            "service": "journal.page",
+            "outcome": "unavailable"
+          }
+        ]
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Le stockage local des sessions est indisponible."
+        ],
+        "image": "storage-light-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark",
+        "region": {
+          "numberFormat": "us",
+          "dateOrder": "mdy"
+        }
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": null
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": {
+          "revision": 5,
+          "notice": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "The journal is unavailable right now."
+        ],
+        "image": "error-dark-en",
+        "noText": [
+          "Loading…"
+        ],
+        "calls": [
+          {
+            "service": "journal.page",
+            "outcome": "unavailable"
+          }
+        ]
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Le journal est indisponible pour le moment."
+        ],
+        "image": "error-light-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark",
+        "region": {
+          "numberFormat": "us",
+          "dateOrder": "mdy"
+        }
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": {
+          "revision": 6,
+          "notice": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "03/01/2026 · 23:20",
+          "12/31/2025 · 23:30",
+          "Page 3 · End of the journal"
+        ],
+        "image": "end-dark-en",
+        "calls": [
+          {
+            "service": "journal.page",
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "01/03/2026 · 23:20",
+          "31/12/2025 · 23:30",
+          "Page 3 · Fin du journal"
+        ],
+        "image": "end-light-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark",
+        "region": {
+          "numberFormat": "us",
+          "dateOrder": "mdy"
+        }
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Page 3 · End of the journal"
+        ],
+        "image": "end-interactive-dark-en"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Page 3 · Fin du journal"
+        ],
+        "image": "end-interactive-light-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark",
+        "region": {
+          "numberFormat": "us",
+          "dateOrder": "mdy"
+        }
+      }
+    }
+  ]
+}

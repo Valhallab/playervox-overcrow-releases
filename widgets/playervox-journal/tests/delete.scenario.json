@@ -1,0 +1,432 @@
+{
+  "scenarioVersion": 1,
+  "name": "delete",
+  "description": "A trash click asks the host, which confirms in its own chrome. Accepted: the session is deleted and the page read again without it. Declined: nothing changes and nothing is read. A deletion the host refuses says why above the sessions, and the next page turn clears it. Passive mode has no trash.",
+  "fixtures": {
+    "calls": {
+      "journal.delete": [
+        {
+          "value": null
+        },
+        {
+          "error": "busy"
+        },
+        {
+          "error": "unavailable"
+        }
+      ],
+      "journal.page": [
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000013",
+                "startedAt": 1789929000000,
+                "offsetMinutes": 120,
+                "durationMs": 2700000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000012",
+                "startedAt": 1789844700000,
+                "offsetMinutes": 120,
+                "durationMs": 7920000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000011",
+                "startedAt": 1789629300000,
+                "offsetMinutes": 120,
+                "durationMs": 480000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000010",
+                "startedAt": 1789214400000,
+                "offsetMinutes": 120,
+                "durationMs": 14400000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000009",
+                "startedAt": 1788640920000,
+                "offsetMinutes": 120,
+                "durationMs": 3660000,
+                "source": "local"
+              }
+            ],
+            "page": 1,
+            "next": "c2",
+            "previous": null
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000012",
+                "startedAt": 1789844700000,
+                "offsetMinutes": 120,
+                "durationMs": 7920000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000011",
+                "startedAt": 1789629300000,
+                "offsetMinutes": 120,
+                "durationMs": 480000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000010",
+                "startedAt": 1789214400000,
+                "offsetMinutes": 120,
+                "durationMs": 14400000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000009",
+                "startedAt": 1788640920000,
+                "offsetMinutes": 120,
+                "durationMs": 3660000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000008",
+                "startedAt": 1788106200000,
+                "offsetMinutes": 120,
+                "durationMs": 5700000,
+                "source": "cloud"
+              }
+            ],
+            "page": 1,
+            "next": "c2",
+            "previous": null
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000012",
+                "startedAt": 1789844700000,
+                "offsetMinutes": 120,
+                "durationMs": 7920000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000011",
+                "startedAt": 1789629300000,
+                "offsetMinutes": 120,
+                "durationMs": 480000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000010",
+                "startedAt": 1789214400000,
+                "offsetMinutes": 120,
+                "durationMs": 14400000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000009",
+                "startedAt": 1788640920000,
+                "offsetMinutes": 120,
+                "durationMs": 3660000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000008",
+                "startedAt": 1788106200000,
+                "offsetMinutes": 120,
+                "durationMs": 5700000,
+                "source": "cloud"
+              }
+            ],
+            "page": 1,
+            "next": "c2",
+            "previous": null
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000007",
+                "startedAt": 1787435700000,
+                "offsetMinutes": 120,
+                "durationMs": 1020000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000006",
+                "startedAt": 1786784400000,
+                "offsetMinutes": 120,
+                "durationMs": 36000000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000005",
+                "startedAt": 1785677460000,
+                "offsetMinutes": 120,
+                "durationMs": 4440000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000004",
+                "startedAt": 1784052000000,
+                "offsetMinutes": 120,
+                "durationMs": 1800000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000003",
+                "startedAt": 1772403600000,
+                "offsetMinutes": 60,
+                "durationMs": 7500000,
+                "source": "cloud"
+              }
+            ],
+            "page": 2,
+            "next": "c3",
+            "previous": "c1"
+          }
+        }
+      ]
+    },
+    "subscriptions": {
+      "journal.subscribe": {
+        "revision": 1,
+        "notice": null
+      }
+    },
+    "confirmations": [
+      "accept",
+      "cancel",
+      "accept",
+      "accept"
+    ]
+  },
+  "steps": [
+    {
+      "host": {
+        "mode": "interactive"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "09/20/2026 · 20:30",
+          "09/19/2026 · 21:05"
+        ],
+        "calls": [
+          {
+            "service": "journal.subscribe",
+            "outcome": "ok"
+          },
+          {
+            "service": "journal.page",
+            "outcome": "ok"
+          }
+        ],
+        "image": "before"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Delete session"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "09/19/2026 · 21:05",
+          "08/30/2026 · 18:10"
+        ],
+        "noText": [
+          "09/20/2026 · 20:30"
+        ],
+        "calls": [
+          {
+            "service": "journal.delete",
+            "params": {
+              "session": "00000000-0000-4000-8000-000000000013"
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "journal.page",
+            "params": {},
+            "outcome": "ok"
+          }
+        ],
+        "image": "accepted"
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": {
+          "revision": 2,
+          "notice": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "09/20/2026 · 20:30"
+        ],
+        "calls": [
+          {
+            "service": "journal.page",
+            "params": {},
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Delete session"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "09/19/2026 · 21:05",
+          "08/30/2026 · 18:10"
+        ],
+        "calls": [
+          {
+            "service": "journal.delete",
+            "params": {
+              "session": "00000000-0000-4000-8000-000000000012"
+            },
+            "outcome": "cancelled"
+          }
+        ],
+        "image": "declined"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Delete session"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "An operation is already in progress. Please try again shortly.",
+          "09/19/2026 · 21:05"
+        ],
+        "calls": [
+          {
+            "service": "journal.delete",
+            "outcome": "busy"
+          }
+        ],
+        "image": "busy"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Delete session"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "The session could not be deleted. Try again.",
+          "09/19/2026 · 21:05"
+        ],
+        "calls": [
+          {
+            "service": "journal.delete",
+            "outcome": "unavailable"
+          }
+        ],
+        "image": "failed"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "La session n’a pas pu être supprimée. Réessayez."
+        ],
+        "image": "failed-light-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark",
+        "region": {
+          "numberFormat": "us",
+          "dateOrder": "mdy"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Next page"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Page 2"
+        ],
+        "noText": [
+          "The session could not be deleted. Try again."
+        ],
+        "calls": [
+          {
+            "service": "journal.page",
+            "params": {
+              "cursor": "c2"
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Page 2"
+        ],
+        "image": "passive"
+      }
+    }
+  ]
+}

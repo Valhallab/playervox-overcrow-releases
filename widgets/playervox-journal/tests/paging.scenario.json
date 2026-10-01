@@ -1,0 +1,428 @@
+{
+  "scenarioVersion": 1,
+  "name": "paging",
+  "description": "Passive shows the page label without buttons, and a click where they would be asks nothing. In Interactive mode the previous and next buttons read the page's own cursors, one page per click; a disabled button asks nothing; the last page says so. A new revision of the journal reads the page shown again, with the same cursor.",
+  "fixtures": {
+    "calls": {
+      "journal.page": [
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000013",
+                "startedAt": 1789929000000,
+                "offsetMinutes": 120,
+                "durationMs": 2700000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000012",
+                "startedAt": 1789844700000,
+                "offsetMinutes": 120,
+                "durationMs": 7920000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000011",
+                "startedAt": 1789629300000,
+                "offsetMinutes": 120,
+                "durationMs": 480000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000010",
+                "startedAt": 1789214400000,
+                "offsetMinutes": 120,
+                "durationMs": 14400000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000009",
+                "startedAt": 1788640920000,
+                "offsetMinutes": 120,
+                "durationMs": 3660000,
+                "source": "local"
+              }
+            ],
+            "page": 1,
+            "next": "c2",
+            "previous": null
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000008",
+                "startedAt": 1788106200000,
+                "offsetMinutes": 120,
+                "durationMs": 5700000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000007",
+                "startedAt": 1787435700000,
+                "offsetMinutes": 120,
+                "durationMs": 1020000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000006",
+                "startedAt": 1786784400000,
+                "offsetMinutes": 120,
+                "durationMs": 36000000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000005",
+                "startedAt": 1785677460000,
+                "offsetMinutes": 120,
+                "durationMs": 4440000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000004",
+                "startedAt": 1784052000000,
+                "offsetMinutes": 120,
+                "durationMs": 1800000,
+                "source": "cloud"
+              }
+            ],
+            "page": 2,
+            "next": "c3",
+            "previous": "c1"
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000003",
+                "startedAt": 1772403600000,
+                "offsetMinutes": 60,
+                "durationMs": 7500000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000002",
+                "startedAt": 1768474800000,
+                "offsetMinutes": 60,
+                "durationMs": 3540000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000001",
+                "startedAt": 1767220200000,
+                "offsetMinutes": 60,
+                "durationMs": 10800000,
+                "source": "local"
+              }
+            ],
+            "page": 3,
+            "next": null,
+            "previous": "c2"
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000008",
+                "startedAt": 1788106200000,
+                "offsetMinutes": 120,
+                "durationMs": 5700000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000007",
+                "startedAt": 1787435700000,
+                "offsetMinutes": 120,
+                "durationMs": 1020000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000006",
+                "startedAt": 1786784400000,
+                "offsetMinutes": 120,
+                "durationMs": 36000000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000005",
+                "startedAt": 1785677460000,
+                "offsetMinutes": 120,
+                "durationMs": 4440000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000004",
+                "startedAt": 1784052000000,
+                "offsetMinutes": 120,
+                "durationMs": 1800000,
+                "source": "cloud"
+              }
+            ],
+            "page": 2,
+            "next": "c3",
+            "previous": "c1"
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000008",
+                "startedAt": 1788106200000,
+                "offsetMinutes": 120,
+                "durationMs": 5700000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000007",
+                "startedAt": 1787435700000,
+                "offsetMinutes": 120,
+                "durationMs": 1020000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000006",
+                "startedAt": 1786784400000,
+                "offsetMinutes": 120,
+                "durationMs": 36000000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000005",
+                "startedAt": 1785677460000,
+                "offsetMinutes": 120,
+                "durationMs": 4440000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000004",
+                "startedAt": 1784052000000,
+                "offsetMinutes": 120,
+                "durationMs": 1800000,
+                "source": "cloud"
+              }
+            ],
+            "page": 2,
+            "next": "c3",
+            "previous": "c1"
+          }
+        }
+      ]
+    },
+    "subscriptions": {
+      "journal.subscribe": {
+        "revision": 1,
+        "notice": null
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Page 1"
+        ],
+        "calls": [
+          {
+            "service": "journal.subscribe",
+            "outcome": "ok"
+          },
+          {
+            "service": "journal.page",
+            "params": {},
+            "outcome": "ok"
+          }
+        ],
+        "image": "page-1-passive"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "at": [
+            47,
+            222
+          ]
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "at": [
+            21,
+            222
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Page 1"
+        ],
+        "calls": []
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive"
+      }
+    },
+    {
+      "expect": {
+        "image": "page-1"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Previous page"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Page 1"
+        ],
+        "calls": []
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Next page"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Page 2",
+          "08/30/2026 · 18:10"
+        ],
+        "noText": [
+          "09/20/2026 · 20:30"
+        ],
+        "calls": [
+          {
+            "service": "journal.page",
+            "params": {
+              "cursor": "c2"
+            },
+            "outcome": "ok"
+          }
+        ],
+        "image": "page-2"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Next page"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Page 3 · End of the journal",
+          "12/31/2025 · 23:30"
+        ],
+        "calls": [
+          {
+            "service": "journal.page",
+            "params": {
+              "cursor": "c3"
+            },
+            "outcome": "ok"
+          }
+        ],
+        "image": "page-3"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Next page"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": []
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Previous page"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Page 2"
+        ],
+        "calls": [
+          {
+            "service": "journal.page",
+            "params": {
+              "cursor": "c2"
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": {
+          "revision": 2,
+          "notice": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Page 2"
+        ],
+        "calls": [
+          {
+            "service": "journal.page",
+            "params": {
+              "cursor": "c2"
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Page 2"
+        ],
+        "image": "page-2-passive"
+      }
+    }
+  ]
+}

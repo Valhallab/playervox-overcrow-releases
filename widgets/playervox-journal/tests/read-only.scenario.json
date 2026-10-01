@@ -1,0 +1,157 @@
+{
+  "scenarioVersion": 1,
+  "name": "read-only",
+  "description": "Granted journal.read without journal.delete, the widget shows and pages the journal in Interactive mode, without any trash.",
+  "host": {
+    "grants": [
+      "journal.read"
+    ],
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "calls": {
+      "journal.page": [
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000013",
+                "startedAt": 1789929000000,
+                "offsetMinutes": 120,
+                "durationMs": 2700000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000012",
+                "startedAt": 1789844700000,
+                "offsetMinutes": 120,
+                "durationMs": 7920000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000011",
+                "startedAt": 1789629300000,
+                "offsetMinutes": 120,
+                "durationMs": 480000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000010",
+                "startedAt": 1789214400000,
+                "offsetMinutes": 120,
+                "durationMs": 14400000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000009",
+                "startedAt": 1788640920000,
+                "offsetMinutes": 120,
+                "durationMs": 3660000,
+                "source": "local"
+              }
+            ],
+            "page": 1,
+            "next": "c2",
+            "previous": null
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000008",
+                "startedAt": 1788106200000,
+                "offsetMinutes": 120,
+                "durationMs": 5700000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000007",
+                "startedAt": 1787435700000,
+                "offsetMinutes": 120,
+                "durationMs": 1020000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000006",
+                "startedAt": 1786784400000,
+                "offsetMinutes": 120,
+                "durationMs": 36000000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000005",
+                "startedAt": 1785677460000,
+                "offsetMinutes": 120,
+                "durationMs": 4440000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000004",
+                "startedAt": 1784052000000,
+                "offsetMinutes": 120,
+                "durationMs": 1800000,
+                "source": "cloud"
+              }
+            ],
+            "page": 2,
+            "next": "c3",
+            "previous": "c1"
+          }
+        }
+      ]
+    },
+    "subscriptions": {
+      "journal.subscribe": {
+        "revision": 1,
+        "notice": null
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "Page 1"
+        ],
+        "calls": [
+          {
+            "service": "journal.subscribe",
+            "outcome": "ok"
+          },
+          {
+            "service": "journal.page",
+            "outcome": "ok"
+          }
+        ],
+        "image": "read-only"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Next page"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Page 2"
+        ],
+        "calls": [
+          {
+            "service": "journal.page",
+            "params": {
+              "cursor": "c2"
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    }
+  ]
+}

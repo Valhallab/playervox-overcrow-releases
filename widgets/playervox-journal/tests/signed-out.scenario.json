@@ -1,0 +1,134 @@
+{
+  "scenarioVersion": 1,
+  "name": "signed-out",
+  "description": "The journal needs no account: signed out of PlayerVox, the local sessions show in the host frame with no account panel, and a session is deleted after the host's confirmation.",
+  "host": {
+    "accounts": {
+      "playervox": "disconnected",
+      "twitch": "disconnected"
+    },
+    "frame": true,
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "calls": {
+      "journal.delete": [
+        {
+          "value": null
+        }
+      ],
+      "journal.page": [
+        {
+          "value": {
+            "gameName": "",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000013",
+                "startedAt": 1789929000000,
+                "offsetMinutes": 120,
+                "durationMs": 2700000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000011",
+                "startedAt": 1789629300000,
+                "offsetMinutes": 120,
+                "durationMs": 480000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000002",
+                "startedAt": 1768474800000,
+                "offsetMinutes": 60,
+                "durationMs": 3540000,
+                "source": "local"
+              }
+            ],
+            "page": 1,
+            "next": null,
+            "previous": null
+          }
+        },
+        {
+          "value": {
+            "gameName": "",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000011",
+                "startedAt": 1789629300000,
+                "offsetMinutes": 120,
+                "durationMs": 480000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000002",
+                "startedAt": 1768474800000,
+                "offsetMinutes": 60,
+                "durationMs": 3540000,
+                "source": "local"
+              }
+            ],
+            "page": 1,
+            "next": null,
+            "previous": null
+          }
+        }
+      ]
+    },
+    "subscriptions": {
+      "journal.subscribe": {
+        "revision": 1,
+        "notice": null
+      }
+    },
+    "confirmations": [
+      "accept"
+    ]
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "09/20/2026 · 20:30",
+          "01/15/2026 · 12:00"
+        ],
+        "state": "running",
+        "calls": [
+          {
+            "service": "journal.subscribe",
+            "outcome": "ok"
+          },
+          {
+            "service": "journal.page",
+            "outcome": "ok"
+          }
+        ],
+        "image": "signed-out"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Delete session"
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "09/20/2026 · 20:30"
+        ],
+        "calls": [
+          {
+            "service": "journal.delete",
+            "outcome": "ok"
+          },
+          {
+            "service": "journal.page",
+            "outcome": "ok"
+          }
+        ]
+      }
+    }
+  ]
+}
