@@ -138,3 +138,29 @@ no form.
   A publication refused because no gesture made it (`gesture_required`)
   cannot be played by a scenario, where every submission is a gesture:
   OverCrow tests it with this package in its own repository.
+
+## Cost
+
+Measured on 2026-10-01 with OverCrow's release build, on an AMD Ryzen 7
+5800X3D Linux workstation and in a Windows 11 virtual machine (2 vCPU),
+with a published rating and its review:
+
+| | Linux | Windows (VM) |
+| --- | --- | --- |
+| Widget start, warm, into the overlay's runtime | 8.7 ms (p50), 8.8 ms at most | VM ready in 14–15 ms (p50) |
+| VM memory | 0.79 MiB private, 0.97 MiB PSS | 1.15 MiB private working set, 1.43 MiB private commit |
+| Private memory in all (VM, sandbox helpers, overlay share) | 8.7–11.2 MB | — |
+| CPU at rest, Passive mode | 0.05 % of one core, no frame | — |
+| CPU at rest, the form open | 0.03–0.05 % of one core, no frame | — |
+| CPU, a slider changed and the rating published every 2 s | 0.30 % of one core: the frames of the keys, the outcome and the badge's pulse (about 36 frames of 0.10 ms), then none | — |
+| CPU, hidden, a new rating every 2 s | 0.05 % of one core | — |
+| VM CPU | one short turn per rating or form value; none at rest | — |
+
+A rating changes when you publish one: the 2 s load is a stress. The
+private memory is above OverCrow's 8 MB goal per widget by up to 3 MB and
+far under its 80 MB ceiling. The egui widget it replaces painted in the
+overlay's own process (0.05 ms a frame in Passive mode, 0.09 ms with its
+form) and repainted each second while a publication was pending; OverCrow
+read the rating whenever that widget was enabled, and now only while this
+widget subscribes. Scenarios render the same images on Linux and Windows,
+pixel for pixel.
