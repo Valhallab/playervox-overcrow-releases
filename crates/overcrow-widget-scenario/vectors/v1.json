@@ -636,6 +636,9 @@
       "twitch.chat.send": [
        {
         "error": "busy"
+       },
+       {
+        "error": "permission_denied"
        }
       ],
       "notes.save": []
