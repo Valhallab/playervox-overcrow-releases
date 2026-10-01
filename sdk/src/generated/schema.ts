@@ -703,6 +703,8 @@ export interface TwitchChat {
   readonly channel: string | null;
   /** Channel connection state. */
   readonly joinState: "idle" | "connecting" | "joined" | "reconnecting" | "failed";
+  /** Why `joinState` is `failed`, as a fixed category: the channel does not exist or refuses the account, the connection failed, Twitch answered something unexpected, or another widget holds the host's one chat connection (`limit`). `null` in every other state. An account failure is not here: the host draws it. */
+  readonly failure: "channel_unavailable" | "connection" | "provider" | "limit" | null;
   /** Favorite channels. */
   readonly favorites: ReadonlyArray<string>;
   /** A message can be sent now. */
@@ -944,7 +946,7 @@ export interface ServiceResultMap {
   readonly "journal.page": JournalPage;
   /** `journal.delete`: `null`, or `cancelled` when the user declines; `not_connected` for a cloud session while PlayerVox is disconnected. */
   readonly "journal.delete": null;
-  /** `twitch.chat.subscribe`: `{ account, channel, joinState, favorites, canSend, generation, reset, messages, removed }`: `account` is `signed_out`, `pending`, `connected` or `expired` (sign-in is host chrome); messages arrive as deltas, with `reset` after subscribing, a generation change or a show; each message `{ id, author, color, badges, fragments, reply, deleted, receivedAt }` with at most `MAX_CHAT_FRAGMENTS` fragments, emotes and badges as `asset:` handles for the current theme and scale. */
+  /** `twitch.chat.subscribe`: `{ account, channel, joinState, failure, favorites, canSend, generation, reset, messages, removed }`: `account` is `signed_out`, `pending`, `connected` or `expired` (sign-in is host chrome); `failure` is the fixed category of a `failed` join; messages arrive as deltas, with `reset` after subscribing, a generation change or a show; each message `{ id, author, color, badges, fragments, reply, deleted, receivedAt }` with at most `MAX_CHAT_FRAGMENTS` fragments, emotes and badges as `asset:` handles for the current theme and scale. */
   readonly "twitch.chat.subscribe": TwitchChat;
   /** `twitch.chat.join`: `null`; the host remembers the channel and rejoins it when the widget starts. */
   readonly "twitch.chat.join": null;

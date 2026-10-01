@@ -220,6 +220,42 @@ fn a_chat_message_carries_its_reception_time() {
     assert!(!message.matches(&fractional), "whole milliseconds");
 }
 
+/// A chat state as the host delivers it.
+fn chat_state() -> serde_json::Value {
+    json!({
+        "account": "connected", "channel": "juniper_plays", "joinState": "joined",
+        "failure": null, "favorites": ["juniper_plays"], "canSend": true,
+        "generation": 3, "reset": true, "messages": [chat_message()], "removed": [],
+    })
+}
+
+/// A failed join says why with a fixed category, never with provider
+/// text; the account's own failures are the host's to draw.
+#[test]
+fn a_failed_join_names_a_fixed_category() {
+    let chat = shape("TwitchChat").expect("shape").shape;
+    assert!(chat.matches(&chat_state()));
+    for failure in ["channel_unavailable", "connection", "provider", "limit"] {
+        let mut failed = chat_state();
+        failed["joinState"] = json!("failed");
+        failed["failure"] = json!(failure);
+        assert!(chat.matches(&failed), "{failure}");
+    }
+    for refused in [
+        "authentication",
+        "rate_limited",
+        "credential_store",
+        "HTTP 404",
+    ] {
+        let mut failed = chat_state();
+        failed["failure"] = json!(refused);
+        assert!(!chat.matches(&failed), "{refused}");
+    }
+    let mut without = chat_state();
+    without.as_object_mut().expect("object").remove("failure");
+    assert!(!chat.matches(&without), "failure is always present");
+}
+
 #[test]
 fn scalars_are_checked() {
     assert!(Shape::Integer.matches(&json!(9_007_199_254_740_991_u64)));

@@ -868,7 +868,7 @@ Authority is checked by the host at every call, immediately before acting. Gestu
 | `journal.subscribe` | capability `journal.read` | subscribe | no | no | none | `null` without an active game, or `{ revision, notice }`: `revision` changes whenever the merged journal of the active game changes (a session recorded or deleted, cloud sessions merged, the PlayerVox account or sync changed), so the widget reads its page again; `notice` is `null`, `offline`, `storage_unavailable`, `full`, `expired`, `busy` or `unavailable`. Holding this subscription is what keeps the host's journal source running | `JournalState` or `null` | fixed |
 | `journal.page` | capability `journal.read` | call | no | no | `cursor?`: text ≤ `MAX_OBJECT_ID_BYTES` | `{ gameName, items, page, next, previous }`: five local and cloud sessions of the active game, merged and deduplicated, newest first; without `cursor`, the first page; each item `{ id, startedAt, offsetMinutes, durationMs, source }`; cursors are host handles that stay valid for the widget whatever other widgets read, and a cursor past the end answers the last page | `JournalPage` | fixed |
 | `journal.delete` | capability `journal.delete` | call | yes | yes | `session`: text ≤ `MAX_OBJECT_ID_BYTES` | `null`, or `cancelled` when the user declines; `not_connected` for a cloud session while PlayerVox is disconnected | `null` | fixed |
-| `twitch.chat.subscribe` | capability `twitch.chat.read` | subscribe | no | no | none | `{ account, channel, joinState, favorites, canSend, generation, reset, messages, removed }`: `account` is `signed_out`, `pending`, `connected` or `expired` (sign-in is host chrome); messages arrive as deltas, with `reset` after subscribing, a generation change or a show; each message `{ id, author, color, badges, fragments, reply, deleted, receivedAt }` with at most `MAX_CHAT_FRAGMENTS` fragments, emotes and badges as `asset:` handles for the current theme and scale | `TwitchChat` | fixed |
+| `twitch.chat.subscribe` | capability `twitch.chat.read` | subscribe | no | no | none | `{ account, channel, joinState, failure, favorites, canSend, generation, reset, messages, removed }`: `account` is `signed_out`, `pending`, `connected` or `expired` (sign-in is host chrome); `failure` is the fixed category of a `failed` join; messages arrive as deltas, with `reset` after subscribing, a generation change or a show; each message `{ id, author, color, badges, fragments, reply, deleted, receivedAt }` with at most `MAX_CHAT_FRAGMENTS` fragments, emotes and badges as `asset:` handles for the current theme and scale | `TwitchChat` | fixed |
 | `twitch.chat.join` | capability `twitch.chat.read` | call | yes | no | `channel`: text ≤ `MAX_CHAT_CHANNEL_BYTES` | `null`; the host remembers the channel and rejoins it when the widget starts | `null` | fixed |
 | `twitch.chat.leave` | capability `twitch.chat.read` | call | yes | no | none | `null`; the host forgets the channel | `null` | fixed |
 | `twitch.chat.favorite` | capability `twitch.chat.read` | call | yes | no | `channel`: text ≤ `MAX_CHAT_CHANNEL_BYTES`; `favorite`: boolean | `null`; `quota_exceeded` beyond `MAX_CHAT_FAVORITES` | `null` | fixed |
@@ -1151,13 +1151,14 @@ One chat message. `{ id, author, color, badges, fragments, reply, deleted, recei
 
 #### `TwitchChat`
 
-Twitch chat state. `{ account, channel, joinState, favorites, canSend, generation, reset, messages, removed }`
+Twitch chat state. `{ account, channel, joinState, failure, favorites, canSend, generation, reset, messages, removed }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
 | `account` | `signed_out` \| `pending` \| `connected` \| `expired` | Twitch account state; sign-in is host chrome. |
 | `channel` | text or `null` | Joined channel login. |
 | `joinState` | `idle` \| `connecting` \| `joined` \| `reconnecting` \| `failed` | Channel connection state. |
+| `failure` | `channel_unavailable` \| `connection` \| `provider` \| `limit` or `null` | Why `joinState` is `failed`, as a fixed category: the channel does not exist or refuses the account, the connection failed, Twitch answered something unexpected, or another widget holds the host's one chat connection (`limit`). `null` in every other state. An account failure is not here: the host draws it. |
 | `favorites` | list of text | Favorite channels. |
 | `canSend` | boolean | A message can be sent now. |
 | `generation` | integer | Changes with the channel or account. |

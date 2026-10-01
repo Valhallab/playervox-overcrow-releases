@@ -481,6 +481,16 @@ pub const SHAPES: &[NamedShape] = &[
                 Shape::Keyword(&["idle", "connecting", "joined", "reconnecting", "failed"]),
                 "Channel connection state.",
             ),
+            member(
+                "failure",
+                Shape::Nullable(&Shape::Keyword(&[
+                    "channel_unavailable",
+                    "connection",
+                    "provider",
+                    "limit",
+                ])),
+                "Why `joinState` is `failed`, as a fixed category: the channel does not exist or refuses the account, the connection failed, Twitch answered something unexpected, or another widget holds the host's one chat connection (`limit`). `null` in every other state. An account failure is not here: the host draws it.",
+            ),
             member("favorites", Shape::List(&Shape::Text), "Favorite channels."),
             member("canSend", Shape::Bool, "A message can be sent now."),
             member(
