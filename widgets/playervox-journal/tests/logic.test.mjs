@@ -293,6 +293,10 @@ test("dates follow the session's own offset and the user's date order", () => {
   // 2026-09-20T18:30:00Z.
   const summer = { id: "a", startedAt: 1_789_929_000_000, offsetMinutes: 120, durationMs: 0, source: "local" };
   assert.equal(logic.startText(summer), "09/20/2026 · 20:30");
+  // The session's offset, not the host's current one (`region.offsetMinutes`).
+  vm.setHost({ region: { numberFormat: "us", dateOrder: "mdy", offsetMinutes: -300 } });
+  assert.equal(logic.startText(summer), "09/20/2026 · 20:30");
+  assert.equal(logic.startText({ ...summer, offsetMinutes: -210 }), "09/20/2026 · 15:00");
   // 2026-01-15T11:00:00Z, an hour ahead in winter: its own offset, not today's.
   const winter = { ...summer, startedAt: 1_768_474_800_000, offsetMinutes: 60 };
   assert.equal(logic.startText(winter), "01/15/2026 · 12:00");
