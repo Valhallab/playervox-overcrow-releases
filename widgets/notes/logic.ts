@@ -206,14 +206,18 @@ export function dirty(editor: Editor, note: Note | null): boolean {
   if (note === null || editor.title === null || editor.body === null) {
     return false;
   }
+  // As a save reads the form: the title and the rows trimmed, the empty
+  // rows left out, the text as written. Stored texts are compared trimmed
+  // too: a note written by an older version may hold a padded entry.
   const rows = keptRows(editor);
+  const items = note.items.filter((item) => item.text.trim() !== "");
   return (
-    editor.title.trim() !== note.title ||
+    editor.title.trim() !== note.title.trim() ||
     editor.body !== note.body ||
-    rows.length !== note.items.length ||
+    rows.length !== items.length ||
     rows.some((row, index) => {
-      const item = note.items[index];
-      return item === undefined || row.id !== item.id || row.text.trim() !== item.text;
+      const item = items[index];
+      return item === undefined || row.id !== item.id || row.text.trim() !== item.text.trim();
     })
   );
 }

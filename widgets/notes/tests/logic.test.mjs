@@ -197,6 +197,16 @@ test("the title and the rows compare trimmed, the body as written", () => {
   assert.equal(logic.saveClass(state, editor), "action");
 });
 
+test("a stored note with padded texts is not a draft when its editor opens", () => {
+  reset(doc([note("note-1", " Padded ", "text ", [item("local-1", "entry "), item("local-2", "  ")])]));
+  const editor = openEditor();
+  assert.equal(logic.dirty(editor, state.doc.notes[0]), false);
+  assert.equal(logic.activeLabel(state), " Padded ");
+  logic.bodyInput("note-1", "text");
+  assert.equal(logic.dirty(editor, state.doc.notes[0]), true, "the text is compared as written");
+  logic.cancel("note-1");
+});
+
 test("a save waits for OverCrow's answer: stored, the editor closes; refused, the draft stays", () => {
   reset();
   let editor = openEditor();
