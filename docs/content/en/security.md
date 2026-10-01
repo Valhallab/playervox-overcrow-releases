@@ -88,7 +88,7 @@ data cannot leave the machine through the widget.
 | `playervox.score.read` | **yes** | `playervox.score.subscribe` | — |
 | `playervox.rating.read` | **yes** | `playervox.rating.subscribe` | — |
 | `playervox.rating.write` | **yes** | none (host-bound intent) | — |
-| `playervox.reviews.read` | **yes** | `playervox.reviews.page` | — |
+| `playervox.reviews.read` | **yes** | `playervox.reviews.subscribe`, `playervox.reviews.page` | — |
 | `journal.read` | **yes** | `journal.subscribe`, `journal.page` | — |
 | `journal.delete` | **yes** | — | `journal.delete` |
 | `twitch.chat.read` | **yes** | `twitch.chat.subscribe` | `twitch.chat.join`, `twitch.chat.leave`, `twitch.chat.favorite` |

@@ -120,7 +120,7 @@ grants nothing: the user consents, and `hasGrant` tells what was granted.
 | `media` | namespace | `subscribe({ cover? }, listener)`; `previous`, `playPause`, `next({ player? })` on a gesture. |
 | `stopwatch` | namespace | `subscribe(listener)`; `toggle()`, `reset()` on a gesture. |
 | `notes` | namespace | `subscribe(listener)`; `create()`, `select({ note })`, `setItem({ note, item, checked })`, `delete({ note })` on a gesture. |
-| `playervox` | namespace | `score.subscribe`, `rating.subscribe`, `reviews.page({ page?, followedOnly? })`. |
+| `playervox` | namespace | `score.subscribe`, `rating.subscribe`, `reviews.subscribe`, `reviews.page({ page?, followedOnly? })`. |
 | `journal` | namespace | `subscribe(listener)`; `page({ cursor? })`; `delete({ session })` on a gesture, after the host's confirmation. |
 | `twitch` | namespace | `chat.subscribe(listener)`; `chat.join({ channel })`, `chat.leave()`, `chat.favorite({ channel, favorite })` on a gesture. |
 | `call(service, params?)` | function | Calls any answered-once service by name. |
@@ -254,7 +254,7 @@ reference](widget-schema-v1.md) documents each value.
 | `ServiceName`, `CallServiceName`, `SubscribeServiceName`, `GestureServiceName` | Service names by kind. |
 | `ServiceParamsMap`, `ServiceResultMap` | Parameters and result of each service. |
 | `ServiceErrorCode`, `ServiceErrorPayload` | Failure codes, and the `{ code }` value the host sends. |
-| `Session`, `Telemetry`, `Fps`, `Stopwatch`, `Media`, `Notes`, `Note`, `NoteItem`, `CreatedNote`, `Score`, `Rating`, `RatingState`, `Review`, `ReviewsPage`, `JournalState`, `JournalPage`, `JournalSession`, `TwitchChat`, `ChatMessage`, `ChatFragment`, `GameEvent`, `HttpResponse` | Result shapes. |
+| `Session`, `Telemetry`, `Fps`, `Stopwatch`, `Media`, `Notes`, `Note`, `NoteItem`, `CreatedNote`, `Score`, `Rating`, `RatingState`, `Review`, `ReviewsState`, `ReviewsPage`, `JournalState`, `JournalPage`, `JournalSession`, `TwitchChat`, `ChatMessage`, `ChatFragment`, `GameEvent`, `HttpResponse` | Result shapes. |
 | `Permission`, `Capability`, `SensitiveCapability`, `CapabilityServices`, `PermissionServices` | Manifest permissions and capabilities, and the services each authorizes. |
 | `Locale`, `Theme`, `Mode`, `Region`, `NumberFormat`, `DateOrder` | Host values. |
 | `EventName`, `GestureEventName`, `EventDetailMap`, `NamedKey` | View events and their details. |

@@ -400,6 +400,13 @@ pub const SERVICES: &[Service] = &[
         Status::Fixed,
     )
     .returning(Shape::Named("RatingState")),
+    subscribe(
+        "playervox.reviews.subscribe",
+        "playervox.reviews.read",
+        "`{ state, revision, offline }`: `state` is `idle`, `unsupported` or `ready`; `revision` changes whenever the reviews to read change (another game, another PlayerVox account, reviews changed on PlayerVox), so the widget reads its page again; `offline` while PlayerVox is unreachable. Nothing is sent while the PlayerVox account is signed out, pending or expired. Holding this subscription is what keeps the host's reviews source running",
+        Status::Fixed,
+    )
+    .returning(Shape::Named("ReviewsState")),
     call(
         "playervox.reviews.page",
         cap("playervox.reviews.read"),
@@ -418,7 +425,7 @@ pub const SERVICES: &[Service] = &[
                 "Only reviews of followed players; default `false`.",
             ),
         ],
-        "`{ items, page, totalPages, count }`; each item `{ id, author, grade, score, text, original, publishedAt, offsetMinutes }`, `text` in the user's language when a translation exists, `original` the untranslated text or `null`, both cut by the host to `MAX_NODE_TEXT_BYTES`",
+        "`{ gameName, items, page, totalPages, count }`: three reviews of the active game per page, in the language of the host's interface; a page past the end answers the last page; each item `{ id, author, grade, score, text, original, hidden, publishedAt, offsetMinutes }`, `text` translated when a translation exists, `original` the untranslated text of a translated review or `null`, both cut by the host to `MAX_NODE_TEXT_BYTES`. Each call reads its own page: the host keeps no page position or filter shared between widgets",
         Status::Fixed,
     )
     .returning(Shape::Named("ReviewsPage")),
