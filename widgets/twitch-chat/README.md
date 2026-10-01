@@ -245,4 +245,39 @@ cannot check and retries, it adds its notice at the bottom of the widget.
 
 ## Cost
 
-<!-- COST: filled in by the lot -->
+Measured on 2026-10-01 with OverCrow's release build, on an AMD Ryzen 7
+5800X3D Linux workstation and in a Windows 11 virtual machine (2 vCPU),
+over a synthetic chat: 200 messages, each a coloured author, text, one of
+eight emotes and more text that wraps, at the default size.
+
+| | Linux | Windows (VM) |
+| --- | --- | --- |
+| Widget start, warm, into the overlay's runtime, 200 messages | 10.0–10.1 ms (p50), 11.2 ms at most | VM ready in 17.0–20.8 ms (p50) |
+| VM memory, Interactive mode, 200 messages | 2.6 MiB private; 3.2 MiB while the chat turns over | — |
+| VM memory, Passive mode | 1.7 MiB private, 1.9 MiB PSS | 1.71–1.73 MiB private working set, 2.20–2.23 MiB private commit |
+| Private memory in all (VM, sandbox helpers, overlay share), Interactive mode | 18–21 MB with 200 messages held, 23–26 MB while they turn over | — |
+| Private memory in all, Passive mode | 9–12 MB | — |
+| CPU at rest, 200 messages held | 0.05 % of one core, no frame | — |
+| 1 message a second, Interactive mode | overlay 0.15–0.17 % of one core, VM 0.25–0.28 %; one frame per message, 1.1 ms (p95) | — |
+| 10 messages a second | overlay 1.1 %, VM 2.2 %; ten frames a second, 1.1 ms (p95) | — |
+| 50 messages a second | overlay 1.4–1.5 %, VM 2.3–2.5 %; ten frames a second, 1.3–1.4 ms (p95), 2.8 ms at most | — |
+| 50 messages a second, Passive mode | overlay 1.0–1.1 %, VM 0.6–0.7 %; ten frames a second, 0.8 ms (p95) | — |
+| Passive mode, messages fading (one every 5 s) | overlay 0.13 %, VM 0.07 %; 2 to 3 frames a second | — |
+| Hidden, 50 messages a second | 0.10–0.12 % of one core, one frame in a minute, the VM idle | — |
+
+OverCrow sends the chat at most every 100 ms: an update is one turn of the
+widget's logic and one frame, so fifty messages a second cost what ten do,
+and nothing is drawn while nothing arrives. Each update is read before the
+next is sent; a chat beyond 200 messages a second would be sampled. A
+frame of the chat stays under OverCrow's 2 ms goal at the 95th percentile;
+the longest frame of a burst took 2.8 ms. The private memory is above
+OverCrow's 8 MB goal per widget, around its 20 MB threshold in Interactive
+mode, where OverCrow lays out 200 messages, and above it by up to 6 MB
+while they turn over; far under the 80 MB ceiling. The Passive fade is 32
+steps on one timer: a first version with a style transition had OverCrow
+draw 43 frames a second while a message faded, for the same picture. The
+egui widget it replaces painted in the overlay's own process at every
+frame (0.8–1.0 ms with 200 messages) and every 100 ms in Passive mode;
+OverCrow connected to the chat whenever that widget was enabled, and now
+only while this widget subscribes. Scenarios render the same images on
+Linux and Windows, pixel for pixel.
