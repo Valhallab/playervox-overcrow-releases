@@ -177,3 +177,39 @@ writes.
   tests them with this package in its own repository, with a save refused
   because no gesture made it and a logic that tries to set or submit the
   form.
+
+## Cost
+
+Measured on 2026-10-01 with OverCrow's release build, on an AMD Ryzen 7
+5800X3D Linux workstation and in a Windows 11 virtual machine (2 vCPU),
+with synthetic notes: an ordinary document (two notes, a few lines, three
+entries) and the largest OverCrow stores (8 notes, each with 8 KiB of text
+and 64 entries of 256 bytes).
+
+| | Linux | Windows (VM) |
+| --- | --- | --- |
+| Widget start, warm, into the overlay's runtime, largest document | 8.9–9.1 ms (p50), 10.8 ms at most | VM ready in 15.1–15.4 ms (p50) |
+| VM memory, ordinary document | 0.96 MiB private | — |
+| VM memory, largest document | 1.84 MiB private, 2.0 MiB PSS; up to 3.0 MiB after thirty saves | 1.76 MiB private working set, 2.04 MiB private commit |
+| Private memory in all (VM, sandbox helpers, overlay share), ordinary document | 6.5–9.9 MB | — |
+| Private memory in all, largest document | 15.6–17.4 MB in Passive mode, 19.3–26.7 MB with the editor | — |
+| CPU at rest, Passive mode or the editor open | 0.03–0.05 % of one core, no frame | — |
+| CPU, typing ten characters a second in a 64-entry note | overlay 1.0–1.2 % of one core, VM 5.2–5.3 % | — |
+| A typed character shown | in the frame of its key: 0.3 ms (p50), 0.5 ms (p95), 1.2 ms at most | — |
+| The widget's answer to a typed character (draft mark, Save) | 5–7 ms (p50), 11 ms at most | — |
+| Opening the editor of a 64-entry note | frames of 6–10 ms; 0.33 ms for the ordinary note | — |
+| CPU, hidden, a changed document every 2 s | 0.10–0.12 % of one core | — |
+
+What you type is drawn by OverCrow in its own field, in the frame of the
+key; the widget's logic is told the value afterwards and only updates the
+draft mark and the Save button. With the ordinary document the private
+memory is around OverCrow's 8 MB goal per widget (above it by up to 2 MB);
+with the largest document it is above that goal, and far under the 80 MB
+ceiling: the cost is the text itself, laid out by OverCrow, and in the
+editor one host field per entry. The frames that open the editor of a
+64-entry note are above OverCrow's 2 ms goal for a frame, once per opening.
+The egui widget it replaces painted in the overlay's own process at every
+frame (0.16 ms in Passive mode, 0.30 ms with its editor, largest
+document); OverCrow read the notes file at each start, and now only while
+this widget subscribes. Scenarios render the same images on Linux and
+Windows, pixel for pixel.
