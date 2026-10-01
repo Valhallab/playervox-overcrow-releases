@@ -123,3 +123,28 @@ it, is asked again one second later, three times at most; nothing polls.
   | `signed-out` | signed out of PlayerVox: the local sessions and a deletion, no account panel |
 
   The sessions of every fixture are synthetic.
+
+## Cost
+
+Measured on 2026-10-01 with OverCrow's release build, on an AMD Ryzen 7
+5800X3D Linux workstation and in a Windows 11 virtual machine (2 vCPU),
+over a synthetic journal of 10,000 sessions:
+
+| | Linux | Windows (VM) |
+| --- | --- | --- |
+| Widget start, warm, into the overlay's runtime | 7.9 ms (p50), 8.0 ms at most | VM ready in 15.0–15.6 ms (p50) |
+| VM memory, twenty pages read | 0.75 MiB private, 0.93 MiB PSS | 1.12–1.14 MiB private working set, 1.40–1.41 MiB private commit |
+| Private memory in all (VM, sandbox helpers, overlay share) | 3.1–6.1 MB | — |
+| CPU, a page held | 0.03 % of one core, no frame | — |
+| CPU, a page read every 2 s | 0.07–0.08 % of one core: one frame of 0.5 ms per page | — |
+| CPU, hidden, a page read every 2 s | 0.07 % of one core | — |
+| VM CPU | 0.02 % of one core while a page is read every 2 s; none at rest | — |
+
+The widget keeps the page it shows, never the journal: its memory does not
+grow with the journal's length or with the pages read, and there is no
+scrolling to measure. A page is read on a click or when the journal
+changes; the 2 s load is a stress. The egui widget it replaces painted its
+five rows at every overlay frame (0.08 ms a frame); OverCrow read the
+journal whenever that widget was enabled, and now only while this widget
+subscribes. Scenarios render the same images on Linux and Windows, pixel
+for pixel.
