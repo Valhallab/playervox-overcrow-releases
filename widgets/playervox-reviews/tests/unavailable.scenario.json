@@ -1,0 +1,192 @@
+{
+  "scenarioVersion": 1,
+  "name": "unavailable",
+  "description": "OverCrow ends the subscription when its reviews source fails: the widget says so, keeps nothing of the page it showed, and subscribes again five seconds later; hidden, it waits until it shows again.",
+  "fixtures": {
+    "calls": {
+      "playervox.reviews.page": [
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "r31",
+                "author": "Mira_Quill",
+                "grade": "S+",
+                "score": 94,
+                "text": "The co-op campaign is the best puzzle design I have played in years. Every chamber teaches one idea, then twists it twice before letting you go, and the writing never gets in the way of the thinking. My only complaint is the loading between chambers.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789900200000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r30",
+                "author": "Kestrel42",
+                "grade": "A",
+                "score": 74,
+                "text": "Solid puzzles, short story.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789813800000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r29",
+                "author": "Tavish",
+                "grade": "D",
+                "score": 38,
+                "text": "Runs badly on my laptop.\nCrashed twice in chapter 3.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789381800000,
+                "offsetMinutes": 120
+              }
+            ],
+            "page": 1,
+            "totalPages": 3,
+            "count": 7
+          }
+        }
+      ]
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Loading…"
+        ],
+        "calls": [
+          {
+            "service": "playervox.reviews.subscribe"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.reviews.subscribe",
+        "error": "unavailable"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "The reviews are unavailable. Retrying automatically."
+        ],
+        "noText": [
+          "Loading…"
+        ],
+        "image": "source-failed",
+        "calls": []
+      }
+    },
+    {
+      "advance": {
+        "ms": 4900
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "The reviews are unavailable. Retrying automatically."
+        ],
+        "calls": []
+      }
+    },
+    {
+      "advance": {
+        "ms": 100
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "playervox.reviews.subscribe"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.reviews.subscribe",
+        "value": {
+          "state": "ready",
+          "revision": 1,
+          "offline": false
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "7 reviews",
+          "Mira_Quill"
+        ],
+        "noText": [
+          "The reviews are unavailable. Retrying automatically."
+        ],
+        "image": "recovered",
+        "calls": [
+          {
+            "service": "playervox.reviews.page",
+            "params": {
+              "page": 1,
+              "followedOnly": false
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.reviews.subscribe",
+        "error": "unavailable"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "The reviews are unavailable. Retrying automatically."
+        ],
+        "noText": [
+          "7 reviews",
+          "Mira_Quill",
+          "Portal 2"
+        ]
+      }
+    },
+    {
+      "host": {
+        "visible": false
+      }
+    },
+    {
+      "advance": {
+        "ms": 60000
+      }
+    },
+    {
+      "expect": {
+        "calls": []
+      }
+    },
+    {
+      "host": {
+        "visible": true
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "playervox.reviews.subscribe"
+          }
+        ]
+      }
+    }
+  ]
+}

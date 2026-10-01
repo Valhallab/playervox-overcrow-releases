@@ -323,15 +323,46 @@ pub const SHAPES: &[NamedShape] = &[
                 NULLABLE_TEXT,
                 "Text, translated when a translation exists.",
             ),
-            member("original", NULLABLE_TEXT, "Untranslated text."),
+            member(
+                "original",
+                NULLABLE_TEXT,
+                "Untranslated text when `text` is a translation; `null` otherwise.",
+            ),
+            member(
+                "hidden",
+                Shape::Bool,
+                "Hidden by the community: show the text only once the user asks for it.",
+            ),
             member("publishedAt", Shape::Integer, "Unix ms."),
             member("offsetMinutes", Shape::Integer, OFFSET),
         ]),
         "One player review.",
     ),
     named(
+        "ReviewsState",
+        Shape::Record(&[
+            member(
+                "state",
+                Shape::Keyword(&["idle", "unsupported", "ready"]),
+                "`idle` without an active game, `unsupported` for a game without a Steam app ID, `ready` when `playervox.reviews.page` reads the game's reviews.",
+            ),
+            member(
+                "revision",
+                Shape::Integer,
+                "Changes whenever the reviews to read change: another game, another PlayerVox account, or reviews changed on PlayerVox.",
+            ),
+            member(
+                "offline",
+                Shape::Bool,
+                "PlayerVox is unreachable: `playervox.reviews.page` answers `not_connected`.",
+            ),
+        ]),
+        "The player reviews of the active game: what to read, not the reviews.",
+    ),
+    named(
         "ReviewsPage",
         Shape::Record(&[
+            member("gameName", Shape::Text, "Game name on PlayerVox."),
             member("items", Shape::List(&Shape::Named("Review")), "Reviews."),
             member("page", Shape::Integer, "Page number."),
             member("totalPages", Shape::Integer, "Number of pages."),

@@ -146,6 +146,54 @@ fn the_rating_subscription_carries_its_state() {
     );
 }
 
+/// `playervox.reviews.subscribe` says what to read, never the reviews; a
+/// page carries the game's name and each review whether it is hidden.
+#[test]
+fn the_reviews_subscription_says_what_to_read_and_pages_carry_hidden_reviews() {
+    let service = |name| {
+        overcrow_widget_schema::services::service(name)
+            .map(|service| service.returns)
+            .expect("service")
+    };
+    let state = service("playervox.reviews.subscribe");
+    for name in ["idle", "unsupported", "ready"] {
+        assert!(
+            state.matches(&json!({"state": name, "revision": 3, "offline": false})),
+            "{name}"
+        );
+    }
+    assert!(!state.matches(&json!(null)), "never a bare null");
+    assert!(
+        !state.matches(&json!({"state": "ready", "revision": 3})),
+        "offline is always present"
+    );
+    assert!(!state.matches(&json!({"state": "loading", "revision": 3, "offline": false})));
+    assert!(
+        !state.matches(&json!({"state": "ready", "revision": 3, "offline": false, "items": []})),
+        "the subscription carries no review"
+    );
+
+    let page = service("playervox.reviews.page");
+    let review = json!({
+        "id": "r7", "author": "Mira", "grade": "A", "score": 74,
+        "text": "Solid.", "original": null, "hidden": true,
+        "publishedAt": 1_789_900_200_000_u64, "offsetMinutes": 120,
+    });
+    let full = json!({
+        "gameName": "Portal 2", "items": [review], "page": 1, "totalPages": 1, "count": 1,
+    });
+    assert!(page.matches(&full));
+    let mut unnamed = full.clone();
+    unnamed.as_object_mut().expect("object").remove("gameName");
+    assert!(!page.matches(&unnamed), "the game's name is always present");
+    let mut unmarked = full;
+    unmarked["items"][0]
+        .as_object_mut()
+        .expect("object")
+        .remove("hidden");
+    assert!(!page.matches(&unmarked), "hidden is always present");
+}
+
 #[test]
 fn scalars_are_checked() {
     assert!(Shape::Integer.matches(&json!(9_007_199_254_740_991_u64)));

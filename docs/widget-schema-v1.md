@@ -863,7 +863,8 @@ Authority is checked by the host at every call, immediately before acting. Gestu
 | `notes.delete` | capability `notes.write` | call | yes | yes | `note`: text ≤ `MAX_OBJECT_ID_BYTES` | `null`, or `cancelled` when the user declines | `null` | fixed |
 | `playervox.score.subscribe` | capability `playervox.score.read` | subscribe | no | no | none | `{ state, name, score, grade, ratingsCount, criteria }`: `state` is `idle`, `unsupported`, `loading`, `ready`, `no_ratings`, `not_found` or `unavailable`; `criteria` `{ gameplay, art, tech }`, each 0–100 or `null` | `Score` | fixed |
 | `playervox.rating.subscribe` | capability `playervox.rating.read` | subscribe | no | no | none | `{ state, name, offline, rating }`: `state` is `idle`, `unsupported`, `loading`, `ready` or `unavailable`; `rating` is `null` before the user's first rating, or `{ gameplay, art, tech, review, publishedAt, offsetMinutes }`. Nothing is sent while the PlayerVox account is signed out, pending or expired. A published rating is sent again by the subscription. The host seeds the `playervox.rating.publish` controls from it | `RatingState` | fixed |
-| `playervox.reviews.page` | capability `playervox.reviews.read` | call | no | no | `page?`: integer 1..=100000; `followedOnly?`: boolean | `{ items, page, totalPages, count }`; each item `{ id, author, grade, score, text, original, publishedAt, offsetMinutes }`, `text` in the user's language when a translation exists, `original` the untranslated text or `null`, both cut by the host to `MAX_NODE_TEXT_BYTES` | `ReviewsPage` | fixed |
+| `playervox.reviews.subscribe` | capability `playervox.reviews.read` | subscribe | no | no | none | `{ state, revision, offline }`: `state` is `idle`, `unsupported` or `ready`; `revision` changes whenever the reviews to read change (another game, another PlayerVox account, reviews changed on PlayerVox), so the widget reads its page again; `offline` while PlayerVox is unreachable. Nothing is sent while the PlayerVox account is signed out, pending or expired. Holding this subscription is what keeps the host's reviews source running | `ReviewsState` | fixed |
+| `playervox.reviews.page` | capability `playervox.reviews.read` | call | no | no | `page?`: integer 1..=100000; `followedOnly?`: boolean | `{ gameName, items, page, totalPages, count }`: three reviews of the active game per page, in the language of the host's interface; a page past the end answers the last page; each item `{ id, author, grade, score, text, original, hidden, publishedAt, offsetMinutes }`, `text` translated when a translation exists, `original` the untranslated text of a translated review or `null`, both cut by the host to `MAX_NODE_TEXT_BYTES`. Each call reads its own page: the host keeps no page position or filter shared between widgets | `ReviewsPage` | fixed |
 | `journal.subscribe` | capability `journal.read` | subscribe | no | no | none | `null` without an active game, or `{ revision, notice }`: `revision` changes whenever the merged journal of the active game changes (a session recorded or deleted, cloud sessions merged, the PlayerVox account or sync changed), so the widget reads its page again; `notice` is `null`, `offline`, `storage_unavailable`, `full`, `expired`, `busy` or `unavailable`. Holding this subscription is what keeps the host's journal source running | `JournalState` or `null` | fixed |
 | `journal.page` | capability `journal.read` | call | no | no | `cursor?`: text ≤ `MAX_OBJECT_ID_BYTES` | `{ gameName, items, page, next, previous }`: five local and cloud sessions of the active game, merged and deduplicated, newest first; without `cursor`, the first page; each item `{ id, startedAt, offsetMinutes, durationMs, source }`; cursors are host handles that stay valid for the widget whatever other widgets read, and a cursor past the end answers the last page | `JournalPage` | fixed |
 | `journal.delete` | capability `journal.delete` | call | yes | yes | `session`: text ≤ `MAX_OBJECT_ID_BYTES` | `null`, or `cancelled` when the user declines; `not_connected` for a cloud session while PlayerVox is disconnected | `null` | fixed |
@@ -1049,7 +1050,7 @@ The user's own rating of the active game, with its state. `{ state, name, offlin
 
 #### `Review`
 
-One player review. `{ id, author, grade, score, text, original, publishedAt, offsetMinutes }`
+One player review. `{ id, author, grade, score, text, original, hidden, publishedAt, offsetMinutes }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
@@ -1058,16 +1059,28 @@ One player review. `{ id, author, grade, score, text, original, publishedAt, off
 | `grade` | `S+` \| `S` \| `A` \| `B` \| `C` \| `D` \| `F` \| `--` | Grade. |
 | `score` | integer | 0–100. |
 | `text` | text or `null` | Text, translated when a translation exists. |
-| `original` | text or `null` | Untranslated text. |
+| `original` | text or `null` | Untranslated text when `text` is a translation; `null` otherwise. |
+| `hidden` | boolean | Hidden by the community: show the text only once the user asks for it. |
 | `publishedAt` | integer | Unix ms. |
 | `offsetMinutes` | integer | UTC offset in minutes to show the timestamp with. |
 
-#### `ReviewsPage`
+#### `ReviewsState`
 
-A page of player reviews. `{ items, page, totalPages, count }`
+The player reviews of the active game: what to read, not the reviews. `{ state, revision, offline }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
+| `state` | `idle` \| `unsupported` \| `ready` | `idle` without an active game, `unsupported` for a game without a Steam app ID, `ready` when `playervox.reviews.page` reads the game's reviews. |
+| `revision` | integer | Changes whenever the reviews to read change: another game, another PlayerVox account, or reviews changed on PlayerVox. |
+| `offline` | boolean | PlayerVox is unreachable: `playervox.reviews.page` answers `not_connected`. |
+
+#### `ReviewsPage`
+
+A page of player reviews. `{ gameName, items, page, totalPages, count }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `gameName` | text | Game name on PlayerVox. |
 | `items` | list of `Review` | Reviews. |
 | `page` | integer | Page number. |
 | `totalPages` | integer | Number of pages. |

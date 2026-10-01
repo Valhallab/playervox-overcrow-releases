@@ -1,0 +1,260 @@
+/* The built-in's layout at 100 %: a 24 px header (title, PlayerVox mark),
+   the game's name, the last failed read, then up to three reviews under a
+   rule each, in a list that scrolls beyond 340 px, and the paging footer
+   below it. The wrapper draws the panel; the content keeps the built-in's
+   10 x 8 px margin. The width is the user's: a long name or review never
+   widens the panel. */
+.reviews {
+  display: grid;
+  grid-template-columns: minmax(0px, 1fr);
+  /* A taller panel leaves its free space below the footer. */
+  align-content: start;
+  width: 100%;
+  padding: 8px 10px;
+}
+
+/* OverCrow draws its offline notice over the last 22 px of the content. */
+.offline {
+  padding-bottom: 30px;
+}
+
+.header {
+  flex-direction: row;
+  align-items: start;
+  column-gap: 6px;
+  height: 24px;
+}
+
+.title {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The mark keeps the header's right corner. */
+.mark {
+  width: 16px;
+  height: 18px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.game {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 17px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+/* The last failed read or the widget's condition: wrapped, muted. */
+.message,
+.status {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  line-height: 15px;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+
+.message {
+  color: var(--color-warning);
+}
+
+/* The reviews scroll; the footer stays below them. */
+.list {
+  flex-direction: column;
+  max-height: 340px;
+}
+
+.rule {
+  height: 1px;
+  background: var(--color-border);
+  margin: 3px 0px;
+}
+
+.review {
+  flex-direction: column;
+  row-gap: 4px;
+  padding: 3px 0px 4px 0px;
+}
+
+/* The badge, the player's name over the date, the score on the right. */
+.head {
+  flex-direction: row;
+  align-items: center;
+  column-gap: 8px;
+  min-height: 32px;
+}
+
+/* The shared badge at 42 %: a 32 px canvas around a 24 px badge. */
+.grade {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.who {
+  flex-direction: column;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0px;
+  row-gap: 1px;
+}
+
+.author {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.date {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  font-variant-numeric: tabular-nums;
+  line-height: 14px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.score {
+  flex-shrink: 0;
+  font-family: var(--font-ui);
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 22px;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+/* A review keeps its line breaks and wraps in the panel's width. */
+.body {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 17px;
+  color: var(--color-text-secondary);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* A long review folds to three lines until the user asks for more. */
+.folded {
+  line-clamp: 3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.note {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  line-height: 15px;
+  color: var(--color-text-muted);
+}
+
+/* The review's small buttons, wrapped: plain muted text. */
+.actions {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 2px;
+}
+
+.link {
+  padding: 1px 2px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+}
+
+.link-text {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  line-height: 15px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.link:hover,
+.link:focus {
+  background: var(--color-surface-hover);
+}
+
+.link:hover .link-text,
+.link:focus .link-text {
+  color: var(--color-text);
+}
+
+/* The built-in's compact icon buttons: a raised surface, lighter under
+   the pointer or with the keyboard focus, dimmed while they cannot act. */
+.control {
+  width: var(--icon-button-size);
+  height: var(--icon-button-size);
+  padding: 5px;
+  /* The icon (sized by `font-size`) fills the 12 px content box exactly
+     and is centred in it. */
+  font-size: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+}
+
+.control:hover,
+.control:focus {
+  background: var(--color-surface-hover);
+}
+
+.control:disabled {
+  color: var(--color-text-subtle);
+  background: var(--color-surface-raised);
+}
+
+/* The count on the left; the pager keeps the right edge. */
+.footer {
+  flex-direction: row;
+  align-items: center;
+  column-gap: 6px;
+  margin-top: 6px;
+  min-height: 22px;
+}
+
+.count {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pager {
+  flex-shrink: 0;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}

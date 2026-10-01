@@ -1,0 +1,152 @@
+{
+  "scenarioVersion": 1,
+  "name": "offline-start",
+  "description": "Started while PlayerVox is unreachable, the widget has no page to show: it says so and reads nothing, in both languages, until PlayerVox is back.",
+  "host": {
+    "frame": true,
+    "accounts": {
+      "playervox": "offline"
+    }
+  },
+  "fixtures": {
+    "calls": {
+      "playervox.reviews.page": [
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "r31",
+                "author": "Mira_Quill",
+                "grade": "S+",
+                "score": 94,
+                "text": "The co-op campaign is the best puzzle design I have played in years. Every chamber teaches one idea, then twists it twice before letting you go, and the writing never gets in the way of the thinking. My only complaint is the loading between chambers.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789900200000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r30",
+                "author": "Kestrel42",
+                "grade": "A",
+                "score": 74,
+                "text": "Solid puzzles, short story.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789813800000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r29",
+                "author": "Tavish",
+                "grade": "D",
+                "score": 38,
+                "text": "Runs badly on my laptop.\nCrashed twice in chapter 3.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789381800000,
+                "offsetMinutes": 120
+              }
+            ],
+            "page": 1,
+            "totalPages": 3,
+            "count": 7
+          }
+        }
+      ]
+    },
+    "subscriptions": {
+      "playervox.reviews.subscribe": {
+        "state": "ready",
+        "revision": 1,
+        "offline": true
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Offline · Reviews show once PlayerVox is reachable again."
+        ],
+        "noText": [
+          "Loading…"
+        ],
+        "image": "offline-start",
+        "calls": [
+          {
+            "service": "playervox.reviews.subscribe",
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Hors ligne · Les avis s’afficheront au retour de PlayerVox."
+        ],
+        "image": "offline-start-light-fr",
+        "calls": []
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark",
+        "region": {
+          "numberFormat": "us",
+          "dateOrder": "mdy"
+        }
+      }
+    },
+    {
+      "host": {
+        "accounts": {
+          "playervox": "connected"
+        }
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.reviews.subscribe",
+        "value": {
+          "state": "ready",
+          "revision": 1,
+          "offline": false
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "7 reviews"
+        ],
+        "noText": [
+          "Offline · Reviews show once PlayerVox is reachable again."
+        ],
+        "calls": [
+          {
+            "service": "playervox.reviews.page",
+            "params": {
+              "page": 1,
+              "followedOnly": false
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    }
+  ]
+}

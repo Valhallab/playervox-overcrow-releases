@@ -64,7 +64,8 @@ const MAX_LABEL_BYTES = 256;
 
 // <shared:playervox-badge/badge.ts>
 // The PlayerVox grade badge and mark, shared by the Score and Rating
-// built-ins; the Journal draws the mark alone. scripts/sync-shared-widgets.mjs
+// built-ins; the Journal draws the mark alone, and Player reviews the mark
+// and a smaller badge per review. scripts/sync-shared-widgets.mjs
 // copies this file, as is, into
 // their logic.ts between the markers `// <shared:playervox-badge/badge.ts>`;
 // edit it here, never in a copy. The copy relies on the widget importing

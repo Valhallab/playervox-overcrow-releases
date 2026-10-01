@@ -119,7 +119,7 @@ export interface CapabilityServices {
   /** Publish a rating and review through a host-bound intent. */
   readonly "playervox.rating.write": never;
   /** Paged player reviews of the active game, optionally from followed players only. */
-  readonly "playervox.reviews.read": "playervox.reviews.page";
+  readonly "playervox.reviews.read": "playervox.reviews.subscribe" | "playervox.reviews.page";
   /** Play sessions of the active game: local ones, plus cloud ones while PlayerVox is connected. */
   readonly "journal.read": "journal.subscribe" | "journal.page";
   /** Delete a journal session after native confirmation; cloud rows need PlayerVox. */
@@ -589,16 +589,30 @@ export interface Review {
   readonly score: number;
   /** Text, translated when a translation exists. */
   readonly text: string | null;
-  /** Untranslated text. */
+  /** Untranslated text when `text` is a translation; `null` otherwise. */
   readonly original: string | null;
+  /** Hidden by the community: show the text only once the user asks for it. */
+  readonly hidden: boolean;
   /** Unix ms. */
   readonly publishedAt: number;
   /** UTC offset in minutes to show the timestamp with. */
   readonly offsetMinutes: number;
 }
 
+/** The player reviews of the active game: what to read, not the reviews. */
+export interface ReviewsState {
+  /** `idle` without an active game, `unsupported` for a game without a Steam app ID, `ready` when `playervox.reviews.page` reads the game's reviews. */
+  readonly state: "idle" | "unsupported" | "ready";
+  /** Changes whenever the reviews to read change: another game, another PlayerVox account, or reviews changed on PlayerVox. */
+  readonly revision: number;
+  /** PlayerVox is unreachable: `playervox.reviews.page` answers `not_connected`. */
+  readonly offline: boolean;
+}
+
 /** A page of player reviews. */
 export interface ReviewsPage {
+  /** Game name on PlayerVox. */
+  readonly gameName: string;
   /** Reviews. */
   readonly items: ReadonlyArray<Review>;
   /** Page number. */
@@ -823,6 +837,8 @@ export interface ServiceParamsMap {
   readonly "playervox.score.subscribe": Record<string, never>;
   /** Parameters of `playervox.rating.subscribe`. */
   readonly "playervox.rating.subscribe": Record<string, never>;
+  /** Parameters of `playervox.reviews.subscribe`. */
+  readonly "playervox.reviews.subscribe": Record<string, never>;
   /** Parameters of `playervox.reviews.page`. */
   readonly "playervox.reviews.page": {
     /** Page number; default 1. */
@@ -916,7 +932,9 @@ export interface ServiceResultMap {
   readonly "playervox.score.subscribe": Score;
   /** `playervox.rating.subscribe`: `{ state, name, offline, rating }`: `state` is `idle`, `unsupported`, `loading`, `ready` or `unavailable`; `rating` is `null` before the user's first rating, or `{ gameplay, art, tech, review, publishedAt, offsetMinutes }`. Nothing is sent while the PlayerVox account is signed out, pending or expired. A published rating is sent again by the subscription. The host seeds the `playervox.rating.publish` controls from it. */
   readonly "playervox.rating.subscribe": RatingState;
-  /** `playervox.reviews.page`: `{ items, page, totalPages, count }`; each item `{ id, author, grade, score, text, original, publishedAt, offsetMinutes }`, `text` in the user's language when a translation exists, `original` the untranslated text or `null`, both cut by the host to `MAX_NODE_TEXT_BYTES`. */
+  /** `playervox.reviews.subscribe`: `{ state, revision, offline }`: `state` is `idle`, `unsupported` or `ready`; `revision` changes whenever the reviews to read change (another game, another PlayerVox account, reviews changed on PlayerVox), so the widget reads its page again; `offline` while PlayerVox is unreachable. Nothing is sent while the PlayerVox account is signed out, pending or expired. Holding this subscription is what keeps the host's reviews source running. */
+  readonly "playervox.reviews.subscribe": ReviewsState;
+  /** `playervox.reviews.page`: `{ gameName, items, page, totalPages, count }`: three reviews of the active game per page, in the language of the host's interface; a page past the end answers the last page; each item `{ id, author, grade, score, text, original, hidden, publishedAt, offsetMinutes }`, `text` translated when a translation exists, `original` the untranslated text of a translated review or `null`, both cut by the host to `MAX_NODE_TEXT_BYTES`. Each call reads its own page: the host keeps no page position or filter shared between widgets. */
   readonly "playervox.reviews.page": ReviewsPage;
   /** `journal.subscribe`: `null` without an active game, or `{ revision, notice }`: `revision` changes whenever the merged journal of the active game changes (a session recorded or deleted, cloud sessions merged, the PlayerVox account or sync changed), so the widget reads its page again; `notice` is `null`, `offline`, `storage_unavailable`, `full`, `expired`, `busy` or `unavailable`. Holding this subscription is what keeps the host's journal source running. */
   readonly "journal.subscribe": JournalState | null;
@@ -972,6 +990,7 @@ export type SubscribeServiceName =
   | "notes.subscribe"
   | "playervox.score.subscribe"
   | "playervox.rating.subscribe"
+  | "playervox.reviews.subscribe"
   | "journal.subscribe"
   | "twitch.chat.subscribe";
 

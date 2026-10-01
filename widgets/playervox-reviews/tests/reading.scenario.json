@@ -1,0 +1,591 @@
+{
+  "scenarioVersion": 1,
+  "name": "reading",
+  "description": "Reading a review in Interactive mode. A long review folds to three lines behind Read more, and Show less folds it again. In French, PlayerVox answers the translations: a translated review is marked, Show original shows its untranslated text and Show translation comes back. A review hidden by the community shows no text until Show review. The choices stay through a new revision of the same page and start again on another page; Passive mode has no button.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "calls": {
+      "playervox.reviews.page": [
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "r31",
+                "author": "Mira_Quill",
+                "grade": "S+",
+                "score": 94,
+                "text": "The co-op campaign is the best puzzle design I have played in years. Every chamber teaches one idea, then twists it twice before letting you go, and the writing never gets in the way of the thinking. My only complaint is the loading between chambers.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789900200000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r30",
+                "author": "Kestrel42",
+                "grade": "A",
+                "score": 74,
+                "text": "Solid puzzles, short story.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789813800000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r29",
+                "author": "Tavish",
+                "grade": "D",
+                "score": 38,
+                "text": "Runs badly on my laptop.\nCrashed twice in chapter 3.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789381800000,
+                "offsetMinutes": 120
+              }
+            ],
+            "page": 1,
+            "totalPages": 3,
+            "count": 7
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "r31",
+                "author": "Mira_Quill",
+                "grade": "S+",
+                "score": 94,
+                "text": "La campagne en coopération est la meilleure conception de puzzles à laquelle j’ai joué depuis des années. Chaque salle enseigne une idée, puis la retourne deux fois avant de vous laisser partir, et l’écriture ne gêne jamais la réflexion. Mon seul reproche : les chargements entre les salles.",
+                "original": "The co-op campaign is the best puzzle design I have played in years. Every chamber teaches one idea, then twists it twice before letting you go, and the writing never gets in the way of the thinking. My only complaint is the loading between chambers.",
+                "hidden": false,
+                "publishedAt": 1789900200000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r30",
+                "author": "Kestrel42",
+                "grade": "A",
+                "score": 74,
+                "text": "Des puzzles solides, une histoire courte.",
+                "original": "Solid puzzles, short story.",
+                "hidden": false,
+                "publishedAt": 1789813800000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r29",
+                "author": "Tavish",
+                "grade": "D",
+                "score": 38,
+                "text": "Runs badly on my laptop.\nCrashed twice in chapter 3.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789381800000,
+                "offsetMinutes": 120
+              }
+            ],
+            "page": 1,
+            "totalPages": 3,
+            "count": 7
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "r31",
+                "author": "Mira_Quill",
+                "grade": "S+",
+                "score": 94,
+                "text": "La campagne en coopération est la meilleure conception de puzzles à laquelle j’ai joué depuis des années. Chaque salle enseigne une idée, puis la retourne deux fois avant de vous laisser partir, et l’écriture ne gêne jamais la réflexion. Mon seul reproche : les chargements entre les salles.",
+                "original": "The co-op campaign is the best puzzle design I have played in years. Every chamber teaches one idea, then twists it twice before letting you go, and the writing never gets in the way of the thinking. My only complaint is the loading between chambers.",
+                "hidden": false,
+                "publishedAt": 1789900200000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r30",
+                "author": "Kestrel42",
+                "grade": "A",
+                "score": 74,
+                "text": "Des puzzles solides, une histoire courte.",
+                "original": "Solid puzzles, short story.",
+                "hidden": false,
+                "publishedAt": 1789813800000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r29",
+                "author": "Tavish",
+                "grade": "D",
+                "score": 38,
+                "text": "Runs badly on my laptop.\nCrashed twice in chapter 3.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789381800000,
+                "offsetMinutes": 120
+              }
+            ],
+            "page": 1,
+            "totalPages": 3,
+            "count": 7
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "r28",
+                "author": "Onyx Vale",
+                "grade": "S",
+                "score": 81,
+                "text": "Toujours drôle après toutes ces années.",
+                "original": "Still funny after all these years.",
+                "hidden": false,
+                "publishedAt": 1789122600000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r27",
+                "author": "Lune-Bleue",
+                "grade": "B",
+                "score": 62,
+                "text": "Bien, mais j’aurais voulu plus de salles.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1788690600000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r26",
+                "author": "brackish_owl",
+                "grade": "F",
+                "score": 12,
+                "text": "Not for me.",
+                "original": null,
+                "hidden": true,
+                "publishedAt": 1788172200000,
+                "offsetMinutes": 120
+              }
+            ],
+            "page": 2,
+            "totalPages": 3,
+            "count": 7
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "r31",
+                "author": "Mira_Quill",
+                "grade": "S+",
+                "score": 94,
+                "text": "La campagne en coopération est la meilleure conception de puzzles à laquelle j’ai joué depuis des années. Chaque salle enseigne une idée, puis la retourne deux fois avant de vous laisser partir, et l’écriture ne gêne jamais la réflexion. Mon seul reproche : les chargements entre les salles.",
+                "original": "The co-op campaign is the best puzzle design I have played in years. Every chamber teaches one idea, then twists it twice before letting you go, and the writing never gets in the way of the thinking. My only complaint is the loading between chambers.",
+                "hidden": false,
+                "publishedAt": 1789900200000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r30",
+                "author": "Kestrel42",
+                "grade": "A",
+                "score": 74,
+                "text": "Des puzzles solides, une histoire courte.",
+                "original": "Solid puzzles, short story.",
+                "hidden": false,
+                "publishedAt": 1789813800000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r29",
+                "author": "Tavish",
+                "grade": "D",
+                "score": 38,
+                "text": "Runs badly on my laptop.\nCrashed twice in chapter 3.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789381800000,
+                "offsetMinutes": 120
+              }
+            ],
+            "page": 1,
+            "totalPages": 3,
+            "count": 7
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "r28",
+                "author": "Onyx Vale",
+                "grade": "S",
+                "score": 81,
+                "text": "Toujours drôle après toutes ces années.",
+                "original": "Still funny after all these years.",
+                "hidden": false,
+                "publishedAt": 1789122600000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r27",
+                "author": "Lune-Bleue",
+                "grade": "B",
+                "score": 62,
+                "text": "Bien, mais j’aurais voulu plus de salles.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1788690600000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r26",
+                "author": "brackish_owl",
+                "grade": "F",
+                "score": 12,
+                "text": "Not for me.",
+                "original": null,
+                "hidden": true,
+                "publishedAt": 1788172200000,
+                "offsetMinutes": 120
+              }
+            ],
+            "page": 2,
+            "totalPages": 3,
+            "count": 7
+          }
+        }
+      ]
+    },
+    "subscriptions": {
+      "playervox.reviews.subscribe": {
+        "state": "ready",
+        "revision": 1,
+        "offline": false
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Read more",
+          "1 / 3"
+        ],
+        "noText": [
+          "Show less",
+          "Translated"
+        ],
+        "image": "folded"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Read more"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Show less",
+          "The co-op campaign is the best puzzle design I have played in years. Every chamber teaches one idea, then twists it twice before letting you go, and the writing never gets in the way of the thinking. My only complaint is the loading between chambers."
+        ],
+        "noText": [
+          "Read more"
+        ],
+        "image": "expanded"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Show less"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Read more"
+        ],
+        "noText": [
+          "Show less"
+        ]
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Lire la suite",
+          "Traduit",
+          "Voir l’original",
+          "La campagne en coopération est la meilleure conception de puzzles à laquelle j’ai joué depuis des années. Chaque salle enseigne une idée, puis la retourne deux fois avant de vous laisser partir, et l’écriture ne gêne jamais la réflexion. Mon seul reproche : les chargements entre les salles."
+        ],
+        "noText": [
+          "Voir la traduction",
+          "The co-op campaign is the best puzzle design I have played in years. Every chamber teaches one idea, then twists it twice before letting you go, and the writing never gets in the way of the thinking. My only complaint is the loading between chambers."
+        ],
+        "image": "translated-light-fr",
+        "calls": [
+          {
+            "service": "playervox.reviews.subscribe",
+            "outcome": "ok"
+          },
+          {
+            "service": "playervox.reviews.page",
+            "params": {
+              "page": 1,
+              "followedOnly": false
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "playervox.reviews.page",
+            "params": {
+              "page": 1,
+              "followedOnly": false
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Voir l’original"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Voir la traduction",
+          "The co-op campaign is the best puzzle design I have played in years. Every chamber teaches one idea, then twists it twice before letting you go, and the writing never gets in the way of the thinking. My only complaint is the loading between chambers.",
+          "Des puzzles solides, une histoire courte."
+        ],
+        "noText": [
+          "La campagne en coopération est la meilleure conception de puzzles à laquelle j’ai joué depuis des années. Chaque salle enseigne une idée, puis la retourne deux fois avant de vous laisser partir, et l’écriture ne gêne jamais la réflexion. Mon seul reproche : les chargements entre les salles."
+        ],
+        "image": "original-light-fr"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Lire la suite"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Réduire",
+          "Voir la traduction"
+        ],
+        "image": "original-expanded-light-fr"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.reviews.subscribe",
+        "value": {
+          "state": "ready",
+          "revision": 2,
+          "offline": false
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Réduire",
+          "Voir la traduction",
+          "The co-op campaign is the best puzzle design I have played in years. Every chamber teaches one idea, then twists it twice before letting you go, and the writing never gets in the way of the thinking. My only complaint is the loading between chambers."
+        ],
+        "noText": [
+          "Lire la suite"
+        ],
+        "calls": [
+          {
+            "service": "playervox.reviews.page",
+            "params": {
+              "page": 1,
+              "followedOnly": false
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Voir la traduction"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Réduire",
+          "La campagne en coopération est la meilleure conception de puzzles à laquelle j’ai joué depuis des années. Chaque salle enseigne une idée, puis la retourne deux fois avant de vous laisser partir, et l’écriture ne gêne jamais la réflexion. Mon seul reproche : les chargements entre les salles."
+        ],
+        "noText": [
+          "The co-op campaign is the best puzzle design I have played in years. Every chamber teaches one idea, then twists it twice before letting you go, and the writing never gets in the way of the thinking. My only complaint is the loading between chambers.",
+          "Voir la traduction"
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Page suivante"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "2 / 3",
+          "Avis masqué par la communauté",
+          "Afficher l’avis",
+          "Traduit"
+        ],
+        "noText": [
+          "Not for me.",
+          "Réduire"
+        ],
+        "image": "hidden-light-fr",
+        "calls": [
+          {
+            "service": "playervox.reviews.page",
+            "params": {
+              "page": 2,
+              "followedOnly": false
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Afficher l’avis"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Not for me."
+        ],
+        "noText": [
+          "Avis masqué par la communauté",
+          "Afficher l’avis"
+        ],
+        "image": "revealed-light-fr"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Page précédente"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "1 / 3",
+          "Lire la suite",
+          "Voir l’original",
+          "La campagne en coopération est la meilleure conception de puzzles à laquelle j’ai joué depuis des années. Chaque salle enseigne une idée, puis la retourne deux fois avant de vous laisser partir, et l’écriture ne gêne jamais la réflexion. Mon seul reproche : les chargements entre les salles."
+        ],
+        "noText": [
+          "Réduire",
+          "Voir la traduction"
+        ],
+        "calls": [
+          {
+            "service": "playervox.reviews.page",
+            "params": {
+              "page": 1,
+              "followedOnly": false
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Page suivante"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Avis masqué par la communauté"
+        ],
+        "noText": [
+          "Not for me."
+        ],
+        "calls": [
+          {
+            "service": "playervox.reviews.page",
+            "params": {
+              "page": 2,
+              "followedOnly": false
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Traduit",
+          "Avis masqué par la communauté"
+        ],
+        "noText": [
+          "Afficher l’avis",
+          "Voir l’original"
+        ],
+        "image": "hidden-passive-light-fr"
+      }
+    }
+  ]
+}
