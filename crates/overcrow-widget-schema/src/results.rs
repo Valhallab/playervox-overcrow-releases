@@ -358,7 +358,11 @@ pub const SHAPES: &[NamedShape] = &[
     named(
         "JournalPage",
         Shape::Record(&[
-            member("gameName", Shape::Text, "Active game; empty when the host has no name."),
+            member(
+                "gameName",
+                Shape::Text,
+                "Active game; empty when the host has no name.",
+            ),
             member(
                 "items",
                 Shape::List(&Shape::Named("JournalSession")),
