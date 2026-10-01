@@ -691,6 +691,8 @@ export interface ChatMessage {
   } | null;
   /** Deleted by a moderator. */
   readonly deleted: boolean;
+  /** When the host received the message, in Unix milliseconds of the host's clock: compare it with `Date.now()` to age a message (the Passive fade), also after a `reset`. */
+  readonly receivedAt: number;
 }
 
 /** Twitch chat state. */
@@ -942,7 +944,7 @@ export interface ServiceResultMap {
   readonly "journal.page": JournalPage;
   /** `journal.delete`: `null`, or `cancelled` when the user declines; `not_connected` for a cloud session while PlayerVox is disconnected. */
   readonly "journal.delete": null;
-  /** `twitch.chat.subscribe`: `{ account, channel, joinState, favorites, canSend, generation, reset, messages, removed }`: `account` is `signed_out`, `pending`, `connected` or `expired` (sign-in is host chrome); messages arrive as deltas, with `reset` after subscribing, a generation change or a show; each message `{ id, author, color, badges, fragments, reply, deleted }` with at most `MAX_CHAT_FRAGMENTS` fragments, emotes and badges as `asset:` handles for the current theme and scale. */
+  /** `twitch.chat.subscribe`: `{ account, channel, joinState, favorites, canSend, generation, reset, messages, removed }`: `account` is `signed_out`, `pending`, `connected` or `expired` (sign-in is host chrome); messages arrive as deltas, with `reset` after subscribing, a generation change or a show; each message `{ id, author, color, badges, fragments, reply, deleted, receivedAt }` with at most `MAX_CHAT_FRAGMENTS` fragments, emotes and badges as `asset:` handles for the current theme and scale. */
   readonly "twitch.chat.subscribe": TwitchChat;
   /** `twitch.chat.join`: `null`; the host remembers the channel and rejoins it when the widget starts. */
   readonly "twitch.chat.join": null;

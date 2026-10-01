@@ -194,6 +194,32 @@ fn the_reviews_subscription_says_what_to_read_and_pages_carry_hidden_reviews() {
     assert!(!page.matches(&unmarked), "hidden is always present");
 }
 
+/// A chat message as the host delivers it.
+fn chat_message() -> serde_json::Value {
+    json!({
+        "id": "m1", "author": "Juniper", "color": "#ff7f50", "badges": [],
+        "fragments": [{"text": "hello "}, {"emote": "asset:00000000000000aa", "alt": "Wave"}],
+        "reply": null, "deleted": false, "receivedAt": 1_767_225_600_000_u64,
+    })
+}
+
+/// A chat message says when the host received it: after a `reset` the
+/// widget still tells an old message from a new one (the Passive fade).
+#[test]
+fn a_chat_message_carries_its_reception_time() {
+    let message = shape("ChatMessage").expect("shape").shape;
+    assert!(message.matches(&chat_message()));
+    let mut without = chat_message();
+    without
+        .as_object_mut()
+        .expect("object")
+        .remove("receivedAt");
+    assert!(!message.matches(&without), "receivedAt is always present");
+    let mut fractional = chat_message();
+    fractional["receivedAt"] = json!(1.5);
+    assert!(!message.matches(&fractional), "whole milliseconds");
+}
+
 #[test]
 fn scalars_are_checked() {
     assert!(Shape::Integer.matches(&json!(9_007_199_254_740_991_u64)));

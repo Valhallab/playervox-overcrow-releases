@@ -459,6 +459,11 @@ pub const SHAPES: &[NamedShape] = &[
                 "The message replied to.",
             ),
             member("deleted", Shape::Bool, "Deleted by a moderator."),
+            member(
+                "receivedAt",
+                Shape::Integer,
+                "When the host received the message, in Unix milliseconds of the host's clock: compare it with `Date.now()` to age a message (the Passive fade), also after a `reset`.",
+            ),
         ]),
         "One chat message.",
     ),
