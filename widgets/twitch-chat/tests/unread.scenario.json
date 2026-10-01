@@ -1,0 +1,997 @@
+{
+  "scenarioVersion": 1,
+  "name": "unread",
+  "description": "Scrolled away from the end of the history, the list stops following: new messages are counted on a button, messages OverCrow left out included, and a replacement or a removal is not. The button returns to the latest message; so does scrolling back to the end. At the end nothing is counted. A reset shows the end again.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "twitch.chat.subscribe": {
+        "account": "connected",
+        "channel": "juniper_plays",
+        "joinState": "joined",
+        "failure": null,
+        "favorites": [],
+        "canSend": true,
+        "generation": 1,
+        "reset": true,
+        "messages": [
+          {
+            "id": "b1",
+            "author": "River_Otter",
+            "color": "#1e90ff",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 1"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b2",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 2"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b3",
+            "author": "Fern_42",
+            "color": "#2e8b57",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 3"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b4",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 4"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b5",
+            "author": "River_Otter",
+            "color": "#1e90ff",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 5"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b6",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 6"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b7",
+            "author": "Fern_42",
+            "color": "#2e8b57",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 7"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b8",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 8"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b9",
+            "author": "River_Otter",
+            "color": "#1e90ff",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 9"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b10",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 10"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b11",
+            "author": "Fern_42",
+            "color": "#2e8b57",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 11"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b12",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 12"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b13",
+            "author": "River_Otter",
+            "color": "#1e90ff",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 13"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b14",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 14"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b15",
+            "author": "Fern_42",
+            "color": "#2e8b57",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 15"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b16",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 16"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b17",
+            "author": "River_Otter",
+            "color": "#1e90ff",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 17"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b18",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 18"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b19",
+            "author": "Fern_42",
+            "color": "#2e8b57",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 19"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b20",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 20"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b21",
+            "author": "River_Otter",
+            "color": "#1e90ff",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 21"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b22",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 22"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b23",
+            "author": "Fern_42",
+            "color": "#2e8b57",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 23"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b24",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 24"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b25",
+            "author": "River_Otter",
+            "color": "#1e90ff",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 25"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b26",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 26"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b27",
+            "author": "Fern_42",
+            "color": "#2e8b57",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 27"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b28",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 28"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b29",
+            "author": "River_Otter",
+            "color": "#1e90ff",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 29"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "b30",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "burst line 30"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          }
+        ],
+        "removed": [],
+        "skipped": 0
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Moss: burst line 30"
+        ],
+        "calls": [
+          {
+            "service": "twitch.chat.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "image": "at-the-end"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [],
+          "canSend": true,
+          "generation": 1,
+          "reset": false,
+          "messages": [
+            {
+              "id": "b31",
+              "author": "Fern_42",
+              "color": "#2e8b57",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "burst line 31"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            }
+          ],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "1 new message"
+        ],
+        "text": [
+          "Fern_42: burst line 31"
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "wheel": {
+          "target": {
+            "text": "Fern_42: burst line 31"
+          },
+          "dx": 0,
+          "dy": -6
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "1 new message"
+        ],
+        "image": "scrolled-away"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [],
+          "canSend": true,
+          "generation": 1,
+          "reset": false,
+          "messages": [
+            {
+              "id": "b32",
+              "author": "Juniper",
+              "color": "#ff7f50",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "burst line 32"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            }
+          ],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "1 new message"
+        ],
+        "image": "one-new-message"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [],
+          "canSend": true,
+          "generation": 1,
+          "reset": false,
+          "messages": [
+            {
+              "id": "b33",
+              "author": "River_Otter",
+              "color": "#1e90ff",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "burst line 33"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            },
+            {
+              "id": "b34",
+              "author": "Moss",
+              "color": null,
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "burst line 34"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            },
+            {
+              "id": "b35",
+              "author": "Fern_42",
+              "color": "#2e8b57",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "burst line 35"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            },
+            {
+              "id": "b36",
+              "author": "Juniper",
+              "color": "#ff7f50",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "burst line 36"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            }
+          ],
+          "removed": [],
+          "skipped": 2
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "7 new messages"
+        ],
+        "noText": [
+          "1 new message"
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [],
+          "canSend": true,
+          "generation": 1,
+          "reset": false,
+          "messages": [
+            {
+              "id": "b33",
+              "author": "River_Otter",
+              "color": "#1e90ff",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "burst line 33, edited"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            }
+          ],
+          "removed": [
+            "b34"
+          ],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "7 new messages"
+        ],
+        "image": "seven-new-messages"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "7 nouveaux messages"
+        ],
+        "image": "seven-new-messages-light-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "7 new messages"
+        }
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "expect": {
+        "noText": [
+          "7 new messages"
+        ],
+        "text": [
+          "Juniper: burst line 36",
+          "2 messages not shown",
+          "River_Otter: burst line 33, edited"
+        ],
+        "image": "back-to-the-latest"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [],
+          "canSend": true,
+          "generation": 1,
+          "reset": false,
+          "messages": [
+            {
+              "id": "b37",
+              "author": "River_Otter",
+              "color": "#1e90ff",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "burst line 37"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            }
+          ],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "1 new message"
+        ],
+        "text": [
+          "River_Otter: burst line 37"
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "wheel": {
+          "target": {
+            "text": "River_Otter: burst line 37"
+          },
+          "dx": 0,
+          "dy": -6
+        }
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [],
+          "canSend": true,
+          "generation": 1,
+          "reset": false,
+          "messages": [
+            {
+              "id": "b38",
+              "author": "Moss",
+              "color": null,
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "burst line 38"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            }
+          ],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "1 new message"
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "wheel": {
+          "target": {
+            "at": [
+              200,
+              150
+            ]
+          },
+          "dx": 0,
+          "dy": 20
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "1 new message"
+        ],
+        "text": [
+          "Moss: burst line 38"
+        ],
+        "image": "scrolled-back"
+      }
+    },
+    {
+      "pointer": {
+        "wheel": {
+          "target": {
+            "at": [
+              200,
+              150
+            ]
+          },
+          "dx": 0,
+          "dy": -6
+        }
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [],
+          "canSend": true,
+          "generation": 1,
+          "reset": false,
+          "messages": [
+            {
+              "id": "b39",
+              "author": "Fern_42",
+              "color": "#2e8b57",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "burst line 39"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            },
+            {
+              "id": "b40",
+              "author": "Juniper",
+              "color": "#ff7f50",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "burst line 40"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            }
+          ],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "2 new messages"
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [],
+          "canSend": true,
+          "generation": 1,
+          "reset": true,
+          "messages": [
+            {
+              "id": "m1",
+              "author": "Juniper",
+              "color": "#ff7f50",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "good evening chat"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            },
+            {
+              "id": "m2",
+              "author": "River_Otter",
+              "color": "#1e90ff",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "hello, ready for the boss?"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            },
+            {
+              "id": "m3",
+              "author": "Moss",
+              "color": null,
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "that last jump was close"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            }
+          ],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "2 new messages"
+        ],
+        "text": [
+          "Moss: that last jump was close"
+        ],
+        "image": "reset",
+        "calls": [],
+        "fault": "none"
+      }
+    }
+  ]
+}

@@ -128,6 +128,17 @@ useful state when it is missing.
   checklist row: the logic adds and removes rows, and the host remembers
   which entry it filled each field with. In that form Enter moves to the
   next field; Ctrl+Enter or a `submit` button saves.
+- A subscription may send changes rather than whole values.
+  `twitch.chat.subscribe` sends the chat's state and a delta at most every
+  100 ms: the new messages, the changed ones (same `id`) and the IDs of the
+  removed ones, the whole list when `reset` is set, and in `skipped` the
+  number of messages a faster chat left out. The
+  [Twitch chat widget](../widgets/twitch-chat/logic.ts) keeps its history
+  from them in a `list` with `stick-to-end`, and counts the unread messages
+  from the list's `stick` event, which says when the user scrolled away
+  from the end or back to it. Its `twitch.chat.send` form has the chat's
+  `generation` as its key: another channel is another form, without the
+  text typed for the previous one.
 
 ## Drawing, menus and messages
 

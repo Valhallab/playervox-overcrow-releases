@@ -1,0 +1,186 @@
+{
+  "scenarioVersion": 1,
+  "name": "lifetime",
+  "description": "The menu row \"Message lifetime in Passive\": at 120 s a message of 70 s is opaque and one of 100 s fades; at 5 s only a message under 5 s shows, and it is gone a moment later; back at 30 s the messages under 30 s show again.",
+  "host": {
+    "options": {
+      "passive-lifetime": 120
+    }
+  },
+  "fixtures": {
+    "subscriptions": {
+      "twitch.chat.subscribe": {
+        "account": "connected",
+        "channel": "juniper_plays",
+        "joinState": "joined",
+        "failure": null,
+        "favorites": [],
+        "canSend": true,
+        "generation": 1,
+        "reset": true,
+        "messages": [
+          {
+            "id": "m1",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "a hundred seconds old"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225500000
+          },
+          {
+            "id": "m2",
+            "author": "River_Otter",
+            "color": "#1e90ff",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "seventy seconds old"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225530000
+          },
+          {
+            "id": "m3",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "twenty seconds old"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225580000
+          },
+          {
+            "id": "m4",
+            "author": "Fern_42",
+            "color": "#2e8b57",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "two seconds old"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225598000
+          }
+        ],
+        "removed": [],
+        "skipped": 0
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Juniper: a hundred seconds old",
+          "River_Otter: seventy seconds old",
+          "Moss: twenty seconds old",
+          "Fern_42: two seconds old"
+        ],
+        "image": "two-minutes"
+      }
+    },
+    {
+      "menu": {
+        "id": "passive-lifetime",
+        "value": 5
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Fern_42: two seconds old"
+        ],
+        "noText": [
+          "Juniper: a hundred seconds old",
+          "River_Otter: seventy seconds old",
+          "Moss: twenty seconds old"
+        ],
+        "image": "five-seconds"
+      }
+    },
+    {
+      "advance": {
+        "ms": 2000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Fern_42: two seconds old"
+        ],
+        "image": "five-seconds-fading"
+      }
+    },
+    {
+      "advance": {
+        "ms": 1200
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "No recent messages"
+        ],
+        "noText": [
+          "Fern_42: two seconds old"
+        ],
+        "image": "five-seconds-gone"
+      }
+    },
+    {
+      "menu": {
+        "id": "passive-lifetime",
+        "value": 30
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Moss: twenty seconds old",
+          "Fern_42: two seconds old"
+        ],
+        "noText": [
+          "River_Otter: seventy seconds old",
+          "No recent messages"
+        ],
+        "image": "thirty-seconds"
+      }
+    },
+    {
+      "advance": {
+        "ms": 8000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Fern_42: two seconds old"
+        ],
+        "noText": [
+          "Moss: twenty seconds old"
+        ],
+        "calls": [
+          {
+            "service": "twitch.chat.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

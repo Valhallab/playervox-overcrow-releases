@@ -1,0 +1,562 @@
+/* The built-in's layout at 100 %: a header row (the chat mark, the
+   favorite star, the channel, the connection dot and in Interactive mode
+   the channel buttons), then the channel selector, or the history and in
+   Interactive mode the composer. The wrapper draws the panel; the content
+   keeps the built-in's 10 x 8 px margin. The size is the user's: the
+   history takes what the other rows leave and scrolls. */
+.chat {
+  flex-direction: column;
+  row-gap: 6px;
+  width: 100%;
+  height: 100%;
+  padding: 8px 10px;
+}
+
+.header {
+  flex-direction: row;
+  align-items: center;
+  column-gap: 6px;
+  min-height: 22px;
+  flex-shrink: 0;
+}
+
+.mark {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  font-size: 16px;
+  color: var(--color-accent);
+}
+
+/* The favorite star: a button in Interactive mode, a mark in Passive. */
+.star {
+  justify-content: center;
+  align-items: center;
+  width: var(--icon-button-size);
+  height: var(--icon-button-size);
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.star:hover,
+.star:focus {
+  background: var(--color-surface-hover);
+}
+
+.star:disabled {
+  opacity: 0.4;
+}
+
+.on {
+  color: #ffc83c;
+}
+
+.star-mark {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  font-size: 14px;
+  color: #ffc83c;
+}
+
+.heading {
+  flex-shrink: 1;
+  min-width: 0px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+  font-weight: 700;
+  line-height: 18px;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The connection: grey idle, green joined, amber on its way, red failed.
+   Its label and tooltip say it in words. */
+.dot {
+  width: 6px;
+  height: 6px;
+  margin: 0px 1px;
+  flex-shrink: 0;
+  border-radius: var(--radius-pill);
+  background: #969696;
+}
+
+.ok {
+  background: var(--color-success);
+}
+
+.warn {
+  background: var(--color-warning);
+}
+
+.failed {
+  background: var(--color-danger);
+}
+
+.icon-button {
+  justify-content: center;
+  align-items: center;
+  width: var(--icon-button-size);
+  height: var(--icon-button-size);
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.icon-button:hover,
+.icon-button:focus {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.small {
+  font-size: 12px;
+}
+
+.status {
+  flex-shrink: 0;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-text-muted);
+}
+
+.error {
+  flex-shrink: 0;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  line-height: 14px;
+  color: var(--color-danger);
+}
+
+.empty {
+  flex-shrink: 0;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-text-muted);
+}
+
+/* The channel selector: the field takes the free width, the button keeps
+   the width of its label. */
+.selector {
+  flex-direction: row;
+  align-items: center;
+  column-gap: 6px;
+  flex-shrink: 0;
+}
+
+.input {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0px;
+  height: var(--control-height);
+  padding: 0px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-field);
+  font-family: var(--font-ui);
+  font-size: var(--font-size-button);
+  line-height: 18px;
+  color: var(--color-text);
+}
+
+.input:focus {
+  border: 1px solid var(--color-accent);
+}
+
+.input:disabled {
+  opacity: 0.6;
+}
+
+.action {
+  justify-content: center;
+  align-items: center;
+  height: var(--control-height);
+  flex-shrink: 0;
+  padding: 0px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+}
+
+.action:hover,
+.action:focus {
+  background: var(--color-accent-hover);
+}
+
+.action:disabled {
+  background: var(--color-surface-raised);
+}
+
+.action-label {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-button);
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--color-on-accent);
+  white-space: nowrap;
+}
+
+.action:disabled .action-label {
+  color: var(--color-text-subtle);
+}
+
+.eyebrow {
+  flex-shrink: 0;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  line-height: 14px;
+  color: var(--color-text-muted);
+}
+
+/* At most three rows of favorites show; twenty scroll in that height and
+   never push the chat out of the panel. */
+.chips {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-height: 80px;
+  flex-shrink: 0;
+}
+
+.chip {
+  align-items: center;
+  height: 24px;
+  padding: 0px 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+}
+
+.chip:hover,
+.chip:focus {
+  background: var(--color-surface-hover);
+}
+
+.chip-label {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+/* The history: the newest message at the bottom, followed until the user
+   scrolls away. */
+.history {
+  flex-direction: column;
+  row-gap: 2px;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-height: 0px;
+}
+
+.row {
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 100%;
+}
+
+/* A reply: indented behind a rail, under one line of what it answers. */
+.replied {
+  padding-left: 6px;
+  border-left: 2px solid var(--color-accent);
+}
+
+.context {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  line-height: 14px;
+  color: var(--color-text-muted);
+  line-clamp: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The line keeps room at its end for the reply icon. */
+.message {
+  padding-right: 18px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+/* An author without a colour of their own is light grey. */
+.author {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+/* An emote is as tall as its line and as wide as its picture asks. */
+.emote {
+  height: 20px;
+}
+
+/* The reply icon shows under the pointer, or with the keyboard on it. */
+.reply {
+  position: absolute;
+  top: 3px;
+  right: 0px;
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  opacity: 0;
+}
+
+.row:hover .reply {
+  opacity: 0.68;
+}
+
+.reply:hover,
+.reply:focus {
+  color: var(--color-accent);
+  opacity: 1;
+}
+
+.gap {
+  flex-shrink: 0;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  line-height: 16px;
+  color: var(--color-text-subtle);
+  text-align: center;
+}
+
+.unread {
+  justify-content: center;
+  align-items: center;
+  align-self: center;
+  height: 22px;
+  flex-shrink: 0;
+  padding: 0px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+}
+
+.unread:hover,
+.unread:focus {
+  background: var(--color-surface-hover);
+}
+
+.unread-label {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  line-height: 14px;
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+
+/* The composer. Hidden in Passive mode, the form stays in the view and
+   OverCrow keeps the text its field holds. */
+.composer {
+  flex-direction: column;
+  row-gap: 4px;
+  flex-shrink: 0;
+}
+
+.hidden {
+  display: none;
+}
+
+.replying {
+  flex-direction: row;
+  align-items: center;
+  column-gap: 4px;
+}
+
+.replying-label {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  line-height: 14px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compose {
+  flex-direction: row;
+  align-items: center;
+  column-gap: 6px;
+}
+
+.pending {
+  flex-shrink: 0;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  line-height: 14px;
+  color: var(--color-warning);
+  white-space: nowrap;
+}
+
+.unsent {
+  flex-shrink: 0;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  line-height: 14px;
+  color: var(--color-danger);
+  white-space: nowrap;
+}
+
+/* The Passive fade. The logic gives a fading message the opacity it has
+   one step later and the step's duration: the transition makes the steps
+   one continuous fade, whatever the lifetime chosen. */
+.ease-100 {
+  transition: opacity 100ms linear;
+}
+
+.ease-200 {
+  transition: opacity 200ms linear;
+}
+
+.ease-400 {
+  transition: opacity 400ms linear;
+}
+
+.ease-800 {
+  transition: opacity 800ms linear;
+}
+
+.ease-1600 {
+  transition: opacity 1600ms linear;
+}
+
+.fade-1 {
+  opacity: 0.96875;
+}
+
+.fade-2 {
+  opacity: 0.9375;
+}
+
+.fade-3 {
+  opacity: 0.90625;
+}
+
+.fade-4 {
+  opacity: 0.875;
+}
+
+.fade-5 {
+  opacity: 0.84375;
+}
+
+.fade-6 {
+  opacity: 0.8125;
+}
+
+.fade-7 {
+  opacity: 0.78125;
+}
+
+.fade-8 {
+  opacity: 0.75;
+}
+
+.fade-9 {
+  opacity: 0.71875;
+}
+
+.fade-10 {
+  opacity: 0.6875;
+}
+
+.fade-11 {
+  opacity: 0.65625;
+}
+
+.fade-12 {
+  opacity: 0.625;
+}
+
+.fade-13 {
+  opacity: 0.59375;
+}
+
+.fade-14 {
+  opacity: 0.5625;
+}
+
+.fade-15 {
+  opacity: 0.53125;
+}
+
+.fade-16 {
+  opacity: 0.5;
+}
+
+.fade-17 {
+  opacity: 0.46875;
+}
+
+.fade-18 {
+  opacity: 0.4375;
+}
+
+.fade-19 {
+  opacity: 0.40625;
+}
+
+.fade-20 {
+  opacity: 0.375;
+}
+
+.fade-21 {
+  opacity: 0.34375;
+}
+
+.fade-22 {
+  opacity: 0.3125;
+}
+
+.fade-23 {
+  opacity: 0.28125;
+}
+
+.fade-24 {
+  opacity: 0.25;
+}
+
+.fade-25 {
+  opacity: 0.21875;
+}
+
+.fade-26 {
+  opacity: 0.1875;
+}
+
+.fade-27 {
+  opacity: 0.15625;
+}
+
+.fade-28 {
+  opacity: 0.125;
+}
+
+.fade-29 {
+  opacity: 0.09375;
+}
+
+.fade-30 {
+  opacity: 0.0625;
+}
+
+.fade-31 {
+  opacity: 0.03125;
+}
+
+.fade-32 {
+  opacity: 0;
+}

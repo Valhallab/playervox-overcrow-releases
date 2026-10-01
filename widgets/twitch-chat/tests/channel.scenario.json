@@ -1,0 +1,480 @@
+{
+  "scenarioVersion": 1,
+  "name": "channel",
+  "description": "Choosing the channel. A name Twitch could not have keeps \"Join chat\" off and Enter joins nothing; the field takes 26 characters; a name is joined as Twitch writes it, without its # and in lower case, by Enter or by the button; a favorite's chip joins it; \"Change channel\" opens the selector over the chat, which stays until the new channel is joined, and closes it; \"Disconnect channel\" leaves. Each is one call, and the channel shown is the one OverCrow announces.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "twitch.chat.subscribe": {
+        "account": "connected",
+        "channel": null,
+        "joinState": "idle",
+        "failure": null,
+        "favorites": [
+          "moss_and_fern",
+          "lantern_quest"
+        ],
+        "canSend": false,
+        "generation": 1,
+        "reset": true,
+        "messages": [],
+        "removed": [],
+        "skipped": 0
+      }
+    },
+    "calls": {
+      "twitch.chat.join": [
+        {
+          "value": null
+        },
+        {
+          "value": null
+        },
+        {
+          "value": null
+        },
+        {
+          "value": null
+        }
+      ],
+      "twitch.chat.leave": [
+        {
+          "value": null
+        }
+      ]
+    }
+  },
+  "steps": [
+    {
+      "pointer": {
+        "click": {
+          "text": "Join chat"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Channel name"
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "image": "empty-field"
+      }
+    },
+    {
+      "text": "not a channel!"
+    },
+    {
+      "expect": {
+        "image": "invalid-name"
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Join chat"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": []
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Channel name"
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "A",
+        "modifiers": [
+          "ctrl"
+        ]
+      }
+    },
+    {
+      "text": "#Abcdefghijklmnopqrstuvwxy_and_more"
+    },
+    {
+      "expect": {
+        "image": "twenty-six-characters"
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.join",
+            "params": {
+              "channel": "abcdefghijklmnopqrstuvwxy"
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "abcdefghijklmnopqrstuvwxy",
+          "joinState": "failed",
+          "failure": "channel_unavailable",
+          "favorites": [
+            "moss_and_fern",
+            "lantern_quest"
+          ],
+          "canSend": false,
+          "generation": 2,
+          "reset": true,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "#abcdefghijklmnopqrstuvwxy",
+          "CHANNEL UNAVAILABLE"
+        ],
+        "image": "longest-name"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Change channel"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Join chat",
+          "Favorites",
+          "#abcdefghijklmnopqrstuvwxy"
+        ],
+        "image": "selector-over-the-chat"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Channel name"
+        }
+      }
+    },
+    {
+      "text": "  #Juniper_Plays "
+    },
+    {
+      "expect": {
+        "image": "valid-name"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Join chat"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.join",
+            "params": {
+              "channel": "juniper_plays"
+            },
+            "outcome": "ok"
+          }
+        ],
+        "noText": [
+          "Join chat"
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [
+            "moss_and_fern",
+            "lantern_quest"
+          ],
+          "canSend": true,
+          "generation": 3,
+          "reset": true,
+          "messages": [
+            {
+              "id": "m1",
+              "author": "Juniper",
+              "color": "#ff7f50",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "good evening chat"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            },
+            {
+              "id": "m2",
+              "author": "River_Otter",
+              "color": "#1e90ff",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "hello, ready for the boss?"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            },
+            {
+              "id": "m3",
+              "author": "Moss",
+              "color": null,
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "that last jump was close"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            }
+          ],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "#juniper_plays",
+          "Moss: that last jump was close"
+        ],
+        "noText": [
+          "Join chat"
+        ],
+        "image": "joined"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Change channel"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Join chat",
+          "Moss: that last jump was close"
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Change channel"
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "Join chat"
+        ],
+        "calls": []
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Change channel"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "#moss_and_fern"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.join",
+            "params": {
+              "channel": "moss_and_fern"
+            },
+            "outcome": "ok"
+          }
+        ],
+        "text": [
+          "#juniper_plays",
+          "Moss: that last jump was close"
+        ],
+        "noText": [
+          "Join chat"
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "moss_and_fern",
+          "joinState": "connecting",
+          "failure": null,
+          "favorites": [
+            "moss_and_fern",
+            "lantern_quest"
+          ],
+          "canSend": false,
+          "generation": 4,
+          "reset": true,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "#moss_and_fern",
+          "No messages yet"
+        ],
+        "noText": [
+          "Moss: that last jump was close"
+        ],
+        "image": "favorite-joined"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Disconnect channel"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.leave",
+            "outcome": "ok"
+          }
+        ],
+        "text": [
+          "#moss_and_fern"
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": null,
+          "joinState": "idle",
+          "failure": null,
+          "favorites": [
+            "moss_and_fern",
+            "lantern_quest"
+          ],
+          "canSend": false,
+          "generation": 5,
+          "reset": true,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Twitch",
+          "Join chat",
+          "#lantern_quest"
+        ],
+        "noText": [
+          "No messages yet"
+        ],
+        "image": "left"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "#lantern_quest"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.join",
+            "params": {
+              "channel": "lantern_quest"
+            },
+            "outcome": "ok"
+          }
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

@@ -1,0 +1,536 @@
+{
+  "scenarioVersion": 1,
+  "name": "passive",
+  "description": "Passive mode, state by state: the header alone until OverCrow's first answer, no channel, a channel connecting, joined and empty, then the last 12 of 15 messages, the star of a favorite channel and no control at all. Light French, 150 %, a 180 px wide panel. A click and Enter reach nothing.",
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Twitch"
+        ],
+        "calls": [
+          {
+            "service": "twitch.chat.subscribe"
+          }
+        ],
+        "image": "waiting"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": null,
+          "joinState": "idle",
+          "failure": null,
+          "favorites": [
+            "juniper_plays",
+            "moss_and_fern",
+            "lantern_quest"
+          ],
+          "canSend": false,
+          "generation": 1,
+          "reset": true,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "No channel selected"
+        ],
+        "noText": [
+          "Join chat",
+          "Favorites",
+          "#juniper_plays"
+        ],
+        "image": "no-channel"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "connecting",
+          "failure": null,
+          "favorites": [],
+          "canSend": false,
+          "generation": 2,
+          "reset": true,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "#juniper_plays",
+          "No recent messages"
+        ],
+        "noText": [
+          "Send",
+          "No messages yet"
+        ],
+        "image": "connecting"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [],
+          "canSend": true,
+          "generation": 2,
+          "reset": false,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "No recent messages"
+        ],
+        "image": "joined-empty"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [
+            "juniper_plays",
+            "moss_and_fern",
+            "lantern_quest"
+          ],
+          "canSend": true,
+          "generation": 2,
+          "reset": false,
+          "messages": [
+            {
+              "id": "m1",
+              "author": "Juniper",
+              "color": "#ff7f50",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "message 1"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225592000
+            },
+            {
+              "id": "m2",
+              "author": "River_Otter",
+              "color": "#1e90ff",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "message 2"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225592500
+            },
+            {
+              "id": "m3",
+              "author": "Moss",
+              "color": null,
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "message 3"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225593000
+            },
+            {
+              "id": "m4",
+              "author": "Fern_42",
+              "color": "#2e8b57",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "message 4"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225593500
+            },
+            {
+              "id": "m5",
+              "author": "Juniper",
+              "color": "#ff7f50",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "message 5"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225594000
+            },
+            {
+              "id": "m6",
+              "author": "River_Otter",
+              "color": "#1e90ff",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "message 6"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225594500
+            },
+            {
+              "id": "m7",
+              "author": "Moss",
+              "color": null,
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "message 7"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            },
+            {
+              "id": "m8",
+              "author": "Fern_42",
+              "color": "#2e8b57",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "message 8"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595500
+            },
+            {
+              "id": "m9",
+              "author": "Juniper",
+              "color": "#ff7f50",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "message 9"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225596000
+            },
+            {
+              "id": "m10",
+              "author": "River_Otter",
+              "color": "#1e90ff",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "message 10"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225596500
+            },
+            {
+              "id": "m11",
+              "author": "Moss",
+              "color": null,
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "message 11"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225597000
+            },
+            {
+              "id": "m12",
+              "author": "Fern_42",
+              "color": "#2e8b57",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "message 12"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225597500
+            },
+            {
+              "id": "m13",
+              "author": "Juniper",
+              "color": "#ff7f50",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "message 13"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225598000
+            },
+            {
+              "id": "m14",
+              "author": "River_Otter",
+              "color": "#1e90ff",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "message 14"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225598500
+            },
+            {
+              "id": "m15",
+              "author": "Moss",
+              "color": null,
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "message 15"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225599000
+            }
+          ],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "River_Otter: message 14",
+          "Moss: message 15",
+          "Fern_42: message 4"
+        ],
+        "noText": [
+          "Juniper: message 1",
+          "River_Otter: message 2",
+          "Moss: message 3",
+          "No recent messages",
+          "Send"
+        ],
+        "image": "last-twelve"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "at": [
+            200,
+            100
+          ]
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "text": "hello"
+    },
+    {
+      "expect": {
+        "calls": [],
+        "intents": [],
+        "noText": [
+          "Join chat",
+          "Replying to Juniper"
+        ]
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "last-twelve-light-fr"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "last-twelve-light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark",
+        "scale": 1000,
+        "size": {
+          "width": 180,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "last-twelve-narrow"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 420,
+          "height": 360
+        }
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "reconnecting",
+          "failure": null,
+          "favorites": [
+            "juniper_plays",
+            "moss_and_fern",
+            "lantern_quest"
+          ],
+          "canSend": false,
+          "generation": 2,
+          "reset": false,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Moss: message 15"
+        ],
+        "image": "reconnecting"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [
+            "juniper_plays",
+            "moss_and_fern",
+            "lantern_quest"
+          ],
+          "canSend": true,
+          "generation": 2,
+          "reset": true,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "No recent messages"
+        ],
+        "noText": [
+          "Moss: message 15"
+        ]
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Aucun message récent"
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": null,
+          "joinState": "idle",
+          "failure": null,
+          "favorites": [],
+          "canSend": false,
+          "generation": 3,
+          "reset": true,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Aucune chaîne sélectionnée"
+        ],
+        "image": "no-channel-fr",
+        "fault": "none"
+      }
+    }
+  ]
+}

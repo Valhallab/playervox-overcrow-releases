@@ -1,0 +1,18 @@
+{
+  "author": "PlayerVox",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/twitch-chat",
+  "defaultLocale": "en",
+  "localizations": [
+    {
+      "locale": "en",
+      "name": "Twitch chat",
+      "description": "Read and send messages in a public Twitch chat you choose: your favorite channels, the scrolling history with emotes and replies in Interactive mode, the last messages fading out in Passive mode. Needs your Twitch account."
+    },
+    {
+      "locale": "fr",
+      "name": "Chat Twitch",
+      "description": "Lisez et envoyez des messages dans le chat Twitch public de votre choix : vos chaînes favorites, l’historique défilant avec emotes et réponses en mode interactif, les derniers messages qui s’effacent en mode passif. Nécessite votre compte Twitch."
+    }
+  ]
+}

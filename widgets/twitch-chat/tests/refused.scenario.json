@@ -1,0 +1,65 @@
+{
+  "scenarioVersion": 1,
+  "name": "refused",
+  "description": "Without the permission to read the chat the widget asks OverCrow nothing and says what it lacks, in both modes and languages.",
+  "host": {
+    "grants": []
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Twitch",
+          "Permission needed to read Twitch chat."
+        ],
+        "noText": [
+          "Join chat",
+          "Send"
+        ],
+        "state": "running",
+        "calls": [],
+        "image": "refused"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Permission needed to read Twitch chat."
+        ],
+        "noText": [
+          "Join chat",
+          "Send"
+        ],
+        "calls": [],
+        "image": "refused-interactive"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "advance": {
+        "ms": 60000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Autorisation nécessaire pour lire le chat Twitch."
+        ],
+        "calls": [],
+        "intents": [],
+        "fault": "none",
+        "image": "refused-light-fr"
+      }
+    }
+  ]
+}

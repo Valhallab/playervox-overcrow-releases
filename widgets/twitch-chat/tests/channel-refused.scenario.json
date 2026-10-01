@@ -1,0 +1,372 @@
+{
+  "scenarioVersion": 1,
+  "name": "channel-refused",
+  "description": "OverCrow could not apply a channel or favorite change: the widget says why under the header and keeps what it showed. Busy, the settings could not be saved, the favorites are full; in English and French. The message goes with the next change.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "twitch.chat.subscribe": {
+        "account": "connected",
+        "channel": null,
+        "joinState": "idle",
+        "failure": null,
+        "favorites": [
+          "moss_and_fern"
+        ],
+        "canSend": false,
+        "generation": 1,
+        "reset": true,
+        "messages": [],
+        "removed": [],
+        "skipped": 0
+      }
+    },
+    "calls": {
+      "twitch.chat.join": [
+        {
+          "error": "busy"
+        },
+        {
+          "error": "unavailable"
+        },
+        {
+          "value": null
+        }
+      ],
+      "twitch.chat.favorite": [
+        {
+          "error": "quota_exceeded"
+        },
+        {
+          "error": "busy"
+        }
+      ],
+      "twitch.chat.leave": [
+        {
+          "error": "unavailable"
+        },
+        {
+          "error": "busy"
+        }
+      ]
+    }
+  },
+  "steps": [
+    {
+      "pointer": {
+        "click": {
+          "label": "Channel name"
+        }
+      }
+    },
+    {
+      "text": "juniper_plays"
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.subscribe",
+            "outcome": "ok"
+          },
+          {
+            "service": "twitch.chat.join",
+            "params": {
+              "channel": "juniper_plays"
+            },
+            "outcome": "busy"
+          }
+        ],
+        "text": [
+          "Twitch is busy. Try again.",
+          "Join chat"
+        ],
+        "image": "join-busy"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Join chat"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.join",
+            "params": {
+              "channel": "juniper_plays"
+            },
+            "outcome": "unavailable"
+          }
+        ],
+        "text": [
+          "Could not save Twitch widget settings."
+        ],
+        "noText": [
+          "Twitch is busy. Try again."
+        ],
+        "image": "join-unavailable"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Impossible d’enregistrer les réglages du widget Twitch."
+        ],
+        "image": "join-unavailable-light-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Join chat"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.join",
+            "params": {
+              "channel": "juniper_plays"
+            },
+            "outcome": "ok"
+          }
+        ],
+        "noText": [
+          "Could not save Twitch widget settings."
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [
+            "moss_and_fern"
+          ],
+          "canSend": true,
+          "generation": 2,
+          "reset": true,
+          "messages": [
+            {
+              "id": "m1",
+              "author": "Juniper",
+              "color": "#ff7f50",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "good evening chat"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            },
+            {
+              "id": "m2",
+              "author": "River_Otter",
+              "color": "#1e90ff",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "hello, ready for the boss?"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            },
+            {
+              "id": "m3",
+              "author": "Moss",
+              "color": null,
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "that last jump was close"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            }
+          ],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Favorite #juniper_plays"
+        }
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.favorite",
+            "params": {
+              "channel": "juniper_plays",
+              "favorite": true
+            },
+            "outcome": "quota_exceeded"
+          }
+        ],
+        "text": [
+          "Favorite channel limit reached.",
+          "Moss: that last jump was close"
+        ],
+        "image": "favorite-limit"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Favorite #juniper_plays"
+        }
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.favorite",
+            "params": {
+              "channel": "juniper_plays",
+              "favorite": true
+            },
+            "outcome": "busy"
+          }
+        ],
+        "text": [
+          "Twitch is busy. Try again."
+        ],
+        "noText": [
+          "Favorite channel limit reached."
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Disconnect channel"
+        }
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.leave",
+            "outcome": "unavailable"
+          }
+        ],
+        "text": [
+          "Could not save Twitch widget settings.",
+          "#juniper_plays",
+          "Moss: that last jump was close"
+        ],
+        "image": "leave-unavailable"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Quitter la chaîne"
+        }
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.leave",
+            "outcome": "busy"
+          }
+        ],
+        "text": [
+          "Twitch est occupé. Réessayez."
+        ],
+        "image": "leave-busy-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "#juniper_plays"
+        ],
+        "noText": [
+          "Twitch is busy. Try again."
+        ],
+        "image": "leave-busy-passive",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Twitch is busy. Try again."
+        ]
+      }
+    }
+  ]
+}

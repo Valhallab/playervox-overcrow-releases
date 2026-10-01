@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.playervox.overcrow.twitch.chat",
+  "version": "1.0.0",
+  "name": {
+    "en": "Twitch chat",
+    "fr": "Chat Twitch"
+  },
+  "sizing": {
+    "fit": "none",
+    "preferred": { "width": 420, "height": 360 },
+    "min": { "width": 160, "height": 24 },
+    "max": { "width": 900, "height": 900 }
+  },
+  "permissions": {
+    "capabilities": ["twitch.chat.read", "twitch.chat.compose"]
+  },
+  "wrapper": {
+    "menu": [
+      {
+        "type": "slider",
+        "id": "passive-lifetime",
+        "label": { "en": "Message lifetime in Passive (s)", "fr": "Durée des messages en mode passif (s)" },
+        "icon": "timer",
+        "min": 5,
+        "max": 120,
+        "step": 1,
+        "default": 30
+      }
+    ]
+  }
+}

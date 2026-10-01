@@ -1,0 +1,384 @@
+{
+  "scenarioVersion": 1,
+  "name": "reply",
+  "description": "Replying. The reply icon of a message makes it the target of the composer's form: \"Replying to …\" shows above the field, with a button to cancel. An accepted message takes the target with it; a refused one keeps the text and the target; a target removed by a moderator is dropped. In English and French.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "twitch.chat.subscribe": {
+        "account": "connected",
+        "channel": "juniper_plays",
+        "joinState": "joined",
+        "failure": null,
+        "favorites": [],
+        "canSend": true,
+        "generation": 1,
+        "reset": true,
+        "messages": [
+          {
+            "id": "m1",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "good evening chat"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m2",
+            "author": "River_Otter",
+            "color": "#1e90ff",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "hello, ready for the boss?"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m3",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "that last jump was close"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          }
+        ],
+        "removed": [],
+        "skipped": 0
+      }
+    },
+    "intents": {
+      "twitch.chat.send": [
+        {
+          "error": "unavailable"
+        },
+        "accepted",
+        "accepted"
+      ]
+    }
+  },
+  "steps": [
+    {
+      "pointer": {
+        "move": {
+          "text": "Juniper: good evening chat"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Reply"
+        }
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "expect": {
+        "text": [
+          "Replying to Juniper"
+        ],
+        "calls": [
+          {
+            "service": "twitch.chat.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "image": "replying"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Réponse à Juniper"
+        ],
+        "image": "replying-light-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark",
+        "size": {
+          "width": 180,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "replying-narrow"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 420,
+          "height": 360
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Cancel reply"
+        }
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "expect": {
+        "noText": [
+          "Replying to Juniper"
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "move": {
+          "text": "Juniper: good evening chat"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Reply"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Message"
+        }
+      }
+    },
+    {
+      "text": "good evening to you"
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "twitch.chat.send",
+            "fields": {
+              "message": "good evening to you"
+            },
+            "outcome": "unavailable"
+          }
+        ],
+        "text": [
+          "Replying to Juniper",
+          "Message was not accepted. Try again.",
+          "not sent"
+        ],
+        "image": "refused-keeps-the-target"
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "twitch.chat.send",
+            "fields": {
+              "message": "good evening to you"
+            },
+            "outcome": "accepted"
+          }
+        ],
+        "noText": [
+          "Replying to Juniper",
+          "Message was not accepted. Try again.",
+          "not sent"
+        ],
+        "image": "accepted"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [],
+          "canSend": true,
+          "generation": 1,
+          "reset": false,
+          "messages": [
+            {
+              "id": "m4",
+              "author": "Lantern",
+              "color": "#daa520",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "good evening to you"
+                }
+              ],
+              "reply": {
+                "author": "Juniper",
+                "text": "good evening chat"
+              },
+              "deleted": false,
+              "receivedAt": 1767225595000
+            }
+          ],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Juniper: good evening chat",
+          "Lantern: good evening to you"
+        ],
+        "image": "delivered"
+      }
+    },
+    {
+      "pointer": {
+        "move": {
+          "text": "Juniper: good evening chat"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Reply"
+        }
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "expect": {
+        "text": [
+          "Replying to Juniper"
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [],
+          "canSend": true,
+          "generation": 1,
+          "reset": false,
+          "messages": [
+            {
+              "id": "m4",
+              "author": "Lantern",
+              "color": "#daa520",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "good evening to you"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            }
+          ],
+          "removed": [
+            "m1"
+          ],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "Replying to Juniper",
+          "Juniper: good evening chat"
+        ],
+        "text": [
+          "Lantern: good evening to you"
+        ],
+        "image": "target-removed"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Message"
+        }
+      }
+    },
+    {
+      "text": "anyone else?"
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "twitch.chat.send",
+            "fields": {
+              "message": "anyone else?"
+            },
+            "outcome": "accepted"
+          }
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

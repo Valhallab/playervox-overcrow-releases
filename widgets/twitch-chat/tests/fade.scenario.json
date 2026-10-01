@@ -1,0 +1,269 @@
+{
+  "scenarioVersion": 1,
+  "name": "fade",
+  "description": "The Passive fade in virtual time, with the default lifetime of 30 s: a message is opaque until it is 20 s old, fades for 10 s and leaves at 30 s. Messages of 18, 10 and 1 s; 7 s later the oldest is half-way; 5.5 s later it is gone and the next one fades; hidden for 5 s then shown, each message takes the opacity of its age within one step of the fade; then nothing is left. A new message shows at once. Interactive mode keeps the whole history, opaque.",
+  "fixtures": {
+    "subscriptions": {
+      "twitch.chat.subscribe": {
+        "account": "connected",
+        "channel": "juniper_plays",
+        "joinState": "joined",
+        "failure": null,
+        "favorites": [],
+        "canSend": true,
+        "generation": 1,
+        "reset": true,
+        "messages": [
+          {
+            "id": "m1",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "the oldest message"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225582000
+          },
+          {
+            "id": "m2",
+            "author": "River_Otter",
+            "color": "#1e90ff",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "the middle message"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225590000
+          },
+          {
+            "id": "m3",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "the newest message"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225599000
+          }
+        ],
+        "removed": [],
+        "skipped": 0
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Juniper: the oldest message",
+          "River_Otter: the middle message",
+          "Moss: the newest message"
+        ],
+        "calls": [
+          {
+            "service": "twitch.chat.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "image": "all-opaque"
+      }
+    },
+    {
+      "advance": {
+        "ms": 7000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Juniper: the oldest message"
+        ],
+        "image": "oldest-half-way"
+      }
+    },
+    {
+      "advance": {
+        "ms": 4000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Juniper: the oldest message"
+        ],
+        "image": "oldest-nearly-gone"
+      }
+    },
+    {
+      "advance": {
+        "ms": 1500
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "Juniper: the oldest message"
+        ],
+        "text": [
+          "River_Otter: the middle message"
+        ],
+        "image": "oldest-gone"
+      }
+    },
+    {
+      "host": {
+        "visible": false
+      }
+    },
+    {
+      "advance": {
+        "ms": 5000
+      }
+    },
+    {
+      "host": {
+        "visible": true
+      }
+    },
+    {
+      "advance": {
+        "ms": 500
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "River_Otter: the middle message",
+          "Moss: the newest message"
+        ],
+        "image": "shown-again"
+      }
+    },
+    {
+      "advance": {
+        "ms": 3000
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "River_Otter: the middle message"
+        ],
+        "text": [
+          "Moss: the newest message"
+        ],
+        "image": "newest-alone"
+      }
+    },
+    {
+      "advance": {
+        "ms": 9000
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "Moss: the newest message"
+        ],
+        "text": [
+          "No recent messages"
+        ],
+        "image": "all-gone"
+      }
+    },
+    {
+      "advance": {
+        "ms": 60000
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [],
+          "canSend": true,
+          "generation": 1,
+          "reset": false,
+          "messages": [
+            {
+              "id": "m4",
+              "author": "Fern_42",
+              "color": "#2e8b57",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "a new message"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225690000
+            }
+          ],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Fern_42: a new message"
+        ],
+        "noText": [
+          "No recent messages"
+        ],
+        "image": "new-message"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Juniper: the oldest message",
+          "River_Otter: the middle message",
+          "Moss: the newest message",
+          "Fern_42: a new message"
+        ],
+        "image": "interactive-keeps-the-history"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "Juniper: the oldest message",
+          "Moss: the newest message"
+        ],
+        "text": [
+          "Fern_42: a new message"
+        ],
+        "calls": [],
+        "fault": "none"
+      }
+    }
+  ]
+}

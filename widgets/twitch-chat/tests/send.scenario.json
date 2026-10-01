@@ -1,0 +1,300 @@
+{
+  "scenarioVersion": 1,
+  "name": "send",
+  "description": "Sending a message. The composer's field is OverCrow's: the widget gives it no value. Nothing is sent from an empty field or from spaces, and nothing is said about it. Enter sends what OverCrow's field holds; once the message is accepted OverCrow empties the field, so the next message, sent with the button, holds only its own text. The history shows a sent message when OverCrow delivers it, never before.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "twitch.chat.subscribe": {
+        "account": "connected",
+        "channel": "juniper_plays",
+        "joinState": "joined",
+        "failure": null,
+        "favorites": [],
+        "canSend": true,
+        "generation": 1,
+        "reset": true,
+        "messages": [
+          {
+            "id": "m1",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "good evening chat"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m2",
+            "author": "River_Otter",
+            "color": "#1e90ff",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "hello, ready for the boss?"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m3",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "that last jump was close"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          }
+        ],
+        "removed": [],
+        "skipped": 0
+      }
+    },
+    "intents": {
+      "twitch.chat.send": [
+        "accepted",
+        "accepted"
+      ]
+    }
+  },
+  "steps": [
+    {
+      "pointer": {
+        "click": {
+          "text": "Send"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Message"
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "text": "   "
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Send"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "intents": [
+          {
+            "intent": "twitch.chat.send",
+            "fields": {
+              "message": ""
+            },
+            "outcome": "invalid_request"
+          },
+          {
+            "intent": "twitch.chat.send",
+            "fields": {
+              "message": "   "
+            },
+            "outcome": "invalid_request"
+          }
+        ],
+        "noText": [
+          "Message was not accepted. Try again.",
+          "Message was not sent. Try again.",
+          "not sent",
+          "sending…"
+        ],
+        "image": "nothing-to-send"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Message"
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "A",
+        "modifiers": [
+          "ctrl"
+        ]
+      }
+    },
+    {
+      "text": "good evening everyone"
+    },
+    {
+      "expect": {
+        "image": "typed"
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "twitch.chat.send",
+            "fields": {
+              "message": "good evening everyone"
+            },
+            "outcome": "accepted"
+          }
+        ],
+        "noText": [
+          "sending…",
+          "not sent",
+          "Lantern: good evening everyone"
+        ],
+        "image": "accepted"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [],
+          "canSend": true,
+          "generation": 1,
+          "reset": false,
+          "messages": [
+            {
+              "id": "m4",
+              "author": "Lantern",
+              "color": "#daa520",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "good evening everyone"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            }
+          ],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Lantern: good evening everyone"
+        ]
+      }
+    },
+    {
+      "text": "and good luck"
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Send"
+        }
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "twitch.chat.send",
+            "fields": {
+              "message": "and good luck"
+            },
+            "outcome": "accepted"
+          }
+        ],
+        "image": "second-accepted"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [],
+          "canSend": true,
+          "generation": 1,
+          "reset": false,
+          "messages": [
+            {
+              "id": "m5",
+              "author": "Lantern",
+              "color": "#daa520",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "and good luck"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            }
+          ],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Lantern: and good luck"
+        ],
+        "image": "delivered",
+        "calls": [],
+        "fault": "none"
+      }
+    }
+  ]
+}
