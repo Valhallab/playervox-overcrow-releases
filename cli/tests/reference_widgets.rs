@@ -67,6 +67,7 @@ fn the_pilots_are_here() {
         "performance",
         "playervox-journal",
         "playervox-rating",
+        "playervox-reviews",
         "playervox-score",
         "session",
         "stopwatch",
@@ -273,6 +274,7 @@ fn service_fixtures_follow_the_result_shapes() {
         "journal.delete",
         "playervox.rating.read",
         "playervox.rating.write",
+        "playervox.reviews.read",
     ] {
         assert!(exercised.contains(capability), "{capability}");
     }
@@ -286,7 +288,12 @@ fn service_fixtures_follow_the_result_shapes() {
 #[test]
 fn icon_buttons_centre_their_icons() {
     let mut checked = 0;
-    for widget in ["media", "playervox-journal", "stopwatch"] {
+    for widget in [
+        "media",
+        "playervox-journal",
+        "playervox-reviews",
+        "stopwatch",
+    ] {
         let reference = repository()
             .join("widgets")
             .join(widget)
