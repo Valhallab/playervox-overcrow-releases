@@ -1176,9 +1176,9 @@ Capability `notes.write`; `target` attribute required (note ID; the host seeds t
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `title` | text ≤ `MAX_NOTE_TITLE_BYTES` | yes | `field`. |
-| `body` | text ≤ `MAX_NOTE_BODY_BYTES` | no | `textarea`. |
-| `item` | list of `NoteItem` ≤ `MAX_NOTE_ITEMS` | no | One `field` per checklist item, in order, each ≤ `MAX_NOTE_ITEM_BYTES`. |
+| `title` | text ≤ `MAX_NOTE_TITLE_BYTES` | yes | `field`; saved trimmed, and not empty. |
+| `body` | text ≤ `MAX_NOTE_BODY_BYTES` | no | `textarea`; saved as written. |
+| `item` | list of `NoteItem` ≤ `MAX_NOTE_ITEMS` | no | One `field` per checklist row, in order, each ≤ `MAX_NOTE_ITEM_BYTES`. The host remembers which item it seeded each field with: a row keeps that item's ID and check whichever rows the widget removes or moves, and a field that appeared since is a new, unchecked item. Rows are saved trimmed; an empty row is dropped. A note saved as it is stored is accepted without a write. |
 
 #### `playervox.rating.publish`
 

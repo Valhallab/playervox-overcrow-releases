@@ -564,12 +564,20 @@ pub const WRITE_INTENTS: &[WriteIntent] = &[
         target: Target::Required("note ID; the host seeds the bound controls from that note"),
         enter: Enter::NextControl,
         fields: &[
-            Field::required("title", ValueType::Text(&MAX_NOTE_TITLE_BYTES), "`field`."),
-            Field::optional("body", ValueType::Text(&MAX_NOTE_BODY_BYTES), "`textarea`."),
+            Field::required(
+                "title",
+                ValueType::Text(&MAX_NOTE_TITLE_BYTES),
+                "`field`; saved trimmed, and not empty.",
+            ),
+            Field::optional(
+                "body",
+                ValueType::Text(&MAX_NOTE_BODY_BYTES),
+                "`textarea`; saved as written.",
+            ),
             Field::optional(
                 "item",
                 ValueType::ListOf("NoteItem", &MAX_NOTE_ITEMS),
-                "One `field` per checklist item, in order, each ≤ `MAX_NOTE_ITEM_BYTES`.",
+                "One `field` per checklist row, in order, each ≤ `MAX_NOTE_ITEM_BYTES`. The host remembers which item it seeded each field with: a row keeps that item's ID and check whichever rows the widget removes or moves, and a field that appeared since is a new, unchecked item. Rows are saved trimmed; an empty row is dropped. A note saved as it is stored is accepted without a write.",
             ),
         ],
         status: Status::Fixed,
