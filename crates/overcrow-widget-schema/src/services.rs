@@ -396,10 +396,10 @@ pub const SERVICES: &[Service] = &[
     subscribe(
         "playervox.rating.subscribe",
         "playervox.rating.read",
-        "`null` before the user's first rating, or `{ gameplay, art, tech, review, publishedAt, offsetMinutes }`; `unsupported` outside the PlayerVox catalogue; the host seeds the `playervox.rating.publish` controls from it",
+        "`{ state, name, offline, rating }`: `state` is `idle`, `unsupported`, `loading`, `ready` or `unavailable`; `rating` is `null` before the user's first rating, or `{ gameplay, art, tech, review, publishedAt, offsetMinutes }`. Nothing is sent while the PlayerVox account is signed out, pending or expired. A published rating is sent again by the subscription. The host seeds the `playervox.rating.publish` controls from it",
         Status::Fixed,
     )
-    .returning(Shape::Nullable(&Shape::Named("Rating"))),
+    .returning(Shape::Named("RatingState")),
     call(
         "playervox.reviews.page",
         cap("playervox.reviews.read"),
@@ -560,11 +560,23 @@ pub const WRITE_INTENTS: &[WriteIntent] = &[
             Field::required(
                 "gameplay",
                 ValueType::Integer { min: 0, max: 100 },
-                "`slider`.",
+                "`slider`; seeded from the user's rating, 50 before the first one.",
             ),
-            Field::required("art", ValueType::Integer { min: 0, max: 100 }, "`slider`."),
-            Field::required("tech", ValueType::Integer { min: 0, max: 100 }, "`slider`."),
-            Field::optional("review", ValueType::Chars(&MAX_REVIEW_CHARS), "`textarea`."),
+            Field::required(
+                "art",
+                ValueType::Integer { min: 0, max: 100 },
+                "`slider`; seeded like `gameplay`.",
+            ),
+            Field::required(
+                "tech",
+                ValueType::Integer { min: 0, max: 100 },
+                "`slider`; seeded like `gameplay`.",
+            ),
+            Field::optional(
+                "review",
+                ValueType::Chars(&MAX_REVIEW_CHARS),
+                "`textarea`; seeded from the published review. An unchanged review is not sent again; an emptied one removes it.",
+            ),
         ],
         status: Status::Fixed,
     },

@@ -590,7 +590,10 @@ other key is. Integers stay below 2^53.\n\n",
         "\nService error codes: {}.\n\n### Write intents\n\n\
 A `form` with an `intent` sends the values of its named host-owned controls straight to the \
 service when the user submits it; the VM receives a `submit` event with the outcome but never \
-supplies the body. Named controls not listed are rejected.\n\n",
+supplies the body. Named controls not listed are rejected. Every `field`, `textarea` and `slider` \
+of such a form belongs to the host: a `value` from the VM is rejected, the host seeds the controls \
+where the intent says so and keeps what the user entered. A seed sends the control's `input` \
+event with the new value; that event is not a gesture.\n\n",
         code_list(SERVICE_ERRORS)
     );
     for intent in WRITE_INTENTS {

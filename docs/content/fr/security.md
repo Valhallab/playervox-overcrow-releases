@@ -127,9 +127,10 @@ qu’en mode interactif d’OverCrow ; en mode passif, les clics les traversent.
 Supprimer une note ou une session du journal demande aussi une confirmation
 dans une fenêtre dessinée par OverCrow.
 
-Le texte que l’utilisateur écrit dans les notes, les avis et le chat ne
-passe jamais par votre logique : un `form` doté d’un `intent` envoie le texte
-de ses propres champs, qu’OverCrow édite et soumet lui-même.
+Ce que l’utilisateur écrit dans les notes, les avis et le chat ne passe
+jamais par votre logique : un `form` doté d’un `intent` envoie les valeurs de
+ses propres champs de texte et curseurs, qu’OverCrow remplit, édite et soumet
+lui-même. Votre logique peut les lire, pas les modifier.
 
 ## Ce qu’un widget ne peut pas faire
 

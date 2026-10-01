@@ -565,6 +565,18 @@ export interface Rating {
   readonly offsetMinutes: number | null;
 }
 
+/** The user's own rating of the active game, with its state. */
+export interface RatingState {
+  /** Rating state: `idle` without an active game, `unsupported` for a game without a Steam app ID, `loading` until the first answer for this game and account (never the previous game's rating), `ready` with the rating, `unavailable` while the host retries a failed read. Every state but `ready` has a `null` name and rating. */
+  readonly state: "idle" | "unsupported" | "loading" | "ready" | "unavailable";
+  /** Game name on PlayerVox. */
+  readonly name: string | null;
+  /** PlayerVox is unreachable: the rating is the last one read, and `playervox.rating.publish` answers `not_connected`. */
+  readonly offline: boolean;
+  /** The user's rating; `null` before the first one. */
+  readonly rating: Rating | null;
+}
+
 /** One player review. */
 export interface Review {
   /** Review ID. */
@@ -902,8 +914,8 @@ export interface ServiceResultMap {
   readonly "notes.delete": null;
   /** `playervox.score.subscribe`: `{ state, name, score, grade, ratingsCount, criteria }`: `state` is `idle`, `unsupported`, `loading`, `ready`, `no_ratings`, `not_found` or `unavailable`; `criteria` `{ gameplay, art, tech }`, each 0–100 or `null`. */
   readonly "playervox.score.subscribe": Score;
-  /** `playervox.rating.subscribe`: `null` before the user's first rating, or `{ gameplay, art, tech, review, publishedAt, offsetMinutes }`; `unsupported` outside the PlayerVox catalogue; the host seeds the `playervox.rating.publish` controls from it. */
-  readonly "playervox.rating.subscribe": Rating | null;
+  /** `playervox.rating.subscribe`: `{ state, name, offline, rating }`: `state` is `idle`, `unsupported`, `loading`, `ready` or `unavailable`; `rating` is `null` before the user's first rating, or `{ gameplay, art, tech, review, publishedAt, offsetMinutes }`. Nothing is sent while the PlayerVox account is signed out, pending or expired. A published rating is sent again by the subscription. The host seeds the `playervox.rating.publish` controls from it. */
+  readonly "playervox.rating.subscribe": RatingState;
   /** `playervox.reviews.page`: `{ items, page, totalPages, count }`; each item `{ id, author, grade, score, text, original, publishedAt, offsetMinutes }`, `text` in the user's language when a translation exists, `original` the untranslated text or `null`, both cut by the host to `MAX_NODE_TEXT_BYTES`. */
   readonly "playervox.reviews.page": ReviewsPage;
   /** `journal.subscribe`: `null` without an active game, or `{ revision, notice }`: `revision` changes whenever the merged journal of the active game changes (a session recorded or deleted, cloud sessions merged, the PlayerVox account or sync changed), so the widget reads its page again; `notice` is `null`, `offline`, `storage_unavailable`, `full`, `expired`, `busy` or `unavailable`. Holding this subscription is what keeps the host's journal source running. */

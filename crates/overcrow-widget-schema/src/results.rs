@@ -290,6 +290,28 @@ pub const SHAPES: &[NamedShape] = &[
         "The user's PlayerVox rating of the active game.",
     ),
     named(
+        "RatingState",
+        Shape::Record(&[
+            member(
+                "state",
+                Shape::Keyword(&["idle", "unsupported", "loading", "ready", "unavailable"]),
+                "Rating state: `idle` without an active game, `unsupported` for a game without a Steam app ID, `loading` until the first answer for this game and account (never the previous game's rating), `ready` with the rating, `unavailable` while the host retries a failed read. Every state but `ready` has a `null` name and rating.",
+            ),
+            member("name", NULLABLE_TEXT, "Game name on PlayerVox."),
+            member(
+                "offline",
+                Shape::Bool,
+                "PlayerVox is unreachable: the rating is the last one read, and `playervox.rating.publish` answers `not_connected`.",
+            ),
+            member(
+                "rating",
+                Shape::Nullable(&Shape::Named("Rating")),
+                "The user's rating; `null` before the first one.",
+            ),
+        ]),
+        "The user's own rating of the active game, with its state.",
+    ),
+    named(
         "Review",
         Shape::Record(&[
             member("id", Shape::Text, "Review ID."),

@@ -154,6 +154,10 @@ A gesture-bound service must be called while an `activate`, `keydown`,
 that gesture to the call, and the host refuses it otherwise
 (`gesture_required`). Text written to notes, ratings and chat never goes
 through a call: a `form` with an `intent` sends its host-owned controls.
+Its `field`, `textarea` and `slider` controls belong to the host: the logic
+cannot set their `value` (the host stops a widget that tries) and follows
+them through their `input` events, which the host also sends when it seeds
+a control (a seed is not a gesture).
 
 `http.fetch` sends a string body as `text/plain` and any other body as JSON,
 unless `contentType` says otherwise, and decodes the answer as `as` asks; a
@@ -250,7 +254,7 @@ reference](widget-schema-v1.md) documents each value.
 | `ServiceName`, `CallServiceName`, `SubscribeServiceName`, `GestureServiceName` | Service names by kind. |
 | `ServiceParamsMap`, `ServiceResultMap` | Parameters and result of each service. |
 | `ServiceErrorCode`, `ServiceErrorPayload` | Failure codes, and the `{ code }` value the host sends. |
-| `Session`, `Telemetry`, `Fps`, `Stopwatch`, `Media`, `Notes`, `Note`, `NoteItem`, `CreatedNote`, `Score`, `Rating`, `Review`, `ReviewsPage`, `JournalState`, `JournalPage`, `JournalSession`, `TwitchChat`, `ChatMessage`, `ChatFragment`, `GameEvent`, `HttpResponse` | Result shapes. |
+| `Session`, `Telemetry`, `Fps`, `Stopwatch`, `Media`, `Notes`, `Note`, `NoteItem`, `CreatedNote`, `Score`, `Rating`, `RatingState`, `Review`, `ReviewsPage`, `JournalState`, `JournalPage`, `JournalSession`, `TwitchChat`, `ChatMessage`, `ChatFragment`, `GameEvent`, `HttpResponse` | Result shapes. |
 | `Permission`, `Capability`, `SensitiveCapability`, `CapabilityServices`, `PermissionServices` | Manifest permissions and capabilities, and the services each authorizes. |
 | `Locale`, `Theme`, `Mode`, `Region`, `NumberFormat`, `DateOrder` | Host values. |
 | `EventName`, `GestureEventName`, `EventDetailMap`, `NamedKey` | View events and their details. |

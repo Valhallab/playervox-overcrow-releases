@@ -114,7 +114,13 @@ useful state when it is missing.
   `twitch.chat.join`…) need a user gesture: call them from an `activate`,
   `keydown`, `change`… handler, not from a timer or a menu action.
 - Text written to notes, ratings and chat goes through a `form` with an
-  `intent`: the host sends its own controls' text, never the script's.
+  `intent`: the host sends its own controls' values, never the script's.
+  Leave `value` off the `field`, `textarea` and `slider` controls of such a
+  form (`overcrow-widget check` reports it): the host fills them where the
+  intent says so, keeps what the user entered, and tells the logic each
+  value in the control's `input` event. The
+  [PlayerVox rating widget](../widgets/playervox-rating/logic.ts) follows
+  its three sliders and its review this way.
 
 ## Drawing, menus and messages
 
