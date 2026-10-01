@@ -636,7 +636,7 @@ pub const EVENTS: &[Event] = &[
     },
     Event {
         name: "submit",
-        summary: "Form submitted by Enter in a field or a `submit` button. With an intent, carries the service outcome.",
+        summary: "Form submitted by Enter in a field, Ctrl+Enter in a `field` or `textarea`, or a `submit` button; a write intent may keep plain Enter for moving between its fields. With an intent, carries the service outcome.",
         gesture: true,
         detail: &[
             Field::required(

@@ -421,7 +421,7 @@ A gesture event authorizes gesture-bound service calls made while the VM handles
 | `keydown` | yes | `key`, `ctrl`, `alt`, `shift`, `meta`, `repeat` | Key pressed while the node has focus in Interactive mode. Keys reserved by the host (Tab traversal, OverCrow shortcuts, IME composition) are never delivered. |
 | `input` | yes | `value` | Value edited (text, slider drag). Read-only copy; the host keeps the content. |
 | `change` | yes | `value` | Value committed: blur or Enter for text, release for a slider, any change for toggle, checkbox and select. |
-| `submit` | yes | `outcome`, `error` | Form submitted by Enter in a field or a `submit` button. With an intent, carries the service outcome. |
+| `submit` | yes | `outcome`, `error` | Form submitted by Enter in a field, Ctrl+Enter in a `field` or `textarea`, or a `submit` button; a write intent may keep plain Enter for moving between its fields. With an intent, carries the service outcome. |
 | `focus` | no | none | Node gained keyboard focus. |
 | `blur` | no | none | Node lost keyboard focus. |
 | `reachend` | no | none | Scrolled within one viewport of the end (load more, history). |
@@ -1172,7 +1172,7 @@ A `form` with an `intent` sends the values of its named host-owned controls stra
 
 #### `notes.save`
 
-Capability `notes.write`; `target` attribute required (note ID; the host seeds the bound controls from that note). Status: fixed.
+Capability `notes.write`; `target` attribute required (note ID; the host seeds the bound controls from that note). Enter in a `field` of the form moves the focus to its next `field` or `textarea` and does not submit; Ctrl+Enter and a `submit` button do. Status: fixed.
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |

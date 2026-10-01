@@ -306,7 +306,7 @@ export interface EventDetailMap {
     /** Text, number or boolean, within the element bounds. */
     readonly value: JsonValue;
   };
-  /** Form submitted by Enter in a field or a `submit` button. With an intent, carries the service outcome. */
+  /** Form submitted by Enter in a field, Ctrl+Enter in a `field` or `textarea`, or a `submit` button; a write intent may keep plain Enter for moving between its fields. With an intent, carries the service outcome. */
   readonly submit: {
     /** `submitted` without intent; otherwise the outcome of the host service call. */
     readonly outcome: "submitted" | "accepted" | "rejected" | "cancelled";

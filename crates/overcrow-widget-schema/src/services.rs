@@ -532,8 +532,22 @@ pub struct WriteIntent {
     pub capability: &'static str,
     /// Whether the form `target` attribute is required, optional or refused.
     pub target: Target,
+    /// What plain Enter does in a `field` of the form.
+    pub enter: Enter,
     pub fields: &'static [Field],
     pub status: Status,
+}
+
+/// Plain Enter in a single-line `field` of a form bound to the intent.
+/// Ctrl+Enter in any text control and a `submit` button always submit.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Enter {
+    /// Submits the form.
+    Submit,
+    /// Moves the keyboard focus to the form's next text control and never
+    /// submits: an editor of several fields (a note's title, body and
+    /// checklist rows) is saved only on purpose.
+    NextControl,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -548,6 +562,7 @@ pub const WRITE_INTENTS: &[WriteIntent] = &[
         name: "notes.save",
         capability: "notes.write",
         target: Target::Required("note ID; the host seeds the bound controls from that note"),
+        enter: Enter::NextControl,
         fields: &[
             Field::required("title", ValueType::Text(&MAX_NOTE_TITLE_BYTES), "`field`."),
             Field::optional("body", ValueType::Text(&MAX_NOTE_BODY_BYTES), "`textarea`."),
@@ -563,6 +578,7 @@ pub const WRITE_INTENTS: &[WriteIntent] = &[
         name: "playervox.rating.publish",
         capability: "playervox.rating.write",
         target: Target::Refused,
+        enter: Enter::Submit,
         fields: &[
             Field::required(
                 "gameplay",
@@ -591,6 +607,7 @@ pub const WRITE_INTENTS: &[WriteIntent] = &[
         name: "twitch.chat.send",
         capability: "twitch.chat.compose",
         target: Target::Optional("ID of the message replied to"),
+        enter: Enter::Submit,
         fields: &[Field::required(
             "message",
             ValueType::Chars(&MAX_CHAT_MESSAGE_CHARS),
