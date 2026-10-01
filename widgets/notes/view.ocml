@@ -1,0 +1,152 @@
+<!-- Notes: the active note of the user's notes document, and in
+     Interactive mode the selector, the checks and the editor (parity
+     sheet: playervox-overcrow docs/builtin-parity/notes.md).
+     Each editor is a form bound to the `notes.save` intent. Its title, its
+     body and its checklist rows belong to OverCrow, which fills them from
+     the stored note, keeps the draft and sends their values: they take no
+     `value` here. The logic only decides which rows a form has. A form
+     stays in the view, hidden, while its note has a draft. -->
+<box class="notes" label={t("label")}>
+  <if test={phase(state) == "loading"}>
+    <text class="status">{t("loading")}</text>
+  </if>
+  <if test={phase(state) == "unavailable"}>
+    <text class="error">{t(unavailableKey(state))}</text>
+  </if>
+  <if test={phase(state) == "ready"}>
+    <if test={editable(state)}>
+      <if test={noteCount(state) == 0}>
+        <button class="action primary add" on:activate={create}>
+          <icon class="action-icon" name="plus"/>
+          <text class="action-label">{t("add-note")}</text>
+        </button>
+      </if>
+      <else>
+        <box class="toolbar">
+          <button class="selector" label={t("choose")} disabled={noteCount(state) < 2} on:activate={toggleMenu}>
+            <text class="selector-label">{activeLabel(state)}</text>
+            <if test={state.busy > 0}>
+              <icon class="selector-icon spin" name="loader-circle"/>
+            </if>
+            <else>
+              <icon class={chevronClass(state)} name="chevron-down"/>
+            </else>
+          </button>
+          <button class="icon-button" label={t("edit-current")} tooltip={t("edit-current")} disabled={editing(state)} on:activate={edit(activeId(state))}>
+            <icon name="pencil"/>
+          </button>
+          <button class="icon-button" label={t("add-note")} disabled={full(state)} on:activate={create}>
+            <icon name="plus"/>
+          </button>
+          <button class="icon-button" label={t("delete-current")} tooltip={t("delete-current")} on:activate={remove(activeId(state))}>
+            <icon name="trash-2"/>
+          </button>
+        </box>
+        <if test={state.menu}>
+          <scroll class="list">
+            <for each={state.doc.notes} as="note" key={note.id}>
+              <box class="list-row">
+                <button class={listItemClass(state, note)} on:activate={select(note.id)}>
+                  <text class="list-label">{noteLabel(state, note)}</text>
+                </button>
+                <button class="icon-button small" label={titled("edit-note", note.title)} tooltip={titled("edit-note", note.title)} on:activate={edit(note.id)}>
+                  <icon name="pencil"/>
+                </button>
+                <button class="icon-button small" label={titled("delete-note", note.title)} tooltip={titled("delete-note", note.title)} on:activate={remove(note.id)}>
+                  <icon name="trash-2"/>
+                </button>
+              </box>
+            </for>
+          </scroll>
+        </if>
+      </else>
+    </if>
+    <else>
+      <if test={showsNote(state) && activeId(state) != ""}>
+        <box class="heading">
+          <icon class="heading-icon" name="sticky-note"/>
+          <text class="heading-title">{activeTitle(state)}</text>
+        </box>
+      </if>
+    </else>
+    <if test={state.error != ""}>
+      <text class="error">{t(state.error)}</text>
+    </if>
+    <if test={!editing(state) && activeId(state) != ""}>
+      <scroll class="preview">
+        <if test={showsNote(state) && activeBody(state) != ""}>
+          <text class="body">{activeBody(state)}</text>
+        </if>
+        <if test={showsChecklist(state)}>
+          <if test={!showsNote(state) && editable(state)}>
+            <box class="heading">
+              <icon class="heading-icon" name="list-checks"/>
+              <text class="heading-title">{t("checklist")}</text>
+            </box>
+          </if>
+          <for each={previewItems(state)} as="item" key={item.id}>
+            <box class="item">
+              <if test={editable(state)}>
+                <checkbox class="item-check" checked={checked(state, item)} label={itemLabel(item)} on:change={check(activeId(state), item.id, event.value)}/>
+              </if>
+              <else>
+                <if test={checked(state, item)}>
+                  <icon class="item-icon item-icon-done" name="circle-check" label={t("done")}/>
+                </if>
+                <else>
+                  <icon class="item-icon" name="circle" label={t("todo")}/>
+                </else>
+              </else>
+              <text class={itemClass(state, item)}>{item.text}</text>
+            </box>
+          </for>
+        </if>
+      </scroll>
+    </if>
+  </if>
+  <for each={state.editors} as="editor" key={editor.note}>
+    <form class={editorClass(state, editor)} intent="notes.save" target={editor.note} on:submit={saved(editor.note, event.outcome, event.error)}>
+      <scroll class="fields">
+        <field class="title-field" name="title" placeholder={t("title-hint")} label={t("title-hint")} on:input={titleInput(editor.note, event.value)} on:keydown={keyed(editor.note, event.key, event.ctrl)}/>
+        <textarea class="body-field" name="body" rows={bodyRows(editor)} label={t("body-label")} on:input={bodyInput(editor.note, event.value)} on:keydown={keyed(editor.note, event.key, event.ctrl)}/>
+        <text class="meta">{t("checklist")}</text>
+        <box class="rows">
+          <for each={editor.rows} as="row" key={row.key}>
+            <box class="row">
+              <if test={rowStored(state, editor, row)}>
+                <checkbox class="row-check" checked={rowChecked(state, editor, row)} label={rowLabel(row)} on:change={check(editor.note, row.id, event.value)}/>
+              </if>
+              <else>
+                <icon class="row-new" name="circle"/>
+              </else>
+              <field class="row-field" name="item" placeholder={rowHint(editor, row)} label={t("item-hint")} on:input={rowInput(editor.note, row.key, event.value)} on:keydown={keyed(editor.note, event.key, event.ctrl)}/>
+              <if test={lastEmpty(editor, row)}>
+                <box class="row-space"/>
+              </if>
+              <else>
+                <button class="icon-button small" label={t("remove-entry")} tooltip={t("remove-entry")} on:activate={dropRow(editor.note, row.key)}>
+                  <icon name="x"/>
+                </button>
+              </else>
+            </box>
+          </for>
+        </box>
+        <if test={rowsFull(editor)}>
+          <text class="hint">{t("checklist-full")}</text>
+        </if>
+      </scroll>
+      <separator class="rule"/>
+      <if test={untitled(editor)}>
+        <text class="hint">{t("add-title")}</text>
+      </if>
+      <box class="actions">
+        <button class={saveClass(state, editor)} submit disabled={!canSave(state, editor)} on:activate={saving(editor.note)}>
+          <text class="action-label">{t("save")}</text>
+        </button>
+        <button class="action" on:activate={cancel(editor.note)}>
+          <text class="action-label">{t("cancel")}</text>
+        </button>
+      </box>
+    </form>
+  </for>
+</box>

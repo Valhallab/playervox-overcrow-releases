@@ -1,0 +1,344 @@
+{
+  "scenarioVersion": 1,
+  "name": "interactive",
+  "description": "Interactive mode: the note selector with its edit, add and delete buttons, the checks, and the note list opened under the selector. Both themes and languages, 150 %, 280 px wide. Checklist only keeps the selector and names the checklist. One note: nothing to choose. Eight notes: no more can be added.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "notes.subscribe": {
+        "active": "note-1",
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Expedition",
+            "body": "Find the northern entrance before sunset.\nBring rope.",
+            "items": [
+              {
+                "id": "local-1",
+                "text": "Pack torches",
+                "checked": true
+              },
+              {
+                "id": "local-2",
+                "text": "Sharpen the blade",
+                "checked": false
+              },
+              {
+                "id": "local-3",
+                "text": "Buy healing potions for the whole party before leaving town",
+                "checked": false
+              }
+            ]
+          },
+          {
+            "id": "note-2",
+            "title": "Build ideas",
+            "body": "Fire sword first, then armor.",
+            "items": []
+          },
+          {
+            "id": "note-3",
+            "title": "A very long note title that must be cut in the selector and in the list",
+            "body": "",
+            "items": [
+              {
+                "id": "local-4",
+                "text": "One entry",
+                "checked": false
+              }
+            ]
+          },
+          {
+            "id": "note-4",
+            "title": "Route",
+            "body": "North gate, then the river.",
+            "items": [
+              {
+                "id": "local-5",
+                "text": "Buy a map",
+                "checked": true
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Expedition",
+          "Pack torches"
+        ],
+        "image": "preview-dark-en",
+        "calls": [
+          {
+            "service": "notes.subscribe",
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Choose note"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Build ideas",
+          "Route"
+        ],
+        "image": "list-dark-en"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "list-dark-en-150"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "list-light-fr"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Choisir une note"
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "Build ideas"
+        ],
+        "image": "preview-light-fr"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "preview-light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "locale": "en",
+        "theme": "dark",
+        "size": {
+          "width": 280,
+          "height": 280
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "preview-narrow"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Choose note"
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "list-narrow"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Choose note"
+        }
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 360,
+          "height": 280
+        }
+      }
+    },
+    {
+      "menu": {
+        "id": "sections",
+        "value": "checklist"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Checklist",
+          "Pack torches"
+        ],
+        "image": "checklist-only"
+      }
+    },
+    {
+      "menu": {
+        "id": "sections",
+        "value": "note"
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "Pack torches",
+          "Checklist"
+        ],
+        "image": "note-only"
+      }
+    },
+    {
+      "menu": {
+        "id": "sections",
+        "value": "both"
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "value": {
+          "active": "note-1",
+          "notes": [
+            {
+              "id": "note-1",
+              "title": "Expedition",
+              "body": "Find the northern entrance before sunset.\nBring rope.",
+              "items": [
+                {
+                  "id": "local-1",
+                  "text": "Pack torches",
+                  "checked": true
+                },
+                {
+                  "id": "local-2",
+                  "text": "Sharpen the blade",
+                  "checked": false
+                },
+                {
+                  "id": "local-3",
+                  "text": "Buy healing potions for the whole party before leaving town",
+                  "checked": false
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "one-note"
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "value": {
+          "active": "note-3",
+          "notes": [
+            {
+              "id": "note-1",
+              "title": "Note 1",
+              "body": "",
+              "items": []
+            },
+            {
+              "id": "note-2",
+              "title": "Note 2",
+              "body": "",
+              "items": []
+            },
+            {
+              "id": "note-3",
+              "title": "Note 3",
+              "body": "",
+              "items": []
+            },
+            {
+              "id": "note-4",
+              "title": "Note 4",
+              "body": "",
+              "items": []
+            },
+            {
+              "id": "note-5",
+              "title": "Note 5",
+              "body": "",
+              "items": []
+            },
+            {
+              "id": "note-6",
+              "title": "Note 6",
+              "body": "",
+              "items": []
+            },
+            {
+              "id": "note-7",
+              "title": "Note 7",
+              "body": "",
+              "items": []
+            },
+            {
+              "id": "note-8",
+              "title": "Note 8",
+              "body": "",
+              "items": []
+            }
+          ]
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Choose note"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Note 1",
+          "Note 8"
+        ],
+        "image": "eight-notes"
+      }
+    },
+    {
+      "expect": {
+        "calls": []
+      }
+    }
+  ]
+}

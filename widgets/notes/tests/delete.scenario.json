@@ -1,0 +1,342 @@
+{
+  "scenarioVersion": 1,
+  "name": "delete",
+  "description": "The trash asks OverCrow, which confirms in its own chrome. Declined: nothing changes and nothing is said. Confirmed: the note goes and the next one shows. A deletion from the list; one OverCrow could not store. The last note deleted: Add note, in English and French, in Interactive mode only. A new note opens in its editor, titled by OverCrow.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "notes.subscribe": {
+        "active": "note-1",
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Expedition",
+            "body": "Find the northern entrance before sunset.\nBring rope.",
+            "items": [
+              {
+                "id": "local-1",
+                "text": "Pack torches",
+                "checked": true
+              },
+              {
+                "id": "local-2",
+                "text": "Sharpen the blade",
+                "checked": false
+              },
+              {
+                "id": "local-3",
+                "text": "Buy healing potions for the whole party before leaving town",
+                "checked": false
+              }
+            ]
+          },
+          {
+            "id": "note-2",
+            "title": "Build ideas",
+            "body": "Fire sword first, then armor.",
+            "items": []
+          },
+          {
+            "id": "note-3",
+            "title": "A very long note title that must be cut in the selector and in the list",
+            "body": "",
+            "items": [
+              {
+                "id": "local-4",
+                "text": "One entry",
+                "checked": false
+              }
+            ]
+          },
+          {
+            "id": "note-4",
+            "title": "Route",
+            "body": "North gate, then the river.",
+            "items": [
+              {
+                "id": "local-5",
+                "text": "Buy a map",
+                "checked": true
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "confirmations": [
+      "cancel",
+      "accept",
+      "accept"
+    ],
+    "calls": {
+      "notes.delete": [
+        {
+          "value": null
+        },
+        {
+          "error": "unavailable"
+        }
+      ],
+      "notes.create": [
+        {
+          "value": {
+            "note": {
+              "id": "note-5",
+              "title": "Note 5",
+              "body": "",
+              "items": []
+            }
+          }
+        }
+      ]
+    }
+  },
+  "steps": [
+    {
+      "pointer": {
+        "click": {
+          "label": "Delete current note"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "notes.subscribe",
+            "outcome": "ok"
+          },
+          {
+            "service": "notes.delete",
+            "outcome": "cancelled",
+            "params": {
+              "note": "note-1"
+            }
+          }
+        ],
+        "text": [
+          "Expedition"
+        ],
+        "noText": [
+          "Notes could not be loaded or saved. Try again."
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Delete current note"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "notes.delete",
+            "outcome": "ok",
+            "params": {
+              "note": "note-1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "value": {
+          "active": "note-2",
+          "notes": [
+            {
+              "id": "note-2",
+              "title": "Build ideas",
+              "body": "Fire sword first, then armor.",
+              "items": []
+            },
+            {
+              "id": "note-3",
+              "title": "A very long note title that must be cut in the selector and in the list",
+              "body": "",
+              "items": [
+                {
+                  "id": "local-4",
+                  "text": "One entry",
+                  "checked": false
+                }
+              ]
+            },
+            {
+              "id": "note-4",
+              "title": "Route",
+              "body": "North gate, then the river.",
+              "items": [
+                {
+                  "id": "local-5",
+                  "text": "Buy a map",
+                  "checked": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Build ideas"
+        ],
+        "noText": [
+          "Expedition"
+        ],
+        "image": "deleted"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Choose note"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Delete note: Route"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "notes.delete",
+            "outcome": "unavailable",
+            "params": {
+              "note": "note-4"
+            }
+          }
+        ],
+        "text": [
+          "Notes could not be loaded or saved. Try again."
+        ],
+        "image": "delete-refused"
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "value": {
+          "active": null,
+          "notes": []
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Add note"
+        ],
+        "noText": [
+          "Build ideas"
+        ],
+        "image": "no-notes-dark-en"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Ajouter une note"
+        ],
+        "image": "no-notes-light-fr"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "Ajouter une note"
+        ],
+        "image": "no-notes-passive"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "locale": "en",
+        "theme": "dark"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Add note"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "notes.create",
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "value": {
+          "active": "note-5",
+          "notes": [
+            {
+              "id": "note-5",
+              "title": "Note 5",
+              "body": "",
+              "items": []
+            }
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Note 5",
+          "Save",
+          "Cancel"
+        ],
+        "image": "new-note"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Cancel"
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "Save"
+        ],
+        "image": "new-note-shown"
+      }
+    }
+  ]
+}

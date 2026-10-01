@@ -25,7 +25,9 @@ use crate::permissions::{
     CAPABILITIES, NETWORK_RULE_FIELDS, PARAMETER_CONSTRAINTS, PERMISSIONS, SensitiveRule,
 };
 use crate::results::{SHAPES, Shape};
-use crate::services::{Requirement, SERVICE_ERRORS, SERVICES, ServiceKind, Target, WRITE_INTENTS};
+use crate::services::{
+    Enter, Requirement, SERVICE_ERRORS, SERVICES, ServiceKind, Target, WRITE_INTENTS,
+};
 use crate::style::{DEFAULT_SIZES, PROPERTIES, SELECTORS, SHEET_RULES, SyntaxEntry, VALUE_SYNTAX};
 use crate::tokens::TOKENS;
 use crate::view::{
@@ -602,9 +604,16 @@ event with the new value; that event is not a gesture.\n\n",
             Target::Optional(meaning) => format!("optional ({meaning})"),
             Target::Required(meaning) => format!("required ({meaning})"),
         };
+        let enter = match intent.enter {
+            Enter::Submit => "",
+            Enter::NextControl => {
+                " Enter in a `field` of the form moves the focus to its next `field` or \
+`textarea` and does not submit; Ctrl+Enter and a `submit` button do."
+            }
+        };
         let _ = write!(
             out,
-            "#### `{}`\n\nCapability `{}`; `target` attribute {target}. Status: {}.\n\n",
+            "#### `{}`\n\nCapability `{}`; `target` attribute {target}.{enter} Status: {}.\n\n",
             intent.name,
             intent.capability,
             status(intent.status)

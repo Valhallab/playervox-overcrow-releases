@@ -212,7 +212,7 @@ sent and nothing is in flight. There is no wall-clock wait.
 | `state` | `starting`, `running`, `restarting`, `failed`, `refused` or `stopped`. |
 | `fault` | The last fault of the VM (`handler_exception`, `resource_limit`…) or `none`. |
 | `clipboard` | The last text the widget wrote to the clipboard. |
-| `intents` | Exactly these write intents were submitted since the previous `intents` expectation, in order: `{ intent, fields?, outcome? }`. `fields` are the exact values the host's form sent (they come from its own controls, never from the logic); `outcome` is `accepted`, the error code the widget received in its `submit` event, or `pending` for a submission not answered yet. |
+| `intents` | Exactly these write intents were submitted since the previous `intents` expectation, in order: `{ intent, fields?, outcome? }`. `fields` are the exact values the host's form sent (they come from its own controls, never from the logic; each `item` of a `notes.save` is `{ "id", "text" }`, `id` being the entry of the scenario's `notes.subscribe` value the host filled that row with, or `null` for a row added since); `outcome` is `accepted`, the error code the widget received in its `submit` event, or `pending` for a submission not answered yet. |
 
 ## Time and determinism
 

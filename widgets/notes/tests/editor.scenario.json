@@ -1,0 +1,232 @@
+{
+  "scenarioVersion": 1,
+  "name": "editor",
+  "description": "The pencil opens the editor in place of the note: the title, the text and one row per checklist entry, filled by OverCrow from the stored note, and an empty row to add an entry. Both themes and languages, 150 %, 280 px wide. Without a title Save is inactive and says why; Ctrl+Enter then sends a form OverCrow refuses.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "notes.subscribe": {
+        "active": "note-1",
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Expedition",
+            "body": "Find the northern entrance before sunset.\nBring rope.",
+            "items": [
+              {
+                "id": "local-1",
+                "text": "Pack torches",
+                "checked": true
+              },
+              {
+                "id": "local-2",
+                "text": "Sharpen the blade",
+                "checked": false
+              },
+              {
+                "id": "local-3",
+                "text": "Buy healing potions for the whole party before leaving town",
+                "checked": false
+              }
+            ]
+          },
+          {
+            "id": "note-2",
+            "title": "Build ideas",
+            "body": "Fire sword first, then armor.",
+            "items": []
+          },
+          {
+            "id": "note-3",
+            "title": "A very long note title that must be cut in the selector and in the list",
+            "body": "",
+            "items": [
+              {
+                "id": "local-4",
+                "text": "One entry",
+                "checked": false
+              }
+            ]
+          },
+          {
+            "id": "note-4",
+            "title": "Route",
+            "body": "North gate, then the river.",
+            "items": [
+              {
+                "id": "local-5",
+                "text": "Buy a map",
+                "checked": true
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "steps": [
+    {
+      "pointer": {
+        "click": {
+          "label": "Edit current note"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Checklist",
+          "Save",
+          "Cancel"
+        ],
+        "image": "editor-dark-en",
+        "intents": []
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "editor-dark-en-150"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Enregistrer",
+          "Annuler",
+          "Liste de tâches"
+        ],
+        "image": "editor-light-fr"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "editor-light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "locale": "en",
+        "theme": "dark",
+        "size": {
+          "width": 280,
+          "height": 280
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "editor-narrow"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 360,
+          "height": 280
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Note title"
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "A",
+        "modifiers": [
+          "ctrl"
+        ]
+      }
+    },
+    {
+      "key": {
+        "key": "Backspace"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Add a note title before saving"
+        ],
+        "image": "no-title"
+      }
+    },
+    {
+      "key": {
+        "key": "Enter",
+        "modifiers": [
+          "ctrl"
+        ]
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Add a note title before saving"
+        ],
+        "intents": [
+          {
+            "intent": "notes.save",
+            "fields": {
+              "title": "",
+              "body": "Find the northern entrance before sunset.\nBring rope.",
+              "item": [
+                {
+                  "id": "local-1",
+                  "text": "Pack torches"
+                },
+                {
+                  "id": "local-2",
+                  "text": "Sharpen the blade"
+                },
+                {
+                  "id": "local-3",
+                  "text": "Buy healing potions for the whole party before leaving town"
+                },
+                {
+                  "id": null,
+                  "text": ""
+                }
+              ]
+            },
+            "outcome": "invalid_request"
+          }
+        ],
+        "image": "refused-without-title"
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "notes.subscribe",
+            "outcome": "ok"
+          }
+        ]
+      }
+    }
+  ]
+}

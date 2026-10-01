@@ -1,0 +1,246 @@
+{
+  "scenarioVersion": 1,
+  "name": "unavailable",
+  "description": "The host could not read the notes: the subscription ends, the widget says so, in French on a light panel here, and subscribes again 5 s later. The notes then show. A failure while a draft is open keeps the draft.",
+  "host": {
+    "locale": "fr",
+    "theme": "light"
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Chargement des notes…"
+        ],
+        "image": "loading-light-fr",
+        "calls": [
+          {
+            "service": "notes.subscribe"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "error": "unavailable"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Impossible de charger ou d’enregistrer les notes. Réessayez."
+        ],
+        "image": "unavailable-light-fr"
+      }
+    },
+    {
+      "advance": {
+        "ms": 5000
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "notes.subscribe"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "value": {
+          "active": "note-1",
+          "notes": [
+            {
+              "id": "note-1",
+              "title": "Expedition",
+              "body": "Find the northern entrance before sunset.\nBring rope.",
+              "items": [
+                {
+                  "id": "local-1",
+                  "text": "Pack torches",
+                  "checked": true
+                },
+                {
+                  "id": "local-2",
+                  "text": "Sharpen the blade",
+                  "checked": false
+                },
+                {
+                  "id": "local-3",
+                  "text": "Buy healing potions for the whole party before leaving town",
+                  "checked": false
+                }
+              ]
+            },
+            {
+              "id": "note-2",
+              "title": "Build ideas",
+              "body": "Fire sword first, then armor.",
+              "items": []
+            },
+            {
+              "id": "note-3",
+              "title": "A very long note title that must be cut in the selector and in the list",
+              "body": "",
+              "items": [
+                {
+                  "id": "local-4",
+                  "text": "One entry",
+                  "checked": false
+                }
+              ]
+            },
+            {
+              "id": "note-4",
+              "title": "Route",
+              "body": "North gate, then the river.",
+              "items": [
+                {
+                  "id": "local-5",
+                  "text": "Buy a map",
+                  "checked": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Expedition"
+        ],
+        "image": "back-light-fr"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "locale": "en",
+        "theme": "dark"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Edit current note"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Note title"
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "End"
+      }
+    },
+    {
+      "text": " II"
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "error": "unavailable"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Notes could not be loaded or saved. Try again."
+        ],
+        "image": "unavailable-dark-en"
+      }
+    },
+    {
+      "advance": {
+        "ms": 5000
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "value": {
+          "active": "note-1",
+          "notes": [
+            {
+              "id": "note-1",
+              "title": "Expedition",
+              "body": "Find the northern entrance before sunset.\nBring rope.",
+              "items": [
+                {
+                  "id": "local-1",
+                  "text": "Pack torches",
+                  "checked": true
+                },
+                {
+                  "id": "local-2",
+                  "text": "Sharpen the blade",
+                  "checked": false
+                },
+                {
+                  "id": "local-3",
+                  "text": "Buy healing potions for the whole party before leaving town",
+                  "checked": false
+                }
+              ]
+            },
+            {
+              "id": "note-2",
+              "title": "Build ideas",
+              "body": "Fire sword first, then armor.",
+              "items": []
+            },
+            {
+              "id": "note-3",
+              "title": "A very long note title that must be cut in the selector and in the list",
+              "body": "",
+              "items": [
+                {
+                  "id": "local-4",
+                  "text": "One entry",
+                  "checked": false
+                }
+              ]
+            },
+            {
+              "id": "note-4",
+              "title": "Route",
+              "body": "North gate, then the river.",
+              "items": [
+                {
+                  "id": "local-5",
+                  "text": "Buy a map",
+                  "checked": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Expedition •",
+          "Save"
+        ],
+        "image": "draft-kept",
+        "calls": [
+          {
+            "service": "notes.subscribe"
+          }
+        ]
+      }
+    }
+  ]
+}

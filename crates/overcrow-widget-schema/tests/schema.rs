@@ -449,6 +449,25 @@ fn services_reference_declared_authority() {
                 field.name
             );
         }
+        // Plain Enter is kept for moving between fields only where a form
+        // edits several texts; every other intent submits on Enter.
+        let texts = intent
+            .fields
+            .iter()
+            .filter(|field| {
+                matches!(
+                    field.ty,
+                    ValueType::Text(_) | ValueType::Chars(_) | ValueType::ListOf(..)
+                )
+            })
+            .count();
+        match intent.enter {
+            services::Enter::NextControl => {
+                assert_eq!(intent.name, "notes.save");
+                assert!(texts > 1, "{}", intent.name);
+            }
+            services::Enter::Submit => assert!(texts <= 1, "{}", intent.name),
+        }
     }
     for capability in permissions::CAPABILITIES {
         assert!(

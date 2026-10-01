@@ -1,0 +1,237 @@
+{
+  "scenarioVersion": 1,
+  "name": "checks",
+  "description": "A check in the note is written at once: the box shows it before OverCrow answers, and the entry joins the checked ones. Stored, the subscription says the same. A check OverCrow could not store goes back, with a message. In the editor the stored entries have the same checks; a new row has none until it is saved.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "notes.subscribe": {
+        "active": "note-1",
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Expedition",
+            "body": "Find the northern entrance before sunset.\nBring rope.",
+            "items": [
+              {
+                "id": "local-1",
+                "text": "Pack torches",
+                "checked": true
+              },
+              {
+                "id": "local-2",
+                "text": "Sharpen the blade",
+                "checked": false
+              },
+              {
+                "id": "local-3",
+                "text": "Buy healing potions for the whole party before leaving town",
+                "checked": false
+              }
+            ]
+          },
+          {
+            "id": "note-2",
+            "title": "Build ideas",
+            "body": "Fire sword first, then armor.",
+            "items": []
+          },
+          {
+            "id": "note-3",
+            "title": "A very long note title that must be cut in the selector and in the list",
+            "body": "",
+            "items": [
+              {
+                "id": "local-4",
+                "text": "One entry",
+                "checked": false
+              }
+            ]
+          },
+          {
+            "id": "note-4",
+            "title": "Route",
+            "body": "North gate, then the river.",
+            "items": [
+              {
+                "id": "local-5",
+                "text": "Buy a map",
+                "checked": true
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "calls": {
+      "notes.setItem": [
+        {
+          "value": null
+        },
+        {
+          "error": "unavailable"
+        },
+        {
+          "value": null
+        }
+      ]
+    }
+  },
+  "steps": [
+    {
+      "pointer": {
+        "click": {
+          "label": "Sharpen the blade"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "notes.subscribe",
+            "outcome": "ok"
+          },
+          {
+            "service": "notes.setItem",
+            "outcome": "ok",
+            "params": {
+              "note": "note-1",
+              "item": "local-2",
+              "checked": true
+            }
+          }
+        ],
+        "image": "checked-at-once"
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "value": {
+          "active": "note-1",
+          "notes": [
+            {
+              "id": "note-1",
+              "title": "Expedition",
+              "body": "Find the northern entrance before sunset.\nBring rope.",
+              "items": [
+                {
+                  "id": "local-1",
+                  "text": "Pack torches",
+                  "checked": true
+                },
+                {
+                  "id": "local-2",
+                  "text": "Sharpen the blade",
+                  "checked": true
+                },
+                {
+                  "id": "local-3",
+                  "text": "Buy healing potions for the whole party before leaving town",
+                  "checked": false
+                }
+              ]
+            },
+            {
+              "id": "note-2",
+              "title": "Build ideas",
+              "body": "Fire sword first, then armor.",
+              "items": []
+            },
+            {
+              "id": "note-3",
+              "title": "A very long note title that must be cut in the selector and in the list",
+              "body": "",
+              "items": [
+                {
+                  "id": "local-4",
+                  "text": "One entry",
+                  "checked": false
+                }
+              ]
+            },
+            {
+              "id": "note-4",
+              "title": "Route",
+              "body": "North gate, then the river.",
+              "items": [
+                {
+                  "id": "local-5",
+                  "text": "Buy a map",
+                  "checked": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "checked-stored"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Pack torches"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "notes.setItem",
+            "outcome": "unavailable",
+            "params": {
+              "note": "note-1",
+              "item": "local-1",
+              "checked": false
+            }
+          }
+        ],
+        "text": [
+          "Notes could not be loaded or saved. Try again."
+        ],
+        "image": "check-refused"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Edit current note"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Pack torches"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "notes.setItem",
+            "outcome": "ok",
+            "params": {
+              "note": "note-1",
+              "item": "local-1",
+              "checked": false
+            }
+          }
+        ],
+        "noText": [
+          "Notes could not be loaded or saved. Try again."
+        ],
+        "image": "editor-check"
+      }
+    }
+  ]
+}

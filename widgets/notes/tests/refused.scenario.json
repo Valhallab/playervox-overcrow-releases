@@ -1,0 +1,33 @@
+{
+  "scenarioVersion": 1,
+  "name": "refused",
+  "description": "Without the permission to read the notes the widget asks OverCrow nothing and says what it lacks.",
+  "host": {
+    "grants": []
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Permission needed to read your notes."
+        ],
+        "calls": [],
+        "image": "refused"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Permission needed to read your notes."
+        ],
+        "calls": [],
+        "image": "refused-interactive"
+      }
+    }
+  ]
+}
