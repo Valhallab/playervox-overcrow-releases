@@ -274,6 +274,38 @@ fn patch_attributes_use_the_view_encodings() {
     assert_eq!(check(popover, anchor, json!(3)), Err("invalid_attribute"));
 }
 
+/// Only scroll containers say when the user leaves or regains their end:
+/// a `list` and a `scroll` subscribe to `stick`, whose detail is exactly
+/// `{ stuck }`; nothing else does.
+#[test]
+fn scroll_containers_report_leaving_their_end() {
+    let view = refs_view();
+    let assets = assets();
+    let on = COMMON_ATTRIBUTES
+        .iter()
+        .find(|field| field.name == "on")
+        .expect("common attribute");
+    let check = |name: &str, value: Value| {
+        validate_patch_attribute(element(name).expect("element"), on, &value, &view, &assets)
+            .map_err(IpcError::as_str)
+    };
+    for name in ["list", "scroll"] {
+        assert_eq!(check(name, json!(["reachend", "stick"])), Ok(()), "{name}");
+    }
+    for name in ["box", "text", "button", "field"] {
+        assert_eq!(
+            check(name, json!(["stick"])),
+            Err("invalid_attribute"),
+            "{name}"
+        );
+    }
+    let event = overcrow_widget_schema::view::event("stick").expect("event");
+    assert!(!event.gesture, "a scroll never authorizes a call");
+    let detail: Vec<_> = event.detail.iter().map(|field| field.name).collect();
+    assert_eq!(detail, ["stuck"]);
+    assert!(event.detail[0].required);
+}
+
 #[test]
 fn span_colors_and_asset_handles_are_accepted_strictly() {
     let view = refs_view();

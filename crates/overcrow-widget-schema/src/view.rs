@@ -159,10 +159,10 @@ pub const ELEMENTS: &[Element] = &[
             Field::optional(
                 "stick-to-end",
                 ValueType::Bool,
-                "Stay at the end while content grows, until the user scrolls away (chat).",
+                "Stay at the end while content grows, until the user scrolls away (chat). Setting it again after it was off scrolls to the end.",
             ),
         ],
-        events: &["reachend", "contextmenu"],
+        events: &["reachend", "stick", "contextmenu"],
     },
     Element {
         name: "list",
@@ -182,7 +182,7 @@ pub const ELEMENTS: &[Element] = &[
                 "Estimated child height used before a child is first measured.",
             ),
         ],
-        events: &["reachend", "contextmenu"],
+        events: &["reachend", "stick", "contextmenu"],
     },
     Element {
         name: "text",
@@ -668,6 +668,16 @@ pub const EVENTS: &[Event] = &[
         summary: "Scrolled within one viewport of the end (load more, history).",
         gesture: false,
         detail: &[],
+    },
+    Event {
+        name: "stick",
+        summary: "The user scrolled a container away from its end, or back to it (unread count, return to the latest). Content growing never sends it.",
+        gesture: false,
+        detail: &[Field::required(
+            "stuck",
+            ValueType::Bool,
+            "The container is at its end.",
+        )],
     },
     Event {
         name: "dismiss",

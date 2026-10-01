@@ -459,6 +459,11 @@ pub const SHAPES: &[NamedShape] = &[
                 "The message replied to.",
             ),
             member("deleted", Shape::Bool, "Deleted by a moderator."),
+            member(
+                "receivedAt",
+                Shape::Integer,
+                "When the host received the message, in Unix milliseconds of the host's clock: compare it with `Date.now()` to age a message (the Passive fade), also after a `reset`.",
+            ),
         ]),
         "One chat message.",
     ),
@@ -476,6 +481,16 @@ pub const SHAPES: &[NamedShape] = &[
                 Shape::Keyword(&["idle", "connecting", "joined", "reconnecting", "failed"]),
                 "Channel connection state.",
             ),
+            member(
+                "failure",
+                Shape::Nullable(&Shape::Keyword(&[
+                    "channel_unavailable",
+                    "connection",
+                    "provider",
+                    "limit",
+                ])),
+                "Why `joinState` is `failed`, as a fixed category: the channel does not exist or refuses the account, the connection failed, Twitch answered something unexpected, or another widget holds the host's one chat connection (`limit`). `null` in every other state. An account failure is not here: the host draws it.",
+            ),
             member("favorites", Shape::List(&Shape::Text), "Favorite channels."),
             member("canSend", Shape::Bool, "A message can be sent now."),
             member(
@@ -487,12 +502,17 @@ pub const SHAPES: &[NamedShape] = &[
             member(
                 "messages",
                 Shape::List(&Shape::Named("ChatMessage")),
-                "Messages, oldest first.",
+                "Messages, oldest first: the whole list with `reset`; otherwise the new messages, to append, and the changed ones, which replace the message of the same `id` in place.",
             ),
             member(
                 "removed",
                 Shape::List(&Shape::Text),
                 "IDs of removed messages.",
+            ),
+            member(
+                "skipped",
+                Shape::Integer,
+                "New messages the host left out since the previous update, because the chat is faster than it delivers; 0 with `reset`. A removal is never left out.",
             ),
         ]),
         "Twitch chat state.",

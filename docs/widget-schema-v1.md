@@ -199,8 +199,8 @@ Expressions: Literals, state and prop paths, `!`, `&&`, `||`, `??`, comparison a
 | Element | Content | Parents | Focus | Role | Events | Meaning |
 | --- | --- | --- | --- | --- | --- | --- |
 | `box` | flow | any flow | when subscribed | group | `activate`, `contextmenu`, `wheel`, `keydown`, `focus`, `blur` | Generic container; flex or grid layout comes from style. The scene root (node 0) is a `box`. |
-| `scroll` | flow | any flow | never | scroll-view | `reachend`, `contextmenu` | Clipping container scrolled by the host with wheel, drag and keyboard. |
-| `list` | flow | any flow | never | list | `reachend`, `contextmenu` | Vertical scrolling list whose children are laid out and painted only when visible. |
+| `scroll` | flow | any flow | never | scroll-view | `reachend`, `stick`, `contextmenu` | Clipping container scrolled by the host with wheel, drag and keyboard. |
+| `list` | flow | any flow | never | list | `reachend`, `stick`, `contextmenu` | Vertical scrolling list whose children are laid out and painted only when visible. |
 | `text` | inline: `span`, `icon`, `image` | any flow | when subscribed | label | `activate`, `contextmenu`, `wheel`, `keydown`, `focus`, `blur` | Block of wrapped text; its inline children flow with it (chat line with emotes). |
 | `span` | text | `text` | never | label | none | Styled run of text inside `text`. |
 | `icon` | empty | any flow | when subscribed | image | `activate`, `contextmenu`, `wheel`, `keydown`, `focus`, `blur` | Lucide icon tinted with `color`, sized by `font-size` unless `width`/`height` are set. |
@@ -240,7 +240,7 @@ Expressions: Literals, state and prop paths, `!`, `&&`, `||`, `??`, comparison a
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
 | `axis` | `vertical` \| `horizontal` | no | Scroll direction; default `vertical`. |
-| `stick-to-end` | boolean | no | Stay at the end while content grows, until the user scrolls away (chat). |
+| `stick-to-end` | boolean | no | Stay at the end while content grows, until the user scrolls away (chat). Setting it again after it was off scrolls to the end. |
 
 #### `list` attributes
 
@@ -425,6 +425,7 @@ A gesture event authorizes gesture-bound service calls made while the VM handles
 | `focus` | no | none | Node gained keyboard focus. |
 | `blur` | no | none | Node lost keyboard focus. |
 | `reachend` | no | none | Scrolled within one viewport of the end (load more, history). |
+| `stick` | no | `stuck` | The user scrolled a container away from its end, or back to it (unread count, return to the latest). Content growing never sends it. |
 | `dismiss` | no | none | The host closed a popover (Escape, outside click, anchor removed). |
 
 Named `keydown` keys: `Enter`, `Escape`, `Backspace`, `Delete`, `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight`, `Home`, `End`, `PageUp`, `PageDown`. Any other `key` is one printable grapheme.
@@ -868,7 +869,7 @@ Authority is checked by the host at every call, immediately before acting. Gestu
 | `journal.subscribe` | capability `journal.read` | subscribe | no | no | none | `null` without an active game, or `{ revision, notice }`: `revision` changes whenever the merged journal of the active game changes (a session recorded or deleted, cloud sessions merged, the PlayerVox account or sync changed), so the widget reads its page again; `notice` is `null`, `offline`, `storage_unavailable`, `full`, `expired`, `busy` or `unavailable`. Holding this subscription is what keeps the host's journal source running | `JournalState` or `null` | fixed |
 | `journal.page` | capability `journal.read` | call | no | no | `cursor?`: text ≤ `MAX_OBJECT_ID_BYTES` | `{ gameName, items, page, next, previous }`: five local and cloud sessions of the active game, merged and deduplicated, newest first; without `cursor`, the first page; each item `{ id, startedAt, offsetMinutes, durationMs, source }`; cursors are host handles that stay valid for the widget whatever other widgets read, and a cursor past the end answers the last page | `JournalPage` | fixed |
 | `journal.delete` | capability `journal.delete` | call | yes | yes | `session`: text ≤ `MAX_OBJECT_ID_BYTES` | `null`, or `cancelled` when the user declines; `not_connected` for a cloud session while PlayerVox is disconnected | `null` | fixed |
-| `twitch.chat.subscribe` | capability `twitch.chat.read` | subscribe | no | no | none | `{ account, channel, joinState, favorites, canSend, generation, reset, messages, removed }`: `account` is `signed_out`, `pending`, `connected` or `expired` (sign-in is host chrome); messages arrive as deltas, with `reset` after subscribing, a generation change or a show; each message `{ id, author, color, badges, fragments, reply, deleted }` with at most `MAX_CHAT_FRAGMENTS` fragments, emotes and badges as `asset:` handles for the current theme and scale | `TwitchChat` | fixed |
+| `twitch.chat.subscribe` | capability `twitch.chat.read` | subscribe | no | no | none | `{ account, channel, joinState, failure, favorites, canSend, generation, reset, messages, removed, skipped }`: `account` is `signed_out`, `pending`, `connected` or `expired` (sign-in is host chrome); `failure` is the fixed category of a `failed` join; messages arrive as deltas, at most one update per 100 ms, with `reset` after subscribing, a generation change or a show, and nothing while the widget is hidden; a faster chat is sampled, `skipped` counting the new messages left out; each message `{ id, author, color, badges, fragments, reply, deleted, receivedAt }` with at most `MAX_CHAT_FRAGMENTS` fragments, emotes and badges as `asset:` handles for the current theme and scale | `TwitchChat` | fixed |
 | `twitch.chat.join` | capability `twitch.chat.read` | call | yes | no | `channel`: text ≤ `MAX_CHAT_CHANNEL_BYTES` | `null`; the host remembers the channel and rejoins it when the widget starts | `null` | fixed |
 | `twitch.chat.leave` | capability `twitch.chat.read` | call | yes | no | none | `null`; the host forgets the channel | `null` | fixed |
 | `twitch.chat.favorite` | capability `twitch.chat.read` | call | yes | no | `channel`: text ≤ `MAX_CHAT_CHANNEL_BYTES`; `favorite`: boolean | `null`; `quota_exceeded` beyond `MAX_CHAT_FAVORITES` | `null` | fixed |
@@ -1134,7 +1135,7 @@ A text run or an emote of a chat message. `{ text }` or `{ emote, alt }`
 
 #### `ChatMessage`
 
-One chat message. `{ id, author, color, badges, fragments, reply, deleted }`
+One chat message. `{ id, author, color, badges, fragments, reply, deleted, receivedAt }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
@@ -1147,22 +1148,25 @@ One chat message. `{ id, author, color, badges, fragments, reply, deleted }`
 | `reply.author` | text | Author replied to. |
 | `reply.text` | text | Text replied to. |
 | `deleted` | boolean | Deleted by a moderator. |
+| `receivedAt` | integer | When the host received the message, in Unix milliseconds of the host's clock: compare it with `Date.now()` to age a message (the Passive fade), also after a `reset`. |
 
 #### `TwitchChat`
 
-Twitch chat state. `{ account, channel, joinState, favorites, canSend, generation, reset, messages, removed }`
+Twitch chat state. `{ account, channel, joinState, failure, favorites, canSend, generation, reset, messages, removed, skipped }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
 | `account` | `signed_out` \| `pending` \| `connected` \| `expired` | Twitch account state; sign-in is host chrome. |
 | `channel` | text or `null` | Joined channel login. |
 | `joinState` | `idle` \| `connecting` \| `joined` \| `reconnecting` \| `failed` | Channel connection state. |
+| `failure` | `channel_unavailable` \| `connection` \| `provider` \| `limit` or `null` | Why `joinState` is `failed`, as a fixed category: the channel does not exist or refuses the account, the connection failed, Twitch answered something unexpected, or another widget holds the host's one chat connection (`limit`). `null` in every other state. An account failure is not here: the host draws it. |
 | `favorites` | list of text | Favorite channels. |
 | `canSend` | boolean | A message can be sent now. |
 | `generation` | integer | Changes with the channel or account. |
 | `reset` | boolean | `messages` replaces the whole list. |
-| `messages` | list of `ChatMessage` | Messages, oldest first. |
+| `messages` | list of `ChatMessage` | Messages, oldest first: the whole list with `reset`; otherwise the new messages, to append, and the changed ones, which replace the message of the same `id` in place. |
 | `removed` | list of text | IDs of removed messages. |
+| `skipped` | integer | New messages the host left out since the previous update, because the chat is faster than it delivers; 0 with `reset`. A removal is never left out. |
 
 Service error codes: `invalid_request`, `permission_denied`, `gesture_required`, `not_connected`, `stale_context`, `unavailable`, `busy`, `cancelled`, `quota_exceeded`, `unsupported`, `url_invalid`, `resolve_failed`, `address_denied`, `too_many_addresses`, `peer_mismatch`, `redirect_denied`, `encoding_denied`, `content_type_denied`, `response_metadata_limit`, `request_body_limit`, `response_body_limit`, `image_invalid`, `timeout`, `transport_failed`.
 

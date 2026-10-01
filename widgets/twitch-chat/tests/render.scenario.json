@@ -1,0 +1,347 @@
+{
+  "scenarioVersion": 1,
+  "name": "render",
+  "description": "What a chat line is made of: an author in their own colour (a very dark and a very light one, which OverCrow keeps readable on each panel), an author without a colour, inline emotes of three shapes, a long message that wraps, a reply under one line of what it answers, a message of 16 runs; the reply icon under the pointer with its tooltip. Dark English and light French, at 100 % and 150 %, a 180 px wide panel, and Passive mode.",
+  "host": {
+    "mode": "interactive"
+  },
+  "assets": {
+    "smile": "tests/assets/smile.png",
+    "gem": "tests/assets/gem.png",
+    "wide": "tests/assets/wide.png"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "twitch.chat.subscribe": {
+        "account": "connected",
+        "channel": "juniper_plays",
+        "joinState": "joined",
+        "failure": null,
+        "favorites": [
+          "juniper_plays"
+        ],
+        "canSend": true,
+        "generation": 1,
+        "reset": true,
+        "messages": [
+          {
+            "id": "m1",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "good evening chat"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m2",
+            "author": "River_Otter",
+            "color": "#1e90ff",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "hello "
+              },
+              {
+                "emote": "fixture:smile",
+                "alt": "ocSmile"
+              },
+              {
+                "text": " ready for the boss?"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m3",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "that last jump was close, I thought the run was over right there and then, what a save"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m4",
+            "author": "Night_Heron",
+            "color": "#05050f",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "a name as dark as the panel stays readable"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m5",
+            "author": "Snowdrift",
+            "color": "#fdfdfd",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "and so does a name as light as a light panel"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m6",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "not yet "
+              },
+              {
+                "emote": "fixture:gem",
+                "alt": "ocGem"
+              },
+              {
+                "emote": "fixture:wide",
+                "alt": "ocWide"
+              }
+            ],
+            "reply": {
+              "author": "River_Otter",
+              "text": "hello ocSmile ready for the boss?"
+            },
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m7",
+            "author": "Fern_42",
+            "color": "#2e8b57",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "what "
+              },
+              {
+                "emote": "fixture:smile",
+                "alt": "ocSmile"
+              },
+              {
+                "text": " a "
+              },
+              {
+                "emote": "fixture:gem",
+                "alt": "ocGem"
+              },
+              {
+                "text": " run "
+              },
+              {
+                "emote": "fixture:wide",
+                "alt": "ocWide"
+              },
+              {
+                "text": " that "
+              },
+              {
+                "emote": "fixture:smile",
+                "alt": "ocSmile"
+              },
+              {
+                "text": " was "
+              },
+              {
+                "emote": "fixture:gem",
+                "alt": "ocGem"
+              },
+              {
+                "text": " so "
+              },
+              {
+                "emote": "fixture:wide",
+                "alt": "ocWide"
+              },
+              {
+                "text": " many "
+              },
+              {
+                "emote": "fixture:smile",
+                "alt": "ocSmile"
+              },
+              {
+                "text": " gems "
+              },
+              {
+                "emote": "fixture:gem",
+                "alt": "ocGem"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          }
+        ],
+        "removed": [],
+        "skipped": 0
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "#juniper_plays",
+          "Juniper: good evening chat",
+          "hello",
+          "ready for the boss?",
+          "River_Otter: hello ocSmile ready for the boss?",
+          "Juniper: not yet",
+          "Fern_42:",
+          "gems"
+        ],
+        "calls": [
+          {
+            "service": "twitch.chat.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "image": "dark-en"
+      }
+    },
+    {
+      "pointer": {
+        "move": {
+          "text": "Juniper: good evening chat"
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "reply-icon"
+      }
+    },
+    {
+      "pointer": {
+        "move": {
+          "label": "Reply"
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 1000
+      }
+    },
+    {
+      "expect": {
+        "image": "reply-tooltip"
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "advance": {
+        "ms": 3000
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "dark-en-150"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "light-fr"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 180,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "light-fr-narrow"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "dark-en-narrow"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 420,
+          "height": 360
+        },
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "Send"
+        ],
+        "image": "passive-dark-en"
+      }
+    },
+    {
+      "host": {
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "passive-light-en",
+        "fault": "none"
+      }
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+<!-- Twitch chat: the chat of one public Twitch channel (parity sheet:
+     playervox-overcrow docs/builtin-parity/twitch-chat.md).
+     OverCrow holds the account, the connection, the channel and the
+     favorites. The composer is a form bound to the `twitch.chat.send`
+     intent: its message field belongs to OverCrow, which keeps the text,
+     sends it and empties it once accepted; it takes no `value` here. The
+     form's key is the chat's generation: another channel or account is
+     another form, without the previous text. -->
+<box class="chat" label={t("label")}>
+  <box class="header">
+    <icon class="mark" name="message-square" label={t("twitch")}/>
+    <if test={phase(state) == "chat"}>
+      <if test={state.interactive}>
+        <button class={starClass(state)} label={favoriteLabel(state)} tooltip={t(favoriteTip(state))} disabled={favoriteFull(state)} on:activate={toggleFavorite}>
+          <icon name="star"/>
+        </button>
+      </if>
+      <else-if test={isFavorite(state)}>
+        <icon class="star-mark" name="star" label={t("favorite-channel")}/>
+      </else-if>
+    </if>
+    <text class="heading">{heading(state)}</text>
+    <box class={dotClass(state)} label={t(statusKey(state))} tooltip={t(statusKey(state))}/>
+    <if test={state.interactive && phase(state) == "chat"}>
+      <button class="icon-button" label={t("change-channel")} tooltip={t("change-channel")} on:activate={toggleSelector}>
+        <icon name="chevron-right"/>
+      </button>
+      <button class="icon-button" label={t("leave-channel")} tooltip={t("leave-channel")} on:activate={leave}>
+        <icon name="x"/>
+      </button>
+    </if>
+  </box>
+  <if test={failureKey(state) != ""}>
+    <text class="error">{t(failureKey(state))}</text>
+  </if>
+  <if test={state.interactive && state.notice != ""}>
+    <text class="error">{t(state.notice)}</text>
+  </if>
+  <if test={phase(state) == "permission"}>
+    <text class="status">{t("no-permission")}</text>
+  </if>
+  <if test={phase(state) == "unavailable"}>
+    <text class="status">{t("unavailable")}</text>
+  </if>
+  <if test={phase(state) == "signed-out"}>
+    <text class="status">{t("signed-out")}</text>
+  </if>
+  <if test={phase(state) == "pending"}>
+    <text class="status">{t("pending")}</text>
+  </if>
+  <if test={phase(state) == "no-channel" && !state.interactive}>
+    <text class="status">{t("no-channel")}</text>
+  </if>
+  <if test={selecting(state)}>
+    <!-- The selector's key changes when it starts over: its field is
+         OverCrow's to edit, and a new field is an empty one. -->
+    <for each={selectors(state)} as="selector" key={selector}>
+      <form class="selector" on:submit={join}>
+        <field class="input channel" max-length="26" placeholder={t("channel-name")} label={t("channel-name")} on:input={channelTyped(event.value)}/>
+        <button class="action" submit disabled={!canJoin(state)}>
+          <text class="action-label">{t("join")}</text>
+        </button>
+      </form>
+    </for>
+    <if test={state.favorites.length > 0}>
+      <text class="eyebrow">{t("favorites")}</text>
+      <scroll class="chips">
+        <for each={state.favorites} as="favorite" key={favorite}>
+          <button class="chip" on:activate={joinFavorite(favorite)}>
+            <text class="chip-label">#{favorite}</text>
+          </button>
+        </for>
+      </scroll>
+    </if>
+  </if>
+  <if test={phase(state) == "chat"}>
+    <if test={state.shown.length == 0}>
+      <text class="empty">{t(emptyKey(state))}</text>
+    </if>
+    <list class="history" stick-to-end={state.following} item-height="20" label={heading(state)} on:stick={stuck(event.stuck)}>
+      <for each={state.shown} as="row" key={row.key}>
+        <if test={row.gap > 0}>
+          <text class="gap">{gapText(row.gap)}</text>
+        </if>
+        <else>
+          <box class={row.cls}>
+            <if test={row.context != ""}>
+              <text class="context">{row.context}</text>
+            </if>
+            <text class="message">
+              <span class="author" color={row.color}>{row.author}</span>
+              <for each={row.parts} as="part" key={part.key}>
+                <if test={part.emote != ""}>
+                  <image class="emote" src={part.emote} label={part.text}/>
+                </if>
+                <else>
+                  <span>{part.text}</span>
+                </else>
+              </for>
+            </text>
+            <if test={composing(state)}>
+              <icon class="reply" name="reply" label={t("reply")} tooltip={row.tip} on:activate={replyTo(row.id)}/>
+            </if>
+          </box>
+        </else>
+      </for>
+    </list>
+    <if test={state.interactive && state.unread > 0}>
+      <button class="unread" on:activate={latest}>
+        <text class="unread-label">{unreadText(state.unread)}</text>
+      </button>
+    </if>
+  </if>
+  <!-- The composer stays in the view whatever shows above it, hidden when
+       nothing can be composed: OverCrow keeps the text of its field through
+       Passive mode and a failed subscription. -->
+  <for each={composers(state)} as="composer" key={composer}>
+    <form class={composerClass(state)} intent="twitch.chat.send" target={replyTarget(state)} on:submit={submitted(event.outcome, event.error)}>
+      <if test={state.reply}>
+        <box class="replying">
+          <text class="replying-label">{replyingTo(state)}</text>
+          <button class="icon-button small" label={t("cancel-reply")} tooltip={t("cancel-reply")} on:activate={cancelReply}>
+            <icon name="x"/>
+          </button>
+        </box>
+      </if>
+      <if test={state.sendError != ""}>
+        <text class="error">{t(state.sendError)}</text>
+      </if>
+      <box class="compose">
+        <field class="input message-field" name="message" max-length="500" placeholder={t(composerHint(state))} label={t("message-label")} disabled={!state.canSend} on:input={drafted(event.value)} on:keydown={keyed(event.key)}/>
+        <if test={sendMark(state) != ""}>
+          <text class={sendMarkClass(state)}>{t(sendMark(state))}</text>
+        </if>
+        <button class="action" submit disabled={!canSubmit(state)} on:activate={sendPressed}>
+          <text class="action-label">{t("send")}</text>
+        </button>
+      </box>
+    </form>
+  </for>
+</box>

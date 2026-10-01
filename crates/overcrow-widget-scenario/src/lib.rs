@@ -980,6 +980,18 @@ fn check_error_code(path: &str, code: &str) -> Checked {
     Ok(())
 }
 
+/// The error code of a write intent's answer. A provider can refuse a
+/// write for a reason of its own that reads as a permission (a chat that
+/// does not take the account's messages, a rating the service forbids):
+/// `permission_denied` is an answer here, while it is the host's alone for
+/// a call. The other host checks stay refused.
+fn check_intent_error_code(path: &str, code: &str) -> Checked {
+    if code == "permission_denied" {
+        return Ok(());
+    }
+    check_error_code(path, code)
+}
+
 /// A provider-backed call: its answers come from the fixtures.
 fn provider_call(name: &str) -> Option<&'static overcrow_widget_schema::services::Service> {
     service(name).filter(|service| {
@@ -1262,7 +1274,7 @@ impl Scenario {
             }
             for (index, reply) in replies.iter().enumerate() {
                 if let IntentReply::Error(code) = reply {
-                    check_error_code(&format!("{path}[{index}].error"), code)?;
+                    check_intent_error_code(&format!("{path}[{index}].error"), code)?;
                 }
             }
         }

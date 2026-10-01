@@ -1,0 +1,279 @@
+{
+  "scenarioVersion": 1,
+  "name": "draft",
+  "description": "The text being typed is kept by OverCrow's field while its form stays in the view: through Passive mode, where the composer is hidden and Enter sends nothing, through a hidden widget, and under the channel selector. Another channel is another form: the text typed for the previous one is gone, which the next message proves.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "twitch.chat.subscribe": {
+        "account": "connected",
+        "channel": "juniper_plays",
+        "joinState": "joined",
+        "failure": null,
+        "favorites": [],
+        "canSend": true,
+        "generation": 1,
+        "reset": true,
+        "messages": [
+          {
+            "id": "m1",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "good evening chat"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m2",
+            "author": "River_Otter",
+            "color": "#1e90ff",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "hello, ready for the boss?"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m3",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "that last jump was close"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          }
+        ],
+        "removed": [],
+        "skipped": 0
+      }
+    },
+    "intents": {
+      "twitch.chat.send": [
+        "accepted",
+        "accepted"
+      ]
+    }
+  },
+  "steps": [
+    {
+      "pointer": {
+        "click": {
+          "label": "Message"
+        }
+      }
+    },
+    {
+      "text": "half a thought"
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "image": "draft"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "intents": [],
+        "noText": [
+          "Send",
+          "sending…"
+        ],
+        "image": "passive-hides-the-composer"
+      }
+    },
+    {
+      "host": {
+        "visible": false
+      }
+    },
+    {
+      "advance": {
+        "ms": 60000
+      }
+    },
+    {
+      "host": {
+        "visible": true
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Send"
+        ],
+        "image": "draft-kept"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Change channel"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Change channel"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Message"
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "End"
+      }
+    },
+    {
+      "text": ", finished"
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "twitch.chat.send",
+            "fields": {
+              "message": "half a thought, finished"
+            },
+            "outcome": "accepted"
+          }
+        ]
+      }
+    },
+    {
+      "text": "meant for this channel"
+    },
+    {
+      "expect": {
+        "image": "second-draft"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "moss_and_fern",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [],
+          "canSend": true,
+          "generation": 2,
+          "reset": true,
+          "messages": [
+            {
+              "id": "n1",
+              "author": "Fern_42",
+              "color": "#2e8b57",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "welcome to the other channel"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            }
+          ],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "#moss_and_fern",
+          "Fern_42: welcome to the other channel"
+        ],
+        "noText": [
+          "Moss: that last jump was close"
+        ],
+        "image": "another-channel"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Message"
+        }
+      }
+    },
+    {
+      "text": "hello moss"
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "twitch.chat.send",
+            "fields": {
+              "message": "hello moss"
+            },
+            "outcome": "accepted"
+          }
+        ],
+        "image": "sent-there",
+        "calls": [],
+        "fault": "none"
+      }
+    }
+  ]
+}

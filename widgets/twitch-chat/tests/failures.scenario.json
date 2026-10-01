@@ -1,0 +1,420 @@
+{
+  "scenarioVersion": 1,
+  "name": "failures",
+  "description": "A join that failed says why under the header, and the status dot turns red: the channel is unavailable, the connection failed, Twitch answered something unexpected, another widget holds OverCrow's chat connection. In both modes, in English and French; the history received before stays, and the label goes once the chat is joined again.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "twitch.chat.subscribe": {
+        "account": "connected",
+        "channel": "juniper_plays",
+        "joinState": "connecting",
+        "failure": null,
+        "favorites": [],
+        "canSend": false,
+        "generation": 1,
+        "reset": true,
+        "messages": [],
+        "removed": [],
+        "skipped": 0
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "#juniper_plays"
+        ],
+        "calls": [
+          {
+            "service": "twitch.chat.subscribe",
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "failed",
+          "failure": "channel_unavailable",
+          "favorites": [],
+          "canSend": false,
+          "generation": 1,
+          "reset": false,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "CHANNEL UNAVAILABLE",
+          "No messages yet"
+        ],
+        "noText": [
+          "CONNECTION ERROR",
+          "TWITCH ERROR"
+        ],
+        "image": "channel-unavailable"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "CHANNEL UNAVAILABLE",
+          "No recent messages"
+        ],
+        "image": "channel-unavailable-passive"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "failed",
+          "failure": "limit",
+          "favorites": [],
+          "canSend": false,
+          "generation": 1,
+          "reset": false,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Another widget is using Twitch chat"
+        ],
+        "noText": [
+          "CHANNEL UNAVAILABLE"
+        ],
+        "image": "limit"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Un autre widget utilise le chat Twitch"
+        ],
+        "image": "limit-light-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [],
+          "canSend": true,
+          "generation": 1,
+          "reset": false,
+          "messages": [
+            {
+              "id": "m1",
+              "author": "Juniper",
+              "color": "#ff7f50",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "good evening chat"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            },
+            {
+              "id": "m2",
+              "author": "River_Otter",
+              "color": "#1e90ff",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "hello, ready for the boss?"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            },
+            {
+              "id": "m3",
+              "author": "Moss",
+              "color": null,
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "that last jump was close"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            }
+          ],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "Another widget is using Twitch chat"
+        ],
+        "text": [
+          "Moss: that last jump was close"
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "failed",
+          "failure": "connection",
+          "favorites": [],
+          "canSend": false,
+          "generation": 1,
+          "reset": false,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "CONNECTION ERROR",
+          "Moss: that last jump was close"
+        ],
+        "image": "connection"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "failed",
+          "failure": "provider",
+          "favorites": [],
+          "canSend": false,
+          "generation": 1,
+          "reset": false,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "TWITCH ERROR"
+        ],
+        "noText": [
+          "CONNECTION ERROR"
+        ],
+        "image": "provider"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "TWITCH ERROR",
+          "Moss: that last jump was close"
+        ],
+        "image": "provider-passive"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "locale": "fr"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "ERREUR TWITCH"
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "failed",
+          "failure": "connection",
+          "favorites": [],
+          "canSend": false,
+          "generation": 1,
+          "reset": false,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "ERREUR DE CONNEXION"
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "failed",
+          "failure": "channel_unavailable",
+          "favorites": [],
+          "canSend": false,
+          "generation": 1,
+          "reset": false,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "CHAÎNE INDISPONIBLE"
+        ],
+        "image": "channel-unavailable-fr"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500,
+        "size": {
+          "width": 180,
+          "height": 200
+        }
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "failed",
+          "failure": "limit",
+          "favorites": [],
+          "canSend": false,
+          "generation": 1,
+          "reset": false,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "limit-fr-narrow-150"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 420,
+          "height": 360
+        },
+        "locale": "en"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [],
+          "canSend": true,
+          "generation": 1,
+          "reset": false,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "CHANNEL UNAVAILABLE",
+          "CONNECTION ERROR",
+          "TWITCH ERROR",
+          "Another widget is using Twitch chat"
+        ],
+        "text": [
+          "Moss: that last jump was close"
+        ],
+        "image": "joined-again",
+        "calls": [],
+        "fault": "none"
+      }
+    }
+  ]
+}

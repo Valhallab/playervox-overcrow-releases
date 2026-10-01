@@ -1,0 +1,455 @@
+{
+  "scenarioVersion": 1,
+  "name": "states",
+  "description": "Interactive mode, state by state: the header alone until OverCrow's first answer, the channel selector without and with favorites, a channel connecting, joined and empty, joined with messages, reconnecting with its tooltip. Dark English and light French, at 100 % and 150 %, and in a 180 px wide panel.",
+  "host": {
+    "mode": "interactive"
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Twitch"
+        ],
+        "noText": [
+          "Join chat",
+          "Send",
+          "No messages yet"
+        ],
+        "calls": [
+          {
+            "service": "twitch.chat.subscribe"
+          }
+        ],
+        "state": "running",
+        "image": "waiting"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": null,
+          "joinState": "idle",
+          "failure": null,
+          "favorites": [],
+          "canSend": false,
+          "generation": 1,
+          "reset": true,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Twitch",
+          "Join chat"
+        ],
+        "noText": [
+          "Favorites",
+          "No channel selected",
+          "Send"
+        ],
+        "image": "selector"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": null,
+          "joinState": "idle",
+          "failure": null,
+          "favorites": [
+            "juniper_plays",
+            "moss_and_fern",
+            "lantern_quest"
+          ],
+          "canSend": false,
+          "generation": 1,
+          "reset": false,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Favorites",
+          "#juniper_plays",
+          "#moss_and_fern",
+          "#lantern_quest"
+        ],
+        "image": "selector-favorites"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Rejoindre",
+          "Favoris"
+        ],
+        "image": "selector-light-fr"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "selector-light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 180,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "selector-light-fr-narrow"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark",
+        "size": {
+          "width": 420,
+          "height": 360
+        }
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "connecting",
+          "failure": null,
+          "favorites": [
+            "juniper_plays",
+            "moss_and_fern",
+            "lantern_quest"
+          ],
+          "canSend": false,
+          "generation": 2,
+          "reset": true,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "#juniper_plays",
+          "No messages yet",
+          "Send"
+        ],
+        "noText": [
+          "Join chat",
+          "Favorites"
+        ],
+        "image": "connecting"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [
+            "juniper_plays",
+            "moss_and_fern",
+            "lantern_quest"
+          ],
+          "canSend": true,
+          "generation": 2,
+          "reset": false,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "No messages yet"
+        ],
+        "image": "joined-empty"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [
+            "juniper_plays",
+            "moss_and_fern",
+            "lantern_quest"
+          ],
+          "canSend": true,
+          "generation": 2,
+          "reset": false,
+          "messages": [
+            {
+              "id": "m1",
+              "author": "Juniper",
+              "color": "#ff7f50",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "good evening chat"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            },
+            {
+              "id": "m2",
+              "author": "River_Otter",
+              "color": "#1e90ff",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "hello, ready for the boss?"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            },
+            {
+              "id": "m3",
+              "author": "Moss",
+              "color": null,
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "that last jump was close"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            }
+          ],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Juniper: good evening chat",
+          "River_Otter: hello, ready for the boss?",
+          "Moss: that last jump was close"
+        ],
+        "noText": [
+          "No messages yet"
+        ],
+        "image": "joined"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "reconnecting",
+          "failure": null,
+          "favorites": [
+            "juniper_plays",
+            "moss_and_fern",
+            "lantern_quest"
+          ],
+          "canSend": false,
+          "generation": 2,
+          "reset": false,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Moss: that last jump was close"
+        ],
+        "image": "reconnecting"
+      }
+    },
+    {
+      "pointer": {
+        "move": {
+          "label": "RECONNECTING"
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 1000
+      }
+    },
+    {
+      "expect": {
+        "image": "reconnecting-tooltip"
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "advance": {
+        "ms": 3000
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Envoyer"
+        ],
+        "image": "reconnecting-light-fr"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [
+            "juniper_plays",
+            "moss_and_fern",
+            "lantern_quest"
+          ],
+          "canSend": true,
+          "generation": 2,
+          "reset": false,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "joined-light-fr"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "joined-light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "joined-150"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 180,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "joined-narrow"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [
+            "juniper_plays",
+            "moss_and_fern",
+            "lantern_quest"
+          ],
+          "canSend": true,
+          "generation": 2,
+          "reset": true,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "No messages yet"
+        ],
+        "image": "joined-empty-narrow"
+      }
+    },
+    {
+      "expect": {
+        "calls": [],
+        "intents": [],
+        "fault": "none"
+      }
+    }
+  ]
+}

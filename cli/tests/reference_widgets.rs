@@ -72,6 +72,7 @@ fn the_pilots_are_here() {
         "playervox-score",
         "session",
         "stopwatch",
+        "twitch-chat",
     ] {
         assert!(names.iter().any(|name| name == pilot), "widgets/{pilot}");
     }
@@ -278,6 +279,8 @@ fn service_fixtures_follow_the_result_shapes() {
         "playervox.reviews.read",
         "notes.read",
         "notes.write",
+        "twitch.chat.read",
+        "twitch.chat.compose",
     ] {
         assert!(exercised.contains(capability), "{capability}");
     }

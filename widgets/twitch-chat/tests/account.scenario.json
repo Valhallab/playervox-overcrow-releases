@@ -1,0 +1,325 @@
+{
+  "scenarioVersion": 1,
+  "name": "account",
+  "description": "Without a Twitch session the widget shows nothing of its own: OverCrow covers it with its account panel (connect, the sign-in step open in the browser, an expired session), in both modes, and no input reaches the widget. Offline, OverCrow adds its notice at the bottom of the widget, which shows the chat reconnecting. Captured with OverCrow's wrapper.",
+  "host": {
+    "mode": "interactive",
+    "frame": true,
+    "accounts": {
+      "twitch": "disconnected"
+    }
+  },
+  "fixtures": {
+    "subscriptions": {
+      "twitch.chat.subscribe": {
+        "account": "signed_out",
+        "channel": null,
+        "joinState": "idle",
+        "failure": null,
+        "favorites": [],
+        "canSend": false,
+        "generation": 1,
+        "reset": true,
+        "messages": [],
+        "removed": [],
+        "skipped": 0
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "calls": [
+          {
+            "service": "twitch.chat.subscribe"
+          }
+        ],
+        "noText": [
+          "Join chat"
+        ],
+        "image": "signed-out-interactive"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "at": [
+            200,
+            60
+          ]
+        }
+      }
+    },
+    {
+      "text": "juniper_plays"
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "calls": [],
+        "intents": []
+      }
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "image": "signed-out-passive"
+      }
+    },
+    {
+      "host": {
+        "accounts": {
+          "twitch": "pending"
+        }
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "pending",
+          "channel": null,
+          "joinState": "idle",
+          "failure": null,
+          "favorites": [],
+          "canSend": false,
+          "generation": 1,
+          "reset": true,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "pending-passive"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive"
+      }
+    },
+    {
+      "expect": {
+        "image": "pending-interactive"
+      }
+    },
+    {
+      "host": {
+        "accounts": {
+          "twitch": "expired"
+        }
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "expired",
+          "channel": null,
+          "joinState": "idle",
+          "failure": null,
+          "favorites": [],
+          "canSend": false,
+          "generation": 1,
+          "reset": true,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "expired-interactive"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "image": "expired-passive"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "expired-light-fr"
+      }
+    },
+    {
+      "host": {
+        "accounts": {
+          "twitch": "connected"
+        },
+        "locale": "en",
+        "theme": "dark"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [],
+          "canSend": true,
+          "generation": 2,
+          "reset": true,
+          "messages": [
+            {
+              "id": "m1",
+              "author": "Juniper",
+              "color": "#ff7f50",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "good evening chat"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            },
+            {
+              "id": "m2",
+              "author": "River_Otter",
+              "color": "#1e90ff",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "hello, ready for the boss?"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            },
+            {
+              "id": "m3",
+              "author": "Moss",
+              "color": null,
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "that last jump was close"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225595000
+            }
+          ],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "#juniper_plays",
+          "Moss: that last jump was close",
+          "Send"
+        ],
+        "image": "connected"
+      }
+    },
+    {
+      "host": {
+        "accounts": {
+          "twitch": "offline"
+        }
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "reconnecting",
+          "failure": null,
+          "favorites": [],
+          "canSend": false,
+          "generation": 2,
+          "reset": false,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Moss: that last jump was close"
+        ],
+        "image": "offline-interactive"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "image": "offline-passive"
+      }
+    },
+    {
+      "host": {
+        "accounts": {
+          "twitch": "connected"
+        }
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [],
+          "canSend": true,
+          "generation": 2,
+          "reset": false,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "connected-passive",
+        "fault": "none"
+      }
+    }
+  ]
+}

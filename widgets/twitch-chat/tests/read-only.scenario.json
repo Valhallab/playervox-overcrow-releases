@@ -1,0 +1,202 @@
+{
+  "scenarioVersion": 1,
+  "name": "read-only",
+  "description": "With the permission to read alone the widget shows the chat in both modes, with its channel controls, without a composer and without reply icons: nothing can be sent.",
+  "host": {
+    "mode": "interactive",
+    "grants": [
+      "twitch.chat.read"
+    ]
+  },
+  "fixtures": {
+    "subscriptions": {
+      "twitch.chat.subscribe": {
+        "account": "connected",
+        "channel": "juniper_plays",
+        "joinState": "joined",
+        "failure": null,
+        "favorites": [],
+        "canSend": false,
+        "generation": 1,
+        "reset": true,
+        "messages": [
+          {
+            "id": "m1",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "good evening chat"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m2",
+            "author": "River_Otter",
+            "color": "#1e90ff",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "hello, ready for the boss?"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m3",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "that last jump was close"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          }
+        ],
+        "removed": [],
+        "skipped": 0
+      }
+    },
+    "calls": {
+      "twitch.chat.favorite": [
+        {
+          "value": null
+        }
+      ]
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "#juniper_plays",
+          "Moss: that last jump was close"
+        ],
+        "noText": [
+          "Send"
+        ],
+        "calls": [
+          {
+            "service": "twitch.chat.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "image": "read-only"
+      }
+    },
+    {
+      "pointer": {
+        "move": {
+          "text": "Juniper: good evening chat"
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "read-only-no-reply-icon"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Juniper: good evening chat"
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "text": "hello"
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "expect": {
+        "intents": [],
+        "noText": [
+          "Send",
+          "Replying to Juniper"
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Favorite #juniper_plays"
+        }
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.favorite",
+            "params": {
+              "channel": "juniper_plays",
+              "favorite": true
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Change channel"
+        }
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "expect": {
+        "text": [
+          "Join chat"
+        ],
+        "noText": [
+          "Send"
+        ],
+        "image": "read-only-selector"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "Join chat",
+          "Send"
+        ],
+        "image": "read-only-passive",
+        "fault": "none"
+      }
+    }
+  ]
+}

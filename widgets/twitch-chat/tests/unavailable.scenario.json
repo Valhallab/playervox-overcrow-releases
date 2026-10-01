@@ -1,0 +1,256 @@
+{
+  "scenarioVersion": 1,
+  "name": "unavailable",
+  "description": "OverCrow's chat source failed: the subscription ends, the widget says so in place of the chat, in both modes and languages, and subscribes again 5 s later, which brings the chat back, with the message that was being typed: its form never left the view.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "twitch.chat.subscribe": {
+        "account": "connected",
+        "channel": "juniper_plays",
+        "joinState": "joined",
+        "failure": null,
+        "favorites": [],
+        "canSend": true,
+        "generation": 1,
+        "reset": true,
+        "messages": [
+          {
+            "id": "m1",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "good evening chat"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m2",
+            "author": "River_Otter",
+            "color": "#1e90ff",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "hello, ready for the boss?"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m3",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "that last jump was close"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          }
+        ],
+        "removed": [],
+        "skipped": 0
+      }
+    },
+    "intents": {
+      "twitch.chat.send": [
+        "accepted"
+      ]
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "#juniper_plays"
+        ],
+        "calls": [
+          {
+            "service": "twitch.chat.subscribe",
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Message"
+        }
+      }
+    },
+    {
+      "text": "still typing"
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "error": "unavailable"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Twitch",
+          "Twitch is temporarily unavailable. Retrying automatically."
+        ],
+        "noText": [
+          "#juniper_plays",
+          "Moss: that last jump was close",
+          "Send",
+          "Join chat"
+        ],
+        "image": "unavailable"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Twitch est temporairement indisponible. Nouvelle tentative automatique."
+        ],
+        "image": "unavailable-passive-light-fr"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "locale": "en",
+        "theme": "dark"
+      }
+    },
+    {
+      "advance": {
+        "ms": 4900
+      }
+    },
+    {
+      "expect": {
+        "calls": [],
+        "text": [
+          "Twitch is temporarily unavailable. Retrying automatically."
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 100
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "text": [
+          "#juniper_plays",
+          "Moss: that last jump was close",
+          "Send"
+        ],
+        "noText": [
+          "Twitch is temporarily unavailable. Retrying automatically."
+        ],
+        "image": "recovered"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Message"
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "End"
+      }
+    },
+    {
+      "text": "!"
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "twitch.chat.send",
+            "fields": {
+              "message": "still typing!"
+            },
+            "outcome": "accepted"
+          }
+        ],
+        "image": "draft-sent"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "error": "unavailable"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Twitch is temporarily unavailable. Retrying automatically."
+        ],
+        "image": "unavailable-passive"
+      }
+    },
+    {
+      "advance": {
+        "ms": 5000
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "text": [
+          "Moss: that last jump was close"
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

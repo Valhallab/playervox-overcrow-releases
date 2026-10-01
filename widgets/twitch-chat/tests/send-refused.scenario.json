@@ -1,0 +1,383 @@
+{
+  "scenarioVersion": 1,
+  "name": "send-refused",
+  "description": "A message OverCrow or Twitch refused: the widget says why above the field and \"not sent\" beside it, and OverCrow's field keeps the text for another try. Too many messages (busy), a chat that does not take this account's messages (permission_denied: banned, followers or subscribers only), any other refusal (unavailable). In English and French. The text goes only with the accepted message. Then a message Twitch never answers: \"sending…\" and Send off; OverCrow sends nothing more from the form meanwhile, whatever the keys and clicks, and after 40 s the widget says the message was not accepted.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "twitch.chat.subscribe": {
+        "account": "connected",
+        "channel": "juniper_plays",
+        "joinState": "joined",
+        "failure": null,
+        "favorites": [],
+        "canSend": true,
+        "generation": 1,
+        "reset": true,
+        "messages": [
+          {
+            "id": "m1",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "good evening chat"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m2",
+            "author": "River_Otter",
+            "color": "#1e90ff",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "hello, ready for the boss?"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m3",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "that last jump was close"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          }
+        ],
+        "removed": [],
+        "skipped": 0
+      }
+    },
+    "intents": {
+      "twitch.chat.send": [
+        {
+          "error": "busy"
+        },
+        {
+          "error": "unavailable"
+        },
+        {
+          "error": "busy"
+        },
+        {
+          "error": "permission_denied"
+        },
+        {
+          "error": "permission_denied"
+        },
+        "accepted",
+        "pending"
+      ]
+    }
+  },
+  "steps": [
+    {
+      "pointer": {
+        "click": {
+          "label": "Message"
+        }
+      }
+    },
+    {
+      "text": "is anyone there?"
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "intents": [
+          {
+            "intent": "twitch.chat.send",
+            "fields": {
+              "message": "is anyone there?"
+            },
+            "outcome": "busy"
+          }
+        ],
+        "text": [
+          "Too many messages. Wait a moment, then try again.",
+          "not sent",
+          "Send"
+        ],
+        "image": "too-fast"
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "twitch.chat.send",
+            "fields": {
+              "message": "is anyone there?"
+            },
+            "outcome": "unavailable"
+          }
+        ],
+        "text": [
+          "Message was not accepted. Try again.",
+          "not sent"
+        ],
+        "noText": [
+          "Too many messages. Wait a moment, then try again."
+        ],
+        "image": "not-accepted"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Le message a été refusé. Réessayez.",
+          "non envoyé"
+        ],
+        "image": "not-accepted-light-fr"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Envoyer"
+        }
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "twitch.chat.send",
+            "fields": {
+              "message": "is anyone there?"
+            },
+            "outcome": "busy"
+          }
+        ],
+        "text": [
+          "Trop de messages. Attendez un instant, puis réessayez.",
+          "non envoyé"
+        ],
+        "image": "too-fast-light-fr"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Message"
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "twitch.chat.send",
+            "fields": {
+              "message": "is anyone there?"
+            },
+            "outcome": "permission_denied"
+          }
+        ],
+        "text": [
+          "Ce chat n’accepte pas vos messages pour le moment.",
+          "non envoyé"
+        ],
+        "noText": [
+          "Trop de messages. Attendez un instant, puis réessayez."
+        ],
+        "image": "restricted-light-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark"
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "twitch.chat.send",
+            "fields": {
+              "message": "is anyone there?"
+            },
+            "outcome": "permission_denied"
+          }
+        ],
+        "text": [
+          "This chat does not accept your messages right now.",
+          "not sent"
+        ],
+        "image": "restricted"
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "twitch.chat.send",
+            "fields": {
+              "message": "is anyone there?"
+            },
+            "outcome": "accepted"
+          }
+        ],
+        "noText": [
+          "This chat does not accept your messages right now.",
+          "not sent",
+          "sending…"
+        ],
+        "image": "accepted"
+      }
+    },
+    {
+      "text": "still here"
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "twitch.chat.send",
+            "fields": {
+              "message": "still here"
+            },
+            "outcome": "pending"
+          }
+        ],
+        "text": [
+          "sending…"
+        ],
+        "noText": [
+          "not sent",
+          "Too many messages. Wait a moment, then try again."
+        ],
+        "image": "sending"
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Send"
+        }
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "expect": {
+        "intents": []
+      }
+    },
+    {
+      "advance": {
+        "ms": 39000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "sending…"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 1000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Message was not accepted. Try again.",
+          "not sent"
+        ],
+        "noText": [
+          "sending…"
+        ],
+        "image": "no-answer"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Message"
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "intents": [],
+        "calls": [],
+        "fault": "none"
+      }
+    }
+  ]
+}

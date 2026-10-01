@@ -232,6 +232,7 @@ export type EventName =
   | "focus"
   | "blur"
   | "reachend"
+  | "stick"
   | "dismiss";
 
 /** Events that are user gestures: gesture-bound services accept a call made while one is handled. */
@@ -319,6 +320,11 @@ export interface EventDetailMap {
   readonly blur: Record<string, never>;
   /** Scrolled within one viewport of the end (load more, history). */
   readonly reachend: Record<string, never>;
+  /** The user scrolled a container away from its end, or back to it (unread count, return to the latest). Content growing never sends it. */
+  readonly stick: {
+    /** The container is at its end. */
+    readonly stuck: boolean;
+  };
   /** The host closed a popover (Escape, outside click, anchor removed). */
   readonly dismiss: Record<string, never>;
 }
@@ -691,6 +697,8 @@ export interface ChatMessage {
   } | null;
   /** Deleted by a moderator. */
   readonly deleted: boolean;
+  /** When the host received the message, in Unix milliseconds of the host's clock: compare it with `Date.now()` to age a message (the Passive fade), also after a `reset`. */
+  readonly receivedAt: number;
 }
 
 /** Twitch chat state. */
@@ -701,6 +709,8 @@ export interface TwitchChat {
   readonly channel: string | null;
   /** Channel connection state. */
   readonly joinState: "idle" | "connecting" | "joined" | "reconnecting" | "failed";
+  /** Why `joinState` is `failed`, as a fixed category: the channel does not exist or refuses the account, the connection failed, Twitch answered something unexpected, or another widget holds the host's one chat connection (`limit`). `null` in every other state. An account failure is not here: the host draws it. */
+  readonly failure: "channel_unavailable" | "connection" | "provider" | "limit" | null;
   /** Favorite channels. */
   readonly favorites: ReadonlyArray<string>;
   /** A message can be sent now. */
@@ -709,10 +719,12 @@ export interface TwitchChat {
   readonly generation: number;
   /** `messages` replaces the whole list. */
   readonly reset: boolean;
-  /** Messages, oldest first. */
+  /** Messages, oldest first: the whole list with `reset`; otherwise the new messages, to append, and the changed ones, which replace the message of the same `id` in place. */
   readonly messages: ReadonlyArray<ChatMessage>;
   /** IDs of removed messages. */
   readonly removed: ReadonlyArray<string>;
+  /** New messages the host left out since the previous update, because the chat is faster than it delivers; 0 with `reset`. A removal is never left out. */
+  readonly skipped: number;
 }
 
 // Services.
@@ -942,7 +954,7 @@ export interface ServiceResultMap {
   readonly "journal.page": JournalPage;
   /** `journal.delete`: `null`, or `cancelled` when the user declines; `not_connected` for a cloud session while PlayerVox is disconnected. */
   readonly "journal.delete": null;
-  /** `twitch.chat.subscribe`: `{ account, channel, joinState, favorites, canSend, generation, reset, messages, removed }`: `account` is `signed_out`, `pending`, `connected` or `expired` (sign-in is host chrome); messages arrive as deltas, with `reset` after subscribing, a generation change or a show; each message `{ id, author, color, badges, fragments, reply, deleted }` with at most `MAX_CHAT_FRAGMENTS` fragments, emotes and badges as `asset:` handles for the current theme and scale. */
+  /** `twitch.chat.subscribe`: `{ account, channel, joinState, failure, favorites, canSend, generation, reset, messages, removed, skipped }`: `account` is `signed_out`, `pending`, `connected` or `expired` (sign-in is host chrome); `failure` is the fixed category of a `failed` join; messages arrive as deltas, at most one update per 100 ms, with `reset` after subscribing, a generation change or a show, and nothing while the widget is hidden; a faster chat is sampled, `skipped` counting the new messages left out; each message `{ id, author, color, badges, fragments, reply, deleted, receivedAt }` with at most `MAX_CHAT_FRAGMENTS` fragments, emotes and badges as `asset:` handles for the current theme and scale. */
   readonly "twitch.chat.subscribe": TwitchChat;
   /** `twitch.chat.join`: `null`; the host remembers the channel and rejoins it when the widget starts. */
   readonly "twitch.chat.join": null;

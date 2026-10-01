@@ -1,0 +1,376 @@
+{
+  "scenarioVersion": 1,
+  "name": "favorites",
+  "description": "The star of the header adds the current channel to the favorites, then removes it: one call each, and the star turns yellow when OverCrow says the channel is a favorite. Its tooltip says what it does. With 20 favorites the star of another channel takes no click and says the limit is reached; the selector wraps the 20 chips. Passive mode shows the star of a favorite channel, without a button.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "twitch.chat.subscribe": {
+        "account": "connected",
+        "channel": "juniper_plays",
+        "joinState": "joined",
+        "failure": null,
+        "favorites": [],
+        "canSend": true,
+        "generation": 1,
+        "reset": true,
+        "messages": [
+          {
+            "id": "m1",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "good evening chat"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m2",
+            "author": "River_Otter",
+            "color": "#1e90ff",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "hello, ready for the boss?"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m3",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "that last jump was close"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          }
+        ],
+        "removed": [],
+        "skipped": 0
+      }
+    },
+    "calls": {
+      "twitch.chat.favorite": [
+        {
+          "value": null
+        },
+        {
+          "value": null
+        }
+      ]
+    }
+  },
+  "steps": [
+    {
+      "pointer": {
+        "move": {
+          "label": "Favorite #juniper_plays"
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 1000
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "image": "add-tooltip"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Favorite #juniper_plays"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.favorite",
+            "params": {
+              "channel": "juniper_plays",
+              "favorite": true
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [
+            "juniper_plays"
+          ],
+          "canSend": true,
+          "generation": 1,
+          "reset": false,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "pointer": {
+        "move": {
+          "label": "Unfavorite #juniper_plays"
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 1000
+      }
+    },
+    {
+      "expect": {
+        "image": "favorite-tooltip"
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "advance": {
+        "ms": 3000
+      }
+    },
+    {
+      "expect": {
+        "image": "favorite"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "image": "favorite-passive"
+      }
+    },
+    {
+      "host": {
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "favorite-passive-light"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive"
+      }
+    },
+    {
+      "expect": {
+        "image": "favorite-light"
+      }
+    },
+    {
+      "host": {
+        "theme": "dark"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Unfavorite #juniper_plays"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "twitch.chat.favorite",
+            "params": {
+              "channel": "juniper_plays",
+              "favorite": false
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [],
+          "canSend": true,
+          "generation": 1,
+          "reset": false,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "image": "not-favorite-passive"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [
+            "invented_channel_01",
+            "invented_channel_02",
+            "invented_channel_03",
+            "invented_channel_04",
+            "invented_channel_05",
+            "invented_channel_06",
+            "invented_channel_07",
+            "invented_channel_08",
+            "invented_channel_09",
+            "invented_channel_10",
+            "invented_channel_11",
+            "invented_channel_12",
+            "invented_channel_13",
+            "invented_channel_14",
+            "invented_channel_15",
+            "invented_channel_16",
+            "invented_channel_17",
+            "invented_channel_18",
+            "invented_channel_19",
+            "invented_channel_20"
+          ],
+          "canSend": true,
+          "generation": 1,
+          "reset": false,
+          "messages": [],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "pointer": {
+        "move": {
+          "label": "Favorite #juniper_plays"
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 1000
+      }
+    },
+    {
+      "expect": {
+        "image": "limit-tooltip"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Favorite #juniper_plays"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": []
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Change channel"
+        }
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "advance": {
+        "ms": 3000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Favorites",
+          "#invented_channel_01",
+          "#invented_channel_20"
+        ],
+        "image": "twenty-chips"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 180,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "twenty-chips-narrow",
+        "fault": "none"
+      }
+    }
+  ]
+}

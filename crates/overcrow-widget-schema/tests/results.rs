@@ -194,6 +194,85 @@ fn the_reviews_subscription_says_what_to_read_and_pages_carry_hidden_reviews() {
     assert!(!page.matches(&unmarked), "hidden is always present");
 }
 
+/// A chat message as the host delivers it.
+fn chat_message() -> serde_json::Value {
+    json!({
+        "id": "m1", "author": "Juniper", "color": "#ff7f50", "badges": [],
+        "fragments": [{"text": "hello "}, {"emote": "asset:00000000000000aa", "alt": "Wave"}],
+        "reply": null, "deleted": false, "receivedAt": 1_767_225_600_000_u64,
+    })
+}
+
+/// A chat message says when the host received it: after a `reset` the
+/// widget still tells an old message from a new one (the Passive fade).
+#[test]
+fn a_chat_message_carries_its_reception_time() {
+    let message = shape("ChatMessage").expect("shape").shape;
+    assert!(message.matches(&chat_message()));
+    let mut without = chat_message();
+    without
+        .as_object_mut()
+        .expect("object")
+        .remove("receivedAt");
+    assert!(!message.matches(&without), "receivedAt is always present");
+    let mut fractional = chat_message();
+    fractional["receivedAt"] = json!(1.5);
+    assert!(!message.matches(&fractional), "whole milliseconds");
+}
+
+/// A chat state as the host delivers it.
+fn chat_state() -> serde_json::Value {
+    json!({
+        "account": "connected", "channel": "juniper_plays", "joinState": "joined",
+        "failure": null, "favorites": ["juniper_plays"], "canSend": true,
+        "generation": 3, "reset": true, "messages": [chat_message()], "removed": [],
+        "skipped": 0,
+    })
+}
+
+/// A failed join says why with a fixed category, never with provider
+/// text; the account's own failures are the host's to draw.
+#[test]
+fn a_failed_join_names_a_fixed_category() {
+    let chat = shape("TwitchChat").expect("shape").shape;
+    assert!(chat.matches(&chat_state()));
+    for failure in ["channel_unavailable", "connection", "provider", "limit"] {
+        let mut failed = chat_state();
+        failed["joinState"] = json!("failed");
+        failed["failure"] = json!(failure);
+        assert!(chat.matches(&failed), "{failure}");
+    }
+    for refused in [
+        "authentication",
+        "rate_limited",
+        "credential_store",
+        "HTTP 404",
+    ] {
+        let mut failed = chat_state();
+        failed["failure"] = json!(refused);
+        assert!(!chat.matches(&failed), "{refused}");
+    }
+    let mut without = chat_state();
+    without.as_object_mut().expect("object").remove("failure");
+    assert!(!chat.matches(&without), "failure is always present");
+}
+
+/// A chat faster than the host delivers is sampled, and every update says
+/// how many new messages it left out.
+#[test]
+fn a_chat_update_counts_the_messages_left_out() {
+    let chat = shape("TwitchChat").expect("shape").shape;
+    let mut update = chat_state();
+    update["reset"] = json!(false);
+    update["skipped"] = json!(37);
+    assert!(chat.matches(&update));
+    let mut without = chat_state();
+    without.as_object_mut().expect("object").remove("skipped");
+    assert!(!chat.matches(&without), "skipped is always present");
+    update["skipped"] = json!("many");
+    assert!(!chat.matches(&update));
+}
+
 #[test]
 fn scalars_are_checked() {
     assert!(Shape::Integer.matches(&json!(9_007_199_254_740_991_u64)));

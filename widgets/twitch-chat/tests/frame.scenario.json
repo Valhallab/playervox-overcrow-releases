@@ -1,0 +1,152 @@
+{
+  "scenarioVersion": 1,
+  "name": "frame",
+  "description": "The widget in OverCrow's wrapper, in Passive mode and in Interactive mode.",
+  "host": {
+    "frame": true
+  },
+  "assets": {
+    "smile": "tests/assets/smile.png",
+    "gem": "tests/assets/gem.png",
+    "wide": "tests/assets/wide.png"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "twitch.chat.subscribe": {
+        "account": "connected",
+        "channel": "juniper_plays",
+        "joinState": "joined",
+        "failure": null,
+        "favorites": [
+          "juniper_plays"
+        ],
+        "canSend": true,
+        "generation": 1,
+        "reset": true,
+        "messages": [
+          {
+            "id": "m1",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "good evening chat"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m2",
+            "author": "River_Otter",
+            "color": "#1e90ff",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "hello "
+              },
+              {
+                "emote": "fixture:smile",
+                "alt": "ocSmile"
+              },
+              {
+                "text": " ready for the boss?"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m3",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "that last jump was close, I thought the run was over right there and then, what a save"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m4",
+            "author": "Night_Heron",
+            "color": "#05050f",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "a name as dark as the panel stays readable"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m5",
+            "author": "Snowdrift",
+            "color": "#fdfdfd",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "and so does a name as light as a light panel"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m6",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "not yet "
+              },
+              {
+                "emote": "fixture:gem",
+                "alt": "ocGem"
+              },
+              {
+                "emote": "fixture:wide",
+                "alt": "ocWide"
+              }
+            ],
+            "reply": {
+              "author": "River_Otter",
+              "text": "hello ocSmile ready for the boss?"
+            },
+            "deleted": false,
+            "receivedAt": 1767225595000
+          }
+        ],
+        "removed": [],
+        "skipped": 0
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "image": "frame-passive"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive"
+      }
+    },
+    {
+      "expect": {
+        "image": "frame-interactive"
+      }
+    }
+  ]
+}
