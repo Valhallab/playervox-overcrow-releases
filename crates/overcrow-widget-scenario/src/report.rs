@@ -86,6 +86,9 @@ pub struct Report {
     pub expectations: Vec<Outcome>,
     /// Every service call of the widget, in order, timers included.
     pub calls: Vec<Call>,
+    /// Every write intent the user submitted, in order.
+    #[serde(default)]
+    pub intents: Vec<Intent>,
     pub logs: Vec<Log>,
     /// Fault categories of the VM, in order.
     pub faults: Vec<String>,
@@ -115,7 +118,7 @@ pub struct Capture {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Outcome {
     pub step: usize,
-    /// `text`, `noText`, `calls`, `state`, `fault`, `clipboard`, or for an
+    /// `text`, `noText`, `calls`, `intents`, `state`, `fault`, `clipboard`, or for an
     /// error of the scenario `fixture`, `target`, `menu`, `settle`.
     pub kind: String,
     pub ok: bool,
@@ -135,6 +138,20 @@ pub struct Call {
     pub at: u64,
 }
 
+/// A submitted write intent: what the host's form sent to the service.
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct Intent {
+    pub intent: String,
+    /// The values of the form's host-owned controls.
+    pub fields: serde_json::Map<String, serde_json::Value>,
+    /// `accepted`, an error code, or `pending` when the scenario ended
+    /// first.
+    pub outcome: String,
+    /// Virtual Unix milliseconds of the submission.
+    pub at: u64,
+}
+
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Log {
@@ -150,6 +167,7 @@ impl Report {
                 self.captures.len(),
                 self.expectations.len(),
                 self.calls.len(),
+                self.intents.len(),
                 self.logs.len(),
                 self.faults.len(),
                 self.errors.len(),
