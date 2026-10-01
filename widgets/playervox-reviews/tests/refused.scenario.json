@@ -1,0 +1,54 @@
+{
+  "scenarioVersion": 1,
+  "name": "refused",
+  "description": "Without the permission to read the reviews, the widget asks OverCrow nothing and says what it needs.",
+  "host": {
+    "grants": []
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Player reviews",
+          "The reviews need your permission."
+        ],
+        "noText": [
+          "Loading…"
+        ],
+        "image": "refused",
+        "calls": [],
+        "state": "running"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Les avis ont besoin de votre autorisation."
+        ],
+        "image": "refused-light-fr",
+        "calls": []
+      }
+    },
+    {
+      "menu": {
+        "id": "followed-only",
+        "value": true
+      }
+    },
+    {
+      "expect": {
+        "calls": []
+      }
+    }
+  ]
+}

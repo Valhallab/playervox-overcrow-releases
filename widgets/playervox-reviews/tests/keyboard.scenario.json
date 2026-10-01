@@ -1,0 +1,188 @@
+{
+  "scenarioVersion": 1,
+  "name": "keyboard",
+  "description": "The keyboard alone, with the pointer resting on the widget: Tab reaches Read more, Enter unfolds the review; the next Tab skips the disabled previous button and reaches the next one, and Space turns the page.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "calls": {
+      "playervox.reviews.page": [
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "r31",
+                "author": "Mira_Quill",
+                "grade": "S+",
+                "score": 94,
+                "text": "The co-op campaign is the best puzzle design I have played in years. Every chamber teaches one idea, then twists it twice before letting you go, and the writing never gets in the way of the thinking. My only complaint is the loading between chambers.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789900200000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r30",
+                "author": "Kestrel42",
+                "grade": "A",
+                "score": 74,
+                "text": "Solid puzzles, short story.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789813800000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r29",
+                "author": "Tavish",
+                "grade": "D",
+                "score": 38,
+                "text": "Runs badly on my laptop.\nCrashed twice in chapter 3.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789381800000,
+                "offsetMinutes": 120
+              }
+            ],
+            "page": 1,
+            "totalPages": 3,
+            "count": 7
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "r28",
+                "author": "Onyx Vale",
+                "grade": "S",
+                "score": 81,
+                "text": "Still funny after all these years.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789122600000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r27",
+                "author": "Lune-Bleue",
+                "grade": "B",
+                "score": 62,
+                "text": "Good, but I wanted more chambers.",
+                "original": "Bien, mais j’aurais voulu plus de salles.",
+                "hidden": false,
+                "publishedAt": 1788690600000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r26",
+                "author": "brackish_owl",
+                "grade": "F",
+                "score": 12,
+                "text": "Not for me.",
+                "original": null,
+                "hidden": true,
+                "publishedAt": 1788172200000,
+                "offsetMinutes": 120
+              }
+            ],
+            "page": 2,
+            "totalPages": 3,
+            "count": 7
+          }
+        }
+      ]
+    },
+    "subscriptions": {
+      "playervox.reviews.subscribe": {
+        "state": "ready",
+        "revision": 1,
+        "offline": false
+      }
+    }
+  },
+  "steps": [
+    {
+      "pointer": {
+        "move": {
+          "text": "Player reviews"
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Read more"
+        ],
+        "image": "focus-read-more"
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Show less"
+        ],
+        "noText": [
+          "Read more"
+        ]
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "expect": {
+        "image": "focus-next"
+      }
+    },
+    {
+      "key": {
+        "key": "Space"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "2 / 3"
+        ],
+        "calls": [
+          {
+            "service": "playervox.reviews.subscribe",
+            "outcome": "ok"
+          },
+          {
+            "service": "playervox.reviews.page",
+            "params": {
+              "page": 1,
+              "followedOnly": false
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "playervox.reviews.page",
+            "params": {
+              "page": 2,
+              "followedOnly": false
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    }
+  ]
+}

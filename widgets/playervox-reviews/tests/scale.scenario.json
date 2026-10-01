@@ -1,0 +1,303 @@
+{
+  "scenarioVersion": 1,
+  "name": "scale",
+  "description": "The content at 150 %, dark English and light French: the list in both modes (a translated and a hidden review), no review from the followed players, no game and a game without a Steam app ID.",
+  "host": {
+    "mode": "interactive",
+    "scale": 1500,
+    "options": {
+      "followed-only": true
+    }
+  },
+  "fixtures": {
+    "calls": {
+      "playervox.reviews.page": [
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "r28",
+                "author": "Onyx Vale",
+                "grade": "S",
+                "score": 81,
+                "text": "Still funny after all these years.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789122600000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r27",
+                "author": "Lune-Bleue",
+                "grade": "B",
+                "score": 62,
+                "text": "Good, but I wanted more chambers.",
+                "original": "Bien, mais j’aurais voulu plus de salles.",
+                "hidden": false,
+                "publishedAt": 1788690600000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r26",
+                "author": "brackish_owl",
+                "grade": "F",
+                "score": 12,
+                "text": "Not for me.",
+                "original": null,
+                "hidden": true,
+                "publishedAt": 1788172200000,
+                "offsetMinutes": 120
+              }
+            ],
+            "page": 2,
+            "totalPages": 3,
+            "count": 7
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "r28",
+                "author": "Onyx Vale",
+                "grade": "S",
+                "score": 81,
+                "text": "Toujours drôle après toutes ces années.",
+                "original": "Still funny after all these years.",
+                "hidden": false,
+                "publishedAt": 1789122600000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r27",
+                "author": "Lune-Bleue",
+                "grade": "B",
+                "score": 62,
+                "text": "Bien, mais j’aurais voulu plus de salles.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1788690600000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r26",
+                "author": "brackish_owl",
+                "grade": "F",
+                "score": 12,
+                "text": "Not for me.",
+                "original": null,
+                "hidden": true,
+                "publishedAt": 1788172200000,
+                "offsetMinutes": 120
+              }
+            ],
+            "page": 2,
+            "totalPages": 3,
+            "count": 7
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "r28",
+                "author": "Onyx Vale",
+                "grade": "S",
+                "score": 81,
+                "text": "Still funny after all these years.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789122600000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r27",
+                "author": "Lune-Bleue",
+                "grade": "B",
+                "score": 62,
+                "text": "Good, but I wanted more chambers.",
+                "original": "Bien, mais j’aurais voulu plus de salles.",
+                "hidden": false,
+                "publishedAt": 1788690600000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r26",
+                "author": "brackish_owl",
+                "grade": "F",
+                "score": 12,
+                "text": "Not for me.",
+                "original": null,
+                "hidden": true,
+                "publishedAt": 1788172200000,
+                "offsetMinutes": 120
+              }
+            ],
+            "page": 2,
+            "totalPages": 3,
+            "count": 7
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [],
+            "page": 1,
+            "totalPages": 1,
+            "count": 0
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [],
+            "page": 1,
+            "totalPages": 1,
+            "count": 0
+          }
+        }
+      ]
+    },
+    "subscriptions": {
+      "playervox.reviews.subscribe": {
+        "state": "ready",
+        "revision": 1,
+        "offline": false
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "2 / 3"
+        ],
+        "image": "list-interactive-dark-en-150"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Avis masqué par la communauté"
+        ],
+        "image": "list-interactive-light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "image": "list-passive-light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark",
+        "region": {
+          "numberFormat": "us",
+          "dateOrder": "mdy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "list-passive-dark-en-150"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.reviews.subscribe",
+        "value": {
+          "state": "ready",
+          "revision": 2,
+          "offline": false
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "No reviews from the players you follow yet."
+        ],
+        "image": "empty-followed-dark-en-150"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "empty-followed-light-fr-150"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.reviews.subscribe",
+        "value": {
+          "state": "idle",
+          "revision": 2,
+          "offline": false
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "idle-light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark",
+        "region": {
+          "numberFormat": "us",
+          "dateOrder": "mdy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "idle-dark-en-150"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.reviews.subscribe",
+        "value": {
+          "state": "unsupported",
+          "revision": 2,
+          "offline": false
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "unsupported-dark-en-150"
+      }
+    }
+  ]
+}

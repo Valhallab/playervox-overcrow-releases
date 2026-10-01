@@ -1,0 +1,249 @@
+{
+  "scenarioVersion": 1,
+  "name": "account",
+  "description": "PlayerVox asks for an account for every list of reviews, filtered or not. With Followed players only turned on and no PlayerVox session, the widget shows nothing of its own: OverCrow covers it with its account panel (link or create an account, the browser step, an expired session), in both modes, and no input reaches the widget, which reads nothing. Once connected, it reads the followed players' reviews. Signed out again with the filter off, the panel is the same.",
+  "host": {
+    "mode": "interactive",
+    "frame": true,
+    "accounts": {
+      "playervox": "disconnected"
+    },
+    "options": {
+      "followed-only": true
+    }
+  },
+  "fixtures": {
+    "calls": {
+      "playervox.reviews.page": [
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "r30",
+                "author": "Kestrel42",
+                "grade": "A",
+                "score": 74,
+                "text": "Solid puzzles, short story.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789813800000,
+                "offsetMinutes": 120
+              }
+            ],
+            "page": 1,
+            "totalPages": 1,
+            "count": 1
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "r31",
+                "author": "Mira_Quill",
+                "grade": "S+",
+                "score": 94,
+                "text": "The co-op campaign is the best puzzle design I have played in years. Every chamber teaches one idea, then twists it twice before letting you go, and the writing never gets in the way of the thinking. My only complaint is the loading between chambers.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789900200000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r30",
+                "author": "Kestrel42",
+                "grade": "A",
+                "score": 74,
+                "text": "Solid puzzles, short story.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789813800000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r29",
+                "author": "Tavish",
+                "grade": "D",
+                "score": 38,
+                "text": "Runs badly on my laptop.\nCrashed twice in chapter 3.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789381800000,
+                "offsetMinutes": 120
+              }
+            ],
+            "page": 1,
+            "totalPages": 3,
+            "count": 7
+          }
+        }
+      ]
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "calls": [
+          {
+            "service": "playervox.reviews.subscribe"
+          }
+        ],
+        "noText": [
+          "Portal 2"
+        ],
+        "image": "signed-out-followed"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "at": [
+            175,
+            60
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": []
+      }
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "image": "signed-out-passive"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "accounts": {
+          "playervox": "pending"
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "pending"
+      }
+    },
+    {
+      "host": {
+        "accounts": {
+          "playervox": "expired"
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "expired"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "expired-light-fr",
+        "calls": []
+      }
+    },
+    {
+      "host": {
+        "accounts": {
+          "playervox": "connected"
+        },
+        "locale": "en",
+        "theme": "dark"
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.reviews.subscribe",
+        "value": {
+          "state": "ready",
+          "revision": 1,
+          "offline": false
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "Kestrel42",
+          "1 review"
+        ],
+        "image": "connected-followed",
+        "calls": [
+          {
+            "service": "playervox.reviews.page",
+            "params": {
+              "page": 1,
+              "followedOnly": true
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "menu": {
+        "id": "followed-only",
+        "value": false
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "7 reviews"
+        ],
+        "calls": [
+          {
+            "service": "playervox.reviews.page",
+            "params": {
+              "page": 1,
+              "followedOnly": false
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "host": {
+        "accounts": {
+          "playervox": "disconnected"
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "signed-out-all"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Next page"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": []
+      }
+    }
+  ]
+}

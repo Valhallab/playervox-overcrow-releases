@@ -1,0 +1,18 @@
+{
+  "author": "PlayerVox",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/playervox-reviews",
+  "defaultLocale": "en",
+  "localizations": [
+    {
+      "locale": "en",
+      "name": "Player reviews",
+      "description": "What PlayerVox players think of the game you play: three reviews per page with each player's grade and score, in your language when a translation exists. Limit them to the players you follow from the widget's menu. Needs your PlayerVox account."
+    },
+    {
+      "locale": "fr",
+      "name": "Avis des joueurs",
+      "description": "Ce que les joueurs de PlayerVox pensent du jeu auquel vous jouez : trois avis par page avec la note et le score de chaque joueur, dans votre langue quand une traduction existe. Limitez-les aux joueurs que vous suivez depuis le menu du widget. Nécessite votre compte PlayerVox."
+    }
+  ]
+}

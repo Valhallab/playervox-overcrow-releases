@@ -1,0 +1,110 @@
+<!-- Player reviews: three PlayerVox reviews of the active game per page,
+     each with its player's grade badge, name, date, score and text, and
+     the paging footer (parity sheet: playervox-overcrow
+     docs/builtin-parity/playervox-circle.md). The buttons show in
+     Interactive mode. A page holds at most three reviews, so each has its
+     own badge canvas, passed to the card through its slot. -->
+<component name="review-card" props="row">
+  <separator class="rule"/>
+  <box class="review" label={row.label}>
+    <box class="head">
+      <slot/>
+      <box class="who">
+        <text class="author" tooltip={row.authorTip}>{row.author}</text>
+        <text class="date">{row.date}</text>
+      </box>
+      <text class="score">{row.score}</text>
+    </box>
+    <if test={row.masked}>
+      <text class="note">{t("hidden")}</text>
+      <if test={state.interactive}>
+        <box class="actions">
+          <button class="link" on:activate={reveal(row.id)}>
+            <text class="link-text">{t("reveal")}</text>
+          </button>
+        </box>
+      </if>
+    </if>
+    <else-if test={row.text != ""}>
+      <text class={row.textClass}>{row.text}</text>
+      <if test={row.actions}>
+        <box class="actions">
+          <if test={row.fold != ""}>
+            <button class="link" on:activate={toggleFold(row.id)}>
+              <text class="link-text">{row.fold}</text>
+            </button>
+          </if>
+          <if test={row.translated}>
+            <text class="note">{t("translated")}</text>
+          </if>
+          <if test={row.language != ""}>
+            <button class="link" on:activate={toggleLanguage(row.id)}>
+              <text class="link-text">{row.language}</text>
+            </button>
+          </if>
+        </box>
+      </if>
+      <else-if test={row.translated}>
+        <text class="note">{t("translated")}</text>
+      </else-if>
+    </else-if>
+  </box>
+</component>
+
+<box class={state.offline ? "reviews offline" : "reviews"} label={t("label")}>
+  <box class="header">
+    <text class="title">{t("label")}</text>
+    <canvas ref="mark" class="mark" label={t("mark")}/>
+  </box>
+  <if test={gameName(state.page) != ""}>
+    <text class="game" tooltip={cutBytes(gameName(state.page), 256)}>{gameName(state.page)}</text>
+  </if>
+  <if test={message(state.problem) != ""}>
+    <text class="message">{message(state.problem)}</text>
+  </if>
+  <if test={state.phase == "loading"}>
+    <text class="status">{state.offline ? t("offline") : t("loading")}</text>
+  </if>
+  <if test={state.phase == "idle"}>
+    <text class="status">{t("waiting")}</text>
+  </if>
+  <if test={state.phase == "unsupported"}>
+    <text class="status">{t("unsupported")}</text>
+  </if>
+  <if test={state.phase == "ready"}>
+    <if test={!has(state.page, 0)}>
+      <text class="status">{emptyText(state.followedOnly)}</text>
+    </if>
+    <else>
+      <scroll class="list">
+        <review-card row={row(state.page, state.reading, state.interactive, 0)}>
+          <canvas ref="badge-0" class="grade" label={row(state.page, state.reading, state.interactive, 0).badge}/>
+        </review-card>
+        <if test={has(state.page, 1)}>
+          <review-card row={row(state.page, state.reading, state.interactive, 1)}>
+            <canvas ref="badge-1" class="grade" label={row(state.page, state.reading, state.interactive, 1).badge}/>
+          </review-card>
+        </if>
+        <if test={has(state.page, 2)}>
+          <review-card row={row(state.page, state.reading, state.interactive, 2)}>
+            <canvas ref="badge-2" class="grade" label={row(state.page, state.reading, state.interactive, 2).badge}/>
+          </review-card>
+        </if>
+      </scroll>
+      <box class="footer">
+        <text class="count">{countText(state.page)}</text>
+        <if test={state.interactive}>
+          <button class="control" label={t("previous")} tooltip={t("previous")} disabled={!canTurn(state.page, "previous", state.busy, state.offline)} on:activate={turn("previous")}>
+            <icon name="chevron-left"/>
+          </button>
+        </if>
+        <text class="pager" label={pagerLabel(state.page)} tooltip={t("page")}>{pagerText(state.page)}</text>
+        <if test={state.interactive}>
+          <button class="control" label={t("next")} tooltip={t("next")} disabled={!canTurn(state.page, "next", state.busy, state.offline)} on:activate={turn("next")}>
+            <icon name="chevron-right"/>
+          </button>
+        </if>
+      </box>
+    </else>
+  </if>
+</box>

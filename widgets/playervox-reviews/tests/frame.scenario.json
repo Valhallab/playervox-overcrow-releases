@@ -1,0 +1,185 @@
+{
+  "scenarioVersion": 1,
+  "name": "frame",
+  "description": "The widget in OverCrow's frame: Interactive and Passive at the preferred width, then 280 px wide with a long player name and game name cut by an ellipsis, at 100 % and at 175 % with a review unfolded, and 600 px wide.",
+  "host": {
+    "mode": "interactive",
+    "frame": true
+  },
+  "fixtures": {
+    "calls": {
+      "playervox.reviews.page": [
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "r31",
+                "author": "Mira_Quill",
+                "grade": "S+",
+                "score": 94,
+                "text": "The co-op campaign is the best puzzle design I have played in years. Every chamber teaches one idea, then twists it twice before letting you go, and the writing never gets in the way of the thinking. My only complaint is the loading between chambers.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789900200000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r30",
+                "author": "Kestrel42",
+                "grade": "A",
+                "score": 74,
+                "text": "Solid puzzles, short story.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789813800000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r29",
+                "author": "Tavish",
+                "grade": "D",
+                "score": 38,
+                "text": "Runs badly on my laptop.\nCrashed twice in chapter 3.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789381800000,
+                "offsetMinutes": 120
+              }
+            ],
+            "page": 1,
+            "totalPages": 3,
+            "count": 7
+          }
+        },
+        {
+          "value": {
+            "gameName": "The Unreasonably Long Chronicle of the Cartographer Who Mapped Every Corridor Twice: Definitive Edition",
+            "items": [
+              {
+                "id": "r41",
+                "author": "Aurelian_of_the_Ninth_Meridian_and_Keeper_of_Extremely_Long_Display_Names",
+                "grade": "S+",
+                "score": 100,
+                "text": "The co-op campaign is the best puzzle design I have played in years. Every chamber teaches one idea, then twists it twice before letting you go, and the writing never gets in the way of the thinking. My only complaint is the loading between chambers.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789900200000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r40",
+                "author": "Kestrel42",
+                "grade": "F",
+                "score": 0,
+                "text": "Solid puzzles, short story.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789813800000,
+                "offsetMinutes": 120
+              }
+            ],
+            "page": 1,
+            "totalPages": 1,
+            "count": 2
+          }
+        }
+      ]
+    },
+    "subscriptions": {
+      "playervox.reviews.subscribe": {
+        "state": "ready",
+        "revision": 1,
+        "offline": false
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "7 reviews"
+        ],
+        "image": "frame-interactive"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "image": "frame-passive"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "size": {
+          "width": 280,
+          "height": 320
+        }
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.reviews.subscribe",
+        "value": {
+          "state": "ready",
+          "revision": 2,
+          "offline": false
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "100",
+          "0",
+          "2 reviews"
+        ],
+        "image": "frame-narrow"
+      }
+    },
+    {
+      "host": {
+        "scale": 1750
+      }
+    },
+    {
+      "expect": {
+        "image": "frame-narrow-175"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Read more"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Show less"
+        ],
+        "image": "frame-narrow-175-expanded"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 600,
+          "height": 320
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "frame-wide"
+      }
+    }
+  ]
+}

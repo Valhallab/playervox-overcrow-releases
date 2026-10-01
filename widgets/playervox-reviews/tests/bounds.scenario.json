@@ -1,0 +1,336 @@
+{
+  "scenarioVersion": 1,
+  "name": "bounds",
+  "description": "The longest review PlayerVox answers, 8000 characters: folded to three lines, then unfolded in a list that scrolls while the count and the pager stay below it. A review of exactly 120 characters has no Read more, one of 121 has; so has a short review of four lines. A blank review shows no text, and a blank original is no translation. The count follows the user's number format.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "calls": {
+      "playervox.reviews.page": [
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "r61",
+                "author": "Mira_Quill",
+                "grade": "S+",
+                "score": 90,
+                "text": "Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789900200000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r60",
+                "author": "Kestrel42",
+                "grade": "A",
+                "score": 74,
+                "text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789813800000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r59",
+                "author": "Tavish",
+                "grade": "D",
+                "score": 38,
+                "text": "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789727400000,
+                "offsetMinutes": 120
+              }
+            ],
+            "page": 1,
+            "totalPages": 428,
+            "count": 1284
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "r61",
+                "author": "Mira_Quill",
+                "grade": "S+",
+                "score": 90,
+                "text": "Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789900200000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r60",
+                "author": "Kestrel42",
+                "grade": "A",
+                "score": 74,
+                "text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789813800000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r59",
+                "author": "Tavish",
+                "grade": "D",
+                "score": 38,
+                "text": "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789727400000,
+                "offsetMinutes": 120
+              }
+            ],
+            "page": 1,
+            "totalPages": 428,
+            "count": 1284
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "r61",
+                "author": "Mira_Quill",
+                "grade": "S+",
+                "score": 90,
+                "text": "Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it. Chamber after chamber, the game keeps finding one more thing to do with two portals. It never repeats a trick without bending it.",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789900200000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r60",
+                "author": "Kestrel42",
+                "grade": "A",
+                "score": 74,
+                "text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789813800000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r59",
+                "author": "Tavish",
+                "grade": "D",
+                "score": 38,
+                "text": "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789727400000,
+                "offsetMinutes": 120
+              }
+            ],
+            "page": 1,
+            "totalPages": 428,
+            "count": 1284
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "r58",
+                "author": "Wren",
+                "grade": "C",
+                "score": 55,
+                "text": "one\ntwo\nthree\nfour",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789641000000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r57",
+                "author": "Onyx Vale",
+                "grade": "D",
+                "score": 20,
+                "text": "   ",
+                "original": null,
+                "hidden": false,
+                "publishedAt": 1789554600000,
+                "offsetMinutes": 120
+              },
+              {
+                "id": "r56",
+                "author": "Lune-Bleue",
+                "grade": "F",
+                "score": 19,
+                "text": "ok",
+                "original": "   ",
+                "hidden": false,
+                "publishedAt": 1789468200000,
+                "offsetMinutes": 120
+              }
+            ],
+            "page": 2,
+            "totalPages": 428,
+            "count": 1284
+          }
+        }
+      ]
+    },
+    "subscriptions": {
+      "playervox.reviews.subscribe": {
+        "state": "ready",
+        "revision": 1,
+        "offline": false
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "1,284 reviews",
+          "1 / 428",
+          "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        ],
+        "image": "folded",
+        "calls": [
+          {
+            "service": "playervox.reviews.subscribe",
+            "outcome": "ok"
+          },
+          {
+            "service": "playervox.reviews.page",
+            "params": {
+              "page": 1,
+              "followedOnly": false
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Read more"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Show less",
+          "1,284 reviews",
+          "1 / 428"
+        ],
+        "image": "expanded-scrolls"
+      }
+    },
+    {
+      "pointer": {
+        "wheel": {
+          "target": {
+            "at": [
+              175,
+              200
+            ]
+          },
+          "dx": 0,
+          "dy": 40
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "1,284 reviews",
+          "1 / 428"
+        ],
+        "image": "expanded-scrolled"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "1 284 avis",
+          "1 / 428"
+        ],
+        "calls": [
+          {
+            "service": "playervox.reviews.page",
+            "params": {
+              "page": 1,
+              "followedOnly": false
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark",
+        "region": {
+          "numberFormat": "us",
+          "dateOrder": "mdy"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Next page"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "2 / 428",
+          "Read more",
+          "ok"
+        ],
+        "noText": [
+          "Translated",
+          "Show original"
+        ],
+        "image": "lines-and-blank",
+        "calls": [
+          {
+            "service": "playervox.reviews.page",
+            "params": {
+              "page": 1,
+              "followedOnly": false
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "playervox.reviews.page",
+            "params": {
+              "page": 2,
+              "followedOnly": false
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    }
+  ]
+}
