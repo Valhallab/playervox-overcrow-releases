@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.playervox.overcrow.notes",
+  "version": "1.0.0",
+  "name": {
+    "en": "Notes",
+    "fr": "Notes"
+  },
+  "sizing": {
+    "fit": "height",
+    "preferred": { "width": 360, "height": 280 },
+    "min": { "width": 280, "height": 48 },
+    "max": { "width": 900, "height": 900 }
+  },
+  "permissions": {
+    "capabilities": ["notes.read", "notes.write"]
+  },
+  "wrapper": {
+    "menu": [
+      {
+        "type": "choice",
+        "id": "sections",
+        "label": { "en": "Show", "fr": "Afficher" },
+        "choices": [
+          { "value": "both", "label": { "en": "Note and checklist", "fr": "Note et liste de tâches" } },
+          { "value": "note", "label": { "en": "Note only", "fr": "Note seule" } },
+          { "value": "checklist", "label": { "en": "Checklist only", "fr": "Liste de tâches seule" } }
+        ],
+        "default": "both"
+      },
+      {
+        "type": "toggle",
+        "id": "move-checked",
+        "label": { "en": "Move checked entries to bottom", "fr": "Placer les éléments cochés en bas" },
+        "default": true
+      }
+    ]
+  }
+}

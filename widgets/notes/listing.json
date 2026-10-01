@@ -1,0 +1,18 @@
+{
+  "author": "PlayerVox",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/notes",
+  "defaultLocale": "en",
+  "localizations": [
+    {
+      "locale": "en",
+      "name": "Notes",
+      "description": "Your notes and checklists over the game: up to eight notes, each with free text and a checklist, the same for every game. Read them in Passive mode; in Interactive mode choose, create, delete and edit them in the widget, and tick entries off. They stay on this computer."
+    },
+    {
+      "locale": "fr",
+      "name": "Notes",
+      "description": "Vos notes et listes de tâches par-dessus le jeu : jusqu’à huit notes, chacune avec un texte libre et une liste de tâches, les mêmes pour tous les jeux. Lisez-les en mode passif ; en mode interactif, choisissez, créez, supprimez et modifiez-les dans le widget, et cochez les éléments. Elles restent sur cet ordinateur."
+    }
+  ]
+}

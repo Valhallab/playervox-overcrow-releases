@@ -1,0 +1,640 @@
+{
+  "scenarioVersion": 1,
+  "name": "states",
+  "description": "Passive mode: Loading until the host's first document, then the active note: its title, text and checklist, the checked entries last. Dark English and light French, at 100 % and 150 %. The Show row: the note alone, the checklist alone. Checked entries in their stored place. A note without text, without checklist, without either; no note at all; a checklist longer than the panel.",
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Loading notes…"
+        ],
+        "image": "loading-dark-en",
+        "calls": [
+          {
+            "service": "notes.subscribe"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "value": {
+          "active": "note-1",
+          "notes": [
+            {
+              "id": "note-1",
+              "title": "Expedition",
+              "body": "Find the northern entrance before sunset.\nBring rope.",
+              "items": [
+                {
+                  "id": "local-1",
+                  "text": "Pack torches",
+                  "checked": true
+                },
+                {
+                  "id": "local-2",
+                  "text": "Sharpen the blade",
+                  "checked": false
+                },
+                {
+                  "id": "local-3",
+                  "text": "Buy healing potions for the whole party before leaving town",
+                  "checked": false
+                }
+              ]
+            },
+            {
+              "id": "note-2",
+              "title": "Build ideas",
+              "body": "Fire sword first, then armor.",
+              "items": []
+            },
+            {
+              "id": "note-3",
+              "title": "A very long note title that must be cut in the selector and in the list",
+              "body": "",
+              "items": [
+                {
+                  "id": "local-4",
+                  "text": "One entry",
+                  "checked": false
+                }
+              ]
+            },
+            {
+              "id": "note-4",
+              "title": "Route",
+              "body": "North gate, then the river.",
+              "items": [
+                {
+                  "id": "local-5",
+                  "text": "Buy a map",
+                  "checked": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Expedition",
+          "Pack torches",
+          "Sharpen the blade"
+        ],
+        "noText": [
+          "Loading notes…",
+          "Build ideas"
+        ],
+        "image": "note-dark-en"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "note-dark-en-150"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "locale": "fr",
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "note-light-fr"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "image": "note-light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "locale": "en",
+        "theme": "dark"
+      }
+    },
+    {
+      "menu": {
+        "id": "sections",
+        "value": "note"
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "Pack torches"
+        ],
+        "image": "note-only"
+      }
+    },
+    {
+      "menu": {
+        "id": "sections",
+        "value": "checklist"
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "Expedition"
+        ],
+        "text": [
+          "Pack torches"
+        ],
+        "image": "checklist-only"
+      }
+    },
+    {
+      "menu": {
+        "id": "sections",
+        "value": "both"
+      }
+    },
+    {
+      "menu": {
+        "id": "move-checked",
+        "value": false
+      }
+    },
+    {
+      "expect": {
+        "image": "stored-order"
+      }
+    },
+    {
+      "menu": {
+        "id": "move-checked",
+        "value": true
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "value": {
+          "active": "note-1",
+          "notes": [
+            {
+              "id": "note-1",
+              "title": "Expedition",
+              "body": "",
+              "items": [
+                {
+                  "id": "local-1",
+                  "text": "Pack torches",
+                  "checked": true
+                },
+                {
+                  "id": "local-2",
+                  "text": "Sharpen the blade",
+                  "checked": false
+                },
+                {
+                  "id": "local-3",
+                  "text": "Buy healing potions for the whole party before leaving town",
+                  "checked": false
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "empty-body"
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "value": {
+          "active": "note-1",
+          "notes": [
+            {
+              "id": "note-1",
+              "title": "Expedition",
+              "body": "Find the northern entrance before sunset.\nBring rope.",
+              "items": []
+            }
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "no-checklist"
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "value": {
+          "active": "note-1",
+          "notes": [
+            {
+              "id": "note-1",
+              "title": "Expedition",
+              "body": "",
+              "items": []
+            }
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Expedition"
+        ],
+        "image": "blank-note"
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "value": {
+          "active": null,
+          "notes": []
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "Expedition",
+          "Add note"
+        ],
+        "image": "no-notes"
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "value": {
+          "active": "note-1",
+          "notes": [
+            {
+              "id": "note-1",
+              "title": "Inventory",
+              "body": "Everything the party carries.",
+              "items": [
+                {
+                  "id": "local-1",
+                  "text": "Entry 1",
+                  "checked": false
+                },
+                {
+                  "id": "local-2",
+                  "text": "Entry 2",
+                  "checked": false
+                },
+                {
+                  "id": "local-3",
+                  "text": "Entry 3",
+                  "checked": true
+                },
+                {
+                  "id": "local-4",
+                  "text": "Entry 4",
+                  "checked": false
+                },
+                {
+                  "id": "local-5",
+                  "text": "Entry 5",
+                  "checked": false
+                },
+                {
+                  "id": "local-6",
+                  "text": "Entry 6",
+                  "checked": true
+                },
+                {
+                  "id": "local-7",
+                  "text": "Entry 7",
+                  "checked": false
+                },
+                {
+                  "id": "local-8",
+                  "text": "Entry 8",
+                  "checked": false
+                },
+                {
+                  "id": "local-9",
+                  "text": "Entry 9",
+                  "checked": true
+                },
+                {
+                  "id": "local-10",
+                  "text": "Entry 10",
+                  "checked": false
+                },
+                {
+                  "id": "local-11",
+                  "text": "Entry 11",
+                  "checked": false
+                },
+                {
+                  "id": "local-12",
+                  "text": "Entry 12",
+                  "checked": true
+                },
+                {
+                  "id": "local-13",
+                  "text": "Entry 13",
+                  "checked": false
+                },
+                {
+                  "id": "local-14",
+                  "text": "Entry 14",
+                  "checked": false
+                },
+                {
+                  "id": "local-15",
+                  "text": "Entry 15",
+                  "checked": true
+                },
+                {
+                  "id": "local-16",
+                  "text": "Entry 16",
+                  "checked": false
+                },
+                {
+                  "id": "local-17",
+                  "text": "Entry 17",
+                  "checked": false
+                },
+                {
+                  "id": "local-18",
+                  "text": "Entry 18",
+                  "checked": true
+                },
+                {
+                  "id": "local-19",
+                  "text": "Entry 19",
+                  "checked": false
+                },
+                {
+                  "id": "local-20",
+                  "text": "Entry 20",
+                  "checked": false
+                },
+                {
+                  "id": "local-21",
+                  "text": "Entry 21",
+                  "checked": true
+                },
+                {
+                  "id": "local-22",
+                  "text": "Entry 22",
+                  "checked": false
+                },
+                {
+                  "id": "local-23",
+                  "text": "Entry 23",
+                  "checked": false
+                },
+                {
+                  "id": "local-24",
+                  "text": "Entry 24",
+                  "checked": true
+                },
+                {
+                  "id": "local-25",
+                  "text": "Entry 25",
+                  "checked": false
+                },
+                {
+                  "id": "local-26",
+                  "text": "Entry 26",
+                  "checked": false
+                },
+                {
+                  "id": "local-27",
+                  "text": "Entry 27",
+                  "checked": true
+                },
+                {
+                  "id": "local-28",
+                  "text": "Entry 28",
+                  "checked": false
+                },
+                {
+                  "id": "local-29",
+                  "text": "Entry 29",
+                  "checked": false
+                },
+                {
+                  "id": "local-30",
+                  "text": "Entry 30",
+                  "checked": true
+                },
+                {
+                  "id": "local-31",
+                  "text": "Entry 31",
+                  "checked": false
+                },
+                {
+                  "id": "local-32",
+                  "text": "Entry 32",
+                  "checked": false
+                },
+                {
+                  "id": "local-33",
+                  "text": "Entry 33",
+                  "checked": true
+                },
+                {
+                  "id": "local-34",
+                  "text": "Entry 34",
+                  "checked": false
+                },
+                {
+                  "id": "local-35",
+                  "text": "Entry 35",
+                  "checked": false
+                },
+                {
+                  "id": "local-36",
+                  "text": "Entry 36",
+                  "checked": true
+                },
+                {
+                  "id": "local-37",
+                  "text": "Entry 37",
+                  "checked": false
+                },
+                {
+                  "id": "local-38",
+                  "text": "Entry 38",
+                  "checked": false
+                },
+                {
+                  "id": "local-39",
+                  "text": "Entry 39",
+                  "checked": true
+                },
+                {
+                  "id": "local-40",
+                  "text": "Entry 40",
+                  "checked": false
+                },
+                {
+                  "id": "local-41",
+                  "text": "Entry 41",
+                  "checked": false
+                },
+                {
+                  "id": "local-42",
+                  "text": "Entry 42",
+                  "checked": true
+                },
+                {
+                  "id": "local-43",
+                  "text": "Entry 43",
+                  "checked": false
+                },
+                {
+                  "id": "local-44",
+                  "text": "Entry 44",
+                  "checked": false
+                },
+                {
+                  "id": "local-45",
+                  "text": "Entry 45",
+                  "checked": true
+                },
+                {
+                  "id": "local-46",
+                  "text": "Entry 46",
+                  "checked": false
+                },
+                {
+                  "id": "local-47",
+                  "text": "Entry 47",
+                  "checked": false
+                },
+                {
+                  "id": "local-48",
+                  "text": "Entry 48",
+                  "checked": true
+                },
+                {
+                  "id": "local-49",
+                  "text": "Entry 49",
+                  "checked": false
+                },
+                {
+                  "id": "local-50",
+                  "text": "Entry 50",
+                  "checked": false
+                },
+                {
+                  "id": "local-51",
+                  "text": "Entry 51",
+                  "checked": true
+                },
+                {
+                  "id": "local-52",
+                  "text": "Entry 52",
+                  "checked": false
+                },
+                {
+                  "id": "local-53",
+                  "text": "Entry 53",
+                  "checked": false
+                },
+                {
+                  "id": "local-54",
+                  "text": "Entry 54",
+                  "checked": true
+                },
+                {
+                  "id": "local-55",
+                  "text": "Entry 55",
+                  "checked": false
+                },
+                {
+                  "id": "local-56",
+                  "text": "Entry 56",
+                  "checked": false
+                },
+                {
+                  "id": "local-57",
+                  "text": "Entry 57",
+                  "checked": true
+                },
+                {
+                  "id": "local-58",
+                  "text": "Entry 58",
+                  "checked": false
+                },
+                {
+                  "id": "local-59",
+                  "text": "Entry 59",
+                  "checked": false
+                },
+                {
+                  "id": "local-60",
+                  "text": "Entry 60",
+                  "checked": true
+                },
+                {
+                  "id": "local-61",
+                  "text": "Entry 61",
+                  "checked": false
+                },
+                {
+                  "id": "local-62",
+                  "text": "Entry 62",
+                  "checked": false
+                },
+                {
+                  "id": "local-63",
+                  "text": "Entry 63",
+                  "checked": true
+                },
+                {
+                  "id": "local-64",
+                  "text": "Entry 64",
+                  "checked": false
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Inventory",
+          "Entry 64"
+        ],
+        "image": "long-checklist"
+      }
+    },
+    {
+      "expect": {
+        "calls": []
+      }
+    }
+  ]
+}

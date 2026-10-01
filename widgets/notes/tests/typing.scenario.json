@@ -1,0 +1,569 @@
+{
+  "scenarioVersion": 1,
+  "name": "typing",
+  "description": "The editor with the keyboard alone, after one click in the title. End, typing, Shift+Home and typing over a selection, Backspace, Delete, the arrows and Ctrl+A in the title; Enter goes to the text, where Enter is a line break; Tab reaches the checklist; Enter goes from row to row and continues on the empty row, which gets its successor as soon as something is typed; Escape changes nothing; Tab and Shift+Tab stay in the widget. Ctrl+Enter saves: OverCrow sends its own values, each row with the entry it holds, and the editor closes once the note is stored.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "notes.subscribe": {
+        "active": "note-1",
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Expedition",
+            "body": "Find the northern entrance before sunset.\nBring rope.",
+            "items": [
+              {
+                "id": "local-1",
+                "text": "Pack torches",
+                "checked": true
+              },
+              {
+                "id": "local-2",
+                "text": "Sharpen the blade",
+                "checked": false
+              },
+              {
+                "id": "local-3",
+                "text": "Buy healing potions for the whole party before leaving town",
+                "checked": false
+              }
+            ]
+          },
+          {
+            "id": "note-2",
+            "title": "Build ideas",
+            "body": "Fire sword first, then armor.",
+            "items": []
+          },
+          {
+            "id": "note-3",
+            "title": "A very long note title that must be cut in the selector and in the list",
+            "body": "",
+            "items": [
+              {
+                "id": "local-4",
+                "text": "One entry",
+                "checked": false
+              }
+            ]
+          },
+          {
+            "id": "note-4",
+            "title": "Route",
+            "body": "North gate, then the river.",
+            "items": [
+              {
+                "id": "local-5",
+                "text": "Buy a map",
+                "checked": true
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "intents": {
+      "notes.save": [
+        "accepted"
+      ]
+    }
+  },
+  "steps": [
+    {
+      "pointer": {
+        "click": {
+          "label": "Edit current note"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Note title"
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "End"
+      }
+    },
+    {
+      "text": " nrth"
+    },
+    {
+      "key": {
+        "key": "ArrowLeft"
+      }
+    },
+    {
+      "key": {
+        "key": "ArrowLeft"
+      }
+    },
+    {
+      "key": {
+        "key": "ArrowLeft"
+      }
+    },
+    {
+      "text": "o"
+    },
+    {
+      "expect": {
+        "image": "title-typed"
+      }
+    },
+    {
+      "key": {
+        "key": "Home",
+        "modifiers": [
+          "shift"
+        ]
+      }
+    },
+    {
+      "expect": {
+        "image": "title-selected"
+      }
+    },
+    {
+      "text": "Trip"
+    },
+    {
+      "key": {
+        "key": "Backspace"
+      }
+    },
+    {
+      "key": {
+        "key": "Backspace"
+      }
+    },
+    {
+      "key": {
+        "key": "A",
+        "modifiers": [
+          "ctrl"
+        ]
+      }
+    },
+    {
+      "text": "xExpedition north!"
+    },
+    {
+      "key": {
+        "key": "Home"
+      }
+    },
+    {
+      "key": {
+        "key": "Delete"
+      }
+    },
+    {
+      "key": {
+        "key": "End"
+      }
+    },
+    {
+      "key": {
+        "key": "Backspace"
+      }
+    },
+    {
+      "expect": {
+        "image": "title-edited"
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "key": {
+        "key": "End",
+        "modifiers": [
+          "ctrl"
+        ]
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "text": "Leave at dawn."
+    },
+    {
+      "expect": {
+        "image": "body-typed"
+      }
+    },
+    {
+      "key": {
+        "key": "ArrowUp"
+      }
+    },
+    {
+      "key": {
+        "key": "ArrowUp"
+      }
+    },
+    {
+      "key": {
+        "key": "Home"
+      }
+    },
+    {
+      "key": {
+        "key": "ArrowDown"
+      }
+    },
+    {
+      "key": {
+        "key": "ArrowDown"
+      }
+    },
+    {
+      "key": {
+        "key": "End"
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "key": {
+        "key": "Home"
+      }
+    },
+    {
+      "key": {
+        "key": "ArrowRight",
+        "modifiers": [
+          "ctrl"
+        ]
+      }
+    },
+    {
+      "key": {
+        "key": "ArrowRight",
+        "modifiers": [
+          "ctrl",
+          "shift"
+        ]
+      }
+    },
+    {
+      "key": {
+        "key": "ArrowRight",
+        "modifiers": [
+          "ctrl",
+          "shift"
+        ]
+      }
+    },
+    {
+      "text": " both blades"
+    },
+    {
+      "expect": {
+        "image": "row-edited"
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "key": {
+        "key": "A",
+        "modifiers": [
+          "ctrl"
+        ]
+      }
+    },
+    {
+      "key": {
+        "key": "Backspace"
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "text": "Buy potions"
+    },
+    {
+      "expect": {
+        "image": "row-added"
+      }
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "text": "Rest"
+    },
+    {
+      "key": {
+        "key": "Escape"
+      }
+    },
+    {
+      "expect": {
+        "image": "rows-added",
+        "intents": []
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "expect": {
+        "image": "tab-wrapped"
+      }
+    },
+    {
+      "key": {
+        "key": "Tab",
+        "modifiers": [
+          "shift"
+        ]
+      }
+    },
+    {
+      "key": {
+        "key": "Tab",
+        "modifiers": [
+          "shift"
+        ]
+      }
+    },
+    {
+      "key": {
+        "key": "Tab",
+        "modifiers": [
+          "shift"
+        ]
+      }
+    },
+    {
+      "key": {
+        "key": "Tab",
+        "modifiers": [
+          "shift"
+        ]
+      }
+    },
+    {
+      "key": {
+        "key": "Tab",
+        "modifiers": [
+          "shift"
+        ]
+      }
+    },
+    {
+      "expect": {
+        "image": "tab-back"
+      }
+    },
+    {
+      "key": {
+        "key": "Enter",
+        "modifiers": [
+          "ctrl"
+        ]
+      }
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "notes.save",
+            "fields": {
+              "title": "Expedition north",
+              "body": "Find the northern entrance before sunset.\nBring rope.\nLeave at dawn.",
+              "item": [
+                {
+                  "id": "local-1",
+                  "text": "Pack torches"
+                },
+                {
+                  "id": "local-2",
+                  "text": "Sharpen both blades"
+                },
+                {
+                  "id": "local-3",
+                  "text": ""
+                },
+                {
+                  "id": null,
+                  "text": "Buy potions"
+                },
+                {
+                  "id": null,
+                  "text": "Rest"
+                },
+                {
+                  "id": null,
+                  "text": ""
+                }
+              ]
+            },
+            "outcome": "accepted"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "value": {
+          "active": "note-1",
+          "notes": [
+            {
+              "id": "note-1",
+              "title": "Expedition north",
+              "body": "Find the northern entrance before sunset.\nBring rope.\nLeave at dawn.",
+              "items": [
+                {
+                  "id": "local-1",
+                  "text": "Pack torches",
+                  "checked": true
+                },
+                {
+                  "id": "local-2",
+                  "text": "Sharpen both blades",
+                  "checked": false
+                },
+                {
+                  "id": "local-6",
+                  "text": "Buy potions",
+                  "checked": false
+                },
+                {
+                  "id": "local-7",
+                  "text": "Rest",
+                  "checked": false
+                }
+              ]
+            },
+            {
+              "id": "note-2",
+              "title": "Build ideas",
+              "body": "Fire sword first, then armor.",
+              "items": []
+            },
+            {
+              "id": "note-3",
+              "title": "A very long note title that must be cut in the selector and in the list",
+              "body": "",
+              "items": [
+                {
+                  "id": "local-4",
+                  "text": "One entry",
+                  "checked": false
+                }
+              ]
+            },
+            {
+              "id": "note-4",
+              "title": "Route",
+              "body": "North gate, then the river.",
+              "items": [
+                {
+                  "id": "local-5",
+                  "text": "Buy a map",
+                  "checked": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Expedition north",
+          "Sharpen both blades",
+          "Buy potions",
+          "Rest"
+        ],
+        "noText": [
+          "Save",
+          "Cancel"
+        ],
+        "image": "saved",
+        "calls": [
+          {
+            "service": "notes.subscribe",
+            "outcome": "ok"
+          }
+        ]
+      }
+    }
+  ]
+}

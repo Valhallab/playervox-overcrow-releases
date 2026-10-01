@@ -64,6 +64,7 @@ fn the_pilots_are_here() {
         "clock",
         "fps",
         "media",
+        "notes",
         "performance",
         "playervox-journal",
         "playervox-rating",
@@ -275,6 +276,8 @@ fn service_fixtures_follow_the_result_shapes() {
         "playervox.rating.read",
         "playervox.rating.write",
         "playervox.reviews.read",
+        "notes.read",
+        "notes.write",
     ] {
         assert!(exercised.contains(capability), "{capability}");
     }

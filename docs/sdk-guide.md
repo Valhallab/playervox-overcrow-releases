@@ -121,6 +121,13 @@ useful state when it is missing.
   value in the control's `input` event. The
   [PlayerVox rating widget](../widgets/playervox-rating/logic.ts) follows
   its three sliders and its review this way.
+- A form keeps what the user entered for as long as it stays in the view:
+  hide it with `display: none` to keep a draft, remove it to discard one.
+  The [Notes widget](../widgets/notes/logic.ts) keeps one hidden form per
+  note with a draft. Its `notes.save` form has one `item` field per
+  checklist row: the logic adds and removes rows, and the host remembers
+  which entry it filled each field with. In that form Enter moves to the
+  next field; Ctrl+Enter or a `submit` button saves.
 
 ## Drawing, menus and messages
 

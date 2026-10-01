@@ -1,0 +1,378 @@
+{
+  "scenarioVersion": 1,
+  "name": "save",
+  "description": "Save with the pointer. A draft marks the selector with a dot. OverCrow could not store the note: the message shows, the editor keeps the draft and Save comes back. No answer at all: the selector's spinner turns and Save waits, until the editor is given back after 40 s. A save of a note deleted meanwhile is refused too. Stored: the editor closes and the subscription shows the note.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "notes.subscribe": {
+        "active": "note-1",
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Expedition",
+            "body": "Find the northern entrance before sunset.\nBring rope.",
+            "items": [
+              {
+                "id": "local-1",
+                "text": "Pack torches",
+                "checked": true
+              },
+              {
+                "id": "local-2",
+                "text": "Sharpen the blade",
+                "checked": false
+              },
+              {
+                "id": "local-3",
+                "text": "Buy healing potions for the whole party before leaving town",
+                "checked": false
+              }
+            ]
+          },
+          {
+            "id": "note-2",
+            "title": "Build ideas",
+            "body": "Fire sword first, then armor.",
+            "items": []
+          },
+          {
+            "id": "note-3",
+            "title": "A very long note title that must be cut in the selector and in the list",
+            "body": "",
+            "items": [
+              {
+                "id": "local-4",
+                "text": "One entry",
+                "checked": false
+              }
+            ]
+          },
+          {
+            "id": "note-4",
+            "title": "Route",
+            "body": "North gate, then the river.",
+            "items": [
+              {
+                "id": "local-5",
+                "text": "Buy a map",
+                "checked": true
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "intents": {
+      "notes.save": [
+        {
+          "error": "unavailable"
+        },
+        "pending",
+        {
+          "error": "stale_context"
+        },
+        "accepted"
+      ]
+    }
+  },
+  "steps": [
+    {
+      "pointer": {
+        "click": {
+          "label": "Edit current note"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Note title"
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "End"
+      }
+    },
+    {
+      "text": " II"
+    },
+    {
+      "expect": {
+        "text": [
+          "Expedition •"
+        ],
+        "image": "draft"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Save"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Notes could not be loaded or saved. Try again.",
+          "Save",
+          "Expedition •"
+        ],
+        "intents": [
+          {
+            "intent": "notes.save",
+            "fields": {
+              "title": "Expedition II",
+              "body": "Find the northern entrance before sunset.\nBring rope.",
+              "item": [
+                {
+                  "id": "local-1",
+                  "text": "Pack torches"
+                },
+                {
+                  "id": "local-2",
+                  "text": "Sharpen the blade"
+                },
+                {
+                  "id": "local-3",
+                  "text": "Buy healing potions for the whole party before leaving town"
+                },
+                {
+                  "id": null,
+                  "text": ""
+                }
+              ]
+            },
+            "outcome": "unavailable"
+          }
+        ],
+        "image": "refused"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Save"
+        }
+      }
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "notes.save",
+            "fields": {
+              "title": "Expedition II",
+              "body": "Find the northern entrance before sunset.\nBring rope.",
+              "item": [
+                {
+                  "id": "local-1",
+                  "text": "Pack torches"
+                },
+                {
+                  "id": "local-2",
+                  "text": "Sharpen the blade"
+                },
+                {
+                  "id": "local-3",
+                  "text": "Buy healing potions for the whole party before leaving town"
+                },
+                {
+                  "id": null,
+                  "text": ""
+                }
+              ]
+            },
+            "outcome": "pending"
+          }
+        ],
+        "noText": [
+          "Notes could not be loaded or saved. Try again."
+        ],
+        "image": "saving"
+      }
+    },
+    {
+      "advance": {
+        "ms": 40000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Notes could not be loaded or saved. Try again."
+        ],
+        "image": "no-answer"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Save"
+        }
+      }
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "notes.save",
+            "fields": {
+              "title": "Expedition II",
+              "body": "Find the northern entrance before sunset.\nBring rope.",
+              "item": [
+                {
+                  "id": "local-1",
+                  "text": "Pack torches"
+                },
+                {
+                  "id": "local-2",
+                  "text": "Sharpen the blade"
+                },
+                {
+                  "id": "local-3",
+                  "text": "Buy healing potions for the whole party before leaving town"
+                },
+                {
+                  "id": null,
+                  "text": ""
+                }
+              ]
+            },
+            "outcome": "stale_context"
+          }
+        ],
+        "text": [
+          "Notes could not be loaded or saved. Try again."
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Save"
+        }
+      }
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "notes.save",
+            "fields": {
+              "title": "Expedition II",
+              "body": "Find the northern entrance before sunset.\nBring rope.",
+              "item": [
+                {
+                  "id": "local-1",
+                  "text": "Pack torches"
+                },
+                {
+                  "id": "local-2",
+                  "text": "Sharpen the blade"
+                },
+                {
+                  "id": "local-3",
+                  "text": "Buy healing potions for the whole party before leaving town"
+                },
+                {
+                  "id": null,
+                  "text": ""
+                }
+              ]
+            },
+            "outcome": "accepted"
+          }
+        ],
+        "noText": [
+          "Save",
+          "Notes could not be loaded or saved. Try again."
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "value": {
+          "active": "note-1",
+          "notes": [
+            {
+              "id": "note-1",
+              "title": "Expedition II",
+              "body": "Find the northern entrance before sunset.\nBring rope.",
+              "items": [
+                {
+                  "id": "local-1",
+                  "text": "Pack torches",
+                  "checked": true
+                },
+                {
+                  "id": "local-2",
+                  "text": "Sharpen the blade",
+                  "checked": false
+                },
+                {
+                  "id": "local-3",
+                  "text": "Buy healing potions for the whole party before leaving town",
+                  "checked": false
+                }
+              ]
+            },
+            {
+              "id": "note-2",
+              "title": "Build ideas",
+              "body": "Fire sword first, then armor.",
+              "items": []
+            },
+            {
+              "id": "note-3",
+              "title": "A very long note title that must be cut in the selector and in the list",
+              "body": "",
+              "items": [
+                {
+                  "id": "local-4",
+                  "text": "One entry",
+                  "checked": false
+                }
+              ]
+            },
+            {
+              "id": "note-4",
+              "title": "Route",
+              "body": "North gate, then the river.",
+              "items": [
+                {
+                  "id": "local-5",
+                  "text": "Buy a map",
+                  "checked": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Expedition II"
+        ],
+        "noText": [
+          "Expedition II •"
+        ],
+        "image": "stored",
+        "calls": [
+          {
+            "service": "notes.subscribe",
+            "outcome": "ok"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,1351 @@
+{
+  "scenarioVersion": 1,
+  "name": "limits",
+  "description": "OverCrow's fields hold what a note may: a title of 96 bytes (48 two-byte letters of 60 typed), a text of 8192 bytes (of 9000 typed), an entry of 256 bytes (of 300 typed); the rest is not taken. A long text wraps in its field, which grows to ten rows. Eight notes: the add button takes no click. A checklist of 64 entries scrolls in the panel, above Save and Cancel; it has no empty row and says it is full.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "notes.subscribe": {
+        "active": "note-1",
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Inventory",
+            "body": "",
+            "items": [
+              {
+                "id": "local-1",
+                "text": "Entry 1",
+                "checked": false
+              },
+              {
+                "id": "local-2",
+                "text": "Entry 2",
+                "checked": false
+              },
+              {
+                "id": "local-3",
+                "text": "Entry 3",
+                "checked": false
+              },
+              {
+                "id": "local-4",
+                "text": "Entry 4",
+                "checked": false
+              },
+              {
+                "id": "local-5",
+                "text": "Entry 5",
+                "checked": false
+              },
+              {
+                "id": "local-6",
+                "text": "Entry 6",
+                "checked": false
+              },
+              {
+                "id": "local-7",
+                "text": "Entry 7",
+                "checked": false
+              },
+              {
+                "id": "local-8",
+                "text": "Entry 8",
+                "checked": false
+              },
+              {
+                "id": "local-9",
+                "text": "Entry 9",
+                "checked": false
+              },
+              {
+                "id": "local-10",
+                "text": "Entry 10",
+                "checked": false
+              },
+              {
+                "id": "local-11",
+                "text": "Entry 11",
+                "checked": false
+              },
+              {
+                "id": "local-12",
+                "text": "Entry 12",
+                "checked": false
+              },
+              {
+                "id": "local-13",
+                "text": "Entry 13",
+                "checked": false
+              },
+              {
+                "id": "local-14",
+                "text": "Entry 14",
+                "checked": false
+              },
+              {
+                "id": "local-15",
+                "text": "Entry 15",
+                "checked": false
+              },
+              {
+                "id": "local-16",
+                "text": "Entry 16",
+                "checked": false
+              },
+              {
+                "id": "local-17",
+                "text": "Entry 17",
+                "checked": false
+              },
+              {
+                "id": "local-18",
+                "text": "Entry 18",
+                "checked": false
+              },
+              {
+                "id": "local-19",
+                "text": "Entry 19",
+                "checked": false
+              },
+              {
+                "id": "local-20",
+                "text": "Entry 20",
+                "checked": false
+              },
+              {
+                "id": "local-21",
+                "text": "Entry 21",
+                "checked": false
+              },
+              {
+                "id": "local-22",
+                "text": "Entry 22",
+                "checked": false
+              },
+              {
+                "id": "local-23",
+                "text": "Entry 23",
+                "checked": false
+              },
+              {
+                "id": "local-24",
+                "text": "Entry 24",
+                "checked": false
+              },
+              {
+                "id": "local-25",
+                "text": "Entry 25",
+                "checked": false
+              },
+              {
+                "id": "local-26",
+                "text": "Entry 26",
+                "checked": false
+              },
+              {
+                "id": "local-27",
+                "text": "Entry 27",
+                "checked": false
+              },
+              {
+                "id": "local-28",
+                "text": "Entry 28",
+                "checked": false
+              },
+              {
+                "id": "local-29",
+                "text": "Entry 29",
+                "checked": false
+              },
+              {
+                "id": "local-30",
+                "text": "Entry 30",
+                "checked": false
+              },
+              {
+                "id": "local-31",
+                "text": "Entry 31",
+                "checked": false
+              },
+              {
+                "id": "local-32",
+                "text": "Entry 32",
+                "checked": false
+              },
+              {
+                "id": "local-33",
+                "text": "Entry 33",
+                "checked": false
+              },
+              {
+                "id": "local-34",
+                "text": "Entry 34",
+                "checked": false
+              },
+              {
+                "id": "local-35",
+                "text": "Entry 35",
+                "checked": false
+              },
+              {
+                "id": "local-36",
+                "text": "Entry 36",
+                "checked": false
+              },
+              {
+                "id": "local-37",
+                "text": "Entry 37",
+                "checked": false
+              },
+              {
+                "id": "local-38",
+                "text": "Entry 38",
+                "checked": false
+              },
+              {
+                "id": "local-39",
+                "text": "Entry 39",
+                "checked": false
+              },
+              {
+                "id": "local-40",
+                "text": "Entry 40",
+                "checked": false
+              },
+              {
+                "id": "local-41",
+                "text": "Entry 41",
+                "checked": false
+              },
+              {
+                "id": "local-42",
+                "text": "Entry 42",
+                "checked": false
+              },
+              {
+                "id": "local-43",
+                "text": "Entry 43",
+                "checked": false
+              },
+              {
+                "id": "local-44",
+                "text": "Entry 44",
+                "checked": false
+              },
+              {
+                "id": "local-45",
+                "text": "Entry 45",
+                "checked": false
+              },
+              {
+                "id": "local-46",
+                "text": "Entry 46",
+                "checked": false
+              },
+              {
+                "id": "local-47",
+                "text": "Entry 47",
+                "checked": false
+              },
+              {
+                "id": "local-48",
+                "text": "Entry 48",
+                "checked": false
+              },
+              {
+                "id": "local-49",
+                "text": "Entry 49",
+                "checked": false
+              },
+              {
+                "id": "local-50",
+                "text": "Entry 50",
+                "checked": false
+              },
+              {
+                "id": "local-51",
+                "text": "Entry 51",
+                "checked": false
+              },
+              {
+                "id": "local-52",
+                "text": "Entry 52",
+                "checked": false
+              },
+              {
+                "id": "local-53",
+                "text": "Entry 53",
+                "checked": false
+              },
+              {
+                "id": "local-54",
+                "text": "Entry 54",
+                "checked": false
+              },
+              {
+                "id": "local-55",
+                "text": "Entry 55",
+                "checked": false
+              },
+              {
+                "id": "local-56",
+                "text": "Entry 56",
+                "checked": false
+              },
+              {
+                "id": "local-57",
+                "text": "Entry 57",
+                "checked": false
+              },
+              {
+                "id": "local-58",
+                "text": "Entry 58",
+                "checked": false
+              },
+              {
+                "id": "local-59",
+                "text": "Entry 59",
+                "checked": false
+              },
+              {
+                "id": "local-60",
+                "text": "Entry 60",
+                "checked": false
+              },
+              {
+                "id": "local-61",
+                "text": "Entry 61",
+                "checked": false
+              },
+              {
+                "id": "local-62",
+                "text": "Entry 62",
+                "checked": false
+              },
+              {
+                "id": "local-63",
+                "text": "Entry 63",
+                "checked": false
+              },
+              {
+                "id": "local-64",
+                "text": "Entry 64",
+                "checked": false
+              }
+            ]
+          },
+          {
+            "id": "note-2",
+            "title": "Note 2",
+            "body": "",
+            "items": []
+          },
+          {
+            "id": "note-3",
+            "title": "Note 3",
+            "body": "",
+            "items": []
+          },
+          {
+            "id": "note-4",
+            "title": "Note 4",
+            "body": "",
+            "items": []
+          },
+          {
+            "id": "note-5",
+            "title": "Note 5",
+            "body": "",
+            "items": []
+          },
+          {
+            "id": "note-6",
+            "title": "Note 6",
+            "body": "",
+            "items": []
+          },
+          {
+            "id": "note-7",
+            "title": "Note 7",
+            "body": "",
+            "items": []
+          },
+          {
+            "id": "note-8",
+            "title": "Note 8",
+            "body": "",
+            "items": []
+          }
+        ]
+      }
+    },
+    "calls": {
+      "notes.select": [
+        {
+          "value": null
+        },
+        {
+          "value": null
+        }
+      ]
+    },
+    "intents": {
+      "notes.save": [
+        "accepted"
+      ]
+    }
+  },
+  "steps": [
+    {
+      "pointer": {
+        "click": {
+          "label": "Choose note"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Add note"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "notes.subscribe",
+            "outcome": "ok"
+          }
+        ],
+        "image": "eight-notes"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Edit note: Note 2"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "notes.select",
+            "outcome": "ok",
+            "params": {
+              "note": "note-2"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "value": {
+          "active": "note-2",
+          "notes": [
+            {
+              "id": "note-1",
+              "title": "Inventory",
+              "body": "",
+              "items": [
+                {
+                  "id": "local-1",
+                  "text": "Entry 1",
+                  "checked": false
+                },
+                {
+                  "id": "local-2",
+                  "text": "Entry 2",
+                  "checked": false
+                },
+                {
+                  "id": "local-3",
+                  "text": "Entry 3",
+                  "checked": false
+                },
+                {
+                  "id": "local-4",
+                  "text": "Entry 4",
+                  "checked": false
+                },
+                {
+                  "id": "local-5",
+                  "text": "Entry 5",
+                  "checked": false
+                },
+                {
+                  "id": "local-6",
+                  "text": "Entry 6",
+                  "checked": false
+                },
+                {
+                  "id": "local-7",
+                  "text": "Entry 7",
+                  "checked": false
+                },
+                {
+                  "id": "local-8",
+                  "text": "Entry 8",
+                  "checked": false
+                },
+                {
+                  "id": "local-9",
+                  "text": "Entry 9",
+                  "checked": false
+                },
+                {
+                  "id": "local-10",
+                  "text": "Entry 10",
+                  "checked": false
+                },
+                {
+                  "id": "local-11",
+                  "text": "Entry 11",
+                  "checked": false
+                },
+                {
+                  "id": "local-12",
+                  "text": "Entry 12",
+                  "checked": false
+                },
+                {
+                  "id": "local-13",
+                  "text": "Entry 13",
+                  "checked": false
+                },
+                {
+                  "id": "local-14",
+                  "text": "Entry 14",
+                  "checked": false
+                },
+                {
+                  "id": "local-15",
+                  "text": "Entry 15",
+                  "checked": false
+                },
+                {
+                  "id": "local-16",
+                  "text": "Entry 16",
+                  "checked": false
+                },
+                {
+                  "id": "local-17",
+                  "text": "Entry 17",
+                  "checked": false
+                },
+                {
+                  "id": "local-18",
+                  "text": "Entry 18",
+                  "checked": false
+                },
+                {
+                  "id": "local-19",
+                  "text": "Entry 19",
+                  "checked": false
+                },
+                {
+                  "id": "local-20",
+                  "text": "Entry 20",
+                  "checked": false
+                },
+                {
+                  "id": "local-21",
+                  "text": "Entry 21",
+                  "checked": false
+                },
+                {
+                  "id": "local-22",
+                  "text": "Entry 22",
+                  "checked": false
+                },
+                {
+                  "id": "local-23",
+                  "text": "Entry 23",
+                  "checked": false
+                },
+                {
+                  "id": "local-24",
+                  "text": "Entry 24",
+                  "checked": false
+                },
+                {
+                  "id": "local-25",
+                  "text": "Entry 25",
+                  "checked": false
+                },
+                {
+                  "id": "local-26",
+                  "text": "Entry 26",
+                  "checked": false
+                },
+                {
+                  "id": "local-27",
+                  "text": "Entry 27",
+                  "checked": false
+                },
+                {
+                  "id": "local-28",
+                  "text": "Entry 28",
+                  "checked": false
+                },
+                {
+                  "id": "local-29",
+                  "text": "Entry 29",
+                  "checked": false
+                },
+                {
+                  "id": "local-30",
+                  "text": "Entry 30",
+                  "checked": false
+                },
+                {
+                  "id": "local-31",
+                  "text": "Entry 31",
+                  "checked": false
+                },
+                {
+                  "id": "local-32",
+                  "text": "Entry 32",
+                  "checked": false
+                },
+                {
+                  "id": "local-33",
+                  "text": "Entry 33",
+                  "checked": false
+                },
+                {
+                  "id": "local-34",
+                  "text": "Entry 34",
+                  "checked": false
+                },
+                {
+                  "id": "local-35",
+                  "text": "Entry 35",
+                  "checked": false
+                },
+                {
+                  "id": "local-36",
+                  "text": "Entry 36",
+                  "checked": false
+                },
+                {
+                  "id": "local-37",
+                  "text": "Entry 37",
+                  "checked": false
+                },
+                {
+                  "id": "local-38",
+                  "text": "Entry 38",
+                  "checked": false
+                },
+                {
+                  "id": "local-39",
+                  "text": "Entry 39",
+                  "checked": false
+                },
+                {
+                  "id": "local-40",
+                  "text": "Entry 40",
+                  "checked": false
+                },
+                {
+                  "id": "local-41",
+                  "text": "Entry 41",
+                  "checked": false
+                },
+                {
+                  "id": "local-42",
+                  "text": "Entry 42",
+                  "checked": false
+                },
+                {
+                  "id": "local-43",
+                  "text": "Entry 43",
+                  "checked": false
+                },
+                {
+                  "id": "local-44",
+                  "text": "Entry 44",
+                  "checked": false
+                },
+                {
+                  "id": "local-45",
+                  "text": "Entry 45",
+                  "checked": false
+                },
+                {
+                  "id": "local-46",
+                  "text": "Entry 46",
+                  "checked": false
+                },
+                {
+                  "id": "local-47",
+                  "text": "Entry 47",
+                  "checked": false
+                },
+                {
+                  "id": "local-48",
+                  "text": "Entry 48",
+                  "checked": false
+                },
+                {
+                  "id": "local-49",
+                  "text": "Entry 49",
+                  "checked": false
+                },
+                {
+                  "id": "local-50",
+                  "text": "Entry 50",
+                  "checked": false
+                },
+                {
+                  "id": "local-51",
+                  "text": "Entry 51",
+                  "checked": false
+                },
+                {
+                  "id": "local-52",
+                  "text": "Entry 52",
+                  "checked": false
+                },
+                {
+                  "id": "local-53",
+                  "text": "Entry 53",
+                  "checked": false
+                },
+                {
+                  "id": "local-54",
+                  "text": "Entry 54",
+                  "checked": false
+                },
+                {
+                  "id": "local-55",
+                  "text": "Entry 55",
+                  "checked": false
+                },
+                {
+                  "id": "local-56",
+                  "text": "Entry 56",
+                  "checked": false
+                },
+                {
+                  "id": "local-57",
+                  "text": "Entry 57",
+                  "checked": false
+                },
+                {
+                  "id": "local-58",
+                  "text": "Entry 58",
+                  "checked": false
+                },
+                {
+                  "id": "local-59",
+                  "text": "Entry 59",
+                  "checked": false
+                },
+                {
+                  "id": "local-60",
+                  "text": "Entry 60",
+                  "checked": false
+                },
+                {
+                  "id": "local-61",
+                  "text": "Entry 61",
+                  "checked": false
+                },
+                {
+                  "id": "local-62",
+                  "text": "Entry 62",
+                  "checked": false
+                },
+                {
+                  "id": "local-63",
+                  "text": "Entry 63",
+                  "checked": false
+                },
+                {
+                  "id": "local-64",
+                  "text": "Entry 64",
+                  "checked": false
+                }
+              ]
+            },
+            {
+              "id": "note-2",
+              "title": "Note 2",
+              "body": "",
+              "items": []
+            },
+            {
+              "id": "note-3",
+              "title": "Note 3",
+              "body": "",
+              "items": []
+            },
+            {
+              "id": "note-4",
+              "title": "Note 4",
+              "body": "",
+              "items": []
+            },
+            {
+              "id": "note-5",
+              "title": "Note 5",
+              "body": "",
+              "items": []
+            },
+            {
+              "id": "note-6",
+              "title": "Note 6",
+              "body": "",
+              "items": []
+            },
+            {
+              "id": "note-7",
+              "title": "Note 7",
+              "body": "",
+              "items": []
+            },
+            {
+              "id": "note-8",
+              "title": "Note 8",
+              "body": "",
+              "items": []
+            }
+          ]
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Note title"
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "A",
+        "modifiers": [
+          "ctrl"
+        ]
+      }
+    },
+    {
+      "text": "éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé"
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, con"
+    },
+    {
+      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, con"
+    },
+    {
+      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, con"
+    },
+    {
+      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, con"
+    },
+    {
+      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, con"
+    },
+    {
+      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, con"
+    },
+    {
+      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, con"
+    },
+    {
+      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, con"
+    },
+    {
+      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, con"
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+    {
+      "expect": {
+        "image": "bounded"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Save"
+        }
+      }
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "notes.save",
+            "fields": {
+              "title": "éééééééééééééééééééééééééééééééééééééééééééééééé",
+              "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, conLorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, conLorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, conLorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, conLorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, conLorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, conLorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, conLorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, conLorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit",
+              "item": [
+                {
+                  "id": null,
+                  "text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                },
+                {
+                  "id": null,
+                  "text": ""
+                }
+              ]
+            },
+            "outcome": "accepted"
+          }
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Choose note"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Edit note: Inventory"
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "notes.select",
+            "outcome": "ok",
+            "params": {
+              "note": "note-1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "value": {
+          "active": "note-1",
+          "notes": [
+            {
+              "id": "note-1",
+              "title": "Inventory",
+              "body": "",
+              "items": [
+                {
+                  "id": "local-1",
+                  "text": "Entry 1",
+                  "checked": false
+                },
+                {
+                  "id": "local-2",
+                  "text": "Entry 2",
+                  "checked": false
+                },
+                {
+                  "id": "local-3",
+                  "text": "Entry 3",
+                  "checked": false
+                },
+                {
+                  "id": "local-4",
+                  "text": "Entry 4",
+                  "checked": false
+                },
+                {
+                  "id": "local-5",
+                  "text": "Entry 5",
+                  "checked": false
+                },
+                {
+                  "id": "local-6",
+                  "text": "Entry 6",
+                  "checked": false
+                },
+                {
+                  "id": "local-7",
+                  "text": "Entry 7",
+                  "checked": false
+                },
+                {
+                  "id": "local-8",
+                  "text": "Entry 8",
+                  "checked": false
+                },
+                {
+                  "id": "local-9",
+                  "text": "Entry 9",
+                  "checked": false
+                },
+                {
+                  "id": "local-10",
+                  "text": "Entry 10",
+                  "checked": false
+                },
+                {
+                  "id": "local-11",
+                  "text": "Entry 11",
+                  "checked": false
+                },
+                {
+                  "id": "local-12",
+                  "text": "Entry 12",
+                  "checked": false
+                },
+                {
+                  "id": "local-13",
+                  "text": "Entry 13",
+                  "checked": false
+                },
+                {
+                  "id": "local-14",
+                  "text": "Entry 14",
+                  "checked": false
+                },
+                {
+                  "id": "local-15",
+                  "text": "Entry 15",
+                  "checked": false
+                },
+                {
+                  "id": "local-16",
+                  "text": "Entry 16",
+                  "checked": false
+                },
+                {
+                  "id": "local-17",
+                  "text": "Entry 17",
+                  "checked": false
+                },
+                {
+                  "id": "local-18",
+                  "text": "Entry 18",
+                  "checked": false
+                },
+                {
+                  "id": "local-19",
+                  "text": "Entry 19",
+                  "checked": false
+                },
+                {
+                  "id": "local-20",
+                  "text": "Entry 20",
+                  "checked": false
+                },
+                {
+                  "id": "local-21",
+                  "text": "Entry 21",
+                  "checked": false
+                },
+                {
+                  "id": "local-22",
+                  "text": "Entry 22",
+                  "checked": false
+                },
+                {
+                  "id": "local-23",
+                  "text": "Entry 23",
+                  "checked": false
+                },
+                {
+                  "id": "local-24",
+                  "text": "Entry 24",
+                  "checked": false
+                },
+                {
+                  "id": "local-25",
+                  "text": "Entry 25",
+                  "checked": false
+                },
+                {
+                  "id": "local-26",
+                  "text": "Entry 26",
+                  "checked": false
+                },
+                {
+                  "id": "local-27",
+                  "text": "Entry 27",
+                  "checked": false
+                },
+                {
+                  "id": "local-28",
+                  "text": "Entry 28",
+                  "checked": false
+                },
+                {
+                  "id": "local-29",
+                  "text": "Entry 29",
+                  "checked": false
+                },
+                {
+                  "id": "local-30",
+                  "text": "Entry 30",
+                  "checked": false
+                },
+                {
+                  "id": "local-31",
+                  "text": "Entry 31",
+                  "checked": false
+                },
+                {
+                  "id": "local-32",
+                  "text": "Entry 32",
+                  "checked": false
+                },
+                {
+                  "id": "local-33",
+                  "text": "Entry 33",
+                  "checked": false
+                },
+                {
+                  "id": "local-34",
+                  "text": "Entry 34",
+                  "checked": false
+                },
+                {
+                  "id": "local-35",
+                  "text": "Entry 35",
+                  "checked": false
+                },
+                {
+                  "id": "local-36",
+                  "text": "Entry 36",
+                  "checked": false
+                },
+                {
+                  "id": "local-37",
+                  "text": "Entry 37",
+                  "checked": false
+                },
+                {
+                  "id": "local-38",
+                  "text": "Entry 38",
+                  "checked": false
+                },
+                {
+                  "id": "local-39",
+                  "text": "Entry 39",
+                  "checked": false
+                },
+                {
+                  "id": "local-40",
+                  "text": "Entry 40",
+                  "checked": false
+                },
+                {
+                  "id": "local-41",
+                  "text": "Entry 41",
+                  "checked": false
+                },
+                {
+                  "id": "local-42",
+                  "text": "Entry 42",
+                  "checked": false
+                },
+                {
+                  "id": "local-43",
+                  "text": "Entry 43",
+                  "checked": false
+                },
+                {
+                  "id": "local-44",
+                  "text": "Entry 44",
+                  "checked": false
+                },
+                {
+                  "id": "local-45",
+                  "text": "Entry 45",
+                  "checked": false
+                },
+                {
+                  "id": "local-46",
+                  "text": "Entry 46",
+                  "checked": false
+                },
+                {
+                  "id": "local-47",
+                  "text": "Entry 47",
+                  "checked": false
+                },
+                {
+                  "id": "local-48",
+                  "text": "Entry 48",
+                  "checked": false
+                },
+                {
+                  "id": "local-49",
+                  "text": "Entry 49",
+                  "checked": false
+                },
+                {
+                  "id": "local-50",
+                  "text": "Entry 50",
+                  "checked": false
+                },
+                {
+                  "id": "local-51",
+                  "text": "Entry 51",
+                  "checked": false
+                },
+                {
+                  "id": "local-52",
+                  "text": "Entry 52",
+                  "checked": false
+                },
+                {
+                  "id": "local-53",
+                  "text": "Entry 53",
+                  "checked": false
+                },
+                {
+                  "id": "local-54",
+                  "text": "Entry 54",
+                  "checked": false
+                },
+                {
+                  "id": "local-55",
+                  "text": "Entry 55",
+                  "checked": false
+                },
+                {
+                  "id": "local-56",
+                  "text": "Entry 56",
+                  "checked": false
+                },
+                {
+                  "id": "local-57",
+                  "text": "Entry 57",
+                  "checked": false
+                },
+                {
+                  "id": "local-58",
+                  "text": "Entry 58",
+                  "checked": false
+                },
+                {
+                  "id": "local-59",
+                  "text": "Entry 59",
+                  "checked": false
+                },
+                {
+                  "id": "local-60",
+                  "text": "Entry 60",
+                  "checked": false
+                },
+                {
+                  "id": "local-61",
+                  "text": "Entry 61",
+                  "checked": false
+                },
+                {
+                  "id": "local-62",
+                  "text": "Entry 62",
+                  "checked": false
+                },
+                {
+                  "id": "local-63",
+                  "text": "Entry 63",
+                  "checked": false
+                },
+                {
+                  "id": "local-64",
+                  "text": "Entry 64",
+                  "checked": false
+                }
+              ]
+            },
+            {
+              "id": "note-2",
+              "title": "Note 2",
+              "body": "",
+              "items": []
+            },
+            {
+              "id": "note-3",
+              "title": "Note 3",
+              "body": "",
+              "items": []
+            },
+            {
+              "id": "note-4",
+              "title": "Note 4",
+              "body": "",
+              "items": []
+            },
+            {
+              "id": "note-5",
+              "title": "Note 5",
+              "body": "",
+              "items": []
+            },
+            {
+              "id": "note-6",
+              "title": "Note 6",
+              "body": "",
+              "items": []
+            },
+            {
+              "id": "note-7",
+              "title": "Note 7",
+              "body": "",
+              "items": []
+            },
+            {
+              "id": "note-8",
+              "title": "Note 8",
+              "body": "",
+              "items": []
+            }
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Checklist full"
+        ],
+        "image": "full-checklist"
+      }
+    },
+    {
+      "pointer": {
+        "wheel": {
+          "target": {
+            "label": "Note title"
+          },
+          "dx": 0,
+          "dy": 60
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "full-checklist-end"
+      }
+    }
+  ]
+}
