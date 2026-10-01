@@ -165,11 +165,13 @@ no row for messages left out. Clicks go through to the game.
 A message is opaque until two thirds of its lifetime, then fades to nothing
 over the last third, and leaves. `receivedAt`, the time OverCrow received
 the message, gives its age, also after the widget was hidden. The fade is
-stepped: the logic gives a fading row one of 32 opacity classes and a
-transition as long as the step (100 ms to 1.6 s, the longest that keeps at
-least 16 steps in a fade), so OverCrow draws it as one continuous fade.
-One timer drives it: it sleeps until the first message is about to fade,
-ticks once per step while one fades, and does not exist when nothing shows.
+stepped: the logic gives a fading row one of 32 opacity classes, one level
+per step (a 32nd of the fade: 313 ms for the default 30 s, never under
+100 ms). Each step is one frame; the style has no transition, which would
+have OverCrow draw a frame at every refresh for as long as a message
+fades. One timer drives it: it sleeps until the first message starts to
+fade, ticks once per step while one fades, and does not exist when nothing
+shows.
 Interactive mode keeps the whole history, opaque, and runs no timer.
 
 ## Menu

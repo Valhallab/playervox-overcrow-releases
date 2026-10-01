@@ -478,18 +478,17 @@ test("the fade starts at two thirds of the lifetime and ends with it", () => {
   }
 });
 
-test("the fade's step is the longest transition of the style within a sixteenth of the fade", () => {
-  assert.deepEqual(logic.FADE_STEPS_MS, [100, 200, 400, 800, 1600]);
+test("the fade's step is one opacity level, never under the host's shortest timer", () => {
+  assert.equal(logic.FADE_STEP_MIN_MS, 100);
   assert.equal(logic.fadeStepMs(5_000), 100);
   assert.equal(logic.fadeStepMs(9_000), 100);
-  assert.equal(logic.fadeStepMs(10_000), 200);
-  assert.equal(logic.fadeStepMs(30_000), 400);
-  assert.equal(logic.fadeStepMs(60_000), 800);
-  assert.equal(logic.fadeStepMs(120_000), 1600);
+  assert.equal(logic.fadeStepMs(10_000), 104);
+  assert.equal(logic.fadeStepMs(30_000), 313);
+  assert.equal(logic.fadeStepMs(60_000), 625);
+  assert.equal(logic.fadeStepMs(120_000), 1250);
+  // A transition would draw a frame at every refresh while a message fades.
   const style = read("style.ocss");
-  for (const step of logic.FADE_STEPS_MS) {
-    assert.ok(style.includes(`.ease-${step} {\n  transition: opacity ${step}ms linear;`), `.ease-${step}`);
-  }
+  assert.ok(!/^\s*transition\s*:/m.test(style), "no transition in the style");
   for (let level = 1; level <= logic.FADE_LEVELS; level += 1) {
     const opacity = 1 - level / logic.FADE_LEVELS;
     assert.ok(style.includes(`.fade-${level} {\n  opacity: ${opacity};`), `.fade-${level}`);
@@ -522,38 +521,38 @@ test("Passive mode shows the last 12 messages younger than the lifetime", () => 
   assert.deepEqual(ids(logic.passiveRows([], now, 30_000)), []);
 });
 
-test("a Passive row is opaque until two thirds, then aims at its opacity one step later", () => {
+test("a Passive row is opaque until two thirds, then has the opacity level of its age", () => {
   const now = vm.now;
   const cls = (age, lifetime = 30_000) => {
     const row = logic.messageRow(message("m1", "hi", { receivedAt: now - age }));
     return logic.passiveRows([row], now, lifetime)[0]?.cls;
   };
   assert.equal(cls(0), "row");
-  assert.equal(cls(19_600), "row", "one step before two thirds: still its own class");
-  assert.equal(cls(20_000), "row fade-1 ease-400");
-  assert.equal(cls(24_600), "row fade-16 ease-400");
-  assert.equal(cls(29_600), "row fade-32 ease-400", "transparent when it leaves");
-  assert.equal(cls(29_999), "row fade-32 ease-400");
+  assert.equal(cls(20_000), "row", "two thirds: still its own class");
+  assert.equal(cls(20_001), "row fade-1");
+  assert.equal(cls(25_000), "row fade-16");
+  assert.equal(cls(29_999), "row fade-32", "transparent when it leaves");
   assert.equal(cls(30_000), undefined);
   assert.equal(cls(3_000, 5_000), "row");
-  assert.equal(cls(4_000, 5_000), "row fade-15 ease-100");
-  assert.equal(cls(100_000, 120_000), "row fade-17 ease-1600");
+  assert.equal(cls(4_000, 5_000), "row fade-13");
+  assert.equal(cls(100_000, 120_000), "row fade-16");
   const replied = logic.messageRow(
     message("m1", "hi", { receivedAt: now - 25_000, reply: { author: "Moss", text: "hey" } }),
   );
-  assert.equal(logic.passiveRows([replied], now, 30_000)[0].cls, "row replied fade-17 ease-400");
+  assert.equal(logic.passiveRows([replied], now, 30_000)[0].cls, "row replied fade-16");
 });
 
 test("the next change of a Passive row: the start of the first fade, then one step", () => {
   const now = vm.now;
   const aged = (age) => logic.messageRow(message("m", "hi", { receivedAt: now - age }));
   assert.equal(logic.nextFadeMs([], now, 30_000), null, "nothing shows: nothing to wait for");
-  assert.equal(logic.nextFadeMs([aged(1_000)], now, 30_000), 18_600);
-  assert.equal(logic.nextFadeMs([aged(1_000), aged(9_000)], now, 30_000), 10_600, "the oldest decides");
+  assert.equal(logic.nextFadeMs([aged(1_000)], now, 30_000), 19_000);
+  assert.equal(logic.nextFadeMs([aged(1_000), aged(9_000)], now, 30_000), 11_000, "the oldest decides");
   assert.equal(logic.nextFadeMs([aged(19_600)], now, 30_000), 400);
-  assert.equal(logic.nextFadeMs([aged(25_000), aged(0)], now, 30_000), 400, "one step while a message fades");
+  assert.equal(logic.nextFadeMs([aged(19_900)], now, 30_000), 313, "never less than a step");
+  assert.equal(logic.nextFadeMs([aged(25_000), aged(0)], now, 30_000), 313, "one step while a message fades");
   assert.equal(logic.nextFadeMs([aged(4_900)], now, 5_000), 100, "never under the host's shortest timer");
-  assert.equal(logic.nextFadeMs([aged(0)], now, 120_000), 78_400);
+  assert.equal(logic.nextFadeMs([aged(0)], now, 120_000), 80_000);
 });
 
 test("the lifetime is the menu row's, within 5 to 120 s", () => {
@@ -589,21 +588,21 @@ test("one timer drives the fade and stops once nothing shows", () => {
   assert.equal(logic.emptyKey(state), "no-recent");
   assert.equal(vm.timers.length, 1, "one timer");
   assert.equal(vm.timers[0].repeat, false);
-  assert.equal(vm.timers[0].dueAt - vm.now, 10_600, "asleep until the first fade is one step away");
+  assert.equal(vm.timers[0].dueAt - vm.now, 11_000, "asleep until the first fade starts");
 
-  assert.equal(vm.advance(10_599), 0);
+  assert.equal(vm.advance(10_999), 0);
   assert.equal(vm.advance(1), 1);
-  assert.equal(state.shown[0].cls, "row", "m1 is 19.6 s old");
-  assert.equal(vm.advance(400), 1);
+  assert.equal(state.shown[0].cls, "row", "m1 is 20 s old");
+  assert.equal(vm.advance(313), 1, "one tick per step");
   assert.deepEqual(
     state.shown.map((row) => row.cls),
-    ["row fade-1 ease-400", "row"],
+    ["row fade-1", "row"],
   );
   assert.equal(vm.timers.length, 1);
-  vm.advance(4_800);
+  assert.equal(vm.advance(4_800), 15, "one render per opacity level");
   assert.deepEqual(
     state.shown.map((row) => row.cls),
-    ["row fade-17 ease-400", "row"],
+    ["row fade-16", "row"],
     "m1 half-way",
   );
   vm.advance(5_200);
@@ -616,9 +615,11 @@ test("one timer drives the fade and stops once nothing shows", () => {
   assert.deepEqual(ids(state.shown), ["m2", "m3"]);
   assert.equal(vm.timers.length, 1);
 
-  const ticks = vm.advance(30_000);
+  // The last step lands within one step after the lifetime; the row is
+  // transparent meanwhile.
+  const ticks = vm.advance(30_000 + logic.fadeStepMs(30_000));
   assert.deepEqual(ids(state.shown), [], "everything expired");
-  assert.ok(ticks > 0 && ticks <= 2 * (10_000 / 400) + 4, `${ticks} ticks for two fades`);
+  assert.ok(ticks > 0 && ticks <= 2 * logic.FADE_LEVELS + 6, `${ticks} ticks for two fades`);
   assert.equal(vm.timers.length, 0, "nothing ticks any more");
   assert.equal(vm.advance(600_000), 0);
 
@@ -634,9 +635,9 @@ test("the fade follows the lifetime row and the mode, and runs nothing in Intera
   vm.setHost({ mode: "passive" });
   assert.equal(state.shown[0].cls, "row");
   vm.setHost({ options: { "passive-lifetime": 10 } });
-  assert.equal(state.shown[0].cls, "row fade-15 ease-200", "8 s of a 10 s lifetime");
+  assert.equal(state.shown[0].cls, "row fade-13", "8 s of a 10 s lifetime");
   assert.equal(vm.timers.length, 1);
-  assert.equal(vm.timers[0].dueAt - vm.now, 200);
+  assert.equal(vm.timers[0].dueAt - vm.now, 104);
   vm.setHost({ options: { "passive-lifetime": 5 } });
   assert.deepEqual(ids(state.shown), [], "older than the new lifetime");
   assert.equal(vm.timers.length, 0);
@@ -650,7 +651,7 @@ test("the fade follows the lifetime row and the mode, and runs nothing in Intera
   vm.setHost({ visible: false });
   vm.advance(15_000);
   vm.setHost({ visible: true });
-  assert.equal(state.shown[0].cls, "row fade-11 ease-400", "23 s old");
+  assert.equal(state.shown[0].cls, "row fade-10", "23 s old");
   vm.advance(60_000);
   assert.equal(vm.timers.length, 0);
 });

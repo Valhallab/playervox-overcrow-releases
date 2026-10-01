@@ -116,8 +116,8 @@ export const RETRY_MS = 5_000;
 export const ANSWER_MS = 40_000;
 /** Opacity levels of the Passive fade (`fade-1` … `fade-32` in the style). */
 export const FADE_LEVELS = 32;
-/** Step durations the style has a transition for (`ease-100` …), in ms. */
-export const FADE_STEPS_MS: readonly number[] = [100, 200, 400, 800, 1600];
+/** The shortest step of the fade: OverCrow's shortest timer, in ms. */
+export const FADE_STEP_MIN_MS = 100;
 /** `MAX_CHAT_CHANNEL_BYTES`. */
 const CHANNEL_MAX = 25;
 /** `MAX_CHAT_FAVORITES`. */
@@ -339,16 +339,14 @@ export function trimmed(rows: Row[]): Row[] {
 
 // The Passive fade.
 
-/** The fade's step: the longest the style has within 1/16 of the fade. */
+/**
+ * The fade's step: the time one opacity level lasts, and no shorter than
+ * OverCrow's shortest timer. Each step is one render and one frame: the
+ * fade has no transition, which would draw a frame at every refresh for as
+ * long as a message fades.
+ */
 export function fadeStepMs(lifetimeMs: number): number {
-  const sixteenth = lifetimeMs / 3 / 16;
-  let step = FADE_STEPS_MS[0] ?? 100;
-  for (const candidate of FADE_STEPS_MS) {
-    if (candidate <= sixteenth) {
-      step = candidate;
-    }
-  }
-  return step;
+  return Math.max(FADE_STEP_MIN_MS, Math.round(lifetimeMs / 3 / FADE_LEVELS));
 }
 
 /**
@@ -366,11 +364,9 @@ export function fadeLevel(ageMs: number, lifetimeMs: number): number {
 
 /**
  * The rows of Passive mode: the last `PASSIVE_MAX` messages younger than
- * the lifetime. Each aims at the opacity it has one step from now, which
- * the style's transition reaches in that time: the fade looks continuous.
+ * the lifetime, each with the opacity level of its age.
  */
 export function passiveRows(rows: readonly Row[], now: number, lifetimeMs: number): Row[] {
-  const step = fadeStepMs(lifetimeMs);
   const recent = rows.filter((row) => row.gap === 0).slice(-PASSIVE_MAX);
   const shown: Row[] = [];
   for (const row of recent) {
@@ -378,16 +374,16 @@ export function passiveRows(rows: readonly Row[], now: number, lifetimeMs: numbe
     if (age >= lifetimeMs) {
       continue;
     }
-    const level = fadeLevel(age + step, lifetimeMs);
-    shown.push(level === 0 ? row : { ...row, cls: `${row.cls} fade-${level} ease-${step}` });
+    const level = fadeLevel(age, lifetimeMs);
+    shown.push(level === 0 ? row : { ...row, cls: `${row.cls} fade-${level}` });
   }
   return shown;
 }
 
 /**
  * How long until a row of Passive mode changes: one step while a message
- * fades or is about to, the time until the first fade starts otherwise;
- * `null` when nothing shows.
+ * fades, the time until the first fade starts otherwise; `null` when
+ * nothing shows.
  */
 export function nextFadeMs(rows: readonly Row[], now: number, lifetimeMs: number): number | null {
   const step = fadeStepMs(lifetimeMs);
@@ -395,7 +391,7 @@ export function nextFadeMs(rows: readonly Row[], now: number, lifetimeMs: number
   let next: number | null = null;
   for (const row of rows) {
     const age = now - row.receivedAt;
-    const wait = Math.max(step, start - step - age);
+    const wait = Math.max(step, start - age);
     next = next === null ? wait : Math.min(next, wait);
   }
   return next;

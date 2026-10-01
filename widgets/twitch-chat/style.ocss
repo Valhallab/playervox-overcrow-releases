@@ -410,29 +410,9 @@
   white-space: nowrap;
 }
 
-/* The Passive fade. The logic gives a fading message the opacity it has
-   one step later and the step's duration: the transition makes the steps
-   one continuous fade, whatever the lifetime chosen. */
-.ease-100 {
-  transition: opacity 100ms linear;
-}
-
-.ease-200 {
-  transition: opacity 200ms linear;
-}
-
-.ease-400 {
-  transition: opacity 400ms linear;
-}
-
-.ease-800 {
-  transition: opacity 800ms linear;
-}
-
-.ease-1600 {
-  transition: opacity 1600ms linear;
-}
-
+/* The Passive fade: 32 opacity levels, one per step of the logic's timer.
+   No transition: it would draw a frame at every refresh while a message
+   fades. */
 .fade-1 {
   opacity: 0.96875;
 }
