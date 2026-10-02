@@ -10,7 +10,7 @@ use std::time::SystemTime;
 
 use overcrow_widget_schema::limits::MAX_PACKAGE_FILES;
 
-/// Top-level files of a project (`docs/cli.md`, Project layout).
+/// Top-level files of a project (`docs/content/en/cli.md`, Files of a project).
 const SOURCES: &[&str] = &[
     "manifest.json",
     "view.ocml",

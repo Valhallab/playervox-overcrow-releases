@@ -462,7 +462,7 @@ pub fn style_diagnostic(kind: OcssErrorKind, position: Position, source: &str) -
         OcssErrorKind::Syntax => ("malformed style sheet".into(), Some("check braces, `;` and `:`".into())),
         OcssErrorKind::Unsupported => (
             "this CSS feature is outside the style subset".into(),
-            Some("no @media, @import, !important, attribute or universal selectors; see docs/widget-source-formats.md".into()),
+            Some("no @media, @import, !important, attribute or universal selectors; see https://overcrow.playervox.com/docs/en/style/#what-is-refused".into()),
         ),
         OcssErrorKind::UnknownElement => (
             format!("{quoted} is not an element"),

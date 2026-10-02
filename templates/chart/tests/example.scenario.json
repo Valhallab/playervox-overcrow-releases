@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "example",
-  "description": "The chart after ten seconds of one-second ticks, on virtual time (Math.random is seeded in tests). `overcrow-widget test` plays it and compares the images with tests/reference/example/; `--update` records them again (docs/widget-testing.md).",
+  "description": "The chart after ten seconds of one-second ticks, on virtual time (Math.random is seeded in tests). `overcrow-widget test` plays it and compares the images with tests/reference/example/; `--update` records them again (https://overcrow.playervox.com/docs/en/testing/).",
   "steps": [
     { "expect": { "state": "running", "text": ["Activity", "50"], "image": "initial" } },
     { "advance": { "ms": 10000 } },
