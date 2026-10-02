@@ -258,6 +258,7 @@ Single-line text input edited by the host, input methods (IME) included.
 | `max-length` | integer 1 to 16384 | no | Content limit in bytes; a write intent may impose a lower one. |
 | `disabled` | boolean | no | Rejects input; matches `:disabled`. |
 | `name` | identifier ≤ 64 bytes | no | Field name inside a `form`. |
+| `autofocus` | boolean | no | Takes keyboard focus when the element appears while the logic handles a user action (an editor opened by a click), in Interactive mode, in the widget that received the action; the first such element of the view when several appear together. Never when the widget starts, from a timer or the answer of a service, in Passive mode, or when set on an element already shown. |
 
 ### `textarea`
 
@@ -275,6 +276,7 @@ Multi-line text input edited by the host, input methods (IME) included.
 | `rows` | integer 1 to 40 | no | Visible rows before scrolling; default 3. |
 | `disabled` | boolean | no | Rejects input; matches `:disabled`. |
 | `name` | identifier ≤ 64 bytes | no | Field name inside a `form`. |
+| `autofocus` | boolean | no | Takes keyboard focus when the element appears while the logic handles a user action (an editor opened by a click), in Interactive mode, in the widget that received the action; the first such element of the view when several appear together. Never when the widget starts, from a timer or the answer of a service, in Passive mode, or when set on an element already shown. |
 
 ### `form`
 

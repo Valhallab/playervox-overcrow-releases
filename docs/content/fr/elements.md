@@ -263,6 +263,7 @@ Champ de texte d’une ligne, édité par l’hôte, méthodes de saisie (IME) c
 | `max-length` | entier de 1 à 16384 | non | Limite du contenu, en octets ; un intent d’écriture peut en imposer une plus basse. |
 | `disabled` | booléen | non | Refuse les entrées ; correspond à `:disabled`. |
 | `name` | identifiant ≤ 64 octets | non | Nom du champ dans un `form`. |
+| `autofocus` | booléen | non | Prend le focus clavier quand l’élément apparaît pendant que la logique traite une action de l’utilisateur (un éditeur ouvert par un clic), en mode interactif, dans le widget qui a reçu l’action ; le premier de ces éléments dans la vue quand plusieurs apparaissent ensemble. Jamais au démarrage du widget, depuis un minuteur ou la réponse d’un service, en mode passif, ni quand il est posé sur un élément déjà affiché. |
 
 ### `textarea`
 
@@ -280,6 +281,7 @@ Champ de texte de plusieurs lignes, édité par l’hôte, méthodes de saisie (
 | `rows` | entier de 1 à 40 | non | Lignes visibles avant le défilement ; 3 par défaut. |
 | `disabled` | booléen | non | Refuse les entrées ; correspond à `:disabled`. |
 | `name` | identifiant ≤ 64 octets | non | Nom du champ dans un `form`. |
+| `autofocus` | booléen | non | Prend le focus clavier quand l’élément apparaît pendant que la logique traite une action de l’utilisateur (un éditeur ouvert par un clic), en mode interactif, dans le widget qui a reçu l’action ; le premier de ces éléments dans la vue quand plusieurs apparaissent ensemble. Jamais au démarrage du widget, depuis un minuteur ou la réponse d’un service, en mode passif, ni quand il est posé sur un élément déjà affiché. |
 
 ### `form`
 
