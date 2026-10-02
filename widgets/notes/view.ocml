@@ -5,7 +5,9 @@
      body and its checklist rows belong to OverCrow, which fills them from
      the stored note, keeps the draft and sends their values: they take no
      `value` here. The logic only decides which rows a form has. A form
-     stays in the view, hidden, while its note has a draft. -->
+     stays in the view, hidden, while its note has a draft. The form of a
+     new note is there from the click, without a target: its title takes
+     the focus, and OverCrow fills it when the note exists. -->
 <box class="notes" label={t("label")}>
   <if test={phase(state) == "loading"}>
     <text class="status">{t("loading")}</text>
@@ -104,11 +106,11 @@
       </scroll>
     </if>
   </if>
-  <for each={state.editors} as="editor" key={editor.note}>
-    <form class={editorClass(state, editor)} intent="notes.save" target={editor.note} on:submit={saved(editor.note, event.outcome, event.error)}>
+  <for each={state.editors} as="editor" key={editor.key}>
+    <form class={editorClass(state, editor)} intent="notes.save" target={editor.note} on:submit={saved(editor.key, event.outcome, event.error)}>
       <scroll class="fields">
-        <field class="title-field" name="title" autofocus placeholder={t("title-hint")} label={t("title-hint")} on:input={titleInput(editor.note, event.value)} on:keydown={keyed(editor.note, event.key, event.ctrl)}/>
-        <textarea class="body-field" name="body" rows={bodyRows(editor)} label={t("body-label")} on:input={bodyInput(editor.note, event.value)} on:keydown={keyed(editor.note, event.key, event.ctrl)}/>
+        <field class="title-field" name="title" autofocus placeholder={t("title-hint")} label={t("title-hint")} on:input={titleInput(editor.key, event.value)} on:keydown={keyed(editor.key, event.key, event.ctrl)}/>
+        <textarea class="body-field" name="body" rows={bodyRows(editor)} label={t("body-label")} on:input={bodyInput(editor.key, event.value)} on:keydown={keyed(editor.key, event.key, event.ctrl)}/>
         <text class="meta">{t("checklist")}</text>
         <box class="rows">
           <for each={editor.rows} as="row" key={row.key}>
@@ -119,12 +121,12 @@
               <else>
                 <icon class="row-new" name="circle"/>
               </else>
-              <field class="row-field" name="item" placeholder={rowHint(editor, row)} label={t("item-hint")} on:input={rowInput(editor.note, row.key, event.value)} on:keydown={keyed(editor.note, event.key, event.ctrl)}/>
+              <field class="row-field" name="item" placeholder={rowHint(editor, row)} label={t("item-hint")} on:input={rowInput(editor.key, row.key, event.value)} on:keydown={keyed(editor.key, event.key, event.ctrl)}/>
               <if test={lastEmpty(editor, row)}>
                 <box class="row-space"/>
               </if>
               <else>
-                <button class="icon-button small" label={t("remove-entry")} tooltip={t("remove-entry")} on:activate={dropRow(editor.note, row.key)}>
+                <button class="icon-button small" label={t("remove-entry")} tooltip={t("remove-entry")} on:activate={dropRow(editor.key, row.key)}>
                   <icon name="x"/>
                 </button>
               </else>
@@ -140,10 +142,10 @@
         <text class="hint">{t("add-title")}</text>
       </if>
       <box class="actions">
-        <button class={saveClass(state, editor)} submit disabled={!canSave(state, editor)} on:activate={saving(editor.note)}>
+        <button class={saveClass(state, editor)} submit disabled={!canSave(state, editor)} on:activate={saving(editor.key)}>
           <text class="action-label">{t("save")}</text>
         </button>
-        <button class="action" on:activate={cancel(editor.note)}>
+        <button class="action" on:activate={cancel(editor.key)}>
           <text class="action-label">{t("cancel")}</text>
         </button>
       </box>

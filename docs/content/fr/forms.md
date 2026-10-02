@@ -105,7 +105,7 @@ champ, après son texte, comme le ferait un clic dans ce champ.
 
 <!-- source: widgets/notes/view.ocml -->
 ```xml
-        <field class="title-field" name="title" autofocus placeholder={t("title-hint")} label={t("title-hint")} on:input={titleInput(editor.note, event.value)} on:keydown={keyed(editor.note, event.key, event.ctrl)}/>
+        <field class="title-field" name="title" autofocus placeholder={t("title-hint")} label={t("title-hint")} on:input={titleInput(editor.key, event.value)} on:keydown={keyed(editor.key, event.key, event.ctrl)}/>
 ```
 
 OverCrow ne donne ce focus que si l’élément apparaît pendant une
@@ -307,7 +307,7 @@ entrée.
               <else>
                 <icon class="row-new" name="circle"/>
               </else>
-              <field class="row-field" name="item" placeholder={rowHint(editor, row)} label={t("item-hint")} on:input={rowInput(editor.note, row.key, event.value)} on:keydown={keyed(editor.note, event.key, event.ctrl)}/>
+              <field class="row-field" name="item" placeholder={rowHint(editor, row)} label={t("item-hint")} on:input={rowInput(editor.key, row.key, event.value)} on:keydown={keyed(editor.key, event.key, event.ctrl)}/>
 ```
 
 Dans ce formulaire, Entrée passe au champ suivant au lieu de valider ;
