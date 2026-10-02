@@ -30,7 +30,7 @@ update.
 - **When it can be called**: at any time, or only during a
   [user action](services.md#calls-that-need-a-user-action).
 - **Parameters**: the members of the object to pass; a `?` marks an
-  optional one. A type such as "text ≤ `MAX_OBJECT_ID_BYTES`" names a
+  optional one. A type such as "text ≤ 128 bytes" gives a
   [limit](limits.md).
 - **Result**, or **Each update** for a subscription: what the service
   answers, and the error codes that are specific to it. Every service can
@@ -46,7 +46,7 @@ update.
 - **Kind**: call, answered once
 - **Requires**: permission `storage`
 - **When it can be called**: At any time
-- **Parameters**: `key`: text ≤ `MAX_STORAGE_KEY_BYTES`
+- **Parameters**: `key`: text ≤ 128 bytes
 - **Result**: stored JSON value or `null`
 - **Shape**: JSON
 
@@ -55,8 +55,8 @@ update.
 - **Kind**: call, answered once
 - **Requires**: permission `storage`
 - **When it can be called**: At any time
-- **Parameters**: `key`: text ≤ `MAX_STORAGE_KEY_BYTES`; `value`: JSON
-- **Result**: `null`; `quota_exceeded` beyond `STORAGE_QUOTA_BYTES`
+- **Parameters**: `key`: text ≤ 128 bytes; `value`: JSON
+- **Result**: `null`; `quota_exceeded` beyond 256 KiB
 - **Shape**: `null`
 
 ### `storage.remove`
@@ -64,7 +64,7 @@ update.
 - **Kind**: call, answered once
 - **Requires**: permission `storage`
 - **When it can be called**: At any time
-- **Parameters**: `key`: text ≤ `MAX_STORAGE_KEY_BYTES`
+- **Parameters**: `key`: text ≤ 128 bytes
 - **Result**: `null`
 
 ### `storage.keys`
@@ -81,8 +81,8 @@ update.
 - **Kind**: call, answered once
 - **Requires**: permission `network`
 - **When it can be called**: At any time
-- **Parameters**: `url`: text ≤ `MAX_REQUEST_URL_BYTES`; `method`: `GET` \| `POST` \| `PUT` \| `PATCH` \| `DELETE`; `contentType?`: `application/json` \| `text/plain`; `as`: `json` \| `text` \| `bytes` \| `image`
-- **Result**: `{ status, contentType }` with the body, ≤ the rule's `maxResponseBytes` (`MAX_HTTP_RESPONSE_BYTES` when absent), or `{ status, asset }` from a body ≤ `MAX_HTTP_RESPONSE_BYTES`
+- **Parameters**: `url`: text ≤ 2 KiB; `method`: `GET` \| `POST` \| `PUT` \| `PATCH` \| `DELETE`; `contentType?`: `application/json` \| `text/plain`; `as`: `json` \| `text` \| `bytes` \| `image`
+- **Result**: `{ status, contentType }` with the body, ≤ the rule's `maxResponseBytes` (1 MiB when absent), or `{ status, asset }` from a body ≤ 1 MiB
 - **Shape**: [`HttpResponse`](result-shapes.md#httpresponse)
 
 ### `clipboard.writeText`
@@ -90,7 +90,7 @@ update.
 - **Kind**: call, answered once
 - **Requires**: permission `clipboardWrite`
 - **When it can be called**: Only during a user action
-- **Parameters**: `text`: text ≤ `MAX_CLIPBOARD_BYTES`
+- **Parameters**: `text`: text ≤ 16 KiB
 - **Result**: `null`
 
 ### `gameEvents.subscribe`
@@ -143,7 +143,7 @@ update.
 - **Kind**: call, answered once
 - **Requires**: capability `media.control`
 - **When it can be called**: Only during a user action
-- **Parameters**: `player?`: text ≤ `MAX_OBJECT_ID_BYTES`
+- **Parameters**: `player?`: text ≤ 128 bytes
 - **Result**: `null`; `stale_context` when `player` is no longer current
 - **Shape**: `null`
 
@@ -152,7 +152,7 @@ update.
 - **Kind**: call, answered once
 - **Requires**: capability `media.control`
 - **When it can be called**: Only during a user action
-- **Parameters**: `player?`: text ≤ `MAX_OBJECT_ID_BYTES`
+- **Parameters**: `player?`: text ≤ 128 bytes
 - **Result**: `null`; `stale_context` when `player` is no longer current
 - **Shape**: `null`
 
@@ -161,7 +161,7 @@ update.
 - **Kind**: call, answered once
 - **Requires**: capability `media.control`
 - **When it can be called**: Only during a user action
-- **Parameters**: `player?`: text ≤ `MAX_OBJECT_ID_BYTES`
+- **Parameters**: `player?`: text ≤ 128 bytes
 - **Result**: `null`; `stale_context` when `player` is no longer current
 - **Shape**: `null`
 
@@ -207,7 +207,7 @@ update.
 - **Requires**: capability `notes.write`
 - **When it can be called**: Only during a user action
 - **Parameters**: none
-- **Result**: `{ note }`, a new empty active note titled `Note {n}` in the user's language; `quota_exceeded` beyond `MAX_NOTES`
+- **Result**: `{ note }`, a new empty active note titled `Note {n}` in the user's language; `quota_exceeded` beyond 8
 - **Shape**: [`CreatedNote`](result-shapes.md#creatednote)
 
 ### `notes.select`
@@ -215,7 +215,7 @@ update.
 - **Kind**: call, answered once
 - **Requires**: capability `notes.write`
 - **When it can be called**: Only during a user action
-- **Parameters**: `note`: text ≤ `MAX_OBJECT_ID_BYTES`
+- **Parameters**: `note`: text ≤ 128 bytes
 - **Result**: `null`; the host stores the active note
 - **Shape**: `null`
 
@@ -224,7 +224,7 @@ update.
 - **Kind**: call, answered once
 - **Requires**: capability `notes.write`
 - **When it can be called**: Only during a user action
-- **Parameters**: `note`: text ≤ `MAX_OBJECT_ID_BYTES`; `item`: text ≤ `MAX_OBJECT_ID_BYTES`; `checked`: boolean
+- **Parameters**: `note`: text ≤ 128 bytes; `item`: text ≤ 128 bytes; `checked`: boolean
 - **Result**: `null`
 
 ### `notes.delete`
@@ -232,7 +232,7 @@ update.
 - **Kind**: call, answered once; the user confirms it first, in a dialog drawn by OverCrow
 - **Requires**: capability `notes.write`
 - **When it can be called**: Only during a user action
-- **Parameters**: `note`: text ≤ `MAX_OBJECT_ID_BYTES`
+- **Parameters**: `note`: text ≤ 128 bytes
 - **Result**: `null`, or `cancelled` when the user declines
 - **Shape**: `null`
 
@@ -269,7 +269,7 @@ update.
 - **Requires**: capability `playervox.reviews.read`
 - **When it can be called**: At any time
 - **Parameters**: `page?`: integer 1 to 100000; `followedOnly?`: boolean
-- **Result**: `{ gameName, items, page, totalPages, count }`: three reviews of the active game per page, in the language of the host's interface; a page past the end answers the last page; each item `{ id, author, grade, score, text, original, hidden, publishedAt, offsetMinutes }`, `text` translated when a translation exists, `original` the untranslated text of a translated review or `null`, both cut by the host to `MAX_NODE_TEXT_BYTES`. Each call reads its own page: the host keeps no page position or filter shared between widgets
+- **Result**: `{ gameName, items, page, totalPages, count }`: three reviews of the active game per page, in the language of the host's interface; a page past the end answers the last page; each item `{ id, author, grade, score, text, original, hidden, publishedAt, offsetMinutes }`, `text` translated when a translation exists, `original` the untranslated text of a translated review or `null`, both cut by the host to 16 KiB. Each call reads its own page: the host keeps no page position or filter shared between widgets
 - **Shape**: [`ReviewsPage`](result-shapes.md#reviewspage)
 
 ### `journal.subscribe`
@@ -286,7 +286,7 @@ update.
 - **Kind**: call, answered once
 - **Requires**: capability `journal.read`
 - **When it can be called**: At any time
-- **Parameters**: `cursor?`: text ≤ `MAX_OBJECT_ID_BYTES`
+- **Parameters**: `cursor?`: text ≤ 128 bytes
 - **Result**: `{ gameName, items, page, next, previous }`: five local and cloud sessions of the active game, merged and deduplicated, newest first; without `cursor`, the first page; each item `{ id, startedAt, offsetMinutes, durationMs, source }`; cursors are host handles that stay valid for the widget whatever other widgets read, and a cursor past the end answers the last page
 - **Shape**: [`JournalPage`](result-shapes.md#journalpage)
 
@@ -295,7 +295,7 @@ update.
 - **Kind**: call, answered once; the user confirms it first, in a dialog drawn by OverCrow
 - **Requires**: capability `journal.delete`
 - **When it can be called**: Only during a user action
-- **Parameters**: `session`: text ≤ `MAX_OBJECT_ID_BYTES`
+- **Parameters**: `session`: text ≤ 128 bytes
 - **Result**: `null`, or `cancelled` when the user declines; `not_connected` for a cloud session while PlayerVox is disconnected
 - **Shape**: `null`
 
@@ -305,7 +305,7 @@ update.
 - **Requires**: capability `twitch.chat.read`
 - **When it can be called**: At any time
 - **Parameters**: none
-- **Each update**: `{ account, channel, joinState, failure, favorites, canSend, generation, reset, messages, removed, skipped }`: `account` is `signed_out`, `pending`, `connected` or `expired` (sign-in is drawn by the host); `failure` is the fixed category of a `failed` join; messages arrive as deltas, at most one update per 100 ms, with `reset` after subscribing, a generation change or a show, and nothing while the widget is hidden; a faster chat is sampled, `skipped` counting the new messages left out; each message `{ id, author, color, badges, fragments, reply, deleted, receivedAt }` with at most `MAX_CHAT_FRAGMENTS` fragments, emotes and badges as `asset:` handles for the current theme and scale
+- **Each update**: `{ account, channel, joinState, failure, favorites, canSend, generation, reset, messages, removed, skipped }`: `account` is `signed_out`, `pending`, `connected` or `expired` (sign-in is drawn by the host); `failure` is the fixed category of a `failed` join; messages arrive as deltas, at most one update per 100 ms, with `reset` after subscribing, a generation change or a show, and nothing while the widget is hidden; a faster chat is sampled, `skipped` counting the new messages left out; each message `{ id, author, color, badges, fragments, reply, deleted, receivedAt }` with at most 16 fragments, emotes and badges as `asset:` handles for the current theme and scale
 - **Shape**: [`TwitchChat`](result-shapes.md#twitchchat)
 
 ### `twitch.chat.join`
@@ -313,7 +313,7 @@ update.
 - **Kind**: call, answered once
 - **Requires**: capability `twitch.chat.read`
 - **When it can be called**: Only during a user action
-- **Parameters**: `channel`: text ≤ `MAX_CHAT_CHANNEL_BYTES`
+- **Parameters**: `channel`: text ≤ 25 bytes
 - **Result**: `null`; the host remembers the channel and rejoins it when the widget starts
 - **Shape**: `null`
 
@@ -331,8 +331,8 @@ update.
 - **Kind**: call, answered once
 - **Requires**: capability `twitch.chat.read`
 - **When it can be called**: Only during a user action
-- **Parameters**: `channel`: text ≤ `MAX_CHAT_CHANNEL_BYTES`; `favorite`: boolean
-- **Result**: `null`; `quota_exceeded` beyond `MAX_CHAT_FAVORITES`
+- **Parameters**: `channel`: text ≤ 25 bytes; `favorite`: boolean
+- **Result**: `null`; `quota_exceeded` beyond 20
 - **Shape**: `null`
 <!-- /generated:services -->
 

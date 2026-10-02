@@ -116,5 +116,6 @@
   "Share of pixels allowed beyond the channel tolerance. Measured renderer noise is 0 to 11 ppm; one wrong 10 px letter in a 360 × 260 widget is 385 ppm.": "Share of pixels allowed beyond the channel tolerance. One wrong 10 px letter in a 360 × 260 widget is 385 ppm.",
   "Manifest v1, as authored.": "The manifest, as written.",
   "The only executable content: one ES2023 script without imports, compiled template expressions included. UTF-8, not empty.": "The only executable content: one ES2023 script without imports, compiled expressions of the view included. UTF-8, not empty.",
-  "Style sheet source, parsed by the host at activation. UTF-8.": "Style sheet source, parsed by the host when the widget starts. UTF-8."
+  "Style sheet source, parsed by the host at activation. UTF-8.": "Style sheet source, parsed by the host when the widget starts. UTF-8.",
+  "Takes keyboard focus when the node is created by the patch of a user gesture's turn (an editor opened by a click), in Interactive mode, in the widget that received the gesture; the first such node of the patch. Never at start, from a timer or a service answer, in Passive mode, or when set on an existing node.": "Takes keyboard focus when the element appears while the logic handles a user action (an editor opened by a click), in Interactive mode, in the widget that received the action; the first such element of the view when several appear together. Never when the widget starts, from a timer or the answer of a service, in Passive mode, or when set on an element already shown."
 }

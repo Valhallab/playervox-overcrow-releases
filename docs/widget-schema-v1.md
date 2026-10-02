@@ -338,6 +338,7 @@ Expressions: Literals, state and prop paths, `!`, `&&`, `||`, `??`, comparison a
 | `max-length` | integer 1..=16384 | no | Content limit in bytes; a write intent may impose a lower one. |
 | `disabled` | boolean | no | Rejects input; matches `:disabled`. |
 | `name` | identifier ≤ `MAX_IDENTIFIER_BYTES` | no | Field name inside a `form`. |
+| `autofocus` | boolean | no | Takes keyboard focus when the node is created by the patch of a user gesture's turn (an editor opened by a click), in Interactive mode, in the widget that received the gesture; the first such node of the patch. Never at start, from a timer or a service answer, in Passive mode, or when set on an existing node. |
 
 #### `textarea` attributes
 
@@ -349,6 +350,7 @@ Expressions: Literals, state and prop paths, `!`, `&&`, `||`, `??`, comparison a
 | `rows` | integer 1..=40 | no | Visible rows before scrolling; default 3. |
 | `disabled` | boolean | no | Rejects input; matches `:disabled`. |
 | `name` | identifier ≤ `MAX_IDENTIFIER_BYTES` | no | Field name inside a `form`. |
+| `autofocus` | boolean | no | Takes keyboard focus when the node is created by the patch of a user gesture's turn (an editor opened by a click), in Interactive mode, in the widget that received the gesture; the first such node of the patch. Never at start, from a timer or a service answer, in Passive mode, or when set on an existing node. |
 
 #### `form` attributes
 
@@ -1370,6 +1372,7 @@ Atomic: validated in full against the resulting scene before it is applied.
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
 | `ops` | integer 1..=4096 | yes | Number of operations in the raw payload. |
+| `cause` | id | no | Sequence of the host frame carrying the gesture event whose turn produced the patch; the host honours `autofocus` only then. |
 
 #### `ServiceCall` (frame 5)
 

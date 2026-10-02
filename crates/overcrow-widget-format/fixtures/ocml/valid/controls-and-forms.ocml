@@ -1,6 +1,6 @@
 <form intent="notes.save" target={state.noteId} on:submit={saved}>
   <textarea name="body" rows="6" max-length="4000" placeholder="Write a note"/>
-  <field name="title" on:input={titleChanged} on:keydown={keys(event.key, event.ctrl)}/>
+  <field name="title" autofocus on:input={titleChanged} on:keydown={keys(event.key, event.ctrl)}/>
   <select name="kind" value="plain" on:change={kindChanged}>
     <option value="plain">Plain</option>
     <option value="list" disabled>List</option>

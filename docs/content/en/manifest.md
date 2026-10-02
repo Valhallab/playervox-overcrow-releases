@@ -79,8 +79,8 @@ values it fills in. A manifest with permissions and a menu:
 | --- | --- | --- | --- |
 | `schemaVersion` | integer 1 to 1 | yes | Manifest document version. |
 | `apiVersion` | integer 1 to 1 | yes | Widget API version; selects this schema. |
-| `id` | `widget ID` | yes | Reverse-DNS ID, from `MIN_WIDGET_ID_BYTES` to `MAX_WIDGET_ID_BYTES`: at least two dot-separated segments of `[a-z0-9-]`, each at most `MAX_DNS_LABEL_BYTES` and not starting or ending with `-`. `com.playervox` and `com.playervox.*` are reserved for packages signed by PlayerVox. |
-| `version` | `version` | yes | SemVer 2.0.0 `MAJOR.MINOR.PATCH[-PRERELEASE]` in canonical form, at most `MAX_VERSION_BYTES`; build metadata is rejected. |
+| `id` | `widget ID` | yes | Reverse-DNS ID, from 3 bytes to 128 bytes: at least two dot-separated segments of `[a-z0-9-]`, each at most 63 bytes and not starting or ending with `-`. `com.playervox` and `com.playervox.*` are reserved for packages signed by PlayerVox. |
+| `version` | `version` | yes | SemVer 2.0.0 `MAJOR.MINOR.PATCH[-PRERELEASE]` in canonical form, at most 64 bytes; build metadata is rejected. |
 | `name` | `WidgetName` | yes | Localized widget name shown by the host. |
 | `sizing` | `Sizing` | yes | Size and fit rules applied by the widget's frame. |
 | `vm` | `VmRequest` | no | VM budget request; absent means the defaults. |
@@ -164,10 +164,10 @@ it allows.
 <!-- generated:manifest-permissions -->
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `network` | list of `NetworkRule` ≤ `MAX_NETWORK_RULES` | no | Distinct network rules. |
+| `network` | list of `NetworkRule` ≤ 32 | no | Distinct network rules. |
 | `storage` | boolean | no | Host key-value storage; default `false`. |
 | `clipboardWrite` | boolean | no | Clipboard text writes; default `false`. |
-| `gameEvents` | list of `game event` ≤ `MAX_GAME_EVENTS` | no | Distinct `overcrow.game.<name>.v1` event names. |
+| `gameEvents` | list of `game event` ≤ 32 | no | Distinct `overcrow.game.<name>.v1` event names. |
 | `capabilities` | `capability names` | no | Distinct capabilities of the schema. |
 <!-- /generated:manifest-permissions -->
 
@@ -237,10 +237,10 @@ a protected service call.
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
 | `type` | `toggle` \| `slider` \| `choice` \| `action` \| `group` | yes | Row type. |
-| `id` | identifier ≤ `MAX_MENU_ID_BYTES` | yes | Unique among all rows of the widget; key of the stored value. |
+| `id` | identifier ≤ 48 bytes | yes | Unique among all rows of the widget; key of the stored value. |
 | `label` | `MenuLabel` | yes | Localized row label. |
 | `icon` | Lucide icon name | no | Leading icon from the host list, drawn by the host. |
-| `visibleWhen` | identifier ≤ `MAX_MENU_ID_BYTES` | no | ID of a `toggle` row declared earlier; this row is shown only while that toggle is on. |
+| `visibleWhen` | identifier ≤ 48 bytes | no | ID of a `toggle` row declared earlier; this row is shown only while that toggle is on. |
 | `requires` | `fps` \| `telemetry.cpuTemperature` \| `telemetry.gpuTemperature` | no | Host data source; the host hides the row when it cannot supply it. |
 <!-- /generated:menu-row-fields -->
 
@@ -267,7 +267,7 @@ Boolean switch.
 
 ### `slider`
 
-Bounded number; `step` > 0, `step` ≤ `max - min`, at most `MAX_SLIDER_STEPS` steps, `default` within range.
+Bounded number; `step` > 0, `step` ≤ `max - min`, at most 10000 steps, `default` within range.
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
@@ -282,8 +282,8 @@ One value among declared choices.
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `choices` | list of `MenuChoice` ≤ `MAX_MENU_CHOICES` | yes | At least `MIN_MENU_CHOICES` choices. |
-| `default` | identifier ≤ `MAX_MENU_ID_BYTES` | yes | Value of one declared choice. |
+| `choices` | list of `MenuChoice` ≤ 16 | yes | At least 2 choices. |
+| `default` | identifier ≤ 48 bytes | yes | Value of one declared choice. |
 
 ### `action`
 
@@ -295,7 +295,7 @@ Side flyout holding non-group rows.
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `rows` | list of `MenuRow` ≤ `MAX_MENU_ROWS` | yes | At least one row; a `group` is not allowed here. |
+| `rows` | list of `MenuRow` ≤ 16 | yes | At least one row; a `group` is not allowed here. |
 <!-- /generated:menu-row-types -->
 
 ### Labels and choices
@@ -314,7 +314,7 @@ Each entry of `choices` is a value and its label:
 <!-- generated:menu-choice -->
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `value` | identifier ≤ `MAX_MENU_ID_BYTES` | yes | Stored value; unique within the row. |
+| `value` | identifier ≤ 48 bytes | yes | Stored value; unique within the row. |
 | `label` | `MenuLabel` | yes | Localized choice label. |
 <!-- /generated:menu-choice -->
 
@@ -335,7 +335,7 @@ with `vm`; nothing else about the VM's budgets can be changed.
 <!-- generated:manifest-vm -->
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `heapMiB` | integer 16 to 48 | yes | QuickJS heap ceiling in MiB, from `VM_HEAP_BYTES` to `VM_MAX_HEAP_BYTES`. The VM process ceiling (`VM_PROCESS_MEMORY_BYTES`) does not change. |
+| `heapMiB` | integer 16 to 48 | yes | QuickJS heap ceiling in MiB, from 16 MiB to 48 MiB. The VM process ceiling (64 MiB) does not change. |
 <!-- /generated:manifest-vm -->
 
 The memory ceiling of the widget's process stays the same, so a larger heap

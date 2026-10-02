@@ -174,9 +174,8 @@ Les types des autres espaces de noms sont générés à partir du schéma :
 | `timers` | espace de noms | `after(ms, callback)`, `every(ms, callback)`, `atEach(unit, callback)`. |
 | `Timer` | interface | `cancel()` ; un nouvel appel ne fait rien. |
 
-- `MAX_TIMERS` minuteurs au plus, jamais plus courts que
-  `MIN_TIMER_INTERVAL_MS` : un intervalle plus court est porté à cette
-  valeur.
+- 16 minuteurs au plus, jamais plus courts que 100 ms : un intervalle plus
+  court est porté à cette valeur.
 - Aucun minuteur ne se déclenche tant que le widget est masqué. Un minuteur
   répétitif saute les déclenchements manqués ; un minuteur à usage unique
   arrivé à échéance pendant ce temps se déclenche une fois quand le widget

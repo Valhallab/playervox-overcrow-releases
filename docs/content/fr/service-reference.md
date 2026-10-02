@@ -32,7 +32,7 @@ mise à jour.
 - **Quand l’appeler** : *À tout moment*, ou
   [*Seulement pendant une action de l’utilisateur*](services.md#les-appels-qui-demandent-une-action-de-lutilisateur).
 - **Paramètres** : les membres de l’objet à passer ; un `?` marque un membre
-  facultatif. Un type tel que « texte ≤ `MAX_OBJECT_ID_BYTES` » nomme une
+  facultatif. Un type tel que « texte ≤ 128 octets » donne une
   [limite](limits.md).
 - **Résultat**, ou **Chaque mise à jour** pour un abonnement : ce que répond
   le service, et les codes d’erreur qui lui sont propres. Tout service peut
@@ -48,7 +48,7 @@ mise à jour.
 - **Nature** : appel, à réponse unique
 - **Exige** : permission `storage`
 - **Quand l’appeler** : À tout moment
-- **Paramètres** : `key` : texte ≤ `MAX_STORAGE_KEY_BYTES`
+- **Paramètres** : `key` : texte ≤ 128 octets
 - **Résultat** : la valeur JSON enregistrée, ou `null`
 - **Forme** : JSON
 
@@ -57,8 +57,8 @@ mise à jour.
 - **Nature** : appel, à réponse unique
 - **Exige** : permission `storage`
 - **Quand l’appeler** : À tout moment
-- **Paramètres** : `key` : texte ≤ `MAX_STORAGE_KEY_BYTES` ; `value` : JSON
-- **Résultat** : `null` ; `quota_exceeded` au-delà de `STORAGE_QUOTA_BYTES`
+- **Paramètres** : `key` : texte ≤ 128 octets ; `value` : JSON
+- **Résultat** : `null` ; `quota_exceeded` au-delà de 256 Kio
 - **Forme** : `null`
 
 ### `storage.remove`
@@ -66,7 +66,7 @@ mise à jour.
 - **Nature** : appel, à réponse unique
 - **Exige** : permission `storage`
 - **Quand l’appeler** : À tout moment
-- **Paramètres** : `key` : texte ≤ `MAX_STORAGE_KEY_BYTES`
+- **Paramètres** : `key` : texte ≤ 128 octets
 - **Résultat** : `null`
 
 ### `storage.keys`
@@ -83,8 +83,8 @@ mise à jour.
 - **Nature** : appel, à réponse unique
 - **Exige** : permission `network`
 - **Quand l’appeler** : À tout moment
-- **Paramètres** : `url` : texte ≤ `MAX_REQUEST_URL_BYTES` ; `method` : `GET` \| `POST` \| `PUT` \| `PATCH` \| `DELETE` ; `contentType?` : `application/json` \| `text/plain` ; `as` : `json` \| `text` \| `bytes` \| `image`
-- **Résultat** : `{ status, contentType }` avec le corps, d’une taille ≤ au `maxResponseBytes` de la règle (`MAX_HTTP_RESPONSE_BYTES` quand il est absent), ou `{ status, asset }` à partir d’un corps ≤ `MAX_HTTP_RESPONSE_BYTES`
+- **Paramètres** : `url` : texte ≤ 2 Kio ; `method` : `GET` \| `POST` \| `PUT` \| `PATCH` \| `DELETE` ; `contentType?` : `application/json` \| `text/plain` ; `as` : `json` \| `text` \| `bytes` \| `image`
+- **Résultat** : `{ status, contentType }` avec le corps, d’une taille ≤ au `maxResponseBytes` de la règle (1 Mio quand il est absent), ou `{ status, asset }` à partir d’un corps ≤ 1 Mio
 - **Forme** : [`HttpResponse`](result-shapes.md#httpresponse)
 
 ### `clipboard.writeText`
@@ -92,7 +92,7 @@ mise à jour.
 - **Nature** : appel, à réponse unique
 - **Exige** : permission `clipboardWrite`
 - **Quand l’appeler** : Seulement pendant une action de l’utilisateur
-- **Paramètres** : `text` : texte ≤ `MAX_CLIPBOARD_BYTES`
+- **Paramètres** : `text` : texte ≤ 16 Kio
 - **Résultat** : `null`
 
 ### `gameEvents.subscribe`
@@ -145,7 +145,7 @@ mise à jour.
 - **Nature** : appel, à réponse unique
 - **Exige** : capability `media.control`
 - **Quand l’appeler** : Seulement pendant une action de l’utilisateur
-- **Paramètres** : `player?` : texte ≤ `MAX_OBJECT_ID_BYTES`
+- **Paramètres** : `player?` : texte ≤ 128 octets
 - **Résultat** : `null` ; `stale_context` quand `player` n’est plus le lecteur courant
 - **Forme** : `null`
 
@@ -154,7 +154,7 @@ mise à jour.
 - **Nature** : appel, à réponse unique
 - **Exige** : capability `media.control`
 - **Quand l’appeler** : Seulement pendant une action de l’utilisateur
-- **Paramètres** : `player?` : texte ≤ `MAX_OBJECT_ID_BYTES`
+- **Paramètres** : `player?` : texte ≤ 128 octets
 - **Résultat** : `null` ; `stale_context` quand `player` n’est plus le lecteur courant
 - **Forme** : `null`
 
@@ -163,7 +163,7 @@ mise à jour.
 - **Nature** : appel, à réponse unique
 - **Exige** : capability `media.control`
 - **Quand l’appeler** : Seulement pendant une action de l’utilisateur
-- **Paramètres** : `player?` : texte ≤ `MAX_OBJECT_ID_BYTES`
+- **Paramètres** : `player?` : texte ≤ 128 octets
 - **Résultat** : `null` ; `stale_context` quand `player` n’est plus le lecteur courant
 - **Forme** : `null`
 
@@ -209,7 +209,7 @@ mise à jour.
 - **Exige** : capability `notes.write`
 - **Quand l’appeler** : Seulement pendant une action de l’utilisateur
 - **Paramètres** : aucune
-- **Résultat** : `{ note }`, une nouvelle note vide et active, intitulée `Note {n}` dans la langue de l’utilisateur ; `quota_exceeded` au-delà de `MAX_NOTES`
+- **Résultat** : `{ note }`, une nouvelle note vide et active, intitulée `Note {n}` dans la langue de l’utilisateur ; `quota_exceeded` au-delà de 8
 - **Forme** : [`CreatedNote`](result-shapes.md#creatednote)
 
 ### `notes.select`
@@ -217,7 +217,7 @@ mise à jour.
 - **Nature** : appel, à réponse unique
 - **Exige** : capability `notes.write`
 - **Quand l’appeler** : Seulement pendant une action de l’utilisateur
-- **Paramètres** : `note` : texte ≤ `MAX_OBJECT_ID_BYTES`
+- **Paramètres** : `note` : texte ≤ 128 octets
 - **Résultat** : `null` ; l’hôte enregistre la note active
 - **Forme** : `null`
 
@@ -226,7 +226,7 @@ mise à jour.
 - **Nature** : appel, à réponse unique
 - **Exige** : capability `notes.write`
 - **Quand l’appeler** : Seulement pendant une action de l’utilisateur
-- **Paramètres** : `note` : texte ≤ `MAX_OBJECT_ID_BYTES` ; `item` : texte ≤ `MAX_OBJECT_ID_BYTES` ; `checked` : booléen
+- **Paramètres** : `note` : texte ≤ 128 octets ; `item` : texte ≤ 128 octets ; `checked` : booléen
 - **Résultat** : `null`
 
 ### `notes.delete`
@@ -234,7 +234,7 @@ mise à jour.
 - **Nature** : appel, à réponse unique ; l’utilisateur le confirme d’abord, dans une boîte de dialogue dessinée par OverCrow
 - **Exige** : capability `notes.write`
 - **Quand l’appeler** : Seulement pendant une action de l’utilisateur
-- **Paramètres** : `note` : texte ≤ `MAX_OBJECT_ID_BYTES`
+- **Paramètres** : `note` : texte ≤ 128 octets
 - **Résultat** : `null`, ou `cancelled` quand l’utilisateur refuse
 - **Forme** : `null`
 
@@ -271,7 +271,7 @@ mise à jour.
 - **Exige** : capability `playervox.reviews.read`
 - **Quand l’appeler** : À tout moment
 - **Paramètres** : `page?` : entier de 1 à 100000 ; `followedOnly?` : booléen
-- **Résultat** : `{ gameName, items, page, totalPages, count }` : trois avis du jeu actif par page, dans la langue de l’interface de l’hôte ; une page au-delà de la fin donne la dernière page ; chaque avis `{ id, author, grade, score, text, original, hidden, publishedAt, offsetMinutes }`, `text` traduit quand une traduction existe, `original` le texte non traduit d’un avis traduit ou `null`, tous deux coupés par l’hôte à `MAX_NODE_TEXT_BYTES`. Chaque appel lit sa propre page : l’hôte ne garde ni position ni filtre communs à plusieurs widgets
+- **Résultat** : `{ gameName, items, page, totalPages, count }` : trois avis du jeu actif par page, dans la langue de l’interface de l’hôte ; une page au-delà de la fin donne la dernière page ; chaque avis `{ id, author, grade, score, text, original, hidden, publishedAt, offsetMinutes }`, `text` traduit quand une traduction existe, `original` le texte non traduit d’un avis traduit ou `null`, tous deux coupés par l’hôte à 16 Kio. Chaque appel lit sa propre page : l’hôte ne garde ni position ni filtre communs à plusieurs widgets
 - **Forme** : [`ReviewsPage`](result-shapes.md#reviewspage)
 
 ### `journal.subscribe`
@@ -288,7 +288,7 @@ mise à jour.
 - **Nature** : appel, à réponse unique
 - **Exige** : capability `journal.read`
 - **Quand l’appeler** : À tout moment
-- **Paramètres** : `cursor?` : texte ≤ `MAX_OBJECT_ID_BYTES`
+- **Paramètres** : `cursor?` : texte ≤ 128 octets
 - **Résultat** : `{ gameName, items, page, next, previous }` : cinq sessions locales et du cloud du jeu actif, fusionnées et dédoublonnées, de la plus récente à la plus ancienne ; sans `cursor`, la première page ; chaque session `{ id, startedAt, offsetMinutes, durationMs, source }` ; les curseurs sont des identifiants de l’hôte qui restent valables pour le widget quoi que lisent les autres widgets, et un curseur au-delà de la fin donne la dernière page
 - **Forme** : [`JournalPage`](result-shapes.md#journalpage)
 
@@ -297,7 +297,7 @@ mise à jour.
 - **Nature** : appel, à réponse unique ; l’utilisateur le confirme d’abord, dans une boîte de dialogue dessinée par OverCrow
 - **Exige** : capability `journal.delete`
 - **Quand l’appeler** : Seulement pendant une action de l’utilisateur
-- **Paramètres** : `session` : texte ≤ `MAX_OBJECT_ID_BYTES`
+- **Paramètres** : `session` : texte ≤ 128 octets
 - **Résultat** : `null`, ou `cancelled` quand l’utilisateur refuse ; `not_connected` pour une session du cloud tant que PlayerVox est déconnecté
 - **Forme** : `null`
 
@@ -307,7 +307,7 @@ mise à jour.
 - **Exige** : capability `twitch.chat.read`
 - **Quand l’appeler** : À tout moment
 - **Paramètres** : aucune
-- **Chaque mise à jour** : `{ account, channel, joinState, failure, favorites, canSend, generation, reset, messages, removed, skipped }` : `account` vaut `signed_out`, `pending`, `connected` ou `expired` (la connexion est affichée par l’hôte) ; `failure` est la catégorie fixe d’une connexion à la chaîne qui a échoué (`failed`) ; les messages arrivent par différences, au plus une mise à jour par 100 ms, avec `reset` après l’abonnement, un changement de génération ou un retour à l’affichage, et rien tant que le widget est masqué ; un chat plus rapide est échantillonné, `skipped` comptant les nouveaux messages laissés de côté ; chaque message `{ id, author, color, badges, fragments, reply, deleted, receivedAt }` avec au plus `MAX_CHAT_FRAGMENTS` fragments, les emotes et les badges étant des identifiants `asset:` pour le thème et l’échelle courants
+- **Chaque mise à jour** : `{ account, channel, joinState, failure, favorites, canSend, generation, reset, messages, removed, skipped }` : `account` vaut `signed_out`, `pending`, `connected` ou `expired` (la connexion est affichée par l’hôte) ; `failure` est la catégorie fixe d’une connexion à la chaîne qui a échoué (`failed`) ; les messages arrivent par différences, au plus une mise à jour par 100 ms, avec `reset` après l’abonnement, un changement de génération ou un retour à l’affichage, et rien tant que le widget est masqué ; un chat plus rapide est échantillonné, `skipped` comptant les nouveaux messages laissés de côté ; chaque message `{ id, author, color, badges, fragments, reply, deleted, receivedAt }` avec au plus 16 fragments, les emotes et les badges étant des identifiants `asset:` pour le thème et l’échelle courants
 - **Forme** : [`TwitchChat`](result-shapes.md#twitchchat)
 
 ### `twitch.chat.join`
@@ -315,7 +315,7 @@ mise à jour.
 - **Nature** : appel, à réponse unique
 - **Exige** : capability `twitch.chat.read`
 - **Quand l’appeler** : Seulement pendant une action de l’utilisateur
-- **Paramètres** : `channel` : texte ≤ `MAX_CHAT_CHANNEL_BYTES`
+- **Paramètres** : `channel` : texte ≤ 25 octets
 - **Résultat** : `null` ; l’hôte retient la chaîne et la rejoint au démarrage du widget
 - **Forme** : `null`
 
@@ -333,8 +333,8 @@ mise à jour.
 - **Nature** : appel, à réponse unique
 - **Exige** : capability `twitch.chat.read`
 - **Quand l’appeler** : Seulement pendant une action de l’utilisateur
-- **Paramètres** : `channel` : texte ≤ `MAX_CHAT_CHANNEL_BYTES` ; `favorite` : booléen
-- **Résultat** : `null` ; `quota_exceeded` au-delà de `MAX_CHAT_FAVORITES`
+- **Paramètres** : `channel` : texte ≤ 25 octets ; `favorite` : booléen
+- **Résultat** : `null` ; `quota_exceeded` au-delà de 20
 - **Forme** : `null`
 <!-- /generated:services -->
 

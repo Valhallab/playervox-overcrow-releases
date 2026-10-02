@@ -420,14 +420,21 @@ pub const VM_MESSAGES: &[Message] = &[
     Message {
         name: "ScenePatch",
         frame: 6,
-        fields: &[Field::required(
-            "ops",
-            ValueType::Integer {
-                min: 1,
-                max: MAX_PATCH_OPS.value as i64,
-            },
-            "Number of operations in the raw payload.",
-        )],
+        fields: &[
+            Field::required(
+                "ops",
+                ValueType::Integer {
+                    min: 1,
+                    max: MAX_PATCH_OPS.value as i64,
+                },
+                "Number of operations in the raw payload.",
+            ),
+            Field::optional(
+                "cause",
+                ValueType::Id,
+                "Sequence of the host frame carrying the gesture event whose turn produced the patch; the host honours `autofocus` only then.",
+            ),
+        ],
         summary: "Atomic: validated in full against the resulting scene before it is applied.",
     },
     Message {

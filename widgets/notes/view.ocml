@@ -107,7 +107,7 @@
   <for each={state.editors} as="editor" key={editor.note}>
     <form class={editorClass(state, editor)} intent="notes.save" target={editor.note} on:submit={saved(editor.note, event.outcome, event.error)}>
       <scroll class="fields">
-        <field class="title-field" name="title" placeholder={t("title-hint")} label={t("title-hint")} on:input={titleInput(editor.note, event.value)} on:keydown={keyed(editor.note, event.key, event.ctrl)}/>
+        <field class="title-field" name="title" autofocus placeholder={t("title-hint")} label={t("title-hint")} on:input={titleInput(editor.note, event.value)} on:keydown={keyed(editor.note, event.key, event.ctrl)}/>
         <textarea class="body-field" name="body" rows={bodyRows(editor)} label={t("body-label")} on:input={bodyInput(editor.note, event.value)} on:keydown={keyed(editor.note, event.key, event.ctrl)}/>
         <text class="meta">{t("checklist")}</text>
         <box class="rows">

@@ -38,7 +38,7 @@ d’une `series` : OverCrow dessine le tout, graphique compris.
 - **Événements** : les événements que la vue peut écouter avec
   `on:<event>`.
 
-Un type tel que « texte ≤ `MAX_LABEL_BYTES` » nomme une
+Un type tel que « texte ≤ 256 octets » donne une
 [limite](limits.md).
 
 ## Attributs communs à tous les éléments
@@ -48,8 +48,8 @@ Un type tel que « texte ≤ `MAX_LABEL_BYTES` » nomme une
 | --- | --- | --- | --- |
 | `class` | liste de classes | non | Classes de style : des noms distincts, séparés par une espace. |
 | `ref` | nom de `ref` statique | non | Nom par lequel `draw` désigne ce `canvas` et par lequel un attribut tel que `anchor` d’un `popover` désigne cet élément. Statique, unique dans la vue, et interdit dans un `for` ou dans le corps d’un composant, où il nommerait plusieurs éléments. |
-| `label` | texte ≤ `MAX_LABEL_BYTES` | non | Nom accessible ; obligatoire sur les contrôles qui ne montrent qu’une icône. |
-| `tooltip` | texte ≤ `MAX_LABEL_BYTES` | non | Texte brut que l’hôte affiche au survol ou au focus. |
+| `label` | texte ≤ 256 octets | non | Nom accessible ; obligatoire sur les contrôles qui ne montrent qu’une icône. |
+| `tooltip` | texte ≤ 256 octets | non | Texte brut que l’hôte affiche au survol ou au focus. |
 | `on` | noms d’événements triés | non | Événements transmis à la logique ; s’écrit `on:<event>` dans la vue. |
 <!-- /generated:common-attributes -->
 
@@ -151,7 +151,7 @@ Image ronde, avec un texte de remplacement tant que l’image manque ou n’a pa
 | Attribut | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
 | `src` | source d’image | non | Source de l’image. |
-| `initials` | texte ≤ `MAX_INITIALS_BYTES` | non | Texte de remplacement. |
+| `initials` | texte ≤ 16 octets | non | Texte de remplacement. |
 
 ### `badge`
 
@@ -188,7 +188,7 @@ Bascule activé/désactivé.
 | --- | --- | --- | --- |
 | `checked` | booléen | non | État ; correspond à `:checked`. |
 | `disabled` | booléen | non | Refuse les entrées ; correspond à `:disabled`. |
-| `name` | identifiant ≤ `MAX_IDENTIFIER_BYTES` | non | Nom du champ dans un `form`. |
+| `name` | identifiant ≤ 64 octets | non | Nom du champ dans un `form`. |
 
 ### `checkbox`
 
@@ -202,7 +202,7 @@ Case à cocher (listes de tâches).
 | --- | --- | --- | --- |
 | `checked` | booléen | non | État ; correspond à `:checked`. |
 | `disabled` | booléen | non | Refuse les entrées ; correspond à `:disabled`. |
-| `name` | identifiant ≤ `MAX_IDENTIFIER_BYTES` | non | Nom du champ dans un `form`. |
+| `name` | identifiant ≤ 64 octets | non | Nom du champ dans un `form`. |
 
 ### `slider`
 
@@ -219,7 +219,7 @@ Curseur sur un intervalle numérique ; le glissement est géré par l’hôte.
 | `step` | nombre de -1000000000 à 1000000000 | non | Pas, positif ; 1 par défaut. |
 | `value` | nombre de -1000000000 à 1000000000 | non | Valeur courante, ramenée dans l’intervalle ; refusée sur un curseur lié à un intent d’écriture. |
 | `disabled` | booléen | non | Refuse les entrées ; correspond à `:disabled`. |
-| `name` | identifiant ≤ `MAX_IDENTIFIER_BYTES` | non | Nom du champ dans un `form`. |
+| `name` | identifiant ≤ 64 octets | non | Nom du champ dans un `form`. |
 
 ### `select`
 
@@ -231,9 +231,9 @@ Liste déroulante ; la liste ouverte est dessinée par l’hôte.
 
 | Attribut | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
-| `value` | texte ≤ `MAX_ATTRIBUTE_TEXT_BYTES` | non | Valeur de l’option sélectionnée. |
+| `value` | texte ≤ 1 Kio | non | Valeur de l’option sélectionnée. |
 | `disabled` | booléen | non | Refuse les entrées ; correspond à `:disabled`. |
-| `name` | identifiant ≤ `MAX_IDENTIFIER_BYTES` | non | Nom du champ dans un `form`. |
+| `name` | identifiant ≤ 64 octets | non | Nom du champ dans un `form`. |
 
 ### `option`
 
@@ -245,7 +245,7 @@ Choix d’un `select` ; son texte est le libellé affiché.
 
 | Attribut | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
-| `value` | texte ≤ `MAX_ATTRIBUTE_TEXT_BYTES` | oui | Valeur transmise par `change`. |
+| `value` | texte ≤ 1 Kio | oui | Valeur transmise par `change`. |
 | `disabled` | booléen | non | Refuse les entrées ; correspond à `:disabled`. |
 
 ### `field`
@@ -258,11 +258,12 @@ Champ de texte d’une ligne, édité par l’hôte, méthodes de saisie (IME) c
 
 | Attribut | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
-| `value` | texte ≤ `MAX_FIELD_TEXT_BYTES` | non | Remplace le contenu ; refusée sur un champ lié à un intent d’écriture. |
-| `placeholder` | texte ≤ `MAX_LABEL_BYTES` | non | Indication affichée tant que le champ est vide. |
+| `value` | texte ≤ 16 Kio | non | Remplace le contenu ; refusée sur un champ lié à un intent d’écriture. |
+| `placeholder` | texte ≤ 256 octets | non | Indication affichée tant que le champ est vide. |
 | `max-length` | entier de 1 à 16384 | non | Limite du contenu, en octets ; un intent d’écriture peut en imposer une plus basse. |
 | `disabled` | booléen | non | Refuse les entrées ; correspond à `:disabled`. |
-| `name` | identifiant ≤ `MAX_IDENTIFIER_BYTES` | non | Nom du champ dans un `form`. |
+| `name` | identifiant ≤ 64 octets | non | Nom du champ dans un `form`. |
+| `autofocus` | booléen | non | Prend le focus clavier quand l’élément apparaît pendant que la logique traite une action de l’utilisateur (un éditeur ouvert par un clic), en mode interactif, dans le widget qui a reçu l’action ; le premier de ces éléments dans la vue quand plusieurs apparaissent ensemble. Jamais au démarrage du widget, depuis un minuteur ou la réponse d’un service, en mode passif, ni quand il est posé sur un élément déjà affiché. |
 
 ### `textarea`
 
@@ -274,12 +275,13 @@ Champ de texte de plusieurs lignes, édité par l’hôte, méthodes de saisie (
 
 | Attribut | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
-| `value` | texte ≤ `MAX_FIELD_TEXT_BYTES` | non | Comme pour `field`. |
-| `placeholder` | texte ≤ `MAX_LABEL_BYTES` | non | Indication affichée tant que le champ est vide. |
+| `value` | texte ≤ 16 Kio | non | Comme pour `field`. |
+| `placeholder` | texte ≤ 256 octets | non | Indication affichée tant que le champ est vide. |
 | `max-length` | entier de 1 à 16384 | non | Comme pour `field`. |
 | `rows` | entier de 1 à 40 | non | Lignes visibles avant le défilement ; 3 par défaut. |
 | `disabled` | booléen | non | Refuse les entrées ; correspond à `:disabled`. |
-| `name` | identifiant ≤ `MAX_IDENTIFIER_BYTES` | non | Nom du champ dans un `form`. |
+| `name` | identifiant ≤ 64 octets | non | Nom du champ dans un `form`. |
+| `autofocus` | booléen | non | Prend le focus clavier quand l’élément apparaît pendant que la logique traite une action de l’utilisateur (un éditeur ouvert par un clic), en mode interactif, dans le widget qui a reçu l’action ; le premier de ces éléments dans la vue quand plusieurs apparaissent ensemble. Jamais au démarrage du widget, depuis un minuteur ou la réponse d’un service, en mode passif, ni quand il est posé sur un élément déjà affiché. |
 
 ### `form`
 
@@ -292,11 +294,11 @@ Regroupe des contrôles nommés. Avec `intent`, la validation envoie leurs valeu
 | Attribut | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
 | `intent` | `notes.save` \| `playervox.rating.publish` \| `twitch.chat.send` | non | Intent d’écriture lié. |
-| `target` | texte ≤ `MAX_ATTRIBUTE_TEXT_BYTES` | non | ID opaque de l’objet modifié (une note, le message auquel on répond), vérifié par le service. |
+| `target` | texte ≤ 1 Kio | non | ID opaque de l’objet modifié (une note, le message auquel on répond), vérifié par le service. |
 
 ### `elapsed`
 
-Durée affichée que l’hôte fait avancer à partir d’un repère donné par un service : un chronomètre qui tourne ne demande aucun travail à la logique. Stylé comme `text` ; repeint seulement quand le texte affiché change, au plus à `ANIMATION_RATE_HZ`, et jamais quand le widget est masqué.
+Durée affichée que l’hôte fait avancer à partir d’un repère donné par un service : un chronomètre qui tourne ne demande aucun travail à la logique. Stylé comme `text` ; repeint seulement quand le texte affiché change, au plus à 60 Hz, et jamais quand le widget est masqué.
 
 | Contenu | Parents | Focus clavier | Rôle | Événements |
 | --- | --- | --- | --- | --- |
@@ -360,7 +362,7 @@ Une série de données d’un `chart`, colorée par `color`.
 
 | Attribut | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
-| `values` | liste de nombres ≤ `MAX_CHART_POINTS` | oui | Valeurs, dans l’ordre. |
+| `values` | liste de nombres ≤ 1024 | oui | Valeurs, dans l’ordre. |
 
 ### `separator`
 

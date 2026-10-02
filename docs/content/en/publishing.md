@@ -47,11 +47,11 @@ the ID is the widget's identity in the catalog.
 <!-- generated:listing-fields -->
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `author` | text ≤ `MAX_AUTHOR_BYTES` | yes | Plain text, trimmed, without `<` or `>`. |
-| `spdxLicense` | text ≤ `MAX_SPDX_LICENSE_BYTES` | yes | SPDX expression characters `[A-Za-z0-9.+-]`. |
-| `sourceUrl` | text ≤ `MAX_CATALOG_URL_BYTES` | yes | Canonical HTTPS URL of the reviewed source, without port, query or fragment. |
+| `author` | text ≤ 128 bytes | yes | Plain text, trimmed, without `<` or `>`. |
+| `spdxLicense` | text ≤ 64 bytes | yes | SPDX expression characters `[A-Za-z0-9.+-]`. |
+| `sourceUrl` | text ≤ 2 KiB | yes | Canonical HTTPS URL of the reviewed source, without port, query or fragment. |
 | `defaultLocale` | `locale` | yes | One of the localizations. |
-| `localizations` | list of `Localization` ≤ `MAX_LISTING_LOCALIZATIONS` | yes | `{ locale, name, description }` with distinct `xx` or `xx-YY` locales; name ≤ `MAX_LISTING_NAME_BYTES`, description ≤ `MAX_LISTING_DESCRIPTION_BYTES`. |
+| `localizations` | list of `Localization` ≤ 16 | yes | `{ locale, name, description }` with distinct `xx` or `xx-YY` locales; name ≤ 128 bytes, description ≤ 512 bytes. |
 <!-- /generated:listing-fields -->
 
 - `author`, names and descriptions are plain, trimmed text without `<` or

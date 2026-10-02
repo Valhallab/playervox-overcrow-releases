@@ -81,7 +81,7 @@ leaves that OverCrow draws: `icon`, `image`, `toggle`, `slider`, `field`,
 | [`field`](elements.md#field) | Single-line text input edited by the host, input methods (IME) included. |
 | [`textarea`](elements.md#textarea) | Multi-line text input edited by the host, input methods (IME) included. |
 | [`form`](elements.md#form) | Groups named controls. With `intent`, submitting sends their values to a write service directly from the host; the widget's logic never supplies that content. |
-| [`elapsed`](elements.md#elapsed) | Duration text advanced by the host from an anchor given by a service, so a running stopwatch needs no work from the logic. Styled like `text`; repainted only when the shown text changes, at most at `ANIMATION_RATE_HZ`, and never while hidden. |
+| [`elapsed`](elements.md#elapsed) | Duration text advanced by the host from an anchor given by a service, so a running stopwatch needs no work from the logic. Styled like `text`; repainted only when the shown text changes, at most at 60 Hz, and never while hidden. |
 | [`progress`](elements.md#progress) | Horizontal progress bar. |
 | [`gauge`](elements.md#gauge) | Ring or arc gauge. |
 | [`chart`](elements.md#chart) | Line, area, bar or sparkline chart drawn by the host. |
@@ -143,8 +143,8 @@ Five attributes exist on every element:
 | --- | --- | --- | --- |
 | `class` | class list | no | Style classes: distinct names separated by one space. |
 | `ref` | static `ref` name | no | Name by which `draw` designates this `canvas` and by which an attribute such as the `anchor` of a `popover` designates this element. Static, unique in the view, and not allowed inside a `for` or a component body, where it would name several elements. |
-| `label` | text ≤ `MAX_LABEL_BYTES` | no | Accessible name; required on icon-only controls. |
-| `tooltip` | text ≤ `MAX_LABEL_BYTES` | no | Plain text drawn by the host on hover or focus. |
+| `label` | text ≤ 256 bytes | no | Accessible name; required on icon-only controls. |
+| `tooltip` | text ≤ 256 bytes | no | Plain text drawn by the host on hover or focus. |
 | `on` | sorted event names | no | Events forwarded to the logic; written `on:<event>` in the view. |
 <!-- /generated:common-attributes -->
 

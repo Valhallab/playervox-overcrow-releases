@@ -117,6 +117,11 @@ const DISABLED: Field = Field::optional(
     ValueType::Bool,
     "Rejects input; matches `:disabled`.",
 );
+const AUTOFOCUS: Field = Field::optional(
+    "autofocus",
+    ValueType::Bool,
+    "Takes keyboard focus when the node is created by the patch of a user gesture's turn (an editor opened by a click), in Interactive mode, in the widget that received the gesture; the first such node of the patch. Never at start, from a timer or a service answer, in Passive mode, or when set on an existing node.",
+);
 const POINTER_EVENTS: &[&str] = &["activate", "contextmenu", "wheel"];
 const FOCUS_EVENTS: &[&str] = &[
     "activate",
@@ -377,6 +382,7 @@ pub const ELEMENTS: &[Element] = &[
             ),
             DISABLED,
             Field::optional("name", IDENTIFIER, "Field name inside a `form`."),
+            AUTOFOCUS,
         ],
         events: FIELD_EVENTS,
     },
@@ -398,6 +404,7 @@ pub const ELEMENTS: &[Element] = &[
             ),
             DISABLED,
             Field::optional("name", IDENTIFIER, "Field name inside a `form`."),
+            AUTOFOCUS,
         ],
         events: FIELD_EVENTS,
     },

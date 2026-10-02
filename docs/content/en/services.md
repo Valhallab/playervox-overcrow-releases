@@ -174,7 +174,7 @@ subscription that fails delivers the same error in its last update.
 | `encoding_denied` | `http.fetch`: the response is compressed or encoded in a way OverCrow does not accept, or its body does not decode as `as` asks (invalid JSON or text). |
 | `content_type_denied` | `http.fetch`: the media type of the response is not one that OverCrow accepts for this request. |
 | `response_metadata_limit` | `http.fetch`: the status line or the headers of the response are malformed or exceed OverCrow's bounds. |
-| `request_body_limit` | `http.fetch`: the request body is larger than `MAX_HTTP_REQUEST_BYTES`. |
+| `request_body_limit` | `http.fetch`: the request body is larger than 256 KiB. |
 | `response_body_limit` | `http.fetch`: the response body is larger than the bound of the network rule (`maxResponseBytes`, or 1 MiB without it and for `as: "image"`). |
 | `image_invalid` | `http.fetch` with `as: "image"`: the response is not a PNG, JPEG or WebP image within the image limits. |
 | `timeout` | `http.fetch`: the exchange took longer than 30 seconds. |
@@ -243,10 +243,10 @@ The tables below say, for each service, when it can be called.
 <!-- generated:permission-list -->
 | Permission | Meaning | With a sensitive capability |
 | --- | --- | --- |
-| `network` | Exact HTTPS routes reachable through the host broker, at most `MAX_NETWORK_RULES` rules. | manifest rejected |
-| `storage` | Host-managed key-value storage partitioned by widget ID, within `STORAGE_QUOTA_BYTES`. | process-lifetime data only |
+| `network` | Exact HTTPS routes reachable through the host broker, at most 32 rules. | manifest rejected |
+| `storage` | Host-managed key-value storage partitioned by widget ID, within 256 KiB. | process-lifetime data only |
 | `clipboardWrite` | Text clipboard writes, during a user action in Interactive mode. | manifest rejected |
-| `gameEvents` | Named semantic game events `overcrow.game.<name>.v1`, at most `MAX_GAME_EVENTS`. | allowed |
+| `gameEvents` | Named semantic game events `overcrow.game.<name>.v1`, at most 32. | allowed |
 | `capabilities` | Host services listed with the capabilities. | allowed |
 <!-- /generated:permission-list -->
 
@@ -307,12 +307,12 @@ parameter, and only the declared query parameters are accepted.
 <!-- generated:network-rule-fields -->
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `origin` | `origin` | yes | Canonical `https://host[:port]` origin, host ≤ `MAX_DNS_NAME_BYTES` with labels ≤ `MAX_DNS_LABEL_BYTES`; no credentials, IP literal or local name. |
+| `origin` | `origin` | yes | Canonical `https://host[:port]` origin, host ≤ 253 bytes with labels ≤ 63 bytes; no credentials, IP literal or local name. |
 | `method` | `GET` \| `POST` \| `PUT` \| `PATCH` \| `DELETE` | yes | One method. |
-| `path` | text ≤ `MAX_NETWORK_PATH_BYTES` | yes | Complete path; `{name}` segments are typed path parameters. |
-| `pathParams` | `name → ParameterConstraint` | no | Constraint of every `{name}` segment, at most `MAX_PATH_PARAMS`. |
-| `queryParams` | `name → ParameterConstraint` | no | Allowed query parameters, at most `MAX_QUERY_PARAMS`, each optionally `required`; others are refused. |
-| `maxResponseBytes` | integer 1 to 3145728 | no | Largest response body of this route, from 1 to `MAX_HTTP_DECLARED_RESPONSE_BYTES`; `MAX_HTTP_RESPONSE_BYTES` when absent. Not for `as: "image"`, which keeps `MAX_HTTP_RESPONSE_BYTES`. When several rules allow a request, the largest bound applies. |
+| `path` | text ≤ 1 KiB | yes | Complete path; `{name}` segments are typed path parameters. |
+| `pathParams` | `name → ParameterConstraint` | no | Constraint of every `{name}` segment, at most 8. |
+| `queryParams` | `name → ParameterConstraint` | no | Allowed query parameters, at most 16, each optionally `required`; others are refused. |
+| `maxResponseBytes` | integer 1 to 3145728 | no | Largest response body of this route, from 1 to 3 MiB; 1 MiB when absent. Not for `as: "image"`, which keeps 1 MiB. When several rules allow a request, the largest bound applies. |
 <!-- /generated:network-rule-fields -->
 
 Each path and query parameter has a constraint:
@@ -321,9 +321,9 @@ Each path and query parameter has a constraint:
 | Type | Shape | Accepts |
 | --- | --- | --- |
 | `integer` | `{ min, max }` | Decimal without leading zero, from 0 to 2^53 - 1. |
-| `slug` | `{ maxLength }` | ASCII letters of either case, digits, `_` and `-`, at least one character; `maxLength` from 1 to `MAX_SLUG_PARAMETER_BYTES`. |
-| `enum` | list of `literal segment` ≤ `MAX_ENUM_VALUES` | One of the listed values, each ≤ `MAX_ENUM_VALUE_BYTES`. |
-| `string` | `{ maxLength }` | Query parameters only; any text without control characters; `maxLength` from 1 to `MAX_STRING_PARAMETER_BYTES`. |
+| `slug` | `{ maxLength }` | ASCII letters of either case, digits, `_` and `-`, at least one character; `maxLength` from 1 to 128 bytes. |
+| `enum` | list of `literal segment` ≤ 32 | One of the listed values, each ≤ 128 bytes. |
+| `string` | `{ maxLength }` | Query parameters only; any text without control characters; `maxLength` from 1 to 256 bytes. |
 <!-- /generated:parameter-constraints -->
 
 The request leaves through OverCrow's broker, never from the widget's

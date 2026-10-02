@@ -196,6 +196,21 @@ test("a long review folds behind Read more; a short one has no button", async ()
   const huge = "é🎮".repeat(4000);
   assert.equal(logic.foldedText(huge), `${"é🎮".repeat(logic.FOLDED_CHARACTERS / 2)}…`);
   assert.equal(logic.foldedText("x".repeat(logic.FOLDED_CHARACTERS)), "x".repeat(logic.FOLDED_CHARACTERS));
+  // The cut never falls inside a grapheme: a decomposed accent, an emoji
+  // sequence, a skin tone, a flag. The grapheme that straddles the bound
+  // is left out whole.
+  const lead = "x".repeat(logic.FOLDED_CHARACTERS - 1);
+  for (const grapheme of ["e\u0301", "o\u0323\u0302", "👩\u200d🚀", "👍🏽", "❤\ufe0f", "🏴\u{e0067}\u{e0062}\u{e007f}"]) {
+    const folded = logic.foldedText(`${lead}${grapheme}${grapheme}`);
+    assert.equal(folded, `${lead}…`, `${JSON.stringify(grapheme)} is not cut`);
+  }
+  // Flags: the second one straddles the bound, the first one is whole.
+  const flags = "x".repeat(logic.FOLDED_CHARACTERS - 3);
+  assert.equal(logic.foldedText(`${flags}🇫🇷🇩🇪🇮🇹`), `${flags}🇫🇷…`);
+  assert.equal(logic.foldedText(`${"x".repeat(logic.FOLDED_CHARACTERS - 2)}🇫🇷🇩🇪`), `${"x".repeat(logic.FOLDED_CHARACTERS - 2)}🇫🇷…`);
+  assert.equal(logic.graphemeStart("ae\u0301", 2), 1);
+  assert.equal(logic.graphemeStart("ab", 1), 1);
+  assert.equal(logic.graphemeStart("\u0301\u0301", 1), 0, "nothing whole before the cut");
   const longest = page(1, { items: [review(1, { text: huge })] });
   assert.equal(logic.row(longest, {}, true, 0).text, logic.foldedText(huge));
   assert.equal(logic.row(longest, { r1: { expanded: true, original: false, revealed: false } }, true, 0).text, huge);

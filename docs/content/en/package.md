@@ -19,15 +19,15 @@ for, as a reviewer sees it.
 <!-- generated:package-files -->
 | Path | Required | Limit | Meaning |
 | --- | --- | --- | --- |
-| `manifest.json` | yes | `MAX_MANIFEST_BYTES` | The manifest, as written. |
-| `ledger.json` | yes | `MAX_LEDGER_BYTES` | Canonical SHA-256 and byte ledger of every other entry, written by the CLI. |
-| `logic.js` | yes | `MAX_LOGIC_BYTES` | The only executable content: one ES2023 script without imports, compiled expressions of the view included. UTF-8, not empty. |
-| `view.json` | yes | `MAX_COMPILED_VIEW_BYTES` | Compiled view. The `view.ocml` source is not shipped. |
-| `style.ocss` | no | `MAX_STYLE_SOURCE_BYTES` | Style sheet source, parsed by the host when the widget starts. UTF-8. |
-| `locales/en.json` | no | `MAX_LOCALE_FILE_BYTES` | English messages; present if and only if `locales/fr.json` is, with the same keys. |
-| `locales/fr.json` | no | `MAX_LOCALE_FILE_BYTES` | French messages. |
-| `LICENSE` | yes | `MAX_LICENSE_BYTES` | License text of the package. UTF-8, not empty. |
-| `assets/<path>.{png,jpg,jpeg,webp}` | no | `MAX_IMAGE_ENCODED_BYTES` | Images whose signature matches the extension; lowercase `[a-z0-9_-]` segments, at most `MAX_ASSET_PATH_SEGMENTS` below `assets/`. |
+| `manifest.json` | yes | 64 KiB | The manifest, as written. |
+| `ledger.json` | yes | 64 KiB | Canonical SHA-256 and byte ledger of every other entry, written by the CLI. |
+| `logic.js` | yes | 512 KiB | The only executable content: one ES2023 script without imports, compiled expressions of the view included. UTF-8, not empty. |
+| `view.json` | yes | 512 KiB | Compiled view. The `view.ocml` source is not shipped. |
+| `style.ocss` | no | 128 KiB | Style sheet source, parsed by the host when the widget starts. UTF-8. |
+| `locales/en.json` | no | 256 KiB | English messages; present if and only if `locales/fr.json` is, with the same keys. |
+| `locales/fr.json` | no | 256 KiB | French messages. |
+| `LICENSE` | yes | 64 KiB | License text of the package. UTF-8, not empty. |
+| `assets/<path>.{png,jpg,jpeg,webp}` | no | 2 MiB | Images whose signature matches the extension; lowercase `[a-z0-9_-]` segments, at most 4 below `assets/`. |
 <!-- /generated:package-files -->
 
 Any other entry rejects the package: a second script, an HTML file, a

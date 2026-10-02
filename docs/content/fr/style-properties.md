@@ -55,13 +55,13 @@ est une erreur, accompagnée du nom le plus proche en suggestion.
 | `gap` | 1–2 × (`<px>` \| `<percent>`) | `0` | non | non |
 | `row-gap` | `<px>` \| `<percent>` | `0` | non | non |
 | `column-gap` | `<px>` \| `<percent>` | `0` | non | non |
-| `grid-template-columns` | `none` \| liste ≤ `MAX_GRID_TRACKS` de `<track>`, ou `repeat(<integer>, <track>)` | `none` | non | non |
-| `grid-template-rows` | `none` \| liste ≤ `MAX_GRID_TRACKS` de `<track>`, ou `repeat(<integer>, <track>)` | `none` | non | non |
+| `grid-template-columns` | `none` \| liste ≤ 24 de `<track>`, ou `repeat(<integer>, <track>)` | `none` | non | non |
+| `grid-template-rows` | `none` \| liste ≤ 24 de `<track>`, ou `repeat(<integer>, <track>)` | `none` | non | non |
 | `grid-auto-flow` | `row` \| `column` | `row` | non | non |
 | `grid-auto-columns` | `<track>`: `<px>` \| `<percent>` \| `<fr>` \| `auto` \| `min-content` \| `max-content` \| `minmax(<track>, <track>)` | `auto` | non | non |
 | `grid-auto-rows` | `<track>`: `<px>` \| `<percent>` \| `<fr>` \| `auto` \| `min-content` \| `max-content` \| `minmax(<track>, <track>)` | `auto` | non | non |
-| `grid-column` | `auto` \| `<integer>` \| `span <integer>` \| `<start> / <end>`, lignes de 1 à `MAX_GRID_TRACKS` | `auto` | non | non |
-| `grid-row` | `auto` \| `<integer>` \| `span <integer>` \| `<start> / <end>`, lignes de 1 à `MAX_GRID_TRACKS` | `auto` | non | non |
+| `grid-column` | `auto` \| `<integer>` \| `span <integer>` \| `<start> / <end>`, lignes de 1 à 24 | `auto` | non | non |
+| `grid-row` | `auto` \| `<integer>` \| `span <integer>` \| `<start> / <end>`, lignes de 1 à 24 | `auto` | non | non |
 
 ### Boîte
 
@@ -91,7 +91,7 @@ est une erreur, accompagnée du nom le plus proche en suggestion.
 | Propriété | Valeur | Valeur initiale | Héritée | Animable |
 | --- | --- | --- | --- | --- |
 | `background-color` | `<color>` | `transparent` | non | oui |
-| `background` | `<color>` \| `linear-gradient(<angle>?, <color> <percent>?, …)`, arrêts ≤ `MAX_GRADIENT_STOPS` | `transparent` | non | non |
+| `background` | `<color>` \| `linear-gradient(<angle>?, <color> <percent>?, …)`, arrêts ≤ 8 | `transparent` | non | non |
 | `border` | `<px>` (`solid` \| `none`)? `<color>`? | `0 none` | non | non |
 | `border-top` | `<px>` (`solid` \| `none`)? `<color>`? | `0 none` | non | non |
 | `border-right` | `<px>` (`solid` \| `none`)? `<color>`? | `0 none` | non | non |
@@ -101,7 +101,7 @@ est une erreur, accompagnée du nom le plus proche en suggestion.
 | `border-style` | `solid` \| `none` | `none` | non | non |
 | `border-color` | `<color>` | `currentColor` | non | oui |
 | `border-radius` | 1–4 × (`<px>` \| `<percent>`) | `0` | non | non |
-| `box-shadow` | `none` \| `var(--shadow-…)` seul \| liste ≤ `MAX_SHADOWS` de `inset`? `<px> <px> <px>? <px>? <color>` | `none` | non | non |
+| `box-shadow` | `none` \| `var(--shadow-…)` seul \| liste ≤ 2 de `inset`? `<px> <px> <px>? <px>? <color>` | `none` | non | non |
 | `opacity` | nombre de 0 à 1 | `1` | non | oui |
 | `visibility` | `visible` \| `hidden` | `visible` | oui | non |
 | `object-fit` | `contain` \| `cover` \| `fill` \| `none` | `contain` | non | non |
@@ -112,7 +112,7 @@ est une erreur, accompagnée du nom le plus proche en suggestion.
 | --- | --- | --- | --- | --- |
 | `color` | `<color>` | `var(--color-text)` | oui | oui |
 | `font-family` | `ui` \| `mono` \| `display`, ou un token de police | `ui` | oui | non |
-| `font-size` | `<px>` de `MIN_FONT_SIZE_PX` à `MAX_FONT_SIZE_PX`, ou un token de taille | `var(--font-size-body)` | oui | non |
+| `font-size` | `<px>` de 6 px à 96 px, ou un token de taille | `var(--font-size-body)` | oui | non |
 | `font-weight` | `400` \| `500` \| `600` \| `700` \| `normal` \| `bold` | `400` | oui | non |
 | `font-style` | `normal` \| `italic` | `normal` | oui | non |
 | `font-variant-numeric` | `normal` \| `tabular-nums` | `normal` | oui | non |
@@ -131,10 +131,10 @@ est une erreur, accompagnée du nom le plus proche en suggestion.
 
 | Propriété | Valeur | Valeur initiale | Héritée | Animable |
 | --- | --- | --- | --- | --- |
-| `transform` | `none` \| jusqu’à `MAX_TRANSFORM_FUNCTIONS` fonctions parmi `translate(<length>, <length>)` avec `<px>` ou `<percent>`, `translateX()`, `translateY()`, `scale(<number>{1,2})` de 0 à `MAX_TRANSFORM_SCALE`, `rotate(<angle>)` | `none` | non | oui |
+| `transform` | `none` \| jusqu’à 4 fonctions parmi `translate(<length>, <length>)` avec `<px>` ou `<percent>`, `translateX()`, `translateY()`, `scale(<number>{1,2})` de 0 à 8, `rotate(<angle>)` | `none` | non | oui |
 | `transform-origin` | 1–2 × (`left` \| `center` \| `right` \| `top` \| `bottom` \| `<percent>` \| `<px>`) | `center` | non | non |
-| `transition` | `none` \| liste ≤ `MAX_TRANSITIONS` de `<animatable-property> <time> <easing>? <time>?` | `none` | non | non |
-| `animation` | `none` \| liste ≤ `MAX_TRANSITIONS` de `<keyframes-name> <time> <easing>? <time>? (<integer> \| infinite)? <direction>? <fill-mode>?`, entier de 1 à `MAX_ANIMATION_ITERATIONS` | `none` | non | non |
+| `transition` | `none` \| liste ≤ 8 de `<animatable-property> <time> <easing>? <time>?` | `none` | non | non |
+| `animation` | `none` \| liste ≤ 8 de `<keyframes-name> <time> <easing>? <time>? (<integer> \| infinite)? <direction>? <fill-mode>?`, entier de 1 à 10000 | `none` | non | non |
 
 ### Interaction
 
@@ -150,10 +150,10 @@ est une erreur, accompagnée du nom le plus proche en suggestion.
 | Syntaxe | Signification |
 | --- | --- |
 | `<px>` | `12px` ; `0` peut se passer d’unité. Nombres décimaux, sans exposant. |
-| `<percent>` | `50%` du bloc conteneur, comme en CSS ; au plus `MAX_PERCENT` dans un sens ou dans l’autre. |
-| `<fr>` | `1fr`, pour les pistes de grille seulement ; de 0 à `MAX_GRID_FRACTION`. |
-| `<time>` | `120ms` ou `0.12s`, de 0 à `MAX_ANIMATION_MS`. |
-| `<angle>` | `4deg` ou `0.5turn`, au plus `MAX_ANGLE_DEG` degrés dans un sens ou dans l’autre. |
+| `<percent>` | `50%` du bloc conteneur, comme en CSS ; au plus 1000 dans un sens ou dans l’autre. |
+| `<fr>` | `1fr`, pour les pistes de grille seulement ; de 0 à 1000. |
+| `<time>` | `120ms` ou `0.12s`, de 0 à 300000 ms. |
+| `<angle>` | `4deg` ou `0.5turn`, au plus 3600 degrés dans un sens ou dans l’autre. |
 | `<color>` | `#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`, `rgb(r g b)`, `rgb(r g b / a)`, `transparent`, `currentColor`, ou un token de couleur. Pas de couleurs nommées. |
 | `var(--token)` | Token du design system, du type attendu, comme valeur entière ou comme composante d’une valeur composite. Pas d’argument de repli ; un widget ne peut pas déclarer de propriétés personnalisées. |
 | `<easing>` | `linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out`, `steps(<integer 1..=MAX_EASING_STEPS>)`. |

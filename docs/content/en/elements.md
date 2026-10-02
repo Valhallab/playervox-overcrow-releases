@@ -34,7 +34,7 @@ with one `series`: OverCrow draws all of it, the chart included.
 - **Role** is what assistive technology is told the element is.
 - **Events** are the events the view may listen to with `on:<event>`.
 
-A type such as "text ≤ `MAX_LABEL_BYTES`" names a [limit](limits.md).
+A type such as "text ≤ 256 bytes" gives a [limit](limits.md).
 
 ## Attributes of every element
 
@@ -43,8 +43,8 @@ A type such as "text ≤ `MAX_LABEL_BYTES`" names a [limit](limits.md).
 | --- | --- | --- | --- |
 | `class` | class list | no | Style classes: distinct names separated by one space. |
 | `ref` | static `ref` name | no | Name by which `draw` designates this `canvas` and by which an attribute such as the `anchor` of a `popover` designates this element. Static, unique in the view, and not allowed inside a `for` or a component body, where it would name several elements. |
-| `label` | text ≤ `MAX_LABEL_BYTES` | no | Accessible name; required on icon-only controls. |
-| `tooltip` | text ≤ `MAX_LABEL_BYTES` | no | Plain text drawn by the host on hover or focus. |
+| `label` | text ≤ 256 bytes | no | Accessible name; required on icon-only controls. |
+| `tooltip` | text ≤ 256 bytes | no | Plain text drawn by the host on hover or focus. |
 | `on` | sorted event names | no | Events forwarded to the logic; written `on:<event>` in the view. |
 <!-- /generated:common-attributes -->
 
@@ -146,7 +146,7 @@ Round image with a text fallback while the image is missing or failed.
 | Attribute | Type | Required | Meaning |
 | --- | --- | --- | --- |
 | `src` | image source | no | Image source. |
-| `initials` | text ≤ `MAX_INITIALS_BYTES` | no | Fallback text. |
+| `initials` | text ≤ 16 bytes | no | Fallback text. |
 
 ### `badge`
 
@@ -183,7 +183,7 @@ On/off switch.
 | --- | --- | --- | --- |
 | `checked` | boolean | no | State; matches `:checked`. |
 | `disabled` | boolean | no | Rejects input; matches `:disabled`. |
-| `name` | identifier ≤ `MAX_IDENTIFIER_BYTES` | no | Field name inside a `form`. |
+| `name` | identifier ≤ 64 bytes | no | Field name inside a `form`. |
 
 ### `checkbox`
 
@@ -197,7 +197,7 @@ Check control (checklists).
 | --- | --- | --- | --- |
 | `checked` | boolean | no | State; matches `:checked`. |
 | `disabled` | boolean | no | Rejects input; matches `:disabled`. |
-| `name` | identifier ≤ `MAX_IDENTIFIER_BYTES` | no | Field name inside a `form`. |
+| `name` | identifier ≤ 64 bytes | no | Field name inside a `form`. |
 
 ### `slider`
 
@@ -214,7 +214,7 @@ Numeric range control; dragging is handled by the host.
 | `step` | number -1000000000 to 1000000000 | no | Positive increment; default 1. |
 | `value` | number -1000000000 to 1000000000 | no | Current value, clamped to the range; rejected on a slider bound to a write intent. |
 | `disabled` | boolean | no | Rejects input; matches `:disabled`. |
-| `name` | identifier ≤ `MAX_IDENTIFIER_BYTES` | no | Field name inside a `form`. |
+| `name` | identifier ≤ 64 bytes | no | Field name inside a `form`. |
 
 ### `select`
 
@@ -226,9 +226,9 @@ Drop-down choice; the open list is drawn by the host.
 
 | Attribute | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `value` | text ≤ `MAX_ATTRIBUTE_TEXT_BYTES` | no | Selected option value. |
+| `value` | text ≤ 1 KiB | no | Selected option value. |
 | `disabled` | boolean | no | Rejects input; matches `:disabled`. |
-| `name` | identifier ≤ `MAX_IDENTIFIER_BYTES` | no | Field name inside a `form`. |
+| `name` | identifier ≤ 64 bytes | no | Field name inside a `form`. |
 
 ### `option`
 
@@ -240,7 +240,7 @@ Choice of a `select`; its text is the visible label.
 
 | Attribute | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `value` | text ≤ `MAX_ATTRIBUTE_TEXT_BYTES` | yes | Value reported by `change`. |
+| `value` | text ≤ 1 KiB | yes | Value reported by `change`. |
 | `disabled` | boolean | no | Rejects input; matches `:disabled`. |
 
 ### `field`
@@ -253,11 +253,12 @@ Single-line text input edited by the host, input methods (IME) included.
 
 | Attribute | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `value` | text ≤ `MAX_FIELD_TEXT_BYTES` | no | Replaces the content; rejected on a field bound to a write intent. |
-| `placeholder` | text ≤ `MAX_LABEL_BYTES` | no | Hint shown while empty. |
+| `value` | text ≤ 16 KiB | no | Replaces the content; rejected on a field bound to a write intent. |
+| `placeholder` | text ≤ 256 bytes | no | Hint shown while empty. |
 | `max-length` | integer 1 to 16384 | no | Content limit in bytes; a write intent may impose a lower one. |
 | `disabled` | boolean | no | Rejects input; matches `:disabled`. |
-| `name` | identifier ≤ `MAX_IDENTIFIER_BYTES` | no | Field name inside a `form`. |
+| `name` | identifier ≤ 64 bytes | no | Field name inside a `form`. |
+| `autofocus` | boolean | no | Takes keyboard focus when the element appears while the logic handles a user action (an editor opened by a click), in Interactive mode, in the widget that received the action; the first such element of the view when several appear together. Never when the widget starts, from a timer or the answer of a service, in Passive mode, or when set on an element already shown. |
 
 ### `textarea`
 
@@ -269,12 +270,13 @@ Multi-line text input edited by the host, input methods (IME) included.
 
 | Attribute | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `value` | text ≤ `MAX_FIELD_TEXT_BYTES` | no | As for `field`. |
-| `placeholder` | text ≤ `MAX_LABEL_BYTES` | no | Hint shown while empty. |
+| `value` | text ≤ 16 KiB | no | As for `field`. |
+| `placeholder` | text ≤ 256 bytes | no | Hint shown while empty. |
 | `max-length` | integer 1 to 16384 | no | As for `field`. |
 | `rows` | integer 1 to 40 | no | Visible rows before scrolling; default 3. |
 | `disabled` | boolean | no | Rejects input; matches `:disabled`. |
-| `name` | identifier ≤ `MAX_IDENTIFIER_BYTES` | no | Field name inside a `form`. |
+| `name` | identifier ≤ 64 bytes | no | Field name inside a `form`. |
+| `autofocus` | boolean | no | Takes keyboard focus when the element appears while the logic handles a user action (an editor opened by a click), in Interactive mode, in the widget that received the action; the first such element of the view when several appear together. Never when the widget starts, from a timer or the answer of a service, in Passive mode, or when set on an element already shown. |
 
 ### `form`
 
@@ -287,11 +289,11 @@ Groups named controls. With `intent`, submitting sends their values to a write s
 | Attribute | Type | Required | Meaning |
 | --- | --- | --- | --- |
 | `intent` | `notes.save` \| `playervox.rating.publish` \| `twitch.chat.send` | no | Bound write intent. |
-| `target` | text ≤ `MAX_ATTRIBUTE_TEXT_BYTES` | no | Opaque ID of the edited object (note, reply parent), checked by the service. |
+| `target` | text ≤ 1 KiB | no | Opaque ID of the edited object (note, reply parent), checked by the service. |
 
 ### `elapsed`
 
-Duration text advanced by the host from an anchor given by a service, so a running stopwatch needs no work from the logic. Styled like `text`; repainted only when the shown text changes, at most at `ANIMATION_RATE_HZ`, and never while hidden.
+Duration text advanced by the host from an anchor given by a service, so a running stopwatch needs no work from the logic. Styled like `text`; repainted only when the shown text changes, at most at 60 Hz, and never while hidden.
 
 | Content | Parents | Keyboard focus | Role | Events |
 | --- | --- | --- | --- | --- |
@@ -355,7 +357,7 @@ One data series of a `chart`, coloured with `color`.
 
 | Attribute | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `values` | number list ≤ `MAX_CHART_POINTS` | yes | Values in order. |
+| `values` | number list ≤ 1024 | yes | Values in order. |
 
 ### `separator`
 

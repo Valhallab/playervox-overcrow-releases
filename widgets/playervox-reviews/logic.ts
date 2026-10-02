@@ -343,12 +343,61 @@ export function foldedText(text: string): string {
   let end = 0;
   for (const character of text) {
     if (characters === FOLDED_CHARACTERS) {
-      return `${text.slice(0, end)}…`;
+      return `${text.slice(0, graphemeStart(text, end))}…`;
     }
     characters += 1;
     end += character.length;
   }
   return text;
+}
+
+/** What continues the character before it: a combining mark, a variation selector, a joiner, a skin tone, a tag. */
+const CONTINUES = /^[\p{M}\u200d\ufe00-\ufe0f\u{1f3fb}-\u{1f3ff}\u{e0020}-\u{e007f}]/u;
+/** The two letters of a flag. */
+const FLAG_LETTER = /^[\u{1f1e6}-\u{1f1ff}]/u;
+
+/**
+ * The cut at or before `end` (an index between two characters of `text`)
+ * that leaves every grapheme whole: an accented letter keeps its
+ * combining accent, an emoji sequence its joined parts and a flag its two
+ * letters.
+ */
+export function graphemeStart(text: string, end: number): number {
+  let cut = end;
+  while (cut > 0 && insideGrapheme(text, cut)) {
+    cut = before(text, cut);
+  }
+  return cut;
+}
+
+/** The index of the character that ends at `index`. */
+function before(text: string, index: number): number {
+  const low = text.charCodeAt(index - 1);
+  const high = index > 1 ? text.charCodeAt(index - 2) : 0;
+  return low >= 0xdc00 && low <= 0xdfff && high >= 0xd800 && high <= 0xdbff ? index - 2 : index - 1;
+}
+
+function insideGrapheme(text: string, index: number): boolean {
+  const next = text.slice(index, index + 2);
+  if (next === "") {
+    return false;
+  }
+  if (CONTINUES.test(next) || text.charCodeAt(index - 1) === 0x200d) {
+    return true;
+  }
+  if (!FLAG_LETTER.test(next)) {
+    return false;
+  }
+  // Flag letters pair up from the first of their run: a cut after an odd
+  // number of them falls inside a flag.
+  let letters = 0;
+  for (let at = index; at > 0; at = before(text, at)) {
+    if (!FLAG_LETTER.test(text.slice(before(text, at), at))) {
+      break;
+    }
+    letters += 1;
+  }
+  return letters % 2 === 1;
 }
 
 const UNREAD: Reading = { expanded: false, original: false, revealed: false };

@@ -562,7 +562,8 @@
     "SPDX expression characters `[A-Za-z0-9.+-]`.": "Expression SPDX, faite des caractères `[A-Za-z0-9.+-]`.",
     "Canonical HTTPS URL of the reviewed source, without port, query or fragment.": "URL HTTPS canonique des sources relues, sans port, requête ni fragment.",
     "One of the localizations.": "L’une des localisations.",
-    "`{ locale, name, description }` with distinct `xx` or `xx-YY` locales; name ≤ `MAX_LISTING_NAME_BYTES`, description ≤ `MAX_LISTING_DESCRIPTION_BYTES`.": "`{ locale, name, description }` avec des locales distinctes de la forme `xx` ou `xx-YY` ; nom ≤ `MAX_LISTING_NAME_BYTES`, description ≤ `MAX_LISTING_DESCRIPTION_BYTES`."
+    "`{ locale, name, description }` with distinct `xx` or `xx-YY` locales; name ≤ `MAX_LISTING_NAME_BYTES`, description ≤ `MAX_LISTING_DESCRIPTION_BYTES`.": "`{ locale, name, description }` avec des locales distinctes de la forme `xx` ou `xx-YY` ; nom ≤ `MAX_LISTING_NAME_BYTES`, description ≤ `MAX_LISTING_DESCRIPTION_BYTES`.",
+    "Takes keyboard focus when the element appears while the logic handles a user action (an editor opened by a click), in Interactive mode, in the widget that received the action; the first such element of the view when several appear together. Never when the widget starts, from a timer or the answer of a service, in Passive mode, or when set on an element already shown.": "Prend le focus clavier quand l’élément apparaît pendant que la logique traite une action de l’utilisateur (un éditeur ouvert par un clic), en mode interactif, dans le widget qui a reçu l’action ; le premier de ces éléments dans la vue quand plusieurs apparaissent ensemble. Jamais au démarrage du widget, depuis un minuteur ou la réponse d’un service, en mode passif, ni quand il est posé sur un élément déjà affiché."
   },
   "patterns": {
     "integer {0}": "entier {0}",

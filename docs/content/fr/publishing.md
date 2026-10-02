@@ -48,11 +48,11 @@ contrôlez, et gardez-le : l’ID est l’identité du widget dans le catalogue.
 <!-- generated:listing-fields -->
 | Champ | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
-| `author` | texte ≤ `MAX_AUTHOR_BYTES` | oui | Texte brut, sans espaces en début ni en fin, sans `<` ni `>`. |
-| `spdxLicense` | texte ≤ `MAX_SPDX_LICENSE_BYTES` | oui | Expression SPDX, faite des caractères `[A-Za-z0-9.+-]`. |
-| `sourceUrl` | texte ≤ `MAX_CATALOG_URL_BYTES` | oui | URL HTTPS canonique des sources relues, sans port, requête ni fragment. |
+| `author` | texte ≤ 128 octets | oui | Texte brut, sans espaces en début ni en fin, sans `<` ni `>`. |
+| `spdxLicense` | texte ≤ 64 octets | oui | Expression SPDX, faite des caractères `[A-Za-z0-9.+-]`. |
+| `sourceUrl` | texte ≤ 2 Kio | oui | URL HTTPS canonique des sources relues, sans port, requête ni fragment. |
 | `defaultLocale` | `locale` | oui | L’une des localisations. |
-| `localizations` | liste de `Localization` ≤ `MAX_LISTING_LOCALIZATIONS` | oui | `{ locale, name, description }` avec des locales distinctes de la forme `xx` ou `xx-YY` ; nom ≤ `MAX_LISTING_NAME_BYTES`, description ≤ `MAX_LISTING_DESCRIPTION_BYTES`. |
+| `localizations` | liste de `Localization` ≤ 16 | oui | `{ locale, name, description }` avec des locales distinctes de la forme `xx` ou `xx-YY` ; nom ≤ 128 octets, description ≤ 512 octets. |
 <!-- /generated:listing-fields -->
 
 - `author`, les noms et les descriptions sont du texte brut, sans espace au
