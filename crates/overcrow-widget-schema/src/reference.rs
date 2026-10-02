@@ -244,7 +244,10 @@ fn style_section(out: &mut String) {
         "Animatable properties change paint only, so transitions and animations never rerun \
 layout. `text-overflow: marquee` scrolls one overflowing line back and forth at a host-defined \
 speed, pausing at each end; it runs only while the widget is visible, counts as an active \
-animation and restarts when the text changes.\n\n| Property | Group | Value | Initial | Inherited | Animatable |\n\
+animation and restarts when the text changes. `vertical-align` places an inline `icon` or \
+`image` in its line of text: `baseline` stands it on the text's baseline, and the line is as \
+tall as it needs above that baseline; `middle` centres it on the line, which grows only when \
+the box is taller than the text's own line.\n\n| Property | Group | Value | Initial | Inherited | Animatable |\n\
 | --- | --- | --- | --- | --- | --- |\n",
     );
     for property in PROPERTIES {

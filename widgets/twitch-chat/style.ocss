@@ -294,9 +294,11 @@
   color: var(--color-text-secondary);
 }
 
-/* An emote is as tall as its line and as wide as its picture asks. */
+/* An emote is as tall as its line, centred on it, and as wide as its
+   picture asks. */
 .emote {
   height: 20px;
+  vertical-align: middle;
 }
 
 /* The reply icon shows under the pointer, or with the keyboard on it. */

@@ -189,6 +189,23 @@ fn style_tables_are_closed_and_resolve_tokens() {
     }
 }
 
+/// An inline box stands on the baseline unless its style centres it on the
+/// line: the default keeps every existing layout.
+#[test]
+fn an_inline_box_is_aligned_on_the_baseline_or_the_middle_of_its_line() {
+    let property = style::PROPERTIES
+        .iter()
+        .find(|property| property.name == "vertical-align")
+        .expect("vertical-align");
+    assert_eq!(
+        property.value,
+        style::StyleValue::Keywords(&["baseline", "middle"])
+    );
+    assert_eq!(property.initial, "baseline");
+    assert!(!property.inherited, "the box's own, not its text's");
+    assert!(!property.animatable, "it changes layout");
+}
+
 #[test]
 fn tokens_are_unique_and_well_formed() {
     assert_unique("token", tokens::TOKENS.iter().map(|token| token.name));
