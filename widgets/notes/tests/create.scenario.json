@@ -1,0 +1,260 @@
+{
+  "scenarioVersion": 1,
+  "name": "create",
+  "description": "A new note with the keyboard in hand: a click on Add opens its editor at once, with the caret in its title, before OverCrow answered; OverCrow then fills the title, and what the user types goes after it without a click in the field. Ctrl+Enter saves under that title. A note OverCrow cannot create leaves no editor: the widget says so and shows the note it showed.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "notes.subscribe": {
+        "active": "note-1",
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Expedition",
+            "body": "Find the northern entrance before sunset.\nBring rope.",
+            "items": [
+              {
+                "id": "local-1",
+                "text": "Pack torches",
+                "checked": true
+              },
+              {
+                "id": "local-2",
+                "text": "Sharpen the blade",
+                "checked": false
+              }
+            ]
+          },
+          {
+            "id": "note-2",
+            "title": "Build ideas",
+            "body": "Fire sword first, then armor.",
+            "items": []
+          }
+        ]
+      }
+    },
+    "calls": {
+      "notes.create": [
+        {
+          "value": {
+            "note": {
+              "id": "note-3",
+              "title": "Note 3",
+              "body": "",
+              "items": []
+            }
+          }
+        },
+        {
+          "error": "unavailable"
+        }
+      ]
+    },
+    "intents": {
+      "notes.save": [
+        "accepted"
+      ]
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "Expedition"
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Add note"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Save",
+          "Cancel"
+        ],
+        "calls": [
+          {
+            "service": "notes.subscribe",
+            "outcome": "ok"
+          },
+          {
+            "service": "notes.create",
+            "outcome": "ok"
+          }
+        ],
+        "image": "editor-at-the-click"
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "value": {
+          "active": "note-3",
+          "notes": [
+            {
+              "id": "note-1",
+              "title": "Expedition",
+              "body": "Find the northern entrance before sunset.\nBring rope.",
+              "items": [
+                {
+                  "id": "local-1",
+                  "text": "Pack torches",
+                  "checked": true
+                },
+                {
+                  "id": "local-2",
+                  "text": "Sharpen the blade",
+                  "checked": false
+                }
+              ]
+            },
+            {
+              "id": "note-2",
+              "title": "Build ideas",
+              "body": "Fire sword first, then armor.",
+              "items": []
+            },
+            {
+              "id": "note-3",
+              "title": "Note 3",
+              "body": "",
+              "items": []
+            }
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Note 3",
+          "Save",
+          "Cancel"
+        ],
+        "image": "title-filled"
+      }
+    },
+    {
+      "text": " of the trip"
+    },
+    {
+      "expect": {
+        "image": "typed-without-a-click"
+      }
+    },
+    {
+      "key": {
+        "key": "Enter",
+        "modifiers": [
+          "ctrl"
+        ]
+      }
+    },
+    {
+      "expect": {
+        "intents": [
+          {
+            "intent": "notes.save",
+            "fields": {
+              "title": "Note 3 of the trip",
+              "body": "",
+              "item": [
+                {
+                  "id": null,
+                  "text": ""
+                }
+              ]
+            },
+            "outcome": "accepted"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "value": {
+          "active": "note-3",
+          "notes": [
+            {
+              "id": "note-1",
+              "title": "Expedition",
+              "body": "Find the northern entrance before sunset.\nBring rope.",
+              "items": [
+                {
+                  "id": "local-1",
+                  "text": "Pack torches",
+                  "checked": true
+                },
+                {
+                  "id": "local-2",
+                  "text": "Sharpen the blade",
+                  "checked": false
+                }
+              ]
+            },
+            {
+              "id": "note-2",
+              "title": "Build ideas",
+              "body": "Fire sword first, then armor.",
+              "items": []
+            },
+            {
+              "id": "note-3",
+              "title": "Note 3 of the trip",
+              "body": "",
+              "items": []
+            }
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Note 3 of the trip"
+        ],
+        "noText": [
+          "Save",
+          "Cancel"
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Add note"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Note 3 of the trip",
+          "Notes could not be loaded or saved. Try again."
+        ],
+        "noText": [
+          "Save",
+          "Cancel"
+        ],
+        "calls": [
+          {
+            "service": "notes.create",
+            "outcome": "unavailable"
+          }
+        ],
+        "image": "not-created",
+        "fault": "none"
+      }
+    }
+  ]
+}

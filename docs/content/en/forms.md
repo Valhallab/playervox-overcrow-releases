@@ -102,7 +102,7 @@ the caret in the field, after its text, as a click in it would.
 
 <!-- source: widgets/notes/view.ocml -->
 ```xml
-        <field class="title-field" name="title" autofocus placeholder={t("title-hint")} label={t("title-hint")} on:input={titleInput(editor.note, event.value)} on:keydown={keyed(editor.note, event.key, event.ctrl)}/>
+        <field class="title-field" name="title" autofocus placeholder={t("title-hint")} label={t("title-hint")} on:input={titleInput(editor.key, event.value)} on:keydown={keyed(editor.key, event.key, event.ctrl)}/>
 ```
 
 OverCrow gives that focus only when the element appears during a
@@ -297,7 +297,7 @@ row added since is a new entry.
               <else>
                 <icon class="row-new" name="circle"/>
               </else>
-              <field class="row-field" name="item" placeholder={rowHint(editor, row)} label={t("item-hint")} on:input={rowInput(editor.note, row.key, event.value)} on:keydown={keyed(editor.note, event.key, event.ctrl)}/>
+              <field class="row-field" name="item" placeholder={rowHint(editor, row)} label={t("item-hint")} on:input={rowInput(editor.key, row.key, event.value)} on:keydown={keyed(editor.key, event.key, event.ctrl)}/>
 ```
 
 In that form, Enter moves to the next field instead of submitting;

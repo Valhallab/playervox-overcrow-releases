@@ -41,9 +41,24 @@ export interface Row {
  * hidden when it is not the one shown: OverCrow keeps the draft.
  */
 export interface Editor {
-  note: string;
+  /**
+   * Stable key of the form in the view: the note's ID, or a key of its
+   * own for the editor of a note being created.
+   */
+  key: string;
+  /**
+   * The note the form saves to. `null` while a new note is being created:
+   * the form is already there, so that its title takes the focus in the
+   * turn of the user's click, and OverCrow fills it once it has its note.
+   */
+  note: string | null;
   /** The user opened it and has not saved or cancelled since. */
   open: boolean;
+  /**
+   * The editor of a note just created: it shows until its note is the
+   * active one, which the document says a moment after the click.
+   */
+  fresh: boolean;
   /** `null` until OverCrow filled the form. */
   title: string | null;
   body: string | null;
@@ -164,7 +179,7 @@ export function editable(view: View): boolean {
 }
 
 export function noteOf(view: View, id: string | null): Note | null {
-  return view.doc?.notes.find((note) => note.id === id) ?? null;
+  return id === null ? null : (view.doc?.notes.find((note) => note.id === id) ?? null);
 }
 
 /** The note shown: the document's active one. */
@@ -190,7 +205,12 @@ export function showsChecklist(view: View): boolean {
 }
 
 export function editorOf(view: View, id: string | null): Editor | null {
-  return view.editors.find((editor) => editor.note === id) ?? null;
+  return id === null ? null : (view.editors.find((editor) => editor.note === id) ?? null);
+}
+
+/** The editor whose form has this key. */
+export function editorAt(view: View, key: string): Editor | null {
+  return view.editors.find((editor) => editor.key === key) ?? null;
 }
 
 /** The rows a save keeps: trimmed, the empty ones left out. */
@@ -266,19 +286,34 @@ export function unavailableKey(view: View): string {
   return canRead && view.unavailable ? "error-unavailable" : "error-permission";
 }
 
-/** The editor of the active note shows in place of its preview. */
-export function editing(view: View): boolean {
+/**
+ * The editor that shows, in Interactive mode: the one of a note just
+ * created, else the open one of the active note.
+ */
+export function shownEditor(view: View): Editor | null {
+  if (!editable(view)) {
+    return null;
+  }
+  const fresh = view.editors.find((editor) => editor.open && editor.fresh);
+  if (fresh !== undefined) {
+    return fresh;
+  }
   const editor = editorOf(view, view.doc?.active ?? null);
-  return editable(view) && editor !== null && editor.open;
+  return editor !== null && editor.open ? editor : null;
+}
+
+/** An editor shows in place of the active note's preview. */
+export function editing(view: View): boolean {
+  return shownEditor(view) !== null;
 }
 
 /**
- * The classes of an editor's form: shown for the active note in
- * Interactive mode, hidden otherwise. Hidden, it stays in the view and
- * OverCrow keeps the draft its controls hold.
+ * The classes of an editor's form: shown for the editor that shows,
+ * hidden otherwise. Hidden, it stays in the view and OverCrow keeps the
+ * draft its controls hold.
  */
 export function editorClass(view: View, editor: Editor): string {
-  return editing(view) && editor.note === view.doc?.active ? "editor" : "editor hidden";
+  return shownEditor(view) === editor ? "editor" : "editor hidden";
 }
 
 /** Whether the item shows checked: a check just sent, else the stored one. */
@@ -355,11 +390,11 @@ export function untitled(editor: Editor): boolean {
 }
 
 /**
- * Save is active once OverCrow filled the form, with a title, while no
- * save is in flight.
+ * Save is active once the form has its note and OverCrow filled it, with a
+ * title, while no save is in flight.
  */
 export function canSave(view: View, editor: Editor): boolean {
-  return editable(view) && editor.title !== null && !untitled(editor) && !editor.pending;
+  return editable(view) && editor.note !== null && editor.title !== null && !untitled(editor) && !editor.pending;
 }
 
 export function saveClass(view: View, editor: Editor): string {
@@ -404,8 +439,10 @@ function openEditor(note: Note): void {
   let editor = editorOf(state, note.id);
   if (editor === null) {
     editor = {
+      key: note.id,
       note: note.id,
       open: true,
+      fresh: false,
       title: null,
       body: null,
       rows: note.items.map((item, index) => ({ key: `row-${index}`, id: item.id, text: item.text })),
@@ -420,32 +457,34 @@ function openEditor(note: Note): void {
 }
 
 /** Removes an editor: OverCrow forgets its form's draft with it. */
-function closeEditor(id: string): void {
-  state.editors = state.editors.filter((editor) => editor.note !== id);
+function closeEditor(key: string): void {
+  state.editors = state.editors.filter((editor) => editor.key !== key);
 }
 
 /**
  * The editors leave the screen: a draft stays, hidden, with its form; an
- * editor without a change is closed.
+ * editor without a change is closed, and so is the editor of a note that
+ * is still being created.
  */
 function setEditorsAside(): void {
   state.editors = state.editors.filter((editor) => editor.pending || dirty(editor, noteOf(state, editor.note)));
   for (const editor of state.editors) {
     editor.open = false;
+    editor.fresh = false;
   }
 }
 
 /** The title's text, from the user's typing or from OverCrow's fill. */
-export function titleInput(id: string, text: string): void {
-  const editor = editorOf(state, id);
+export function titleInput(key: string, text: string): void {
+  const editor = editorAt(state, key);
   if (editor !== null) {
     editor.title = text;
   }
 }
 
 /** The body's text, from the user's typing or from OverCrow's fill. */
-export function bodyInput(id: string, text: string): void {
-  const editor = editorOf(state, id);
+export function bodyInput(key: string, text: string): void {
+  const editor = editorAt(state, key);
   if (editor !== null) {
     editor.body = text;
   }
@@ -455,8 +494,8 @@ export function bodyInput(id: string, text: string): void {
  * A row's text. Typing in the empty row at the end adds the next one, so
  * that Enter, which OverCrow moves to the next field, continues the list.
  */
-export function rowInput(id: string, key: string, text: string): void {
-  const editor = editorOf(state, id);
+export function rowInput(form: string, key: string, text: string): void {
+  const editor = editorAt(state, form);
   const row = editor?.rows.find((candidate) => candidate.key === key);
   if (editor === null || row === undefined) {
     return;
@@ -466,8 +505,8 @@ export function rowInput(id: string, key: string, text: string): void {
 }
 
 /** Removes a row from the form: its entry leaves the note at the next save. */
-export function dropRow(id: string, key: string): void {
-  const editor = editorOf(state, id);
+export function dropRow(form: string, key: string): void {
+  const editor = editorAt(state, form);
   if (editor === null) {
     return;
   }
@@ -478,19 +517,20 @@ export function dropRow(id: string, key: string): void {
 const answers = new Map<string, Timer>();
 
 /** OverCrow is sending the form: the editor waits for the outcome. */
-function sending(id: string): void {
-  const editor = editorOf(state, id);
-  if (editor === null || editor.pending) {
+function sending(key: string): void {
+  const editor = editorAt(state, key);
+  // Without its note yet, the form has nothing to save to.
+  if (editor === null || editor.note === null || editor.pending) {
     return;
   }
   editor.pending = true;
   state.busy += 1;
   state.error = "";
   answers.set(
-    id,
+    key,
     timers.after(ANSWER_MS, () => {
-      answers.delete(id);
-      const waiting = editorOf(state, id);
+      answers.delete(key);
+      const waiting = editorAt(state, key);
       if (waiting !== null && waiting.pending) {
         waiting.pending = false;
         state.busy = Math.max(0, state.busy - 1);
@@ -501,14 +541,14 @@ function sending(id: string): void {
 }
 
 /** The Save button: OverCrow submits the form on the same gesture. */
-export function saving(id: string): void {
-  sending(id);
+export function saving(key: string): void {
+  sending(key);
 }
 
 /** Ctrl+Enter in a field or the body submits the form too. */
-export function keyed(id: string, key: string, ctrl: boolean): void {
+export function keyed(form: string, key: string, ctrl: boolean): void {
   if (key === "Enter" && ctrl) {
-    sending(id);
+    sending(form);
   }
 }
 
@@ -517,31 +557,33 @@ export function keyed(id: string, key: string, ctrl: boolean): void {
  * failure's code when it was refused. Stored, the editor closes and the
  * subscription shows the note; refused, the form keeps the draft.
  */
-export function saved(id: string, outcome: string, error: ServiceErrorPayload | undefined): void {
-  const editor = editorOf(state, id);
+export function saved(key: string, outcome: string, error: ServiceErrorPayload | undefined): void {
+  const editor = editorAt(state, key);
   if (editor !== null && editor.pending) {
     editor.pending = false;
     state.busy = Math.max(0, state.busy - 1);
   }
-  answers.get(id)?.cancel();
-  answers.delete(id);
+  answers.get(key)?.cancel();
+  answers.delete(key);
   if (outcome === "accepted") {
     state.error = "";
-    closeEditor(id);
-  } else if (outcome !== "cancelled") {
+    closeEditor(key);
+  } else if (outcome !== "cancelled" && (editor === null || editor.note !== null)) {
+    // (A save asked before the new note exists had no note to go to:
+    // nothing to report, the form is filled a moment later.)
     state.error = editor !== null && untitled(editor) ? "add-title" : errorKey(error?.code ?? null);
   }
 }
 
 /** Cancel: the draft is discarded with its form. */
-export function cancel(id: string): void {
-  closeEditor(id);
+export function cancel(key: string): void {
+  closeEditor(key);
 }
 
 // ---------------------------------------------------------------------
 // Calls. Each one is made while handling the user's gesture.
 
-function sent<T>(promise: Promise<T>, done: (value: T) => void): void {
+function sent<T>(promise: Promise<T>, done: (value: T) => void, refused: () => void = () => {}): void {
   state.busy += 1;
   promise.then(
     (value) => {
@@ -551,6 +593,7 @@ function sent<T>(promise: Promise<T>, done: (value: T) => void): void {
     },
     (error: ServiceError) => {
       state.busy = Math.max(0, state.busy - 1);
+      refused();
       // The user declined the host's confirmation: nothing to say.
       if (error.code !== "cancelled") {
         state.error = errorKey(error.code);
@@ -592,20 +635,63 @@ export function edit(id: string): void {
   openEditor(note);
 }
 
-/** A new note, titled by OverCrow, opened in its editor. */
+/** Number of the next new note's editor. */
+let created = 0;
+
+/**
+ * A new note, titled by OverCrow, opened in its editor. The editor is in
+ * the view at once, in the turn of the user's click, so that its title
+ * takes the focus; its note comes with OverCrow's answer, and OverCrow
+ * fills the form then. If the note cannot be created (the notes are full,
+ * the store refuses), the editor goes and the failure is said.
+ */
 export function create(): void {
   state.menu = false;
   setEditorsAside();
-  sent(notes.create(), (created) => {
-    openEditor(created.note);
-  });
+  // A key no note and no editor has.
+  let key = "";
+  do {
+    created += 1;
+    key = `new:${created}`;
+  } while (noteOf(state, key) !== null || editorAt(state, key) !== null);
+  const editor: Editor = {
+    key,
+    note: null,
+    open: true,
+    fresh: true,
+    title: null,
+    body: null,
+    rows: [],
+    next: 0,
+    pending: false,
+  };
+  addEmptyRow(editor);
+  state.editors.push(editor);
+  sent(
+    notes.create(),
+    (answer) => {
+      const waiting = editorAt(state, key);
+      // The user went elsewhere meanwhile: the note exists, without editor.
+      if (waiting === null) {
+        return;
+      }
+      if (answer.note.id === null) {
+        closeEditor(key);
+        return;
+      }
+      waiting.note = answer.note.id;
+    },
+    () => {
+      closeEditor(key);
+    },
+  );
 }
 
 /** Deletes a note: OverCrow asks the user to confirm first. */
 export function remove(id: string): void {
   state.menu = false;
   sent(notes.delete({ note: id }), () => {
-    closeEditor(id);
+    state.editors = state.editors.filter((editor) => editor.note !== id);
   });
 }
 
@@ -613,8 +699,8 @@ export function remove(id: string): void {
  * Checks or unchecks a stored item at once: the box shows the new state
  * until OverCrow stored it, and goes back if it could not.
  */
-export function check(note: string, item: string | null, value: boolean): void {
-  if (item === null) {
+export function check(note: string | null, item: string | null, value: boolean): void {
+  if (note === null || item === null) {
     return;
   }
   state.checks[item] = value;
@@ -661,8 +747,15 @@ function show(doc: Notes): void {
   // What is stored changed: the last failure is no longer the news. A
   // refused write changes nothing, so its message stays.
   state.error = "";
-  // A note deleted, here or elsewhere, takes its editor with it.
-  state.editors = state.editors.filter((editor) => noteOf(state, editor.note) !== null);
+  // A note deleted, here or elsewhere, takes its editor with it. The
+  // editor of a note being created has none yet and stays.
+  state.editors = state.editors.filter((editor) => editor.note === null || noteOf(state, editor.note) !== null);
+  // A new note is now the active one: its editor shows as any other.
+  for (const editor of state.editors) {
+    if (editor.fresh && editor.note !== null && editor.note === doc.active) {
+      editor.fresh = false;
+    }
+  }
   if (doc.notes.length < 2) {
     state.menu = false;
   }

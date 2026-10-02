@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "delete",
-  "description": "The trash asks OverCrow, which confirms in its own chrome. Declined: nothing changes and nothing is said. Confirmed: the note goes and the next one shows. A deletion from the list; one OverCrow could not store. The last note deleted: Add note, in English and French, in Interactive mode only. A new note opens in its editor, titled by OverCrow.",
+  "description": "The trash asks OverCrow, which confirms in its own chrome. Declined: nothing changes and nothing is said. Confirmed: the note goes and the next one shows. A deletion from the list; one OverCrow could not store. The last note deleted: Add note, in English and French, in Interactive mode only. A new note opens in its editor, the caret in its title, titled by OverCrow.",
   "host": {
     "mode": "interactive"
   },

@@ -34,7 +34,10 @@ Interactive mode; Passive mode shows its top.
   on a note shows it, and each row has its own edit and delete buttons.
   OverCrow stores which note is shown.
 - **Add** creates a note titled "Note {n}" by OverCrow and opens its
-  editor.
+  editor. The editor is there from the click, with the caret in its
+  title: OverCrow fills the title when the note exists, and typing goes
+  on after it. A note that cannot be created (eight notes already, a
+  store that refuses) leaves no editor, and the widget says why.
 - **Delete** asks OverCrow, which confirms in its own panel beside the
   widget, naming the note: "Delete “Expedition”? This permanently deletes
   the note and its checklist." Declined, nothing changes.
@@ -166,6 +169,7 @@ writes.
   | `drafts` | a draft through another note, the list, Passive mode and a hidden widget; an unchanged editor closed; Cancel |
   | `checks` | a check written at once, stored, refused; a check in the editor |
   | `delete` | a deletion declined, confirmed, from the list, refused; the last note; a new note |
+  | `create` | a new note: its editor at the click with the caret in the title, the title filled, typing without a click, the save; a note that could not be created |
   | `limits` | 96 bytes of title, 8192 of text, 256 of an entry; eight notes; a full checklist that scrolls above Save |
   | `unavailable` | the source failed and came back, in French on a light panel; a failure with a draft open |
   | `refused` | no grant: no call |

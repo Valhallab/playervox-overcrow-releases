@@ -320,28 +320,96 @@ test("a draft is hidden in Passive mode and back in Interactive mode", () => {
   logic.cancel("note-1");
 });
 
-test("a new note opens in its editor; the ninth is refused by OverCrow", async () => {
+test("a new note's editor is there from the click, and gets its note with OverCrow's answer", async () => {
   reset();
   logic.create();
   assert.equal(state.busy, 1);
-  vm.lastCall("notes.create").resolve({ note: note("note-3", "Note 3") });
-  await flush();
-  vm.push(SERVICE, doc([expedition(), note("note-2", "Build ideas"), note("note-3", "Note 3")], "note-3"));
+  // In the turn of the click: the form exists and shows, so that its title
+  // takes the focus; it has no note yet and cannot be saved.
+  assert.equal(state.editors.length, 1);
+  const editor = state.editors[0];
+  assert.equal(editor.note, null);
+  assert.equal(logic.shownEditor(state), editor);
   assert.equal(logic.editing(state), true);
+  assert.equal(logic.editorClass(state, editor), "editor");
   assert.deepEqual(
-    logic.editorOf(state, "note-3").rows.map((row) => row.id),
+    editor.rows.map((row) => row.id),
     [null],
     "one empty row",
   );
-  logic.cancel("note-3");
+  logic.titleInput(editor.key, "Typed early");
+  assert.equal(logic.canSave(state, editor), false, "no note to save to yet");
+  logic.saving(editor.key);
+  assert.equal(editor.pending, false);
+  // A change of the document meanwhile keeps the editor.
+  vm.push(SERVICE, doc([expedition(), note("note-2", "Build ideas")]));
+  assert.equal(logic.shownEditor(state), editor);
 
+  vm.lastCall("notes.create").resolve({ note: note("note-3", "Note 3") });
+  await flush();
+  assert.equal(editor.note, "note-3", "the form now has its target");
+  assert.equal(state.editors.length, 1, "the same form, not another one");
+  assert.equal(logic.shownEditor(state), editor, "before the document names the new note");
+  vm.push(SERVICE, doc([expedition(), note("note-2", "Build ideas"), note("note-3", "Note 3")], "note-3"));
+  assert.equal(logic.shownEditor(state), editor);
+  assert.equal(editor.fresh, false, "its note is the active one");
+  assert.equal(logic.editorOf(state, "note-3"), editor);
+  // OverCrow fills the form: Save is active.
+  logic.titleInput(editor.key, "Note 3");
+  logic.bodyInput(editor.key, "");
+  assert.equal(logic.canSave(state, editor), true);
+  logic.cancel(editor.key);
+  assert.equal(state.editors.length, 0);
+});
+
+test("a note that cannot be created leaves no editor and says why", async () => {
+  reset();
   const eight = Array.from({ length: 8 }, (_, index) => note(`note-${index + 1}`, `Note ${index + 1}`));
   vm.push(SERVICE, doc(eight));
   assert.equal(logic.full(state), true);
+  for (const [code, message] of [
+    ["quota_exceeded", "error-full"],
+    ["unavailable", "error-unavailable"],
+    ["permission_denied", "error-permission"],
+  ]) {
+    logic.create();
+    assert.equal(state.editors.length, 1);
+    vm.lastCall("notes.create").reject(code);
+    await flush();
+    assert.equal(state.editors.length, 0, `${code}: no orphan editor`);
+    assert.equal(logic.editing(state), false);
+    assert.equal(state.error, message);
+    assert.equal(state.busy, 0);
+  }
+});
+
+test("going elsewhere before the new note exists drops its editor; a draft elsewhere is kept", async () => {
+  reset();
+  openEditor();
+  logic.titleInput("note-1", "Changed");
   logic.create();
-  vm.lastCall("notes.create").reject("quota_exceeded");
+  assert.equal(state.editors.length, 2, "the draft is kept aside");
+  const fresh = state.editors.find((editor) => editor.note === null);
+  assert.equal(logic.shownEditor(state), fresh);
+  // The user chooses another note before OverCrow answered.
+  logic.select("note-2");
+  assert.equal(state.editors.includes(fresh), false);
+  vm.lastCall("notes.create").resolve({ note: note("note-3", "Note 3") });
   await flush();
-  assert.equal(state.error, "error-full");
+  assert.equal(logic.editorOf(state, "note-3"), null, "the note exists, without an editor");
+  assert.equal(logic.drafted(state, "note-1"), true);
+  // Two notes created in a row have two forms.
+  logic.create();
+  const first = logic.shownEditor(state);
+  logic.create();
+  const second = logic.shownEditor(state);
+  assert.notEqual(first.key, second.key);
+  assert.equal(state.editors.includes(first), false, "the first one left with the second click");
+  for (const call of vm.calls.filter((pending) => !pending.settled)) {
+    call.reject("unavailable");
+  }
+  await flush();
+  assert.equal(state.editors.some((editor) => editor.note === null), false);
 });
 
 test("a deletion is OverCrow's to confirm: declined, nothing is said; done, the note's editor goes", async () => {
