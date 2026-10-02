@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "typing",
-  "description": "The editor with the keyboard alone, after one click in the title. End, typing, Shift+Home and typing over a selection, Backspace, Delete, the arrows and Ctrl+A in the title; Enter goes to the text, where Enter is a line break; Tab reaches the checklist; Enter goes from row to row and continues on the empty row, which gets its successor as soon as something is typed; Escape changes nothing; Tab and Shift+Tab stay in the widget. Ctrl+Enter saves: OverCrow sends its own values, each row with the entry it holds, and the editor closes once the note is stored.",
+  "description": "The editor with the keyboard alone: opening it puts the caret after the title (`autofocus`), without a click in the field. End, typing, Shift+Home and typing over a selection, Backspace, Delete, the arrows and Ctrl+A in the title; Enter goes to the text, where Enter is a line break; Tab reaches the checklist; Enter goes from row to row and continues on the empty row, which gets its successor as soon as something is typed; Escape changes nothing; Tab and Shift+Tab stay in the widget. Ctrl+Enter saves: OverCrow sends its own values, each row with the entry it holds, and the editor closes once the note is stored.",
   "host": {
     "mode": "interactive"
   },
@@ -76,13 +76,6 @@
       "pointer": {
         "click": {
           "label": "Edit current note"
-        }
-      }
-    },
-    {
-      "pointer": {
-        "click": {
-          "label": "Note title"
         }
       }
     },

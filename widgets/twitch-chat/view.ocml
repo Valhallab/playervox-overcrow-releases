@@ -56,7 +56,7 @@
          OverCrow's to edit, and a new field is an empty one. -->
     <for each={selectors(state)} as="selector" key={selector}>
       <form class="selector" on:submit={join}>
-        <field class="input channel" max-length="26" placeholder={t("channel-name")} label={t("channel-name")} on:input={channelTyped(event.value)}/>
+        <field class="input channel" max-length="26" autofocus placeholder={t("channel-name")} label={t("channel-name")} on:input={channelTyped(event.value)}/>
         <button class="action" submit disabled={!canJoin(state)}>
           <text class="action-label">{t("join")}</text>
         </button>
