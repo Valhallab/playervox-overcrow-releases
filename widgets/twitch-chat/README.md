@@ -77,8 +77,8 @@ the other leaves or stops, or when you join from it again.
 ## The history and the pace of the chat
 
 Each line is the author's name, in bold and in their Twitch colour, then
-the message: text and emotes, as tall as the line, each with its name as
-accessible label. OverCrow keeps a colour readable on the panel of the
+the message: text and emotes, as tall as the line and centred on it, each
+with its name as accessible label. OverCrow keeps a colour readable on the panel of the
 current theme (a very dark name is lightened on a dark panel, a very light
 one darkened on a light panel); an author without a colour is grey. A long
 message wraps.
