@@ -470,7 +470,7 @@ impl Linker<'_> {
                             format!("@overcrow/sdk does not export `{imported}`"),
                         )
                         .in_file(display_path(id, self.logic_path))
-                        .help("see docs/sdk-reference.md for the exported names")
+                        .help("see https://overcrow.playervox.com/docs/en/sdk/ for the exported names")
                     })?;
                     match target {
                         Target::Namespace(module) => {
@@ -583,7 +583,7 @@ impl<'a> VisitMut<'a> for NamespaceRewriter<'a, '_> {
                             "logic.import",
                             format!("@overcrow/sdk does not export `{name}`"),
                         )
-                        .help("see docs/sdk-reference.md for the exported names"),
+                        .help("see https://overcrow.playervox.com/docs/en/sdk/ for the exported names"),
                     );
                 }
             }
@@ -642,7 +642,7 @@ fn minify(script: &str) -> Result<String> {
 // ------------------------------------------------------------- view table
 
 /// The generated view module: the expression table of `view.json` in the
-/// calling convention of `registerView` (docs/sdk-reference.md). Called
+/// calling convention of `registerView` (docs/cli.md). Called
 /// names are the logic module's exports; `t` is the SDK's unless the logic
 /// module exports its own.
 pub fn view_module(view: &CompiledView, logic_exports: &BTreeSet<String>) -> String {

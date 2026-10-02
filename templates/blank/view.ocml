@@ -1,5 +1,6 @@
-<!-- The view: elements, bindings and handlers (docs/widget-source-formats.md).
-     Expressions call functions exported by logic.ts; t() reads locales/. -->
+<!-- The view: elements, bindings and handlers
+     (https://overcrow.playervox.com/docs/en/view/). Expressions call
+     functions exported by logic.ts; t() reads locales/. -->
 <box class="root">
   <text class="title">{t("hello")}</text>
 </box>

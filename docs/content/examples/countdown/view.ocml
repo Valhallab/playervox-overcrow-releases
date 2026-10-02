@@ -1,0 +1,42 @@
+<!-- A countdown: a ring that empties, a duration chosen in a list, and the
+     finished rounds drawn as dots. A right click opens a small menu. -->
+<component name="stat" props="name value">
+  <box class="stat">
+    <text class="stat-name">{name}</text>
+    <text class="stat-value">{value}</text>
+  </box>
+</component>
+
+<box ref="panel" class="countdown" on:contextmenu={openMenu}>
+  <box class="dial">
+    <gauge class={ringClass(state.remainingMs)} value={state.remainingMs} max={total(state.minutes)} label={t("remaining")}/>
+    <text class="time">{timeLeft(state.remainingMs)}</text>
+  </box>
+  <box class="controls">
+    <select class="duration" value={minutesValue(state.minutes)} label={t("duration")} disabled={state.running} on:change={setMinutes}>
+      <for each={state.durations} as="minutes" key={minutes}>
+        <option value={minutesValue(minutes)}>{t("minutes", { count: minutes })}</option>
+      </for>
+    </select>
+    <button class="start" label={startLabel(state.running)} on:activate={toggle}>
+      <if test={state.running}>
+        <icon name="pause"/>
+      </if>
+      <else>
+        <icon name="play"/>
+      </else>
+    </button>
+    <toggle class="repeat" label={t("repeat")} tooltip={t("repeat")} checked={state.repeat} on:change={setRepeat}/>
+  </box>
+  <stat name={t("state")} value={stateText(state.running, state.remainingMs)}/>
+  <if test={state.showRounds}>
+    <stat name={t("rounds")} value={state.rounds}/>
+    <canvas ref="dots" class="dots" label={t("rounds-drawn", { count: state.rounds })}/>
+  </if>
+</box>
+
+<popover anchor="panel" placement="pointer" open={state.menu} on:dismiss={closeMenu}>
+  <button class="menu-row" on:activate={resetRounds}>
+    <text class="menu-text">{t("reset-rounds")}</text>
+  </button>
+</popover>

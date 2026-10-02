@@ -1,8 +1,8 @@
 // The creator documentation (docs/content/, docs/content/README.md): every
 // page exists in both languages with the same code blocks, every code block
 // is an excerpt of a project the CLI checks, packages and admits, every
-// `overcrow-widget` command of a shell block exists, and the generated
-// regions are current.
+// `overcrow-widget` command of a shell block exists, the generated regions
+// are current, and every generated description has its French translation.
 //
 //   node scripts/prepare-widgets.mjs   (links the SDK into the examples)
 //   node --test --test-concurrency=2 tests/docs-content.test.mjs
@@ -131,7 +131,7 @@ test("every overcrow-widget command of a shell block exists", () => {
   }
 });
 
-test("the generated regions are current", () => {
+test("the generated regions are current and their descriptions translated", () => {
   const result = spawnSync(process.execPath, [join(root, "scripts", "build-docs-content.mjs"), "--check"], {
     encoding: "utf8",
   });

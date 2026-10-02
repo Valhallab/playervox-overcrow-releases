@@ -7,6 +7,12 @@
 //   `…/tree/main/PATH`) must name an existing path, as a relative one;
 // - the retired Web downloads (`…/docs/downloads/…`) may not be linked.
 //
+// It also checks every address of the documentation website
+// (under `overcrow.playervox.com/docs/`) that a tracked text file cites,
+// the messages of the CLI included: the address must be a page of
+// docs/content/pages.json, in English (`/docs/en/<slug>/`) or in French
+// (`/docs/<slug>/`), and its `#anchor` a heading of that page.
+//
 // Other external URLs are not fetched.
 //
 //   node scripts/check-links.mjs [REPOSITORY]
@@ -122,14 +128,73 @@ export function check(root, files) {
   return problems;
 }
 
+const SITE_URL = /https:\/\/overcrow\.playervox\.com\/docs\/[^\s"'`)<>\]\\]*/g;
+const SITE_PATH = /^https:\/\/overcrow\.playervox\.com\/docs\/(en\/)?(?:([a-z0-9]+(?:-[a-z0-9]+)*)\/)?(?:#(.+))?$/;
+const TEXT_FILE = /\.(?:md|rs|ts|tsx|js|mjs|json|toml|ya?ml|sh|ocml|ocss)$/;
+
+/**
+ * Problems of the documentation website addresses cited by `files`: each
+ * must name a page of docs/content/pages.json and, with an anchor, one of
+ * its headings in that language.
+ */
+export function checkSite(root, files) {
+  const content = join(root, "docs", "content");
+  const pages = JSON.parse(readFileSync(join(content, "pages.json"), "utf8")).pages;
+  const headings = new Map();
+  const problems = [];
+  for (const file of files.filter((name) => TEXT_FILE.test(name))) {
+    readFileSync(join(root, file), "utf8")
+      .split("\n")
+      .forEach((line, index) => {
+        for (const match of line.matchAll(SITE_URL)) {
+          // Punctuation that ends a sentence is not part of the address.
+          const url = match[0].replace(/[.,;:!?]+$/, "");
+          const where = `${file}:${index + 1}`;
+          if (RETIRED.some((pattern) => pattern.test(url))) {
+            problems.push(`${where}: ${url} is a retired Web download`);
+            continue;
+          }
+          const parts = url.match(SITE_PATH);
+          const page = parts && pages.find((entry) => entry.slug === (parts[2] ?? ""));
+          if (!page) {
+            problems.push(`${where}: ${url} is no page of the documentation website`);
+            continue;
+          }
+          if (parts[3] === undefined) {
+            continue;
+          }
+          const source = join(content, parts[1] ? "en" : "fr", page.file);
+          if (!headings.has(source)) {
+            headings.set(source, anchors(readFileSync(source, "utf8")));
+          }
+          let anchor;
+          try {
+            anchor = decodeURIComponent(parts[3]);
+          } catch {
+            anchor = parts[3];
+          }
+          if (!headings.get(source).has(anchor)) {
+            problems.push(`${where}: ${url} names no heading of ${relative(root, source).split(sep).join("/")}`);
+          }
+        }
+      });
+  }
+  return problems;
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const root = resolve(process.argv[2] ?? join(dirname(fileURLToPath(import.meta.url)), ".."));
-  const files = execFileSync("git", ["-C", root, "ls-files", "-z", "--cached", "--others", "--exclude-standard", "*.md"], {
-    encoding: "utf8",
-  })
-    .split("\0")
-    .filter((file) => file && existsSync(join(root, file)));
-  const problems = check(root, files);
+  const tracked = (...patterns) =>
+    execFileSync("git", ["-C", root, "ls-files", "-z", "--cached", "--others", "--exclude-standard", ...patterns], {
+      encoding: "utf8",
+      maxBuffer: 64 * 1024 * 1024,
+    })
+      .split("\0")
+      .filter((file) => file && existsSync(join(root, file)) && statSync(join(root, file)).isFile());
+  const files = tracked("*.md");
+  // The scratch links of the link check's own test are broken on purpose.
+  const cited = tracked().filter((file) => file !== "tests/check-links.test.mjs");
+  const problems = [...check(root, files), ...checkSite(root, cited)];
   for (const problem of problems) {
     console.error(problem);
   }
@@ -137,5 +202,5 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     console.error(`check-links: ${problems.length} broken link(s)`);
     process.exit(1);
   }
-  console.log(`check-links: ${files.length} Markdown files, no broken link`);
+  console.log(`check-links: ${files.length} Markdown files and ${cited.length} files citing the website, no broken link`);
 }

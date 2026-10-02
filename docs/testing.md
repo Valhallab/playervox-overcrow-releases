@@ -1,7 +1,7 @@
 # Testing
 
 How this repository is tested. Testing a widget of your own is described in
-[testing a widget](widget-testing.md). Website rendering and browser tests
+[testing a widget](https://overcrow.playervox.com/docs/en/testing/). Website rendering and browser tests
 belong to the separate web repository.
 
 ## Widget contract
@@ -57,7 +57,8 @@ any accepted archive byte for byte.
 The `sdk-cli` workflow builds and tests the CLI, type-checks, builds and
 tests the SDK, requires a reproducible npm package and `.ocpkg`, and checks,
 packages and unit-tests the reference widgets of `widgets/`; see the
-[SDK README](../sdk/README.md) and the [CLI guide](cli.md):
+[SDK README](../sdk/README.md) and the
+[CLI guide](https://overcrow.playervox.com/docs/en/cli/):
 
 ```sh
 cargo test -p overcrow-widget-cli --all-targets --locked
@@ -70,10 +71,15 @@ node --test --test-concurrency=2 widgets/*/tests/*.test.mjs
 
 The creator documentation (`docs/content/`) is checked by the `sdk-cli`
 workflow, after the CLI and the SDK are built: its generated tables are
-current, both languages have the same code blocks, each code block is an
-excerpt of a project that the CLI checks, packages and admits, and each
-`overcrow-widget` command it shows exists. The `policy` workflow checks the
-links of every Markdown file:
+current, every generated description has its French translation and no
+translation is left without its description, both languages have the same
+code blocks, each code block is an excerpt of a project that the CLI checks,
+packages and admits, and each `overcrow-widget` command it shows exists. The
+SDK's tests check that the SDK reference page lists every export, in both
+languages. The `policy` workflow checks the links of every Markdown file,
+and every address of the documentation website that a tracked file cites
+(the CLI's messages included) against the pages and headings of
+`docs/content/`:
 
 ```sh
 node scripts/build-docs-content.mjs --check

@@ -1,0 +1,15 @@
+{
+  "name": "overcrow-example-countdown",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "check": "overcrow-widget check",
+    "package": "overcrow-widget package"
+  },
+  "devDependencies": {
+    "@overcrow/sdk": "1.0.0",
+    "typescript": "6.0.3"
+  }
+}

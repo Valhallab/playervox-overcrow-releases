@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "example",
-  "description": "The counter starts at 0 and Increase adds one. `overcrow-widget test` plays it and compares the images with tests/reference/example/; `--update` records them again (docs/widget-testing.md).",
+  "description": "The counter starts at 0 and Increase adds one. `overcrow-widget test` plays it and compares the images with tests/reference/example/; `--update` records them again (https://overcrow.playervox.com/docs/en/testing/).",
   "host": { "mode": "interactive" },
   "steps": [
     { "expect": { "state": "running", "text": ["0"], "image": "initial" } },

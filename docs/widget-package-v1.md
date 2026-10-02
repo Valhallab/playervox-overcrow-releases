@@ -1,61 +1,27 @@
 # Widget package and catalog format v1
 
-This document specifies how a widget is packaged, signed, listed, shipped
-offline and admitted by the host. The decisions and their reasons are
-recorded in the OverCrow design record ADR 0005; every field table and
-numeric bound is generated from the `overcrow-widget-schema` crate into the
-[widget schema reference](widget-schema-v1.md) (sections Manifest, Package and
-Catalog), which wins over this text if they ever disagree.
+What a package holds and how OverCrow checks it is documented for creators
+on the website: [the package](https://overcrow.playervox.com/docs/en/package/)
+and [publishing and review](https://overcrow.playervox.com/docs/en/publishing/)
+([français](https://overcrow.playervox.com/docs/package/)), from
+[`docs/content/en/package.md`](content/en/package.md) and
+[`docs/content/en/publishing.md`](content/en/publishing.md). The manifest is
+on [its own page](https://overcrow.playervox.com/docs/en/manifest/).
 
-Nothing here is implemented in the host yet: the validators exist in the
-schema crate with conformance fixtures, and the host adopts them in P1.8.
-
-## Manifest
-
-`manifest.json` is written by the creator and is one strict JSON object: a
-byte-order mark, a duplicate key, trailing data or an unknown field rejects
-it. Its fields are in the reference (Manifest). A minimal manifest:
-
-```json
-{
-  "schemaVersion": 1,
-  "apiVersion": 1,
-  "id": "com.example.minimal",
-  "version": "0.1.0",
-  "name": { "en": "Minimal", "fr": "Minimal" },
-  "sizing": {
-    "fit": "none",
-    "preferred": { "width": 200, "height": 100 },
-    "min": { "width": 200, "height": 100 },
-    "max": { "width": 200, "height": 100 }
-  }
-}
-```
-
-A widget that needs a larger QuickJS heap adds `"vm": { "heapMiB": 32 }`: any
-whole number of MiB from 16 (the default) to 48. The VM process ceiling stays
-64 MiB, so the extra heap comes out of the same per-widget budget.
-
-A Web API manifest is rejected like any invalid manifest (`api_version`).
+This document keeps the specification that implementers of a host, of a
+packaging tool or of the catalog need: the exact bytes of the archive and of
+the ledger, the signed catalog, the offline seed and the lifecycle of the
+built-ins. Every field table and numeric bound is generated from the
+`overcrow-widget-schema` crate into the
+[widget schema reference](widget-schema-v1.md) (sections Manifest, Package
+and Catalog), which wins over this text if they ever disagree.
 
 ## Package `.ocpkg` v1
 
-### Files
-
-| Path | Required | Content |
-| --- | --- | --- |
-| `manifest.json` | yes | The manifest, as authored. |
-| `ledger.json` | yes | SHA-256 and size of every other entry, written by the CLI. |
-| `logic.js` | yes | The widget logic and the compiled template expressions; the only executable content. |
-| `view.json` | yes | The compiled view. |
-| `LICENSE` | yes | License text. |
-| `style.ocss` | no | Style sheet source, parsed by the host at activation. |
-| `locales/en.json`, `locales/fr.json` | both or neither | Flat `{ "key": "text" }` messages with the same keys. |
-| `assets/…` | no | PNG, JPEG or WebP images whose signature matches the extension; lowercase `[a-z0-9_-]` segments. |
-
-Any other entry rejects the package: `view.ocml`, `.html`, `.wasm`, a second
-script, native code, hidden files, other locales. Text files are UTF-8
-without byte-order mark or NUL.
+The files of a package, their limits and the nodes of the compiled view
+`view.json` are listed in the schema reference
+([Package](widget-schema-v1.md#package)). Any other entry rejects the
+package. Text files are UTF-8 without byte-order mark or NUL.
 
 ### Archive layout
 
@@ -84,42 +50,6 @@ It lists every entry except itself, in byte order of the path, with the
 lowercase hexadecimal SHA-256. The reader recomputes it from the archive and
 requires the same bytes. The ledger keeps the authored manifest unchanged
 between the source tree, the package and the catalog.
-
-### Compiled view
-
-The CLI compiles `view.ocml` ([source format](widget-source-formats.md)) into
-`view.json`, a JSON tree, and compiles each
-template expression and event handler into a function of `logic.js`. The tree
-refers to these functions by index in a table that `logic.js` registers with
-the SDK before the widget code runs (the call is defined by P2.1). For
-example, `<box class="clock"><text class="time">{time()}</text></box>`
-becomes:
-
-```json
-{
-  "viewFormat": 1,
-  "expressions": 1,
-  "children": [
-    {
-      "element": "box",
-      "attrs": { "class": "clock" },
-      "children": [
-        { "element": "text", "attrs": { "class": "time" }, "text": [{ "expr": 0 }] }
-      ]
-    }
-  ]
-}
-```
-
-Node kinds are `element`, `if`, `for`, `component` (a use) and `slot`; their
-fields are in the reference. At activation the host checks, before starting
-the VM: known elements and the parent rules of the scene, known attributes
-with static values of the right type, required attributes present statically
-or bound, events of the element, expression indices below `expressions`,
-components declared once, used with declared props and never recursive, at
-most one `slot` per component, the element, children and depth bounds, and
-that every static `assets/…` image is in the package. The host then sends the
-tree to the VM in `Init` and still validates every scene patch.
 
 ### Admission and activation
 
@@ -193,7 +123,7 @@ Its effect is default installation with default consent (ADR 0001, Q2); see
 ### Keys
 
 - Production keys (`overcrow-widgets-YYYY-NN`) are generated offline by the
-  release owner in P4.2. Their private halves never enter a repository, a
+  release owner. Their private halves never enter a repository, a
   release asset, CI or a log. The public keys ship with the application, at
   most `MAX_TRUST_KEYS` at once for rotation.
 - `overcrow-widgets-development` signs local development marketplaces
@@ -235,7 +165,7 @@ The host uses the seed at startup, before or without network:
 
 Expiry only governs installation from the seed; installed packages keep
 running. The release pipeline cuts the seed from a published catalog when it
-builds the application (P4.2).
+builds the application.
 
 ## Built-in lifecycle
 

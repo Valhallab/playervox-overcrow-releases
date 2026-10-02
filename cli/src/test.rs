@@ -125,7 +125,7 @@ pub fn run(root: &Path, options: &Options<'_>) -> ExitCode {
             Some(_) => "no scenario of this name in tests/",
             None => "the project has no tests/*.scenario.json",
         };
-        eprintln!("overcrow-widget: {message} (docs/widget-testing.md)");
+        eprintln!("overcrow-widget: {message} (https://overcrow.playervox.com/docs/en/testing/)");
         return ExitCode::from(1);
     }
     let runtime = match runtime::resolve(options.runtime, runtime::PIN.as_ref()) {

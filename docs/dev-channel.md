@@ -1,9 +1,14 @@
-# The development channel, version 1
+# The development channel, version 1: wire protocol
 
 `overcrow-widget dev` installs a widget in a running OverCrow overlay, reloads
-it when its sources change, and shows its states and logs. It talks to the
-overlay through the **development channel** described here. The
-implementation both ends share is the MIT crate
+it when its sources change, and shows its states and logs. How to turn the
+channel on and what `dev` shows is documented for creators on the website:
+[the development channel](https://overcrow.playervox.com/docs/en/dev-channel/)
+([français](https://overcrow.playervox.com/docs/dev-channel/)), from
+[`docs/content/en/dev-channel.md`](content/en/dev-channel.md).
+
+This document is the protocol itself, for those who implement either end.
+The implementation both ends share is the MIT crate
 [`crates/overcrow-widget-devchannel`](../crates/overcrow-widget-devchannel)
 (messages, bounds, framing), and its test vectors,
 [`vectors/v1.json`](../crates/overcrow-widget-devchannel/vectors/v1.json), are
@@ -14,24 +19,10 @@ package in full, exactly as it validates a sideloaded one, runs it in the same
 sandbox, grants it only the permissions its manifest declares and only for
 the session, never persists anything of it, and marks it
 "Unverified · development package" in both modes. Nothing sent over the
-channel skips a check.
-
-## Availability
-
-The channel exists only while an overlay runs **with development installs
-allowed**: OverCrow started with the environment variable
-`OVERCROW_WIDGET_DEVELOPMENT=1`. Without it, the overlay opens no socket or
-pipe at all. `overcrow-widget doctor` says whether the channel is there and
-how to restart OverCrow with it.
-
-- **Linux**: `systemctl --user set-environment OVERCROW_WIDGET_DEVELOPMENT=1`,
-  then `systemctl --user restart overcrow-overlay.service`. Undo it with
-  `systemctl --user unset-environment OVERCROW_WIDGET_DEVELOPMENT` and the
-  same restart (or log out).
-- **Windows**: quit OverCrow (tray icon, Quit), then start it from
-  PowerShell: `$env:OVERCROW_WIDGET_DEVELOPMENT='1'; & "$env:LOCALAPPDATA\Programs\OverCrow\OverCrow.exe"`.
-
-One overlay holds the channel at a time.
+channel skips a check. The channel exists only while an overlay runs with
+development installs allowed (`OVERCROW_WIDGET_DEVELOPMENT=1`); without it,
+the overlay opens no socket or pipe at all. One overlay holds the channel at
+a time.
 
 ## Transport and identity
 
@@ -109,7 +100,7 @@ file the client chooses.
 | `status` | `request`, `widgets` | Up to 64 `{id, state, failure?}`. |
 | `event` | `kind` (`installed`, `failed`, `removed`), `id`?, `code`? | `installed` and `removed` name the widget; `failed` has a `code` and no ID. |
 | `state` | `id`, `state`, `failure`? | A widget's state changed: `starting`, `running`, `restarting`, `failed` (waits for a reload), `refused`, `stopped`; `failure` is the overlay's category (`resource_limit`, `unresponsive`…). |
-| `log` | `id`, `generation`, `level` (`debug`, `info`, `warn`, `error`), `text` | A `log` of the widget's logic ([SDK](sdk-reference.md)), at most 4 096 bytes of text. |
+| `log` | `id`, `generation`, `level` (`debug`, `info`, `warn`, `error`), `text` | A `log` of the widget's logic, at most 4 096 bytes of text. |
 | `dropped` | `count` | Events, states or logs dropped because the client read too slowly. |
 
 `?` marks a member present only when it applies; it is then never `null`.
@@ -161,9 +152,7 @@ are.
 The protocol version is `1`. Any change to a message, a member or a
 bound's meaning is a new version; an overlay refuses versions it does not
 speak with `unsupported_protocol` and the list it supports, and
-`overcrow-widget doctor` reports the mismatch. Event replay and service
-fixtures (the simulator of the next release of the CLI) will be new
-requests of a later version.
+`overcrow-widget doctor` reports the mismatch.
 
 ## Test vectors
 

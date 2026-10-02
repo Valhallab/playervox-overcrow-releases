@@ -23,13 +23,17 @@ goldens and the SDK types in the same change (see the [README](README.md) and
 
 Keep the documentation on the current widget API v1 contract:
 
-- The creator documentation in `docs/content/` exists in English and French;
-  update both languages together, with the same code blocks. Its tables are
-  generated and its code blocks are excerpts of checked projects; see
-  [its README](docs/content/README.md).
-- The technical manuals of `docs/` are in English. Each topic has one source
-  page; other pages link to it rather than copy it.
-- Every relative link must resolve: `node scripts/check-links.mjs`.
+- The creator documentation in `docs/content/` is what the website shows, in
+  English and French; update both languages together, with the same code
+  blocks, and the French catalog of the generated descriptions with them.
+  Its tables are generated and its code blocks are excerpts of checked
+  projects; see [its README](docs/content/README.md), which also holds the
+  English–French glossary.
+- Everything a creator needs is in `docs/content/`. The other documents of
+  `docs/` are specifications and notes for implementers and maintainers, in
+  English; they link to the website's page instead of repeating it.
+- Every relative link, and every address of the documentation website,
+  must resolve: `node scripts/check-links.mjs`.
 
 ```sh
 cargo test -p overcrow-widget-cli --locked

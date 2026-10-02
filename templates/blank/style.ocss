@@ -1,4 +1,5 @@
-/* The style subset (docs/widget-source-formats.md); tokens follow the theme. */
+/* The style subset (https://overcrow.playervox.com/docs/en/style/); tokens
+   follow the theme. */
 .root {
   padding: var(--space-3);
 }

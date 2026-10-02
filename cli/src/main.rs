@@ -1,5 +1,5 @@
 //! `overcrow-widget`: the creator CLI of OverCrow widget API v1. See
-//! `docs/cli.md`.
+//! `docs/content/en/cli.md` (the website's page) and `docs/cli.md`.
 
 mod admit;
 mod build;
@@ -52,7 +52,7 @@ Exit status: 0 success (warnings allowed), 1 errors found, 2 usage or I/O error.
 `admit` ends with 1 when the submission would be refused.
 `test` ends with 1 when a scenario fails, 2 when no runtime can run.
 `dev` runs until Ctrl+C (0), or ends with 1 when the overlay ends the session.
-Guide: docs/cli.md in https://github.com/Valhallab/playervox-overcrow-releases";
+Guide: https://overcrow.playervox.com/docs/en/cli/";
 
 #[derive(Clone, Copy, PartialEq)]
 enum Format {

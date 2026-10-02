@@ -1,18 +1,16 @@
 # Guide du créateur
 
-Ce guide mène un widget d’un dossier vide à une soumission : créer un
-projet, modifier sa vue, son style et sa logique, le lancer dans OverCrow, le
-tester, l’empaqueter et le soumettre. Chaque étape renvoie au manuel qui la
-détaille ; les manuels de référence sont en anglais.
+Ce guide mène un widget PlayerVox OverCrow d’un dossier vide à une
+soumission : créer un projet, modifier sa vue, son style et sa logique, le
+lancer dans OverCrow, le tester, l’empaqueter et le soumettre. Chaque étape
+renvoie à la page qui la traite en détail.
 
 ## 1. Installer les outils
 
-- **`overcrow-widget`**, le CLI des widgets, un seul binaire pour Linux et
-  Windows. En attendant sa première release, compilez-le depuis ce dépôt
-  avec la toolchain Rust épinglée : voir
-  [installing the CLI](../../cli.md#installing).
+- **`overcrow-widget`**, la CLI des widgets, un seul binaire pour Linux et
+  Windows. Voir [installer la CLI](cli.md#installation).
 - **Node.js 22 ou plus récent**, pour que `check` vérifie les types de votre
-  logique avec le TypeScript du projet. Sans lui, le CLI vérifie et
+  logique avec le TypeScript du projet. Sans lui, la CLI vérifie et
   empaquette quand même, mais signale que les types n’ont pas été vérifiés.
 - **OverCrow**, pour lancer le widget pendant que vous l’écrivez.
 
@@ -24,20 +22,21 @@ manque.
 ```sh
 overcrow-widget init my-counter --template counter
 cd my-counter
-npm install
 ```
 
 Les templates sont `blank`, `counter`, `list` et `chart`. L’ID vaut par
-défaut `com.example.<dossier>` : passez `--id` avec un nom DNS inversé que
-vous contrôlez (`com.playervox.*` est réservé). La
-[structure du projet](../../cli.md#project-layout) liste chaque fichier et
-indique lesquels sont empaquetés.
+défaut `com.example.<dir>` : passez `--id` avec un nom DNS inversé que vous
+contrôlez (`com.playervox.*` est réservé).
+[Fichiers d’un projet](cli.md#fichiers-dun-projet) liste chaque fichier et
+indique lesquels sont empaquetés ;
+[les types du SDK](cli.md#les-types-du-sdk) explique comment installer
+TypeScript et les types du SDK dans le projet.
 
 ## 3. La vue
 
 `view.ocml` est du balisage : des éléments, des attributs, des expressions
-`{…}` liées à l’état, et des gestionnaires `on:<événement>` qui appellent
-des fonctions exportées par la logique.
+`{…}` liées à l’état, et des gestionnaires `on:<event>` qui appellent des
+fonctions exportées par la logique.
 
 <!-- source: templates/counter/view.ocml -->
 ```xml
@@ -54,10 +53,9 @@ des fonctions exportées par la logique.
 </box>
 ```
 
-Les gabarits offrent aussi `if`, `for` avec une clé obligatoire, et des
-composants locaux. Chaque élément et attribut figure dans la
-[référence](reference.md) ; la syntaxe est décrite dans
-[source formats](../../widget-source-formats.md).
+La vue offre aussi `if`, `for` avec une clé obligatoire, et des composants
+locaux : voir [la vue](view.md). Chaque élément et chaque attribut figure
+dans [éléments et attributs](elements.md).
 
 ## 4. Le style
 
@@ -74,14 +72,19 @@ en `var(--…)`, qui suivent le thème clair ou sombre de l’utilisateur.
   border-radius: var(--radius-md);
   background: var(--color-surface-raised);
 }
+```
 
+<!-- source: templates/counter/style.ocss -->
+```css
 .step:hover {
   background: var(--color-surface-hover);
 }
 ```
 
 Il n’y a ni `@media`, ni `@import`, ni `url()`, ni `calc()` : une
-propriété ou un sélecteur inconnu est une erreur, pas un effet silencieux.
+propriété ou un sélecteur inconnu est une erreur, il n’est pas ignoré en
+silence. Voir [le style](style.md) et
+[propriétés de style et tokens](style-properties.md).
 
 ## 5. La logique
 
@@ -98,25 +101,27 @@ declare module "@overcrow/sdk" {
     count: number;
   }
 }
+```
 
-const state = initState({ count: 0 });
-
+<!-- source: templates/counter/logic.ts -->
+```ts
 export function increment(): void {
   state.count += 1;
 }
 ```
 
-La logique tourne dans une VM isolée, pas dans un navigateur : il n’y a ni
-DOM, ni `fetch`, ni `setTimeout`, ni `console`, ni `Intl`. Le SDK fournit
-les minuteurs, les services de l’hôte, des fonctions de formatage des heures
-et des nombres au format régional de l’utilisateur, les messages et le
-dessin. Lisez le [SDK guide](../../sdk-guide.md).
+La logique tourne dans une VM enfermée dans un sandbox, pas dans un
+navigateur : il n’y a ni DOM, ni `fetch`, ni `setTimeout`, ni `console`, ni
+`Intl`. Le SDK fournit les minuteurs, les services, des fonctions de
+formatage des heures et des nombres au format régional de l’utilisateur, les
+messages et le dessin. Voir [la logique](logic.md) et la
+[référence du SDK](sdk.md).
 
 ## 6. Les messages
 
-`t("clé")`, dans la vue ou la logique, lit `locales/en.json` ou
+`t("key")`, dans la vue ou la logique, lit `locales/en.json` ou
 `locales/fr.json` selon la langue de l’utilisateur et remplit les paramètres
-`{nom}`.
+`{name}`.
 
 <!-- source: templates/counter/locales/en.json -->
 ```json
@@ -126,7 +131,8 @@ dessin. Lisez le [SDK guide](../../sdk-guide.md).
 }
 ```
 
-Fournissez les deux fichiers ou aucun, avec les mêmes clés.
+Fournissez les deux fichiers ou aucun, avec les mêmes clés. Voir
+[messages](logic.md#messages).
 
 ## 7. Vérifier
 
@@ -137,8 +143,8 @@ overcrow-widget check
 `check` exécute les mêmes validateurs qu’OverCrow : manifeste, vue, style,
 messages, une analyse de la logique selon ce que la VM exécute, le
 TypeScript du projet, et un paquet construit en mémoire puis relu. Chaque
-problème a un code stable, une position et une aide ; voir les
-[diagnostics](../../cli.md#diagnostics).
+problème a un code stable, une position et une ligne d’aide ; voir les
+[diagnostics](cli.md#diagnostics).
 
 ## 8. Le lancer dans OverCrow
 
@@ -146,24 +152,26 @@ problème a un code stable, une position et une aide ; voir les
 overcrow-widget dev
 ```
 
-`dev` envoie le widget à l’overlay OverCrow de votre machine et le recharge
-à chaque enregistrement. OverCrow ne le permet que s’il a été lancé avec les
-installations de développement autorisées (`OVERCROW_WIDGET_DEVELOPMENT=1` ;
-`overcrow-widget doctor` affiche les commandes). Le widget porte la mention
+`dev` envoie le widget à l’overlay OverCrow qui tourne sur votre machine et
+le recharge à chaque enregistrement. OverCrow ne le propose que s’il a été
+lancé avec les installations de développement autorisées
+(`OVERCROW_WIDGET_DEVELOPMENT=1` ; `overcrow-widget doctor` affiche les
+commandes). Le widget porte la mention
 **Unverified · development package** ; ses permissions déclarées sont
 accordées pour la session seulement, et rien n’est conservé. Les
-`log.info(…)` de votre logique s’affichent dans le terminal. Détails :
-[`dev`](../../cli.md#dev-dir).
+`log.info(…)` de votre logique s’affichent dans le terminal. Voir
+[le canal de développement](dev-channel.md).
 
 ## 9. Le tester
 
-Deux sortes de tests, décrites dans [testing a widget](../../widget-testing.md) :
+Deux sortes de tests, décrites dans [tester un widget](testing.md) :
 
 - des tests unitaires de la logique avec `@overcrow/sdk/testing`, qui
   exécute votre module avec un temps virtuel et des services simulés ;
 - des scénarios joués par `overcrow-widget test` dans le runtime headless
   d’OverCrow : la vraie VM et le vrai rendu, des services qui répondent avec
-  des fixtures, et des images comparées à des références.
+  des fixtures (des données simulées), et des images comparées à des images
+  de référence.
 
 <!-- source: templates/counter/tests/example.scenario.json -->
 ```json
@@ -178,9 +186,6 @@ Deux sortes de tests, décrites dans [testing a widget](../../widget-testing.md)
 ```sh
 overcrow-widget test --runtime path/to/overcrow-widget-headless
 ```
-
-Le runtime headless sera publié avec les releases d’OverCrow ; tant que le
-CLI n’en épingle pas un, passez son chemin avec `--runtime`.
 
 ## 10. Demander ce dont vous avez besoin
 
@@ -216,15 +221,10 @@ paramètres typés :
 
 Les données du jeu et du système viennent d’abonnements (`fps.subscribe`,
 `media.subscribe`…), qui mettent votre état à jour jusqu’à ce que vous les
-annuliez. Un abonnement se termine par un échec quand la source de l’hôte
-échoue, `unavailable` pour un lecteur multimédia qui ne répond plus :
-affichez-le et abonnez-vous de nouveau quelques secondes plus tard avec
-`timers.after`, comme le fait le [widget Média](../../../widgets/media/logic.ts).
-
-L’exemple complet se trouve dans
-[`docs/content/examples/weather`](../examples/weather/). Lisez
-[sécurité](security.md) pour savoir ce que chaque permission autorise et ce
-qu’un widget ne peut jamais faire.
+annuliez. [Services et permissions](services.md) explique ce que chaque
+permission autorise, et [sécurité](security.md) ce qu’un widget ne peut
+jamais faire. L’exemple complet se trouve dans
+[`docs/content/examples/weather`](../examples/weather/).
 
 ## 11. Empaqueter
 
@@ -234,16 +234,18 @@ overcrow-widget inspect dist/com.example.my-counter-0.1.0.ocpkg
 ```
 
 `package` écrit un `.ocpkg` déterministe dans `dist/` : les mêmes sources
-et la même version du CLI donnent les mêmes octets sur tous les systèmes.
+et la même version de la CLI donnent les mêmes octets sur tous les systèmes.
 `inspect` montre ce qu’un paquet contient et demande, comme le voit un
 relecteur. Un paquet installé localement reste non vérifié ; les
-utilisateurs obtiennent les widgets par le catalogue signé.
+utilisateurs obtiennent les widgets par le catalogue signé. Voir
+[le paquet](package.md).
 
 ## 12. Soumettre
 
 Ajoutez un `listing.json` avec le texte de la marketplace, lancez vous-même
 l’admission, puis ouvrez une pull request qui ajoute votre widget sous
-`widgets/<dossier>/` sur la branche `candidate` :
+`widgets/<dir>/`, sur la branche `candidate` du
+[dépôt public](https://github.com/Valhallab/playervox-overcrow-releases) :
 
 ```sh
 overcrow-widget admit

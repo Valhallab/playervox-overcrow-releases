@@ -1,0 +1,94 @@
+.countdown {
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+/* The time sits in the middle of the ring: both share one grid cell. */
+.dial {
+  display: grid;
+  grid-template-columns: 72px;
+  grid-template-rows: 72px;
+  justify-content: center;
+  justify-items: center;
+  align-items: center;
+}
+
+.ring {
+  grid-column: 1;
+  grid-row: 1;
+  width: 72px;
+  height: 72px;
+  color: var(--color-accent);
+}
+
+.ring.done {
+  color: var(--color-success);
+  animation: countdown-pulse 800ms ease-in-out 3 alternate;
+}
+
+@keyframes countdown-pulse {
+  from { opacity: 1; }
+  to { opacity: 0.4; }
+}
+
+.time {
+  grid-column: 1;
+  grid-row: 1;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.controls {
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.duration {
+  flex-grow: 1;
+}
+
+.start {
+  width: var(--control-height);
+  height: var(--control-height);
+  justify-content: center;
+  align-items: center;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  transition: background-color var(--duration-fast) ease-out;
+}
+
+.start:hover {
+  background: var(--color-surface-hover);
+}
+
+.start:focus {
+  border: 1px solid var(--color-accent);
+}
+
+.repeat:checked {
+  color: var(--color-accent);
+}
+
+.stat {
+  justify-content: space-between;
+  font-size: var(--font-size-small);
+}
+
+.stat-name {
+  color: var(--color-text-muted);
+}
+
+.dots {
+  height: 12px;
+}
+
+.menu-row {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+}
+
+.menu-row:hover {
+  background: var(--color-surface-hover);
+}

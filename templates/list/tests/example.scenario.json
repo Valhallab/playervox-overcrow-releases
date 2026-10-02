@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "example",
-  "description": "The checklist in English, then in French with the light theme. `overcrow-widget test` plays it and compares the images with tests/reference/example/; `--update` records them again (docs/widget-testing.md).",
+  "description": "The checklist in English, then in French with the light theme. `overcrow-widget test` plays it and compares the images with tests/reference/example/; `--update` records them again (https://overcrow.playervox.com/docs/en/testing/).",
   "steps": [
     { "expect": { "state": "running", "text": ["Today", "2 left"], "image": "initial" } },
     { "host": { "locale": "fr", "theme": "light" } },

@@ -42,7 +42,7 @@ async function load(): Promise<void> {
     state.status = "updated";
     await storage.set({ key, value });
   } catch (error) {
-    // permission_denied until the user consents, network_error offline…
+    // permission_denied until the user consents, transport_failed offline…
     state.status = error instanceof ServiceError ? "unavailable" : "failed";
   }
 }

@@ -307,7 +307,7 @@ fn check_listing(path: &Path, findings: &mut Findings, publisher: Publisher, rep
                     "a submission needs listing.json next to manifest.json",
                 )
                 .in_file(LISTING_FILE)
-                .help("see the listing section of docs/publishing.md"),
+                .help("see https://overcrow.playervox.com/docs/en/publishing/#the-listing"),
             );
             return;
         }
@@ -328,7 +328,7 @@ fn check_listing(path: &Path, findings: &mut Findings, publisher: Publisher, rep
         report.push(
             Diagnostic::error("admission.listing", "listing.json is refused by the catalog's Listing rules")
                 .in_file(LISTING_FILE)
-                .help("author, spdxLicense, an https sourceUrl, defaultLocale and plain-text localizations; see docs/publishing.md"),
+                .help("author, spdxLicense, an https sourceUrl, defaultLocale and plain-text localizations; see https://overcrow.playervox.com/docs/en/publishing/#the-listing"),
         );
         return;
     }

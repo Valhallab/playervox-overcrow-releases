@@ -1,0 +1,15 @@
+{
+  "duration": "Duration",
+  "minutes": "{count} min",
+  "pause": "Pause",
+  "remaining": "Time left",
+  "repeat": "Start again when it ends",
+  "reset-rounds": "Reset the rounds",
+  "rounds": "Rounds",
+  "rounds-drawn": "{count} finished rounds",
+  "start": "Start",
+  "state": "State",
+  "state-done": "Finished",
+  "state-paused": "Paused",
+  "state-running": "Running"
+}

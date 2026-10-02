@@ -16,7 +16,7 @@ path = "src/main.rs"
 # lint and the view table are this crate's own. oxc is pre-1.0 and breaks its
 # API with each minor release: every oxc crate is pinned to the same exact
 # version, and an upgrade is an explicit change with new measurements
-# (docs/cli.md).
+# (docs/content/en/cli.md, docs/cli.md).
 [dependencies]
 overcrow-widget-devchannel = { path = "../crates/overcrow-widget-devchannel" }
 overcrow-widget-format = { path = "../crates/overcrow-widget-format" }

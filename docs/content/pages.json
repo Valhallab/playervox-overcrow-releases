@@ -22,15 +22,111 @@
       "label": { "en": "Reference widgets", "fr": "Widgets de référence" }
     },
     {
+      "slug": "manifest",
+      "file": "manifest.md",
+      "group": "build",
+      "label": { "en": "The manifest", "fr": "Le manifeste" }
+    },
+    {
+      "slug": "view",
+      "file": "view.md",
+      "group": "build",
+      "label": { "en": "The view", "fr": "La vue" }
+    },
+    {
+      "slug": "style",
+      "file": "style.md",
+      "group": "build",
+      "label": { "en": "The style", "fr": "Le style" }
+    },
+    {
+      "slug": "logic",
+      "file": "logic.md",
+      "group": "build",
+      "label": { "en": "The logic", "fr": "La logique" }
+    },
+    {
+      "slug": "services",
+      "file": "services.md",
+      "group": "build",
+      "label": { "en": "Services and permissions", "fr": "Services et permissions" }
+    },
+    {
+      "slug": "forms",
+      "file": "forms.md",
+      "group": "build",
+      "label": { "en": "Forms and write intents", "fr": "Formulaires et intents" }
+    },
+    {
+      "slug": "cli",
+      "file": "cli.md",
+      "group": "tools",
+      "label": { "en": "Command-line tool", "fr": "Outil en ligne de commande" }
+    },
+    {
+      "slug": "testing",
+      "file": "testing.md",
+      "group": "tools",
+      "label": { "en": "Testing", "fr": "Tests" }
+    },
+    {
+      "slug": "dev-channel",
+      "file": "dev-channel.md",
+      "group": "tools",
+      "label": { "en": "Development channel", "fr": "Canal de développement" }
+    },
+    {
       "slug": "reference",
       "file": "reference.md",
       "group": "reference",
-      "label": { "en": "Reference", "fr": "Référence" }
+      "label": { "en": "Overview of the reference", "fr": "Sommaire de la référence" }
+    },
+    {
+      "slug": "elements",
+      "file": "elements.md",
+      "group": "reference",
+      "label": { "en": "Elements and attributes", "fr": "Éléments et attributs" }
+    },
+    {
+      "slug": "style-properties",
+      "file": "style-properties.md",
+      "group": "reference",
+      "label": { "en": "Style properties and tokens", "fr": "Propriétés de style et tokens" }
+    },
+    {
+      "slug": "sdk",
+      "file": "sdk.md",
+      "group": "reference",
+      "label": { "en": "SDK", "fr": "SDK" }
+    },
+    {
+      "slug": "service-reference",
+      "file": "service-reference.md",
+      "group": "reference",
+      "label": { "en": "Services", "fr": "Services" }
+    },
+    {
+      "slug": "result-shapes",
+      "file": "result-shapes.md",
+      "group": "reference",
+      "label": { "en": "Result shapes", "fr": "Formes de résultat" }
+    },
+    {
+      "slug": "limits",
+      "file": "limits.md",
+      "group": "reference",
+      "label": { "en": "Limits", "fr": "Limites" }
+    },
+    {
+      "slug": "package",
+      "file": "package.md",
+      "group": "publish",
+      "label": { "en": "The package", "fr": "Le paquet" }
     },
     {
       "slug": "security",
       "file": "security.md",
-      "group": "reference",
+      "group": "publish",
       "label": { "en": "Security", "fr": "Sécurité" }
     },
     {
