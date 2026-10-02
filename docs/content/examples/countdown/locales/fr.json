@@ -1,0 +1,15 @@
+{
+  "duration": "Durée",
+  "minutes": "{count} min",
+  "pause": "Mettre en pause",
+  "remaining": "Temps restant",
+  "repeat": "Recommencer à la fin",
+  "reset-rounds": "Remettre les tours à zéro",
+  "rounds": "Tours",
+  "rounds-drawn": "{count} tours terminés",
+  "start": "Démarrer",
+  "state": "État",
+  "state-done": "Terminé",
+  "state-paused": "En pause",
+  "state-running": "En cours"
+}

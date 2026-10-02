@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.example.countdown",
+  "version": "1.0.0",
+  "name": { "en": "Countdown", "fr": "Compte à rebours" },
+  "sizing": {
+    "fit": "none",
+    "preferred": { "width": 220, "height": 190 },
+    "min": { "width": 180, "height": 160 },
+    "max": { "width": 480, "height": 400 }
+  },
+  "permissions": {
+    "storage": true
+  },
+  "wrapper": {
+    "menu": [
+      {
+        "type": "toggle",
+        "id": "show-rounds",
+        "label": { "en": "Show finished rounds", "fr": "Afficher les tours terminés" },
+        "icon": "circle-check",
+        "default": true
+      },
+      {
+        "type": "action",
+        "id": "reset-rounds",
+        "label": { "en": "Reset the rounds", "fr": "Remettre les tours à zéro" },
+        "icon": "rotate-ccw",
+        "visibleWhen": "show-rounds"
+      }
+    ]
+  }
+}

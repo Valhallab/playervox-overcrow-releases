@@ -1,0 +1,10 @@
+{
+  "author": "Example Studio",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/example/countdown-widget",
+  "defaultLocale": "en",
+  "localizations": [
+    { "locale": "en", "name": "Countdown", "description": "A countdown of a few minutes that counts the rounds you finish." },
+    { "locale": "fr", "name": "Compte à rebours", "description": "Un compte à rebours de quelques minutes, qui compte les tours terminés." }
+  ]
+}

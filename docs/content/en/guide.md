@@ -1,15 +1,14 @@
 # Creator guide
 
-This guide takes a widget from an empty directory to a submission: create a
-project, edit its view, style and logic, run it in OverCrow, test it,
-package it and submit it. Each step links to the manual that covers it in
-full.
+This guide takes a PlayerVox OverCrow widget from an empty directory to a
+submission: create a project, edit its view, style and logic, run it in
+OverCrow, test it, package it and submit it. Each step links to the page
+that covers it in full.
 
 ## 1. Install the tools
 
 - **`overcrow-widget`**, the widget CLI, one binary for Linux and Windows.
-  Until its first release, build it from this repository with the pinned
-  Rust toolchain; see [installing the CLI](../../cli.md#installing).
+  See [installing the CLI](cli.md#installing).
 - **Node.js 22 or later**, so that `check` can type-check your logic with the
   project's own TypeScript. The CLI checks and packages without it, but
   warns that types were not checked.
@@ -22,13 +21,14 @@ full.
 ```sh
 overcrow-widget init my-counter --template counter
 cd my-counter
-npm install
 ```
 
 The templates are `blank`, `counter`, `list` and `chart`. The ID defaults to
 `com.example.<dir>`: pass `--id` with a reverse-DNS name you control
-(`com.playervox.*` is reserved). The [project layout](../../cli.md#project-layout)
-lists every file and says which ones are packaged.
+(`com.playervox.*` is reserved). [Files of a project](cli.md#files-of-a-project)
+lists every file and says which ones are packaged;
+[the SDK types](cli.md#the-sdk-types) says how to install TypeScript and
+the SDK types into the project.
 
 ## 3. The view
 
@@ -50,9 +50,9 @@ state, and `on:<event>` handlers that call functions exported by the logic.
 </box>
 ```
 
-Templates also offer `if`, `for` with a mandatory key, and local components.
-Every element and attribute is in the [reference](reference.md); the syntax
-is in [source formats](../../widget-source-formats.md).
+The view also has `if`, `for` with a mandatory key, and local components:
+see [the view](view.md). Every element and attribute is in
+[elements and attributes](elements.md).
 
 ## 4. The style
 
@@ -69,14 +69,18 @@ child selectors, the `:hover`, `:active`, `:focus`, `:disabled` and
   border-radius: var(--radius-md);
   background: var(--color-surface-raised);
 }
+```
 
+<!-- source: templates/counter/style.ocss -->
+```css
 .step:hover {
   background: var(--color-surface-hover);
 }
 ```
 
 There is no `@media`, `@import`, `url()` or `calc()`: an unknown
-property or selector is an error, not a silent no-op.
+property or selector is an error, not a silent no-op. See
+[the style](style.md) and [style properties and tokens](style-properties.md).
 
 ## 5. The logic
 
@@ -93,18 +97,20 @@ declare module "@overcrow/sdk" {
     count: number;
   }
 }
+```
 
-const state = initState({ count: 0 });
-
+<!-- source: templates/counter/logic.ts -->
+```ts
 export function increment(): void {
   state.count += 1;
 }
 ```
 
 The logic runs in a sandboxed VM, not in a browser: there is no DOM,
-`fetch`, `setTimeout`, `console` or `Intl`. The SDK provides timers, host
+`fetch`, `setTimeout`, `console` or `Intl`. The SDK provides timers,
 services, formatting helpers for times and numbers in the user's regional
-format, messages and drawing. Read the [SDK guide](../../sdk-guide.md).
+format, messages and drawing. See [the logic](logic.md) and the
+[SDK reference](sdk.md).
 
 ## 6. Messages
 
@@ -119,7 +125,8 @@ format, messages and drawing. Read the [SDK guide](../../sdk-guide.md).
 }
 ```
 
-Provide both files or neither, with the same keys.
+Provide both files or neither, with the same keys. See
+[messages](logic.md#messages).
 
 ## 7. Check
 
@@ -131,7 +138,7 @@ overcrow-widget check
 locales, a lint of the logic against what the VM runs, the project's
 TypeScript, and a package built in memory and read back. Each problem has a
 stable code, a position and a help line; see
-[diagnostics](../../cli.md#diagnostics).
+[diagnostics](cli.md#diagnostics).
 
 ## 8. Run it in OverCrow
 
@@ -145,11 +152,12 @@ started with development installs allowed (`OVERCROW_WIDGET_DEVELOPMENT=1`;
 `overcrow-widget doctor` prints the commands). The widget shows an
 **Unverified · development package** marker; its declared permissions are
 granted for the session only, and nothing is stored. `log.info(…)` from your
-logic prints in the terminal. Details: [`dev`](../../cli.md#dev-dir).
+logic prints in the terminal. See
+[the development channel](dev-channel.md).
 
 ## 9. Test it
 
-Two kinds of tests, both described in [testing a widget](../../widget-testing.md):
+Two kinds of tests, both described in [testing a widget](testing.md):
 
 - unit tests of the logic with `@overcrow/sdk/testing`, which runs your
   module with virtual time and simulated services;
@@ -170,9 +178,6 @@ Two kinds of tests, both described in [testing a widget](../../widget-testing.md
 ```sh
 overcrow-widget test --runtime path/to/overcrow-widget-headless
 ```
-
-The headless runtime will be published with OverCrow releases; until the
-CLI pins one, pass its path with `--runtime`.
 
 ## 10. Ask for what you need
 
@@ -206,16 +211,11 @@ complete path, with typed parameters:
 ```
 
 Game and system data come from subscriptions (`fps.subscribe`,
-`media.subscribe`…), which update your state until you cancel them. A
-subscription ends with a failure when the host's source fails, `unavailable`
-for a media player that stopped answering: show it and subscribe again
-after a few seconds with `timers.after`, as the
-[Media widget](../../../widgets/media/logic.ts) does.
-
-The complete example is in
-[`docs/content/examples/weather`](../examples/weather/). Read
-[security](security.md) for what each permission allows and what a widget
-can never do.
+`media.subscribe`…), which update your state until you cancel them. See
+[services and permissions](services.md) for what each permission allows,
+and [security](security.md) for what a widget can never do. The complete
+example is in
+[`docs/content/examples/weather`](../examples/weather/).
 
 ## 11. Package
 
@@ -227,13 +227,15 @@ overcrow-widget inspect dist/com.example.my-counter-0.1.0.ocpkg
 `package` writes a deterministic `.ocpkg` to `dist/`: the same sources and
 CLI version give the same bytes on every system. `inspect` shows what a
 package holds and asks for, as a reviewer sees it. A package installed
-locally stays unverified; users get widgets from the signed catalog.
+locally stays unverified; users get widgets from the signed catalog. See
+[the package](package.md).
 
 ## 12. Submit
 
 Add a `listing.json` with the marketplace text, run the admission yourself,
 then open a pull request that adds your widget under `widgets/<dir>/` on the
-`candidate` branch:
+`candidate` branch of the
+[public repository](https://github.com/Valhallab/playervox-overcrow-releases):
 
 ```sh
 overcrow-widget admit

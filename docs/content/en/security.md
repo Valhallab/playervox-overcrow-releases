@@ -1,10 +1,9 @@
 # Security
 
-OverCrow treats every widget as untrusted code, built-ins included: the same
-package checks, the same sandbox, the same permissions and the same consent
-apply to a PlayerVox widget and to yours. This page describes what that
-means for a widget author. Numeric bounds are listed in the
-[schema reference](../../widget-schema-v1.md#limits).
+PlayerVox OverCrow treats every widget as untrusted code, built-ins
+included: the same package checks, the same sandbox, the same permissions
+and the same consent apply to a PlayerVox widget and to yours. This page
+describes what that means for a widget author.
 
 ## The sandbox
 
@@ -31,41 +30,20 @@ not observe pointer motion it has not asked for through an event.
 
 Going over a budget ends only that widget. OverCrow shows a fixed error in
 its frame and restarts it after 1, 5 and 15 seconds, at most three times;
-a package or protocol error waits for the user to enable it again.
+a package or protocol error waits for the user to enable it again. The
+numbers are in [limits](limits.md#logic).
 
 ## Permissions and consent
 
 A widget gets nothing it has not declared in `manifest.json`, and a
 declaration grants nothing by itself: OverCrow asks the user, who may
 refuse or revoke a permission at any time. Revoking stops the widget first.
-Check `hasGrant(capability)` in your logic and show a useful state when a
-capability is missing.
+OverCrow checks the permission again at every call of a service.
 
-Permissions:
-
-<!-- generated:permissions -->
-| Permission | Services | On a gesture |
-| --- | --- | --- |
-| `network` | `http.fetch` | — |
-| `storage` | `storage.get`, `storage.set`, `storage.remove`, `storage.keys` | — |
-| `clipboardWrite` | — | `clipboard.writeText` |
-| `gameEvents` | `gameEvents.subscribe` | — |
-<!-- /generated:permissions -->
-
-- **`network`** lists exact routes: one HTTPS origin, one method and one
-  complete path per rule, with typed path and query parameters. The request
-  leaves through OverCrow's broker, which refuses anything else, follows no
-  redirect, sends no cookie or credential, refuses local and private
-  addresses, and bounds the size and duration of each exchange. A response
-  is at most 1 MiB, unless the rule declares a larger `maxResponseBytes`
-  (up to 3 MiB): the bound shows in the review and in the permission
-  panel. Requests in flight share a byte budget per widget and for all
-  widgets, so a larger bound never raises OverCrow's worst case.
-- **`storage`** is a key-value store kept by OverCrow for your widget only,
-  within a quota. There is no file access.
-- **`clipboardWrite`** writes text, only while the user interacts with the
-  widget.
-- **`gameEvents`** delivers the named game events you declare.
+Four permissions open general services: `network` (exact HTTPS routes,
+through OverCrow's broker), `storage` (a key-value store for this widget
+only), `clipboardWrite` (writing text, during a user action) and
+`gameEvents` (named game events).
 
 Capabilities give access to data and actions of OverCrow and of the user's
 accounts. A **sensitive** capability reveals personal data or the game
@@ -73,56 +51,33 @@ being played: a widget that declares one cannot also declare `network` or
 `clipboardWrite`, and its storage lasts only as long as its process, so the
 data cannot leave the machine through the widget.
 
-<!-- generated:capabilities -->
-| Capability | Sensitive | Services | On a gesture |
-| --- | --- | --- | --- |
-| `telemetry.read` | no | `telemetry.subscribe` | — |
-| `fps.read` | no | `fps.subscribe` | — |
-| `media.read` | **yes** | `media.subscribe` | — |
-| `media.control` | **yes** | — | `media.previous`, `media.playPause`, `media.next` |
-| `session.read` | no | `session.subscribe` | — |
-| `stopwatch.read` | no | `stopwatch.subscribe` | — |
-| `stopwatch.control` | no | — | `stopwatch.toggle`, `stopwatch.reset` |
-| `notes.read` | **yes** | `notes.subscribe` | — |
-| `notes.write` | **yes** | — | `notes.create`, `notes.select`, `notes.setItem`, `notes.delete` |
-| `playervox.score.read` | **yes** | `playervox.score.subscribe` | — |
-| `playervox.rating.read` | **yes** | `playervox.rating.subscribe` | — |
-| `playervox.rating.write` | **yes** | none (host-bound intent) | — |
-| `playervox.reviews.read` | **yes** | `playervox.reviews.subscribe`, `playervox.reviews.page` | — |
-| `journal.read` | **yes** | `journal.subscribe`, `journal.page` | — |
-| `journal.delete` | **yes** | — | `journal.delete` |
-| `twitch.chat.read` | **yes** | `twitch.chat.subscribe` | `twitch.chat.join`, `twitch.chat.leave`, `twitch.chat.favorite` |
-| `twitch.chat.compose` | **yes** | none (host-bound intent) | — |
-<!-- /generated:capabilities -->
-
 Account connections (PlayerVox, Twitch) belong to OverCrow: sign-in, codes
 and tokens are drawn and kept by OverCrow, and a widget receives only the
 data its capability describes.
 
-Declare the least you need: reviewers read every permission and route, and
-users see them before they consent. Widgets tagged `built-in` in the signed
-catalog (PlayerVox widgets only) start with their declared permissions
-granted; an update that asks for more needs the user's consent, built-ins
-included.
+Each permission, each capability and the services it opens are described
+in [services and permissions](services.md). Declare the least you need:
+reviewers read every permission and route, and users see them before they
+consent. Widgets tagged `built-in` in the signed catalog (PlayerVox widgets
+only) start with their declared permissions granted; an update that asks
+for more needs the user's consent, built-ins included.
 
-## Gestures
+## User actions
 
-Actions that change something for the user need a real user gesture: the
-service must be called while one of these events is handled:
-
-<!-- generated:gesture-events -->
-`activate`, `contextmenu`, `keydown`, `input`, `change`, `submit`.
-<!-- /generated:gesture-events -->
-
-A call from a timer, a service answer or a widget menu row is refused with
-`gesture_required`. Widgets receive input only in OverCrow's interactive
-mode; in passive mode they are click-through. Deleting a note or a journal
-session also asks the user to confirm in a dialog drawn by OverCrow.
+Services that change something for the user can be called only while the
+logic handles a real action of the user in the widget: a click, a key, an
+edit, a submitted form. A call from a timer, from a service answer or from
+a row of the options menu is refused with `gesture_required`. Widgets
+receive input only in OverCrow's Interactive mode; in Passive mode they are
+click-through. Deleting a note or a journal session also asks the user to
+confirm in a dialog drawn by OverCrow. See
+[calls that need a user action](services.md#calls-that-need-a-user-action).
 
 What the user writes to notes, ratings and chat never passes through your
 logic: a `form` with an `intent` sends the values of its own text fields and
 sliders, which OverCrow fills, edits and submits itself. Your logic can read
-them, not set them.
+them, not set them. See
+[forms that write user data](forms.md#forms-that-write-user-data).
 
 ## What a widget cannot do
 
@@ -135,14 +90,22 @@ them, not set them.
 - Draw outside its frame, cover or imitate OverCrow's frame, menus,
   permission panel or confirmations.
 - Read account tokens, cookies or credentials.
+- Read the clipboard.
 - Write to logs in production: `log.*` output appears only in a local
   development session.
-- Grant itself a permission, or use a menu row as a gesture.
+- Grant itself a permission, or use a menu row as a user action.
+
+## What OverCrow verifies
 
 Every package is checked when it is admitted to the catalog and again each
-time OverCrow starts it: the signed catalog, the file ledger and the
-compiled view must match, or the widget does not start. See
+time OverCrow starts it: the signed catalog, the ledger of its files and
+the compiled view must match, or the widget does not start. See
+[the package](package.md#how-overcrow-checks-a-package) and
 [publishing and review](publishing.md).
+
+A version of the catalog can be suspended or revoked after its
+publication: OverCrow then stops the installed copy. See
+[version statuses](publishing.md#version-statuses).
 
 ## Reporting a vulnerability
 

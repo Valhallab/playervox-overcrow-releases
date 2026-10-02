@@ -1,15 +1,16 @@
 # Publishing and review
 
-Widgets reach OverCrow users through the signed widget catalog v1
-(`https://overcrow.playervox.com/marketplace/widgets/v1/catalog.json`). This
-page goes from a widget source directory to a listed version. Neither a
-pull request nor a merge publishes anything: publication is a separate,
-offline step of the maintainers.
+Widgets reach PlayerVox OverCrow users through the signed widget catalog:
+OverCrow installs only what that catalog lists. This page goes from a
+widget's source directory to a listed version. Neither a pull request nor a
+merge publishes anything: publication is a separate, offline step of the
+maintainers.
 
 ## The submission
 
-A submission is a widget source directory under `widgets/<dir>/` of this
-repository, in a pull request to the `candidate` branch:
+A submission is a widget source directory under `widgets/<dir>/` of the
+[public repository](https://github.com/Valhallab/playervox-overcrow-releases),
+in a pull request to its `candidate` branch:
 
 ```text
 widgets/<dir>/
@@ -17,6 +18,9 @@ widgets/<dir>/
   locales/en.json + locales/fr.json?   assets/**?   LICENSE
   listing.json    (marketplace text, never packaged)
 ```
+
+You submit sources, not a package: the catalog always ships the package
+rebuilt from the reviewed sources.
 
 Package IDs under `com.playervox` are reserved for widgets published by
 PlayerVox. Use a reverse-DNS ID under a domain you control, and keep it:
@@ -40,6 +44,16 @@ the ID is the widget's identity in the catalog.
 }
 ```
 
+<!-- generated:listing-fields -->
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `author` | text ≤ `MAX_AUTHOR_BYTES` | yes | Plain text, trimmed, without `<` or `>`. |
+| `spdxLicense` | text ≤ `MAX_SPDX_LICENSE_BYTES` | yes | SPDX expression characters `[A-Za-z0-9.+-]`. |
+| `sourceUrl` | text ≤ `MAX_CATALOG_URL_BYTES` | yes | Canonical HTTPS URL of the reviewed source, without port, query or fragment. |
+| `defaultLocale` | `locale` | yes | One of the localizations. |
+| `localizations` | list of `Localization` ≤ `MAX_LISTING_LOCALIZATIONS` | yes | `{ locale, name, description }` with distinct `xx` or `xx-YY` locales; name ≤ `MAX_LISTING_NAME_BYTES`, description ≤ `MAX_LISTING_DESCRIPTION_BYTES`. |
+<!-- /generated:listing-fields -->
+
 - `author`, names and descriptions are plain, trimmed text without `<` or
   `>`; locales are `xx` or `xx-YY`, one of them `defaultLocale`.
 - `spdxLicense` is an SPDX expression; the package's `LICENSE` holds its
@@ -51,9 +65,6 @@ the ID is the widget's identity in the catalog.
 - `preview` (optional) names a PNG packaged under `assets/`, at most
   256 KiB, for example `"preview": "assets/preview.png"`.
 
-The exact rules are the Listing rules of the
-[schema reference](../../widget-schema-v1.md#listing).
-
 ## Admission: run it yourself
 
 ```sh
@@ -62,25 +73,27 @@ overcrow-widget admit widgets/<dir> --package dist/<id>-<version>.ocpkg
 overcrow-widget admit widgets/<dir> --format json
 ```
 
-`admit` is exactly the static admission of the marketplace CI. It never runs
+`admit` is exactly the static admission of the marketplace. It never runs
 your code or `tsc`:
 
-1. it builds the directory with the `package` pipeline: every source, style,
-   logic and package check, then OverCrow's own package reader;
-2. with `--package`, your archive's `view.json` must be byte for byte what
-   `view.ocml` compiles to (the catalog always ships the rebuild from the
-   reviewed sources);
+1. it builds the directory as `package` does: every source, style, logic
+   and package check, then OverCrow's own package reader;
+2. with `--package`, your archive's compiled view must be byte for byte
+   what `view.ocml` compiles to;
 3. it checks the schema bounds, the reserved IDs, `listing.json`, the
    preview and, for PlayerVox widgets, the MIT license;
 4. it lists the authority the widget requests for the reviewer: sensitive
    capabilities, every network route, clipboard writes, storage and game
    events.
 
-The report ends with status 1 when the submission would be refused. The
-codes are listed with the [`admit` command](../../cli.md#admit-dir). On a
-pull request, the CI builds `overcrow-widget` from the reviewed base branch,
-never from your revision, and runs the same admission on your files as data;
-see the [review policy](../../review-policy.md).
+The command ends with status 1 when the submission would be refused. Its
+codes are listed with the [`admit` command](cli.md#admit).
+
+On a pull request, the admission tool is built from the reviewed base
+branch, never from your revision, and it reads your files as data: your
+JavaScript, TypeScript, build commands, tests and scripts are never
+executed there. A pull request may not change the tools of the admission
+themselves.
 
 ## Review
 
@@ -93,15 +106,16 @@ A maintainer reads the admission report and the source, then merges into
 - **Reproducibility.** The package is rebuilt from the reviewed sources.
 - **Authority.** Every capability, above all the sensitive ones; every
   network route, which must serve the widget's stated purpose; clipboard
-  writes, storage and game events. See [security](security.md).
+  writes, storage and game events. See
+  [services and permissions](services.md).
 - **Listing.** Exact, plain text in every locale; a canonical source URL; a
   preview that shows the widget.
 - **License.** `LICENSE` matches `spdxLicense`, and every bundled asset,
   font or third-party code keeps its notice.
 
-On the merge, CI admits the exact revision again and records a receipt that
-binds the admitted package to the reviewed commit. Accepting a submission
-signs and publishes nothing.
+On the merge, the exact revision is admitted again and a receipt binds the
+admitted package to the reviewed commit. Accepting a submission signs and
+publishes nothing.
 
 ## The catalog
 
@@ -109,19 +123,25 @@ The maintainers prepare the next catalog from admitted revisions and sign it
 offline with the catalog key, whose public half is in
 [`keys/`](../../../keys/). The catalog:
 
-- lists each version at
-  `…/widgets/v1/packages/<id>/<version>/<sha256>.ocpkg`, with its preview at
-  `…/widgets/v1/previews/<id>/<version>/<sha256>.png`; a published version
-  never changes, and a change is a new version;
-- carries a strictly increasing sequence and expires after at most 90 days:
-  OverCrow refuses an older sequence and an expired catalog;
+- lists each version with the SHA-256 and the size of its package; a
+  published version never changes, and a change is a new version;
+- carries a strictly increasing sequence number and expires after at most
+  90 days: OverCrow refuses an older sequence and an expired catalog;
 - tags PlayerVox reference widgets `built-in` (only `com.playervox.*` IDs):
   they are installed on a new profile with their declared permissions
   granted, except for an update that asks for more.
 
-OverCrow verifies the signature, the package digest, its file ledger and its
+OverCrow verifies the signature, the package digest, its ledger and its
 compiled view before installing, and again each time it starts the widget.
-The format is specified in [package and catalog format](../../widget-package-v1.md).
+See [the package](package.md#how-overcrow-checks-a-package).
+
+## Updates
+
+A new version of your widget is a new submission with a higher `version`:
+a published version is never replaced. An update whose manifest asks for
+more than the installed version (a network rule, a game event, a
+capability, storage or the clipboard) needs the user's consent before it
+runs.
 
 ## Version statuses
 
