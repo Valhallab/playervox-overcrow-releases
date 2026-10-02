@@ -176,7 +176,10 @@ fn project_checks(
                     "doctor.typescript_missing",
                     "TypeScript is not installed in this project (node_modules/typescript)",
                 )
-                .help("run `npm install` in the project"),
+                .help(format!(
+                    "install TypeScript and the SDK into the project: {}",
+                    crate::SDK_TYPES_GUIDE
+                )),
             );
         }
     }
@@ -196,8 +199,8 @@ fn project_checks(
                     ),
                 )
                 .help(format!(
-                    "types may disagree with the bundle: `npm install @overcrow/sdk@{}`",
-                    sdk::VERSION
+                    "types may disagree with the bundle: install the SDK of this CLI's repository ({})",
+                    crate::SDK_TYPES_GUIDE
                 )),
             );
         }
@@ -208,7 +211,10 @@ fn project_checks(
                     "doctor.sdk_missing",
                     "@overcrow/sdk is not installed in this project: types are not checked",
                 )
-                .help("run `npm install` in the project"),
+                .help(format!(
+                    "install TypeScript and the SDK into the project: {}",
+                    crate::SDK_TYPES_GUIDE
+                )),
             );
         }
     }

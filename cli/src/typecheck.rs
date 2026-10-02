@@ -32,7 +32,10 @@ pub fn run(root: &Path, logic_path: &str, report: &mut Report) {
                 "typecheck.skipped",
                 "TypeScript is not installed in this project (node_modules/typescript): types were not checked",
             )
-            .help("run `npm install` in the project, then check again"),
+            .help(format!(
+                "install TypeScript and the SDK into the project, then check again: {}",
+                crate::SDK_TYPES_GUIDE
+            )),
         );
         return;
     }

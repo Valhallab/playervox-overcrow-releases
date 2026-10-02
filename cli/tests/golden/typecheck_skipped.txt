@@ -1,3 +1,3 @@
 warning[typecheck.skipped]: TypeScript is not installed in this project (node_modules/typescript): types were not checked
-   = help: run `npm install` in the project, then check again
+   = help: install TypeScript and the SDK into the project, then check again: https://overcrow.playervox.com/docs/en/cli/#the-sdk-types
 check: 0 error(s), 1 warning(s)
