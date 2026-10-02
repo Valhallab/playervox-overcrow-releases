@@ -1,6 +1,7 @@
-// The API reference (docs/sdk-reference.md) is checked against the types:
-// every export of the package is named there, every name it lists as an
-// export exists, and every exported declaration and member has TSDoc.
+// The API reference of the creator documentation (docs/content/en/sdk.md and
+// its French translation, docs/content/fr/sdk.md) is checked against the
+// types: every export of the package is named there, every name it lists as
+// an export exists, and every exported declaration and member has TSDoc.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -10,7 +11,10 @@ import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const reference = readFileSync(join(root, "..", "docs", "sdk-reference.md"), "utf8");
+const references = ["en", "fr"].map((locale) => ({
+  locale,
+  text: readFileSync(join(root, "..", "docs", "content", locale, "sdk.md"), "utf8"),
+}));
 
 const program = ts.createProgram([join(root, "src", "index.ts")], {
   target: ts.ScriptTarget.ES2023,
@@ -28,24 +32,26 @@ const exports = checker
     target: symbol.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(symbol) : symbol,
   }));
 
-/** Names the reference writes in code spans, before any `(` or `<`. */
-const documented = new Set(
-  [...reference.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)[(<`]/g)].map((match) => match[1]),
-);
-
-test("every export is in the reference", () => {
-  const missing = exports.map(({ name }) => name).filter((name) => !documented.has(name));
-  assert.deepEqual(missing, []);
-});
-
-test("every export named in a reference table exists", () => {
-  const names = new Set(exports.map(({ name }) => name));
-  const listed = [...reference.matchAll(/^\| `([A-Za-z_][A-Za-z0-9_]*)[(<`]/gm)].map(
-    (match) => match[1],
+for (const { locale, text } of references) {
+  /** Names the reference writes in code spans, before any `(` or `<`. */
+  const documented = new Set(
+    [...text.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)[(<`]/g)].map((match) => match[1]),
   );
-  const unknown = listed.filter((name) => !names.has(name));
-  assert.deepEqual(unknown, []);
-});
+
+  test(`every export is in the ${locale} reference`, () => {
+    const missing = exports.map(({ name }) => name).filter((name) => !documented.has(name));
+    assert.deepEqual(missing, []);
+  });
+
+  test(`every export named in a table of the ${locale} reference exists`, () => {
+    const names = new Set(exports.map(({ name }) => name));
+    const listed = [...text.matchAll(/^\| `([A-Za-z_][A-Za-z0-9_]*)[(<`]/gm)].map(
+      (match) => match[1],
+    );
+    const unknown = listed.filter((name) => !names.has(name));
+    assert.deepEqual(unknown, []);
+  });
+}
 
 const hasDoc = (symbol) =>
   ts.displayPartsToString(symbol.getDocumentationComment(checker)).trim() !== "";

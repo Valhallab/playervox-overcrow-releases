@@ -48,27 +48,27 @@ archives contain this distribution repository, not the application source.
 
 Widgets are small packages that OverCrow draws over the game: a view in
 markup (`view.ocml`), a bounded style sheet (`style.ocss`) and logic in
-TypeScript against `@overcrow/sdk`, run in a sandboxed VM. Start with the
-[creator documentation](docs/content/en/index.md)
-([français](docs/content/fr/index.md)): the [creator guide](docs/content/en/guide.md)
-goes from `overcrow-widget init` to a submission, and the
-[reference widgets](docs/content/en/widgets.md) are OverCrow's own built-ins.
-
-Widget API v1 replaces the Web runtime: the JavaScript SDK 1.3, the Web
-creator kit, its templates, references and downloads were removed. The
-website's documentation is realigned on this content separately.
+TypeScript against `@overcrow/sdk`, run in a sandboxed VM. The creator
+documentation is on the website, in English and in French:
+[overcrow.playervox.com/docs/en/](https://overcrow.playervox.com/docs/en/)
+([français](https://overcrow.playervox.com/docs/)). The
+[creator guide](https://overcrow.playervox.com/docs/en/guide/) goes from
+`overcrow-widget init` to a submission, and the
+[reference widgets](https://overcrow.playervox.com/docs/en/widgets/) are
+OverCrow's own built-ins. The website renders the pages of
+[`docs/content/`](docs/content/README.md), which this repository owns.
 
 ## Repository map
 
 | Path | Content |
 | --- | --- |
-| `crates/` | The public widget contract, shared with OverCrow at a pinned revision: `overcrow-widget-schema` (schema and validators), `overcrow-widget-format` (`view.ocml` compiler, `style.ocss` parser), `overcrow-widget-devchannel` ([development channel](docs/dev-channel.md)), `overcrow-widget-scenario` ([test scenarios](docs/widget-testing.md)) |
-| `sdk/` | `@overcrow/sdk` 1.0, the TypeScript API of widget logic, with types generated from the schema ([guide](docs/sdk-guide.md), [reference](docs/sdk-reference.md)) |
-| `cli/` | `overcrow-widget`: `init`, `check`, `package`, `inspect`, `dev`, `doctor`, `test`, `admit` ([guide](docs/cli.md)) |
+| `crates/` | The public widget contract, shared with OverCrow at a pinned revision: `overcrow-widget-schema` (schema and validators), `overcrow-widget-format` (`view.ocml` compiler, `style.ocss` parser), `overcrow-widget-devchannel` ([development channel](docs/dev-channel.md)), `overcrow-widget-scenario` ([test scenarios](https://overcrow.playervox.com/docs/en/testing/)) |
+| `sdk/` | `@overcrow/sdk` 1.0, the TypeScript API of widget logic, with types generated from the schema ([guide](https://overcrow.playervox.com/docs/en/logic/), [reference](https://overcrow.playervox.com/docs/en/sdk/)) |
+| `cli/` | `overcrow-widget`: `init`, `check`, `package`, `inspect`, `dev`, `doctor`, `test`, `admit` ([guide](https://overcrow.playervox.com/docs/en/cli/), [internals](docs/cli.md)) |
 | `templates/` | The templates of `overcrow-widget init`: blank, counter, list, chart |
-| `docs/content/` | The creator documentation, in English and French: guide, reference, security, publishing |
-| `docs/` | The technical manuals and specifications: [CLI](docs/cli.md), SDK, [schema reference](docs/widget-schema-v1.md) (generated), [source formats](docs/widget-source-formats.md), [package and catalog format](docs/widget-package-v1.md), [review policy](docs/review-policy.md), [testing](docs/testing.md) |
-| `widgets/` | The built-in widgets on the public SDK, each with its tests and reference page ([list](docs/content/en/widgets.md)), and Warframe Market, a PlayerVox catalog widget |
+| `docs/content/` | The creator documentation that the website renders, in English and French: guide, manifest, view, style, logic, services, forms, CLI, tests, reference, package, security, publishing |
+| `docs/` | Specifications and notes for implementers and maintainers, in English: [schema reference](docs/widget-schema-v1.md) (generated), [package and catalog format](docs/widget-package-v1.md), [development channel protocol](docs/dev-channel.md), [compiled output of the source formats](docs/widget-source-formats.md), [CLI internals](docs/cli.md), [headless runtime interface](docs/widget-testing.md), [review policy](docs/review-policy.md), [testing](docs/testing.md) |
+| `widgets/` | The built-in widgets on the public SDK, each with its tests and reference page ([list](https://overcrow.playervox.com/docs/en/widgets/)), and Warframe Market, a PlayerVox catalog widget |
 | `widgets-shared/` | Sources several built-ins share, copied into each of them by `scripts/sync-shared-widgets.mjs` ([how](widgets-shared/README.md)) |
 | `scripts/`, `tests/` | Public CI drivers and their smoke tests |
 | `fuzz/` | Fuzz targets of every parser and package verifier |

@@ -18,10 +18,13 @@ The package is bundled into a widget's `logic.js` and runs in the widget
 VM over its runtime surface 0.1; it has no runtime dependency. The host
 checks every service call: the SDK helps, the host decides.
 
-- [Guide](https://github.com/Valhallab/playervox-overcrow-releases/blob/main/docs/sdk-guide.md)
-- [API reference](https://github.com/Valhallab/playervox-overcrow-releases/blob/main/docs/sdk-reference.md)
-- [Widget schema v1](https://github.com/Valhallab/playervox-overcrow-releases/blob/main/docs/widget-schema-v1.md)
-- [Testing a widget](https://github.com/Valhallab/playervox-overcrow-releases/blob/main/docs/widget-testing.md):
+The documentation is on the website, in English and in French:
+
+- [The logic](https://overcrow.playervox.com/docs/en/logic/): how a widget's
+  logic runs, its state, timers, messages and drawing.
+- [Services and permissions](https://overcrow.playervox.com/docs/en/services/).
+- [SDK reference](https://overcrow.playervox.com/docs/en/sdk/): every export.
+- [Testing a widget](https://overcrow.playervox.com/docs/en/testing/):
   `@overcrow/sdk/testing`, a stand-in of the runtime with virtual time for
   unit tests of widget logic. It is a separate entry point, never bundled
   into a widget.
