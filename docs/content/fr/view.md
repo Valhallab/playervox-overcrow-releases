@@ -83,7 +83,7 @@ enfants en ligne ; les autres sont des feuilles qu’OverCrow dessine :
 | [`field`](elements.md#field) | Champ de texte d’une ligne, édité par l’hôte, méthodes de saisie (IME) comprises. |
 | [`textarea`](elements.md#textarea) | Champ de texte de plusieurs lignes, édité par l’hôte, méthodes de saisie (IME) comprises. |
 | [`form`](elements.md#form) | Regroupe des contrôles nommés. Avec `intent`, la validation envoie leurs valeurs à un service d’écriture directement depuis l’hôte ; la logique du widget ne fournit jamais ce contenu. |
-| [`elapsed`](elements.md#elapsed) | Durée affichée que l’hôte fait avancer à partir d’un repère donné par un service : un chronomètre qui tourne ne demande aucun travail à la logique. Stylé comme `text` ; repeint seulement quand le texte affiché change, au plus à `ANIMATION_RATE_HZ`, et jamais quand le widget est masqué. |
+| [`elapsed`](elements.md#elapsed) | Durée affichée que l’hôte fait avancer à partir d’un repère donné par un service : un chronomètre qui tourne ne demande aucun travail à la logique. Stylé comme `text` ; repeint seulement quand le texte affiché change, au plus à 60 Hz, et jamais quand le widget est masqué. |
 | [`progress`](elements.md#progress) | Barre de progression horizontale. |
 | [`gauge`](elements.md#gauge) | Jauge en anneau ou en arc. |
 | [`chart`](elements.md#chart) | Graphique en ligne, en aire, en barres ou sparkline, dessiné par l’hôte. |
@@ -148,8 +148,8 @@ Cinq attributs existent sur tous les éléments :
 | --- | --- | --- | --- |
 | `class` | liste de classes | non | Classes de style : des noms distincts, séparés par une espace. |
 | `ref` | nom de `ref` statique | non | Nom par lequel `draw` désigne ce `canvas` et par lequel un attribut tel que `anchor` d’un `popover` désigne cet élément. Statique, unique dans la vue, et interdit dans un `for` ou dans le corps d’un composant, où il nommerait plusieurs éléments. |
-| `label` | texte ≤ `MAX_LABEL_BYTES` | non | Nom accessible ; obligatoire sur les contrôles qui ne montrent qu’une icône. |
-| `tooltip` | texte ≤ `MAX_LABEL_BYTES` | non | Texte brut que l’hôte affiche au survol ou au focus. |
+| `label` | texte ≤ 256 octets | non | Nom accessible ; obligatoire sur les contrôles qui ne montrent qu’une icône. |
+| `tooltip` | texte ≤ 256 octets | non | Texte brut que l’hôte affiche au survol ou au focus. |
 | `on` | noms d’événements triés | non | Événements transmis à la logique ; s’écrit `on:<event>` dans la vue. |
 <!-- /generated:common-attributes -->
 

@@ -928,6 +928,19 @@ function limits(t) {
   );
 }
 
+/**
+ * `text` with each limit named in a code span replaced by its value and
+ * unit, as the table of limits shows it in the page's language.
+ */
+function limitValues(t, text) {
+  const all = new Map(records(sections, "Limits").map((entry) => [entry.Limit, entry]));
+  return text.replace(/`[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+`/g, (name) => {
+    const entry = all.get(name);
+    // The sentence around says which way a signed bound goes.
+    return entry ? t.type(entry.Value.replace(/ absolute value$/, "")) : name;
+  });
+}
+
 function packageFiles(t) {
   return table(
     [t.w.path, t.w.required, t.w.limit, t.w.meaning],
@@ -1040,7 +1053,11 @@ export function render(file, locale, text, usage = newUsage()) {
       if (!generate) {
         throw new Error(`${relative(root, file)}: unknown generated region ${name}`);
       }
-      return `<!-- generated:${name} -->\n${generate(translator, file)}\n<!-- /generated:${name} -->`;
+      const generated = generate(translator, file);
+      // Only the page of limits names the constants; elsewhere a reader
+      // gets the value, with its unit.
+      const shown = name === "limits" ? generated : limitValues(translator, generated);
+      return `<!-- generated:${name} -->\n${shown}\n<!-- /generated:${name} -->`;
     },
   );
 }

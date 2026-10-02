@@ -236,9 +236,9 @@ Capability `notes.write` ; attribut `target` obligatoire (l’ID de la note ; l�
 
 | Champ | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
-| `title` | texte ≤ `MAX_NOTE_TITLE_BYTES` | oui | `field` ; enregistré sans espaces en début ni en fin, et non vide. |
-| `body` | texte ≤ `MAX_NOTE_BODY_BYTES` | non | `textarea` ; enregistré tel qu’il est écrit. |
-| `item` | liste de `NoteItem` ≤ `MAX_NOTE_ITEMS` | non | Un `field` par ligne de la liste de tâches, dans l’ordre, chacun ≤ `MAX_NOTE_ITEM_BYTES`. L’hôte retient avec quelle entrée il a rempli chaque champ : une ligne garde l’ID et la coche de cette entrée quelles que soient les lignes que le widget retire ou déplace, et un champ apparu depuis est une nouvelle entrée, non cochée. Les lignes sont enregistrées sans espaces en début ni en fin ; une ligne vide est abandonnée. Une note enregistrée telle qu’elle est déjà stockée est acceptée sans écriture. |
+| `title` | texte ≤ 96 octets | oui | `field` ; enregistré sans espaces en début ni en fin, et non vide. |
+| `body` | texte ≤ 8 Kio | non | `textarea` ; enregistré tel qu’il est écrit. |
+| `item` | liste de `NoteItem` ≤ 64 | non | Un `field` par ligne de la liste de tâches, dans l’ordre, chacun ≤ 256 octets. L’hôte retient avec quelle entrée il a rempli chaque champ : une ligne garde l’ID et la coche de cette entrée quelles que soient les lignes que le widget retire ou déplace, et un champ apparu depuis est une nouvelle entrée, non cochée. Les lignes sont enregistrées sans espaces en début ni en fin ; une ligne vide est abandonnée. Une note enregistrée telle qu’elle est déjà stockée est acceptée sans écriture. |
 
 ### `playervox.rating.publish`
 
@@ -249,7 +249,7 @@ Capability `playervox.rating.write` ; attribut `target` refusé.
 | `gameplay` | entier de 0 à 100 | oui | `slider` ; rempli à partir de la note de l’utilisateur, 50 avant la première. |
 | `art` | entier de 0 à 100 | oui | `slider` ; rempli comme `gameplay`. |
 | `tech` | entier de 0 à 100 | oui | `slider` ; rempli comme `gameplay`. |
-| `review` | texte ≤ `MAX_REVIEW_CHARS` | non | `textarea` ; rempli à partir de l’avis publié. Un avis inchangé n’est pas renvoyé ; un avis vidé est retiré. |
+| `review` | texte ≤ 2000 caractères | non | `textarea` ; rempli à partir de l’avis publié. Un avis inchangé n’est pas renvoyé ; un avis vidé est retiré. |
 
 ### `twitch.chat.send`
 
@@ -257,7 +257,7 @@ Capability `twitch.chat.compose` ; attribut `target` facultatif (l’ID du messa
 
 | Champ | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
-| `message` | texte ≤ `MAX_CHAT_MESSAGE_CHARS` | oui | `field` ; l’hôte le vide après un envoi réussi. |
+| `message` | texte ≤ 500 caractères | oui | `field` ; l’hôte le vide après un envoi réussi. |
 <!-- /generated:write-intents -->
 
 `target` est l’attribut du formulaire qui désigne l’objet écrit :

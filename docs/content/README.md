@@ -80,6 +80,10 @@ implementers.
   services, result shapes, write intents, error codes, draw commands, fault
   categories, limits, package files, listing fields and the reference
   widgets.
+- **Limits by value.** A page gives a limit as its value with its unit
+  ("at most 32 rules", "text ≤ 256 bytes"), in the generated regions as in
+  the prose. Only `limits.md` names the constants, with the list of the
+  constants the SDK exports in `sdk.md`.
 
 ## Translated descriptions
 

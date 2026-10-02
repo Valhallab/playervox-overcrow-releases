@@ -397,9 +397,9 @@ et quand `host.theme` change si vous utilisez des couleurs littérales.
 | `close` | aucune | Ferme le sous-chemin. |
 | `fill` | `color` : `<color>` | Remplit le chemin courant, puis l’efface. |
 | `stroke` | `color` : `<color>` ; `width` : nombre de 0 à 256 | Trace le contour du chemin courant, puis l’efface. |
-| `text` | `x` : nombre de -16384 à 16384 ; `y` : nombre de -16384 à 16384 ; `text` : texte ≤ `MAX_ATTRIBUTE_TEXT_BYTES` ; `size` : nombre de 6 à 96 ; `color` : `<color>` ; `align` : `start` \| `center` \| `end` ; `family` : `ui` \| `mono` \| `display` ; `weight` : `400` \| `500` \| `600` \| `700` | Une ligne de texte, posée sur sa ligne de base. |
+| `text` | `x` : nombre de -16384 à 16384 ; `y` : nombre de -16384 à 16384 ; `text` : texte ≤ 1 Kio ; `size` : nombre de 6 à 96 ; `color` : `<color>` ; `align` : `start` \| `center` \| `end` ; `family` : `ui` \| `mono` \| `display` ; `weight` : `400` \| `500` \| `600` \| `700` | Une ligne de texte, posée sur sa ligne de base. |
 | `image` | `src` : source d’image ; `x` : nombre de -16384 à 16384 ; `y` : nombre de -16384 à 16384 ; `w` : nombre de -16384 à 16384 ; `h` : nombre de -16384 à 16384 | Dessine une image mise à l’échelle du rectangle. |
-| `save` | aucune | Empile la transformation, le rognage et l’opacité, ≤ `MAX_DRAW_STATE_DEPTH`. |
+| `save` | aucune | Empile la transformation, le rognage et l’opacité, ≤ 16. |
 | `restore` | aucune | Dépile l’état ; un `restore` sans `save` est une erreur. |
 | `clip` | `x` : nombre de -16384 à 16384 ; `y` : nombre de -16384 à 16384 ; `w` : nombre de -16384 à 16384 ; `h` : nombre de -16384 à 16384 | Réduit le rectangle de rognage à son intersection avec celui-ci. |
 | `translate` | `x` : nombre de -16384 à 16384 ; `y` : nombre de -16384 à 16384 | Translation. |

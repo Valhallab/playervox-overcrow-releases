@@ -54,13 +54,13 @@ the closest name as a suggestion.
 | `gap` | 1–2 × (`<px>` \| `<percent>`) | `0` | no | no |
 | `row-gap` | `<px>` \| `<percent>` | `0` | no | no |
 | `column-gap` | `<px>` \| `<percent>` | `0` | no | no |
-| `grid-template-columns` | `none` \| list ≤ `MAX_GRID_TRACKS` of `<track>`, or `repeat(<integer>, <track>)` | `none` | no | no |
-| `grid-template-rows` | `none` \| list ≤ `MAX_GRID_TRACKS` of `<track>`, or `repeat(<integer>, <track>)` | `none` | no | no |
+| `grid-template-columns` | `none` \| list ≤ 24 of `<track>`, or `repeat(<integer>, <track>)` | `none` | no | no |
+| `grid-template-rows` | `none` \| list ≤ 24 of `<track>`, or `repeat(<integer>, <track>)` | `none` | no | no |
 | `grid-auto-flow` | `row` \| `column` | `row` | no | no |
 | `grid-auto-columns` | `<track>`: `<px>` \| `<percent>` \| `<fr>` \| `auto` \| `min-content` \| `max-content` \| `minmax(<track>, <track>)` | `auto` | no | no |
 | `grid-auto-rows` | `<track>`: `<px>` \| `<percent>` \| `<fr>` \| `auto` \| `min-content` \| `max-content` \| `minmax(<track>, <track>)` | `auto` | no | no |
-| `grid-column` | `auto` \| `<integer>` \| `span <integer>` \| `<start> / <end>`, lines 1 to `MAX_GRID_TRACKS` | `auto` | no | no |
-| `grid-row` | `auto` \| `<integer>` \| `span <integer>` \| `<start> / <end>`, lines 1 to `MAX_GRID_TRACKS` | `auto` | no | no |
+| `grid-column` | `auto` \| `<integer>` \| `span <integer>` \| `<start> / <end>`, lines 1 to 24 | `auto` | no | no |
+| `grid-row` | `auto` \| `<integer>` \| `span <integer>` \| `<start> / <end>`, lines 1 to 24 | `auto` | no | no |
 
 ### Box
 
@@ -90,7 +90,7 @@ the closest name as a suggestion.
 | Property | Value | Initial | Inherited | Animatable |
 | --- | --- | --- | --- | --- |
 | `background-color` | `<color>` | `transparent` | no | yes |
-| `background` | `<color>` \| `linear-gradient(<angle>?, <color> <percent>?, …)`, stops ≤ `MAX_GRADIENT_STOPS` | `transparent` | no | no |
+| `background` | `<color>` \| `linear-gradient(<angle>?, <color> <percent>?, …)`, stops ≤ 8 | `transparent` | no | no |
 | `border` | `<px>` (`solid` \| `none`)? `<color>`? | `0 none` | no | no |
 | `border-top` | `<px>` (`solid` \| `none`)? `<color>`? | `0 none` | no | no |
 | `border-right` | `<px>` (`solid` \| `none`)? `<color>`? | `0 none` | no | no |
@@ -100,7 +100,7 @@ the closest name as a suggestion.
 | `border-style` | `solid` \| `none` | `none` | no | no |
 | `border-color` | `<color>` | `currentColor` | no | yes |
 | `border-radius` | 1–4 × (`<px>` \| `<percent>`) | `0` | no | no |
-| `box-shadow` | `none` \| `var(--shadow-…)` alone \| list ≤ `MAX_SHADOWS` of `inset`? `<px> <px> <px>? <px>? <color>` | `none` | no | no |
+| `box-shadow` | `none` \| `var(--shadow-…)` alone \| list ≤ 2 of `inset`? `<px> <px> <px>? <px>? <color>` | `none` | no | no |
 | `opacity` | number 0 to 1 | `1` | no | yes |
 | `visibility` | `visible` \| `hidden` | `visible` | yes | no |
 | `object-fit` | `contain` \| `cover` \| `fill` \| `none` | `contain` | no | no |
@@ -111,7 +111,7 @@ the closest name as a suggestion.
 | --- | --- | --- | --- | --- |
 | `color` | `<color>` | `var(--color-text)` | yes | yes |
 | `font-family` | `ui` \| `mono` \| `display`, or a font token | `ui` | yes | no |
-| `font-size` | `<px>` within `MIN_FONT_SIZE_PX` to `MAX_FONT_SIZE_PX`, or a size token | `var(--font-size-body)` | yes | no |
+| `font-size` | `<px>` within 6 px to 96 px, or a size token | `var(--font-size-body)` | yes | no |
 | `font-weight` | `400` \| `500` \| `600` \| `700` \| `normal` \| `bold` | `400` | yes | no |
 | `font-style` | `normal` \| `italic` | `normal` | yes | no |
 | `font-variant-numeric` | `normal` \| `tabular-nums` | `normal` | yes | no |
@@ -130,10 +130,10 @@ the closest name as a suggestion.
 
 | Property | Value | Initial | Inherited | Animatable |
 | --- | --- | --- | --- | --- |
-| `transform` | `none` \| up to `MAX_TRANSFORM_FUNCTIONS` of `translate(<length>, <length>)` with `<px>` or `<percent>`, `translateX()`, `translateY()`, `scale(<number>{1,2})` 0 to `MAX_TRANSFORM_SCALE`, `rotate(<angle>)` | `none` | no | yes |
+| `transform` | `none` \| up to 4 of `translate(<length>, <length>)` with `<px>` or `<percent>`, `translateX()`, `translateY()`, `scale(<number>{1,2})` 0 to 8, `rotate(<angle>)` | `none` | no | yes |
 | `transform-origin` | 1–2 × (`left` \| `center` \| `right` \| `top` \| `bottom` \| `<percent>` \| `<px>`) | `center` | no | no |
-| `transition` | `none` \| list ≤ `MAX_TRANSITIONS` of `<animatable-property> <time> <easing>? <time>?` | `none` | no | no |
-| `animation` | `none` \| list ≤ `MAX_TRANSITIONS` of `<keyframes-name> <time> <easing>? <time>? (<integer> \| infinite)? <direction>? <fill-mode>?`, integer 1 to `MAX_ANIMATION_ITERATIONS` | `none` | no | no |
+| `transition` | `none` \| list ≤ 8 of `<animatable-property> <time> <easing>? <time>?` | `none` | no | no |
+| `animation` | `none` \| list ≤ 8 of `<keyframes-name> <time> <easing>? <time>? (<integer> \| infinite)? <direction>? <fill-mode>?`, integer 1 to 10000 | `none` | no | no |
 
 ### Interaction
 
@@ -149,10 +149,10 @@ the closest name as a suggestion.
 | Syntax | Meaning |
 | --- | --- |
 | `<px>` | `12px`; `0` may omit the unit. Decimal numbers, no exponent. |
-| `<percent>` | `50%` of the containing block, as in CSS; at most `MAX_PERCENT` either way. |
-| `<fr>` | `1fr`, grid tracks only; from 0 to `MAX_GRID_FRACTION`. |
-| `<time>` | `120ms` or `0.12s`, from 0 to `MAX_ANIMATION_MS`. |
-| `<angle>` | `4deg` or `0.5turn`, at most `MAX_ANGLE_DEG` degrees either way. |
+| `<percent>` | `50%` of the containing block, as in CSS; at most 1000 either way. |
+| `<fr>` | `1fr`, grid tracks only; from 0 to 1000. |
+| `<time>` | `120ms` or `0.12s`, from 0 to 300000 ms. |
+| `<angle>` | `4deg` or `0.5turn`, at most 3600 degrees either way. |
 | `<color>` | `#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`, `rgb(r g b)`, `rgb(r g b / a)`, `transparent`, `currentColor`, or a colour token. No named colours. |
 | `var(--token)` | Design-system token of the expected type, as a whole value or a component of a composite value. No fallback argument; widgets cannot declare custom properties. |
 | `<easing>` | `linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out`, `steps(<integer 1..=MAX_EASING_STEPS>)`. |

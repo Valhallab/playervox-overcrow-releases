@@ -173,8 +173,8 @@ The types of the other namespaces are generated from the schema:
 | `timers` | namespace | `after(ms, callback)`, `every(ms, callback)`, `atEach(unit, callback)`. |
 | `Timer` | interface | `cancel()`; calling it again does nothing. |
 
-- At most `MAX_TIMERS` timers, never shorter than `MIN_TIMER_INTERVAL_MS`:
-  a shorter interval is raised to it.
+- At most 16 timers, never shorter than 100 ms: a shorter interval is
+  raised to it.
 - No timer ticks while the widget is hidden. A repeating timer skips the
   hidden ticks; a one-shot timer that fell due while hidden ticks once when
   the widget is shown again.

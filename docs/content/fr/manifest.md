@@ -79,8 +79,8 @@ valeurs qu’il remplit. Voici un manifeste avec des permissions et un menu :
 | --- | --- | --- | --- |
 | `schemaVersion` | entier de 1 à 1 | oui | Version du document de manifeste. |
 | `apiVersion` | entier de 1 à 1 | oui | Version de l’API des widgets ; elle sélectionne ce schéma. |
-| `id` | `widget ID` | oui | ID en DNS inversé, de `MIN_WIDGET_ID_BYTES` à `MAX_WIDGET_ID_BYTES` : au moins deux segments de `[a-z0-9-]` séparés par des points, chacun d’au plus `MAX_DNS_LABEL_BYTES`, sans `-` au début ni à la fin. `com.playervox` et `com.playervox.*` sont réservés aux paquets signés par PlayerVox. |
-| `version` | `version` | oui | SemVer 2.0.0 `MAJOR.MINOR.PATCH[-PRERELEASE]` sous sa forme canonique, d’au plus `MAX_VERSION_BYTES` ; les métadonnées de build sont refusées. |
+| `id` | `widget ID` | oui | ID en DNS inversé, de 3 octets à 128 octets : au moins deux segments de `[a-z0-9-]` séparés par des points, chacun d’au plus 63 octets, sans `-` au début ni à la fin. `com.playervox` et `com.playervox.*` sont réservés aux paquets signés par PlayerVox. |
+| `version` | `version` | oui | SemVer 2.0.0 `MAJOR.MINOR.PATCH[-PRERELEASE]` sous sa forme canonique, d’au plus 64 octets ; les métadonnées de build sont refusées. |
 | `name` | `WidgetName` | oui | Nom localisé du widget, affiché par l’hôte. |
 | `sizing` | `Sizing` | oui | Règles de taille et d’ajustement appliquées par le cadre du widget. |
 | `vm` | `VmRequest` | non | Budget demandé pour la VM ; absent, les valeurs par défaut s’appliquent. |
@@ -167,10 +167,10 @@ qu’elle autorise.
 <!-- generated:manifest-permissions -->
 | Champ | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
-| `network` | liste de `NetworkRule` ≤ `MAX_NETWORK_RULES` | non | Règles réseau, distinctes. |
+| `network` | liste de `NetworkRule` ≤ 32 | non | Règles réseau, distinctes. |
 | `storage` | booléen | non | Stockage clé-valeur tenu par l’hôte ; `false` par défaut. |
 | `clipboardWrite` | booléen | non | Écriture de texte dans le presse-papiers ; `false` par défaut. |
-| `gameEvents` | liste de `game event` ≤ `MAX_GAME_EVENTS` | non | Noms d’événements `overcrow.game.<name>.v1`, distincts. |
+| `gameEvents` | liste de `game event` ≤ 32 | non | Noms d’événements `overcrow.game.<name>.v1`, distincts. |
 | `capabilities` | `capability names` | non | Capabilities du schéma, distinctes. |
 <!-- /generated:manifest-permissions -->
 
@@ -243,10 +243,10 @@ qui autorise un appel de service protégé.
 | Champ | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
 | `type` | `toggle` \| `slider` \| `choice` \| `action` \| `group` | oui | Type de la ligne. |
-| `id` | identifiant ≤ `MAX_MENU_ID_BYTES` | oui | Unique parmi toutes les lignes du widget ; clé de la valeur enregistrée. |
+| `id` | identifiant ≤ 48 octets | oui | Unique parmi toutes les lignes du widget ; clé de la valeur enregistrée. |
 | `label` | `MenuLabel` | oui | Libellé localisé de la ligne. |
 | `icon` | nom d’icône Lucide | non | Icône placée devant le libellé, prise dans la liste de l’hôte et dessinée par lui. |
-| `visibleWhen` | identifiant ≤ `MAX_MENU_ID_BYTES` | non | ID d’une ligne `toggle` déclarée plus haut ; cette ligne n’est affichée que tant que cette bascule est activée. |
+| `visibleWhen` | identifiant ≤ 48 octets | non | ID d’une ligne `toggle` déclarée plus haut ; cette ligne n’est affichée que tant que cette bascule est activée. |
 | `requires` | `fps` \| `telemetry.cpuTemperature` \| `telemetry.gpuTemperature` | non | Source de données de l’hôte ; l’hôte masque la ligne quand il ne peut pas la fournir. |
 <!-- /generated:menu-row-fields -->
 
@@ -274,7 +274,7 @@ Bascule booléenne.
 
 ### `slider`
 
-Nombre borné ; `step` > 0, `step` ≤ `max - min`, au plus `MAX_SLIDER_STEPS` pas, `default` dans l’intervalle.
+Nombre borné ; `step` > 0, `step` ≤ `max - min`, au plus 10000 pas, `default` dans l’intervalle.
 
 | Champ | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
@@ -289,8 +289,8 @@ Une valeur parmi les choix déclarés.
 
 | Champ | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
-| `choices` | liste de `MenuChoice` ≤ `MAX_MENU_CHOICES` | oui | Au moins `MIN_MENU_CHOICES` choix. |
-| `default` | identifiant ≤ `MAX_MENU_ID_BYTES` | oui | Valeur de l’un des choix déclarés. |
+| `choices` | liste de `MenuChoice` ≤ 16 | oui | Au moins 2 choix. |
+| `default` | identifiant ≤ 48 octets | oui | Valeur de l’un des choix déclarés. |
 
 ### `action`
 
@@ -302,7 +302,7 @@ Sous-menu latéral qui contient des lignes autres que des groupes.
 
 | Champ | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
-| `rows` | liste de `MenuRow` ≤ `MAX_MENU_ROWS` | oui | Au moins une ligne ; un `group` n’y est pas admis. |
+| `rows` | liste de `MenuRow` ≤ 16 | oui | Au moins une ligne ; un `group` n’y est pas admis. |
 <!-- /generated:menu-row-types -->
 
 ### Libellés et choix
@@ -321,7 +321,7 @@ Chaque entrée de `choices` est une valeur et son libellé :
 <!-- generated:menu-choice -->
 | Champ | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
-| `value` | identifiant ≤ `MAX_MENU_ID_BYTES` | oui | Valeur enregistrée ; unique dans la ligne. |
+| `value` | identifiant ≤ 48 octets | oui | Valeur enregistrée ; unique dans la ligne. |
 | `label` | `MenuLabel` | oui | Libellé localisé du choix. |
 <!-- /generated:menu-choice -->
 
@@ -344,7 +344,7 @@ le demande avec `vm` ; aucun autre budget de la VM ne peut être modifié.
 <!-- generated:manifest-vm -->
 | Champ | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
-| `heapMiB` | entier de 16 à 48 | oui | Plafond du tas QuickJS en Mio, de `VM_HEAP_BYTES` à `VM_MAX_HEAP_BYTES`. Le plafond du processus de la VM (`VM_PROCESS_MEMORY_BYTES`) ne change pas. |
+| `heapMiB` | entier de 16 à 48 | oui | Plafond du tas QuickJS en Mio, de 16 Mio à 48 Mio. Le plafond du processus de la VM (64 Mio) ne change pas. |
 <!-- /generated:manifest-vm -->
 
 Le plafond de mémoire du processus du widget reste le même : un tas plus

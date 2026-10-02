@@ -138,6 +138,28 @@ test("the generated regions are current and their descriptions translated", () =
   assert.equal(result.status, 0, result.stderr);
 });
 
+test("only the page of limits and the list of SDK constants name a limit", () => {
+  const reference = readFileSync(join(root, "docs", "widget-schema-v1.md"), "utf8");
+  const limits = reference.slice(reference.indexOf("\n## Limits"), reference.indexOf("\n## Manifest"));
+  const names = new Set([...limits.matchAll(/^\| `([A-Z][A-Z0-9_]*)` \|/gm)].map((match) => match[1]));
+  assert.ok(names.has("MAX_NETWORK_RULES"), "the schema reference lists the limits");
+  // The SDK exports the constants: its page lists their names, once.
+  const exported = { en: "## Limit constants", fr: "## Constantes de limites" };
+  for (const locale of pages.locales) {
+    for (const file of pageFiles(locale).filter((page) => !page.endsWith("limits.md"))) {
+      let text = readFileSync(file, "utf8");
+      if (file.endsWith("sdk.md")) {
+        const start = text.indexOf(exported[locale]);
+        assert.ok(start >= 0, `${file}: no ${exported[locale]}`);
+        const end = text.indexOf("\n## ", start + 1);
+        text = text.slice(0, start) + (end < 0 ? "" : text.slice(end));
+      }
+      const named = [...text.matchAll(/`([A-Z][A-Z0-9_]*)`/g)].map((match) => match[1]).filter((name) => names.has(name));
+      assert.deepEqual(named, [], `${file} names a limit: write its value and unit`);
+    }
+  }
+});
+
 for (const name of readdirSync(examples).sort()) {
   const project = join(examples, name);
   test(`example ${name} is checked, packaged and admitted by the CLI`, () => {

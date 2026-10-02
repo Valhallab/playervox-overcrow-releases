@@ -20,15 +20,15 @@ qu’il demande, tel que le voit un relecteur.
 <!-- generated:package-files -->
 | Chemin | Obligatoire | Limite | Signification |
 | --- | --- | --- | --- |
-| `manifest.json` | oui | `MAX_MANIFEST_BYTES` | Le manifeste, tel qu’il a été écrit. |
-| `ledger.json` | oui | `MAX_LEDGER_BYTES` | Registre canonique du SHA-256 et de la taille de chaque autre entrée, écrit par la CLI. |
-| `logic.js` | oui | `MAX_LOGIC_BYTES` | Le seul contenu exécutable : un script ES2023 sans import, expressions compilées de la vue comprises. UTF-8, non vide. |
-| `view.json` | oui | `MAX_COMPILED_VIEW_BYTES` | La vue compilée. Le source `view.ocml` n’est pas embarqué. |
-| `style.ocss` | non | `MAX_STYLE_SOURCE_BYTES` | Source de la feuille de style, analysée par l’hôte au démarrage du widget. UTF-8. |
-| `locales/en.json` | non | `MAX_LOCALE_FILE_BYTES` | Messages en anglais ; présent si et seulement si `locales/fr.json` l’est, avec les mêmes clés. |
-| `locales/fr.json` | non | `MAX_LOCALE_FILE_BYTES` | Messages en français. |
-| `LICENSE` | oui | `MAX_LICENSE_BYTES` | Texte de la licence du paquet. UTF-8, non vide. |
-| `assets/<path>.{png,jpg,jpeg,webp}` | non | `MAX_IMAGE_ENCODED_BYTES` | Images dont la signature correspond à l’extension ; segments en minuscules `[a-z0-9_-]`, au plus `MAX_ASSET_PATH_SEGMENTS` sous `assets/`. |
+| `manifest.json` | oui | 64 Kio | Le manifeste, tel qu’il a été écrit. |
+| `ledger.json` | oui | 64 Kio | Registre canonique du SHA-256 et de la taille de chaque autre entrée, écrit par la CLI. |
+| `logic.js` | oui | 512 Kio | Le seul contenu exécutable : un script ES2023 sans import, expressions compilées de la vue comprises. UTF-8, non vide. |
+| `view.json` | oui | 512 Kio | La vue compilée. Le source `view.ocml` n’est pas embarqué. |
+| `style.ocss` | non | 128 Kio | Source de la feuille de style, analysée par l’hôte au démarrage du widget. UTF-8. |
+| `locales/en.json` | non | 256 Kio | Messages en anglais ; présent si et seulement si `locales/fr.json` l’est, avec les mêmes clés. |
+| `locales/fr.json` | non | 256 Kio | Messages en français. |
+| `LICENSE` | oui | 64 Kio | Texte de la licence du paquet. UTF-8, non vide. |
+| `assets/<path>.{png,jpg,jpeg,webp}` | non | 2 Mio | Images dont la signature correspond à l’extension ; segments en minuscules `[a-z0-9_-]`, au plus 4 sous `assets/`. |
 <!-- /generated:package-files -->
 
 Toute autre entrée fait refuser le paquet : un second script, un fichier

@@ -386,9 +386,9 @@ use literal colours.
 | `close` | none | Closes the subpath. |
 | `fill` | `color`: `<color>` | Fills and clears the current path. |
 | `stroke` | `color`: `<color>`; `width`: number 0 to 256 | Strokes and clears the current path. |
-| `text` | `x`: number -16384 to 16384; `y`: number -16384 to 16384; `text`: text ≤ `MAX_ATTRIBUTE_TEXT_BYTES`; `size`: number 6 to 96; `color`: `<color>`; `align`: `start` \| `center` \| `end`; `family`: `ui` \| `mono` \| `display`; `weight`: `400` \| `500` \| `600` \| `700` | One line of text on its baseline. |
+| `text` | `x`: number -16384 to 16384; `y`: number -16384 to 16384; `text`: text ≤ 1 KiB; `size`: number 6 to 96; `color`: `<color>`; `align`: `start` \| `center` \| `end`; `family`: `ui` \| `mono` \| `display`; `weight`: `400` \| `500` \| `600` \| `700` | One line of text on its baseline. |
 | `image` | `src`: image source; `x`: number -16384 to 16384; `y`: number -16384 to 16384; `w`: number -16384 to 16384; `h`: number -16384 to 16384 | Draws an image scaled into the rectangle. |
-| `save` | none | Pushes transform, clip and alpha, ≤ `MAX_DRAW_STATE_DEPTH`. |
+| `save` | none | Pushes transform, clip and alpha, ≤ 16. |
 | `restore` | none | Pops the state; a `restore` without a `save` is an error. |
 | `clip` | `x`: number -16384 to 16384; `y`: number -16384 to 16384; `w`: number -16384 to 16384; `h`: number -16384 to 16384 | Intersects the clip rectangle with this one. |
 | `translate` | `x`: number -16384 to 16384; `y`: number -16384 to 16384 | Translates. |

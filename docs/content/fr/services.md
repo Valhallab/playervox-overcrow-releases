@@ -181,7 +181,7 @@ dernière mise à jour.
 | `encoding_denied` | `http.fetch` : la réponse est compressée ou encodée d’une façon qu’OverCrow n’accepte pas, ou son corps ne se décode pas comme `as` le demande (JSON ou texte invalide). |
 | `content_type_denied` | `http.fetch` : le type de média de la réponse n’est pas de ceux qu’OverCrow accepte pour cette requête. |
 | `response_metadata_limit` | `http.fetch` : la ligne d’état ou les en-têtes de la réponse sont mal formés ou dépassent les limites d’OverCrow. |
-| `request_body_limit` | `http.fetch` : le corps de la requête dépasse `MAX_HTTP_REQUEST_BYTES`. |
+| `request_body_limit` | `http.fetch` : le corps de la requête dépasse 256 Kio. |
 | `response_body_limit` | `http.fetch` : le corps de la réponse dépasse la limite de la règle réseau (`maxResponseBytes`, ou 1 Mio sans lui et pour `as: "image"`). |
 | `image_invalid` | `http.fetch` avec `as: "image"` : la réponse n’est pas une image PNG, JPEG ou WebP dans les limites des images. |
 | `timeout` | `http.fetch` : l’échange a duré plus de 30 secondes. |
@@ -255,10 +255,10 @@ Les tableaux ci-dessous indiquent, pour chaque service, quand l’appeler.
 <!-- generated:permission-list -->
 | Permission | Signification | Avec une capability sensible |
 | --- | --- | --- |
-| `network` | Routes HTTPS exactes, joignables par le broker de l’hôte ; au plus `MAX_NETWORK_RULES` règles. | manifeste refusé |
-| `storage` | Stockage clé-valeur tenu par l’hôte, cloisonné par ID de widget, dans la limite de `STORAGE_QUOTA_BYTES`. | données conservées le temps du processus seulement |
+| `network` | Routes HTTPS exactes, joignables par le broker de l’hôte ; au plus 32 règles. | manifeste refusé |
+| `storage` | Stockage clé-valeur tenu par l’hôte, cloisonné par ID de widget, dans la limite de 256 Kio. | données conservées le temps du processus seulement |
 | `clipboardWrite` | Écriture de texte dans le presse-papiers, pendant une action de l’utilisateur en mode interactif. | manifeste refusé |
-| `gameEvents` | Événements de jeu sémantiques nommés `overcrow.game.<name>.v1`, au plus `MAX_GAME_EVENTS`. | admis |
+| `gameEvents` | Événements de jeu sémantiques nommés `overcrow.game.<name>.v1`, au plus 32. | admis |
 | `capabilities` | Services de l’hôte listés avec les capabilities. | admis |
 <!-- /generated:permission-list -->
 
@@ -320,12 +320,12 @@ requête déclarés sont acceptés.
 <!-- generated:network-rule-fields -->
 | Champ | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
-| `origin` | `origin` | oui | Origine canonique `https://host[:port]`, hôte ≤ `MAX_DNS_NAME_BYTES` avec des labels ≤ `MAX_DNS_LABEL_BYTES` ; ni identifiants, ni adresse IP littérale, ni nom local. |
+| `origin` | `origin` | oui | Origine canonique `https://host[:port]`, hôte ≤ 253 octets avec des labels ≤ 63 octets ; ni identifiants, ni adresse IP littérale, ni nom local. |
 | `method` | `GET` \| `POST` \| `PUT` \| `PATCH` \| `DELETE` | oui | Une seule méthode. |
-| `path` | texte ≤ `MAX_NETWORK_PATH_BYTES` | oui | Chemin complet ; les segments `{name}` sont des paramètres de chemin typés. |
-| `pathParams` | `name → ParameterConstraint` | non | Contrainte de chaque segment `{name}`, au plus `MAX_PATH_PARAMS`. |
-| `queryParams` | `name → ParameterConstraint` | non | Paramètres de requête admis, au plus `MAX_QUERY_PARAMS`, chacun éventuellement `required` ; les autres sont refusés. |
-| `maxResponseBytes` | entier de 1 à 3145728 | non | Plus grand corps de réponse de cette route, de 1 à `MAX_HTTP_DECLARED_RESPONSE_BYTES` ; `MAX_HTTP_RESPONSE_BYTES` quand il est absent. Sans effet pour `as: "image"`, qui garde `MAX_HTTP_RESPONSE_BYTES`. Quand plusieurs règles autorisent une requête, la plus grande limite s’applique. |
+| `path` | texte ≤ 1 Kio | oui | Chemin complet ; les segments `{name}` sont des paramètres de chemin typés. |
+| `pathParams` | `name → ParameterConstraint` | non | Contrainte de chaque segment `{name}`, au plus 8. |
+| `queryParams` | `name → ParameterConstraint` | non | Paramètres de requête admis, au plus 16, chacun éventuellement `required` ; les autres sont refusés. |
+| `maxResponseBytes` | entier de 1 à 3145728 | non | Plus grand corps de réponse de cette route, de 1 à 3 Mio ; 1 Mio quand il est absent. Sans effet pour `as: "image"`, qui garde 1 Mio. Quand plusieurs règles autorisent une requête, la plus grande limite s’applique. |
 <!-- /generated:network-rule-fields -->
 
 Chaque paramètre de chemin ou de requête porte une contrainte :
@@ -334,9 +334,9 @@ Chaque paramètre de chemin ou de requête porte une contrainte :
 | Type | Forme | Accepte |
 | --- | --- | --- |
 | `integer` | `{ min, max }` | Entier décimal sans zéro initial, de 0 à 2^53 - 1. |
-| `slug` | `{ maxLength }` | Lettres ASCII majuscules ou minuscules, chiffres, `_` et `-`, au moins un caractère ; `maxLength` de 1 à `MAX_SLUG_PARAMETER_BYTES`. |
-| `enum` | liste de `literal segment` ≤ `MAX_ENUM_VALUES` | L’une des valeurs listées, chacune ≤ `MAX_ENUM_VALUE_BYTES`. |
-| `string` | `{ maxLength }` | Paramètres de requête seulement ; tout texte sans caractère de contrôle ; `maxLength` de 1 à `MAX_STRING_PARAMETER_BYTES`. |
+| `slug` | `{ maxLength }` | Lettres ASCII majuscules ou minuscules, chiffres, `_` et `-`, au moins un caractère ; `maxLength` de 1 à 128 octets. |
+| `enum` | liste de `literal segment` ≤ 32 | L’une des valeurs listées, chacune ≤ 128 octets. |
+| `string` | `{ maxLength }` | Paramètres de requête seulement ; tout texte sans caractère de contrôle ; `maxLength` de 1 à 256 octets. |
 <!-- /generated:parameter-constraints -->
 
 La requête sort par le broker d’OverCrow, jamais du processus du widget.
