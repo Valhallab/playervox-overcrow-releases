@@ -95,6 +95,30 @@ ses modificateurs, pour des raccourcis comme Échap pour annuler. Les touches
 qu’OverCrow se réserve (Tab pour déplacer le focus, ses propres raccourcis,
 une composition en cours) ne sont pas transmises.
 
+### Le focus à l’ouverture d’un éditeur
+
+La logique ne peut pas déplacer le focus clavier. Un `field` ou un
+`textarea` qui porte `autofocus` le prend de lui-même quand il apparaît
+pendant que la logique traite une action de l’utilisateur : un clic sur un
+bouton Modifier qui ouvre un éditeur place le point d’insertion dans le
+champ, après son texte, comme le ferait un clic dans ce champ.
+
+<!-- source: widgets/notes/view.ocml -->
+```xml
+        <field class="title-field" name="title" autofocus placeholder={t("title-hint")} label={t("title-hint")} on:input={titleInput(editor.note, event.value)} on:keydown={keyed(editor.note, event.key, event.ctrl)}/>
+```
+
+OverCrow ne donne ce focus que si l’élément apparaît pendant une
+[action de l’utilisateur](services.md#les-appels-qui-demandent-une-action-de-lutilisateur),
+en mode interactif, dans le widget sur lequel l’utilisateur a agi ; quand
+plusieurs de ces éléments apparaissent ensemble, le premier de la vue le
+prend. Un élément qui apparaît au démarrage du widget, depuis un minuteur
+ou depuis la réponse d’un service (y compris après un `await` dans le
+gestionnaire du clic) ne prend pas le focus, pas plus qu’un élément déjà
+affiché : `autofocus` est lu quand l’élément apparaît. Donnez-le à un seul
+champ d’un éditeur, et pas à un champ qui apparaît pendant que
+l’utilisateur saisit, comme une nouvelle ligne d’une liste.
+
 ## Formulaires
 
 Un `form` regroupe des contrôles et leur donne un seul événement `submit`.
@@ -104,7 +128,7 @@ un `textarea`, ou en activant un bouton doté de l’attribut `submit`.
 <!-- source: widgets/twitch-chat/view.ocml -->
 ```xml
       <form class="selector" on:submit={join}>
-        <field class="input channel" max-length="26" placeholder={t("channel-name")} label={t("channel-name")} on:input={channelTyped(event.value)}/>
+        <field class="input channel" max-length="26" autofocus placeholder={t("channel-name")} label={t("channel-name")} on:input={channelTyped(event.value)}/>
         <button class="action" submit disabled={!canJoin(state)}>
           <text class="action-label">{t("join")}</text>
         </button>

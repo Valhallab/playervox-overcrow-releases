@@ -93,6 +93,28 @@ modifiers, for shortcuts such as Escape to cancel. Keys that OverCrow
 reserves (Tab to move the focus, its own shortcuts, a composition in
 progress) are not delivered.
 
+### The focus when an editor opens
+
+The logic cannot move the keyboard focus. A `field` or a `textarea` that
+carries `autofocus` takes it by itself when it appears while the logic
+handles a user action: a click on an Edit button that opens an editor puts
+the caret in the field, after its text, as a click in it would.
+
+<!-- source: widgets/notes/view.ocml -->
+```xml
+        <field class="title-field" name="title" autofocus placeholder={t("title-hint")} label={t("title-hint")} on:input={titleInput(editor.note, event.value)} on:keydown={keyed(editor.note, event.key, event.ctrl)}/>
+```
+
+OverCrow gives that focus only when the element appears during a
+[user action](services.md#calls-that-need-a-user-action), in Interactive
+mode, in the widget the user acted on; when several such elements appear
+together, the first one of the view takes it. An element that appears when
+the widget starts, from a timer or from the answer of a service (after an
+`await` in the handler of the click too) does not take the focus, and
+neither does an element that was already shown: `autofocus` is read when
+the element appears. Give it to one field of an editor, and not to a field
+that appears while the user types, such as a new row of a list.
+
 ## Forms
 
 A `form` groups controls and gives them one `submit` event. It is
@@ -102,7 +124,7 @@ submitted by Enter in a `field`, by Ctrl+Enter in a `field` or a
 <!-- source: widgets/twitch-chat/view.ocml -->
 ```xml
       <form class="selector" on:submit={join}>
-        <field class="input channel" max-length="26" placeholder={t("channel-name")} label={t("channel-name")} on:input={channelTyped(event.value)}/>
+        <field class="input channel" max-length="26" autofocus placeholder={t("channel-name")} label={t("channel-name")} on:input={channelTyped(event.value)}/>
         <button class="action" submit disabled={!canJoin(state)}>
           <text class="action-label">{t("join")}</text>
         </button>
