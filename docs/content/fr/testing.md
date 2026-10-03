@@ -145,7 +145,6 @@ Tout est facultatif.
 | `size` | la taille préférée du manifeste | `{ width, height }` du cadre, en pixels logiques ; le `fit` du manifeste s’applique quand même. |
 | `mode` | `passive` | `interactive` donne les entrées au widget. |
 | `visible` | `true` | Masqué, le widget ne reçoit aucun déclenchement de minuteur. |
-| `reducedMotion` | `false` | La préférence de mouvement réduit de l’utilisateur : les transitions et les animations montrent leur état final, et un texte `marquee` est coupé par des points de suspension au lieu de défiler. |
 | `frame` | `false` | `true` capture le cadre d’OverCrow autour du contenu. |
 | `background` | la couleur de panneau du thème | `#rrggbb` derrière le widget. |
 | `region` | `us`, ordre de date de la langue | `{ numberFormat, dateOrder }`. |
@@ -293,7 +292,7 @@ Là où un résultat contient un identifiant d’image, la fixture écrit
 | --- | --- |
 | `{ "advance": { "ms": N } }` | Avance le temps virtuel de `N` ms. Chaque minuteur qui arrive à échéance en chemin se déclenche, dans l’ordre, et le décalage UTC change à son instant. |
 | `{ "advance": { "ms": N, "jump": true } }` | Déplace le temps d’un coup, comme une machine qui sort de veille : chaque minuteur échu se déclenche une fois, en retard. |
-| `{ "host": { … } }` | Modifie `locale`, `theme`, `scale`, `size`, `mode`, `visible`, `reducedMotion`, `region`, `zone` ou `accounts`. |
+| `{ "host": { … } }` | Modifie `locale`, `theme`, `scale`, `size`, `mode`, `visible`, `region`, `zone` ou `accounts`. |
 | `{ "pointer": { "click": target } }` | Un clic. Aussi `rightClick`, `move` (survol), `wheel` (`{ target, dx, dy }`) et `"leave"`. |
 | `{ "key": { "key": "Enter", "modifiers": ["shift"] } }` | Un appui sur une touche : `Tab`, `Escape`, `ArrowUp`, lettres, chiffres… |
 | `{ "text": "…" }` | Du texte saisi dans le champ qui a le focus. |

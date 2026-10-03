@@ -205,7 +205,6 @@
      },
      "mode": "interactive",
      "visible": false,
-     "reducedMotion": true,
      "frame": true,
      "background": "#101820",
      "region": {
@@ -395,11 +394,6 @@
      {
       "host": {
        "visible": false
-      }
-     },
-     {
-      "host": {
-       "reducedMotion": true
       }
      },
      {
@@ -754,6 +748,39 @@
      {
       "expect": {
        "state": "running"
+      }
+     }
+    ]
+   },
+   "path": ""
+  },
+  {
+   "name": "retired reduced-motion preference in the host",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "host": {
+     "reducedMotion": true
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": ""
+  },
+  {
+   "name": "retired reduced-motion preference in a host step",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "steps": [
+     {
+      "host": {
+       "reducedMotion": false
       }
      }
     ]
@@ -1307,24 +1334,6 @@
     ]
    },
    "path": "steps[0].host"
-  },
-  {
-   "name": "reduced motion that is not a boolean",
-   "scenario": {
-    "scenarioVersion": 1,
-    "name": "vector",
-    "host": {
-     "reducedMotion": "reduce"
-    },
-    "steps": [
-     {
-      "expect": {
-       "state": "running"
-      }
-     }
-    ]
-   },
-   "path": ""
   },
   {
    "name": "target with two members",
