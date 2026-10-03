@@ -29,6 +29,8 @@ license: read them, copy them, and use them as a starting point.
 - the package sources: `manifest.json`, `view.ocml`, `style.ocss`,
   `logic.ts`, `locales/`, `LICENSE`;
 - `listing.json`, its marketplace text;
+- `assets/preview.png`, its marketplace preview: a copy of one of its
+  reference images;
 - `tests/`: unit tests of the logic, and scenarios with reference images in
   both themes, both languages and two scales, played by
   `overcrow-widget test` in OverCrow's headless runtime;
