@@ -243,24 +243,6 @@ rien ne change. Un widget masqué ne s’anime pas.
 `@keyframes` est la seule règle @. Son nom est un identifiant qui n’est pas
 un mot-clé d’animation, unique dans la feuille.
 
-### Mouvement réduit
-
-Un utilisateur peut demander à OverCrow de réduire les animations, dans ses
-réglages ou par la préférence de son système. OverCrow ne joue alors ni
-transition ni animation : un changement s’affiche aussitôt, une animation
-qui se termine montre sa fin (sa dernière image clé avec `forwards`, le
-style propre de l’élément sinon), et une animation qui se répète sans fin
-ne joue pas : l’élément montre son style propre. Un texte
-`text-overflow: marquee` ne défile pas : il est coupé par des points de
-suspension.
-
-Un widget n’a rien à faire, et sa logique n’est pas informée de la
-préférence. Écrivez le style propre d’un élément comme son aspect lisible
-et au repos, et gardez le mouvement dans le style : un minuteur qui déplace
-quelque chose pas à pas ne serait pas arrêté. Pour capturer cet aspect dans
-un test, mettez `reducedMotion` dans le [`host`](testing.md#host) d’un
-scénario.
-
 ## Ce qui est refusé
 
 Chacune de ces constructions fait refuser la feuille entière :
