@@ -139,7 +139,6 @@ Everything is optional.
 | `size` | the manifest's preferred size | `{ width, height }` of the frame, in logical pixels; the manifest's `fit` still applies. |
 | `mode` | `passive` | `interactive` gives input to the widget. |
 | `visible` | `true` | Hidden, the widget gets no timer tick. |
-| `reducedMotion` | `false` | The user's reduced-motion preference: transitions and animations show their final state, and a `marquee` text is cut with an ellipsis instead of scrolling. |
 | `frame` | `false` | `true` captures OverCrow's frame around the content. |
 | `background` | the theme's panel colour | `#rrggbb` behind the widget. |
 | `region` | `us`, date order of the locale | `{ numberFormat, dateOrder }`. |
@@ -283,7 +282,7 @@ image handle, the fixture writes `"fixture:<name>"`.
 | --- | --- |
 | `{ "advance": { "ms": N } }` | Moves the virtual time by `N` ms. Every timer due on the way fires in order, and the UTC offset changes at its instant. |
 | `{ "advance": { "ms": N, "jump": true } }` | Moves the time at once, as a machine waking from sleep: each due timer fires once, late. |
-| `{ "host": { … } }` | Changes `locale`, `theme`, `scale`, `size`, `mode`, `visible`, `reducedMotion`, `region`, `zone` or `accounts`. |
+| `{ "host": { … } }` | Changes `locale`, `theme`, `scale`, `size`, `mode`, `visible`, `region`, `zone` or `accounts`. |
 | `{ "pointer": { "click": target } }` | A click. Also `rightClick`, `move` (hover), `wheel` (`{ target, dx, dy }`) and `"leave"`. |
 | `{ "key": { "key": "Enter", "modifiers": ["shift"] } }` | A key press: `Tab`, `Escape`, `ArrowUp`, letters, digits… |
 | `{ "text": "…" }` | Text typed into the focused field. |

@@ -230,22 +230,6 @@ repainted when nothing changes. A widget that is hidden does not animate.
 `@keyframes` is the only at-rule. Its name is an identifier that is not an
 animation keyword, unique in the sheet.
 
-### Reduced motion
-
-A user can ask OverCrow to reduce motion, in its settings or through the
-preference of their system. OverCrow then runs no transition and no
-animation: a change shows at once, an animation that ends shows its end
-(its last keyframe with `forwards`, the element's own style otherwise), and
-an animation that repeats forever does not play, so the element shows its
-own style. A `text-overflow: marquee` text does not scroll: it is cut with
-an ellipsis.
-
-A widget has nothing to do, and its logic is not told about the
-preference. Write an element's own style as its readable, settled look,
-and keep motion in the style: a timer that moves something step by step
-would not be held. To capture that look in a test, set `reducedMotion` in
-the [`host`](testing.md#host) of a scenario.
-
 ## What is refused
 
 Any of these rejects the whole sheet:

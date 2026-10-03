@@ -391,10 +391,6 @@ pub struct Host {
     pub mode: Mode,
     #[serde(default = "yes")]
     pub visible: bool,
-    /// The host's reduced-motion preference: transitions and animations
-    /// show their final state and a `marquee` text is cut, not scrolled.
-    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
-    pub reduced_motion: bool,
     /// Captures include the host wrapper around the content.
     #[serde(default)]
     pub frame: bool,
@@ -434,7 +430,6 @@ impl Default for Host {
             size: None,
             mode: Mode::default(),
             visible: true,
-            reduced_motion: false,
             frame: false,
             background: None,
             region: Region::default(),
@@ -606,8 +601,6 @@ pub struct HostChange {
     pub mode: Option<Mode>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub visible: Option<bool>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub reduced_motion: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub region: Option<Region>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
