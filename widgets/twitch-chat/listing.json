@@ -2,6 +2,7 @@
   "author": "PlayerVox",
   "spdxLicense": "MIT",
   "sourceUrl": "https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/twitch-chat",
+  "preview": "assets/preview.png",
   "defaultLocale": "en",
   "localizations": [
     {
