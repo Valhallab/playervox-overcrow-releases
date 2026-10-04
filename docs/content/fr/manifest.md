@@ -258,7 +258,18 @@ Performances :
 
 <!-- source: widgets/performance/manifest.json -->
 ```json
-        "requires": "telemetry.cpuTemperature",
+            "requires": "telemetry.cpuTemperature",
+```
+
+Une ligne `group` ouvre un sous-menu latéral avec ses propres lignes ; le
+widget Performances range ses cinq bascules de mesures sous une seule ligne :
+
+<!-- source: widgets/performance/manifest.json -->
+```json
+        "type": "group",
+        "id": "shown-values",
+        "label": { "en": "Shown values", "fr": "Valeurs affichées" },
+        "rows": [
 ```
 
 ### Types de ligne

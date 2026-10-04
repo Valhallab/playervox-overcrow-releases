@@ -29,37 +29,44 @@
         "default": "vertical"
       },
       {
-        "type": "toggle",
-        "id": "show-cpu",
-        "label": { "en": "Show CPU", "fr": "Afficher le CPU" },
-        "default": true
-      },
-      {
-        "type": "toggle",
-        "id": "show-ram",
-        "label": { "en": "Show RAM", "fr": "Afficher la RAM" },
-        "default": true
-      },
-      {
-        "type": "toggle",
-        "id": "show-cpu-temperature",
-        "label": { "en": "Show CPU temperature", "fr": "Afficher la température CPU" },
-        "requires": "telemetry.cpuTemperature",
-        "default": true
-      },
-      {
-        "type": "toggle",
-        "id": "show-gpu-temperature",
-        "label": { "en": "Show GPU temperature", "fr": "Afficher la température GPU" },
-        "requires": "telemetry.gpuTemperature",
-        "default": true
-      },
-      {
-        "type": "toggle",
-        "id": "show-fps",
-        "label": { "en": "Show FPS", "fr": "Afficher les FPS" },
-        "requires": "fps",
-        "default": true
+        "type": "group",
+        "id": "shown-values",
+        "label": { "en": "Shown values", "fr": "Valeurs affichées" },
+        "rows": [
+          {
+            "type": "toggle",
+            "id": "show-cpu",
+            "label": { "en": "CPU", "fr": "CPU" },
+            "default": true
+          },
+          {
+            "type": "toggle",
+            "id": "show-ram",
+            "label": { "en": "RAM", "fr": "RAM" },
+            "default": true
+          },
+          {
+            "type": "toggle",
+            "id": "show-cpu-temperature",
+            "label": { "en": "CPU temperature", "fr": "Température CPU" },
+            "requires": "telemetry.cpuTemperature",
+            "default": true
+          },
+          {
+            "type": "toggle",
+            "id": "show-gpu-temperature",
+            "label": { "en": "GPU temperature", "fr": "Température GPU" },
+            "requires": "telemetry.gpuTemperature",
+            "default": true
+          },
+          {
+            "type": "toggle",
+            "id": "show-fps",
+            "label": { "en": "FPS", "fr": "FPS" },
+            "requires": "fps",
+            "default": true
+          }
+        ]
       },
       {
         "type": "choice",

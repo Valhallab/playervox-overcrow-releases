@@ -53,14 +53,25 @@ disagree, give no reading: the row stays away.
 | Row | Type | Default |
 | --- | --- | --- |
 | Layout / Disposition | choice `layout`: Vertical, Horizontal | Vertical |
-| Show CPU / Afficher le CPU | toggle `show-cpu` | on |
-| Show RAM / Afficher la RAM | toggle `show-ram` | on |
-| Show CPU temperature / Afficher la température CPU | toggle `show-cpu-temperature`, `requires: telemetry.cpuTemperature` | on |
-| Show GPU temperature / Afficher la température GPU | toggle `show-gpu-temperature`, `requires: telemetry.gpuTemperature` | on |
-| Show FPS / Afficher les FPS | toggle `show-fps`, `requires: fps` | on |
+| Shown values / Valeurs affichées | group `shown-values`: the five toggles below, in a side flyout | — |
 | Temperature / Température | choice `temperature-unit`: Celsius (°C), Fahrenheit (°F) | Celsius |
 
-OverCrow hides a `requires` row while it has no such source.
+The "Shown values" flyout:
+
+| Row | Type | Default |
+| --- | --- | --- |
+| CPU / CPU | toggle `show-cpu` | on |
+| RAM / RAM | toggle `show-ram` | on |
+| CPU temperature / Température CPU | toggle `show-cpu-temperature`, `requires: telemetry.cpuTemperature` | on |
+| GPU temperature / Température GPU | toggle `show-gpu-temperature`, `requires: telemetry.gpuTemperature` | on |
+| FPS / FPS | toggle `show-fps`, `requires: fps` | on |
+
+OverCrow hides a `requires` row while it has no such source. The flyout
+names each value alone (it was "Show CPU" / "Afficher le CPU"… at the
+first level): its title already says what the toggles do, and the longer
+French labels do not fit the host's flyout width. A group only arranges
+the menu: each toggle keeps its ID, so values saved before the toggles
+moved into the flyout still apply.
 
 ## Permissions
 

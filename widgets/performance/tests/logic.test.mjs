@@ -1,5 +1,6 @@
 // Unit tests of the Performance widget's logic on @overcrow/sdk/testing.
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { installRuntime } from "@overcrow/sdk/testing";
 
@@ -173,4 +174,52 @@ test("the menu applies at once, and the FPS row's toggle owns the FPS subscripti
   vm.setHost({ options: { "show-fps": false } });
   vm.setHost({ options: {} });
   assert.equal(live("fps.subscribe").length, 1, "a failed subscription is retried by the toggle");
+});
+
+test("the shown-values flyout keeps every toggle's ID, so saved and migrated values still apply", () => {
+  const manifest = JSON.parse(readFileSync(new URL("../manifest.json", import.meta.url), "utf8"));
+  const menu = manifest.wrapper.menu;
+  assert.deepEqual(menu.map(({ type, id }) => `${type} ${id}`), [
+    "choice layout",
+    "group shown-values",
+    "choice temperature-unit",
+  ]);
+  const group = menu[1];
+  assert.deepEqual(group.label, { en: "Shown values", fr: "Valeurs affichées" });
+  // The IDs, defaults and sources the toggles had at the first level.
+  assert.deepEqual(group.rows.map(({ type, id, requires, default: value }) => ({ type, id, requires, value })), [
+    { type: "toggle", id: "show-cpu", requires: undefined, value: true },
+    { type: "toggle", id: "show-ram", requires: undefined, value: true },
+    { type: "toggle", id: "show-cpu-temperature", requires: "telemetry.cpuTemperature", value: true },
+    { type: "toggle", id: "show-gpu-temperature", requires: "telemetry.gpuTemperature", value: true },
+    { type: "toggle", id: "show-fps", requires: "fps", value: true },
+  ]);
+  // The host stores and sends values flat, keyed by row ID: every key the
+  // logic reads is a value row of the manifest, group rows included.
+  const leaves = menu.flatMap((row) => (row.type === "group" ? row.rows : [row])).map(({ id }) => id);
+  const read = [...readFileSync(new URL("../logic.ts", import.meta.url), "utf8").matchAll(/option\("([a-z-]+)"/g)];
+  assert.deepEqual(new Set(read.map((match) => match[1])), new Set(leaves));
+  // A profile saved, or migrated from OverCrow's old settings, before the
+  // move: the same flat keys.
+  vm.setHost({
+    options: {
+      layout: "vertical",
+      "show-cpu": true,
+      "show-ram": false,
+      "show-cpu-temperature": false,
+      "show-gpu-temperature": true,
+      "show-fps": false,
+      "temperature-unit": "celsius",
+    },
+  });
+  assert.deepEqual(state.shown, {
+    cpu: true,
+    ram: false,
+    cpuTemperature: false,
+    gpuTemperature: true,
+    fps: false,
+    fahrenheit: false,
+  });
+  assert.equal(live("fps.subscribe").length, 0);
+  vm.setHost({ options: {} });
 });
