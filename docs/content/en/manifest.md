@@ -251,7 +251,18 @@ widget's temperature rows are:
 
 <!-- source: widgets/performance/manifest.json -->
 ```json
-        "requires": "telemetry.cpuTemperature",
+            "requires": "telemetry.cpuTemperature",
+```
+
+A `group` row opens a side flyout with its own rows; the Performance
+widget keeps its five metric toggles under one row:
+
+<!-- source: widgets/performance/manifest.json -->
+```json
+        "type": "group",
+        "id": "shown-values",
+        "label": { "en": "Shown values", "fr": "Valeurs affichées" },
+        "rows": [
 ```
 
 ### Row types

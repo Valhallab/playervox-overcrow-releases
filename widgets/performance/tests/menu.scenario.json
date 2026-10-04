@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "menu",
-  "description": "Each toggle hides its row at once, the layout and unit choices apply at once; with every metric off, “No metric selected”. Switching the FPS row off ends its subscription, so the host stops measuring; switching it on subscribes again.",
+  "description": "Each toggle of the “Shown values” flyout, set by its unchanged ID, hides its row at once, the layout and unit choices apply at once; with every metric off, “No metric selected”. Switching the FPS row off ends its subscription, so the host stops measuring; switching it on subscribes again.",
   "fixtures": {
     "subscriptions": {
       "telemetry.subscribe": {
