@@ -100,8 +100,8 @@ Voir
 - Voir les autres widgets, leur état, leur stockage ou leurs permissions,
   ni la mémoire, la fenêtre ou les entrées du jeu. OverCrow ne s’injecte
   jamais dans le jeu.
-- Dessiner hors de son cadre, couvrir ou imiter le cadre, les menus, le
-  panneau des permissions ou les confirmations d’OverCrow.
+- Dessiner hors de son cadre, couvrir ou imiter le cadre, les menus ou les
+  confirmations d’OverCrow.
 - Lire des jetons de compte, des cookies ou des identifiants.
 - Lire le presse-papiers.
 - Écrire des journaux en production : la sortie de `log.*` n’apparaît que

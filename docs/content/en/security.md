@@ -87,8 +87,8 @@ them, not set them. See
   the only code is the reviewed `logic.js` of the package.
 - See other widgets, their state, storage or permissions, or the game's
   memory, window or input. OverCrow never injects into the game.
-- Draw outside its frame, cover or imitate OverCrow's frame, menus,
-  permission panel or confirmations.
+- Draw outside its frame, cover or imitate OverCrow's frame, menus or
+  confirmations.
 - Read account tokens, cookies or credentials.
 - Read the clipboard.
 - Write to logs in production: `log.*` output appears only in a local
