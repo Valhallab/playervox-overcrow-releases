@@ -32,7 +32,7 @@
       {
         "type": "toggle",
         "id": "move-checked",
-        "label": { "en": "Move checked entries to bottom", "fr": "Placer les éléments cochés en bas" },
+        "label": { "en": "Checked items at the end", "fr": "Éléments cochés à la fin" },
         "default": true
       }
     ]

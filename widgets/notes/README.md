@@ -105,7 +105,7 @@ Interactive mode, and the draft stays.
 | Row | Values |
 | --- | --- |
 | Show / Afficher | Note and checklist (default), Note only, Checklist only |
-| Move checked entries to bottom / Placer les éléments cochés en bas | on by default; display only, the note is never reordered |
+| Checked items at the end / Éléments cochés à la fin | on by default; display only, the note is never reordered |
 
 With "Checklist only", Interactive mode keeps the selector and names the
 checklist; Passive mode shows the entries alone.
