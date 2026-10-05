@@ -1,0 +1,92 @@
+name: cli-dist
+
+# The release files of the widget CLI (scripts/package-cli.sh): one dist
+# build per platform from the dispatched commit, then the named binaries,
+# the licenses, cli.json and SHA256SUMS as one Actions artifact. Run on
+# demand for a release; it creates no tag and no GitHub release. The files
+# are attached to OverCrow's own release (docs/releases/README.md).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cli-dist-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build (${{ matrix.os }})
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+            binary: overcrow-widget
+          - os: windows-2022
+            target: x86_64-pc-windows-msvc
+            binary: overcrow-widget.exe
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install the pinned Rust toolchain
+        run: |
+          rustup toolchain install 1.98.0 --profile minimal --target ${{ matrix.target }}
+          rustup default 1.98.0
+      - name: Build the CLI (dist profile)
+        # The Windows binary links the C runtime statically, so it needs no
+        # Visual C++ redistributable. --target keeps the flag off build
+        # scripts.
+        env:
+          RUSTFLAGS: ${{ runner.os == 'Windows' && '-C target-feature=+crt-static' || '' }}
+        run: |
+          cargo build -p overcrow-widget-cli --profile dist --locked --target ${{ matrix.target }}
+          target/${{ matrix.target }}/dist/${{ matrix.binary }} --version
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: cli-${{ matrix.target }}
+          path: target/${{ matrix.target }}/dist/${{ matrix.binary }}
+          if-no-files-found: error
+          retention-days: 14
+
+  assemble:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install the pinned Rust toolchain and cargo-about
+        run: |
+          rustup toolchain install 1.98.0 --profile minimal
+          rustup default 1.98.0
+          cargo install cargo-about --version 0.9.1 --locked
+          cargo fetch --locked
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: cli-x86_64-unknown-linux-gnu
+          path: built/linux
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: cli-x86_64-pc-windows-msvc
+          path: built/windows
+      - name: Name, license and checksum the release files
+        run: |
+          chmod 0755 built/linux/overcrow-widget
+          sh scripts/package-cli.sh built/linux/overcrow-widget \
+            built/windows/overcrow-widget.exe "$RUNNER_TEMP/cli"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: overcrow-widget-cli-${{ github.sha }}
+          path: ${{ runner.temp }}/cli/
+          if-no-files-found: error
+          retention-days: 14
