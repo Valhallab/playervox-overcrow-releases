@@ -3,8 +3,8 @@
 Widgets reach PlayerVox OverCrow users through the signed widget catalog:
 OverCrow installs only what that catalog lists. This page goes from a
 widget's source directory to a listed version. Neither a pull request nor a
-merge publishes anything: publication is a separate, offline step of the
-maintainers.
+merge publishes anything: publication is a separate step of the maintainers,
+outside CI.
 
 ## The submission
 
@@ -120,7 +120,7 @@ publishes nothing.
 ## The catalog
 
 The maintainers prepare the next catalog from admitted revisions and sign it
-offline with the catalog key, whose public half is in
+outside CI with the catalog key, whose public half is in
 [`keys/`](../../../keys/). The catalog:
 
 - lists each version with the SHA-256 and the size of its package; a
