@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "apiVersion": 1,
   "id": "com.playervox.overcrow.stopwatch",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "name": {
     "en": "Manual stopwatch",
     "fr": "Chronomètre"
