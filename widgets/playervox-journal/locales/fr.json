@@ -12,7 +12,7 @@
   "notice-unavailable": "PlayerVox est indisponible pour ce jeu pour le moment.",
   "read-failed": "Le journal est indisponible pour le moment.",
   "source-failed": "Le journal est indisponible. Nouvel essai automatique.",
-  "no-permission": "Le journal a besoin de votre autorisation.",
+  "no-permission": "Autorisez l’accès à votre journal dans le Centre de contrôle.",
   "delete-failed": "La session n’a pas pu être supprimée. Réessayez.",
   "delete-not-connected": "Connectez PlayerVox pour supprimer cette session.",
   "delete": "Supprimer la session",

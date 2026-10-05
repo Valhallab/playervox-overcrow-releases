@@ -21,5 +21,5 @@
   "cancel": "Annuler",
   "error-unavailable": "Impossible de charger ou d’enregistrer les notes. Réessayez.",
   "error-full": "Vous avez atteint le nombre maximal de notes.",
-  "error-permission": "Autorisation requise pour lire vos notes."
+  "error-permission": "Autorisez l’accès à vos notes dans le Centre de contrôle."
 }

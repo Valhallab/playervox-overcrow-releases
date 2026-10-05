@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "refused",
-  "description": "Without its grants the widget asks nothing and says that it cannot read the rating.",
+  "description": "Without its grants the widget asks nothing and says where to allow it, in English then in light French.",
   "host": {
     "mode": "interactive",
     "grants": []
@@ -11,7 +11,7 @@
       "expect": {
         "text": [
           "Rating unavailable",
-          "Permission needed to read your rating"
+          "Allow access to your rating in the Control Center."
         ],
         "noText": [
           "Publish my rating",
@@ -21,6 +21,24 @@
         "calls": [],
         "fault": "none",
         "image": "refused"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Autorisez l’accès à votre note dans le Centre de contrôle."
+        ],
+        "image": "refused-light-fr"
       }
     }
   ]

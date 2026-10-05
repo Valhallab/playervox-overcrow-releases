@@ -21,5 +21,5 @@
   "cancel": "Cancel",
   "error-unavailable": "Notes could not be loaded or saved. Try again.",
   "error-full": "You have reached the maximum number of notes.",
-  "error-permission": "Permission needed to read your notes."
+  "error-permission": "Allow access to your notes in the Control Center."
 }

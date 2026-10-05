@@ -1,7 +1,7 @@
 {
   "label": "Twitch chat",
   "twitch": "Twitch",
-  "no-permission": "Permission needed to read Twitch chat.",
+  "no-permission": "Allow access to Twitch chat in the Control Center.",
   "unavailable": "Twitch is temporarily unavailable. Retrying automatically.",
   "signed-out": "Twitch is disconnected",
   "pending": "Twitch connection pending",

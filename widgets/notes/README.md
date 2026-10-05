@@ -23,7 +23,7 @@ widget. MIT.
 | Something sent and not stored yet | a spinner in the chevron's place; the title does not move |
 | A note with a draft | a dot after its title, "Expedition •", in the selector and in the list |
 | The notes cannot be read, or a change could not be stored | "Notes could not be loaded or saved. Try again." / "Impossible de charger ou d’enregistrer les notes. Réessayez." |
-| No permission to read | "Permission needed to read your notes.": the widget asks OverCrow nothing |
+| No permission to read | "Allow access to your notes in the Control Center.": the widget asks OverCrow nothing |
 
 A note taller than the panel scrolls in it (wheel, drag, keyboard) in
 Interactive mode; Passive mode shows its top.

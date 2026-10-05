@@ -26,7 +26,7 @@ any creator's widget. MIT.
 | Offline | the page shown, its paging buttons disabled; OverCrow adds its own notice under the content. Without a page: "Offline · Reviews show once PlayerVox is reachable again." |
 | OverCrow's reviews source failed | "The reviews are unavailable. Retrying automatically."; the widget asks again 5 s later |
 | No account, a sign-in in progress, an expired session | nothing of the widget: OverCrow covers it with its account panel (link or create an account, reopen the browser, cancel), whether the followed players filter is on or off |
-| No permission | "The reviews need your permission.": the widget asks OverCrow nothing |
+| No permission | "Allow access to reviews in the Control Center.": the widget asks OverCrow nothing |
 
 ### A review
 
@@ -151,7 +151,7 @@ dropped.
   | `offline-start` | started while PlayerVox is unreachable: the widget's own line, both languages, then online |
   | `changes` | another game back on its first page; a stale and a busy read asked again; the third refusal shown, a failed read, then cleared |
   | `unavailable` | OverCrow's source failing, the new subscription 5 s later, and none while hidden |
-  | `refused` | no grant: no call, "The reviews need your permission." |
+  | `refused` | no grant: no call, "Allow access to reviews in the Control Center." |
   | `scale` | 150 % in dark English and light French: the list in both modes, no followed review, no game, a game without a Steam app ID |
   | `frame` | the host frame, Interactive and Passive, 280 px wide with long names at 100 % and 175 %, and 600 px |
   | `bounds` | an 8000-character review folded, unfolded and scrolled; 120 and 121 characters; four short lines; a blank review; the count in both number formats |
