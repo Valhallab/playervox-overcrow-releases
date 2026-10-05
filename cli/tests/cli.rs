@@ -164,17 +164,19 @@ fn the_default_output_is_under_dist() {
     );
 }
 
-/// `@overcrow/sdk` is not on npm: a plain `npm install` in a new project
-/// fails, so `init` points at the guide's working steps instead.
+/// `init` gives the next commands: `npm install` brings TypeScript and the
+/// SDK of `package.json`, then `check`.
 #[test]
-fn init_advises_only_what_works_today() {
+fn init_advises_npm_install_then_check() {
     let temporary = tempfile::tempdir().expect("temporary directory");
     let root = temporary.path().join("blank");
     let output = cli(&["init", root.to_str().expect("UTF-8 path")]);
     assert!(output.status.success(), "{}", text(&output.stderr));
     let advice = text(&output.stdout);
-    assert!(advice.contains("&& overcrow-widget check"), "{advice}");
-    assert!(!advice.contains("&& npm install"), "{advice}");
+    assert!(
+        advice.contains("cd ") && advice.contains(" && npm install && overcrow-widget check"),
+        "{advice}"
+    );
     assert!(
         advice.contains("https://overcrow.playervox.com/docs/en/cli/#the-sdk-types"),
         "{advice}"

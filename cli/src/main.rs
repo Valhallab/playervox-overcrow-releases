@@ -54,8 +54,8 @@ Exit status: 0 success (warnings allowed), 1 errors found, 2 usage or I/O error.
 `dev` runs until Ctrl+C (0), or ends with 1 when the overlay ends the session.
 Guide: https://overcrow.playervox.com/docs/en/cli/";
 
-/// Where the guide says how to install the SDK types into a project while
-/// `@overcrow/sdk` is not on npm.
+/// Where the guide says how to install TypeScript and the SDK types into a
+/// project.
 pub(crate) const SDK_TYPES_GUIDE: &str =
     "https://overcrow.playervox.com/docs/en/cli/#the-sdk-types";
 
@@ -394,11 +394,10 @@ fn run_init(arguments: &Arguments) -> Result<ExitCode, String> {
                 println!("  {file}");
             }
             println!(
-                "\nNext: cd {directory} && overcrow-widget check\n\
-                 check validates everything but the types until TypeScript and the SDK are in\n\
-                 node_modules. @overcrow/sdk is not on npm yet, so a plain `npm install` fails:\n\
-                 build the SDK from the repository of this tool and install it from that\n\
-                 directory ({SDK_TYPES_GUIDE})"
+                "\nNext: cd {directory} && npm install && overcrow-widget check\n\
+                 npm install brings TypeScript and @overcrow/sdk {}, which check uses to\n\
+                 type-check the logic ({SDK_TYPES_GUIDE})",
+                sdk::VERSION
             );
             Ok(ExitCode::SUCCESS)
         }
