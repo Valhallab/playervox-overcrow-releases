@@ -9,8 +9,8 @@
         "elapsedMs": 1999,
         "at": 0,
         "shortcuts": {
-          "toggle": "Super+Alt+P",
-          "reset": "Super+Alt+R",
+          "toggle": "Super+Alt+T",
+          "reset": "Super+Alt+Z",
           "bound": true
         }
       }
@@ -90,8 +90,8 @@
           "elapsedMs": 359999990,
           "at": 999,
           "shortcuts": {
-            "toggle": "Super+Alt+P",
-            "reset": "Super+Alt+R",
+            "toggle": "Super+Alt+T",
+            "reset": "Super+Alt+Z",
             "bound": true
           }
         }
@@ -125,8 +125,8 @@
           "elapsedMs": 3661250,
           "at": 1009,
           "shortcuts": {
-            "toggle": "Super+Alt+P",
-            "reset": "Super+Alt+R",
+            "toggle": "Super+Alt+T",
+            "reset": "Super+Alt+Z",
             "bound": true
           }
         }

@@ -204,8 +204,8 @@ not of the widget.
             "elapsedMs": 5000,
             "at": 0,
             "shortcuts": {
-              "toggle": "Super+Alt+P",
-              "reset": "Super+Alt+R",
+              "toggle": "Super+Alt+T",
+              "reset": "Super+Alt+Z",
               "bound": true
             }
           }
@@ -223,8 +223,8 @@ not of the widget.
         "elapsedMs": 5000,
         "at": 0,
         "shortcuts": {
-          "toggle": "Super+Alt+P",
-          "reset": "Super+Alt+R",
+          "toggle": "Super+Alt+T",
+          "reset": "Super+Alt+Z",
           "bound": true
         }
       }
