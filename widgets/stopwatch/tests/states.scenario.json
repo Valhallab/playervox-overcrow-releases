@@ -14,8 +14,8 @@
             "elapsedMs": 0,
             "at": 1000,
             "shortcuts": {
-              "toggle": "Super+Alt+P",
-              "reset": "Super+Alt+R",
+              "toggle": "Super+Alt+T",
+              "reset": "Super+Alt+Z",
               "bound": true
             }
           }
@@ -26,8 +26,8 @@
             "elapsedMs": 1234,
             "at": 2234,
             "shortcuts": {
-              "toggle": "Super+Alt+P",
-              "reset": "Super+Alt+R",
+              "toggle": "Super+Alt+T",
+              "reset": "Super+Alt+Z",
               "bound": true
             }
           }
@@ -40,8 +40,8 @@
             "elapsedMs": 0,
             "at": 7234,
             "shortcuts": {
-              "toggle": "Super+Alt+P",
-              "reset": "Super+Alt+R",
+              "toggle": "Super+Alt+T",
+              "reset": "Super+Alt+Z",
               "bound": true
             }
           }
@@ -54,8 +54,8 @@
         "elapsedMs": 0,
         "at": 0,
         "shortcuts": {
-          "toggle": "Super+Alt+P",
-          "reset": "Super+Alt+R",
+          "toggle": "Super+Alt+T",
+          "reset": "Super+Alt+Z",
           "bound": true
         }
       }
@@ -190,8 +190,8 @@
           "elapsedMs": 0,
           "at": 7234,
           "shortcuts": {
-            "toggle": "Super+Alt+P",
-            "reset": "Super+Alt+R",
+            "toggle": "Super+Alt+T",
+            "reset": "Super+Alt+Z",
             "bound": true
           }
         }

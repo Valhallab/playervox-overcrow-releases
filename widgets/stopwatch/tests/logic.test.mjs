@@ -19,7 +19,7 @@ const vm = installRuntime({
 const logic = await loadLogic();
 const { state } = await import("@overcrow/sdk");
 
-const shortcuts = { toggle: "Super+Alt+P", reset: "Super+Alt+R", bound: true };
+const shortcuts = { toggle: "Super+Alt+T", reset: "Super+Alt+Z", bound: true };
 const at = (elapsedMs, running, time) => ({ running, elapsedMs, at: time, shortcuts });
 const settle = () => new Promise((resolve) => setImmediate(resolve));
 
@@ -82,10 +82,10 @@ test("a command's result applies at once; a failure changes nothing", async () =
 test("labels, tooltips and the reminder, in English and French", () => {
   assert.equal(logic.toggleLabel(false), "Start");
   assert.equal(logic.toggleLabel(true), "Pause");
-  assert.equal(logic.withChord("Start", "Super+Alt+P"), "Start (Super+Alt+P)");
+  assert.equal(logic.withChord("Start", "Super+Alt+T"), "Start (Super+Alt+T)");
   assert.equal(
     logic.reminder(shortcuts),
-    "Super+Alt+P  Start / pause  ·  Super+Alt+R  Reset",
+    "Super+Alt+T  Start / pause  ·  Super+Alt+Z  Reset",
   );
   vm.setHost({ locale: "fr", messages: messages("fr") });
   assert.equal(logic.toggleLabel(false), "Démarrer");

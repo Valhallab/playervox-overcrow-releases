@@ -17,7 +17,7 @@ creator's widget. MIT.
 | State unknown, no grant, or the service failed | `--:--:--.--`, no buttons, no reminder |
 
 Below the time, a reminder of the host's two shortcuts, in the host's
-own words for its platform: `Super+Alt+P  Start / pause  ·  Super+Alt+R
+own words for its platform: `Super+Alt+T  Start / pause  ·  Super+Alt+Z
 Reset` on Linux, `Ctrl+Shift+P` and `Ctrl+Shift+R` on Windows. In French:
 `Démarrer / pause`, `Réinitialiser`. The time uses the interface font with
 tabular figures and `.` before the hundredths in both languages.
@@ -29,7 +29,7 @@ tabular figures and `.` before the hundredths in both languages.
 | Interactive | Play or pause button ("Start" / "Pause", FR "Démarrer" / "Pause") | `stopwatch.toggle` |
 | Interactive | Reset button ("Reset", FR "Réinitialiser") | `stopwatch.reset`: zero, paused |
 | Interactive | Enter or Space on a focused button | the same |
-| Interactive | Hover or focus a button | tooltip `{label} ({chord})`, e.g. "Start (Super+Alt+P)" |
+| Interactive | Hover or focus a button | tooltip `{label} ({chord})`, e.g. "Start (Super+Alt+T)" |
 | Passive | — | no buttons: the time and the reminder only |
 | Any | OverCrow's global shortcuts | the host acts on its stopwatch directly; the widget shows the result |
 
