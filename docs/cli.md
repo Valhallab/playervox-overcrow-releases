@@ -150,8 +150,11 @@ workflow builds both platforms with the `dist` profile on hosted runners
 On the release, the entries of this `SHA256SUMS` join the release's single
 `SHA256SUMS` (asset names are unique). A release keeps at most 20 files:
 OverCrow's update check refuses a release list holding a release with
-more. The application's six files, the CLI's five and the runtimes' three
-make fourteen.
+more. The application's six files, the CLI's five and the headless
+runtime's four make fifteen. The runtime's are its Linux and Windows
+executables and `overcrow-widget-headless-VERSION-LICENSE.md`, which
+`runtimes.json` lists, and `runtimes.json` itself; all four are in the
+single `SHA256SUMS`.
 
 The workflow creates no tag and no release. The changes of each version
 are in [`cli/CHANGELOG.md`](../cli/CHANGELOG.md), those of the SDK in
