@@ -423,10 +423,11 @@ offline seed uses `{}`. `\\0` is one NUL byte.\n\n### Envelope\n\n",
 fn wrapper_section(out: &mut String) {
     out.push_str(
         "\n## Wrapper menu\n\nThe manifest `wrapper` object extends the host options menu \
-(ADR 0001, D12). Host rows (opacity, scale, fit to content, passive visibility) come first, \
-are separated and are not declared here. Widget rows only set a declared value or emit a \
-declared event: they cannot change a grant, open a URL or act as the gesture of a write \
-intent. Values are stored by the host profile store and reach the VM in `Init` and `Snapshot` \
+(ADR 0001, D12). Host rows (opacity, content size, fit to content, a row per account the \
+widget's granted capabilities need, a note when a widening update waits) come first, are \
+separated and are not declared here; passive visibility is the toolbar's eye, not a menu \
+row. Widget rows only set a declared value or emit a declared event: they cannot change a \
+grant, open a URL or act as the gesture of a write intent. Values are stored by the host profile store and reach the VM in `Init` and `Snapshot` \
 after durable acknowledgement.\n\n### `wrapper`\n\n",
     );
     fields_table(out, WRAPPER_FIELDS);
