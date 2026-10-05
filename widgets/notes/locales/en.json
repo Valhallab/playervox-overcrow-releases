@@ -14,12 +14,12 @@
   "body-label": "Note text",
   "item-hint": "Checklist item",
   "new-item-hint": "Add an item…",
-  "remove-entry": "Remove entry",
+  "remove-entry": "Remove item",
   "checklist-full": "Checklist full",
   "add-title": "Add a note title before saving",
   "save": "Save",
   "cancel": "Cancel",
   "error-unavailable": "Notes could not be loaded or saved. Try again.",
   "error-full": "You have reached the maximum number of notes.",
-  "error-permission": "Permission needed to read your notes."
+  "error-permission": "Allow access to your notes in the Control Center."
 }

@@ -157,7 +157,7 @@ the view fills it. The user can always resize by hand.
 ## Permissions
 
 A widget gets nothing it has not declared here, and a declaration grants
-nothing by itself: the user consents first.
+nothing by itself: the user consents first, in the Control Center.
 [Services and permissions](services.md) explains each permission and what
 it allows.
 
@@ -184,9 +184,15 @@ A network rule is an object of its own; its fields are described with
 ## The options menu
 
 Every widget has an options menu, opened from its frame. OverCrow puts its
-own rows first (opacity, scale, fit to content, visibility in Passive
-mode). `wrapper.menu` adds yours below them: toggles, sliders, choices,
-actions and groups, each with a label in both languages.
+own rows first: opacity, content size, fit to content and, when the widget
+needs one, its account. Visibility in Passive mode is the eye in the
+widget's toolbar, not a menu row. `wrapper.menu` adds yours below them:
+toggles, sliders, choices, actions and groups, each with a label in both
+languages.
+
+The menu is as wide as its widest row, from 248 to 320 points. Beyond, a
+label ends with "…" and shows whole in a tooltip; a choice shows its
+current value on at most 120 points. Keep labels short, in both languages.
 
 <!-- source: widgets/clock/manifest.json -->
 ```json
@@ -371,5 +377,5 @@ check: 1 error(s), 0 warning(s)
 OverCrow validates it again when the package is admitted to the catalog,
 when it is installed and each time the widget starts. A new version whose
 manifest asks for more than the previous one (a network rule, a game event,
-a capability, storage or the clipboard) waits for the user's consent before
-it replaces the installed version.
+a capability, storage or the clipboard) waits until the user approves it
+in the Control Center before it replaces the installed version.

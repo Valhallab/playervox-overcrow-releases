@@ -31,7 +31,7 @@ favorite star and the "Change channel" and "Disconnect channel" buttons.
 | A channel or favorite change failed | under the header, in Interactive mode: "Twitch is busy. Try again." / "Twitch est occupé. Réessayez.", "Could not save Twitch widget settings." / "Impossible d’enregistrer les réglages du widget Twitch.", "Favorite channel limit reached." / "Nombre maximal de chaînes favorites atteint." |
 | OverCrow's chat source failed | "Twitch is temporarily unavailable. Retrying automatically." / "Twitch est temporairement indisponible. Nouvelle tentative automatique."; the widget asks again 5 s later |
 | No Twitch account, a sign-in in progress, an expired session | OverCrow's own account panel, over the widget, in both modes (see [Permissions](#permissions)) |
-| No permission to read | "Permission needed to read Twitch chat." / "Autorisation nécessaire pour lire le chat Twitch.": the widget asks OverCrow nothing |
+| No permission to read | "Allow access to Twitch chat in the Control Center." / "Autorisez l’accès au chat Twitch dans le Centre de contrôle.": the widget asks OverCrow nothing |
 
 The size is the one you set, 420 × 360 px by default, from 160 × 24 px to
 900 × 900 px: the history takes what the other rows leave, and a channel

@@ -10,5 +10,5 @@
   "hint-permission_denied": "OverCrow s’est vu refuser l’accès aux événements d’image du jeu.",
   "hint-ambiguous": "Plusieurs sources de présentation empêchent une mesure fiable des FPS.",
   "hint-events_lost": "Des événements d’image ont été perdus. Aucune mesure fiable des FPS n’est disponible.",
-  "hint-unavailable": "La capture FPS n’est pas disponible. Consultez les diagnostics du Control Center."
+  "hint-unavailable": "La capture FPS n’est pas disponible. Ouvrez Diagnostic dans le Centre de contrôle."
 }

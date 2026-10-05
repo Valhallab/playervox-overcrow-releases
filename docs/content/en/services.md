@@ -49,9 +49,9 @@ Two kinds of authority exist, both declared in `permissions` of
   },
 ```
 
-A declaration grants nothing by itself. OverCrow shows the user what the
-widget asks for, and the user may refuse an item or revoke it later;
-revoking stops the widget first. The widgets tagged `built-in` in the
+A declaration grants nothing by itself. The Control Center shows the user
+what the widget asks for; the user may uncheck an item, or take it back
+later, which restarts the widget without it. The widgets tagged `built-in` in the
 signed catalog (PlayerVox widgets only) start with their declared
 permissions granted. Declare the least you need: reviewers read every
 permission, and users see them before they consent.

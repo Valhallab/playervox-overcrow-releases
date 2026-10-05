@@ -9,7 +9,7 @@
     {
       "expect": {
         "text": [
-          "The journal needs your permission."
+          "Allow access to your journal in the Control Center."
         ],
         "state": "running",
         "calls": [],
@@ -30,7 +30,7 @@
     {
       "expect": {
         "text": [
-          "Le journal a besoin de votre autorisation."
+          "Autorisez l’accès à votre journal dans le Centre de contrôle."
         ],
         "image": "refused-light-fr"
       }

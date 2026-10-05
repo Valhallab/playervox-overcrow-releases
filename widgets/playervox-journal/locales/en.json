@@ -12,7 +12,7 @@
   "notice-unavailable": "PlayerVox is unavailable for this game right now.",
   "read-failed": "The journal is unavailable right now.",
   "source-failed": "The journal is unavailable. Retrying automatically.",
-  "no-permission": "The journal needs your permission.",
+  "no-permission": "Allow access to your journal in the Control Center.",
   "delete-failed": "The session could not be deleted. Try again.",
   "delete-not-connected": "Connect PlayerVox to delete this session.",
   "delete": "Delete session",

@@ -1,7 +1,7 @@
 # Sécurité
 
 PlayerVox OverCrow traite chaque widget comme du code non fiable, widgets
-intégrés compris : les mêmes vérifications du paquet, le même sandbox, les
+intégrés PlayerVox compris : les mêmes vérifications du paquet, le même sandbox, les
 mêmes permissions et le même consentement s’appliquent à un widget
 PlayerVox et au vôtre. Cette page décrit ce que cela implique pour l’auteur
 d’un widget.
@@ -40,9 +40,11 @@ l’utilisateur le réactive. Les chiffres figurent dans les
 ## Permissions et consentement
 
 Un widget n’obtient rien qu’il n’ait déclaré dans `manifest.json`, et une
-déclaration n’accorde rien à elle seule : OverCrow demande à l’utilisateur,
-qui peut refuser ou retirer une permission à tout moment. Le retrait arrête
-d’abord le widget. OverCrow vérifie de nouveau la permission à chaque appel
+déclaration n’accorde rien à elle seule. À l’installation du widget, le
+Centre de contrôle propose chaque permission cochée, et l’utilisateur peut
+en décocher. Ensuite, l’utilisateur autorise ou retire chaque permission
+dans le Centre de contrôle ; en retirer une redémarre le widget sans elle.
+OverCrow vérifie de nouveau la permission à chaque appel
 d’un service.
 
 Quatre permissions ouvrent les services généraux : `network` (des routes
@@ -68,7 +70,7 @@ les utilisateurs les voient avant de donner leur accord. Les widgets
 marqués `built-in` dans le catalogue signé (widgets PlayerVox uniquement)
 démarrent avec leurs permissions déclarées accordées ; une mise à jour qui
 en demande davantage exige l’accord de l’utilisateur, widgets intégrés
-compris.
+PlayerVox compris.
 
 ## Actions de l’utilisateur
 

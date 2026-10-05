@@ -9,7 +9,7 @@
     {
       "expect": {
         "text": [
-          "Permission needed to read your notes."
+          "Allow access to your notes in the Control Center."
         ],
         "calls": [],
         "image": "refused"
@@ -23,7 +23,7 @@
     {
       "expect": {
         "text": [
-          "Permission needed to read your notes."
+          "Allow access to your notes in the Control Center."
         ],
         "calls": [],
         "image": "refused-interactive"

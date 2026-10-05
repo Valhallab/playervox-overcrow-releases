@@ -1,6 +1,7 @@
 //! The manifest `wrapper.menu` section (ADR 0001, D12): widget rows appended
 //! to the host options menu, after the separated host rows. Host rows
-//! (opacity, scale, fit to content, passive visibility) are not declared here.
+//! (opacity, content size, fit to content, account rows, a pending-update
+//! note) are not declared here; passive visibility is the toolbar's eye.
 //!
 //! Rows only set a declared value or emit a declared event. Values are stored
 //! by the host profile store and reach the VM in `Init` and `Snapshot` after

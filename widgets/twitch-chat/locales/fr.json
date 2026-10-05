@@ -1,7 +1,7 @@
 {
   "label": "Chat Twitch",
   "twitch": "Twitch",
-  "no-permission": "Autorisation nécessaire pour lire le chat Twitch.",
+  "no-permission": "Autorisez l’accès au chat Twitch dans le Centre de contrôle.",
   "unavailable": "Twitch est temporairement indisponible. Nouvelle tentative automatique.",
   "signed-out": "Twitch est déconnecté",
   "pending": "Connexion Twitch en attente",

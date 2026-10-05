@@ -68,8 +68,8 @@ The "Shown values" flyout:
 
 OverCrow hides a `requires` row while it has no such source. The flyout
 names each value alone (it was "Show CPU" / "Afficher le CPU"… at the
-first level): its title already says what the toggles do, and the longer
-French labels do not fit the host's flyout width. A group only arranges
+first level): its title already says what the toggles do, and short
+labels stay whole in the flyout, where a longer one would end with "…". A group only arranges
 the menu: each toggle keeps its ID, so values saved before the toggles
 moved into the flyout still apply.
 

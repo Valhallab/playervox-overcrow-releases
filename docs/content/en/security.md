@@ -36,8 +36,10 @@ numbers are in [limits](limits.md#logic).
 ## Permissions and consent
 
 A widget gets nothing it has not declared in `manifest.json`, and a
-declaration grants nothing by itself: OverCrow asks the user, who may
-refuse or revoke a permission at any time. Revoking stops the widget first.
+declaration grants nothing by itself. When the widget is installed, the
+Control Center proposes each permission checked, and the user may uncheck
+any. Later, the user allows or takes back each permission in the Control
+Center; taking one back restarts the widget without it.
 OverCrow checks the permission again at every call of a service.
 
 Four permissions open general services: `network` (exact HTTPS routes,

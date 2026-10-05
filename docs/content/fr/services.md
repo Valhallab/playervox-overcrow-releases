@@ -53,10 +53,9 @@ du [manifeste](manifest.md#permissions) :
   },
 ```
 
-Une déclaration n’accorde rien à elle seule. OverCrow montre à
-l’utilisateur ce que le widget demande ; celui-ci peut refuser l’une de ces
-autorisations, ou la retirer plus tard. Le retrait arrête d’abord le
-widget. Les widgets marqués `built-in` dans le catalogue signé (widgets
+Une déclaration n’accorde rien à elle seule. Le Centre de contrôle montre
+à l’utilisateur ce que le widget demande ; celui-ci peut en décocher un
+élément, ou le retirer plus tard, ce qui redémarre le widget sans lui. Les widgets marqués `built-in` dans le catalogue signé (widgets
 PlayerVox uniquement) démarrent avec leurs permissions déclarées accordées.
 Déclarez le strict nécessaire : les relecteurs lisent chaque permission, et
 les utilisateurs les voient avant de donner leur accord.

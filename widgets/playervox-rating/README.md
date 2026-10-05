@@ -20,7 +20,7 @@ widget. MIT.
 | The rating cannot be read | "Rating unavailable" / "Note indisponible", "PlayerVox is unavailable for this game right now." |
 | Offline | the last rating read; OverCrow adds its own notice under the content |
 | No account, a sign-in in progress, an expired session | nothing of the widget: OverCrow covers it with its account panel (link or create an account, reopen the browser, cancel) |
-| No permission to read | "Rating unavailable", "Permission needed to read your rating": the widget asks OverCrow nothing |
+| No permission to read | "Rating unavailable", "Allow access to your rating in the Control Center.": the widget asks OverCrow nothing |
 
 The score is the mean of the three criteria, rounded half away from zero
 (96, 88 and 94 show "93"); the grade is the mean's: S+ ≥ 90, S ≥ 80, A ≥ 70,

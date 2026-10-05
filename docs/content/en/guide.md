@@ -182,8 +182,8 @@ overcrow-widget test --runtime path/to/overcrow-widget-headless
 ## 10. Ask for what you need
 
 A widget gets nothing by default. To call an API, keep data or read game
-information, declare it in `manifest.json`; the user consents before the
-widget gets it. A network rule names one HTTPS origin, one method and one
+information, declare it in `manifest.json`; the user consents in the
+Control Center before the widget gets it. A network rule names one HTTPS origin, one method and one
 complete path, with typed parameters:
 
 <!-- source: docs/content/examples/weather/manifest.json -->

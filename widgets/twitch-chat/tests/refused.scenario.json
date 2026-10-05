@@ -10,7 +10,7 @@
       "expect": {
         "text": [
           "Twitch",
-          "Permission needed to read Twitch chat."
+          "Allow access to Twitch chat in the Control Center."
         ],
         "noText": [
           "Join chat",
@@ -29,7 +29,7 @@
     {
       "expect": {
         "text": [
-          "Permission needed to read Twitch chat."
+          "Allow access to Twitch chat in the Control Center."
         ],
         "noText": [
           "Join chat",
@@ -53,7 +53,7 @@
     {
       "expect": {
         "text": [
-          "Autorisation nécessaire pour lire le chat Twitch."
+          "Autorisez l’accès au chat Twitch dans le Centre de contrôle."
         ],
         "calls": [],
         "intents": [],

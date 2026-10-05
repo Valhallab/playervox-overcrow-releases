@@ -23,7 +23,7 @@ OverCrow, written against the public `@overcrow/sdk` and packaged with
 | Local journal unreadable | "Local session storage is unavailable.", no session |
 | A read failed | "The journal is unavailable right now."; the page shown stays |
 | OverCrow's journal source failed | "The journal is unavailable. Retrying automatically."; the widget asks again 5 s later |
-| No permission | "The journal needs your permission.": the widget asks OverCrow nothing |
+| No permission | "Allow access to your journal in the Control Center.": the widget asks OverCrow nothing |
 
 - **Signed out** of PlayerVox, the widget shows the sessions of this device:
   no sign-in panel, no banner. Cloud sessions appear only while PlayerVox is
@@ -118,7 +118,7 @@ it, is asked again one second later, three times at most; nothing polls.
   | `delete` | a deletion accepted (the page without the session), then declined (nothing changes, nothing read), then refused by the host, in both languages; no trash in Passive mode |
   | `changes` | a game switch back to the first page; a busy host and a stale read asked again; a third refusal shown, then cleared |
   | `unavailable` | the host's source failing, then the new subscription 5 s later |
-  | `refused` | no grant: no call, "The journal needs your permission." |
+  | `refused` | no grant: no call, "Allow access to your journal in the Control Center." |
   | `read-only` | `journal.read` alone: the journal and its paging, no trash |
   | `signed-out` | signed out of PlayerVox: the local sessions and a deletion, no account panel |
 

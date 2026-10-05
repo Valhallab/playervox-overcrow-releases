@@ -8,7 +8,7 @@
   "loading": "Loading…",
   "unavailable": "Rating unavailable",
   "retrying": "PlayerVox is unavailable for this game right now.",
-  "no-permission": "Permission needed to read your rating",
+  "no-permission": "Allow access to your rating in the Control Center.",
   "unrated": "Not rated yet",
   "published": "Your published rating",
   "draft": "Unpublished draft",

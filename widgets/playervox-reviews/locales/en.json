@@ -11,7 +11,7 @@
   "read-busy": "An operation is already in progress. Please try again shortly.",
   "read-expired": "Your connection expired. Link your account again.",
   "source-failed": "The reviews are unavailable. Retrying automatically.",
-  "no-permission": "The reviews need your permission.",
+  "no-permission": "Allow access to reviews in the Control Center.",
   "hidden": "Review hidden by the community",
   "reveal": "Show review",
   "more": "Read more",

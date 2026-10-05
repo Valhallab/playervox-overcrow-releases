@@ -18,7 +18,7 @@ test("no grant: no subscription, no call, no timer, and the widget says so", () 
   assert.equal(vm.calls.length, 0);
   assert.equal(vm.timers.length, 0);
   assert.equal(logic.phase(state), "permission");
-  assert.equal(vm.host.messages["no-permission"], "Permission needed to read Twitch chat.");
+  assert.equal(vm.host.messages["no-permission"], "Allow access to Twitch chat in the Control Center.");
   assert.equal(logic.heading(state), "Twitch");
   assert.equal(logic.statusKey(state), "inactive");
   assert.equal(logic.dotClass(state), "dot");

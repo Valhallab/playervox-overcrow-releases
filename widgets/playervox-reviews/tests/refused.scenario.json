@@ -10,7 +10,7 @@
       "expect": {
         "text": [
           "Player reviews",
-          "The reviews need your permission."
+          "Allow access to reviews in the Control Center."
         ],
         "noText": [
           "Loading…"
@@ -33,7 +33,7 @@
     {
       "expect": {
         "text": [
-          "Les avis ont besoin de votre autorisation."
+          "Autorisez l’accès aux avis dans le Centre de contrôle."
         ],
         "image": "refused-light-fr",
         "calls": []

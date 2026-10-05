@@ -160,7 +160,8 @@ redimensionner à la main.
 ## Permissions
 
 Un widget n’obtient rien qu’il n’ait déclaré ici, et une déclaration
-n’accorde rien à elle seule : l’utilisateur donne d’abord son accord.
+n’accorde rien à elle seule : l’utilisateur donne d’abord son accord, dans
+le Centre de contrôle.
 [Services et permissions](services.md) explique chaque permission et ce
 qu’elle autorise.
 
@@ -187,10 +188,16 @@ les [règles réseau](services.md#règles-réseau).
 ## Le menu d’options
 
 Chaque widget a un menu d’options, ouvert depuis son cadre. OverCrow y place
-d’abord ses propres lignes (opacité, échelle, ajustement au contenu,
-visibilité en mode passif). `wrapper.menu` ajoute les vôtres en dessous :
-bascules, curseurs, choix, actions et groupes, chacun avec un libellé dans
-les deux langues.
+d’abord ses propres lignes : opacité, taille du contenu, ajustement au
+contenu et, si le widget en a besoin, son compte. La visibilité en mode
+passif est l’œil de la barre d’outils du widget, pas une ligne du menu.
+`wrapper.menu` ajoute les vôtres en dessous : bascules, curseurs, choix,
+actions et groupes, chacun avec un libellé dans les deux langues.
+
+Le menu prend la largeur de sa ligne la plus large, de 248 à 320 points.
+Au-delà, un libellé se termine par « … » et s’affiche en entier dans une
+infobulle ; un choix montre sa valeur sur 120 points au plus. Gardez des
+libellés courts, dans les deux langues.
 
 <!-- source: widgets/clock/manifest.json -->
 ```json
@@ -381,4 +388,5 @@ OverCrow le valide de nouveau quand le paquet est admis dans le catalogue,
 quand il est installé et à chaque démarrage du widget. Une nouvelle version
 dont le manifeste demande plus que la précédente (une règle réseau, un
 événement de jeu, une capability, le stockage ou le presse-papiers) attend
-l’accord de l’utilisateur avant de remplacer la version installée.
+que l’utilisateur l’approuve dans le Centre de contrôle avant de remplacer
+la version installée.
