@@ -4,7 +4,7 @@ Les widgets atteignent les utilisateurs de PlayerVox OverCrow par le
 catalogue signé des widgets : OverCrow n’installe que ce que liste ce
 catalogue. Cette page va du dossier de sources d’un widget à une version
 listée. Ni une pull request ni une fusion ne publient quoi que ce soit : la
-publication est une étape distincte, hors ligne, des mainteneurs.
+publication est une étape distincte des mainteneurs, hors de la CI.
 
 ## La soumission
 
@@ -125,7 +125,7 @@ rien.
 ## Le catalogue
 
 Les mainteneurs préparent le catalogue suivant à partir des révisions
-admises et le signent hors ligne avec la clé du catalogue, dont la moitié
+admises et le signent hors de la CI avec la clé du catalogue, dont la moitié
 publique est dans [`keys/`](../../../keys/). Le catalogue :
 
 - liste chaque version avec le SHA-256 et la taille de son paquet ; une

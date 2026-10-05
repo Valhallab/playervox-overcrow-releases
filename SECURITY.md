@@ -52,7 +52,8 @@ admitted bytes without rebuilding or retesting them.
 The deterministic development key in `fixtures/keys` is intentionally public
 and grants no production trust; release builds of OverCrow refuse it. No
 production private key, sequence state, deployment credential, or signing
-path exists in this repository: the catalog is signed offline.
+path exists in this repository or its CI: the maintainers sign the catalog
+with a key kept outside both.
 
 The marketplace website cannot install software. OverCrow installs widgets
 from the signed catalog and validates every package in full before it runs,
