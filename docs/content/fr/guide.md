@@ -191,7 +191,8 @@ overcrow-widget test --runtime path/to/overcrow-widget-headless
 
 Un widget n’obtient rien par défaut. Pour appeler une API, conserver des
 données ou lire des informations de jeu, déclarez-le dans `manifest.json` ;
-l’utilisateur donne son accord avant que le widget n’y ait accès. Une règle
+l’utilisateur donne son accord dans le Centre de contrôle avant que le
+widget n’y ait accès. Une règle
 réseau nomme une origine HTTPS, une méthode et un chemin complet, avec des
 paramètres typés :
 

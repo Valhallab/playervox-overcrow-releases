@@ -140,8 +140,8 @@ See [the package](package.md#how-overcrow-checks-a-package).
 A new version of your widget is a new submission with a higher `version`:
 a published version is never replaced. An update whose manifest asks for
 more than the installed version (a network rule, a game event, a
-capability, storage or the clipboard) needs the user's consent before it
-runs.
+capability, storage or the clipboard) needs the user's approval in the
+Control Center before it runs.
 
 ## Version statuses
 

@@ -149,7 +149,8 @@ Une nouvelle version de votre widget est une nouvelle soumission, avec une
 `version` plus élevée : une version publiée n’est jamais remplacée. Une
 mise à jour dont le manifeste demande plus que la version installée (une
 règle réseau, un événement de jeu, une capability, le stockage ou le
-presse-papiers) exige l’accord de l’utilisateur avant de s’exécuter.
+presse-papiers) exige l’accord de l’utilisateur, dans le Centre de
+contrôle, avant de s’exécuter.
 
 ## Statuts des versions
 
