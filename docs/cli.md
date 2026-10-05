@@ -128,3 +128,31 @@ repository's own revisions ([review policy](review-policy.md)).
   checked against its pinned SHA-256 before every run. No runtime is pinned:
   `--runtime` is required. The CLI never builds the runtime
   ([headless runtime interface](widget-testing.md)).
+
+## Release files
+
+The CLI is released as binaries attached to OverCrow's GitHub release,
+beside the application's packages and the headless runtimes of the same
+version; there is no separate GitHub release for the CLI. The `cli-dist`
+workflow builds both platforms with the `dist` profile on hosted runners
+(Ubuntu 24.04; Windows with a static C runtime) and
+`scripts/package-cli.sh` assembles them, for CLI version `VERSION`:
+
+| File | Content |
+| --- | --- |
+| `overcrow-widget-VERSION-linux-x86_64` | The Linux executable. |
+| `overcrow-widget-VERSION-windows-x86_64.exe` | The Windows executable. |
+| `overcrow-widget-VERSION-LICENSE.txt` | The CLI's MIT license. |
+| `overcrow-widget-VERSION-THIRD-PARTY-NOTICES.md` | The licenses of its dependencies on both targets (cargo-about 0.9.1, `about.toml`, `cli/third-party.hbs`). |
+| `cli.json` | The version, the source commit, and each file's name, size and SHA-256. |
+| `SHA256SUMS` | The checksums of the five files above. |
+
+On the release, the entries of this `SHA256SUMS` join the release's single
+`SHA256SUMS` (asset names are unique). A release keeps at most 20 files:
+OverCrow's update check refuses a release list holding a release with
+more. The application's six files, the CLI's five and the runtimes' three
+make fourteen.
+
+The workflow creates no tag and no release. The changes of each version
+are in [`cli/CHANGELOG.md`](../cli/CHANGELOG.md), those of the SDK in
+[`sdk/CHANGELOG.md`](../sdk/CHANGELOG.md).

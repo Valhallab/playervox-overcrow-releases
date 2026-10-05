@@ -1,0 +1,33 @@
+# Changelog of `overcrow-widget`
+
+The CLI's major version follows the packages it writes (`.ocpkg` v1, widget
+API v1) and the `@overcrow/sdk` major it embeds. While the version carries a
+`-beta.N` suffix, its options, JSON output and exit statuses may still
+change between betas; 1.0.0 will freeze them under semantic versioning.
+The CLI's version enters no package: a package depends only on the
+widget's sources and the embedded SDK.
+
+## 1.0.0-beta.1
+
+First release, as binaries for Linux and Windows x86-64 attached to
+OverCrow 0.6.0-beta.1's GitHub release, with their SHA-256 checksums, MIT
+license and third-party notices. It embeds `@overcrow/sdk` 1.0.0.
+
+- `init`: a project from the blank, counter, list or chart template, with
+  an example test scenario and its reference images.
+- `check`: validates the manifest, view, style, logic, messages and assets
+  with the same validators OverCrow runs at installation and at every
+  start, and type-checks the logic with the project's TypeScript.
+- `package`: a deterministic `.ocpkg` v1; the same sources and CLI version
+  give the same bytes. `inspect` shows what a package holds and asks for.
+- `dev` and `doctor`: run the widget in the local OverCrow over the
+  development channel and reload it on save; report what the setup has
+  and lacks.
+- `test`: plays the project's scenarios in OverCrow's headless runtime and
+  compares their images. Pass the runtime with `--runtime`; the binaries
+  are attached to the same release.
+- `admit`: the marketplace's static admission of a submission.
+- Diagnostics with stable codes, `--format json`, and the website page that
+  explains each one.
+
+Documentation: [the command-line tool](https://overcrow.playervox.com/docs/en/cli/).
