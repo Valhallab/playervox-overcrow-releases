@@ -1,0 +1,19 @@
+# overcrow-widget: third-party software notices
+
+The widget CLI is MIT-licensed (see the accompanying LICENSE). This file is
+generated from its locked dependency graph for x86_64 Linux and Windows;
+the listed components remain subject to their own license terms.
+`@overcrow/sdk`, embedded in the CLI and linked into every widget, is
+MIT-0 and needs no notice.
+
+{{#each licenses}}
+## {{{name}}} ({{id}})
+
+Used by:
+{{#each used_by}}
+- {{crate.name}} {{crate.version}}
+{{/each}}
+
+{{{text}}}
+
+{{/each}}

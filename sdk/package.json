@@ -31,6 +31,9 @@
     "widget",
     "overlay"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "node scripts/build.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.testing.json --noEmit && tsc -p test/tsconfig.json",

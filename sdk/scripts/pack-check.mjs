@@ -28,6 +28,13 @@ function pack(index) {
   };
 }
 
+// A scoped package is restricted by default: its first publication would
+// be refused without public access.
+const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+if (manifest.publishConfig?.access !== "public") {
+  throw new Error("package.json must set publishConfig.access to \"public\"");
+}
+
 try {
   const first = pack(1);
   const second = pack(2);
