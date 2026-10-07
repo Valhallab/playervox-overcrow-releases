@@ -56,7 +56,7 @@ A status's second line shows only with the rating count option on.
   "No grade" / "Pas de note"; each bar "Gameplay: 97".
 - **Size.** Fitted to its content, 64 to 220 px of content wide (220 with
   the criteria), within the host frame and its 10 × 8 px margin; the badge
-  alone is a 76 px square.
+  alone is a 64 px square within the frame's 8 px margin.
 
 ## Controls
 

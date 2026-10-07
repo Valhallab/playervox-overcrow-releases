@@ -1,14 +1,15 @@
 /* The cover on the left, as tall as the title and artist rows and centred
    on them; the text column beside it, the buttons and the source message
-   under the text. The wrapper draws the panel; the content keeps the
-   built-in's 10 × 8 px margin, 8 px beside the cover and 2 px between the
-   rows. The width is the user's: long text never widens the panel. */
+   under the text. The wrapper draws the panel and its 8 px margin; the
+   content adds 2 px on the sides (the built-in's 10 × 8 px margin), 8 px
+   beside the cover and 2 px between the rows. The width is the user's:
+   long text never widens the panel. */
 .media {
   display: grid;
   grid-template-columns: minmax(0px, 1fr);
   column-gap: 8px;
   row-gap: 2px;
-  padding: 8px 10px;
+  padding: 0 2px;
 }
 
 .with-cover {

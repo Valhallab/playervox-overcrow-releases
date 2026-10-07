@@ -1,11 +1,12 @@
 /* The built-in's layout at 100 %: a 24 px header (game name, PlayerVox
    mark), a 64 px row (badge, score or status), and three 26 px criterion
-   rows. The wrapper draws the panel; the content keeps the built-in's
-   10 × 8 px margin. It fits between 64 and 220 px of content, the criteria
-   take the full 220 px, and the badge alone is a 76 px square. */
+   rows. The wrapper draws the panel and its 8 px margin; the content adds
+   2 px on the sides: the built-in's 10 × 8 px margin. It fits between 64
+   and 220 px of content, the criteria take the full 220 px, and the badge
+   alone is a 64 px square inside the wrapper's margin. */
 .score {
   flex-direction: column;
-  padding: 8px 10px;
+  padding: 0 2px;
   max-width: 240px;
 }
 
@@ -14,7 +15,7 @@
 }
 
 .badge-only {
-  padding: 6px;
+  padding: 0;
 }
 
 .header {
