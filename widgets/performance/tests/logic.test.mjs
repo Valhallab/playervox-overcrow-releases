@@ -6,7 +6,7 @@ import { installRuntime } from "@overcrow/sdk/testing";
 
 import { loadLogic } from "./load-logic.mjs";
 
-const MESSAGES = {"label": "Performance", "waiting": "Waiting for game data…", "no-metric": "No metric selected", "cpu": "CPU", "ram": "RAM", "cpu-temperature": "CPU°", "gpu-temperature": "GPU°", "fps": "FPS", "old": "old", "hint-cpu": "Game CPU use across all logical processors.", "hint-ram": "Game resident memory.", "hint-cpu-temperature": "Host CPU temperature.", "hint-gpu-temperature": "Host GPU temperature.", "hint-fps": "Observed presentation rate.", "hint-fps-old": "Last FPS reading. No new measurement has arrived for at least three seconds.", "name-cpu": "Game CPU use {value} {unit}", "name-ram": "Game memory {value} {unit}", "name-cpu-temperature": "CPU temperature {value} {unit}", "name-gpu-temperature": "GPU temperature {value} {unit}", "name-fps": "{value} frames per second", "name-fps-old": "{value} frames per second, last reading"};
+const MESSAGES = {"label": "Performance", "waiting": "Waiting for game data…", "no-metric": "No metric selected", "cpu": "CPU", "ram": "RAM", "cpu-temperature": "CPU°", "gpu-temperature": "GPU°", "fps": "FPS", "hint-cpu": "Game CPU use across all logical processors.", "hint-ram": "Game resident memory.", "hint-cpu-temperature": "Host CPU temperature.", "hint-gpu-temperature": "Host GPU temperature.", "hint-fps": "Observed presentation rate.", "name-cpu": "Game CPU use {value} {unit}", "name-ram": "Game memory {value} {unit}", "name-cpu-temperature": "CPU temperature {value} {unit}", "name-gpu-temperature": "GPU temperature {value} {unit}", "name-fps": "{value} frames per second"};
 const GB = 1024 ** 3;
 const ALL = { cpu: true, ram: true, cpuTemperature: true, gpuTemperature: true, fps: true, fahrenheit: false };
 const sample = (fields = {}) => ({
@@ -29,7 +29,7 @@ const shown = (rows) => rows.map((row) => `${row.label} ${row.value}${row.unit}`
 test("it subscribes to both services and runs no timer", () => {
   assert.deepEqual(vm.subscriptions.map(({ service }) => service), ["telemetry.subscribe", "fps.subscribe"]);
   assert.deepEqual([state.telemetry, state.rate, state.layout], [null, null, "vertical"]);
-  assert.equal(vm.timers.length, 0, "the host marks a frame rate stale");
+  assert.equal(vm.timers.length, 0, "the host keeps a frame rate through a gap");
 });
 
 test("rows in the fixed order, each value with its unit", () => {
@@ -112,14 +112,15 @@ test("temperature thresholds stay in °C in °F mode; FPS never coloured", () =>
   assert.equal(fps.valueClass, "value");
 });
 
-test("a stale frame rate keeps its number, marked old", () => {
+test("a frame rate kept through a gap keeps its number, unmarked", () => {
   const [row] = logic.rows(null, { fps: 143.6, stale: true }, ALL);
   assert.deepEqual([row.value, row.unit, row.hint, row.name], [
     "144",
-    "\u2009old",
-    MESSAGES["hint-fps-old"],
-    "144 frames per second, last reading",
+    "",
+    MESSAGES["hint-fps"],
+    "144 frames per second",
   ]);
+  assert.deepEqual(row, logic.rows(null, { fps: 143.6, stale: false }, ALL)[0]);
 });
 
 test("numbers follow the host's number format, not the language", () => {

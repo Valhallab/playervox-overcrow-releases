@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "stale",
-  "description": "The host marks the reading stale 3 s after the last sample: the number stays, muted, with “old” (“ancien” in French); a new sample makes it fresh again.",
+  "description": "The host keeps the reading through a gap of its capture and marks it stale: the number stays exactly as it was, with no sign of its age; a new sample replaces it.",
   "fixtures": {
     "subscriptions": {
       "fps.subscribe": {
@@ -27,7 +27,11 @@
         "text": [
           "144"
         ],
-        "image": "old-dark-en"
+        "image": "kept-dark-en",
+        "noText": [
+          "old",
+          "ancien"
+        ]
       }
     },
     {
@@ -37,7 +41,7 @@
     },
     {
       "expect": {
-        "image": "old-light-en"
+        "image": "kept-light-en"
       }
     },
     {
@@ -48,7 +52,7 @@
     },
     {
       "expect": {
-        "image": "old-dark-fr"
+        "image": "kept-dark-fr"
       }
     },
     {
@@ -59,7 +63,7 @@
     },
     {
       "expect": {
-        "image": "old-light-fr-150"
+        "image": "kept-light-fr-150"
       }
     },
     {

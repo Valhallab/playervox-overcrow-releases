@@ -1,12 +1,9 @@
 <!-- FPS: the game's presented frame rate, observed from outside the game
      (parity sheet: playervox-overcrow docs/builtin-parity/fps.md). One text
-     keeps the value, the "old" marker and the unit on one baseline. -->
-<box class="fps" label={fpsLabel(state.fps, state.stale)} tooltip={fpsTooltip(state.fps, state.stale, state.status)}>
+     keeps the value and the unit on one baseline. -->
+<box class="fps" label={fpsLabel(state.fps)} tooltip={fpsTooltip(state.status)}>
   <text class="line">
-    <span class={valueClass(state.fps, state.stale)}>{fpsValue(state.fps)}</span>
-    <if test={isOld(state.fps, state.stale)}>
-      <span class="small">{oldMarker()}</span>
-    </if>
+    <span class={valueClass(state.fps)}>{fpsValue(state.fps)}</span>
     <if test={state.showLabel}>
       <span class="small">&nbsp;&nbsp;FPS</span>
     </if>

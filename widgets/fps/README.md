@@ -9,13 +9,13 @@ widget. MIT.
 
 | State | Shows |
 | --- | --- |
-| Fresh reading | `144  FPS` (the unit muted, 12 px semibold) |
-| No reading for 3 s | `144 · old  FPS` / `144 · ancien  FPS`, all muted |
-| No reading | `—  FPS`, muted |
+| A reading | `144  FPS` (the unit muted, 12 px semibold) |
+| A gap of the capture | the last reading, exactly as it was |
+| No reading yet | `—  FPS`, muted |
 | Label off | the value alone |
 
-Hovering the widget in Interactive mode shows one sentence: the old
-reading's, or the measurement status's (`ready`, `waiting`, `unsupported`,
+Hovering the widget in Interactive mode shows one sentence, the
+measurement status's (`ready`, `waiting`, `unsupported`,
 `permission_denied`, `ambiguous`, `events_lost`, `unavailable`).
 
 ## Menu
@@ -33,16 +33,18 @@ its place for when the source comes back.
 ## How it works
 
 `fps.subscribe` gives `{ fps, stale, status }`; the host keeps the last
-value across short gaps and marks it stale 3 s after the last sample, so
-the widget runs no timer. The accessible label is "144 frames per second"
-(", last reading" when old) or "Frame rate unavailable".
+value of the game through a gap of its capture until the next one, so the
+widget runs no timer and shows the value as it is: a value shown never
+disappears and shows no sign of its age (`stale` is not drawn). The
+accessible label is "144 frames per second" or "Frame rate unavailable".
 
 ## Tests
 
 - `tests/logic.test.mjs`: the logic on `@overcrow/sdk/testing` (value,
-  marker, sentences, labels, updates, the label row).
+  colour, sentences, labels, updates, the label row).
 - Scenarios with their reference images: `render` (both themes and
-  languages at 100 and 150 %), `stale`, `unavailable` (the statuses, the
+  languages at 100 and 150 %), `stale` (a reading kept through a gap looks
+  unchanged), `unavailable` (the statuses, the
   service stopping), `label`, `refused`.
 
 ## Cost
@@ -55,7 +57,7 @@ Measured on 2026-09-30 with OverCrow's release build, on an AMD Ryzen 7
 | Widget start, warm, into the overlay's runtime | 7 ms at most | — |
 | VM memory | 0.55–0.59 MiB anonymous | similar to the Clock's 0.83 MiB private working set |
 | VM CPU | one short turn per new reading | — |
-| Overlay frames | one per new reading or stale transition | — |
+| Overlay frames | one per new reading | — |
 
 With the Clock and Session widgets beside it, the overlay's process grows
 by about 2 MB per widget and stays at 0.15 % of one core with a reading

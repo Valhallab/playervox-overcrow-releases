@@ -2,8 +2,8 @@
 // CPU and GPU temperatures and the game's frame rate. A row shows when its
 // menu toggle is on and the host has a reading; nothing is ever shown as
 // "—". The host normalizes the CPU share, drops the rows of the sensors it
-// lacks from the menu (`requires`) and marks a frame rate stale: the widget
-// only formats, colours and lays out.
+// lacks from the menu (`requires`) and keeps each reading through a gap of
+// its source: the widget only formats, colours and lays out.
 import {
   formatNumber,
   fps,
@@ -27,7 +27,9 @@ export interface Shown {
   fahrenheit: boolean;
 }
 
-/** The frame rate part the rows use. */
+/** The frame rate part the rows use. The host keeps a value through a gap
+ * of its capture and marks it `stale`; the row shows it as it is: a value
+ * shown never disappears and shows no sign of its age. */
 export interface Rate {
   fps: number | null;
   stale: boolean;
@@ -139,9 +141,9 @@ export function rows(sample: Telemetry | null, rate: Rate | null, show: Shown): 
       label: t("fps"),
       value,
       valueClass: "value",
-      unit: rate.stale ? spaced(t("old")) : "",
-      hint: t(rate.stale ? "hint-fps-old" : "hint-fps"),
-      name: t(rate.stale ? "name-fps-old" : "name-fps", { value }),
+      unit: "",
+      hint: t("hint-fps"),
+      name: t("name-fps", { value }),
     });
   }
   return list.map((row, index) => ({ ...row, first: index === 0 }));
