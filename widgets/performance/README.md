@@ -23,8 +23,9 @@ default) or on one line separated by `·` (horizontal):
   no CPU share yet; the row appears a second or two later.
 - Temperatures compare with their thresholds in °C, even when shown in
   °F, and convert before rounding.
-- A frame rate without a new sample for 3 s keeps its number, followed by
-  "old" / "ancien".
+- A reading the host keeps through a gap of its source (the frame rate
+  between two samples included) shows exactly as it was: a value shown
+  never disappears and shows no sign of its age.
 - Numbers follow the number format of OverCrow's settings, not the
   language: `us` 1,234.5 (the default), `fr` 1 234,5, `de` 1.234,5.
 - With nothing to show: "Waiting for game data…" / "En attente des données
@@ -33,7 +34,7 @@ default) or on one line separated by `·` (horizontal):
 
 Values use the interface font with tabular figures. Hovering a row in
 Interactive mode explains it ("Game CPU use across all logical
-processors.", "Last FPS reading. …" for an old frame rate…); each value's
+processors.", "Observed presentation rate."…); each value's
 accessible name says what it is ("CPU temperature 61.0 °C").
 
 ## Platforms
@@ -86,8 +87,9 @@ The widget stores nothing: its menu values are OverCrow's.
 `telemetry.subscribe` gives `{ cpu, ram, cpuTemperature, gpuTemperature,
 sources }`, or `null` without a game; the host normalizes the CPU share
 to the whole machine and keeps each temperature to its sensor's
-thousandth of a degree. `fps.subscribe` gives `{ fps, stale, status }`
-and marks a value stale itself, so the widget runs no timer. The widget
+thousandth of a degree. `fps.subscribe` gives `{ fps, stale, status }`;
+the host keeps the game's last rate through a gap of its capture, so the
+widget runs no timer and does not draw `stale`. The widget
 subscribes to the frame rate only while the FPS row is switched on:
 OverCrow measures the frame rate only for a subscriber, so switching the
 row off also stops the measurement.
@@ -96,16 +98,18 @@ row off also stops the measurement.
 
 - `tests/logic.test.mjs`, `tests/refused.test.mjs`: the logic on
   `@overcrow/sdk/testing` (rows and their order, units, thresholds, the
-  °F vectors, number formats, the stale marker, messages, the menu and
+  °F vectors, number formats, a rate kept through a gap, messages, the menu and
   the FPS subscription).
 - Scenarios with their reference images:
   - `render`: every row, vertical, in both themes and languages at 100
     and 150 %;
-  - `horizontal`: the one-line layout, the same matrix, an old frame rate;
+  - `horizontal`: the one-line layout, the same matrix, a frame rate kept
+    through a gap;
   - `thresholds`: below, amber and red, in both themes, and °F;
   - `fahrenheit`: the conversion vectors and a negative temperature;
   - `region`: the `us`, `fr` and `de` number formats;
-  - `stale`: "old" and "ancien", then a fresh value, then none;
+  - `stale`: a frame rate kept through a gap, unchanged, then a fresh
+    value, then none;
   - `sources`: Windows (no CPU temperature), no sensor, the first
     sample without CPU; `no-fps-source`;
   - `waiting`, `menu` (every toggle, both choices, "No metric selected",

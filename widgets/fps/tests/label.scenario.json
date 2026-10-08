@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "label",
-  "description": "The “Show FPS label” menu row: the value alone, fresh and old, then the unit back.",
+  "description": "The “Show FPS label” menu row: the value alone, fresh and kept through a gap (unchanged), then the unit back.",
   "fixtures": {
     "subscriptions": {
       "fps.subscribe": {
@@ -41,7 +41,7 @@
     },
     {
       "expect": {
-        "image": "value-only-old"
+        "image": "value-only-kept"
       }
     },
     {
@@ -55,7 +55,7 @@
         "text": [
           "  FPS"
         ],
-        "image": "old-with-label",
+        "image": "kept-with-label",
         "fault": "none"
       }
     }

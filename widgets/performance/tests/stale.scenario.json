@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "stale",
-  "description": "The host marks the frame rate stale 3 s after its last sample: the number stays with “old” (“ancien”), then a new sample makes it fresh again.",
+  "description": "The host keeps the frame rate through a gap of its capture and marks it stale: the number stays exactly as it was, with no sign of its age; a new sample replaces it, and no value hides the row.",
   "fixtures": {
     "subscriptions": {
       "telemetry.subscribe": {
@@ -35,10 +35,12 @@
     {
       "expect": {
         "text": [
-          "144",
-          " old"
+          "144"
         ],
-        "image": "old-dark-en"
+        "image": "kept-dark-en",
+        "noText": [
+          " old"
+        ]
       }
     },
     {
@@ -49,10 +51,10 @@
     },
     {
       "expect": {
-        "text": [
+        "image": "kept-light-fr",
+        "noText": [
           " ancien"
-        ],
-        "image": "old-light-fr"
+        ]
       }
     },
     {
@@ -62,7 +64,7 @@
     },
     {
       "expect": {
-        "image": "old-light-fr-150"
+        "image": "kept-light-fr-150"
       }
     },
     {

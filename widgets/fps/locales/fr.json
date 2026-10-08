@@ -1,9 +1,6 @@
 {
-  "old": "ancien",
   "label": "{fps} images par seconde",
-  "label-old": "{fps} images par seconde, dernière mesure",
   "label-none": "FPS indisponibles",
-  "hint-old": "Dernière mesure FPS. Aucune nouvelle mesure reçue depuis au moins trois secondes.",
   "hint-ready": "Images présentées par le jeu, observées de l’extérieur du jeu : son rythme de présentation, pas la fréquence de l’écran.",
   "hint-waiting": "En attente d’images de la fenêtre de jeu. Un jeu en pause laisse cette valeur indisponible.",
   "hint-unsupported": "Les FPS de cette fenêtre de jeu ne peuvent pas être mesurés sur ce système.",

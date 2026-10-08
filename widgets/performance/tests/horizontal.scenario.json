@@ -85,11 +85,11 @@
     },
     {
       "expect": {
-        "text": [
+        "image": "line-kept-dark-en-150",
+        "fault": "none",
+        "noText": [
           " old"
-        ],
-        "image": "line-old-dark-en-150",
-        "fault": "none"
+        ]
       }
     }
   ]
