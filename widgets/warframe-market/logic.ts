@@ -1263,11 +1263,3 @@ export function copyClass(copyState: CopyFeedback | null, side: Side, id: string
 export function copyBusy(copyState: CopyFeedback | null): boolean {
   return copyState?.state === "pending";
 }
-
-export function copyStatus(copyState: CopyFeedback | null): string {
-  return t(copyState ? `copy-status-${copyState.state}` : "copy-status");
-}
-
-export function copyStatusClass(copyState: CopyFeedback | null): string {
-  return copyState ? `copy-status ${copyState.state}` : "copy-status";
-}

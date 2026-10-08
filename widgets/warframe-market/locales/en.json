@@ -40,9 +40,5 @@
   "copy-pending": "Copying…",
   "copy-copied": "Copied",
   "copy-failed": "Retry",
-  "copy-to": "Copy whisper to {name}",
-  "copy-status": "Whisper copies the message: paste it into Warframe chat.",
-  "copy-status-pending": "Copying whisper…",
-  "copy-status-copied": "Whisper copied. Paste it into Warframe chat.",
-  "copy-status-failed": "Copy failed. Use Retry to try again."
+  "copy-to": "Copy whisper to {name}"
 }

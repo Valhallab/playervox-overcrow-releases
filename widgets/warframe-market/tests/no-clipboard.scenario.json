@@ -68,8 +68,7 @@
     {
       "expect": {
         "text": [
-          "Retry",
-          "Copy failed. Use Retry to try again."
+          "Retry"
         ],
         "calls": [
           {

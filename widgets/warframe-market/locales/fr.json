@@ -40,9 +40,5 @@
   "copy-pending": "Copie…",
   "copy-copied": "Copié",
   "copy-failed": "Réessayer",
-  "copy-to": "Copier le message pour {name}",
-  "copy-status": "Chuchoter copie le message : collez-le dans le chat de Warframe.",
-  "copy-status-pending": "Copie du message…",
-  "copy-status-copied": "Message copié. Collez-le dans le chat de Warframe.",
-  "copy-status-failed": "Échec de la copie. Utilisez Réessayer."
+  "copy-to": "Copier le message pour {name}"
 }

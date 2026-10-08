@@ -101,19 +101,16 @@
       <text class="empty-text">{emptyText(state.query, state.phase)}</text>
     </box>
   </else>
-  <box class="footer">
-    <if test={state.detail}>
-      <box class="legend">
-        <box class="legend-item">
-          <box class="presence ingame"/>
-          <text class="legend-text">{presenceLabel("ingame")}</text>
-        </box>
-        <box class="legend-item">
-          <box class="presence online"/>
-          <text class="legend-text">{presenceLabel("online")}</text>
-        </box>
+  <if test={state.detail}>
+    <box class="legend">
+      <box class="legend-item">
+        <box class="presence ingame"/>
+        <text class="legend-text">{presenceLabel("ingame")}</text>
       </box>
-    </if>
-    <text class={copyStatusClass(state.copy)}>{copyStatus(state.copy)}</text>
-  </box>
+      <box class="legend-item">
+        <box class="presence online"/>
+        <text class="legend-text">{presenceLabel("online")}</text>
+      </box>
+    </box>
+  </if>
 </box>

@@ -122,8 +122,7 @@
       "expect": {
         "clipboard": "/w VoidMerchant Hi, WTB 3 x Arcane Energize (Rank 0) for 60p total",
         "text": [
-          "Copied",
-          "Whisper copied. Paste it into Warframe chat."
+          "Copied"
         ],
         "image": "copied-dark-en-100"
       }
@@ -225,8 +224,7 @@
       "expect": {
         "clipboard": "/w RelicHunter Hi, WTS Arcane Energize (Rank 0) for 12p",
         "text": [
-          "Copié",
-          "Message copié. Collez-le dans le chat de Warframe."
+          "Copié"
         ],
         "image": "copied-light-fr-150"
       }

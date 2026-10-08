@@ -170,7 +170,8 @@ test("copy: the whisper on a gesture, its feedback, a failed copy", async () => 
   open("clipboard.writeText")[0].reject("unavailable");
   await flush();
   assert.deepEqual(state.copy, { side: "buy", id: "order-buy-5", state: "failed" });
-  assert.equal(logic.copyStatus(state.copy), MESSAGES["copy-status-failed"]);
+  assert.equal(logic.copyLabel(state.copy, "buy", "order-buy-5"), MESSAGES["copy-failed"]);
+  assert.equal(logic.copyClass(state.copy, "buy", "order-buy-5"), "copy failed");
   logic.back();
   assert.equal(state.detail, null);
   assert.equal(state.copy, null);

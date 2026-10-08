@@ -399,20 +399,15 @@
   overflow-wrap: anywhere;
 }
 
-/* Always at the bottom, out of the scroll: the legend of the dots while
-   offers show, then the copy status. */
-.footer {
-  flex-shrink: 0;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding-top: 7px;
-  border-top: 1px solid var(--color-border);
-}
-
+/* The legend of the dots, at the bottom and out of the scroll while
+   offers show. A copy says how it went on its own button. */
 .legend {
+  flex-shrink: 0;
   flex-direction: row;
   align-items: center;
   gap: var(--space-5);
+  padding-top: 7px;
+  border-top: 1px solid var(--color-border);
 }
 
 .legend-item {
@@ -421,20 +416,7 @@
   gap: var(--space-2);
 }
 
-.legend-text,
-.copy-status {
+.legend-text {
   font-size: var(--font-size-caption);
   color: var(--color-text-muted);
-}
-
-.copy-status {
-  min-height: 20px;
-}
-
-.copy-status.copied {
-  color: var(--color-accent);
-}
-
-.copy-status.failed {
-  color: var(--color-danger);
 }
