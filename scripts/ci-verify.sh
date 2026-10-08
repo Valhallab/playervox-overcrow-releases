@@ -32,7 +32,7 @@ run_local_checks() {
         CDPATH='' cd -- "$local_root"
         node --test --test-concurrency=2 \
             tests/check-links.test.mjs tests/docs-content.test.mjs \
-            tests/widget-previews.test.mjs
+            tests/compose-previews.test.mjs tests/widget-previews.test.mjs
         # The built-ins' copies of widgets-shared/ are current.
         node scripts/sync-shared-widgets.mjs --check
         for directory in widgets/*/; do

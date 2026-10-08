@@ -1,0 +1,44 @@
+{
+  "scenarioVersion": 1,
+  "name": "preview",
+  "description": "The published rating of Portal 2 and its form in Interactive mode. The marketplace preview: dark theme, English, 150 %, on the stage colour; scripts/compose-previews.mjs frames it into assets/preview.png.",
+  "host": {
+    "mode": "interactive",
+    "scale": 1500,
+    "background": "#1e242e"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "playervox.rating.subscribe": {
+        "state": "ready",
+        "name": "Portal 2",
+        "offline": false,
+        "rating": {
+          "gameplay": 96,
+          "art": 88,
+          "tech": 94,
+          "review": "Clever puzzles from start to finish, and the co-op campaign is worth a second run.",
+          "publishedAt": null,
+          "offsetMinutes": null
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "93",
+          "Your published rating",
+          "96",
+          "88",
+          "94",
+          "Update my rating"
+        ],
+        "intents": [],
+        "image": "preview"
+      }
+    }
+  ]
+}

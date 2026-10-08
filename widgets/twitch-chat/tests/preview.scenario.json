@@ -1,0 +1,147 @@
+{
+  "scenarioVersion": 1,
+  "name": "preview",
+  "description": "A lively public chat in Interactive mode: the channel, the history and the message field. The marketplace preview: dark theme, English, 150 %, on the stage colour; scripts/compose-previews.mjs frames it into assets/preview.png.",
+  "host": {
+    "mode": "interactive",
+    "scale": 1500,
+    "background": "#1e242e",
+    "size": {
+      "width": 420,
+      "height": 300
+    }
+  },
+  "fixtures": {
+    "subscriptions": {
+      "twitch.chat.subscribe": {
+        "account": "connected",
+        "channel": "juniper_plays",
+        "joinState": "joined",
+        "failure": null,
+        "favorites": [
+          "juniper_plays"
+        ],
+        "canSend": true,
+        "generation": 1,
+        "reset": true,
+        "messages": [
+          {
+            "id": "m1",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "good evening chat, boss attempt number three"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m2",
+            "author": "River_Otter",
+            "color": "#1e90ff",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "you've got this, the second phase is all about timing"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m3",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "that last jump was close"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m4",
+            "author": "Fern_42",
+            "color": "#2e8b57",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "dodge left when the arena lights up"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m5",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "noted, thank you"
+              }
+            ],
+            "reply": {
+              "author": "Fern_42",
+              "text": "dodge left when the arena lights up"
+            },
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m6",
+            "author": "Kestrel",
+            "color": "#daa520",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "first try energy"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m7",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "GG if this one works"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          }
+        ],
+        "removed": [],
+        "skipped": 0
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "#juniper_plays",
+          "Moss: GG if this one works"
+        ],
+        "image": "preview"
+      }
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "scenarioVersion": 1,
+  "name": "preview",
+  "description": "A fresh reading of 144 frames per second. The marketplace preview: dark theme, English, 150 %, on the stage colour; scripts/compose-previews.mjs frames it into assets/preview.png.",
+  "host": {
+    "scale": 1500,
+    "background": "#1e242e"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "fps.subscribe": {
+        "fps": 144,
+        "stale": false,
+        "status": "ready"
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "144"
+        ],
+        "image": "preview"
+      }
+    }
+  ]
+}
