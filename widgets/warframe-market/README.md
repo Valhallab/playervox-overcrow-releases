@@ -20,7 +20,7 @@ them or with warframe.market.
 | --- | --- |
 | Loading | "Loading catalog…" until the stored or downloaded catalog is ready |
 | Search | Up to 12 items whose English name or slug holds the text, in catalog order |
-| Selected item | Lowest sell and highest buy price per item, then two tabs, Sellers (first) and Buyers, each with its count: every visible PC offer of a player in game or online, sellers by rising and buyers by falling price per item, the best 150 shown and "+N more" below them: price, a dot for the player's state (green in game, amber online, named on hover and for screen readers), trader, quantity and variant (rank, charges, stars, subtype) |
+| Selected item | Lowest sell and highest buy price per item, then two tabs, Sellers (first) and Buyers, each with its count: every visible PC offer of a player in game or online, sellers by rising and buyers by falling price per item, the best 150 shown and "+N more" below them: price, trader followed by a dot for the player's state (green in game, amber online, named on hover and for screen readers; a long name is cut before the dot), quantity and variant (rank, charges, stars, subtype). A legend of the dots stays at the bottom, out of the scroll |
 | Refresh | The button beside "Back" reloads the item's offers; it is off while they load. The offers shown stay until the new ones arrive ("Refreshing offers…"); a failed refresh keeps them ("Refresh failed · showing the previous offers") |
 | Copy | "Whisper" writes `/w <trader> Hi, WTB <item> (<variant>) for <price>p` (WTS for a buyer; `n x … total` for several items) to the clipboard; the button and the bottom line say whether it worked |
 | Passive mode | The last results, with "Switch to interactive mode to search" |

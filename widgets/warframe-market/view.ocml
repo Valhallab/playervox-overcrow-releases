@@ -10,8 +10,10 @@
       <box class="order">
         <box class="order-line">
           <text class="order-price">{price(order.platinum)}</text>
-          <box class={presenceClass(order.presence)} label={presenceLabel(order.presence)} tooltip={presenceLabel(order.presence)}/>
-          <text class="order-trader" tooltip={order.trader}>{order.trader}</text>
+          <box class="order-player">
+            <text class="order-trader" tooltip={order.trader}>{order.trader}</text>
+            <box class={presenceClass(order.presence)} label={presenceLabel(order.presence)} tooltip={presenceLabel(order.presence)}/>
+          </box>
           <button class={copyClass(feedback, side, order.id)} label={t("copy-to", { name: order.trader })} disabled={copyBusy(feedback)} on:activate={copy(side, order.id)}>
             <if test={copyClass(feedback, side, order.id) == "copy copied"}>
               <icon class="copy-icon" name="check"/>
@@ -99,5 +101,19 @@
       <text class="empty-text">{emptyText(state.query, state.phase)}</text>
     </box>
   </else>
-  <text class={copyStatusClass(state.copy)}>{copyStatus(state.copy)}</text>
+  <box class="footer">
+    <if test={state.detail}>
+      <box class="legend">
+        <box class="legend-item">
+          <box class="presence ingame"/>
+          <text class="legend-text">{presenceLabel("ingame")}</text>
+        </box>
+        <box class="legend-item">
+          <box class="presence online"/>
+          <text class="legend-text">{presenceLabel("online")}</text>
+        </box>
+      </box>
+    </if>
+    <text class={copyStatusClass(state.copy)}>{copyStatus(state.copy)}</text>
+  </box>
 </box>
