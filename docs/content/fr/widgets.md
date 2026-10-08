@@ -29,8 +29,9 @@ lisez-les, copiez-les et servez-vous-en comme point de départ.
 - les sources du paquet : `manifest.json`, `view.ocml`, `style.ocss`,
   `logic.ts`, `locales/`, `LICENSE` ;
 - `listing.json`, son texte pour la marketplace ;
-- `assets/preview.png`, son aperçu dans la marketplace : la copie de l’une de
-  ses images de référence ;
+- `assets/preview.png`, son aperçu dans la marketplace : l’image de son
+  scénario `preview`, cadrée et mise en scène par
+  `node scripts/compose-previews.mjs` ;
 - `tests/` : les tests unitaires de la logique, et des scénarios avec leurs
   images de référence dans les deux thèmes, les deux langues et deux
   échelles, joués par `overcrow-widget test` dans le runtime headless

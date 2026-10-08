@@ -63,7 +63,11 @@ the ID is the widget's identity in the catalog.
 - `sourceUrl` is a canonical HTTPS URL of the reviewed source, without
   port, query or fragment.
 - `preview` (optional) names a PNG packaged under `assets/`, at most
-  256 KiB, for example `"preview": "assets/preview.png"`.
+  256 KiB, for example `"preview": "assets/preview.png"`. The Control
+  Center and the marketplace show it whole in a 4:3 box, centred on the
+  colour `#1e242e`, at 1.5 pixels per screen point at most: render the
+  widget at 150 % (`"scale": 1500` in a scenario) and give the image a 4:3
+  shape, and it appears at its real size, never cropped or enlarged.
 
 ## Admission: run it yourself
 

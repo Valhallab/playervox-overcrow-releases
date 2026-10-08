@@ -1,0 +1,52 @@
+{
+  "scenarioVersion": 1,
+  "name": "preview",
+  "description": "A playing track with its cover and its three buttons in Interactive mode. The marketplace preview: dark theme, English, 150 %, on the stage colour; scripts/compose-previews.mjs frames it into assets/preview.png.",
+  "host": {
+    "mode": "interactive",
+    "scale": 1500,
+    "background": "#1e242e"
+  },
+  "assets": {
+    "aurora": "tests/assets/aurora.png",
+    "horizon": "tests/assets/horizon.png",
+    "tiles": "tests/assets/tiles.png"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "media.subscribe": {
+        "player": "p1",
+        "title": "Beyond the northern lights",
+        "artists": [
+          "The Quiet Expedition"
+        ],
+        "playing": true,
+        "canPrevious": true,
+        "canPlayPause": true,
+        "canNext": true,
+        "cover": "fixture:aurora"
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "Beyond the northern lights",
+          "The Quiet Expedition"
+        ],
+        "calls": [
+          {
+            "service": "media.subscribe",
+            "params": {
+              "cover": true
+            },
+            "outcome": "ok"
+          }
+        ],
+        "image": "preview"
+      }
+    }
+  ]
+}

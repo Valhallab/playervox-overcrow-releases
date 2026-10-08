@@ -1,0 +1,99 @@
+{
+  "scenarioVersion": 1,
+  "name": "preview",
+  "description": "The active note in Passive mode: its title, text and checklist. The marketplace preview: dark theme, English, 150 %, on the stage colour; scripts/compose-previews.mjs frames it into assets/preview.png.",
+  "host": {
+    "scale": 1500,
+    "background": "#1e242e"
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Loading notes…"
+        ],
+        "calls": [
+          {
+            "service": "notes.subscribe"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "notes.subscribe",
+        "value": {
+          "active": "note-1",
+          "notes": [
+            {
+              "id": "note-1",
+              "title": "Expedition",
+              "body": "Find the northern entrance before sunset.\nBring rope.",
+              "items": [
+                {
+                  "id": "local-1",
+                  "text": "Pack torches",
+                  "checked": true
+                },
+                {
+                  "id": "local-2",
+                  "text": "Sharpen the blade",
+                  "checked": false
+                },
+                {
+                  "id": "local-3",
+                  "text": "Buy healing potions for the whole party before leaving town",
+                  "checked": false
+                }
+              ]
+            },
+            {
+              "id": "note-2",
+              "title": "Build ideas",
+              "body": "Fire sword first, then armor.",
+              "items": []
+            },
+            {
+              "id": "note-3",
+              "title": "A very long note title that must be cut in the selector and in the list",
+              "body": "",
+              "items": [
+                {
+                  "id": "local-4",
+                  "text": "One entry",
+                  "checked": false
+                }
+              ]
+            },
+            {
+              "id": "note-4",
+              "title": "Route",
+              "body": "North gate, then the river.",
+              "items": [
+                {
+                  "id": "local-5",
+                  "text": "Buy a map",
+                  "checked": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Expedition",
+          "Pack torches",
+          "Sharpen the blade"
+        ],
+        "noText": [
+          "Loading notes…",
+          "Build ideas"
+        ],
+        "image": "preview"
+      }
+    }
+  ]
+}

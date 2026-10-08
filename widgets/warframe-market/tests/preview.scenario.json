@@ -1,0 +1,146 @@
+{
+  "scenarioVersion": 1,
+  "name": "preview",
+  "description": "The saved search `arcane` and its three results in Interactive mode. The marketplace preview: dark theme, English, 150 %, on the stage colour; scripts/compose-previews.mjs frames it into assets/preview.png.",
+  "host": {
+    "storage": {
+      "state": {
+        "query": "arcane"
+      }
+    },
+    "scale": 1500,
+    "background": "#1e242e",
+    "mode": "interactive",
+    "size": {
+      "width": 360,
+      "height": 340
+    }
+  },
+  "fixtures": {
+    "http": [
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.warframe.market/v2/versions"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"apiVersion\":\"0.25.0\",\"data\":{\"id\":\"synthetic\",\"collections\":{\"items\":\"v1\"},\"updatedAt\":\"2026-09-28T16:09:39Z\"},\"error\":null}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.warframe.market/v2/items"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"apiVersion\":\"0.25.0\",\"data\":[{\"id\":\"000000000000000000000000\",\"slug\":\"arcane_energize\",\"gameRef\":\"/Lotus/Synthetic/0\",\"tags\":[\"synthetic\"],\"i18n\":{\"en\":{\"name\":\"Arcane Energize\",\"icon\":\"items/images/en/arcane_energize.png\",\"thumb\":\"items/images/en/thumbs/arcane_energize.128x128.png\"}}},{\"id\":\"000000000000000000000001\",\"slug\":\"arcane_grace\",\"gameRef\":\"/Lotus/Synthetic/1\",\"tags\":[\"synthetic\"],\"i18n\":{\"en\":{\"name\":\"Arcane Grace\",\"icon\":\"items/images/en/arcane_grace.png\",\"thumb\":\"items/images/en/thumbs/arcane_grace.128x128.png\"}}},{\"id\":\"000000000000000000000002\",\"slug\":\"arcane_guardian\",\"gameRef\":\"/Lotus/Synthetic/2\",\"tags\":[\"synthetic\"],\"i18n\":{\"en\":{\"name\":\"Arcane Guardian\",\"icon\":\"items/images/en/arcane_guardian.png\",\"thumb\":\"items/images/en/thumbs/arcane_guardian.128x128.png\"}}},{\"id\":\"000000000000000000000003\",\"slug\":\"forma_blueprint\",\"gameRef\":\"/Lotus/Synthetic/3\",\"tags\":[\"synthetic\"],\"i18n\":{\"en\":{\"name\":\"Forma Blueprint\",\"icon\":\"items/images/en/forma_blueprint.png\",\"thumb\":\"items/images/en/thumbs/forma_blueprint.128x128.png\"}}},{\"id\":\"000000000000000000000004\",\"slug\":\"primed_flow\",\"gameRef\":\"/Lotus/Synthetic/4\",\"tags\":[\"synthetic\"],\"i18n\":{\"en\":{\"name\":\"Primed Flow\",\"icon\":\"items/images/en/primed_flow.png\",\"thumb\":\"items/images/en/thumbs/primed_flow.128x128.png\"}}},{\"id\":\"000000000000000000000005\",\"slug\":\"soma_prime_set\",\"gameRef\":\"/Lotus/Synthetic/5\",\"tags\":[\"synthetic\"],\"i18n\":{\"en\":{\"name\":\"Soma Prime Set\",\"icon\":\"items/images/en/soma_prime_set.png\",\"thumb\":\"items/images/en/thumbs/soma_prime_set.128x128.png\"}}},{\"id\":\"000000000000000000000006\",\"slug\":\"hells_chamber\",\"gameRef\":\"/Lotus/Synthetic/6\",\"tags\":[\"synthetic\"],\"i18n\":{\"en\":{\"name\":\"Hell's Chamber\",\"icon\":\"items/images/en/hells_chamber.png\",\"thumb\":\"items/images/en/thumbs/hells_chamber.128x128.png\"}}},{\"id\":\"000000000000000000000007\",\"slug\":\"silva_and_aegis_prime_guard\",\"gameRef\":\"/Lotus/Synthetic/7\",\"tags\":[\"synthetic\"],\"i18n\":{\"en\":{\"name\":\"Silva & Aegis Prime Guard\",\"icon\":\"items/images/en/silva_and_aegis_prime_guard.png\",\"thumb\":\"items/images/en/thumbs/silva_and_aegis_prime_guard.128x128.png\"}}}],\"error\":null}"
+        }
+      }
+    ]
+  },
+  "steps": [
+    {
+      "advance": {
+        "ms": 400
+      }
+    },
+    {
+      "advance": {
+        "ms": 200
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "Arcane Energize",
+          "Arcane Grace",
+          "Arcane Guardian",
+          "8 items cached · select an item to view offers"
+        ],
+        "noText": [
+          "Forma Blueprint"
+        ],
+        "calls": [
+          {
+            "service": "storage.get",
+            "params": {
+              "key": "state"
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "storage.get",
+            "params": {
+              "key": "catalog"
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "http.fetch",
+            "params": {
+              "url": "https://api.warframe.market/v2/versions",
+              "method": "GET",
+              "as": "json"
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "http.fetch",
+            "params": {
+              "url": "https://api.warframe.market/v2/items",
+              "method": "GET",
+              "as": "text"
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "storage.remove",
+            "params": {
+              "key": "catalog"
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "storage.set",
+            "outcome": "ok"
+          },
+          {
+            "service": "storage.remove",
+            "params": {
+              "key": "catalog-1"
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "storage.remove",
+            "params": {
+              "key": "catalog-2"
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "storage.set",
+            "params": {
+              "key": "catalog",
+              "value": {
+                "version": "v1",
+                "chunks": 1
+              }
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "expect": {
+        "image": "preview"
+      }
+    }
+  ]
+}

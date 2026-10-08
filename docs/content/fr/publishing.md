@@ -66,7 +66,12 @@ contrôlez, et gardez-le : l’ID est l’identité du widget dans le catalogue.
 - `sourceUrl` est une URL HTTPS canonique des sources relues, sans port,
   requête ni fragment.
 - `preview` (facultatif) désigne un PNG empaqueté sous `assets/`, de
-  256 Kio au plus, par exemple `"preview": "assets/preview.png"`.
+  256 Kio au plus, par exemple `"preview": "assets/preview.png"`. Le
+  Centre de contrôle et la marketplace le montrent entier dans un cadre
+  4:3, centré sur la couleur `#1e242e`, à 1,5 pixel par point d’écran au
+  plus : rendez le widget à 150 % (`"scale": 1500` dans un scénario) et
+  donnez à l’image un format 4:3, il apparaît à sa taille réelle, jamais
+  recadré ni agrandi.
 
 ## L’admission : lancez-la vous-même
 

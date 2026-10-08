@@ -1,0 +1,25 @@
+{
+  "scenarioVersion": 1,
+  "name": "preview",
+  "description": "The clock with its default menu values at 14:08 local time. The marketplace preview: dark theme, English, 150 %, on the stage colour; scripts/compose-previews.mjs frames it into assets/preview.png.",
+  "host": {
+    "zone": {
+      "offsetMinutes": 120
+    },
+    "startAt": 1784290122000,
+    "scale": 1500,
+    "background": "#1e242e"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "14:08",
+          "17/07/2026"
+        ],
+        "image": "preview"
+      }
+    }
+  ]
+}

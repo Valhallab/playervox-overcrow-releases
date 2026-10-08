@@ -1,0 +1,36 @@
+{
+  "scenarioVersion": 1,
+  "name": "preview",
+  "description": "A running stopwatch at 00:02:03.45 with its buttons in Interactive mode. The marketplace preview: dark theme, English, 150 %, on the stage colour; scripts/compose-previews.mjs frames it into assets/preview.png.",
+  "host": {
+    "mode": "interactive",
+    "scale": 1500,
+    "background": "#1e242e"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "stopwatch.subscribe": {
+        "running": true,
+        "elapsedMs": 123450,
+        "at": 0,
+        "shortcuts": {
+          "toggle": "Super+Alt+T",
+          "reset": "Super+Alt+Z",
+          "bound": true
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "00:02:03.45",
+          "Super+Alt+T  Start / pause  ·  Super+Alt+Z  Reset"
+        ],
+        "image": "preview"
+      }
+    }
+  ]
+}

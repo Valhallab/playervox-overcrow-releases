@@ -1,0 +1,184 @@
+{
+  "scenarioVersion": 1,
+  "name": "preview",
+  "description": "The first page of the session journal of Portal 2, in Passive mode. The marketplace preview: dark theme, English, 150 %, on the stage colour; scripts/compose-previews.mjs frames it into assets/preview.png.",
+  "host": {
+    "scale": 1500,
+    "background": "#1e242e"
+  },
+  "fixtures": {
+    "calls": {
+      "journal.page": [
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000013",
+                "startedAt": 1789929000000,
+                "offsetMinutes": 120,
+                "durationMs": 2700000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000012",
+                "startedAt": 1789844700000,
+                "offsetMinutes": 120,
+                "durationMs": 7920000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000011",
+                "startedAt": 1789629300000,
+                "offsetMinutes": 120,
+                "durationMs": 480000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000010",
+                "startedAt": 1789214400000,
+                "offsetMinutes": 120,
+                "durationMs": 14400000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000009",
+                "startedAt": 1788640920000,
+                "offsetMinutes": 120,
+                "durationMs": 3660000,
+                "source": "local"
+              }
+            ],
+            "page": 1,
+            "next": "c2",
+            "previous": null
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [],
+            "page": 1,
+            "next": null,
+            "previous": null
+          }
+        },
+        {
+          "value": {
+            "gameName": "",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000013",
+                "startedAt": 1789929000000,
+                "offsetMinutes": 120,
+                "durationMs": 2700000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000011",
+                "startedAt": 1789629300000,
+                "offsetMinutes": 120,
+                "durationMs": 480000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000002",
+                "startedAt": 1768474800000,
+                "offsetMinutes": 60,
+                "durationMs": 3540000,
+                "source": "local"
+              }
+            ],
+            "page": 1,
+            "next": null,
+            "previous": null
+          }
+        },
+        {
+          "error": "unavailable"
+        },
+        {
+          "error": "unavailable"
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000003",
+                "startedAt": 1772403600000,
+                "offsetMinutes": 60,
+                "durationMs": 7500000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000002",
+                "startedAt": 1768474800000,
+                "offsetMinutes": 60,
+                "durationMs": 3540000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000001",
+                "startedAt": 1767220200000,
+                "offsetMinutes": 60,
+                "durationMs": 10800000,
+                "source": "local"
+              }
+            ],
+            "page": 3,
+            "next": null,
+            "previous": "c2"
+          }
+        }
+      ]
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Session journal",
+          "Loading…"
+        ],
+        "state": "running",
+        "calls": [
+          {
+            "service": "journal.subscribe"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": {
+          "revision": 1,
+          "notice": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "09/20/2026 · 20:30",
+          "0 h 45 min",
+          "2 h 12 min",
+          "Page 1"
+        ],
+        "image": "preview",
+        "noText": [
+          "Loading…"
+        ],
+        "calls": [
+          {
+            "service": "journal.page",
+            "params": {},
+            "outcome": "ok"
+          }
+        ]
+      }
+    }
+  ]
+}
