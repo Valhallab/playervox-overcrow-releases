@@ -3,26 +3,26 @@
 .market {
   flex-direction: column;
   flex-grow: 1;
-  gap: var(--space-5);
+  gap: var(--space-4);
   width: 100%;
   height: 100%;
-  padding: 14px;
+  padding: 10px;
 }
 
 .identity,
 .search-controls,
-.offer-heading,
 .item-heading {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
 .identity-text,
 .item-title {
   flex-direction: column;
   gap: var(--space-1);
+  flex-grow: 1;
   flex-shrink: 1;
   min-width: 0;
 }
@@ -84,7 +84,8 @@
 .clear,
 .result,
 .copy,
-.back {
+.back,
+.refresh {
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
@@ -94,7 +95,8 @@
 .clear:hover,
 .result:hover,
 .copy:hover,
-.back:hover {
+.back:hover,
+.refresh:hover {
   background: var(--color-surface-hover);
   border-color: var(--color-border-strong);
 }
@@ -102,12 +104,14 @@
 .clear:focus,
 .result:focus,
 .copy:focus,
-.back:focus {
+.back:focus,
+.refresh:focus {
   border-color: var(--color-accent);
 }
 
 .clear:disabled,
-.copy:disabled {
+.copy:disabled,
+.refresh:disabled {
   opacity: 0.65;
   cursor: default;
 }
@@ -185,16 +189,17 @@
   color: var(--color-text-muted);
 }
 
-/* The selected item. */
+/* The selected item: its prices, then its offers in two tabs. */
 .detail {
   flex-grow: 1;
   flex-shrink: 1;
   min-height: 0;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-4);
 }
 
-.back {
+.back,
+.refresh {
   width: var(--control-height);
   height: var(--control-height);
   flex-shrink: 0;
@@ -204,21 +209,21 @@
 }
 
 .item-name {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
   overflow-wrap: anywhere;
 }
 
 .metrics {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 7px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
 }
 
 .metric {
   flex-direction: column;
   gap: var(--space-1);
-  padding: 8px 10px;
+  padding: 6px 8px;
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
   border-radius: 7px;
@@ -231,58 +236,91 @@
 }
 
 .metric-value {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-.variant-hint {
-  font-size: var(--font-size-small);
+.tabs {
+  flex-direction: row;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tab {
+  flex-grow: 1;
+  flex-basis: 0;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: 6px 4px;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+
+.tab:hover {
+  background: var(--color-surface-hover);
+}
+
+.tab:focus {
+  border-bottom: 2px solid var(--color-border-strong);
+}
+
+.tab.active {
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.tab-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.tab.active .tab-text {
+  color: var(--color-text);
+}
+
+.tab-count {
+  font-size: var(--font-size-caption);
+  font-variant-numeric: tabular-nums;
   color: var(--color-text-muted);
 }
 
-.offers {
-  flex-direction: column;
-  margin-top: var(--space-2);
-}
-
-.offer-heading {
-  margin-bottom: 5px;
-}
-
-.offer-title {
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.offer-count,
-.no-offers {
+.no-offers,
+.more {
   font-size: var(--font-size-caption);
   color: var(--color-text-muted);
 }
 
 .no-offers {
-  padding: 12px 8px;
-  border-top: 1px solid var(--color-border);
+  padding: 12px 6px;
+}
+
+.more {
+  padding: 6px;
+  text-align: center;
 }
 
 .order {
   flex-direction: column;
-  gap: var(--space-2);
-  padding: 7px 8px;
-  border-top: 1px solid var(--color-border);
+  gap: var(--space-1);
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .order:hover {
   background: var(--color-surface-raised);
 }
 
+/* Price, presence dot, player, whisper: the player's name takes what is
+   left and ends with an ellipsis, so nothing else is ever cut. */
 .order-line {
   display: grid;
-  grid-template-columns: 57px minmax(0, 1fr) 69px 99px;
+  grid-template-columns: auto 8px minmax(0, 1fr) auto;
   align-items: center;
-  column-gap: 8px;
+  column-gap: var(--space-3);
 }
 
 .order-price {
@@ -300,18 +338,19 @@
   overflow: hidden;
 }
 
+/* Semantic colours, never the accent: in game green, online amber. */
 .presence {
-  font-size: var(--font-size-caption);
-  white-space: nowrap;
-  color: var(--color-text-muted);
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
 }
 
 .ingame {
-  color: var(--color-accent);
+  background: var(--color-success);
 }
 
 .online {
-  color: var(--color-text-secondary);
+  background: var(--color-warning);
 }
 
 .copy {
@@ -319,7 +358,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  padding: 5px 6px;
+  padding: 4px 6px;
 }
 
 .copy-icon {

@@ -76,11 +76,13 @@ export function search(detail: { value: unknown }): void {
   state.results = searchItems(items, lowered, state.query);
   state.detail = null;
   state.loadingOrders = false;
+  state.refreshing = false;
   state.copy = null;
   if (state.error === "orders_unavailable") {
     state.error = null;
   }
   selection += 1;
+  stopRefresh();
   saveQuery();
 }
 ```

@@ -1,34 +1,28 @@
-<!-- Warframe Market: search the PC item catalog, compare the best offers of
-     one item and copy a trade whisper (the Web widget it replaces:
-     widgets/warframe-market before P4.3). -->
+<!-- Warframe Market: search the PC item catalog, compare the online offers
+     of one item, sellers and buyers in two tabs, and copy a trade whisper
+     (the Web widget it replaces: widgets/warframe-market before P4.3). -->
 <component name="offers" props="side orders feedback">
-  <box class="offers">
-    <box class="offer-heading">
-      <text class="offer-title">{sideTitle(side)}</text>
-      <text class="offer-count">{shown(orders.length)}</text>
-    </box>
-    <if test={orders.length == 0}>
-      <text class="no-offers">{noOffers(side)}</text>
-    </if>
-    <else>
-      <for each={orders} as="order" key={order.id}>
-        <box class="order">
-          <box class="order-line">
-            <text class="order-price">{price(order.platinum)}</text>
-            <text class="order-trader" tooltip={order.trader}>{order.trader}</text>
-            <text class={presenceClass(order.presence)}>{presenceLabel(order.presence)}</text>
-            <button class={copyClass(feedback, side, order.id)} label={t("copy-to", { name: order.trader })} disabled={copyBusy(feedback)} on:activate={copy(side, order.id)}>
-              <if test={copyClass(feedback, side, order.id) == "copy copied"}>
-                <icon class="copy-icon" name="check"/>
-              </if>
-              <text class="copy-text">{copyLabel(feedback, side, order.id)}</text>
-            </button>
-          </box>
-          <text class="order-detail">{orderDetail(order)}</text>
+  <if test={orders.length == 0}>
+    <text class="no-offers">{noOffers(side)}</text>
+  </if>
+  <else>
+    <for each={orders} as="order" key={order.id}>
+      <box class="order">
+        <box class="order-line">
+          <text class="order-price">{price(order.platinum)}</text>
+          <box class={presenceClass(order.presence)} label={presenceLabel(order.presence)} tooltip={presenceLabel(order.presence)}/>
+          <text class="order-trader" tooltip={order.trader}>{order.trader}</text>
+          <button class={copyClass(feedback, side, order.id)} label={t("copy-to", { name: order.trader })} disabled={copyBusy(feedback)} on:activate={copy(side, order.id)}>
+            <if test={copyClass(feedback, side, order.id) == "copy copied"}>
+              <icon class="copy-icon" name="check"/>
+            </if>
+            <text class="copy-text">{copyLabel(feedback, side, order.id)}</text>
+          </button>
         </box>
-      </for>
-    </else>
-  </box>
+        <text class="order-detail">{orderDetail(order)}</text>
+      </box>
+    </for>
+  </else>
 </component>
 
 <box class="market">
@@ -49,7 +43,7 @@
     </box>
     <text class="hint">{searchHint(state.interactive)}</text>
   </box>
-  <text class={statusClass(state.error)}>{statusText(state.phase, state.count, state.error, state.detail, state.loadingOrders)}</text>
+  <text class={statusClass(state.error)}>{liveStatus(state.phase, state.count, state.error, state.detail, state.loadingOrders, state.refreshing)}</text>
   <if test={state.detail}>
     <scroll class="detail">
       <box class="item-heading">
@@ -57,6 +51,9 @@
           <text class="eyebrow">{t("selected")}</text>
           <text class="item-name">{state.detail.name}</text>
         </box>
+        <button class="refresh" label={t("refresh")} tooltip={t("refresh")} disabled={refreshBusy(state.loadingOrders, state.refreshing)} on:activate={refresh}>
+          <icon name="refresh-cw"/>
+        </button>
         <button class="back" label={t("back")} tooltip={t("back")} on:activate={back}>
           <icon name="arrow-left"/>
         </button>
@@ -70,14 +67,21 @@
           <text class="metric-label">{t("max-buy")}</text>
           <text class="metric-value">{unitPrice(state.detail.buys, false)}</text>
         </box>
-        <box class="metric">
-          <text class="metric-label">{t("orders-shown")}</text>
-          <text class="metric-value">{orderCount(state.detail)}</text>
-        </box>
       </box>
-      <text class="variant-hint">{t("variant-hint")}</text>
-      <offers side="sell" orders={state.detail.sells} feedback={state.copy}/>
-      <offers side="buy" orders={state.detail.buys} feedback={state.copy}/>
+      <box class="tabs">
+        <button class={tabClass(state.tab, "sell")} label={t("sellers")} on:activate={showTab("sell")}>
+          <text class="tab-text">{t("sellers")}</text>
+          <text class="tab-count">{tabCount(state.detail, "sell")}</text>
+        </button>
+        <button class={tabClass(state.tab, "buy")} label={t("buyers")} on:activate={showTab("buy")}>
+          <text class="tab-text">{t("buyers")}</text>
+          <text class="tab-count">{tabCount(state.detail, "buy")}</text>
+        </button>
+      </box>
+      <offers side={state.tab} orders={tabOrders(state.detail, state.tab)} feedback={state.copy}/>
+      <if test={moreOffers(state.detail, state.tab) != ""}>
+        <text class="more">{moreOffers(state.detail, state.tab)}</text>
+      </if>
     </scroll>
   </if>
   <else-if test={state.results.length > 0}>

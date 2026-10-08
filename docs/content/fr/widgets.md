@@ -21,7 +21,7 @@ lisez-les, copiez-les et servez-vous-en comme point de départ.
 | **Session** | Affiche la durée de la session de jeu en cours. | `com.playervox.overcrow.session` | `session.read` | [widgets/session/](../../../widgets/session/) |
 | **Chronomètre** | Un chronomètre au centième de seconde, démarré, mis en pause et réinitialisé par ses boutons ou les raccourcis de l’hôte. | `com.playervox.overcrow.stopwatch` | `stopwatch.read`, `stopwatch.control` | [widgets/stopwatch/](../../../widgets/stopwatch/) |
 | **Chat Twitch** | Lisez et envoyez des messages dans le chat Twitch public de votre choix : vos chaînes favorites, l’historique défilant avec emotes et réponses en mode interactif, les derniers messages qui s’effacent en mode passif. Nécessite votre compte Twitch. | `com.playervox.overcrow.twitch.chat` | `twitch.chat.read`, `twitch.chat.compose` | [widgets/twitch-chat/](../../../widgets/twitch-chat/) |
-| **Marché Warframe** | Recherche les objets PC publics dans un catalogue en cache, affiche les meilleures offres d’achat et de vente d’un objet et copie un message d’échange sur un clic. | `com.playervox.overcrow.warframe.market` | `network`, `storage`, `clipboardWrite` | [widgets/warframe-market/](../../../widgets/warframe-market/) |
+| **Marché Warframe** | Recherche les objets PC publics dans un catalogue en cache, affiche les vendeurs et acheteurs en ligne d’un objet dans deux onglets et copie un message d’échange sur un clic. | `com.playervox.overcrow.warframe.market` | `network`, `storage`, `clipboardWrite` | [widgets/warframe-market/](../../../widgets/warframe-market/) |
 <!-- /generated:widgets -->
 
 ## Ce que contient le dossier d’un widget

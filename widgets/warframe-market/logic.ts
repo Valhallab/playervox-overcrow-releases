@@ -1,9 +1,11 @@
 // Warframe Market: searches the public PC item catalog of warframe.market,
-// shows the best buy and sell offers of one item and copies a trade whisper
-// on an explicit click. The catalog (about 3,900 items, 1.6 MB of JSON) is
-// read once per catalog version, kept compact in host storage and searched
-// in memory; its route declares `maxResponseBytes` because it exceeds the
-// default 1 MiB bound.
+// shows every online offer of one item, sellers and buyers in two tabs, and
+// copies a trade whisper on an explicit click. The catalog (about 3,900
+// items, 1.6 MB of JSON) is read once per catalog version, kept compact in
+// host storage and searched in memory. An item's orders (up to about 1 MB
+// of JSON, a few hundred online among thousands) are read in slices, one
+// VM turn each, so that no turn nears the host's budget under the VM's CPU
+// ceiling. Both routes declare `maxResponseBytes` beyond the default 1 MiB.
 import {
   clipboard,
   formatNumber,
@@ -28,8 +30,18 @@ export const MAX_QUERY_CHARS = 64;
 const MAX_NAME_CHARS = 96;
 const MAX_SLUG_BYTES = 96;
 const MAX_VERSION_CHARS = 128;
-const MAX_ORDERS_PER_SIDE = 5;
-const MAX_ORDERS_IN_ANSWER = 256;
+/** Rows of an orders answer beyond which it is refused (about 10 MB of JSON). */
+export const MAX_ORDERS_IN_ANSWER = 20_000;
+/** Offers kept and shown per tab; the rest is counted (`+N more`). */
+export const MAX_OFFERS_SHOWN = 150;
+/** Orders parsed in one VM turn: 2 to 3 ms of CPU. */
+export const ORDER_SLICE_ROWS = 300;
+/**
+ * A slice of orders larger than this is refused rather than parsed: a
+ * provider format without the row boundary the reader expects fails closed
+ * instead of parsing a whole answer in one turn.
+ */
+export const MAX_ORDER_SLICE_BYTES = 512 * 1024;
 const MAX_PLATINUM = 900_000;
 /** A catalog chunk stays below `MAX_STORAGE_VALUE_BYTES` (64 KiB) as JSON. */
 export const CHUNK_BYTES = 60_000;
@@ -54,7 +66,8 @@ export interface Item {
 }
 
 export type Side = "sell" | "buy";
-export type Presence = "ingame" | "online" | "offline" | "unknown";
+/** Only players in game or online on the site are shown. */
+export type Presence = "ingame" | "online";
 
 export interface Order {
   readonly id: string;
@@ -73,9 +86,16 @@ export interface Order {
 export interface Detail {
   readonly slug: string;
   readonly name: string;
+  /** The best `MAX_OFFERS_SHOWN` of each side, by price. */
   readonly sells: readonly Order[];
   readonly buys: readonly Order[];
+  /** Online offers of each side, those not kept included. */
+  readonly sellTotal: number;
+  readonly buyTotal: number;
 }
+
+/** `wrapper.menu` row `auto-refresh`: the shown offers reload on their own. */
+export type AutoRefresh = "off" | "every-30s" | "every-1m";
 
 export type Phase = "loading" | "ready" | "unavailable";
 export type Failure = "catalog_unavailable" | "storage_unavailable" | "orders_unavailable";
@@ -96,6 +116,9 @@ declare module "@overcrow/sdk" {
     results: readonly Item[];
     detail: Detail | null;
     loadingOrders: boolean;
+    /** The shown offers are reloading; they stay visible meanwhile. */
+    refreshing: boolean;
+    tab: Side;
     copy: CopyFeedback | null;
     interactive: boolean;
   }
@@ -109,6 +132,8 @@ const state = initState({
   results: [] as readonly Item[],
   detail: null as Detail | null,
   loadingOrders: false,
+  refreshing: false,
+  tab: "sell" as Side,
   copy: null as CopyFeedback | null,
   interactive: host.mode === "interactive",
 });
@@ -342,8 +367,8 @@ export function parseVersion(payload: unknown): string {
   return typeof value === "string" && value.length <= MAX_VERSION_CHARS ? value : "";
 }
 
-function presence(status: unknown): Presence {
-  return status === "ingame" || status === "online" || status === "offline" ? status : "unknown";
+function presence(status: unknown): Presence | null {
+  return status === "ingame" || status === "online" ? status : null;
 }
 
 function sanitizeTrader(value: unknown): string | null {
@@ -358,12 +383,15 @@ function sanitizeTrader(value: unknown): string | null {
   return output || null;
 }
 
-function parseOrder(row: unknown, side: Side): Order | null {
-  if (!isObject(row) || row.visible !== true || row.type !== side) {
+/** A visible PC order of a player in game or online, checked field by field. */
+export function parseOrder(row: unknown): Order | null {
+  if (!isObject(row) || row.visible !== true || (row.type !== "sell" && row.type !== "buy")) {
     return null;
   }
+  const side: Side = row.type;
   const user = isObject(row.user) ? row.user : null;
-  if (!user || user.platform !== "pc") {
+  const status = presence(user?.status);
+  if (!user || user.platform !== "pc" || !status) {
     return null;
   }
   const id = row.id;
@@ -384,7 +412,7 @@ function parseOrder(row: unknown, side: Side): Order | null {
   }
   const order: {
     -readonly [K in keyof Order]: Order[K];
-  } = { id, side, platinum, trader, presence: presence(user.status), perTrade };
+  } = { id, side, platinum, trader, presence: status, perTrade };
   for (const key of ["rank", "charges", "amberStars", "cyanStars"] as const) {
     const value = row[key];
     if (value === undefined || value === null) {
@@ -404,33 +432,104 @@ function parseOrder(row: unknown, side: Side): Order | null {
   return order;
 }
 
-function parseSide(rows: unknown[], side: Side): Order[] {
-  const accepted: Order[] = [];
-  for (const row of rows) {
-    const order = parseOrder(row, side);
+/** The online offers of an answer, sorted: sells by rising price, buys by falling price. */
+export class OrderCollector {
+  private readonly sells: Order[] = [];
+  private readonly buys: Order[] = [];
+  private rows = 0;
+
+  add(row: unknown): void {
+    this.rows += 1;
+    if (this.rows > MAX_ORDERS_IN_ANSWER) {
+      throw new Error("invalid orders");
+    }
+    const order = parseOrder(row);
     if (order) {
-      accepted.push(order);
-      if (accepted.length === MAX_ORDERS_PER_SIDE) {
-        break;
-      }
+      (order.side === "sell" ? this.sells : this.buys).push(order);
     }
   }
-  return accepted;
+
+  finish(slug: string, name: string): Detail {
+    this.sells.sort((a, b) => a.platinum / a.perTrade - b.platinum / b.perTrade);
+    this.buys.sort((a, b) => b.platinum / b.perTrade - a.platinum / a.perTrade);
+    return {
+      slug,
+      name,
+      sells: this.sells.slice(0, MAX_OFFERS_SHOWN),
+      buys: this.buys.slice(0, MAX_OFFERS_SHOWN),
+      sellTotal: this.sells.length,
+      buyTotal: this.buys.length,
+    };
+  }
 }
 
-/** `GET /v2/orders/item/{slug}/top`: at most five visible PC offers a side. */
-export function parseOrders(payload: unknown): { sells: Order[]; buys: Order[] } {
-  const data = isObject(payload) ? payload.data : undefined;
-  if (
-    !isObject(data)
-    || !Array.isArray(data.sell)
-    || !Array.isArray(data.buy)
-    || data.sell.length > MAX_ORDERS_IN_ANSWER
-    || data.buy.length > MAX_ORDERS_IN_ANSWER
+/**
+ * `GET /v2/orders/item/{slug}`, `{"apiVersion":…,"data":[{"id":…},…],…}`,
+ * read `ORDER_SLICE_ROWS` rows per step. Rows are cut where `},{"id":"`
+ * starts the next one (an unescaped quote never occurs inside a JSON
+ * string), and each slice is parsed by the engine's own `JSON.parse`: a
+ * wrong cut fails that parse, never silently. A slice beyond
+ * `MAX_ORDER_SLICE_BYTES` is refused.
+ */
+export class OrderReader {
+  private position: number;
+  private readonly end: number;
+
+  constructor(
+    private readonly text: string,
+    private readonly collector: OrderCollector,
   ) {
-    throw new Error("invalid orders");
+    const start = text.indexOf('"data":[');
+    this.end = text.lastIndexOf("]");
+    if (start < 0 || start > 256 || this.end < start || text.length - this.end > 4096) {
+      throw new Error("invalid orders");
+    }
+    // The envelope around the rows, without them, is a JSON object.
+    const envelope: unknown = JSON.parse(`${text.slice(0, start)}"data":[]${text.slice(this.end + 1)}`);
+    if (!isObject(envelope) || !Array.isArray(envelope.data)) {
+      throw new Error("invalid orders");
+    }
+    this.position = start + '"data":['.length;
   }
-  return { sells: parseSide(data.sell, "sell"), buys: parseSide(data.buy, "buy") };
+
+  /** Reads one slice; `true` once every row is read. */
+  step(): boolean {
+    const text = this.text;
+    let cut = this.position;
+    let count = 0;
+    while (count < ORDER_SLICE_ROWS) {
+      const next = text.indexOf('},{"id":"', cut);
+      if (next < 0 || next >= this.end) {
+        break;
+      }
+      cut = next + 1;
+      count += 1;
+    }
+    const last = count < ORDER_SLICE_ROWS;
+    const close = last ? this.end : cut;
+    if (close - this.position > MAX_ORDER_SLICE_BYTES) {
+      throw new Error("invalid orders");
+    }
+    const rows: unknown = JSON.parse(`[${text.slice(this.position, close)}]`);
+    if (!Array.isArray(rows)) {
+      throw new Error("invalid orders");
+    }
+    for (const row of rows) {
+      this.collector.add(row);
+    }
+    this.position = close + 1;
+    return last;
+  }
+}
+
+/** A whole orders answer at once (tests and small answers). */
+export function parseOrdersText(text: string, slug = "", name = ""): Detail {
+  const collector = new OrderCollector();
+  const reader = new OrderReader(text, collector);
+  while (!reader.step()) {
+    // one slice after another
+  }
+  return collector.finish(slug, name);
 }
 
 // ---------------------------------------------------------------------------
@@ -623,16 +722,30 @@ function reserveStart(): number {
   return start - now;
 }
 
+/**
+ * The catalog and the orders reserve their large byte bounds (3 and 2 MiB)
+ * from the widget's network budget: they run one after the other.
+ */
+let lane: Promise<unknown> = Promise.resolve();
+
+export function inLane<T>(task: () => Promise<T>): Promise<T> {
+  const run = lane.then(task, task);
+  lane = run.catch(() => undefined);
+  return run;
+}
+
 async function getText(path: string): Promise<string> {
-  const delay = reserveStart();
-  if (delay > 0) {
-    await wait(delay);
-  }
-  const response = await http.fetch(`${API}${path}`, { as: "text" });
-  if (response.status !== 200) {
-    throw new Error("request failed");
-  }
-  return response.body;
+  return inLane(async () => {
+    const delay = reserveStart();
+    if (delay > 0) {
+      await wait(delay);
+    }
+    const response = await http.fetch(`${API}${path}`, { as: "text" });
+    if (response.status !== 200) {
+      throw new Error("request failed");
+    }
+    return response.body;
+  });
 }
 
 async function getJson(path: string): Promise<JsonValue> {
@@ -764,6 +877,9 @@ onHost((changed) => {
   if (changed.includes("mode")) {
     state.interactive = host.mode === "interactive";
   }
+  if (changed.includes("options")) {
+    scheduleRefresh();
+  }
 });
 
 // ---------------------------------------------------------------------------
@@ -772,6 +888,51 @@ onHost((changed) => {
 let selection = 0;
 let wanted: string | null = null;
 let orderTimer: Timer | undefined;
+/** A request for the shown item is under way (answer read included). */
+let fetching = false;
+let refreshTimer: Timer | undefined;
+/** Failed automatic refreshes in a row: each doubles the wait, up to 8 times. */
+let refreshFailures = 0;
+const MAX_REFRESH_BACKOFF = 8;
+/** Milliseconds between the slices of an orders answer. */
+const ORDER_SLICE_PAUSE_MS = 100;
+
+/** The `auto-refresh` menu value. */
+export function autoRefresh(options: Readonly<Record<string, unknown>>): AutoRefresh {
+  const value = options["auto-refresh"];
+  return value === "every-30s" || value === "every-1m" ? value : "off";
+}
+
+/** Milliseconds between automatic refreshes, 0 when off. */
+export function refreshInterval(value: AutoRefresh): number {
+  return value === "every-30s" ? 30_000 : value === "every-1m" ? 60_000 : 0;
+}
+
+/**
+ * Arms the next automatic refresh of the shown offers, or none: only with
+ * an item shown, never while a request runs (the end of each one arms the
+ * next). Host timers never tick while the widget is hidden; a refresh that
+ * fell due meanwhile runs when it is shown again.
+ */
+function scheduleRefresh(): void {
+  refreshTimer?.cancel();
+  refreshTimer = undefined;
+  const interval = refreshInterval(autoRefresh(host.options));
+  if (interval === 0 || !state.detail || fetching || orderTimer) {
+    return;
+  }
+  const backoff = 2 ** Math.min(refreshFailures, Math.log2(MAX_REFRESH_BACKOFF));
+  refreshTimer = timers.after(interval * backoff, () => {
+    refreshTimer = undefined;
+    refresh();
+  });
+}
+
+function stopRefresh(): void {
+  refreshTimer?.cancel();
+  refreshTimer = undefined;
+  refreshFailures = 0;
+}
 
 /** `input` of the search field: results as the user types. */
 export function search(detail: { value: unknown }): void {
@@ -779,11 +940,13 @@ export function search(detail: { value: unknown }): void {
   state.results = searchItems(items, lowered, state.query);
   state.detail = null;
   state.loadingOrders = false;
+  state.refreshing = false;
   state.copy = null;
   if (state.error === "orders_unavailable") {
     state.error = null;
   }
   selection += 1;
+  stopRefresh();
   saveQuery();
 }
 
@@ -796,7 +959,35 @@ export function back(): void {
   selection += 1;
   state.detail = null;
   state.loadingOrders = false;
+  state.refreshing = false;
   state.copy = null;
+  if (state.error === "orders_unavailable") {
+    state.error = null;
+  }
+  stopRefresh();
+}
+
+/** `activate` of a tab: sellers or buyers. */
+export function showTab(side: Side): void {
+  state.tab = side;
+}
+
+async function readOrders(item: Item): Promise<Detail> {
+  // The slug passed `safeSlug`, the route's `slug` parameter grammar.
+  const response = await inLane(() => {
+    nextStart = Date.now() + REQUEST_SPACING_MS;
+    return http.fetch(`${API}/v2/orders/item/${item.slug}`, { as: "text" });
+  });
+  if (response.status !== 200) {
+    throw new Error("request failed");
+  }
+  const collector = new OrderCollector();
+  const reader = new OrderReader(response.body, collector);
+  // One slice per turn, a host timer apart.
+  while (!reader.step()) {
+    await wait(ORDER_SLICE_PAUSE_MS);
+  }
+  return collector.finish(item.slug, item.name);
 }
 
 function fetchOrders(): void {
@@ -804,45 +995,40 @@ function fetchOrders(): void {
   const item = items.find((entry) => entry.slug === slug);
   if (!item) {
     state.loadingOrders = false;
+    state.refreshing = false;
     return;
   }
   const mine = selection;
-  nextStart = Date.now() + REQUEST_SPACING_MS;
-  // The slug passed `safeSlug`, the route's `slug` parameter grammar.
-  http
-    .fetch(`${API}/v2/orders/item/${item.slug}/top`, { as: "json" })
-    .then((response) => {
-      if (response.status !== 200) {
-        throw new Error("request failed");
-      }
-      const orders = parseOrders(response.body);
+  fetching = true;
+  readOrders(item)
+    .then((detail) => {
       if (mine === selection) {
-        state.detail = { slug: item.slug, name: item.name, ...orders };
+        state.detail = detail;
         state.error = null;
+        refreshFailures = 0;
       }
     })
     .catch(() => {
       if (mine === selection) {
+        // Offers already shown stay; the status says they could not reload.
         state.error = "orders_unavailable";
+        refreshFailures += 1;
       }
     })
     .finally(() => {
+      fetching = false;
       if (mine === selection) {
         state.loadingOrders = false;
+        state.refreshing = false;
+        scheduleRefresh();
       }
     });
 }
 
-/** `activate` of a result: its offers, one request at a time for the provider. */
-export function select(slug: string): void {
-  selection += 1;
-  wanted = slug;
-  state.detail = null;
-  state.copy = null;
-  state.loadingOrders = true;
-  if (state.error === "orders_unavailable") {
-    state.error = null;
-  }
+/** Starts the request for `wanted`, paced for the provider. */
+function requestOrders(): void {
+  refreshTimer?.cancel();
+  refreshTimer = undefined;
   if (orderTimer) {
     return; // the pending start takes the latest selection
   }
@@ -855,6 +1041,38 @@ export function select(slug: string): void {
     orderTimer = undefined;
     fetchOrders();
   });
+}
+
+/** `activate` of a result: its offers, one request at a time for the provider. */
+export function select(slug: string): void {
+  selection += 1;
+  wanted = slug;
+  state.detail = null;
+  state.copy = null;
+  state.loadingOrders = true;
+  state.refreshing = false;
+  state.tab = "sell";
+  refreshFailures = 0;
+  if (state.error === "orders_unavailable") {
+    state.error = null;
+  }
+  requestOrders();
+}
+
+/**
+ * `activate` of the refresh button, and each automatic refresh: the shown
+ * item's offers again, kept on screen until the new ones arrive. Ignored
+ * while a request for it runs.
+ */
+export function refresh(): void {
+  if (!state.detail || state.refreshing || state.loadingOrders || fetching) {
+    return;
+  }
+  selection += 1;
+  wanted = state.detail.slug;
+  state.refreshing = true;
+  state.copy = null;
+  requestOrders();
 }
 
 /** The whisper pasted in Warframe chat; English, as the game's trade chat. */
@@ -915,8 +1133,30 @@ export function unitPrice(orders: readonly Order[], lowest: boolean): string {
   return price(lowest ? Math.min(...units) : Math.max(...units));
 }
 
-export function orderCount(detail: Detail): string {
-  return formatNumber(detail.sells.length + detail.buys.length);
+/** A tab's offer count, those beyond `MAX_OFFERS_SHOWN` included. */
+export function tabCount(detail: Detail, side: Side): string {
+  return formatNumber(side === "sell" ? detail.sellTotal : detail.buyTotal);
+}
+
+export function tabClass(tab: Side, side: Side): string {
+  return tab === side ? "tab active" : "tab";
+}
+
+/** The offers of the active tab. */
+export function tabOrders(detail: Detail, tab: Side): readonly Order[] {
+  return tab === "sell" ? detail.sells : detail.buys;
+}
+
+/** `+N more` below a tab that keeps only `MAX_OFFERS_SHOWN` offers, else empty. */
+export function moreOffers(detail: Detail, tab: Side): string {
+  const total = tab === "sell" ? detail.sellTotal : detail.buyTotal;
+  const kept = tab === "sell" ? detail.sells.length : detail.buys.length;
+  return total > kept ? t("more", { count: formatNumber(total - kept) }) : "";
+}
+
+/** The refresh button is off without an item or while its offers load. */
+export function refreshBusy(loadingOrders: boolean, refreshing: boolean): boolean {
+  return loadingOrders || refreshing;
 }
 
 export function statusText(
@@ -942,6 +1182,24 @@ export function statusText(
     return t("status-loading-orders");
   }
   return t(detail ? "status-detail" : "status-ready", { count: formatNumber(count) });
+}
+
+/** The status line while shown offers reload: they stay until the new ones arrive. */
+export function liveStatus(
+  phase: Phase,
+  count: number,
+  error: Failure | null,
+  detail: Detail | null,
+  loadingOrders: boolean,
+  refreshing: boolean,
+): string {
+  if (refreshing && !error) {
+    return t("status-refreshing");
+  }
+  if (error === "orders_unavailable" && detail) {
+    return t("status-refresh-failed");
+  }
+  return statusText(phase, count, error, detail, loadingOrders);
 }
 
 export function statusClass(error: Failure | null): string {
@@ -970,14 +1228,11 @@ export function noOffers(side: Side): string {
   return t(side === "sell" ? "no-sell-offers" : "no-buy-offers");
 }
 
-export function shown(count: number): string {
-  return t("shown", { count: formatNumber(count) });
-}
-
 export function presenceLabel(value: Presence): string {
   return t(`presence-${value}`);
 }
 
+/** A dot in the semantic colour of the player's state, named by its label. */
 export function presenceClass(value: Presence): string {
   return `presence ${value}`;
 }

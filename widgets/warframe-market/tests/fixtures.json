@@ -127,173 +127,169 @@
   },
   "orders": {
     "apiVersion": "0.25.0",
-    "data": {
-      "sell": [
-        {
-          "id": "order-sell-1",
-          "type": "sell",
-          "platinum": 18,
-          "quantity": 3,
-          "perTrade": 1,
-          "visible": true,
-          "createdAt": "2026-09-30T07:54:17Z",
-          "updatedAt": "2026-09-30T07:54:17Z",
-          "itemId": "000000000000000000000000",
-          "user": {
-            "id": "user-sell-1",
-            "ingameName": "Tenno_Trader",
-            "slug": "tenno_trader",
-            "reputation": 3,
-            "platform": "pc",
-            "crossplay": true,
-            "locale": "en",
-            "status": "ingame",
-            "activity": {
-              "type": "UNKNOWN",
-              "details": "unknown"
-            },
-            "lastSeen": "2026-09-30T08:11:41Z"
+    "data": [
+      {
+        "id": "order-sell-1",
+        "type": "sell",
+        "platinum": 18,
+        "quantity": 3,
+        "perTrade": 1,
+        "visible": true,
+        "createdAt": "2026-09-30T07:54:17Z",
+        "updatedAt": "2026-09-30T07:54:17Z",
+        "itemId": "000000000000000000000000",
+        "user": {
+          "id": "user-sell-1",
+          "ingameName": "Tenno_Trader",
+          "slug": "tenno_trader",
+          "reputation": 3,
+          "platform": "pc",
+          "crossplay": true,
+          "locale": "en",
+          "status": "ingame",
+          "activity": {
+            "type": "UNKNOWN",
+            "details": "unknown"
           },
-          "rank": 0
+          "lastSeen": "2026-09-30T08:11:41Z"
         },
-        {
-          "id": "order-sell-2",
-          "type": "sell",
-          "platinum": 60,
-          "quantity": 3,
-          "perTrade": 3,
-          "visible": true,
-          "createdAt": "2026-09-30T07:54:17Z",
-          "updatedAt": "2026-09-30T07:54:17Z",
-          "itemId": "000000000000000000000000",
-          "user": {
-            "id": "user-sell-2",
-            "ingameName": "VoidMerchant",
-            "slug": "voidmerchant",
-            "reputation": 3,
-            "platform": "pc",
-            "crossplay": true,
-            "locale": "en",
-            "status": "online",
-            "activity": {
-              "type": "UNKNOWN",
-              "details": "unknown"
-            },
-            "lastSeen": "2026-09-30T08:11:41Z"
+        "rank": 0
+      },
+      {
+        "id": "order-sell-2",
+        "type": "sell",
+        "platinum": 60,
+        "quantity": 3,
+        "perTrade": 3,
+        "visible": true,
+        "createdAt": "2026-09-30T07:54:17Z",
+        "updatedAt": "2026-09-30T07:54:17Z",
+        "itemId": "000000000000000000000000",
+        "user": {
+          "id": "user-sell-2",
+          "ingameName": "VoidMerchant",
+          "slug": "voidmerchant",
+          "reputation": 3,
+          "platform": "pc",
+          "crossplay": true,
+          "locale": "en",
+          "status": "online",
+          "activity": {
+            "type": "UNKNOWN",
+            "details": "unknown"
           },
-          "rank": 0
+          "lastSeen": "2026-09-30T08:11:41Z"
         },
-        {
-          "id": "order-sell-3",
-          "type": "sell",
-          "platinum": 1,
-          "quantity": 3,
-          "perTrade": 1,
-          "visible": false,
-          "createdAt": "2026-09-30T07:54:17Z",
-          "updatedAt": "2026-09-30T07:54:17Z",
-          "itemId": "000000000000000000000000",
-          "user": {
-            "id": "user-sell-3",
-            "ingameName": "HiddenSeller",
-            "slug": "hiddenseller",
-            "reputation": 3,
-            "platform": "pc",
-            "crossplay": true,
-            "locale": "en",
-            "status": "ingame",
-            "activity": {
-              "type": "UNKNOWN",
-              "details": "unknown"
-            },
-            "lastSeen": "2026-09-30T08:11:41Z"
-          }
-        },
-        {
-          "id": "order-sell-4",
-          "type": "sell",
-          "platinum": 22,
-          "quantity": 3,
-          "perTrade": 1,
-          "visible": true,
-          "createdAt": "2026-09-30T07:54:17Z",
-          "updatedAt": "2026-09-30T07:54:17Z",
-          "itemId": "000000000000000000000000",
-          "user": {
-            "id": "user-sell-4",
-            "ingameName": "LotusBroker",
-            "slug": "lotusbroker",
-            "reputation": 3,
-            "platform": "pc",
-            "crossplay": true,
-            "locale": "en",
-            "status": "offline",
-            "activity": {
-              "type": "UNKNOWN",
-              "details": "unknown"
-            },
-            "lastSeen": "2026-09-30T08:11:41Z"
+        "rank": 0
+      },
+      {
+        "id": "order-sell-3",
+        "type": "sell",
+        "platinum": 1,
+        "quantity": 3,
+        "perTrade": 1,
+        "visible": false,
+        "createdAt": "2026-09-30T07:54:17Z",
+        "updatedAt": "2026-09-30T07:54:17Z",
+        "itemId": "000000000000000000000000",
+        "user": {
+          "id": "user-sell-3",
+          "ingameName": "HiddenSeller",
+          "slug": "hiddenseller",
+          "reputation": 3,
+          "platform": "pc",
+          "crossplay": true,
+          "locale": "en",
+          "status": "ingame",
+          "activity": {
+            "type": "UNKNOWN",
+            "details": "unknown"
           },
-          "rank": 5
+          "lastSeen": "2026-09-30T08:11:41Z"
         }
-      ],
-      "buy": [
-        {
-          "id": "order-buy-5",
-          "type": "buy",
-          "platinum": 15,
-          "quantity": 3,
-          "perTrade": 1,
-          "visible": true,
-          "createdAt": "2026-09-30T07:54:17Z",
-          "updatedAt": "2026-09-30T07:54:17Z",
-          "itemId": "000000000000000000000000",
-          "user": {
-            "id": "user-buy-5",
-            "ingameName": "OrokinBuyer",
-            "slug": "orokinbuyer",
-            "reputation": 3,
-            "platform": "pc",
-            "crossplay": true,
-            "locale": "en",
-            "status": "ingame",
-            "activity": {
-              "type": "UNKNOWN",
-              "details": "unknown"
-            },
-            "lastSeen": "2026-09-30T08:11:41Z"
+      },
+      {
+        "id": "order-sell-4",
+        "type": "sell",
+        "platinum": 22,
+        "quantity": 3,
+        "perTrade": 1,
+        "visible": true,
+        "createdAt": "2026-09-30T07:54:17Z",
+        "updatedAt": "2026-09-30T07:54:17Z",
+        "itemId": "000000000000000000000000",
+        "user": {
+          "id": "user-sell-4",
+          "ingameName": "LotusBroker",
+          "slug": "lotusbroker",
+          "reputation": 3,
+          "platform": "pc",
+          "crossplay": true,
+          "locale": "en",
+          "status": "offline",
+          "activity": {
+            "type": "UNKNOWN",
+            "details": "unknown"
           },
-          "rank": 0
+          "lastSeen": "2026-09-30T08:11:41Z"
         },
-        {
-          "id": "order-buy-6",
-          "type": "buy",
-          "platinum": 12,
-          "quantity": 3,
-          "perTrade": 1,
-          "visible": true,
-          "createdAt": "2026-09-30T07:54:17Z",
-          "updatedAt": "2026-09-30T07:54:17Z",
-          "itemId": "000000000000000000000000",
-          "user": {
-            "id": "user-buy-6",
-            "ingameName": "RelicHunter",
-            "slug": "relichunter",
-            "reputation": 3,
-            "platform": "pc",
-            "crossplay": true,
-            "locale": "en",
-            "status": "online",
-            "activity": {
-              "type": "UNKNOWN",
-              "details": "unknown"
-            },
-            "lastSeen": "2026-09-30T08:11:41Z"
+        "rank": 5
+      },
+      {
+        "id": "order-buy-5",
+        "type": "buy",
+        "platinum": 15,
+        "quantity": 3,
+        "perTrade": 1,
+        "visible": true,
+        "createdAt": "2026-09-30T07:54:17Z",
+        "updatedAt": "2026-09-30T07:54:17Z",
+        "itemId": "000000000000000000000000",
+        "user": {
+          "id": "user-buy-5",
+          "ingameName": "OrokinBuyer",
+          "slug": "orokinbuyer",
+          "reputation": 3,
+          "platform": "pc",
+          "crossplay": true,
+          "locale": "en",
+          "status": "ingame",
+          "activity": {
+            "type": "UNKNOWN",
+            "details": "unknown"
           },
-          "rank": 0
-        }
-      ]
-    },
+          "lastSeen": "2026-09-30T08:11:41Z"
+        },
+        "rank": 0
+      },
+      {
+        "id": "order-buy-6",
+        "type": "buy",
+        "platinum": 12,
+        "quantity": 3,
+        "perTrade": 1,
+        "visible": true,
+        "createdAt": "2026-09-30T07:54:17Z",
+        "updatedAt": "2026-09-30T07:54:17Z",
+        "itemId": "000000000000000000000000",
+        "user": {
+          "id": "user-buy-6",
+          "ingameName": "RelicHunter",
+          "slug": "relichunter",
+          "reputation": 3,
+          "platform": "pc",
+          "crossplay": true,
+          "locale": "en",
+          "status": "online",
+          "activity": {
+            "type": "UNKNOWN",
+            "details": "unknown"
+          },
+          "lastSeen": "2026-09-30T08:11:41Z"
+        },
+        "rank": 0
+      }
+    ],
     "error": null
   }
 }

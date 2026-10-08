@@ -69,7 +69,8 @@ une espace (descendant) ou par `>` (enfant).
 .clear:focus,
 .result:focus,
 .copy:focus,
-.back:focus {
+.back:focus,
+.refresh:focus {
   border-color: var(--color-accent);
 }
 ```
@@ -112,8 +113,8 @@ la vue.
 ```css
 .metrics {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 7px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
 }
 ```
 

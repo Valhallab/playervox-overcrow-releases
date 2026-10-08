@@ -8,12 +8,12 @@
     {
       "locale": "en",
       "name": "Warframe Market",
-      "description": "Searches public PC items from a cached catalog, shows the best buy and sell offers of an item, and copies a trade whisper when you click."
+      "description": "Searches public PC items from a cached catalog, shows an item’s online sellers and buyers in two tabs, and copies a trade whisper when you click."
     },
     {
       "locale": "fr",
       "name": "Marché Warframe",
-      "description": "Recherche les objets PC publics dans un catalogue en cache, affiche les meilleures offres d’achat et de vente d’un objet et copie un message d’échange sur un clic."
+      "description": "Recherche les objets PC publics dans un catalogue en cache, affiche les vendeurs et acheteurs en ligne d’un objet dans deux onglets et copie un message d’échange sur un clic."
     }
   ]
 }
