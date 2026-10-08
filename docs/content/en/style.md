@@ -66,7 +66,8 @@ states: `button.primary:hover`. Compounds are joined by a space
 .clear:focus,
 .result:focus,
 .copy:focus,
-.back:focus {
+.back:focus,
+.refresh:focus {
   border-color: var(--color-accent);
 }
 ```
@@ -107,8 +108,8 @@ element and its children from the layout while keeping them in the view.
 ```css
 .metrics {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 7px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
 }
 ```
 

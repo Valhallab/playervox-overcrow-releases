@@ -21,7 +21,7 @@ license: read them, copy them, and use them as a starting point.
 | **Session** | Shows how long the current game session has lasted. | `com.playervox.overcrow.session` | `session.read` | [widgets/session/](../../../widgets/session/) |
 | **Manual stopwatch** | A stopwatch to the hundredth of a second, started, paused and reset with its buttons or the host’s shortcuts. | `com.playervox.overcrow.stopwatch` | `stopwatch.read`, `stopwatch.control` | [widgets/stopwatch/](../../../widgets/stopwatch/) |
 | **Twitch chat** | Read and send messages in a public Twitch chat you choose: your favorite channels, the scrolling history with emotes and replies in Interactive mode, the last messages fading out in Passive mode. Needs your Twitch account. | `com.playervox.overcrow.twitch.chat` | `twitch.chat.read`, `twitch.chat.compose` | [widgets/twitch-chat/](../../../widgets/twitch-chat/) |
-| **Warframe Market** | Searches public PC items from a cached catalog, shows the best buy and sell offers of an item, and copies a trade whisper when you click. | `com.playervox.overcrow.warframe.market` | `network`, `storage`, `clipboardWrite` | [widgets/warframe-market/](../../../widgets/warframe-market/) |
+| **Warframe Market** | Searches public PC items from a cached catalog, shows an item’s online sellers and buyers in two tabs, and copies a trade whisper when you click. | `com.playervox.overcrow.warframe.market` | `network`, `storage`, `clipboardWrite` | [widgets/warframe-market/](../../../widgets/warframe-market/) |
 <!-- /generated:widgets -->
 
 ## What a widget directory holds

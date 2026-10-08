@@ -245,19 +245,19 @@ not of the widget.
       {
         "request": {
           "method": "GET",
-          "url": "https://api.warframe.market/v2/orders/item/primed_flow/top"
+          "url": "https://api.warframe.market/v2/orders/item/primed_flow"
         },
         "error": "transport_failed"
       },
       {
         "request": {
           "method": "GET",
-          "url": "https://api.warframe.market/v2/orders/item/primed_flow/top"
+          "url": "https://api.warframe.market/v2/orders/item/primed_flow"
         },
         "response": {
           "status": 200,
           "contentType": "application/json",
-          "body": "{\"apiVersion\":\"0.25.0\",\"data\":{\"sell\":[],\"buy\":[]},\"error\":null}"
+          "body": "{\"apiVersion\":\"0.25.0\",\"data\":[],\"error\":null}"
         }
       }
     ]

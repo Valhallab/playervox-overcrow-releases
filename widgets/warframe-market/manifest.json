@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "apiVersion": 1,
   "id": "com.playervox.overcrow.warframe.market",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "name": {
     "en": "Warframe Market",
     "fr": "Marché Warframe"
@@ -39,17 +39,54 @@
       {
         "origin": "https://api.warframe.market",
         "method": "GET",
-        "path": "/v2/orders/item/{slug}/top",
+        "path": "/v2/orders/item/{slug}",
         "pathParams": {
           "slug": {
             "type": "slug",
             "maxLength": 96
           }
         },
-        "maxResponseBytes": 131072
+        "maxResponseBytes": 2097152
       }
     ],
     "storage": true,
     "clipboardWrite": true
+  },
+  "wrapper": {
+    "menu": [
+      {
+        "type": "choice",
+        "id": "auto-refresh",
+        "icon": "refresh-cw",
+        "label": {
+          "en": "Auto refresh",
+          "fr": "Actualisation auto"
+        },
+        "choices": [
+          {
+            "value": "off",
+            "label": {
+              "en": "Off",
+              "fr": "Désactivée"
+            }
+          },
+          {
+            "value": "every-30s",
+            "label": {
+              "en": "Every 30 s",
+              "fr": "Toutes les 30 s"
+            }
+          },
+          {
+            "value": "every-1m",
+            "label": {
+              "en": "Every minute",
+              "fr": "Toutes les minutes"
+            }
+          }
+        ],
+        "default": "off"
+      }
+    ]
   }
 }

@@ -289,19 +289,19 @@ parameter, and only the declared query parameters are accepted.
       {
         "origin": "https://api.warframe.market",
         "method": "GET",
-        "path": "/v2/orders/item/{slug}/top",
+        "path": "/v2/orders/item/{slug}",
         "pathParams": {
           "slug": {
             "type": "slug",
             "maxLength": 96
           }
         },
-        "maxResponseBytes": 131072
+        "maxResponseBytes": 2097152
       }
     ],
     "storage": true,
     "clipboardWrite": true
-  }
+  },
 ```
 
 <!-- generated:network-rule-fields -->

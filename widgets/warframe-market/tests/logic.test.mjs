@@ -10,6 +10,8 @@ import { loadLogic } from "./load-logic.mjs";
 const read = (path) => JSON.parse(readFileSync(new URL(path, import.meta.url), "utf8"));
 const MESSAGES = read("../locales/en.json");
 const { items: ITEMS, orders: ORDERS } = read("./fixtures.json");
+const ORDERS_TEXT = JSON.stringify(ORDERS);
+const answer = (body) => ({ status: 200, contentType: "application/json", body });
 const API = "https://api.warframe.market";
 const VERSIONS = { data: { collections: { items: "v1" } } };
 
@@ -116,27 +118,34 @@ test("select: paced requests; only the latest selection shows its offers", async
   logic.search({ value: "arcane" });
   logic.select("arcane_energize");
   assert.equal(state.loadingOrders, true);
+  await flush();
   const [first] = open("http.fetch");
-  assert.equal(fetchUrl(first), `${API}/v2/orders/item/arcane_energize/top`);
+  assert.deepEqual(first.params, { url: `${API}/v2/orders/item/arcane_energize`, method: "GET", as: "text" });
   logic.select("arcane_guardian");
   logic.select("arcane_grace");
+  await flush();
   assert.equal(open("http.fetch").length, 1, "the next start waits 400 ms");
   assert.equal(vm.timers.filter((timer) => !timer.repeat).length >= 1, true);
   vm.advance(logic.REQUEST_SPACING_MS);
-  const requests = open("http.fetch");
-  assert.deepEqual(requests.map(fetchUrl), [
-    `${API}/v2/orders/item/arcane_energize/top`,
-    `${API}/v2/orders/item/arcane_grace/top`,
-  ], "one request for the latest selection");
-  first.resolve({ status: 200, contentType: "application/json", body: ORDERS });
+  await flush();
+  assert.equal(open("http.fetch").length, 1, "orders requests run one after the other");
+  first.resolve(answer(ORDERS_TEXT));
   await flush();
   assert.equal(state.detail, null, "a superseded answer is dropped");
-  requests[1].resolve({ status: 200, contentType: "application/json", body: ORDERS });
+  const requests = open("http.fetch");
+  assert.deepEqual(requests.map(fetchUrl), [`${API}/v2/orders/item/arcane_grace`],
+    "one request for the latest selection");
+  requests[0].resolve(answer(ORDERS_TEXT));
   await flush();
   assert.equal(state.loadingOrders, false);
   assert.equal(state.detail.name, "Arcane Grace");
-  assert.deepEqual(state.detail.sells.map((order) => order.trader), ["Tenno_Trader", "VoidMerchant", "LotusBroker"]);
+  // Online and in game only, sellers by rising and buyers by falling price
+  // per item: the hidden offer and the offline seller are left out.
+  assert.deepEqual(state.detail.sells.map((order) => order.trader), ["Tenno_Trader", "VoidMerchant"]);
   assert.deepEqual(state.detail.buys.map((order) => order.trader), ["OrokinBuyer", "RelicHunter"]);
+  assert.equal(state.tab, "sell", "sellers first");
+  assert.equal(logic.tabCount(state.detail, "sell"), "2");
+  assert.equal(logic.moreOffers(state.detail, "sell"), "");
   assert.equal(logic.unitPrice(state.detail.sells, true), "18p");
   assert.equal(logic.unitPrice(state.detail.buys, false), "15p");
   assert.equal(logic.orderDetail(state.detail.sells[1]), "3 items · total price · Rank 0");
@@ -156,12 +165,13 @@ test("copy: the whisper on a gesture, its feedback, a failed copy", async () => 
   await flush();
   assert.equal(state.copy.state, "copied");
   assert.equal(logic.copyLabel(state.copy, "sell", "order-sell-2"), "Copied");
-  assert.equal(logic.copyLabel(state.copy, "buy", "order-buy-5"), "Copy whisper");
+  assert.equal(logic.copyLabel(state.copy, "buy", "order-buy-5"), "Whisper");
   logic.copy("buy", "order-buy-5");
   open("clipboard.writeText")[0].reject("unavailable");
   await flush();
   assert.deepEqual(state.copy, { side: "buy", id: "order-buy-5", state: "failed" });
-  assert.equal(logic.copyStatus(state.copy), MESSAGES["copy-status-failed"]);
+  assert.equal(logic.copyLabel(state.copy, "buy", "order-buy-5"), MESSAGES["copy-failed"]);
+  assert.equal(logic.copyClass(state.copy, "buy", "order-buy-5"), "copy failed");
   logic.back();
   assert.equal(state.detail, null);
   assert.equal(state.copy, null);
@@ -170,6 +180,7 @@ test("copy: the whisper on a gesture, its feedback, a failed copy", async () => 
 test("select: a failed request shows the error until the next selection", async () => {
   vm.advance(logic.REQUEST_SPACING_MS);
   logic.select("primed_flow");
+  await flush();
   open("http.fetch")[0].reject("transport_failed");
   await flush();
   assert.equal(state.error, "orders_unavailable");
@@ -178,9 +189,96 @@ test("select: a failed request shows the error until the next selection", async 
   logic.select("primed_flow");
   assert.equal(state.error, null);
   vm.advance(logic.REQUEST_SPACING_MS);
+  await flush();
   open("http.fetch")[0].resolve({ status: 503, contentType: "text/plain", body: null });
   await flush();
   assert.equal(state.error, "orders_unavailable", "a status other than 200 fails too");
+  logic.back();
+});
+
+/** The fixture's answer with the first seller's price changed. */
+const repriced = (platinum) => JSON.stringify({
+  ...ORDERS,
+  data: ORDERS.data.map((row, index) => (index === 0 ? { ...row, platinum } : row)),
+});
+
+test("refresh: the shown offers stay until the new ones arrive, one request at a time", async () => {
+  vm.advance(logic.REQUEST_SPACING_MS);
+  logic.select("arcane_energize");
+  await flush();
+  open("http.fetch")[0].resolve(answer(ORDERS_TEXT));
+  await flush();
+  const shown = state.detail;
+  assert.equal(shown.sells[0].platinum, 18);
+  logic.refresh();
+  assert.equal(state.refreshing, true);
+  assert.equal(logic.refreshBusy(state.loadingOrders, state.refreshing), true, "the button is off");
+  assert.equal(state.detail, shown, "the offers stay meanwhile");
+  assert.equal(logic.liveStatus(state.phase, state.count, state.error, state.detail, state.loadingOrders,
+    state.refreshing), "Refreshing offers…");
+  logic.refresh();
+  vm.advance(logic.REQUEST_SPACING_MS);
+  await flush();
+  const requests = open("http.fetch");
+  assert.equal(requests.length, 1, "a second press while it runs does nothing");
+  requests[0].resolve(answer(repriced(17)));
+  await flush();
+  assert.equal(state.refreshing, false);
+  assert.equal(state.detail.sells[0].platinum, 17);
+  // A failed refresh keeps the previous offers and says so.
+  vm.advance(logic.REQUEST_SPACING_MS);
+  logic.refresh();
+  await flush();
+  open("http.fetch")[0].reject("transport_failed");
+  await flush();
+  assert.equal(state.detail.sells[0].platinum, 17);
+  assert.equal(logic.liveStatus(state.phase, state.count, state.error, state.detail, state.loadingOrders,
+    state.refreshing), "Refresh failed · showing the previous offers");
+});
+
+test("auto refresh: off by default, then every 30 s, slower after errors, never two at once", async () => {
+  const pending = () => open("http.fetch").length;
+  assert.equal(logic.autoRefresh({}), "off");
+  vm.advance(10 * 60_000);
+  await flush();
+  assert.equal(pending(), 0, "off: nothing reloads");
+  vm.setHost({ options: { "auto-refresh": "every-30s" } });
+  // The last refresh failed: the first automatic one waits twice as long.
+  vm.advance(30_000);
+  await flush();
+  assert.equal(pending(), 0);
+  vm.advance(30_000);
+  await flush();
+  assert.equal(pending(), 1, "after 60 s");
+  vm.advance(5 * 60_000);
+  await flush();
+  assert.equal(pending(), 1, "never while a request runs");
+  open("http.fetch")[0].resolve(answer(repriced(16)));
+  await flush();
+  assert.equal(state.detail.sells[0].platinum, 16);
+  vm.advance(29_999);
+  await flush();
+  assert.equal(pending(), 0);
+  vm.advance(1);
+  await flush();
+  assert.equal(pending(), 1, "every 30 s once it succeeds");
+  open("http.fetch")[0].resolve(answer(ORDERS_TEXT));
+  await flush();
+  vm.setHost({ options: { "auto-refresh": "every-1m" } });
+  vm.advance(59_999);
+  await flush();
+  assert.equal(pending(), 0);
+  vm.advance(1);
+  await flush();
+  assert.equal(pending(), 1, "every minute");
+  open("http.fetch")[0].resolve(answer(ORDERS_TEXT));
+  await flush();
+  // Without an item shown, nothing reloads.
+  logic.back();
+  vm.advance(10 * 60_000);
+  await flush();
+  assert.equal(pending(), 0);
+  vm.setHost({ options: { "auto-refresh": "off" } });
 });
 
 test("the catalog parser keeps valid rows only and bounds the catalog", () => {
@@ -227,27 +325,121 @@ test("a catalog of the real size fits two storage values and round-trips", () =>
   assert.throws(() => logic.decodeCatalog(["Traversal\t../x"]));
 });
 
-test("the orders parser keeps five visible PC offers a side", () => {
-  const { sells, buys } = logic.parseOrders(ORDERS);
-  assert.equal(sells.length, 3, "the hidden offer is dropped");
-  assert.equal(buys.length, 2);
-  const base = ORDERS.data.sell[0];
+test("the orders parser keeps the visible PC offers of players in game or online", () => {
+  const detail = logic.parseOrdersText(ORDERS_TEXT, "arcane_energize", "Arcane Energize");
+  assert.equal(detail.sells.length, 2, "hidden and offline offers are dropped");
+  assert.equal(detail.buys.length, 2);
+  assert.deepEqual(detail.sells.map((order) => order.presence), ["ingame", "online"]);
+  const base = ORDERS.data[0];
   const variant = (changes) => ({ ...base, ...changes, user: { ...base.user, ...(changes.user ?? {}) } });
-  const parsed = (row) => logic.parseOrders({ data: { sell: [row], buy: [] } }).sells;
-  assert.deepEqual(parsed(variant({ user: { platform: "ps4" } })), []);
-  assert.deepEqual(parsed(variant({ id: "bad id" })), []);
-  assert.deepEqual(parsed(variant({ platinum: 0 })), []);
-  assert.deepEqual(parsed(variant({ platinum: 1.5 })), []);
-  assert.deepEqual(parsed(variant({ perTrade: 7 })), []);
-  assert.deepEqual(parsed(variant({ rank: 101 })), []);
-  assert.deepEqual(parsed(variant({ type: "buy" })), []);
-  assert.deepEqual(parsed(variant({ user: { ingameName: "/\\" } })), []);
-  assert.equal(parsed(variant({ user: { ingameName: "Evil/Name\\" } }))[0].trader, "EvilName");
-  assert.equal(parsed(variant({ user: { status: "away" } }))[0].presence, "unknown");
-  const many = Array.from({ length: 8 }, (_, index) => variant({ id: `o${index}` }));
-  assert.equal(logic.parseOrders({ data: { sell: many, buy: [] } }).sells.length, 5);
-  assert.throws(() => logic.parseOrders({ data: { sell: new Array(257).fill(base), buy: [] } }));
-  assert.throws(() => logic.parseOrders({ data: { sell: [] } }));
+  const parsed = (row) => logic.parseOrder(row);
+  assert.equal(parsed(variant({ user: { platform: "ps4" } })), null);
+  assert.equal(parsed(variant({ id: "bad id" })), null);
+  assert.equal(parsed(variant({ platinum: 0 })), null);
+  assert.equal(parsed(variant({ platinum: 1.5 })), null);
+  assert.equal(parsed(variant({ perTrade: 7 })), null);
+  assert.equal(parsed(variant({ rank: 101 })), null);
+  assert.equal(parsed(variant({ type: "trade" })), null);
+  assert.equal(parsed(variant({ visible: false })), null);
+  assert.equal(parsed(variant({ user: { ingameName: "/\\" } })), null);
+  assert.equal(parsed(variant({ user: { ingameName: "Evil/Name\\" } })).trader, "EvilName");
+  assert.equal(parsed(variant({ user: { status: "offline" } })), null);
+  assert.equal(parsed(variant({ user: { status: "away" } })), null);
+  assert.equal(parsed(variant({ type: "buy" })).side, "buy");
+});
+
+/** An orders answer of `count` sells, the cheapest last, as the provider writes it. */
+function manyOrders(count, statuses = ["ingame", "online", "offline"]) {
+  const base = ORDERS.data[0];
+  return {
+    apiVersion: "0.25.0",
+    data: Array.from({ length: count }, (_, index) => ({
+      ...base,
+      id: `order-${index}`,
+      platinum: count - index,
+      user: { ...base.user, ingameName: `Trader${index}`, status: statuses[index % statuses.length] },
+    })),
+    error: null,
+  };
+}
+
+test("an answer is read in slices, and at most 150 offers a tab are kept", () => {
+  const text = JSON.stringify(manyOrders(logic.ORDER_SLICE_ROWS * 2 + 7));
+  const collector = new logic.OrderCollector();
+  const reader = new logic.OrderReader(text, collector);
+  let turns = 1;
+  while (!reader.step()) {
+    turns += 1;
+  }
+  assert.equal(turns, 3, "one slice of 300 rows per turn");
+  const detail = collector.finish("x", "X");
+  // Two in three are online or in game: 405 of 607.
+  assert.equal(detail.sellTotal, 405);
+  assert.equal(detail.sells.length, logic.MAX_OFFERS_SHOWN);
+  assert.equal(detail.sells[0].platinum, 1, "the cheapest first");
+  assert.ok(detail.sells.every((order, index) => index === 0 || order.platinum >= detail.sells[index - 1].platinum));
+  assert.equal(logic.moreOffers(detail, "sell"), "+255 more");
+  assert.equal(logic.tabCount(detail, "sell"), "405");
+  assert.equal(logic.moreOffers(detail, "buy"), "");
+  assert.deepEqual(logic.parseOrdersText('{"apiVersion":"0","data":[],"error":null}').sells, []);
+});
+
+test("a malformed or oversized orders answer fails closed", () => {
+  const row = JSON.stringify(ORDERS.data[0]);
+  for (const bad of [
+    "",
+    "{}",
+    '{"data":{}}',
+    `{"data":[${row}`,
+    `{"data":[${row},]}`,
+    `{"data":[${row}]} trailing`,
+    `{"data":[${row}],"x":1} {"data":[]}`,
+    `${" ".repeat(300)}{"data":[]}`,
+  ]) {
+    assert.throws(() => logic.parseOrdersText(bad), undefined, bad);
+  }
+  // Rows whose first key is not `id` have no boundary the reader cuts at:
+  // a whole answer is never parsed in one turn.
+  const shuffled = manyOrders(1500).data.map(({ id, ...rest }) => ({ ...rest, id }));
+  assert.throws(() => logic.parseOrdersText(JSON.stringify({ data: shuffled })));
+  // Beyond 20,000 rows.
+  const tiny = '{"id":"a","visible":false}';
+  const huge = `{"data":[${new Array(logic.MAX_ORDERS_IN_ANSWER + 1).fill(tiny).join(",")}]}`;
+  assert.throws(() => logic.parseOrdersText(huge));
+});
+
+test("tabs: sellers first, buyers on demand", () => {
+  const detail = logic.parseOrdersText(ORDERS_TEXT, "a", "A");
+  assert.equal(logic.tabClass("sell", "sell"), "tab active");
+  assert.equal(logic.tabClass("sell", "buy"), "tab");
+  assert.deepEqual(logic.tabOrders(detail, "buy").map((order) => order.trader), ["OrokinBuyer", "RelicHunter"]);
+  logic.showTab("buy");
+  assert.equal(state.tab, "buy");
+  logic.showTab("sell");
+});
+
+test("the catalog and the orders run one after the other", async () => {
+  const order = [];
+  let release;
+  const first = logic.inLane(() => new Promise((resolve) => {
+    order.push("catalog");
+    release = resolve;
+  }));
+  const second = logic.inLane(async () => {
+    order.push("orders");
+  });
+  await flush();
+  assert.deepEqual(order, ["catalog"], "the orders wait for the catalog");
+  release();
+  await first;
+  await second;
+  assert.deepEqual(order, ["catalog", "orders"]);
+  // A failed task does not block the next one.
+  const failed = logic.inLane(async () => {
+    throw new Error("x");
+  });
+  await assert.rejects(failed);
+  assert.equal(await logic.inLane(async () => 1), 1);
 });
 
 test("whispers name the variant and the total price", () => {
