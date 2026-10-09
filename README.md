@@ -121,7 +121,9 @@ check, including the documentation examples and the link check. Use Node.js
 
 The website consumes a reviewed, revision-pinned snapshot of this repository.
 `@overcrow/sdk` is published on npm by the `sdk-publish` workflow (npm
-trusted publishing, with provenance; no token); the CLI's binaries go into
+trusted publishing, with provenance; no token; only its `publish` job, in
+the `npm-publish` environment limited to `main` and tags `sdk-v*`, gets the
+OIDC token npm trusts); the CLI's binaries go into
 the creator tools ZIPs of OverCrow's releases
 ([release files](docs/cli.md#release-files)).
 Never publish a separate GitHub Release for the SDK or the CLI: the desktop
