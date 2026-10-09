@@ -33,6 +33,10 @@ image.
 
 ## Tests unitaires
 
+`@overcrow/sdk/testing` est fourni avec le SDK : `npm install` dans un
+projet créé par `overcrow-widget init`, sinon
+`npm install --save-dev --save-exact @overcrow/sdk@1.0.0`.
+
 `installRuntime()` met en place une doublure d’OverCrow avant l’import de la
 logique : les appels de service renvoient des promesses que votre test
 résout ou rejette, les abonnements reçoivent les valeurs que vous poussez,

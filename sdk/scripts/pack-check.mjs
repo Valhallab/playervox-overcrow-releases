@@ -25,6 +25,7 @@ function pack(index) {
     sha256: createHash("sha256").update(bytes).digest("hex"),
     size: bytes.length,
     files: result.files.map((file) => file.path).sort(),
+    modes: result.files.map((file) => [file.path, file.mode]),
   };
 }
 
@@ -50,6 +51,16 @@ try {
     !first.files.includes("dist/testing/index.js")
   ) {
     throw new Error(`unexpected package content: ${unexpected.join(", ")}`);
+  }
+  // npm keeps each file's mode: a build under umask 077 would publish
+  // files only their owner can read, and another tarball.
+  const unreadable = first.modes.filter(([, mode]) => mode !== 0o644);
+  if (unreadable.length > 0) {
+    throw new Error(
+      `package files must be mode 644: ${unreadable
+        .map(([path, mode]) => `${path} (${mode.toString(8)})`)
+        .join(", ")}`,
+    );
   }
   console.log(`reproducible: ${first.sha256} (${first.size} bytes, ${first.files.length} files)`);
 } finally {

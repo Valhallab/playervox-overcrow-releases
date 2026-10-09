@@ -69,24 +69,20 @@ il signale par un avertissement que les types n’ont pas été vérifiés
 (`typecheck.skipped`) et continue. Le SDK lui-même est inclus dans l’outil :
 l’empaquetage ne dépend donc jamais de `node_modules`.
 
-`@overcrow/sdk` arrivera plus tard sur npm ; d’ici là, ses types viennent
-du même dépôt. Compilez le SDK une
-fois, puis installez-le dans votre projet depuis ce dossier, ainsi que
-TypeScript :
+`@overcrow/sdk` est sur [npm](https://www.npmjs.com/package/@overcrow/sdk).
+Le `package.json` d’un projet créé par `init` nomme TypeScript et la version
+du SDK que l’outil embarque : lancez `npm install` dans le projet. Dans un
+autre projet, installez le SDK avec :
 
 ```sh
-npm ci --ignore-scripts
-npm run build
+npm install --save-dev --save-exact @overcrow/sdk@1.0.0
 ```
 
-```sh
-npm install --save-dev path/to/playervox-overcrow-releases/sdk
-```
-
-Les deux premières commandes s’exécutent dans le dossier `sdk/` du dépôt, la
-troisième dans votre projet. `overcrow-widget doctor` signale l’absence de
-TypeScript, ainsi qu’un SDK dans `node_modules` dont la version diffère de
-celle que l’outil embarque.
+Gardez la version que l’outil embarque (`overcrow-widget --version`).
+`overcrow-widget doctor` signale l’absence de TypeScript, ainsi qu’un SDK
+dans `node_modules` dont la version diffère de celle que l’outil embarque.
+La CLI 1.0.0-beta.1 dit encore que le SDK n’est pas sur npm :
+`npm install` fonctionne quand même.
 
 ## Fichiers d’un projet
 

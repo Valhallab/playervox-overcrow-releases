@@ -112,7 +112,7 @@ jobs:
           cmp "$work/a.ocpkg" "$work/b.ocpkg"
           "$cli" inspect "$work/a.ocpkg"
           "$cli" init "$work/counter" --template counter
-          # @overcrow/sdk is not on npm yet: type against this checkout.
+          # Type against this revision's SDK, not the one on npm.
           mkdir -p "$work/counter/node_modules/@overcrow"
           cp -R sdk/node_modules/typescript "$work/counter/node_modules/typescript"
           mkdir "$work/counter/node_modules/@overcrow/sdk"

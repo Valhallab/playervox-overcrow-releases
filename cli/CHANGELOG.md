@@ -7,6 +7,14 @@ change between betas; 1.0.0 will freeze them under semantic versioning.
 The CLI's version enters no package: a package depends only on the
 widget's sources and the embedded SDK.
 
+## Unreleased
+
+- `init` gives `cd <dir> && npm install && overcrow-widget check`:
+  `@overcrow/sdk` 1.0.0 is on npm, so `npm install` brings TypeScript and
+  the SDK types. `doctor` and the type check advise `npm install`, and
+  `doctor` names the exact SDK version to install when `node_modules` holds
+  another one.
+
 ## 1.0.0-beta.1
 
 First release, as binaries for Linux and Windows x86-64 attached to

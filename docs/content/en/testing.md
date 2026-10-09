@@ -31,6 +31,10 @@ is "Increase", then checks the new text and image.
 
 ## Unit tests
 
+`@overcrow/sdk/testing` comes with the SDK: `npm install` in a project made
+by `overcrow-widget init`, otherwise
+`npm install --save-dev --save-exact @overcrow/sdk@1.0.0`.
+
 `installRuntime()` puts a stand-in for OverCrow in place before the logic
 is imported: service calls return promises that your test settles,
 subscriptions take the values you push, timers fire when you advance the
