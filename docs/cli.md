@@ -41,6 +41,30 @@ QuickJS bytecode: the host loads only source it can read and check.
 For the SDK's end-to-end Clock, `logic.js` is 4.3 KB and the VM's start-up
 cost over a hand-written script is about 0.4 ms.
 
+### The code map
+
+With `--source-map`, each of the three prints (types stripped, module
+linked, script minified) also gives a source map (oxc's codegen), and
+`oxc_sourcemap` composes them: the linked module's map with its stripped
+module's map, the modules placed at their line in the script, the
+minified script's map over that, shifted by the notice's line. The result
+is a Source Map v3 of `logic.js` (`cli/src/sourcemap.rs` adds `ignoreList`
+for the SDK, the view table's text and the `x_overcrow_functions` table).
+Asking for the map never changes `logic.js`; the bundle tests check it,
+and that an error thrown at a known line of `logic.ts` maps back to it.
+
+## Source archives and `diff`
+
+`cli/src/zipread.rs` reads two kinds of ZIP with one parser: the creator
+tools ZIP the runtime is downloaded from (`Rules::CREATOR_TOOLS`), and
+creators' source archives (`Rules::SOURCES`, stricter: folder entries,
+attributes, layout, portable names, compression ratio). The `source_zip`
+and `creator_tools_zip` fuzz targets include that file.
+`cli/src/sourcetree.rs` turns a folder or a ZIP into the same sorted tree
+of files, inflated in memory; `admit` writes it into a private temporary
+folder and builds from there, and `diff` compares two trees (Myers line
+diff, a whole rewrite past 2,048 edits).
+
 ## Calling convention of the view table
 
 The SDK runs inside the widget VM, bundled into `logic.js`. It wraps the
@@ -93,7 +117,8 @@ SDK's tests.
 the marketplace CI: the validated file list of a Git revision
 (`scripts/materialize-git-snapshot.sh`). Creators do not need it.
 `admit --publisher playervox` is passed by the marketplace CI only for this
-repository's own revisions ([review policy](review-policy.md)).
+repository's own revisions ([review policy](review-policy.md)); it owns
+`com.playervox.*` through `playervox.com`, which the option implies.
 
 ## Maintenance
 
