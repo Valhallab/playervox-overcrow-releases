@@ -128,7 +128,7 @@ impl std::fmt::Display for DownloadError {
             Self::TooLarge => write!(
                 formatter,
                 "the archive is larger than {} MB",
-                MAX_ZIP_BYTES / 1_000_000
+                MAX_ZIP_BYTES / (1024 * 1024)
             ),
             Self::Archive(error) => error.fmt(formatter),
             Self::MissingEntry(name) => write!(formatter, "the archive has no {name}"),
