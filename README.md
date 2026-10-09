@@ -12,7 +12,10 @@ application belong in GitHub Release assets.
 [Published releases](https://github.com/Valhallab/playervox-overcrow-releases/releases)
 
 Each release contains the Windows x64 installer and the Linux x64 Arch, DEB and
-RPM packages, with a release manifest and SHA-256 checksums. A channel containing
+RPM packages, with a release manifest and SHA-256 checksums. Since
+0.6.0-beta.1 it also carries the tools of widget creators for Linux and
+Windows x64: the widget CLI `overcrow-widget` and the headless runtime that
+`overcrow-widget test` runs. A channel containing
 `release: null` has no published version yet.
 
 Versions follow `MAJOR.MINOR.PATCH`: incompatible changes increment MAJOR,
@@ -115,8 +118,10 @@ check, including the documentation examples and the link check. Use Node.js
 22.18 or later.
 
 The website consumes a reviewed, revision-pinned snapshot of this repository.
-Do not publish SDK or CLI releases as GitHub Releases: the desktop updater
-uses this repository's stable-release API.
+`@overcrow/sdk` is published on npm; the CLI's binaries are attached to
+OverCrow's releases ([release files](docs/cli.md#release-files)).
+Never publish a separate GitHub Release for the SDK or the CLI: the desktop
+updater uses this repository's stable-release API.
 
 Widget submissions target `candidate`; tooling and documentation target `main`.
 Neither a pull request nor a merge signs or publishes a widget. See
