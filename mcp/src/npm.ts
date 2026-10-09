@@ -77,6 +77,14 @@ export async function planInstall(directory: string) {
       "package.json is missing: create the widget with create_widget, which writes one.",
     );
   }
+  for (const name of ["node_modules", "package-lock.json"]) {
+    const info = await lstat(join(directory, name)).catch(() => undefined);
+    if (info?.isSymbolicLink()) {
+      throw new NpmError(
+        `${name} is a link: npm would write outside the widget folder. Remove the link first.`,
+      );
+    }
+  }
   if (existsSync(join(directory, ".npmrc"))) {
     throw new NpmError(
       "The project has its own .npmrc, which could change where npm downloads from: install the SDK yourself after checking it.",

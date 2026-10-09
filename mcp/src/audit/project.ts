@@ -35,6 +35,11 @@ export interface WidgetProject {
 }
 
 const MAX_FILES = 2000;
+/** The CLI's own bounds of view.ocml and style.ocss: larger ones are refused anyway. */
+const MAX_VIEW_BYTES = 256 * 1024;
+const MAX_STYLE_BYTES = 128 * 1024;
+/** Longest line the view rules read; longer lines are cut (bounded regular expressions). */
+const MAX_LINE_CHARS = 4096;
 const MAX_DEPTH = 8;
 const MAX_TEXT_BYTES = 1 << 20;
 const SKIPPED_DIRECTORIES = new Set(["node_modules", "dist", ".git"]);
@@ -163,9 +168,10 @@ export function viewFacts(view: string | null): ViewFacts {
     unconditionalClasses: new Map(),
     images: [],
   };
-  if (!view) return facts;
+  if (!view || view.length > MAX_VIEW_BYTES) return facts;
   let conditional = 0;
-  view.split("\n").forEach((text, index) => {
+  view.split("\n").forEach((full, index) => {
+    const text = full.slice(0, MAX_LINE_CHARS);
     const line = index + 1;
     for (const match of text.matchAll(/<\/?(if|else-if|else)\b[^>]*?(\/?)>/g)) {
       if (match[0].startsWith("</")) conditional = Math.max(0, conditional - 1);
@@ -196,19 +202,40 @@ export function viewFacts(view: string | null): ViewFacts {
 /** Classes of the style whose animation repeats forever: class → line. */
 export function infiniteAnimations(style: string | null): Map<string, number> {
   const out = new Map<string, number>();
-  if (!style) return out;
-  const withoutComments = style.replace(/\/\*[\s\S]*?\*\//g, (comment) =>
-    comment.replace(/[^\n]/g, " "),
-  );
-  for (const match of withoutComments.matchAll(/([^{}]+)\{([^}]*)\}/g)) {
-    const body = match[2] as string;
-    if (!/animation\s*:[^;]*\binfinite\b/.test(body)) continue;
-    const line =
-      withoutComments.slice(0, match.index).split("\n").length +
-      (match[1] as string).split("\n").length -
-      1;
-    for (const selector of (match[1] as string).matchAll(/\.([A-Za-z_][\w-]*)/g))
-      out.set(selector[1] as string, line);
+  if (!style || style.length > MAX_STYLE_BYTES) return out;
+  const text = style.replace(/\/\*[\s\S]*?\*\//g, (comment) => comment.replace(/[^\n]/g, " "));
+  // One linear pass over the braces (no backtracking regular expression).
+  let depth = 0;
+  let line = 1;
+  let selectorStart = 0;
+  let selectorLine = 1;
+  let selector = "";
+  let bodyStart = 0;
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    if (char === "\n") line += 1;
+    else if (char === "{") {
+      if (depth === 0) {
+        selector = text.slice(selectorStart, index);
+        selectorLine =
+          line -
+          (selector.match(/\n/g)?.length ?? 0) +
+          (selector.match(/^\s*\n/)?.[0].split("\n").length ?? 1) -
+          1;
+        bodyStart = index + 1;
+      }
+      depth += 1;
+    } else if (char === "}") {
+      depth -= 1;
+      if (depth <= 0) {
+        if (depth === 0 && /animation\s*:[^;]*\binfinite\b/.test(text.slice(bodyStart, index))) {
+          for (const match of selector.matchAll(/\.([A-Za-z_][\w-]*)/g))
+            out.set(match[1] as string, selectorLine);
+        }
+        depth = 0;
+        selectorStart = index + 1;
+      }
+    }
   }
   return out;
 }

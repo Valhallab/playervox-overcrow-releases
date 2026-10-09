@@ -42,6 +42,14 @@ export async function widgetDirectory(
   return target;
 }
 
+/**
+ * Folders the CLI writes into: a link there could lead the write out of the
+ * project, so each must resolve inside it (or not exist yet).
+ */
+async function checkOutputs(confinement: Confinement, target: string, folders: readonly string[]) {
+  for (const folder of folders) await confinement.resolve(join(target, folder), "new-directory");
+}
+
 const diagnosticSchema = z.object({
   severity: z.enum(["error", "warning"]),
   code: z.string(),
@@ -84,9 +92,13 @@ async function cliOf(env: ToolEnv): Promise<Cli | undefined> {
 
 /** Reads a PNG of the project for an image result, within the bounds. */
 async function pngContent(
-  path: string,
+  confinement: Confinement,
+  wanted: string,
   budget: { left: number },
 ): Promise<ContentBlock | undefined> {
+  // Through the confinement: a link in tests/ cannot show a file from elsewhere.
+  const path = await confinement.resolve(wanted, "file").catch(() => undefined);
+  if (!path) return undefined;
   const info = await lstat(path).catch(() => undefined);
   if (!info?.isFile() || info.size > MAX_IMAGE_BYTES || info.size > budget.left) return undefined;
   const data = await readFile(path);
@@ -204,6 +216,11 @@ async function runTests(
   const cli = await cliOf(env);
   if (!cli) return { failure: fail(TOOLS_MISSING) };
   const target = await widgetDirectory(confinement, directory);
+  await checkOutputs(
+    confinement,
+    target,
+    update ? ["tests/output", "tests/reference"] : ["tests/output"],
+  );
   const result = await cli.test(target, { scenario, update }, signal);
   const { diagnostics } = shapeDiagnostics(result.diagnostics);
   if (!result.ran) {
@@ -243,7 +260,7 @@ async function runTests(
           ["difference", image.diff],
         ] as const) {
           if (!path) continue;
-          const block = await pngContent(join(target, path), budget);
+          const block = await pngContent(confinement, join(target, path), budget);
           if (block) {
             images.push(
               { type: "text", text: `${entry.name} / ${image.name}: ${label} image (${path})` },
@@ -435,6 +452,7 @@ export function registerBuildTools(env: ToolEnv): void {
         if (!/^[a-z0-9.-]{3,128}$/.test(id) || !/^\d+\.\d+\.\d+$/.test(version)) {
           return fail("manifest.json has no valid id and version: run check first.");
         }
+        await checkOutputs(confinement, target, ["dist"]);
         const out = join(target, "dist", `${id}-${version}.ocpkg`);
         const result = await cli.package(target, out, ctx.mcpReq.signal);
         const shaped = shapeDiagnostics(result.diagnostics);

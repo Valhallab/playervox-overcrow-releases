@@ -10,12 +10,16 @@ import { cleanLine } from "../text.js";
 import { DESCRIPTIONS } from "../texts.js";
 import { ok, READ_ONLY, type ToolEnv, withRoots } from "./common.js";
 import { widgetDirectory } from "./build.js";
-import { idProblem } from "./project.js";
+import { idProblem, WIDGET_ID } from "./project.js";
 
 interface ListingFacts {
   spdxLicense?: unknown;
   preview?: unknown;
 }
+
+const SLUG = /^[a-z0-9][a-z0-9-]{0,63}$/;
+/** A path that is safe inside double quotes in sh and PowerShell. */
+const PLAIN_PATH = /^[A-Za-z0-9_][A-Za-z0-9 ._/-]{0,255}$/;
 
 const DIRECTORY = z
   .string()
@@ -249,18 +253,22 @@ export function registerAuditTools(env: ToolEnv): void {
           detail: "LICENSE must match listing.json spdxLicense; bundled assets keep their notices.",
         });
 
+        // Only checked values reach the suggested commands: the manifest and
+        // the folder name are project data and could hold shell syntax.
         const folder = basename(target);
-        const slug = /^[a-z0-9][a-z0-9-]{0,63}$/.test(folder)
-          ? folder
-          : (id.split(".").pop() ?? "my-widget");
+        const lastLabel = WIDGET_ID.test(id) ? (id.split(".").pop() ?? "") : "";
+        const slug = SLUG.test(folder) ? folder : SLUG.test(lastLabel) ? lastLabel : "my-widget";
+        const version = /^\d+\.\d+\.\d+$/.test(audit.version ?? "")
+          ? (audit.version as string)
+          : "";
         const authority = review.length > 0 ? review.map(describeReview) : audit.authority;
         const ready = checklist.every(
           (entry) =>
             entry.status === "pass" || (entry.item === "Tests pass" && entry.status === "todo"),
         );
-        const title = `Add ${slug} ${audit.version ?? ""}`.trim();
+        const title = `Add ${slug} ${version}`.trim();
         const body = [
-          `Submits \`widgets/${slug}/\`: ${id} ${audit.version ?? ""}.`,
+          `Submits \`widgets/${slug}/\`: ${cleanLine(id, 128)} ${version}.`,
           "",
           "## What the widget may do",
           ...authority.map((line) => `- ${line}`),
@@ -271,10 +279,12 @@ export function registerAuditTools(env: ToolEnv): void {
           "Sources only: the maintainers rebuild the package from these sources. Nothing is published by this pull request.",
         ].join("\n");
         const windows = process.platform === "win32";
-        const source =
-          confinement.roots.length === 1
-            ? `<project>/${confinement.display(target)}`
-            : `<${confinement.display(target)}>`;
+        const shown = confinement.display(target);
+        const source = !PLAIN_PATH.test(shown)
+          ? "<widget folder>"
+          : confinement.roots.length === 1
+            ? `<project>/${shown}`
+            : `<${shown}>`;
         const lines = [
           "# 1. On GitHub, fork Valhallab/playervox-overcrow-releases, then:",
           "git clone https://github.com/YOUR-ACCOUNT/playervox-overcrow-releases.git",

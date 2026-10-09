@@ -254,6 +254,18 @@ function networkRules(context: Context): void {
   }
 }
 
+/** Brace depth of the token at `index` (0 = top level of the module). */
+function depthAt(tokens: readonly Token[], index: number): number {
+  let depth = 0;
+  for (let i = 0; i < index; i += 1) {
+    const value = tokens[i]?.value;
+    if (tokens[i]?.kind !== "punctuation") continue;
+    if (value === "{") depth += 1;
+    else if (value === "}") depth -= 1;
+  }
+  return depth;
+}
+
 function clipboardOutsideGesture(context: Context): void {
   for (const open of calls(context.tokens, ["clipboard", "writeText"])) {
     const line = context.tokens[open]?.line ?? null;
@@ -269,24 +281,26 @@ function clipboardOutsideGesture(context: Context): void {
           calls(context.tokens.slice(range.start, range.end), [owner.name]).length > 0,
       );
     }
-    if (!confirmed) {
-      add(context, {
-        rule: "clipboard-without-action",
-        area: "security",
-        severity: owner === undefined ? "high" : "medium",
-        file: context.logicFile,
-        line,
-        message:
-          owner === undefined
-            ? "clipboard.writeText runs outside any function: it would write without the user asking."
-            : `clipboard.writeText is in ${owner.name}, which no button or key of the view calls directly.`,
-        fix: "Write to the clipboard only in the handler of a user action (on:activate of a button): OverCrow refuses it otherwise (gesture_required), and the user must always know what is copied.",
-        example: { widget: "warframe-market", file: "logic.ts", find: "export function copy(" },
-      });
-    }
+    if (confirmed) continue;
+    const topLevel = owner === undefined && depthAt(context.tokens, open) === 0;
+    add(context, {
+      rule: "clipboard-without-action",
+      area: "security",
+      severity: topLevel ? "high" : "medium",
+      file: context.logicFile,
+      line,
+      message: topLevel
+        ? "clipboard.writeText runs when the widget starts: it would write without the user asking."
+        : owner
+          ? `clipboard.writeText is in ${owner.name}, which no button or key of the view calls directly.`
+          : "clipboard.writeText is in a callback (a timer, a subscription…) that no user action calls.",
+      fix: "Write to the clipboard only in the handler of a user action (on:activate of a button): OverCrow refuses it otherwise (gesture_required), and the user must always know what is copied.",
+      example: { widget: "warframe-market", file: "logic.ts", find: "export function copy(" },
+    });
   }
 }
 
+const SCAN_WINDOW = 4096;
 const SECRET_PATTERNS: { name: string; pattern: RegExp }[] = [
   { name: "a private key", pattern: /-----BEGIN (?:[A-Z0-9 ]+ )?PRIVATE KEY(?: BLOCK)?-----/ },
   { name: "a GitHub token", pattern: /\bgh[pousr]_[A-Za-z0-9]{30,}/ },
@@ -319,9 +333,19 @@ function secrets(context: Context): void {
       });
     }
     if (file.text === null) continue;
-    const lines = file.text.split("\n");
+    // Long lines (minified code) are read in overlapping windows: the
+    // patterns then always run on bounded text.
+    const lines = file.text
+      .split("\n")
+      .map((text) =>
+        text.length <= SCAN_WINDOW
+          ? [text]
+          : Array.from({ length: Math.ceil(text.length / (SCAN_WINDOW - 256)) }, (_, i) =>
+              text.slice(i * (SCAN_WINDOW - 256), i * (SCAN_WINDOW - 256) + SCAN_WINDOW),
+            ),
+      );
     for (const { name: what, pattern } of SECRET_PATTERNS) {
-      const index = lines.findIndex((text) => pattern.test(text));
+      const index = lines.findIndex((windows) => windows.some((text) => pattern.test(text)));
       if (index < 0) continue;
       add(context, {
         rule: "secret",
@@ -498,13 +522,14 @@ function unboundedLists(context: Context): void {
   tokens.forEach((token, index) => {
     if (token.value === "{") depth += 1;
     if (token.value === "}") depth -= 1;
-    if (
-      depth === 0 &&
-      (token.value === "let" || token.value === "const") &&
-      tokens[index + 2]?.value === "=" &&
-      tokens[index + 3]?.value === "["
-    ) {
-      moduleArrays.add(tokens[index + 1]?.value ?? "");
+    if (depth !== 0 || (token.value !== "let" && token.value !== "const")) return;
+    // `const name = [` or `const name: Type[] = [`.
+    for (let j = index + 2; j < Math.min(tokens.length - 1, index + 14); j += 1) {
+      if (tokens[j]?.value === ";") return;
+      if (tokens[j]?.value === "=") {
+        if (tokens[j + 1]?.value === "[") moduleArrays.add(tokens[index + 1]?.value ?? "");
+        return;
+      }
     }
   });
   const reported = new Set<string>();
