@@ -8,7 +8,7 @@ An OverCrow widget is not a web page: its view is OCML (view.ocml), its style OC
 
 Work in this order: status, setup (once), create_widget, install_sdk, check, test, audit, package, prepare_submission.
 
-Widget ID: it is final and can never be reused. Ask the user for it: <handle>.<name>, where <handle> is their publisher handle in the OverCrow creator space (such as valhallab.lol-timers), or a reverse domain they can verify (such as gg.valhallab.lol-timers). Never com.playervox.*: it is reserved for PlayerVox.
+Widget ID: it is final and can never be reused. Ask the user for it: <handle>.<name>, where <handle> is their publisher handle in the OverCrow creator space (such as nova.lol-timers), or a reverse domain they can verify (such as gg.nova.lol-timers). Never com.playervox.*: it is reserved for PlayerVox.
 
 Submission: prepare_submission checks everything the creator space asks for, writes the ZIP of the sources to dist/, and lists the texts to write: why the widget needs each permission, the release notes and the description in English and French. Draft them and show them to the user. The user sends the ZIP and the texts in the OverCrow creator space on overcrow.playervox.com.
 

@@ -101,8 +101,8 @@ Claude Desktop.
   empaqueter, préparer la soumission.
 - **L’identifiant du widget** est définitif. Votre assistant vous le
   demande : votre pseudo d’éditeur dans l’espace créateurs d’OverCrow et un
-  nom (`valhallab.lol-timers`), ou un domaine que vous pouvez vérifier
-  (`gg.valhallab.lol-timers`).
+  nom (`nova.lol-timers`), ou un domaine que vous pouvez vérifier
+  (`gg.nova.lol-timers`).
 - **La soumission** : le serveur vérifie tout ce que demande l’espace
   créateurs, puis écrit le zip des sources de votre widget dans `dist/`,
   sans `node_modules`, `dist`, fichiers cachés ni clés, et liste ce qu’il a

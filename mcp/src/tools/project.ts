@@ -101,7 +101,7 @@ export function registerProjectTools(env: ToolEnv): void {
           .min(3)
           .max(128)
           .describe(
-            "The widget's ID, final: <handle>.<name> with the user's publisher handle in the OverCrow creator space (such as valhallab.lol-timers), or a reverse domain the user can verify (such as gg.valhallab.lol-timers). Never com.playervox.*.",
+            "The widget's ID, final: <handle>.<name> with the user's publisher handle in the OverCrow creator space (such as nova.lol-timers), or a reverse domain the user can verify (such as gg.nova.lol-timers). Never com.playervox.*.",
           ),
         name: z
           .string()

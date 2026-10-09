@@ -294,7 +294,7 @@ test("IDs: <handle>.<name> and verified reverse domains pass; placeholders and c
         widget(`id-${id}`, { "manifest.json": manifest({}, { id }), LICENSE: "MIT\n" }),
       ),
     ).filter((rule) => /-id$/.test(rule));
-  for (const id of ["valhallab.lol-timers", "gg.valhallab.lol-timers", "example-studio.clock"])
+  for (const id of ["nova.lol-timers", "gg.nova.lol-timers", "example-studio.clock"])
     assert.deepEqual(await idRules(id), [], id);
   for (const id of ["yourhandle.clock", "example.clock", "com.example.clock", "com.yourname.clock"])
     assert.deepEqual(await idRules(id), ["medium:example-id"], id);

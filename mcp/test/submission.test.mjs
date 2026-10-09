@@ -63,7 +63,7 @@ const manifest = (extra = {}) =>
   JSON.stringify({
     schemaVersion: 1,
     apiVersion: 1,
-    id: "valhallab.weather",
+    id: "nova.weather",
     version: "1.2.0",
     name: { en: "Weather", fr: "Météo" },
     sizing: { fit: "none", preferred: { width: 200, height: 100 } },
@@ -93,14 +93,14 @@ function project(directory, extra = {}) {
       'import { http } from "@overcrow/sdk";\nexport async function load() {\n  return http.fetch("https://api.example-weather.net/v1/now", { as: "json" });\n}\n',
     "locales/en.json": '{"title":"Weather"}\n',
     "locales/fr.json": '{"title":"Météo"}\n',
-    LICENSE: "Copyright Valhallab. All rights reserved.\n",
+    LICENSE: "Copyright Nova. All rights reserved.\n",
     "package.json": '{"private":true}\n',
     "assets/preview.png": png(720, 540),
     "tests/basic.scenario.json": "{}\n",
     "tests/reference/basic/initial.png": png(300, 150),
     "tests/output/basic/initial.actual.png": png(300, 150),
     "node_modules/@overcrow/sdk/index.js": "export {};\n",
-    "dist/valhallab.weather-1.2.0.ocpkg": "package",
+    "dist/nova.weather-1.2.0.ocpkg": "package",
     ".git/config": "[core]\n",
     ".gitignore": "node_modules\n",
     "notes/.draft.md": "draft\n",
@@ -231,7 +231,7 @@ test("the ZIP is written atomically, replaces the previous one, and leaves no te
   const directory = project(join(work, "atomic"));
   const { included } = await selectSources(directory);
   const out = join(directory, "dist");
-  const name = "valhallab.weather-1.2.0-sources.zip";
+  const name = "nova.weather-1.2.0-sources.zip";
   const first = await writeSourcesZip(directory, included, out, name);
   assert.ok(!("problem" in first), JSON.stringify(first));
   const zip = readFileSync(first.path);
@@ -302,7 +302,7 @@ test("prepare_submission: checklist, texts to draft, and the ZIP once nothing fa
   const { root, server, prepare } = await serverWithTools("ready");
   try {
     const directory = project(join(root, "weather"));
-    const zipPath = join(directory, "dist", "valhallab.weather-1.2.0-sources.zip");
+    const zipPath = join(directory, "dist", "nova.weather-1.2.0-sources.zip");
 
     const before = await prepare("weather");
     assert.equal(before.ready, false);
@@ -333,7 +333,7 @@ test("prepare_submission: checklist, texts to draft, and the ZIP once nothing fa
       "Release notes in English and French": "todo",
       "Sources ZIP": "pass",
     });
-    assert.equal(ready.sources.zip, "weather/dist/valhallab.weather-1.2.0-sources.zip");
+    assert.equal(ready.sources.zip, "weather/dist/nova.weather-1.2.0-sources.zip");
     const zip = readFileSync(zipPath);
     assert.equal(ready.sources.bytes, zip.length);
     assert.deepEqual(

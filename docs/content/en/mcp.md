@@ -98,8 +98,8 @@ Developer, Edit Config), then restart Claude Desktop.
   submission.
 - **The widget ID** is final. Your assistant asks you for it: your
   publisher handle in the OverCrow creator space and a name
-  (`valhallab.lol-timers`), or a domain you can verify
-  (`gg.valhallab.lol-timers`).
+  (`nova.lol-timers`), or a domain you can verify
+  (`gg.nova.lol-timers`).
 - **The submission**: the server checks everything the creator space asks
   for, then writes the ZIP of your widget's sources to `dist/`, without
   `node_modules`, `dist`, hidden files or keys, and lists what it left out.

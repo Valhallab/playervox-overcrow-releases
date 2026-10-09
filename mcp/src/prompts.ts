@@ -26,7 +26,7 @@ export function registerPrompts(server: McpServer): void {
           "Work with the overcrow tools:",
           "1. status, then setup if the creator tools are missing.",
           "2. Read the guide (read_doc guide), and the closest reference widget (read_example), before writing code.",
-          "3. Ask me for the widget ID (final): my publisher handle in the OverCrow creator space and a name, such as valhallab.lol-timers, or a domain I can verify. Then create_widget with the closest template.",
+          "3. Ask me for the widget ID (final): my publisher handle in the OverCrow creator space and a name, such as nova.lol-timers, or a domain I can verify. Then create_widget with the closest template.",
           "4. Ask me before install_sdk.",
           "5. Write the view (OCML), style (OCSS) and logic (TypeScript with @overcrow/sdk). Ask only for the permissions the widget uses, with exact network routes and a tight maxResponseBytes.",
           "6. check until clean, test, audit (fix every high and medium finding), then package.",

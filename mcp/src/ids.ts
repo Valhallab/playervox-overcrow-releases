@@ -10,7 +10,7 @@ export const WIDGET_ID =
 
 /** The two forms, for messages. */
 export const ID_FORMS =
-  "<handle>.<name>, with your publisher handle in the OverCrow creator space (such as valhallab.lol-timers), or a reverse domain you can verify (such as gg.valhallab.lol-timers)";
+  "<handle>.<name>, with your publisher handle in the OverCrow creator space (such as nova.lol-timers), or a reverse domain you can verify (such as gg.nova.lol-timers)";
 
 export function isReservedId(id: string): boolean {
   return id === "com.playervox" || id.startsWith("com.playervox.");
