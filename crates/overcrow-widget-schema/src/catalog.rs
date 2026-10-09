@@ -552,14 +552,14 @@ fn payload_object(payload: &[u8]) -> Result<Map<String, Value>, CatalogError> {
     Ok(object)
 }
 
-fn sequence(value: &Value) -> Result<u64, CatalogError> {
+pub(crate) fn sequence(value: &Value) -> Result<u64, CatalogError> {
     value
         .as_u64()
         .filter(|sequence| (1..(1 << 53)).contains(sequence))
         .ok_or(CatalogError::Sequence)
 }
 
-fn validity(
+pub(crate) fn validity(
     object: &Map<String, Value>,
     now: i64,
     max_lifetime_days: Option<u64>,
@@ -792,7 +792,7 @@ fn listing_text(text: &str) -> bool {
 }
 
 /// `xx` or `xx-YY`, as today.
-fn valid_locale(locale: &str) -> bool {
+pub(crate) fn valid_locale(locale: &str) -> bool {
     let bytes = locale.as_bytes();
     let language = |part: &[u8]| part.len() == 2 && part.iter().all(u8::is_ascii_lowercase);
     match locale.split_once('-') {
@@ -898,12 +898,12 @@ pub fn parse_timestamp(text: &str) -> Option<i64> {
 
 /// Unpadded Base64url that re-encodes to the same text; callers bound the
 /// text length first.
-fn decode_canonical(text: &str) -> Option<Vec<u8>> {
+pub(crate) fn decode_canonical(text: &str) -> Option<Vec<u8>> {
     let bytes = URL_SAFE_NO_PAD.decode(text).ok()?;
     (URL_SAFE_NO_PAD.encode(&bytes) == text).then_some(bytes)
 }
 
-fn decode_sha256(text: &str) -> Option<[u8; 32]> {
+pub(crate) fn decode_sha256(text: &str) -> Option<[u8; 32]> {
     if text.len() != 64 {
         return None;
     }

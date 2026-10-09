@@ -1,0 +1,189 @@
+{
+  "cases": [
+    {
+      "name": "Raidforge",
+      "handle": "raidforge",
+      "expected": "ok"
+    },
+    {
+      "name": "Night Owl Studio",
+      "handle": "nightowl",
+      "expected": "ok"
+    },
+    {
+      "name": "Crow Over Studio",
+      "handle": "crow-over",
+      "expected": "ok"
+    },
+    {
+      "name": "Studio d\u00e9tente",
+      "handle": "raidforge",
+      "expected": "ok"
+    },
+    {
+      "name": "PlayerVox",
+      "handle": "playervox",
+      "expected": "ok"
+    },
+    {
+      "name": "PlayerVox OverCrow",
+      "handle": "playervox",
+      "expected": "ok"
+    },
+    {
+      "name": "PlayerVox Official",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "Player Vox",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "P1ayer-Vox",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "0verCrow",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "OVERCROW Team",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "Valhallab",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "Team over.crow",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": " Raidforge",
+      "handle": "raidforge",
+      "expected": "text"
+    },
+    {
+      "name": "Raid\u202eforge",
+      "handle": "raidforge",
+      "expected": "text"
+    },
+    {
+      "name": "",
+      "handle": "raidforge",
+      "expected": "text"
+    },
+    {
+      "name": "Raid<forge>",
+      "handle": "raidforge",
+      "expected": "text"
+    },
+    {
+      "name": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+      "handle": "raidforge",
+      "expected": "text"
+    },
+    {
+      "name": "PlayerV\u043e\u0445",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "\u0420l\u0430y\u0435rVox",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "\u03a1layerVox",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "\uff30\uff4c\uff41\uff59\uff45\uff52\uff36\uff4f\uff58",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "Pl\u00e2y\u00e8rv\u00f8x",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "Ov\u0435rcrow",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "Val\u04bballab",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "P\u0406ayerVox",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "Overcro\u051d",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "\u041d\u043e\u0447\u043d\u0430\u044f \u0441\u043e\u0432\u0430",
+      "handle": "nightowl",
+      "expected": "ok"
+    },
+    {
+      "name": "\u6f22\u5b57 Studio",
+      "handle": "raidforge",
+      "expected": "ok"
+    },
+    {
+      "name": "\ud835\udc0f\ud835\udc25\ud835\udc1a\ud835\udc32\ud835\udc1e\ud835\udc2b\ud835\udc15\ud835\udc28\ud835\udc31",
+      "handle": "raidforge",
+      "expected": "stylized"
+    },
+    {
+      "name": "\u1d18\u029f\u1d00\u028f\u1d07\u0280\u1d20\u1d0fx",
+      "handle": "raidforge",
+      "expected": "stylized"
+    },
+    {
+      "name": "\u24c5layervox",
+      "handle": "raidforge",
+      "expected": "stylized"
+    },
+    {
+      "name": "\ud83c\udd3flayervox",
+      "handle": "raidforge",
+      "expected": "stylized"
+    },
+    {
+      "name": "Raidforge\u00b2\u2070",
+      "handle": "raidforge",
+      "expected": "stylized"
+    },
+    {
+      "name": "Raidforge \u2163",
+      "handle": "raidforge",
+      "expected": "stylized"
+    },
+    {
+      "name": "\u13a2\u13ac\u13aa",
+      "handle": "raidforge",
+      "expected": "stylized"
+    },
+    {
+      "name": "Raidforge\u2122",
+      "handle": "raidforge",
+      "expected": "ok"
+    }
+  ]
+}

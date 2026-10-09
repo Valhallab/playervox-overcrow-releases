@@ -1,0 +1,244 @@
+{
+  "cases": [
+    {
+      "handle": "raidforge",
+      "registration": "ok",
+      "catalog": "ok"
+    },
+    {
+      "handle": "abc",
+      "registration": "ok",
+      "catalog": "ok"
+    },
+    {
+      "handle": "night-owl",
+      "registration": "ok",
+      "catalog": "ok"
+    },
+    {
+      "handle": "a1b",
+      "registration": "ok",
+      "catalog": "ok"
+    },
+    {
+      "handle": "123",
+      "registration": "ok",
+      "catalog": "ok"
+    },
+    {
+      "handle": "games",
+      "registration": "ok",
+      "catalog": "ok"
+    },
+    {
+      "handle": "studio-42",
+      "registration": "ok",
+      "catalog": "ok"
+    },
+    {
+      "handle": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "registration": "ok",
+      "catalog": "ok"
+    },
+    {
+      "handle": "ab",
+      "registration": "length",
+      "catalog": "length"
+    },
+    {
+      "handle": "",
+      "registration": "length",
+      "catalog": "length"
+    },
+    {
+      "handle": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "registration": "length",
+      "catalog": "length"
+    },
+    {
+      "handle": "Raidforge",
+      "registration": "characters",
+      "catalog": "characters"
+    },
+    {
+      "handle": "night_owl",
+      "registration": "characters",
+      "catalog": "characters"
+    },
+    {
+      "handle": "night.owl",
+      "registration": "characters",
+      "catalog": "characters"
+    },
+    {
+      "handle": "nuit-étoilée",
+      "registration": "characters",
+      "catalog": "characters"
+    },
+    {
+      "handle": "night owl",
+      "registration": "characters",
+      "catalog": "characters"
+    },
+    {
+      "handle": "-abc",
+      "registration": "hyphen",
+      "catalog": "hyphen"
+    },
+    {
+      "handle": "abc-",
+      "registration": "hyphen",
+      "catalog": "hyphen"
+    },
+    {
+      "handle": "xn--abc",
+      "registration": "hyphen",
+      "catalog": "hyphen"
+    },
+    {
+      "handle": "night--owl",
+      "registration": "hyphen",
+      "catalog": "hyphen"
+    },
+    {
+      "handle": "com",
+      "registration": "domain_extension",
+      "catalog": "ok"
+    },
+    {
+      "handle": "org",
+      "registration": "domain_extension",
+      "catalog": "ok"
+    },
+    {
+      "handle": "museum",
+      "registration": "domain_extension",
+      "catalog": "ok"
+    },
+    {
+      "handle": "travel",
+      "registration": "domain_extension",
+      "catalog": "ok"
+    },
+    {
+      "handle": "playervox",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "player-vox",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "the-playervox-team",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "overcrow",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "over-crow-fans",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "valhallab-official",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "admin",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "api",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "support",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "www",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "p1ayervox",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "playerv0x-fan",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "pl4yer-v0x",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "overcr0w",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "0verc-r0w",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "overcrovv",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "va1ha11ab",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "vaihaiiab",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "lovercrowd",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "crow-over",
+      "registration": "ok",
+      "catalog": "ok"
+    },
+    {
+      "handle": "adm1n",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "ad-min",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "supp0rt",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "w-w-w",
+      "registration": "reserved",
+      "catalog": "ok"
+    }
+  ]
+}

@@ -1,0 +1,694 @@
+{
+  "cases": [
+    {
+      "field": "publisherName",
+      "value": "Raidforge",
+      "valid": true
+    },
+    {
+      "field": "publisherName",
+      "value": "Night Owl Studio",
+      "valid": true
+    },
+    {
+      "field": "publisherName",
+      "value": "Studio d\u00e9tente",
+      "valid": true
+    },
+    {
+      "field": "publisherName",
+      "value": "\u6f22\u5b57\u30b9\u30bf\u30b8\u30aa",
+      "valid": true
+    },
+    {
+      "field": "publisherName",
+      "value": "Night Owl \u2764\ufe0f",
+      "valid": true
+    },
+    {
+      "field": "publisherName",
+      "value": "12\u00a0h",
+      "valid": true
+    },
+    {
+      "field": "publisherName",
+      "value": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+      "valid": true
+    },
+    {
+      "field": "publisherName",
+      "value": "",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "  Raidforge",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": " x",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "x ",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a<b",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a>b",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "Line\nbreak",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\rb",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\tb",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\u007fb",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\u0085b",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "Raid\u202eegrof",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\u200bb",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\u2066b",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\ufeffb",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\u00adb",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\u2028b",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\u2029b",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "\u3164",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\u115fb",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\uffa0b",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\u2800b",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\u034fb",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\u17b4b",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\u180bb",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\u206ab",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\ufff9b",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\ud834\udd73b",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\udb40\udc41b",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\udb40\udd00b",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+      "valid": false
+    },
+    {
+      "field": "description",
+      "value": "Raid timers.\nServer alerts.",
+      "valid": true
+    },
+    {
+      "field": "description",
+      "value": "\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9",
+      "valid": true
+    },
+    {
+      "field": "description",
+      "value": "\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22\u6f22",
+      "valid": true
+    },
+    {
+      "field": "description",
+      "value": "\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9",
+      "valid": false
+    },
+    {
+      "field": "description",
+      "value": "x\n",
+      "valid": false
+    },
+    {
+      "field": "description",
+      "value": "\nx",
+      "valid": false
+    },
+    {
+      "field": "description",
+      "value": "<b>Weather</b>",
+      "valid": false
+    },
+    {
+      "field": "categoryLabel",
+      "value": "Outils de jeu",
+      "valid": true
+    },
+    {
+      "field": "categoryLabel",
+      "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "valid": true
+    },
+    {
+      "field": "categoryLabel",
+      "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "valid": false
+    },
+    {
+      "field": "categoryLabel",
+      "value": "Two\nlines",
+      "valid": false
+    },
+    {
+      "field": "gameName",
+      "value": "The Witcher 3: Wild Hunt",
+      "valid": true
+    },
+    {
+      "field": "gameName",
+      "value": "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+      "valid": true
+    },
+    {
+      "field": "gameName",
+      "value": "ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/",
+      "valid": true
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/privacy",
+      "valid": true
+    },
+    {
+      "field": "link",
+      "value": "https://example.com/privacy-policy/",
+      "valid": true
+    },
+    {
+      "field": "link",
+      "value": "https://docs.google.com/document/d/1AbC_x-9/edit?usp=sharing",
+      "valid": true
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.notion.site/Politique-de-confidentialit%C3%A9",
+      "valid": true
+    },
+    {
+      "field": "link",
+      "value": "https://github.com/raidforge/timers/issues",
+      "valid": true
+    },
+    {
+      "field": "link",
+      "value": "http://raidforge.gg/privacy",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://RAIDFORGE.gg/",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg:8443/",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://user@raidforge.gg/",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/a#b",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/a/../b",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/./b",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg//a",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://127.0.0.1/",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://localhost/",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/%zz",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/%c3%a9",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/a?",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/a?b c",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/a b",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforg\u00e9.gg/",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "javascript:alert(1)",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "valid": false
+    },
+    {
+      "field": "email",
+      "value": "support@raidforge.gg",
+      "valid": true
+    },
+    {
+      "field": "email",
+      "value": "first.last+ocw@example.co.uk",
+      "valid": true
+    },
+    {
+      "field": "email",
+      "value": "A_b-1@x.io",
+      "valid": true
+    },
+    {
+      "field": "email",
+      "value": "support@",
+      "valid": false
+    },
+    {
+      "field": "email",
+      "value": "@raidforge.gg",
+      "valid": false
+    },
+    {
+      "field": "email",
+      "value": ".a@x.gg",
+      "valid": false
+    },
+    {
+      "field": "email",
+      "value": "a.@x.gg",
+      "valid": false
+    },
+    {
+      "field": "email",
+      "value": "a..b@x.gg",
+      "valid": false
+    },
+    {
+      "field": "email",
+      "value": "a@Raidforge.gg",
+      "valid": false
+    },
+    {
+      "field": "email",
+      "value": "a b@x.gg",
+      "valid": false
+    },
+    {
+      "field": "email",
+      "value": "a@x",
+      "valid": false
+    },
+    {
+      "field": "email",
+      "value": "a@b@x.gg",
+      "valid": false
+    },
+    {
+      "field": "email",
+      "value": "mailto:a@x.gg",
+      "valid": false
+    },
+    {
+      "field": "email",
+      "value": "\"a\"@x.gg",
+      "valid": false
+    },
+    {
+      "field": "email",
+      "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.com",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "MIT",
+      "valid": true
+    },
+    {
+      "field": "spdxLicense",
+      "value": "Apache-2.0",
+      "valid": true
+    },
+    {
+      "field": "spdxLicense",
+      "value": "GPL-3.0+",
+      "valid": true
+    },
+    {
+      "field": "spdxLicense",
+      "value": "MIT OR Apache-2.0",
+      "valid": true
+    },
+    {
+      "field": "spdxLicense",
+      "value": "(MIT OR Apache-2.0) AND CC-BY-4.0",
+      "valid": true
+    },
+    {
+      "field": "spdxLicense",
+      "value": "GPL-3.0-or-later WITH Classpath-exception-2.0",
+      "valid": true
+    },
+    {
+      "field": "spdxLicense",
+      "value": "MIT AND (Apache-2.0 OR BSD-3-Clause)",
+      "valid": true
+    },
+    {
+      "field": "spdxLicense",
+      "value": "LicenseRef-Proprietary",
+      "valid": true
+    },
+    {
+      "field": "spdxLicense",
+      "value": "",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "LicenseRef-Custom",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "LicenseRef-Autre",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "MIT OR LicenseRef-Proprietary",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "(LicenseRef-Proprietary)",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "DocumentRef-x:LicenseRef-y",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "Proprietary License",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "MIT or Apache-2.0",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "MIT OR",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "OR MIT",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "(MIT",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "MIT)",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "()",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "MIT  OR Apache-2.0",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": " MIT",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "( MIT OR Apache-2.0 )",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "MIT WITH GPL-3.0 WITH X",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "(MIT OR Apache-2.0) WITH X",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "MIT+ WITH X+",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "-MIT",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "GPL+2.0",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "AND",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "MIT/Apache-2.0",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA OR MIT",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "Raid\ud82f\udca0forge",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "\ufe0fRaidforge",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "Raidforge \u2764\ufe0f\ufe0f",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\udb40\udc80b",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/a/%2E%2E/privacy",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/%41bc",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/a%2Fb",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/a%5Cb",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/a%00b",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/a%20b?q=%C3%A9",
+      "valid": true
+    },
+    {
+      "field": "spdxLicense",
+      "value": "licenseref-custom",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "licenseref-proprietary",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "MIT OR LICENSEREF-Proprietary",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "MIT WITH AdditionRef-x",
+      "valid": false
+    }
+  ]
+}

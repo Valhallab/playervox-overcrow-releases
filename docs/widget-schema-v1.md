@@ -46,6 +46,24 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MAX_LISTING_DESCRIPTION_BYTES` | 512 bytes | fixed | Marketplace description of one localization, as today. |
 | `MAX_AUTHOR_BYTES` | 128 bytes | fixed | Author shown in a listing, as today. |
 | `MAX_SPDX_LICENSE_BYTES` | 64 bytes | fixed | SPDX license expression of a listing, as today. |
+| `MIN_HANDLE_BYTES` | 3 bytes | fixed | Shortest publisher handle; it also keeps every two-letter country extension out of the handles. |
+| `MAX_HANDLE_BYTES` | 32 bytes | fixed | Longest publisher handle. |
+| `MAX_PUBLISHER_DOMAINS` | 8 | fixed | Domains under which one publisher owns widget IDs. |
+| `MAX_CATALOG_V2_BYTES` | 4 MiB | fixed | Signed envelope of the catalog v2. |
+| `MAX_CATALOG_V2_PAYLOAD_BYTES` | 3000 KiB | fixed | Decoded signed payload of the catalog v2; its Base64 form fits `MAX_CATALOG_V2_BYTES`. |
+| `MAX_CATALOG_V2_TARGETS` | 2000 | fixed | Package versions listed by one catalog v2. |
+| `MAX_CATALOG_V2_WIDGETS` | 1000 | fixed | Widget entries of one catalog v2. |
+| `MAX_CATALOG_PUBLISHERS` | 1000 | fixed | Publisher entries of one catalog v2. |
+| `MAX_CATALOG_CATEGORIES` | 32 | fixed | Categories of one catalog v2, `other` included. |
+| `MAX_CATEGORY_ID_BYTES` | 32 bytes | fixed | Category ID. |
+| `MAX_CATEGORY_LABEL_CHARS` | 32 characters | fixed | One localized category label: a filter or a chip. |
+| `MAX_PUBLISHER_NAME_CHARS` | 64 characters | fixed | Displayed publisher name, one line of a card. |
+| `MAX_LISTING_DESCRIPTION_CHARS` | 500 characters | fixed | Listing description of one locale in the catalog v2. |
+| `MAX_RELEASE_NOTES_CHARS` | 500 characters | fixed | Release notes of one version in one locale. |
+| `MAX_LISTING_GAMES` | 5 | fixed | PlayerVox games a widget is listed for. |
+| `MAX_GAME_NAME_CHARS` | 100 characters | fixed | Game name copied from the PlayerVox games database; longer names are shortened by the catalog producer. |
+| `MAX_GAME_SLUG_BYTES` | 128 bytes | fixed | Slug of a game page on playervox.com. |
+| `MAX_SUPPORT_EMAIL_BYTES` | 254 bytes | fixed | Public support e-mail address of a listing. |
 | `MAX_VIEW_ELEMENTS` | 4096 | fixed | Elements written in `view.ocml`, components included. |
 | `MAX_COMPONENTS` | 64 | fixed | Local components declared in one view. |
 | `MAX_EXPRESSION_BYTES` | 1 KiB | fixed | Source length of one `{expr}` template expression. |
@@ -1708,3 +1726,152 @@ The v1 catalog is `https://overcrow.playervox.com/marketplace/widgets/v1/catalog
 | Tag | Meaning |
 | --- | --- |
 | `built-in` | PlayerVox reference widget: installed by default from the live catalog or the offline seed, with default consent to its declared permissions (ADR 0001, D7). Accepted only for `com.playervox.*` IDs, on every listed version of the ID. |
+
+## Catalog v2
+
+The catalog v2 is `https://overcrow.playervox.com/marketplace/widgets/v2/catalog.json`, beside the catalog v1, whose format never changes and which keeps listing the PlayerVox widgets for the applications already released; [`widget-catalog-v2.md`](widget-catalog-v2.md) specifies it. Its envelope carries an Ed25519 signature, made with the key family of v1, of the domain string `OverCrow widget catalog v2\0` followed by the payload bytes. A reader ignores an unknown object key of the payload, refuses an unknown value of a known key, and skips an entry whose `requires` names a feature it does not support; this version supports none. The envelope and the manifest stay strict.
+
+### Envelope v2
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `formatVersion` | integer 2..=2 | yes | Envelope format. |
+| `keyId` | text ≤ `MAX_KEY_ID_BYTES` | yes | Signing key ID, the family of the catalog v1: production IDs are `overcrow-widgets-YYYY-NN`. |
+| `payload` | `Base64url` | yes | Canonical unpadded Base64url of the payload bytes, at most `MAX_CATALOG_V2_PAYLOAD_BYTES` decoded. |
+| `signature` | `Base64url` | yes | Canonical unpadded Base64url of the 64-byte Ed25519 signature of the domain string followed by the payload bytes. |
+
+### Catalog v2 payload
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `formatVersion` | integer 2..=2 | yes | Catalog format. |
+| `sequence` | integer 1..=9007199254740991 | yes | Anti-rollback sequence of the catalog v2, started at 1 and independent of the v1 sequence. |
+| `generatedAt` | `UTC timestamp` | yes | `YYYY-MM-DDTHH:MM:SSZ`. |
+| `expiresAt` | `UTC timestamp` | yes | After `generatedAt`, at most `MAX_CATALOG_LIFETIME_DAYS` later in production. |
+| `categories` | list of `Category` ≤ `MAX_CATALOG_CATEGORIES` | yes | Categories in display order, unique by ID, `other` included. |
+| `publishers` | list of `Publisher` ≤ `MAX_CATALOG_PUBLISHERS` | yes | Publishers of the listed widgets, unique by handle. |
+| `widgets` | list of `Widget` ≤ `MAX_CATALOG_V2_WIDGETS` | yes | One entry per listed widget ID. |
+| `targets` | list of `TargetV2` ≤ `MAX_CATALOG_V2_TARGETS` | yes | Listed package versions, unique by ID and version. |
+
+### `Category`
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `id` | identifier ≤ `MAX_CATEGORY_ID_BYTES` | yes | `[a-z][a-z0-9-]*` without a final hyphen. |
+| `labels` | `LocalizedText` | yes | Label per locale, `en` required, each at most `MAX_CATEGORY_LABEL_CHARS` characters on one line. |
+
+### `Publisher`
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `handle` | text ≤ `MAX_HANDLE_BYTES` | yes | Handle grammar (see Publisher handles and widget ID ownership); readers do not check the registration policy. |
+| `name` | text ≤ `MAX_PUBLISHER_NAME_CHARS` | yes | Displayed name, display text on one line. |
+| `domains` | list of `domain` ≤ `MAX_PUBLISHER_DOMAINS` | no | Distinct domains under which the publisher owns widget IDs, each verified at least once. No two publishers list equal or nested domains; `playervox.com` and its subdomains belong to `playervox` only. |
+| `verifiedDomain` | `domain` | no | The domain verified now, one of `domains`, shown with the verified-domain badge. |
+
+### `Widget`
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `id` | `widget ID` | yes | Widget ID of the manifest grammar, owned by the publisher (see Publisher handles and widget ID ownership); unique. |
+| `publisher` | text ≤ `MAX_HANDLE_BYTES` | yes | Handle of an entry of `publishers`. |
+| `tags` | `list of tags` | no | Distinct tags of the catalog v1 set; `built-in` only for the publisher `playervox` on a `com.playervox.*` ID. They apply to every version. |
+| `listing` | `ListingV2` | yes | Store text and links. |
+| `preview` | `PreviewV2` | no | One PNG preview for every version. |
+| `requires` | `list of feature names` | no | Features a reader must support to use the entry. Unless it is a list of features the reader supports, the reader skips the widget and its targets. |
+
+### `ListingV2`
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `defaultLocale` | `en` | yes | Always `en`: the text shown when the player's locale has none. |
+| `description` | `LocalizedText` | yes | Description per locale, `en` required, at most `MAX_LISTING_LOCALIZATIONS` locales, each at most `MAX_LISTING_DESCRIPTION_CHARS` characters; line feeds allowed. |
+| `category` | identifier ≤ `MAX_CATEGORY_ID_BYTES` | yes | ID of an entry of `categories`. |
+| `games` | list of `Game` ≤ `MAX_LISTING_GAMES` | no | PlayerVox games the widget is made for, distinct by ID. |
+| `spdxLicense` | text ≤ `MAX_SPDX_LICENSE_BYTES` | yes | A simple SPDX license expression, by grammar only, or exactly `LicenseRef-Proprietary`. |
+| `support` | `Support` | yes | How players reach the publisher. |
+| `privacyPolicyUrl` | text ≤ `MAX_CATALOG_URL_BYTES` | no | Link; required when a listed, not skipped version declares `permissions.network`. |
+| `sourceUrl` | text ≤ `MAX_CATALOG_URL_BYTES` | no | Link to a public source repository; shown as a public-source badge. |
+
+### `Game`
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `id` | id | yes | ID of the game in the PlayerVox games database; the key of the game filter. |
+| `slug` | text ≤ `MAX_GAME_SLUG_BYTES` | yes | `[a-z0-9-]` starting and ending with a letter or digit: the page `https://playervox.com/games/<slug>`. |
+| `name` | text ≤ `MAX_GAME_NAME_CHARS` | yes | Game name, display text on one line. |
+
+### `Support`
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `url` | text ≤ `MAX_CATALOG_URL_BYTES` | no | Support page, a link. |
+| `email` | text ≤ `MAX_SUPPORT_EMAIL_BYTES` | no | Public support address. Exactly one of `url` and `email` is present. |
+
+### `PreviewV2`
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `url` | text ≤ `MAX_CATALOG_URL_BYTES` | yes | Exactly `<base>previews/<id>/<sha256>.png`. |
+| `mediaType` | `image/png` | yes | Media type. |
+| `size` | integer 1..=262144 | yes | Image bytes. |
+| `sha256` | `lowercase hex SHA-256` | yes | Image digest. |
+
+### `TargetV2`
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `manifest` | `manifest` | yes | The package's manifest object, validated strictly as v1; its ID names an entry of `widgets`. |
+| `status` | `verified` \| `security-suspended` \| `revoked` | yes | As in the catalog v1. |
+| `package` | `PackageRef` | yes | As in the catalog v1, with `url` exactly `<base>packages/<id>/<version>/<sha256>.ocpkg` under the v2 base. |
+| `releaseNotes` | `LocalizedText` | no | Release notes of this version per locale, `en` required, at most `MAX_LISTING_LOCALIZATIONS` locales, each at most `MAX_RELEASE_NOTES_CHARS` characters; line feeds allowed. |
+| `requires` | `list of feature names` | no | Features a reader must support to use the entry. Unless it is a list of features the reader supports, the reader skips the target. |
+
+### `PackageRef` v2
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `url` | text ≤ `MAX_CATALOG_URL_BYTES` | yes | Exactly `<base>packages/<id>/<version>/<sha256>.ocpkg`. |
+| `size` | integer 1..=16777216 | yes | Archive bytes. |
+| `sha256` | `lowercase hex SHA-256` | yes | Archive digest. |
+
+### Initial categories
+
+Readers take the categories from each catalog; PlayerVox starts with these.
+
+| ID | English | French |
+| --- | --- | --- |
+| `game-tools` | Game tools | Outils de jeu |
+| `performance` | Performance | Performance |
+| `communication` | Communication | Communication |
+| `productivity` | Productivity | Productivité |
+| `media` | Media | Médias |
+| `streaming` | Streaming | Streaming |
+| `other` | Other | Autre |
+
+### Display text
+
+Publisher names, category labels, game names, descriptions and release notes are non-empty and counted in Unicode scalar values. They have no white space at either end, no `<` or `>`, no control character except line feeds in descriptions and release notes, and none of these invisible or blank characters: U+00AD, U+034F, U+061C, U+115F–U+1160, U+17B4–U+17B5, U+180B–U+180F, U+200B–U+200F, U+2028–U+202E, U+2060–U+206F, U+2800, U+3164, U+FEFF, U+FFA0, U+FFF9–U+FFFB, U+1BCA0–U+1BCA3, U+1D173–U+1D17A, U+E0000–U+E0FFF. A variation selector (U+FE00 to U+FE0F) only follows a character that is not one.
+
+### Publisher handles and widget ID ownership
+
+A handle is `MIN_HANDLE_BYTES`..=`MAX_HANDLE_BYTES` of `[a-z0-9-]` without a hyphen at either end or two in a row. A widget ID of two segments, `<handle>.<name>`, belongs to that handle; an ID of three segments or more belongs to the publisher owning the domain whose reverse is its prefix, the longest one when several match. `com.playervox` and `com.playervox.*` belong only to `playervox` through `playervox.com`, and only its widgets on those IDs may carry `built-in`. No two publishers own equal or nested domains.
+
+Catalog readers check the grammar only. A new publisher may not register a domain extension (`aero`, `arpa`, `asia`, `biz`, `cat`, `com`, `coop`, `edu`, `gov`, `info`, `int`, `jobs`, `mil`, `mobi`, `museum`, `name`, `net`, `org`, `post`, `pro`, `tel`, `travel`, `xxx`) or a handle whose skeleton equals that of a reserved handle (`admin`, `administrator`, `api`, `app`, `assets`, `billing`, `blog`, `catalog`, `cdn`, `creator`, `creators`, `dashboard`, `docs`, `download`, `downloads`, `help`, `legal`, `login`, `mail`, `marketplace`, `moderator`, `null`, `official`, `owner`, `payments`, `privacy`, `publisher`, `publishers`, `root`, `security`, `settings`, `signup`, `staff`, `static`, `status`, `support`, `system`, `team`, `terms`, `undefined`, `verified`, `widget`, `widgets`, `www`) or contains `overcrow`, `playervox`, `valhallab`. The skeleton removes hyphens, reads `vv` as `w`, then `0` as `o`, `1` and `i` as `l`, `3` as `e`, `4` as `a`, `5` as `s`, `7` as `t` and `8` as `b`. The same words may not appear in the skeleton of another publisher's displayed name, read as ASCII letters and digits: fullwidth forms fold to ASCII, the look-alikes below to their letter, other characters are dropped. Such a name may not use stylized letters either (U+0250–U+02FF, U+13A0–U+13FF, U+1D00–U+1DBF, U+2070–U+209F, U+2100–U+218F, U+2460–U+24FF, U+AB70–U+ABBF, U+1D400–U+1D7FF, U+1F100–U+1F1FF), except `™`. Human review covers the look-alikes no table lists.
+
+| Look-alikes | Letter |
+| --- | --- |
+| àáâãäåāăąǎÀÁÂÃÄÅĀĂĄǍаАαΑ | `a` |
+| ƀВЬьβΒ | `b` |
+| çćĉċčÇĆĈĊČсСϲ | `c` |
+| èéêëēĕėęěÈÉÊËĒĔĖĘĚеЕёЁεΕ | `e` |
+| ĥħĤĦһНΗ | `h` |
+| ìíîïĩīĭįıÌÍÎÏĨĪĬĮİіІιΙ | `i` |
+| ĺļľŀłĹĻĽĿŁӏ | `l` |
+| òóôõöøōŏőÒÓÔÕÖØŌŎŐоОοΟσ | `o` |
+| рРρΡ | `p` |
+| ŕŗřŔŖŘ | `r` |
+| ѵѴν | `v` |
+| ŵŴԝԜѡ | `w` |
+| хХχΧ | `x` |
+| ýÿŷÝŸŶуУγΥ | `y` |

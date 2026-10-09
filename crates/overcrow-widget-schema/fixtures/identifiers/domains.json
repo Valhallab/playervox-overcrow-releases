@@ -1,0 +1,146 @@
+{
+  "cases": [
+    {
+      "domain": "raidforge.gg",
+      "handle": "raidforge",
+      "expected": "ok"
+    },
+    {
+      "domain": "eu.raidforge.gg",
+      "handle": "raidforge",
+      "expected": "ok"
+    },
+    {
+      "domain": "xn--nuit-toile-b7a.fr",
+      "handle": "raidforge",
+      "expected": "ok"
+    },
+    {
+      "domain": "a.co",
+      "handle": "raidforge",
+      "expected": "ok"
+    },
+    {
+      "domain": "gg",
+      "handle": "raidforge",
+      "expected": "syntax"
+    },
+    {
+      "domain": "Raidforge.gg",
+      "handle": "raidforge",
+      "expected": "syntax"
+    },
+    {
+      "domain": "raidforge.gg.",
+      "handle": "raidforge",
+      "expected": "syntax"
+    },
+    {
+      "domain": ".raidforge.gg",
+      "handle": "raidforge",
+      "expected": "syntax"
+    },
+    {
+      "domain": "raidforge..gg",
+      "handle": "raidforge",
+      "expected": "syntax"
+    },
+    {
+      "domain": "-raidforge.gg",
+      "handle": "raidforge",
+      "expected": "syntax"
+    },
+    {
+      "domain": "raidforge-.gg",
+      "handle": "raidforge",
+      "expected": "syntax"
+    },
+    {
+      "domain": "raidforge.123",
+      "handle": "raidforge",
+      "expected": "syntax"
+    },
+    {
+      "domain": "127.0.0.1",
+      "handle": "raidforge",
+      "expected": "syntax"
+    },
+    {
+      "domain": "raid_forge.gg",
+      "handle": "raidforge",
+      "expected": "syntax"
+    },
+    {
+      "domain": "raidforge.gg:443",
+      "handle": "raidforge",
+      "expected": "syntax"
+    },
+    {
+      "domain": "https://raidforge.gg",
+      "handle": "raidforge",
+      "expected": "syntax"
+    },
+    {
+      "domain": "a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.com",
+      "handle": "raidforge",
+      "expected": "syntax"
+    },
+    {
+      "domain": "playervox.com",
+      "handle": "playervox",
+      "expected": "ok"
+    },
+    {
+      "domain": "overcrow.playervox.com",
+      "handle": "playervox",
+      "expected": "ok"
+    },
+    {
+      "domain": "playervox.com",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "domain": "eu.playervox.com",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "domain": "myplayervox.com",
+      "handle": "raidforge",
+      "expected": "ok"
+    }
+  ],
+  "overlaps": [
+    {
+      "a": "raidforge.gg",
+      "b": "raidforge.gg",
+      "overlap": true
+    },
+    {
+      "a": "eu.raidforge.gg",
+      "b": "raidforge.gg",
+      "overlap": true
+    },
+    {
+      "a": "raidforge.gg",
+      "b": "eu.raidforge.gg",
+      "overlap": true
+    },
+    {
+      "a": "myraidforge.gg",
+      "b": "raidforge.gg",
+      "overlap": false
+    },
+    {
+      "a": "raidforge.gg",
+      "b": "raidforge.com",
+      "overlap": false
+    },
+    {
+      "a": "a.raidforge.gg",
+      "b": "b.raidforge.gg",
+      "overlap": false
+    }
+  ]
+}
