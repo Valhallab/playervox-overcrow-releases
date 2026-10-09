@@ -390,7 +390,7 @@ hasard sont réels.
 `overcrow-widget-headless` est le code d’OverCrow lui-même, sans fenêtre :
 il valide le paquet comme le fait l’overlay et exécute la logique du widget
 dans le même sandbox. `overcrow-widget test` exécute la version que la CLI
-épingle, 0.6.0-beta.1, et affiche sa version et son SHA-256. Sans le
+épingle, 0.6.0-beta.2, et affiche sa version et son SHA-256. Sans le
 sandbox du système d’exploitation, le runtime refuse de s’exécuter et le
 dit ; la commande de test se termine alors avec le code 2.
 
@@ -402,8 +402,8 @@ ensuite dans le cache de la CLI :
 
 | Plateforme | Chemin |
 | --- | --- |
-| Linux | `~/.cache/overcrow-widget/runtime/0.6.0-beta.1/` (`$XDG_CACHE_HOME` au lieu de `~/.cache` s’il est défini) |
-| Windows | `%LOCALAPPDATA%\overcrow-widget\runtime\0.6.0-beta.1\` |
+| Linux | `~/.cache/overcrow-widget/runtime/0.6.0-beta.2/` (`$XDG_CACHE_HOME` au lieu de `~/.cache` s’il est défini) |
+| Windows | `%LOCALAPPDATA%\overcrow-widget\runtime\0.6.0-beta.2\` |
 
 Pour travailler hors ligne, placez-y vous-même le runtime du ZIP des
 outils créateurs (exécutable sous Linux) : `test` le trouve et ne
