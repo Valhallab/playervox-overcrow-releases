@@ -1,0 +1,54 @@
+{
+  "name": "@overcrow/mcp",
+  "version": "0.1.0",
+  "description": "MCP server that lets an AI assistant create, check, test, audit and package PlayerVox OverCrow widgets.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "overcrow-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "npm-shrinkwrap.json"
+  ],
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Valhallab/playervox-overcrow-releases.git",
+    "directory": "mcp"
+  },
+  "homepage": "https://overcrow.playervox.com/docs/en/ai/",
+  "keywords": [
+    "overcrow",
+    "widget",
+    "mcp",
+    "model-context-protocol"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p test/tsconfig.json --noEmit",
+    "lint": "biome check . && node scripts/lint-security.mjs",
+    "test": "node --test --test-concurrency=2 \"test/*.test.mjs\"",
+    "licenses": "node scripts/check-licenses.mjs",
+    "pack:check": "node scripts/pack-check.mjs",
+    "prepack": "node scripts/build.mjs",
+    "prepublishOnly": "node scripts/pack-check.mjs --release"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.3.1",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "@modelcontextprotocol/client": "2.3.1",
+    "@types/node": "22.20.5",
+    "typescript": "6.0.3"
+  }
+}

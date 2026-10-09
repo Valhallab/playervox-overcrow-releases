@@ -25,9 +25,10 @@ node_modules/
 !published/marketplace/v1/**/*.ocpkg
 !crates/overcrow-widget-schema/fixtures/**/*.ocpkg
 
-# SDK build output and packed tarballs.
+# SDK and MCP server build output and packed tarballs.
 sdk/dist/
 sdk/build/
+mcp/dist/
 *.tgz
 
 # Actual and diff images of failed widget tests (overcrow-widget test).
