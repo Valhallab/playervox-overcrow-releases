@@ -4,33 +4,33 @@
     "channel": "beta",
     "platforms": {
       "linux-arch-x64": {
-        "name": "overcrow-bin-0.5.1beta1-1-x86_64.pkg.tar.zst",
-        "sha256": "0175e6a7d793488b6afcaf4368003fc923e607d8991a842d2ad9972ed742eb02",
-        "size": 24879446,
-        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.5.1-beta.1/overcrow-bin-0.5.1beta1-1-x86_64.pkg.tar.zst"
+        "name": "overcrow-bin-0.6.0beta1-1-x86_64.pkg.tar.zst",
+        "sha256": "605538992b5ec8035b47410d04262d7258e87edec9aabae4cef08f3f5aee8929",
+        "size": 28365750,
+        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.6.0-beta.1/overcrow-bin-0.6.0beta1-1-x86_64.pkg.tar.zst"
       },
       "linux-deb-x64": {
-        "name": "overcrow_0.5.1.beta.1-1_amd64.deb",
-        "sha256": "24fbe650b1e346b91911a911b6ac0ca04dd0cb69d6882667a5166d4d0fdbcfbf",
-        "size": 12459988,
-        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.5.1-beta.1/overcrow_0.5.1.beta.1-1_amd64.deb"
+        "name": "overcrow_0.6.0.beta.1-1_amd64.deb",
+        "sha256": "7af0b6b3ccb5d3668b75369843e6966ee91ebf35d1718546ada549a5da4174ca",
+        "size": 16534572,
+        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.6.0-beta.1/overcrow_0.6.0.beta.1-1_amd64.deb"
       },
       "linux-rpm-x64": {
-        "name": "overcrow-0.5.1.beta.1-1.fc43.x86_64.rpm",
-        "sha256": "a6ef4163866a7f636c48899e7e96c15e892483da34e9ca85f2325c4f12fd2159",
-        "size": 17188263,
-        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.5.1-beta.1/overcrow-0.5.1.beta.1-1.fc43.x86_64.rpm"
+        "name": "overcrow-0.6.0.beta.1-1.fc43.x86_64.rpm",
+        "sha256": "a2919e0826672c46be828f56e0fd6483a6615e8732ff50f63e670bcedc8b5e15",
+        "size": 20922539,
+        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.6.0-beta.1/overcrow-0.6.0.beta.1-1.fc43.x86_64.rpm"
       },
       "windows-x64": {
-        "name": "OverCrow-0.5.1-beta.1-windows-x64-setup.exe",
-        "sha256": "6d7c7ab8a1cd3b3685ebfef6969d504fceabeab6ad87d7e1fbb0ac1df0273a6d",
-        "size": 13860371,
-        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.5.1-beta.1/OverCrow-0.5.1-beta.1-windows-x64-setup.exe"
+        "name": "OverCrow-0.6.0-beta.1-windows-x64-setup.exe",
+        "sha256": "970081b317cca49c43c613ddc4d8d1086fc2af952bc6caea0460397227295f82",
+        "size": 21568818,
+        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.6.0-beta.1/OverCrow-0.6.0-beta.1-windows-x64-setup.exe"
       }
     },
     "schemaVersion": 1,
-    "sourceCommit": "73b94103d09610675f9eca5453e103f619273bb8",
-    "version": "0.5.1-beta.1"
+    "sourceCommit": "1274d7f31fa49316e704d64e52d4da5d7c2d3f77",
+    "version": "0.6.0-beta.1"
   },
   "schemaVersion": 1
 }
