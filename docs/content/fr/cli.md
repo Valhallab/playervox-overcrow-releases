@@ -99,7 +99,7 @@ dans `node_modules` dont la version diffère de celle que l’outil embarque.
 | `logic.ts` ou `logic.js` | [La logique](logic.md), un seul module ; regroupée avec le SDK dans `logic.js`. | regroupé |
 | `locales/en.json`, `locales/fr.json` | [Les messages](logic.md#messages) ; les deux fichiers ou aucun, avec les mêmes clés. | oui |
 | `LICENSE` | Le texte de la licence du paquet. Les templates partent de la licence MIT ; choisissez la vôtre. | oui |
-| `assets/` | Images PNG, JPEG ou WebP ; facultatif. | oui |
+| `assets/` | Images PNG, JPEG ou WebP ; facultatif. Les fichiers cachés (`.DS_Store`) et ce que les outils créateurs n’envoient jamais (`dist/`…) sont ignorés, comme dans les [archives de sources](#archives-de-sources). | oui |
 | `package.json`, `tsconfig.json` | Outillage uniquement : TypeScript et les types du SDK. | non |
 | `listing.json` | Le texte de marketplace d’une [soumission](publishing.md#la-fiche) ; lu par `admit`. | non |
 | `tests/` | Les [scénarios](testing.md#scénarios) (`tests/<name>.scenario.json`), leurs images de référence (`tests/reference/`) et vos tests unitaires. `tests/output/` contient les images des exécutions en échec. | non |
@@ -323,7 +323,7 @@ jamais votre code ni `tsc` :
 
 | Code | Sévérité | Signification |
 | --- | --- | --- |
-| `admission.reserved_id` | erreur | Un ID `com.playervox.*`, réservé à PlayerVox. |
+| `admission.reserved_id` | erreur | Un ID `com.playervox.*`, réservé à PlayerVox ; sans `--publisher`, aussi un ID sous un pseudo réservé (`playervox.*`, `admin.*`…). |
 | `admission.placeholder_id` | erreur | Un ID d’exemple, sans `--publisher`. |
 | `admission.id_not_owned` | erreur | L’ID n’appartient pas à l’éditeur, ou, sans `--publisher`, ne peut appartenir à personne. |
 | `admission.listing_missing`, `admission.listing` | erreur | Pas de `listing.json`, ou un fichier qui enfreint les règles de la fiche. |

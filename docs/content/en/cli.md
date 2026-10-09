@@ -98,7 +98,7 @@ Keep the version the tool embeds (`overcrow-widget --version`).
 | `logic.ts` or `logic.js` | [The logic](logic.md), one module; bundled with the SDK into `logic.js`. | bundled |
 | `locales/en.json`, `locales/fr.json` | [Messages](logic.md#messages); both or neither, with the same keys. | yes |
 | `LICENSE` | The license text of the package. The templates start with MIT; choose your own. | yes |
-| `assets/` | PNG, JPEG or WebP images; optional. | yes |
+| `assets/` | PNG, JPEG or WebP images; optional. Hidden files (`.DS_Store`) and what the creator tools never send (`dist/`…) are skipped, as in [source archives](#source-archives). | yes |
 | `package.json`, `tsconfig.json` | Tooling only: TypeScript and the SDK types. | no |
 | `listing.json` | The marketplace text of a [submission](publishing.md#the-listing); read by `admit`. | no |
 | `tests/` | [Scenarios](testing.md#scenarios) (`tests/<name>.scenario.json`), their reference images (`tests/reference/`) and your unit tests. `tests/output/` holds the images of failed runs. | no |
@@ -310,7 +310,7 @@ never runs your code or `tsc`:
 
 | Code | Severity | Meaning |
 | --- | --- | --- |
-| `admission.reserved_id` | error | A `com.playervox.*` ID, reserved for PlayerVox. |
+| `admission.reserved_id` | error | A `com.playervox.*` ID, reserved for PlayerVox; without `--publisher`, also an ID under a reserved handle (`playervox.*`, `admin.*`…). |
 | `admission.placeholder_id` | error | An example ID, without `--publisher`. |
 | `admission.id_not_owned` | error | The ID does not belong to the publisher, or, without `--publisher`, cannot belong to any. |
 | `admission.listing_missing`, `admission.listing` | error | No `listing.json`, or one that breaks the listing's rules. |

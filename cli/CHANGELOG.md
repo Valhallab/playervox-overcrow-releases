@@ -12,7 +12,8 @@ widget's sources and the embedded SDK.
 - `admit` takes a ZIP of the widget folder (`admit lol-timers.zip`), as the
   creator space receives it, and admits it to the same package as the
   folder; a folder is read the same way, leaving out what the creator
-  tools never send. The archive is read and inflated in memory under strict rules
+  tools never send. `package`, `check`, `dev` and `test` skip the same
+  files under `assets/` (`.DS_Store`, `dist/`…). The archive is read and inflated in memory under strict rules
   (32 MiB, 64 MiB and 2,000 files uncompressed; no link, special file,
   unsafe or non-portable name, duplicate, encryption, ZIP64, comment,
   hidden byte, alternate name or abnormal compression ratio; every entry

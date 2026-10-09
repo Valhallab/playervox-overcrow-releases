@@ -181,6 +181,13 @@ pub fn io_failed(report: &Report) -> bool {
             .all(|diagnostic| diagnostic.code == "sources.read")
 }
 
+/// Whether the folder at `path` (from the root) is left out of the sources:
+/// `package` and `check` skip it in `assets/` too, so that they build what
+/// the creator space builds.
+pub fn left_out_folder(path: &str) -> bool {
+    ignored(&format!("{path}/x")).is_some_and(|(listed, _)| listed.ends_with('/'))
+}
+
 /// Reads sources; every refusal is a diagnostic in `report`.
 pub fn read(input: &Input, report: &mut Report) -> Option<Tree> {
     match input {
@@ -481,10 +488,12 @@ fn read_regular(path: &Path, limit: u64) -> std::io::Result<Option<Vec<u8>>> {
     use std::io::Read as _;
     let mut options = fs::OpenOptions::new();
     options.read(true);
+    // Neither a link nor a FIFO put in place after the walk: a FIFO would
+    // block the open without O_NONBLOCK, which changes nothing for a file.
     #[cfg(unix)]
     {
         use std::os::unix::fs::OpenOptionsExt as _;
-        options.custom_flags(libc::O_NOFOLLOW);
+        options.custom_flags(libc::O_NOFOLLOW | libc::O_NONBLOCK);
     }
     let file = options.open(path)?;
     if !file.metadata()?.is_file() {
@@ -743,5 +752,15 @@ mod tests {
         let mut hostile = Tree::default();
         hostile.files.insert("../escape".into(), b"x".to_vec());
         assert!(materialize(&hostile).is_err());
+    }
+
+    #[test]
+    fn left_out_folders_are_named_by_their_path() {
+        assert!(left_out_folder("assets/dist"));
+        assert!(left_out_folder("assets/.thumbnails"));
+        assert!(left_out_folder("node_modules"));
+        assert!(left_out_folder("tests/output"));
+        assert!(!left_out_folder("assets/icons"));
+        assert!(!left_out_folder("tests"));
     }
 }

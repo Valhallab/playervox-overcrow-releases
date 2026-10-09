@@ -188,6 +188,18 @@ fn an_archive_admits_to_the_same_package_as_its_folder() {
         );
     }
 
+    // `package` leaves out the same files: same package as `admit`.
+    let packaged = temporary.path().join("packaged.ocpkg");
+    let output = cli(&[
+        "package",
+        path(&root),
+        "--no-typecheck",
+        "--out",
+        path(&packaged),
+    ]);
+    assert!(output.status.success(), "{}", text(&output.stderr));
+    assert_eq!(fs::read(&packaged).expect("package"), expected);
+
     // The human report names the archive and what it left out.
     let archive = temporary.path().join("plain.zip");
     let output = cli(&["admit", path(&archive), "--publisher", "nova"]);
