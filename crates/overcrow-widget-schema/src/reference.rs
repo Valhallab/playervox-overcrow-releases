@@ -13,7 +13,7 @@ use crate::catalog_v2;
 use crate::compiled_view::{COMPONENT_FIELDS, NODE_KINDS, VIEW_FIELDS};
 use crate::icons::{ICON_CRATE, ICONS, LUCIDE_VERSION};
 use crate::identifiers::{
-    CONFUSABLE_LETTERS, DOMAIN_EXTENSIONS, PLAYERVOX_DOMAIN, PLAYERVOX_HANDLE,
+    CONFUSABLE_LETTERS, DOMAIN_EXTENSIONS, EXAMPLE_HANDLES, PLAYERVOX_DOMAIN, PLAYERVOX_HANDLE,
     RESERVED_HANDLE_WORDS, RESERVED_HANDLES, STYLIZED_LETTERS,
 };
 use crate::ipc::{
@@ -498,7 +498,7 @@ several match. `com.playervox` and `com.playervox.*` belong only to `{PLAYERVOX_
 through `{PLAYERVOX_DOMAIN}`, and only its widgets on those IDs may carry `built-in`. No two \
 publishers own equal or nested domains.\n\nCatalog readers check the grammar only. A new \
 publisher may not register a domain extension ({}) or a handle whose skeleton equals that of \
-a reserved handle ({}) or contains {}. The skeleton removes hyphens, reads `vv` as `w`, then \
+a reserved handle ({}), of an example handle ({}), or contains {}. The skeleton removes hyphens, reads `vv` as `w`, then \
 `0` as `o`, `1` and `i` as `l`, `3` as `e`, `4` as `a`, `5` as `s`, `7` as `t` and `8` as \
 `b`. The same words may not appear in the skeleton of another publisher's displayed name, \
 read as ASCII letters and digits: fullwidth forms fold to ASCII, the look-alikes below to their \
@@ -507,6 +507,7 @@ except `™`. Human review covers the look-alikes no table lists.\n\n| Look-alik
 | --- | --- |\n",
         code_list(DOMAIN_EXTENSIONS),
         code_list(RESERVED_HANDLES),
+        code_list(EXAMPLE_HANDLES),
         code_list(RESERVED_HANDLE_WORDS),
         STYLIZED_LETTERS
             .iter()

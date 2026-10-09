@@ -79,7 +79,7 @@ values it fills in. A manifest with permissions and a menu:
 | --- | --- | --- | --- |
 | `schemaVersion` | integer 1 to 1 | yes | Manifest document version. |
 | `apiVersion` | integer 1 to 1 | yes | Widget API version; selects this schema. |
-| `id` | `widget ID` | yes | Reverse-DNS ID, from 3 bytes to 128 bytes: at least two dot-separated segments of `[a-z0-9-]`, each at most 63 bytes and not starting or ending with `-`. `com.playervox` and `com.playervox.*` are reserved for packages signed by PlayerVox. |
+| `id` | `widget ID` | yes | Widget ID, from 3 bytes to 128 bytes: at least two dot-separated segments of `[a-z0-9-]`, each at most 63 bytes and not starting or ending with `-`; `<handle>.<name>` with the publisher's handle, or a domain the publisher verified, reversed, then a name. `com.playervox` and `com.playervox.*` are reserved for packages signed by PlayerVox. |
 | `version` | `version` | yes | SemVer 2.0.0 `MAJOR.MINOR.PATCH[-PRERELEASE]` in canonical form, at most 64 bytes; build metadata is rejected. |
 | `name` | `WidgetName` | yes | Localized widget name shown by the host. |
 | `sizing` | `Sizing` | yes | Size and fit rules applied by the widget's frame. |
@@ -92,9 +92,13 @@ values it fills in. A manifest with permissions and a menu:
 ### Identity and version
 
 - **`id`** is the widget's identity everywhere: in the catalog, in the
-  user's profile, in its storage. Choose a reverse-DNS ID under a domain you
-  control and keep it. IDs under `com.playervox` are reserved for widgets
-  published by PlayerVox.
+  user's profile, in its storage. It is `<handle>.<name>`, your publisher
+  handle in the OverCrow creator space and a name (`nova.lol-timers`), or,
+  once you verified a domain, that domain reversed and a name
+  (`gg.nova.lol-timers`). An ID is final: it is never given to another
+  widget, even after yours is removed. `nova`, `example`, `yourhandle` and
+  `yourname` are example handles that nobody can publish under, and IDs
+  under `com.playervox` are reserved for widgets published by PlayerVox.
 - **`version`** is a semantic version. A published version never changes:
   any change to a published widget is a new, higher version.
 - **`schemaVersion`** and **`apiVersion`** are both `1`.

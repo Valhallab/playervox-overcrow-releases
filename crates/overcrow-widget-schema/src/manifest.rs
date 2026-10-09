@@ -50,7 +50,7 @@ pub const MANIFEST_FIELDS: &[Field] = &[
     Field::required(
         "id",
         ValueType::Record("widget ID"),
-        "Reverse-DNS ID, `MIN_WIDGET_ID_BYTES`..=`MAX_WIDGET_ID_BYTES`: at least two dot-separated segments of `[a-z0-9-]`, each at most `MAX_DNS_LABEL_BYTES` and not starting or ending with `-`. `com.playervox` and `com.playervox.*` are reserved for packages signed by PlayerVox.",
+        "Widget ID, `MIN_WIDGET_ID_BYTES`..=`MAX_WIDGET_ID_BYTES`: at least two dot-separated segments of `[a-z0-9-]`, each at most `MAX_DNS_LABEL_BYTES` and not starting or ending with `-`; `<handle>.<name>` with the publisher's handle, or a domain the publisher verified, reversed, then a name. `com.playervox` and `com.playervox.*` are reserved for packages signed by PlayerVox.",
     ),
     Field::required(
         "version",
@@ -345,7 +345,8 @@ fn validate_requires(requires: &Value) -> Result<BTreeSet<&'static str>, Manifes
     Ok(features)
 }
 
-/// Reverse-DNS widget ID, the grammar of the Web runtime kept unchanged.
+/// The widget ID grammar of the Web runtime, kept unchanged: dot-separated
+/// labels of `[a-z0-9-]`.
 pub fn valid_widget_id(id: &str) -> bool {
     (MIN_WIDGET_ID_BYTES.value..=MAX_WIDGET_ID_BYTES.value).contains(&(id.len() as u64))
         && id.split('.').count() >= 2
