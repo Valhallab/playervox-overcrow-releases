@@ -14,11 +14,11 @@ Each file is one JSON object; every string is compared exactly.
 
 - `registration`: the result of `validate_handle`, what a new publisher may
   register: `ok`, or `length`, `characters`, `hyphen`, `domain_extension`,
-  `reserved`, checked in that order. `reserved` covers the listed handles
-  and any handle whose skeleton contains `playervox`, `overcrow` or
-  `valhallab`; the skeleton removes hyphens, replaces `vv` with `w`, then
-  maps `0`→`o`, `1` and `i`→`l`, `3`→`e`, `4`→`a`, `5`→`s`, `7`→`t`,
-  `8`→`b` (the words are folded the same way).
+  `reserved`, checked in that order. `reserved` covers any handle whose
+  skeleton equals the skeleton of a listed handle or contains `playervox`,
+  `overcrow` or `valhallab`. The skeleton removes hyphens, replaces `vv`
+  with `w`, then maps `0`→`o`, `1` and `i`→`l`, `3`→`e`, `4`→`a`, `5`→`s`,
+  `7`→`t`, `8`→`b`; listed handles and words are folded the same way.
 - `catalog`: the result of `handle_syntax`, the grammar a catalog reader
   checks; reserved names and domain extensions pass it.
 
@@ -40,5 +40,6 @@ Each file is one JSON object; every string is compared exactly.
 - `handle`: a two-segment ID `<handle>.<name>`;
 - `domain`: an ID of at least three segments under the reverse of a domain of
   the publisher, named by `domain` (the longest match);
-- `not_owned`, `reserved` (`com.playervox` or `com.playervox.*` for another
-  publisher than `playervox`) or `invalid_id` (not a widget ID).
+- `not_owned` (a domain outside the grammar owns nothing), `reserved`
+  (`com.playervox` or `com.playervox.*` for another publisher than
+  `playervox`) or `invalid_id` (not a widget ID).

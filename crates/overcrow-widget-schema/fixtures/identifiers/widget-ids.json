@@ -175,6 +175,30 @@
         "raidforge.gg"
       ],
       "expected": "invalid_id"
+    },
+    {
+      "id": "com.example.timers",
+      "handle": "raidforge",
+      "domains": [
+        "com"
+      ],
+      "expected": "not_owned"
+    },
+    {
+      "id": "com.example.timers",
+      "handle": "raidforge",
+      "domains": [
+        "gg."
+      ],
+      "expected": "not_owned"
+    },
+    {
+      "id": "com.example.timers",
+      "handle": "raidforge",
+      "domains": [
+        "Raidforge.gg"
+      ],
+      "expected": "not_owned"
     }
   ]
 }

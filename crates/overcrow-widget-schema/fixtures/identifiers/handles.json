@@ -219,6 +219,26 @@
       "handle": "crow-over",
       "registration": "ok",
       "catalog": "ok"
+    },
+    {
+      "handle": "adm1n",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "ad-min",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "supp0rt",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "w-w-w",
+      "registration": "reserved",
+      "catalog": "ok"
     }
   ]
 }

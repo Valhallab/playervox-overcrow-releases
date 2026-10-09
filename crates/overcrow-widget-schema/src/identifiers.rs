@@ -182,7 +182,9 @@ pub fn validate_handle(handle: &str) -> Result<(), HandleError> {
         return Err(HandleError::DomainExtension);
     }
     let folded = confusable_skeleton(handle);
-    if RESERVED_HANDLES.contains(&handle)
+    if RESERVED_HANDLES
+        .iter()
+        .any(|reserved| confusable_skeleton(reserved) == folded)
         || RESERVED_HANDLE_WORDS
             .iter()
             .any(|word| folded.contains(&confusable_skeleton(word)))
@@ -273,7 +275,8 @@ pub fn domains_overlap(a: &str, b: &str) -> bool {
 }
 
 /// Whether `id` belongs to the publisher `handle` owning `domains`. Several
-/// matching domains of the same publisher name the longest one.
+/// matching domains of the same publisher name the longest one; a domain
+/// outside the grammar owns nothing.
 pub fn id_owner<'a>(
     id: &str,
     handle: &str,
@@ -295,8 +298,10 @@ pub fn id_owner<'a>(
     domains
         .iter()
         .filter(|domain| {
-            id.strip_prefix(&reverse_domain(domain))
-                .is_some_and(|rest| rest.starts_with('.'))
+            domain_syntax(domain).is_ok()
+                && id
+                    .strip_prefix(&reverse_domain(domain))
+                    .is_some_and(|rest| rest.starts_with('.'))
         })
         .max_by_key(|domain| domain.len())
         .map(|domain| Owner::Domain(domain.as_str()))
@@ -349,6 +354,10 @@ mod tests {
             ("overcrovv", HandleError::Reserved),
             ("va1ha11ab", HandleError::Reserved),
             ("vaihaiiab", HandleError::Reserved),
+            ("adm1n", HandleError::Reserved),
+            ("ad-min", HandleError::Reserved),
+            ("supp0rt", HandleError::Reserved),
+            ("w-w-w", HandleError::Reserved),
             ("admin", HandleError::Reserved),
             ("www", HandleError::Reserved),
         ] {
@@ -463,6 +472,20 @@ mod tests {
             id_owner("playervox.clock", "playervox", &playervox),
             Ok(Owner::Handle)
         );
+        // Only domains of the grammar own anything.
+        for bogus in ["com", "", "gg.", "Raidforge.gg", "raidforge..gg"] {
+            let domains = vec![bogus.to_owned()];
+            assert_eq!(
+                id_owner("com.example.timers", "raidforge", &domains),
+                Err(OwnershipError::NotOwned),
+                "{bogus:?}"
+            );
+            assert_eq!(
+                id_owner("gg.raidforge.timers", "raidforge", &domains),
+                Err(OwnershipError::NotOwned),
+                "{bogus:?}"
+            );
+        }
         let lookalike = vec!["playervoxx.com".to_owned()];
         assert_eq!(
             id_owner("com.playervoxx.clock", "raidforge", &lookalike),
