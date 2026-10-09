@@ -12,6 +12,7 @@ import { after, test } from "node:test";
 import { Client } from "@modelcontextprotocol/client";
 import { StdioClientTransport } from "@modelcontextprotocol/client/stdio";
 import { startServer } from "./support/rpc.mjs";
+import { schemaErrors } from "./support/schema.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const bin = join(here, "..", "dist", "index.js");
@@ -35,6 +36,7 @@ const TOOLS = {
   check: [true, false, true, false],
   test: [false, false, true, false],
   update_reference_images: [false, true, true, false],
+  use_preview: [false, false, false, false],
   package: [false, false, true, false],
   inspect: [true, false, true, false],
   audit: [true, false, true, false],
@@ -235,5 +237,42 @@ test("2026-07-28 era with the official client: discover, tools, roots by input r
     assert.match(doc.contents[0].text, /MAX_TIMERS/);
   } finally {
     await client.close();
+  }
+});
+
+test("every structured result matches the tool's advertised output schema exactly", async () => {
+  const server = startServer([bin], { cwd: project });
+  try {
+    await server.initialize();
+    const { tools } = (await server.request("tools/list")).result;
+    const schemas = Object.fromEntries(tools.map((tool) => [tool.name, tool.outputSchema]));
+    const calls = [
+      ["status", {}],
+      ["list_templates", {}],
+      ["audit", { directory: "clock" }],
+      ["prepare_submission", { directory: "clock" }],
+      ["explain_permission", { name: "network" }],
+      ["explain_permission", { name: "media.read", locale: "fr" }],
+      ["explain_error", { code: "view.unknown_attribute" }],
+      ["explain_error", { code: "permission_denied" }],
+      ["explain_error", { code: "manifest.network_rule" }],
+      ["search_docs", { query: "timers hidden widget" }],
+      ["read_doc", { slug: "index" }],
+      ["read_doc", { slug: "services", section: "Errors", locale: "en" }],
+      ["read_example", {}],
+      ["read_example", { name: "warframe-market" }],
+      ["read_example", { name: "warframe-market", file: "manifest.json" }],
+    ];
+    for (const [name, args] of calls) {
+      const result = (await server.call(name, args)).result;
+      assert.equal(result.isError, undefined, `${name}: ${JSON.stringify(result).slice(0, 300)}`);
+      assert.deepEqual(
+        schemaErrors(result.structuredContent, schemas[name]),
+        [],
+        `${name} ${JSON.stringify(args)}`,
+      );
+    }
+  } finally {
+    await server.close();
   }
 });

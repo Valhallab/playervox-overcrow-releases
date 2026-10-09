@@ -41,7 +41,7 @@ const RULES = [
   {
     name: "file writes outside the tools cache",
     pattern: /\b(writeFile|writeFileSync|appendFile|createWriteStream|copyFile|rename|mkdtemp)\(/,
-    allowed: ["bootstrap/install.ts", "bootstrap/download.ts"],
+    allowed: ["bootstrap/install.ts", "bootstrap/download.ts", "tools/preview.ts"],
   },
   {
     name: "stdout logging",

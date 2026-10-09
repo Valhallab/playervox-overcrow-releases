@@ -224,7 +224,13 @@ export function registerProjectTools(env: ToolEnv): void {
             `The installed CLI uses @overcrow/sdk ${cliSdk} but this server pins ${pins.sdk.version}: update @overcrow/mcp.`,
           );
         }
-        const installed = await installPackages(target, pins, ctx.mcpReq.signal);
+        const checks = await installPackages(target, pins, ctx.mcpReq.signal);
+        // Exactly the advertised fields: clients check the output schema strictly.
+        const installed = checks.map(({ name, version, integrityMatches }) => ({
+          name,
+          version,
+          integrityMatches,
+        }));
         return ok(
           { directory: confinement.display(target), installed, next: "Run check." },
           `Installed @overcrow/sdk ${pins.sdk.version} and TypeScript ${pins.typescript.version}; their integrity matches the published packages.`,

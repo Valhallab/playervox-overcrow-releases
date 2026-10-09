@@ -5,11 +5,11 @@ import { basename } from "node:path";
 import { z } from "zod";
 import { auditWidget, type Finding } from "../audit/index.js";
 import { Cli } from "../cli.js";
+import { sourcesFingerprint } from "../fingerprint.js";
 import { limit } from "../content.js";
 import { cleanLine } from "../text.js";
 import { DESCRIPTIONS } from "../texts.js";
-import { ok, READ_ONLY, type ToolEnv, withRoots } from "./common.js";
-import { widgetDirectory } from "./build.js";
+import { ok, READ_ONLY, type ToolEnv, widgetDirectory, withRoots } from "./common.js";
 import { idProblem, WIDGET_ID } from "./project.js";
 
 interface ListingFacts {
@@ -242,10 +242,21 @@ export function registerAuditTools(env: ToolEnv): void {
                   .slice(0, 5)
                   .join(" "),
         });
+        const lastTest = session.lastTests.get(target);
+        const unchanged =
+          lastTest !== undefined && lastTest.fingerprint === (await sourcesFingerprint(target));
+        const passedRun =
+          unchanged && lastTest.complete && lastTest.failed === 0 && lastTest.passed > 0
+            ? lastTest
+            : undefined;
         checklist.push({
           item: "Tests pass",
-          status: "todo",
-          detail: "Run test: every scenario must pass with its reference images.",
+          status: passedRun ? "pass" : "todo",
+          detail: passedRun
+            ? `All ${passedRun.passed} scenarios passed at ${passedRun.at.toISOString().slice(11, 16)} UTC, and no source changed since.`
+            : lastTest && !unchanged
+              ? "The sources changed since the last test run: run test again."
+              : "Run test (every scenario, not one): each must pass with its reference images.",
         });
         checklist.push({
           item: "LICENSE",
@@ -262,10 +273,10 @@ export function registerAuditTools(env: ToolEnv): void {
           ? (audit.version as string)
           : "";
         const authority = review.length > 0 ? review.map(describeReview) : audit.authority;
-        const ready = checklist.every(
-          (entry) =>
-            entry.status === "pass" || (entry.item === "Tests pass" && entry.status === "todo"),
-        );
+        // Ready: nothing fails and the tests passed; a missing preview is advice only.
+        const ready =
+          checklist.every((entry) => entry.status !== "fail") &&
+          checklist.find((entry) => entry.item === "Tests pass")?.status === "pass";
         const title = `Add ${slug} ${version}`.trim();
         const body = [
           `Submits \`widgets/${slug}/\`: ${cleanLine(id, 128)} ${version}.`,

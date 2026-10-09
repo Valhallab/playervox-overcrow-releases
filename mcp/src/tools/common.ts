@@ -9,8 +9,9 @@ import type {
   ServerContext,
 } from "@modelcontextprotocol/server";
 import { CliError } from "../cli.js";
-import type { Confinement } from "../confine.js";
-import { ConfinementError } from "../confine.js";
+import { lstat } from "node:fs/promises";
+import { join } from "node:path";
+import { type Confinement, ConfinementError } from "../confine.js";
 import { NpmError } from "../npm.js";
 import { RunError } from "../run.js";
 import { type Session, SetupError } from "../session.js";
@@ -138,3 +139,16 @@ export const READ_ONLY = {
   idempotentHint: true,
   openWorldHint: false,
 } as const;
+
+/** A widget folder inside the project: it must hold a manifest.json. */
+export async function widgetDirectory(
+  confinement: Confinement,
+  directory: string,
+): Promise<string> {
+  const target = await confinement.resolve(directory, "directory");
+  const manifest = await lstat(join(target, "manifest.json")).catch(() => undefined);
+  if (!manifest?.isFile()) {
+    throw new ConfinementError(`${directory} is not a widget folder: it has no manifest.json.`);
+  }
+  return target;
+}

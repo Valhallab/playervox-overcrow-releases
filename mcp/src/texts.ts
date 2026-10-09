@@ -29,6 +29,8 @@ export const DESCRIPTIONS = {
   test: "Play the widget's test scenarios (tests/*.scenario.json) in the headless runtime. When an image differs, returns the reference image, the new image and their difference.",
   update_reference_images:
     "Replace the reference images of the test scenarios with what the widget draws now. Overwrites files: look at the differences with test first. Requires confirm: true.",
+  use_preview:
+    "Use a reference image of a test scenario as the widget's marketplace preview: copies it to assets/preview.png. Never replaces a file.",
   package: "Build the widget's package (.ocpkg) into its dist/ folder and give its size.",
   inspect:
     "Show what a widget package (.ocpkg) contains and what it is allowed to do, in plain words.",

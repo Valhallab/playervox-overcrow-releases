@@ -25,7 +25,14 @@ import { DOWNLOAD_HOSTS, type Pin, toolsUrl } from "./bootstrap/pin.js";
 import { ZipError } from "./bootstrap/zip.js";
 import { probeVersion } from "./cli.js";
 import { checkRoot, Confinement, ConfinementError, labelRoots, rootUriToPath } from "./confine.js";
-import { cacheRoot, homeDirectory, httpsProxy, type Platform, toolsPlatform } from "./env.js";
+import {
+  cacheRoot,
+  homeDirectory,
+  httpsProxy,
+  namedLocations,
+  type Platform,
+  toolsPlatform,
+} from "./env.js";
 import { Redactor } from "./text.js";
 
 export interface SessionOptions {
@@ -55,6 +62,11 @@ export class Session {
   private tools: InstalledTools | undefined;
   private sdkVersion: string | undefined;
   private installing: Promise<InstalledTools> | undefined;
+  /** The last test run of each widget folder, with the fingerprint of its sources then. */
+  readonly lastTests = new Map<
+    string,
+    { fingerprint: string; passed: number; failed: number; complete: boolean; at: Date }
+  >();
 
   constructor(readonly options: SessionOptions) {}
 
@@ -117,10 +129,13 @@ export class Session {
   /** Replaces the user's paths in text results. */
   redactor(confinement?: Confinement): Redactor {
     return new Redactor(
-      (confinement?.roots ?? []).map((root) => ({
-        path: root.path,
-        label: root.label === "." ? "<project>" : `<${root.label}>`,
-      })),
+      [
+        ...(confinement?.roots ?? []).map((root) => ({
+          path: root.path,
+          label: root.label === "." ? "<project>" : `<${root.label}>`,
+        })),
+        ...namedLocations(),
+      ],
       homeDirectory(),
     );
   }

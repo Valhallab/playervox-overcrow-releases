@@ -7,11 +7,21 @@ import type { ContentBlock } from "@modelcontextprotocol/server";
 import { z } from "zod";
 import { authoritySummary } from "../audit/index.js";
 import { Cli, type Diagnostic } from "../cli.js";
-import { type Confinement, ConfinementError } from "../confine.js";
+import type { Confinement } from "../confine.js";
+import { sourcesFingerprint } from "../fingerprint.js";
 import { explainError } from "../knowledge.js";
 import { boundList, clean, cleanLine } from "../text.js";
 import { DESCRIPTIONS } from "../texts.js";
-import { fail, ok, READ_ONLY, TOOLS_MISSING, type ToolEnv, withRoots } from "./common.js";
+import { registerPreviewTool } from "./preview.js";
+import {
+  fail,
+  ok,
+  READ_ONLY,
+  TOOLS_MISSING,
+  type ToolEnv,
+  widgetDirectory,
+  withRoots,
+} from "./common.js";
 
 const DIRECTORY = z
   .string()
@@ -28,19 +38,6 @@ const MAX_DIAGNOSTICS = 200;
 const MAX_IMAGE_BYTES = 1 << 20;
 const MAX_IMAGES_BYTES = 4 << 20;
 const MAX_IMAGE_SETS = 3;
-
-/** A widget folder inside the project: it must hold a manifest.json. */
-export async function widgetDirectory(
-  confinement: Confinement,
-  directory: string,
-): Promise<string> {
-  const target = await confinement.resolve(directory, "directory");
-  const manifest = await lstat(join(target, "manifest.json")).catch(() => undefined);
-  if (!manifest?.isFile()) {
-    throw new ConfinementError(`${directory} is not a widget folder: it has no manifest.json.`);
-  }
-  return target;
-}
 
 /**
  * Folders the CLI writes into: a link there could lead the write out of the
@@ -273,6 +270,16 @@ async function runTests(
     }
   }
   const failed = scenarios.filter((entry) => !entry.passed).length;
+  // Only a plain run counts for the submission: not an update of the references.
+  if (!update) {
+    env.session.lastTests.set(target, {
+      fingerprint: await sourcesFingerprint(target),
+      passed: scenarios.length - failed,
+      failed,
+      complete: scenario === undefined,
+      at: new Date(),
+    });
+  }
   return {
     target,
     structured: {
@@ -413,6 +420,8 @@ export function registerBuildTools(env: ToolEnv): void {
         );
       }),
   );
+
+  registerPreviewTool(env);
 
   server.registerTool(
     "package",

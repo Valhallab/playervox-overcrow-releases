@@ -5,10 +5,9 @@
 //
 //   npx -y @overcrow/mcp [--root <folder>]... [--tools-zip <file>]
 
-import { serveStdio } from "@modelcontextprotocol/server/stdio";
 import { shippedPin } from "./bootstrap/pin.js";
 import { stopAll } from "./run.js";
-import { createServer } from "./server.js";
+import { serve } from "./server.js";
 import { Session } from "./session.js";
 import { VERSION } from "./version.js";
 
@@ -66,9 +65,7 @@ const session = new Session({
   pin: shippedPin(),
   cwd: process.cwd(),
 });
-const handle = serveStdio(() => createServer(session), {
-  onerror: (error) => log(`protocol error: ${error.message}`),
-});
+const handle = serve(session, (error) => log(`protocol error: ${error.message}`));
 
 let stopping = false;
 function shutdown(): void {

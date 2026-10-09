@@ -132,6 +132,16 @@ export function childEnvironment(options: { network: boolean }): NodeJS.ProcessE
   return env;
 }
 
+/** Folders shown by name rather than by path in results. */
+export function namedLocations(): { path: string; label: string }[] {
+  const out: { path: string; label: string }[] = [];
+  const xdg = variable("XDG_CACHE_HOME");
+  if (xdg && isAbsolute(xdg)) out.push({ path: xdg, label: "$XDG_CACHE_HOME" });
+  const local = variable("LOCALAPPDATA");
+  if (local && isAbsolute(local)) out.push({ path: local, label: "%LOCALAPPDATA%" });
+  return out;
+}
+
 /** The user's home directory, for redaction and the root checks. */
 export function homeDirectory(): string {
   return variable("HOME") ?? variable("USERPROFILE") ?? homedir();

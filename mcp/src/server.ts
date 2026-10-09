@@ -3,6 +3,7 @@
 // shared.
 
 import { McpServer } from "@modelcontextprotocol/server";
+import { type StdioServerHandle, serveStdio } from "@modelcontextprotocol/server/stdio";
 import { registerPrompts } from "./prompts.js";
 import { registerResources } from "./resources.js";
 import type { Session } from "./session.js";
@@ -37,4 +38,12 @@ export function createServer(session: Session): McpServer {
     // The 2026-07-28 protocol has no such notification.
   }
   return server;
+}
+
+/**
+ * Serves `session` over this process's stdio, in the protocol era the
+ * client opens with (one instance per era, see serveStdio).
+ */
+export function serve(session: Session, onerror: (error: Error) => void): StdioServerHandle {
+  return serveStdio(() => createServer(session), { onerror });
 }
