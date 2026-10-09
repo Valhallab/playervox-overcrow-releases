@@ -5,6 +5,9 @@ soumission : créer un projet, modifier sa vue, son style et sa logique, le
 lancer dans OverCrow, le tester, l’empaqueter et le soumettre. Chaque étape
 renvoie à la page qui la traite en détail.
 
+Pour travailler plutôt avec un assistant IA, ajoutez-lui le serveur MCP
+d’OverCrow : voir [MCP](mcp.md).
+
 ## 1. Installer les outils
 
 - **`overcrow-widget`**, la CLI des widgets, un seul binaire pour Linux et

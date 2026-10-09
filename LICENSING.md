@@ -4,7 +4,7 @@ Copyright (c) 2026 Valhallab SASU.
 
 This repository's public sources are open source under the
 [MIT License](LICENSE): the widget contract crates (`crates/`), the widget
-CLI (`cli/`), the templates, the documentation, the CI drivers, the
+CLI (`cli/`), the MCP server for creators (`mcp/`), the templates, the documentation, the CI drivers, the
 reference widgets (`widgets/`) and the sources they share
 (`widgets-shared/`). The exception is `@overcrow/sdk` (`sdk/`),
 which is under the [MIT No Attribution License](sdk/LICENSE) (MIT-0). These

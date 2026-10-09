@@ -154,6 +154,11 @@ weaken_cli() {
 }
 expect_refusal "$fork" "$(candidate tool weaken_cli)" \
     'pull-request trusted-path policy rejected' 'an admission tool change'
+weaken_mcp() {
+    printf '%s\n' '// weakened server' >>"$repository/mcp/src/server.ts"
+}
+expect_refusal "$fork" "$(candidate mcp weaken_mcp)" \
+    'pull-request trusted-path policy rejected' 'an MCP server change'
 
 # The root .gitattributes is a trusted path; a nested one still reaches git
 # archive and must be caught by the snapshot comparison.

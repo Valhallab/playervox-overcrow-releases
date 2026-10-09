@@ -76,6 +76,12 @@
       "label": { "en": "Development channel", "fr": "Canal de développement" }
     },
     {
+      "slug": "mcp",
+      "file": "mcp.md",
+      "group": "tools",
+      "label": { "en": "MCP", "fr": "MCP" }
+    },
+    {
       "slug": "reference",
       "file": "reference.md",
       "group": "reference",

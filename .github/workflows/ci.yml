@@ -99,7 +99,7 @@ jobs:
           # This coarse short-circuit saves setup time. The materialized-base
           # admission below remains the authoritative policy gate.
           if ! git -c diff.external= diff --quiet --no-ext-diff \
-              "$BASE_SHA" "$HEAD_SHA" -- .github scripts tests cli sdk \
+              "$BASE_SHA" "$HEAD_SHA" -- .github scripts tests cli sdk mcp \
               crates Cargo.toml Cargo.lock rust-toolchain.toml rust-toolchain \
               .cargo rustfmt.toml .rustfmt.toml clippy.toml .clippy.toml \
               deny.toml .gitattributes .gitignore docs/widget-schema-v1.md \

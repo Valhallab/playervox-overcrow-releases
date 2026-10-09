@@ -16,6 +16,8 @@ for changed_path in "$@"; do
         # The admission tool is built from the reviewed base: the CLI and
         # the SDK it embeds in every bundle.
         cli | cli/* | sdk | sdk/*) reject ;;
+        # The MCP server for creators: published to npm from main.
+        mcp | mcp/*) reject ;;
         # The public widget contract and everything that builds or checks it.
         crates | crates/* | Cargo.toml | Cargo.lock | rust-toolchain.toml | \
             rust-toolchain | .cargo | .cargo/* | rustfmt.toml | .rustfmt.toml | \
