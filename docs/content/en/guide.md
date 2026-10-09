@@ -9,8 +9,8 @@ that covers it in full.
 
 - **`overcrow-widget`**, the widget CLI, one binary for Linux and Windows.
   See [installing the CLI](cli.md#installing).
-- **Node.js 22 or later**, so that `check` can type-check your logic with the
-  project's own TypeScript. The CLI checks and packages without it, but
+- **Node.js 22 or later** and npm, so that `check` can type-check your
+  logic with the project's own TypeScript and the SDK from npm. The CLI checks and packages without it, but
   warns that types were not checked.
 - **OverCrow**, to run the widget while you write it.
 
@@ -21,14 +21,18 @@ that covers it in full.
 ```sh
 overcrow-widget init my-counter --template counter
 cd my-counter
+npm install
 ```
+
+`npm install` brings TypeScript and `@overcrow/sdk` 1.0.0, named in the
+project's `package.json`.
 
 The templates are `blank`, `counter`, `list` and `chart`. The ID defaults to
 `com.example.<dir>`: pass `--id` with a reverse-DNS name you control
 (`com.playervox.*` is reserved). [Files of a project](cli.md#files-of-a-project)
 lists every file and says which ones are packaged;
-[the SDK types](cli.md#the-sdk-types) says how to install TypeScript and
-the SDK types into the project.
+[the SDK types](cli.md#the-sdk-types) says how to add the SDK to another
+project.
 
 ## 3. The view
 

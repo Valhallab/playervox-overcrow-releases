@@ -9,8 +9,8 @@ renvoie à la page qui la traite en détail.
 
 - **`overcrow-widget`**, la CLI des widgets, un seul binaire pour Linux et
   Windows. Voir [installer la CLI](cli.md#installation).
-- **Node.js 22 ou plus récent**, pour que `check` vérifie les types de votre
-  logique avec le TypeScript du projet. Sans lui, la CLI vérifie et
+- **Node.js 22 ou plus récent** et npm, pour que `check` vérifie les types
+  de votre logique avec le TypeScript du projet et le SDK de npm. Sans lui, la CLI vérifie et
   empaquette quand même, mais signale que les types n’ont pas été vérifiés.
 - **OverCrow**, pour lancer le widget pendant que vous l’écrivez.
 
@@ -22,15 +22,19 @@ manque.
 ```sh
 overcrow-widget init my-counter --template counter
 cd my-counter
+npm install
 ```
+
+`npm install` installe TypeScript et `@overcrow/sdk` 1.0.0, nommés dans le
+`package.json` du projet.
 
 Les templates sont `blank`, `counter`, `list` et `chart`. L’ID vaut par
 défaut `com.example.<dir>` : passez `--id` avec un nom DNS inversé que vous
 contrôlez (`com.playervox.*` est réservé).
 [Fichiers d’un projet](cli.md#fichiers-dun-projet) liste chaque fichier et
 indique lesquels sont empaquetés ;
-[les types du SDK](cli.md#les-types-du-sdk) explique comment installer
-TypeScript et les types du SDK dans le projet.
+[les types du SDK](cli.md#les-types-du-sdk) explique comment ajouter le SDK
+à un autre projet.
 
 ## 3. La vue
 

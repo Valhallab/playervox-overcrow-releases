@@ -6,6 +6,14 @@ menu d’options, les messages, les journaux et le formatage. Cette page liste
 tous les exports du paquet. [La logique](logic.md) et
 [Services et permissions](services.md) expliquent comment s’en servir.
 
+Le SDK est sur npm, et la commande ci-dessous l’ajoute à un projet. Un
+projet créé par `overcrow-widget init` le liste déjà : lancez-y
+`npm install`.
+
+```sh
+npm install --save-dev --save-exact @overcrow/sdk@1.0.0
+```
+
 <!-- source: widgets/clock/logic.ts -->
 ```ts
 import {
