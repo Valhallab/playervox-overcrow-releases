@@ -24,8 +24,9 @@ license and third-party notices. It embeds `@overcrow/sdk` 1.0.0.
   development channel and reload it on save; report what the setup has
   and lacks.
 - `test`: plays the project's scenarios in OverCrow's headless runtime and
-  compares their images. Pass the runtime with `--runtime`; the binaries
-  are attached to the same release.
+  compares their images. It pins the headless runtime 0.6.0-beta.1, attached
+  to the same release: put it in the CLI's cache and `--runtime` is
+  optional. The CLI does not download it.
 - `admit`: the marketplace's static admission of a submission.
 - Diagnostics with stable codes, `--format json`, and the website page that
   explains each one.
