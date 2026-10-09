@@ -14,7 +14,7 @@ overcrow-widget package
 overcrow-widget inspect dist/com.example.my-widget-0.1.0.ocpkg
 overcrow-widget doctor
 overcrow-widget dev
-overcrow-widget test --runtime path/to/overcrow-widget-headless
+overcrow-widget test
 ```
 
 | Commande | Rôle |
@@ -33,17 +33,33 @@ elle utilise le dossier courant.
 
 ## Installation
 
-L’outil se compile avec Rust depuis le
+Chaque [release d’OverCrow](https://github.com/Valhallab/playervox-overcrow-releases/releases)
+contient l’outil pour Linux et Windows x86-64, avec sa licence, ses notices
+tierces et le `SHA256SUMS` de la release :
+
+| Plateforme | Fichier |
+| --- | --- |
+| Linux | `overcrow-widget-VERSION-linux-x86_64` |
+| Windows | `overcrow-widget-VERSION-windows-x86_64.exe` |
+
+Vérifiez le fichier avec `SHA256SUMS`, renommez-le `overcrow-widget`
+(`overcrow-widget.exe` sous Windows), rendez-le exécutable sous Linux
+(`chmod +x`) et placez-le dans votre `PATH`. Il n’a besoin de rien d’autre
+pour vérifier et empaqueter un widget. `overcrow-widget --version` donne sa
+version et celle du SDK qu’il embarque.
+
+```sh
+sha256sum --check --ignore-missing SHA256SUMS
+```
+
+L’outil se compile aussi avec Rust depuis le
 [dépôt public](https://github.com/Valhallab/playervox-overcrow-releases) ;
-le dépôt épingle la toolchain nécessaire.
+le dépôt épingle la toolchain nécessaire. Le programme est alors
+`target/dist/overcrow-widget`.
 
 ```sh
 cargo build -p overcrow-widget-cli --profile dist --locked
 ```
-
-Le programme est `target/dist/overcrow-widget` (`overcrow-widget.exe` sous
-Windows) : placez-le dans votre `PATH`. Il n’a besoin de rien d’autre pour
-vérifier et empaqueter un widget.
 
 ### Les types du SDK
 
@@ -53,7 +69,8 @@ il signale par un avertissement que les types n’ont pas été vérifiés
 (`typecheck.skipped`) et continue. Le SDK lui-même est inclus dans l’outil :
 l’empaquetage ne dépend donc jamais de `node_modules`.
 
-Les types de `@overcrow/sdk` viennent du même dépôt. Compilez le SDK une
+`@overcrow/sdk` arrivera plus tard sur npm ; d’ici là, ses types viennent
+du même dépôt. Compilez le SDK une
 fois, puis installez-le dans votre projet depuis ce dossier, ainsi que
 TypeScript :
 
@@ -202,9 +219,9 @@ pour cela, et ce que signifient chaque état et chaque refus.
 ## test
 
 ```sh
-overcrow-widget test --runtime path/to/overcrow-widget-headless
-overcrow-widget test --runtime path/to/overcrow-widget-headless --scenario example
-overcrow-widget test --runtime path/to/overcrow-widget-headless --update
+overcrow-widget test
+overcrow-widget test --scenario example
+overcrow-widget test --update
 ```
 
 Joue les scénarios de `tests/` dans le runtime headless d’OverCrow et
@@ -214,15 +231,16 @@ compare les images qu’il rend avec les références :
 2. elle lit chaque `tests/<name>.scenario.json` et le vérifie par rapport au
    manifeste avant toute exécution ; une erreur dans un scénario donne un
    diagnostic `test.scenario` dans son fichier ;
-3. elle exécute chaque scénario dans le runtime donné par `--runtime`, et
-   affiche la version et le SHA-256 de ce runtime ;
+3. elle exécute chaque scénario dans le [runtime headless](testing.md#le-runtime-headless)
+   que l’outil épingle, ou celui donné par `--runtime`, et affiche la
+   version et le SHA-256 de ce runtime ;
 4. elle compare chaque image capturée avec
    `tests/reference/<name>/<image>.png`. Une différence, un changement de
    taille ou une référence manquante fait échouer le scénario et écrit
    `tests/output/<name>/<image>.actual.png` et, pour une différence,
    `<image>.diff.png`.
 
-Options : `--runtime <path>` (le programme `overcrow-widget-headless`),
+Options : `--runtime <path>` (un autre programme `overcrow-widget-headless`),
 `--scenario <name>` (ce scénario seulement), `--update` (enregistre les
 images capturées comme références : examinez-les avant de les commiter),
 `--format json`, `--no-typecheck`.
