@@ -9,10 +9,11 @@ widget's sources and the embedded SDK.
 
 ## 1.0.0-beta.2
 
-Released in the creator tools ZIPs of OverCrow's next GitHub release,
-`overcrow-creator-tools-<version>-<platform>.zip`, beside the headless
-runtime it pins.
+Released in the creator tools ZIPs of OverCrow 0.6.0-beta.2's GitHub
+release, `overcrow-creator-tools-0.6.0-beta.2-<platform>.zip`, beside the
+headless runtime it pins.
 
+- It pins the headless runtime 0.6.0-beta.2, from the same release.
 - `test` downloads the pinned headless runtime when the cache does not
   hold it and `--runtime` is not given: from the creator tools ZIP of this
   platform in the OverCrow release that published it, keeping only the
