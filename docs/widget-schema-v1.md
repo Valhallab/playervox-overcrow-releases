@@ -46,6 +46,9 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MAX_LISTING_DESCRIPTION_BYTES` | 512 bytes | fixed | Marketplace description of one localization, as today. |
 | `MAX_AUTHOR_BYTES` | 128 bytes | fixed | Author shown in a listing, as today. |
 | `MAX_SPDX_LICENSE_BYTES` | 64 bytes | fixed | SPDX license expression of a listing, as today. |
+| `MIN_HANDLE_BYTES` | 3 bytes | fixed | Shortest publisher handle; it also keeps every two-letter country extension out of the handles. |
+| `MAX_HANDLE_BYTES` | 32 bytes | fixed | Longest publisher handle. |
+| `MAX_PUBLISHER_DOMAINS` | 8 | fixed | Domains under which one publisher owns widget IDs. |
 | `MAX_VIEW_ELEMENTS` | 4096 | fixed | Elements written in `view.ocml`, components included. |
 | `MAX_COMPONENTS` | 64 | fixed | Local components declared in one view. |
 | `MAX_EXPRESSION_BYTES` | 1 KiB | fixed | Source length of one `{expr}` template expression. |

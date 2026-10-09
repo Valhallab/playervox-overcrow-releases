@@ -1,0 +1,180 @@
+{
+  "cases": [
+    {
+      "id": "raidforge.timers",
+      "handle": "raidforge",
+      "domains": [
+        "raidforge.gg"
+      ],
+      "expected": "handle"
+    },
+    {
+      "id": "gg.raidforge.timers",
+      "handle": "raidforge",
+      "domains": [
+        "raidforge.gg"
+      ],
+      "expected": "domain",
+      "domain": "raidforge.gg"
+    },
+    {
+      "id": "gg.raidforge.raid.timers",
+      "handle": "raidforge",
+      "domains": [
+        "raidforge.gg"
+      ],
+      "expected": "domain",
+      "domain": "raidforge.gg"
+    },
+    {
+      "id": "gg.raidforge.eu.timers",
+      "handle": "raidforge",
+      "domains": [
+        "raidforge.gg",
+        "eu.raidforge.gg"
+      ],
+      "expected": "domain",
+      "domain": "eu.raidforge.gg"
+    },
+    {
+      "id": "raidforge.timers",
+      "handle": "raidforge",
+      "domains": [],
+      "expected": "handle"
+    },
+    {
+      "id": "other.timers",
+      "handle": "raidforge",
+      "domains": [
+        "raidforge.gg"
+      ],
+      "expected": "not_owned"
+    },
+    {
+      "id": "raidforge.raid.timers",
+      "handle": "raidforge",
+      "domains": [
+        "raidforge.gg"
+      ],
+      "expected": "not_owned"
+    },
+    {
+      "id": "gg.raidforge",
+      "handle": "raidforge",
+      "domains": [
+        "raidforge.gg"
+      ],
+      "expected": "not_owned"
+    },
+    {
+      "id": "gg.raidforgex.timers",
+      "handle": "raidforge",
+      "domains": [
+        "raidforge.gg"
+      ],
+      "expected": "not_owned"
+    },
+    {
+      "id": "gg.raidforge.timers",
+      "handle": "raidforge",
+      "domains": [],
+      "expected": "not_owned"
+    },
+    {
+      "id": "com.playervox.overcrow.clock",
+      "handle": "playervox",
+      "domains": [
+        "playervox.com"
+      ],
+      "expected": "domain",
+      "domain": "playervox.com"
+    },
+    {
+      "id": "com.playervox.clock",
+      "handle": "playervox",
+      "domains": [],
+      "expected": "not_owned"
+    },
+    {
+      "id": "com.playervox",
+      "handle": "playervox",
+      "domains": [
+        "playervox.com"
+      ],
+      "expected": "not_owned"
+    },
+    {
+      "id": "playervox.clock",
+      "handle": "playervox",
+      "domains": [
+        "playervox.com"
+      ],
+      "expected": "handle"
+    },
+    {
+      "id": "com.playervox.clock",
+      "handle": "raidforge",
+      "domains": [
+        "playervox.com"
+      ],
+      "expected": "reserved"
+    },
+    {
+      "id": "com.playervox",
+      "handle": "raidforge",
+      "domains": [
+        "raidforge.gg"
+      ],
+      "expected": "reserved"
+    },
+    {
+      "id": "com.playervoxx.clock",
+      "handle": "raidforge",
+      "domains": [
+        "playervoxx.com"
+      ],
+      "expected": "domain",
+      "domain": "playervoxx.com"
+    },
+    {
+      "id": "Raidforge.timers",
+      "handle": "raidforge",
+      "domains": [
+        "raidforge.gg"
+      ],
+      "expected": "invalid_id"
+    },
+    {
+      "id": "raidforge..timers",
+      "handle": "raidforge",
+      "domains": [
+        "raidforge.gg"
+      ],
+      "expected": "invalid_id"
+    },
+    {
+      "id": "timers",
+      "handle": "raidforge",
+      "domains": [
+        "raidforge.gg"
+      ],
+      "expected": "invalid_id"
+    },
+    {
+      "id": "raidforge.-timers",
+      "handle": "raidforge",
+      "domains": [
+        "raidforge.gg"
+      ],
+      "expected": "invalid_id"
+    },
+    {
+      "id": "raidforge.tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt",
+      "handle": "raidforge",
+      "domains": [
+        "raidforge.gg"
+      ],
+      "expected": "invalid_id"
+    }
+  ]
+}

@@ -247,6 +247,26 @@ pub const MAX_SPDX_LICENSE_BYTES: Limit = fixed(
     "SPDX license expression of a listing, as today.",
 );
 
+// Publishers and widget ID ownership (CR.1).
+pub const MIN_HANDLE_BYTES: Limit = fixed(
+    "MIN_HANDLE_BYTES",
+    3,
+    Unit::Bytes,
+    "Shortest publisher handle; it also keeps every two-letter country extension out of the handles.",
+);
+pub const MAX_HANDLE_BYTES: Limit = fixed(
+    "MAX_HANDLE_BYTES",
+    32,
+    Unit::Bytes,
+    "Longest publisher handle.",
+);
+pub const MAX_PUBLISHER_DOMAINS: Limit = fixed(
+    "MAX_PUBLISHER_DOMAINS",
+    8,
+    Unit::Count,
+    "Domains under which one publisher owns widget IDs.",
+);
+
 // View source and templates.
 pub const MAX_VIEW_ELEMENTS: Limit = fixed(
     "MAX_VIEW_ELEMENTS",
@@ -1086,6 +1106,9 @@ pub const ALL: &[&Limit] = &[
     &MAX_LISTING_DESCRIPTION_BYTES,
     &MAX_AUTHOR_BYTES,
     &MAX_SPDX_LICENSE_BYTES,
+    &MIN_HANDLE_BYTES,
+    &MAX_HANDLE_BYTES,
+    &MAX_PUBLISHER_DOMAINS,
     &MAX_VIEW_ELEMENTS,
     &MAX_COMPONENTS,
     &MAX_EXPRESSION_BYTES,
@@ -1284,4 +1307,7 @@ const _: () = {
     assert!(MIN_WIDGET_ID_BYTES.value < MAX_WIDGET_ID_BYTES.value);
     assert!(MAX_DNS_LABEL_BYTES.value < MAX_DNS_NAME_BYTES.value);
     assert!(MAX_WIDGET_ID_BYTES.value + MAX_VERSION_BYTES.value < MAX_CATALOG_URL_BYTES.value);
+    // A handle plus a one-letter name fits a widget ID.
+    assert!(MIN_HANDLE_BYTES.value < MAX_HANDLE_BYTES.value);
+    assert!(MAX_HANDLE_BYTES.value + 2 <= MAX_WIDGET_ID_BYTES.value);
 };
