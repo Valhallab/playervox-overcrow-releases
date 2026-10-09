@@ -1,0 +1,3 @@
+[mcp_servers.overcrow]
+command = "npx"
+args = ["-y", "@overcrow/mcp"]

@@ -67,6 +67,23 @@ node scripts/prepare-widgets.mjs
 node --test --test-concurrency=2 widgets/*/tests/*.test.mjs
 ```
 
+## MCP server
+
+The `mcp` workflow lints the server (Biome and the security rules of
+`mcp/scripts/lint-security.mjs`), checks the licenses of its dependencies
+against `deny.toml`, builds, type-checks and tests it on Linux and Windows
+(both protocol eras, the pinned download against a local HTTPS server, the
+audit on the reference widgets), and requires a reproducible npm package;
+`mcp-publish` publishes it ([its README](../mcp/README.md)):
+
+```sh
+cd mcp
+npm ci --ignore-scripts
+npm run lint && npm run licenses && npm run build && npm run typecheck
+npm test
+npm run pack:check
+```
+
 ## Creator documentation
 
 The creator documentation (`docs/content/`) is checked by the `sdk-cli`

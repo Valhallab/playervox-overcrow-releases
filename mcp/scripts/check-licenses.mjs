@@ -26,7 +26,9 @@ function accepted(expression) {
   if (typeof expression !== "string" || expression.includes("(")) return false;
   return expression
     .split(/\s+OR\s+/)
-    .some((alternative) => alternative.split(/\s+AND\s+/).every((license) => allowed.has(license.trim())));
+    .some((alternative) =>
+      alternative.split(/\s+AND\s+/).every((license) => allowed.has(license.trim())),
+    );
 }
 
 const lock = JSON.parse(readFileSync(join(root, "npm-shrinkwrap.json"), "utf8"));
@@ -35,19 +37,31 @@ const runtime = [];
 for (const [path, entry] of Object.entries(lock.packages)) {
   if (path === "") continue;
   const name = path.replace(/^.*node_modules\//, "");
-  if (!accepted(entry.license)) problems.push(`${name} ${entry.version}: license ${entry.license ?? "unknown"} is not accepted`);
+  if (!accepted(entry.license))
+    problems.push(
+      `${name} ${entry.version}: license ${entry.license ?? "unknown"} is not accepted`,
+    );
   if (!entry.dev) runtime.push(name);
-  if (entry.hasInstallScript && !entry.dev) problems.push(`${name}: runtime package with an install script`);
-  if (!entry.resolved?.startsWith("https://registry.npmjs.org/") || !entry.integrity?.startsWith("sha512-")) {
+  if (entry.hasInstallScript && !entry.dev)
+    problems.push(`${name}: runtime package with an install script`);
+  if (
+    !entry.resolved?.startsWith("https://registry.npmjs.org/") ||
+    !entry.integrity?.startsWith("sha512-")
+  ) {
     problems.push(`${name}: not resolved from registry.npmjs.org with an integrity`);
   }
 }
 const expected = Object.keys(RUNTIME).sort();
 if (JSON.stringify(runtime.sort()) !== JSON.stringify(expected)) {
-  problems.push(`runtime packages are ${runtime.join(", ")}; reviewed list: ${expected.join(", ")}`);
+  problems.push(
+    `runtime packages are ${runtime.join(", ")}; reviewed list: ${expected.join(", ")}`,
+  );
 }
 const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
-for (const [name, range] of Object.entries({ ...manifest.dependencies, ...manifest.devDependencies })) {
+for (const [name, range] of Object.entries({
+  ...manifest.dependencies,
+  ...manifest.devDependencies,
+})) {
   if (!/^\d+\.\d+\.\d+$/.test(range)) problems.push(`${name}: version ${range} is not exact`);
 }
 if (manifest.scripts?.postinstall || manifest.scripts?.install || manifest.scripts?.preinstall) {

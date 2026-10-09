@@ -17,8 +17,16 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const source = join(root, "src");
 
 const RULES = [
-  { name: "child_process outside run.ts", pattern: /from "node:child_process"/, allowed: ["run.ts"] },
-  { name: "a shell", pattern: /shell:\s*true|\bexecSync\b|(?<![\w/.)])exec\(|\bexecFile\b/, allowed: [] },
+  {
+    name: "child_process outside run.ts",
+    pattern: /from "node:child_process"/,
+    allowed: ["run.ts"],
+  },
+  {
+    name: "a shell",
+    pattern: /shell:\s*true|\bexecSync\b|(?<![\w/.)])exec\(|\bexecFile\b/,
+    allowed: [],
+  },
   {
     name: "network modules outside download.ts",
     pattern: /from "node:(https?|net|tls|dgram|http2)"|\bfetch\(|\bWebSocket\b/,
@@ -35,7 +43,11 @@ const RULES = [
     pattern: /\b(writeFile|writeFileSync|appendFile|createWriteStream|copyFile|rename|mkdtemp)\(/,
     allowed: ["bootstrap/install.ts", "bootstrap/download.ts"],
   },
-  { name: "stdout logging", pattern: /console\.(log|info|warn|debug)\(|process\.stdout\.write/, allowed: ["index.ts"] },
+  {
+    name: "stdout logging",
+    pattern: /console\.(log|info|warn|debug)\(|process\.stdout\.write/,
+    allowed: ["index.ts"],
+  },
   { name: "eval", pattern: /\beval\(|new Function\(/, allowed: [] },
   { name: "the CLI's doctor or dev", pattern: /\["(doctor|dev)"/, allowed: [] },
   { name: "a plain-HTTP address", pattern: /["'`]http:\/\//, allowed: ["bootstrap/download.ts"] },

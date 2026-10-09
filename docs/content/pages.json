@@ -76,6 +76,12 @@
       "label": { "en": "Development channel", "fr": "Canal de développement" }
     },
     {
+      "slug": "ai",
+      "file": "ai.md",
+      "group": "tools",
+      "label": { "en": "Create with an AI", "fr": "Créer avec une IA" }
+    },
+    {
       "slug": "reference",
       "file": "reference.md",
       "group": "reference",

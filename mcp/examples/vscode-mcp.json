@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "overcrow": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@overcrow/mcp"]
+    }
+  }
+}

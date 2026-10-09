@@ -24,7 +24,7 @@ const cli =
   process.env.OVERCROW_WIDGET ??
   join(root, "target", "debug", process.platform === "win32" ? "overcrow-widget.exe" : "overcrow-widget");
 const pages = JSON.parse(readFileSync(join(content, "pages.json"), "utf8"));
-const SOURCE_ROOTS = ["docs/content/examples/", "templates/", "widgets/"];
+const SOURCE_ROOTS = ["docs/content/examples/", "templates/", "widgets/", "mcp/examples/"];
 const UNCHECKED = new Set(["sh", "text"]);
 
 /** The fenced code blocks of a Markdown page, with their source comment. */

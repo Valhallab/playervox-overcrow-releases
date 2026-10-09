@@ -5,6 +5,9 @@ submission: create a project, edit its view, style and logic, run it in
 OverCrow, test it, package it and submit it. Each step links to the page
 that covers it in full.
 
+To work with an AI assistant instead, add OverCrow's MCP server to it: see
+[create with an AI](ai.md).
+
 ## 1. Install the tools
 
 - **`overcrow-widget`**, the widget CLI, one binary for Linux and Windows.

@@ -1,0 +1,211 @@
+name: mcp-publish
+
+# Publishes @overcrow/mcp to npm with npm trusted publishing, as sdk-publish
+# does for the SDK: npm trusts this workflow of this repository, in the
+# `npm-publish-mcp` environment, through GitHub's OIDC token; no npm token
+# exists, and the package gets a provenance statement. A real publication
+# comes from a tag `mcp-v<version>` or a manual run on main; anything else,
+# a push of a work branch included, is a dry run.
+#
+# The package pins one OverCrow release: before publishing, the committed
+# pin must equal the creatorTools entry of that release's release.json,
+# and both ZIPs must download with its size and SHA-256. Before the release
+# exists, a dry run says so and goes on; a real run stops.
+on:
+  push:
+    tags: ['mcp-v*']
+    branches: ['refacto/**']
+    paths: ['mcp/**', '.github/workflows/mcp-publish.yml']
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Check the package and run npm publish --dry-run; publish nothing
+        type: boolean
+        default: true
+
+# Only `publish`, in the `npm-publish-mcp` environment (main and tags mcp-v*
+# only), gets an OIDC token: a work branch cannot obtain one npm accepts.
+permissions:
+  contents: read
+
+concurrency:
+  group: mcp-publish
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    outputs:
+      dry-run: ${{ steps.mode.outputs.dry-run }}
+      version: ${{ steps.mode.outputs.version }}
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+        working-directory: mcp
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      # Trusted publishing needs npm 11.5.1 or later; Node.js 24 brings it.
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - name: Decide between publication and dry run
+        id: mode
+        env:
+          EVENT: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          REF_NAME: ${{ github.ref_name }}
+          DRY_RUN: ${{ inputs.dry-run }}
+        run: |
+          set -eu
+          npm_version=$(npm --version)
+          node -e '
+            const [major, minor, patch] = process.argv[1].split(".").map(Number);
+            if (major < 11 || (major === 11 && (minor < 5 || (minor === 5 && patch < 1)))) {
+              console.error(`npm ${process.argv[1]} cannot use trusted publishing (11.5.1 or later)`);
+              process.exit(1);
+            }' "$npm_version"
+          name=$(node -p 'require("./package.json").name')
+          version=$(node -p 'require("./package.json").version')
+          test "$name" = '@overcrow/mcp' || { echo "unexpected package $name"; exit 1; }
+          grep -qF "export const VERSION = \"$version\";" src/version.ts \
+            || { echo "src/version.ts does not say $version"; exit 1; }
+          case "$REF" in
+            refs/tags/*)
+              test "$REF_NAME" = "mcp-v$version" \
+                || { echo "tag $REF_NAME does not match @overcrow/mcp $version (mcp-v$version)"; exit 1; } ;;
+          esac
+          dry_run=true
+          if test "$EVENT" = push; then
+            case "$REF" in refs/tags/mcp-v*) dry_run=false ;; esac
+          elif test "$DRY_RUN" = false; then
+            case "$REF" in
+              refs/heads/main|refs/tags/mcp-v*) dry_run=false ;;
+              *) echo "only main or a tag mcp-v$version publishes; this run is a dry run" ;;
+            esac
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "dry-run=$dry_run" >> "$GITHUB_OUTPUT"
+          echo "@overcrow/mcp $version, npm $npm_version, dry run: $dry_run"
+      - name: Refuse a version already on npm
+        id: published
+        env:
+          VERSION: ${{ steps.mode.outputs.version }}
+          DRY_RUN: ${{ steps.mode.outputs.dry-run }}
+        run: |
+          set -u
+          if npm view "@overcrow/mcp@$VERSION" version > view.out 2> view.err; then
+            if test -s view.out; then
+              if test "$DRY_RUN" = true; then
+                echo "::notice::@overcrow/mcp $VERSION is already on npm: a real run would stop here"
+                echo "exists=true" >> "$GITHUB_OUTPUT"
+              else
+                echo "@overcrow/mcp $VERSION is already on npm: raise the version in mcp/package.json"
+                exit 1
+              fi
+            fi
+          elif grep -q E404 view.err; then
+            echo "@overcrow/mcp $VERSION is not on npm yet"
+          else
+            cat view.err
+            echo 'cannot ask npm whether this version exists'
+            exit 1
+          fi
+          rm -f view.out view.err
+      - name: The pin matches the published release and its ZIPs
+        env:
+          DRY_RUN: ${{ steps.mode.outputs.dry-run }}
+        run: |
+          set +e
+          node scripts/pin-release.mjs --check
+          status=$?
+          set -e
+          if test "$status" = 3 && test "$DRY_RUN" = true; then
+            echo "::notice::the pinned release is not published yet: a real run would stop here"
+          elif test "$status" != 0; then
+            exit 1
+          fi
+      - name: Install the pinned toolchain
+        run: |
+          umask 022
+          npm ci --ignore-scripts --no-audit --no-fund
+      - name: Lint, licenses, build, types and tests
+        run: |
+          umask 022
+          npm run lint
+          npm run licenses
+          npm run build
+          npm run typecheck
+          npm test
+      - name: Check the package
+        run: |
+          umask 022
+          npm run pack:check
+      - name: npm publish --dry-run
+        env:
+          EXISTS: ${{ steps.published.outputs.exists }}
+          VERSION: ${{ steps.mode.outputs.version }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          umask 022
+          npm run build
+          # Scripts are off: the build is above, and prepublishOnly refuses
+          # an unpinned package, which a dry run before the release is.
+          # npm refuses even a dry run over a published version: try the
+          # same package under a throwaway prerelease version instead.
+          if test "$EXISTS" = true; then
+            npm pkg set version="$VERSION-dryrun.$RUN_NUMBER"
+            npm publish --access public --tag dry-run --dry-run --ignore-scripts
+            git checkout -- package.json
+          else
+            npm publish --access public --dry-run --ignore-scripts
+          fi
+      - name: The checkout stays clean
+        run: git status --porcelain --untracked-files=no | { ! grep .; }
+
+  publish:
+    needs: check
+    if: needs.check.outputs.dry-run == 'false'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    # Deployment branch policy: main and tags mcp-v* only.
+    environment: npm-publish-mcp
+    permissions:
+      contents: read
+      # The OIDC token npm exchanges for a short-lived publish credential.
+      id-token: write
+    defaults:
+      run:
+        shell: bash
+        working-directory: mcp
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - name: Same version as checked, still not on npm, pin still valid
+        env:
+          VERSION: ${{ needs.check.outputs.version }}
+        run: |
+          set -u
+          test "$(node -p 'require("./package.json").version')" = "$VERSION"
+          if npm view "@overcrow/mcp@$VERSION" version 2> /dev/null | grep -q .; then
+            echo "@overcrow/mcp $VERSION is already on npm"
+            exit 1
+          fi
+          node scripts/pin-release.mjs --check
+      - name: Install the pinned toolchain
+        run: |
+          umask 022
+          npm ci --ignore-scripts --no-audit --no-fund
+      - name: Publish with provenance
+        # prepublishOnly re-runs pack:check --release; prepack builds.
+        run: |
+          umask 022
+          npm publish --provenance --access public
+      - name: The checkout stays clean
+        run: git status --porcelain --untracked-files=no | { ! grep .; }

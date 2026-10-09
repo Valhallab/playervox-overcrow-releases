@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "overcrow": {
+      "command": "npx",
+      "args": ["-y", "@overcrow/mcp", "--root", "C:\\Users\\you\\Documents\\widgets"]
+    }
+  }
+}

@@ -43,7 +43,8 @@ test("prepare_submission keeps shell syntax of the project out of its commands",
   const server = startServer([join(here, "..", "dist", "index.js")], { cwd: project });
   try {
     await server.initialize();
-    const result = (await server.call("prepare_submission", { directory: "x$(touch pwned)`id`" })).result;
+    const result = (await server.call("prepare_submission", { directory: "x$(touch pwned)`id`" }))
+      .result;
     assert.equal(result.isError, undefined, JSON.stringify(result).slice(0, 400));
     const { lines } = result.structuredContent.commands;
     for (const line of lines.filter((text) => !text.startsWith("#"))) {
@@ -57,7 +58,9 @@ test("prepare_submission keeps shell syntax of the project out of its commands",
 });
 
 const POSIX = process.platform !== "win32";
-test("a link in dist/ or tests/output/ cannot lead the CLI's writes outside the project", { skip: POSIX ? false : "fake CLI scripts need a POSIX shell" }, async () => {
+test("a link in dist/ or tests/output/ cannot lead the CLI's writes outside the project", {
+  skip: POSIX ? false : "fake CLI scripts need a POSIX shell",
+}, async () => {
   const project = join(work, "links");
   const outside = join(work, "outside");
   mkdirSync(outside, { recursive: true });
@@ -69,7 +72,10 @@ test("a link in dist/ or tests/output/ cannot lead the CLI's writes outside the 
   const zip = join(project, "tools.zip");
   writeFileSync(zip, release.zips["linux-x86_64"]);
   const config = join(work, "links.json");
-  writeFileSync(config, JSON.stringify({ pin: release.pin, cacheRoot: join(work, "cache"), cwd: project }));
+  writeFileSync(
+    config,
+    JSON.stringify({ pin: release.pin, cacheRoot: join(work, "cache"), cwd: project }),
+  );
   const server = startServer([testServer, config], { cwd: project });
   try {
     await server.initialize();
