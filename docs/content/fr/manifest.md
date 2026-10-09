@@ -39,7 +39,7 @@ valeurs qu’il remplit. Voici un manifeste avec des permissions et un menu :
 {
   "schemaVersion": 1,
   "apiVersion": 1,
-  "id": "com.example.countdown",
+  "id": "nova.countdown",
   "version": "1.0.0",
   "name": { "en": "Countdown", "fr": "Compte à rebours" },
   "sizing": {

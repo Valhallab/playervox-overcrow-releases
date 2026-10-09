@@ -117,8 +117,9 @@ SDK's tests.
 the marketplace CI: the validated file list of a Git revision
 (`scripts/materialize-git-snapshot.sh`). Creators do not need it.
 `admit --publisher playervox` is passed by the marketplace CI only for this
-repository's own revisions ([review policy](review-policy.md)); it owns
-`com.playervox.*` through `playervox.com`, which the option implies.
+repository's own revisions ([review policy](review-policy.md)). It is the
+only publisher that may use `com.playervox.*`, and it admits every widget
+of the repository without the ownership check other publishers get.
 
 ## Maintenance
 

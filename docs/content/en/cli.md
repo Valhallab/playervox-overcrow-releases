@@ -286,17 +286,19 @@ overcrow-widget admit --publisher nova --package dist/nova.my-widget-0.1.0.ocpkg
 ```
 
 Runs the static admission that the creator space runs on every version you
-send. The sources are the project folder or a ZIP of it
-([source archives](#source-archives)). It never runs your code or `tsc`:
+send. The sources are the project folder or a ZIP of it, read as the
+creator space receives them ([source archives](#source-archives)). It
+never runs your code or `tsc`:
 
 1. the sources are built as `package` builds them;
 2. with `--package`, that archive's compiled view must be byte for byte
    what `view.ocml` compiles to;
 3. the ID belongs to the publisher given by `--publisher` (its
    `<handle>.<name>` IDs, and with `--domain`, the IDs under a domain it
-   verified); without `--publisher`, it is neither reserved nor an example
-   ID (`nova.*`, `example.*`, `yourhandle.*`…). `listing.json` is valid, its
-   preview is a packaged PNG of at most 256 KiB;
+   verified); without `--publisher`, it is neither reserved, nor an example
+   ID (`nova.*`, `yourhandle.*`, `gg.nova.*`, `com.example.*`…), nor under a
+   handle nobody can register (`admin.*`, `com.*`). `listing.json` is
+   valid, its preview is a packaged PNG of at most 256 KiB;
 4. the authority the widget asks for is listed for the reviewer:
    capabilities (the sensitive ones marked), network routes with their
    response bound, clipboard writes, storage and game events;
@@ -310,7 +312,7 @@ send. The sources are the project folder or a ZIP of it
 | --- | --- | --- |
 | `admission.reserved_id` | error | A `com.playervox.*` ID, reserved for PlayerVox. |
 | `admission.placeholder_id` | error | An example ID, without `--publisher`. |
-| `admission.id_not_owned` | error | The ID does not belong to the publisher. |
+| `admission.id_not_owned` | error | The ID does not belong to the publisher, or, without `--publisher`, cannot belong to any. |
 | `admission.listing_missing`, `admission.listing` | error | No `listing.json`, or one that breaks the listing's rules. |
 | `admission.preview` | error | `preview` does not name a packaged PNG within bounds. |
 | `admission.license` | error | A PlayerVox widget whose license is not MIT. |
@@ -358,24 +360,26 @@ folder or a ZIP, read as `admit` reads them: the files the creator space
 receives. Files are sorted by path; each added, modified or removed file
 comes with its unified changes (three lines of context) and its added and
 removed line counts. A file that is not UTF-8 text is binary: only its
-SHA-256 is compared. When both versions have a valid manifest, the
+SHA-256 is compared. So is a text above 1 MiB or 20,000 lines, or once
+200,000 lines were compared in one diff (`tooLarge`). When both versions have a valid manifest, the
 [permission keys](#permission-keys) the new version adds, widens and
 removes are listed, with the review it needs.
 
 Option: `--format json`. Exit status: 0 when both versions were read,
 whether or not they differ; 1 when one is refused; 2 on a usage or file
-error.
+error (a version missing or unreadable).
 
 ## Source archives
 
-`admit` and `diff` take a ZIP of the widget folder (its name ends in
+`admit` and `diff` take the widget folder or a ZIP of it (its name ends in
 `.zip`), as the creator space receives it. The ZIP may hold the files
 directly, or one folder that holds them all, as Windows and macOS make it.
 
-Never taken from an archive, and never sent by the creator tools: hidden
-files and folders (`.env`, `.git/`…), `node_modules/`, `dist/`,
-`tests/output/`, `__MACOSX/`, built packages, key files and system files.
-They still count toward the bounds below.
+Left out of both, and never sent by the creator tools: hidden files and
+folders (`.env`, `.git/`, `assets/.DS_Store`…), `node_modules/`, `dist/`,
+`tests/output/`, `__MACOSX/`, built packages, key files and system files,
+and, in a folder, links and names that are not portable ASCII. In a ZIP,
+they still count toward the bounds below and are checked like the rest.
 
 | Bound | Value |
 | --- | --- |
@@ -395,9 +399,10 @@ removed at the end.
 | `sources.duplicate_name` | Two names that differ only by case, or a file that is also a folder. |
 | `sources.link`, `sources.special_file` | A link, or a device, a FIFO or a socket. |
 | `sources.bomb` | An entry that inflates far beyond its compressed size, or beyond its declared size. |
+| `sources.read` | The file cannot be read (exit status 2). |
 | `sources.encrypted` | An encrypted entry. |
 | `sources.zip64` | ZIP64, which sources never need. |
-| `sources.archive` | Anything else a ZIP should not hold: a comment, bytes before, between or after the entries, sizes or checksums that disagree. |
+| `sources.archive` | Anything else a ZIP should not hold: a comment, bytes before, between or after the entries or after an entry's compressed data, another name in an extra field, sizes or checksums that disagree. |
 
 ## The code map
 
@@ -481,7 +486,7 @@ change.
 | `package` | `bytes`, `sha256` and each file's `bytes` and `sha256`. |
 | `reproducible` | `viewJson` and `archive`, compared with `--package`, else `null`. |
 | `listing` | `bytes`, `sha256`, `spdxLicense` and `preview` of `listing.json`. |
-| `sources` | For a ZIP: `kind`, `files`, `bytes`, `sha256`, `prefix` (the wrapping folder) and `ignored` (`path`, `reason`); `null` for a folder. |
+| `sources` | `kind` (`folder` or `archive`), `files`, `bytes`, `ignored` (`path`, `reason`) and, for a ZIP, `sha256` and `prefix` (the wrapping folder). |
 | `review` | The authority to review, one object per item (`kind`, then its fields). |
 | `permissions` | `keys`; with `--previous`, also `previous` (`id`, `version`), `added`, `changed`, `removed` and `reviewType` (`full` or `quick`), else `null`. |
 | `diagnostics` | The diagnostics, as above. |
@@ -493,7 +498,7 @@ change.
 | `formatVersion` | `1`. |
 | `compared` | `false` when a version is refused; then only `diagnostics` follows. |
 | `old`, `new` | `kind`, `files`, `bytes`, `sha256`, `prefix`, `ignored`, `id` and `version` of each version. |
-| `files` | Changed files by path: `path`, `status` (`added`, `modified`, `removed`), `binary`, `oldSha256`, `newSha256`, `additions`, `deletions` and `hunks` (`oldStart`, `oldLines`, `newStart`, `newLines`, `lines`, each line starting with ` `, `-`, `+` or `\`). |
+| `files` | Changed files by path: `path`, `status` (`added`, `modified`, `removed`), `binary`, `tooLarge`, `oldSha256`, `newSha256`, `additions`, `deletions` and `hunks` (`oldStart`, `oldLines`, `newStart`, `newLines`, `lines`, each line starting with ` `, `-`, `+` or `\`). |
 | `totals` | `added`, `modified`, `removed`, `additions`, `deletions`. |
 | `permissions` | `added`, `changed`, `removed` and `reviewType`, or `null` without two valid manifests. |
 | `diagnostics` | The diagnostics. |

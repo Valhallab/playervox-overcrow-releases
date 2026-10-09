@@ -297,17 +297,20 @@ overcrow-widget admit --publisher nova --package dist/nova.my-widget-0.1.0.ocpkg
 
 Exécute l’admission statique que l’espace créateurs fait passer à chaque
 version que vous envoyez. Les sources sont le dossier du projet ou un ZIP
-de ce dossier ([archives de sources](#archives-de-sources)). La commande
-n’exécute jamais votre code ni `tsc` :
+de ce dossier, lus comme l’espace créateurs les reçoit
+([archives de sources](#archives-de-sources)). La commande n’exécute
+jamais votre code ni `tsc` :
 
 1. les sources sont construites comme `package` les construit ;
 2. avec `--package`, la vue compilée de cette archive doit être, à l’octet
    près, ce que donne la compilation de `view.ocml` ;
 3. l’ID appartient à l’éditeur donné par `--publisher` (ses ID
    `<pseudo>.<nom>` et, avec `--domain`, les ID sous un domaine qu’il a
-   vérifié) ; sans `--publisher`, l’ID n’est ni réservé ni un ID d’exemple
-   (`nova.*`, `example.*`, `yourhandle.*`…). `listing.json` est valide, son
-   aperçu est un PNG empaqueté d’au plus 256 Kio ;
+   vérifié) ; sans `--publisher`, l’ID n’est ni réservé, ni un ID
+   d’exemple (`nova.*`, `yourhandle.*`, `gg.nova.*`, `com.example.*`…), ni
+   sous un pseudo que personne ne peut prendre (`admin.*`, `com.*`).
+   `listing.json` est valide, son aperçu est un PNG empaqueté d’au plus
+   256 Kio ;
 4. les pouvoirs que le widget demande sont listés pour le relecteur :
    capabilities (les sensibles sont signalées), routes réseau avec leur
    limite de réponse, écritures dans le presse-papiers, stockage et
@@ -322,7 +325,7 @@ n’exécute jamais votre code ni `tsc` :
 | --- | --- | --- |
 | `admission.reserved_id` | erreur | Un ID `com.playervox.*`, réservé à PlayerVox. |
 | `admission.placeholder_id` | erreur | Un ID d’exemple, sans `--publisher`. |
-| `admission.id_not_owned` | erreur | L’ID n’appartient pas à l’éditeur. |
+| `admission.id_not_owned` | erreur | L’ID n’appartient pas à l’éditeur, ou, sans `--publisher`, ne peut appartenir à personne. |
 | `admission.listing_missing`, `admission.listing` | erreur | Pas de `listing.json`, ou un fichier qui enfreint les règles de la fiche. |
 | `admission.preview` | erreur | `preview` ne désigne pas un PNG empaqueté dans les limites. |
 | `admission.license` | erreur | Un widget PlayerVox dont la licence n’est pas MIT. |
@@ -373,26 +376,30 @@ reçoit l’espace créateurs. Les fichiers sont triés par chemin ; chaque
 fichier ajouté, modifié ou supprimé est accompagné de ses changements au
 format unifié (trois lignes de contexte) et du nombre de lignes ajoutées et
 retirées. Un fichier qui n’est pas du texte UTF-8 est binaire : seul son
-SHA-256 est comparé. Quand les deux versions ont un manifeste valide, les
+SHA-256 est comparé. De même pour un texte de plus de 1 Mio ou de
+20 000 lignes, ou une fois 200 000 lignes comparées dans un même diff
+(`tooLarge`). Quand les deux versions ont un manifeste valide, les
 [clés de permission](#clés-de-permission) que la nouvelle version ajoute,
 élargit et retire sont listées, avec la revue dont elle a besoin.
 
 Option : `--format json`. Codes de sortie : 0 quand les deux versions ont
 été lues, qu’elles diffèrent ou non ; 1 quand l’une est refusée ; 2 pour
-une erreur d’utilisation ou de fichier.
+une erreur d’utilisation ou de fichier (une version absente ou illisible).
 
 ## Archives de sources
 
-`admit` et `diff` acceptent un ZIP du dossier du widget (son nom finit par
-`.zip`), tel que l’espace créateurs le reçoit. Le ZIP peut contenir les
-fichiers directement, ou un seul dossier qui les contient tous, comme le
-font Windows et macOS.
+`admit` et `diff` acceptent le dossier du widget ou un ZIP de ce dossier
+(son nom finit par `.zip`), tel que l’espace créateurs le reçoit. Le ZIP
+peut contenir les fichiers directement, ou un seul dossier qui les contient
+tous, comme le font Windows et macOS.
 
-Jamais repris d’une archive, et jamais envoyés par les outils créateurs :
-les fichiers et dossiers cachés (`.env`, `.git/`…), `node_modules/`,
-`dist/`, `tests/output/`, `__MACOSX/`, les paquets construits, les fichiers
-de clés et les fichiers système. Ils comptent tout de même dans les limites
-ci-dessous.
+Laissés de côté dans les deux cas, et jamais envoyés par les outils
+créateurs : les fichiers et dossiers cachés (`.env`, `.git/`,
+`assets/.DS_Store`…), `node_modules/`, `dist/`, `tests/output/`,
+`__MACOSX/`, les paquets construits, les fichiers de clés et les fichiers
+système, et, dans un dossier, les liens et les noms qui ne sont pas en
+ASCII portable. Dans un ZIP, ils comptent tout de même dans les limites
+ci-dessous et sont vérifiés comme le reste.
 
 | Limite | Valeur |
 | --- | --- |
@@ -412,9 +419,10 @@ travail privé, supprimé à la fin.
 | `sources.duplicate_name` | Deux noms qui ne diffèrent que par la casse, ou un fichier qui est aussi un dossier. |
 | `sources.link`, `sources.special_file` | Un lien, ou un périphérique, une FIFO ou un socket. |
 | `sources.bomb` | Une entrée qui se décompresse bien au-delà de sa taille compressée, ou de sa taille déclarée. |
+| `sources.read` | Le fichier ne peut pas être lu (code de sortie 2). |
 | `sources.encrypted` | Une entrée chiffrée. |
 | `sources.zip64` | Du ZIP64, dont des sources n’ont jamais besoin. |
-| `sources.archive` | Tout autre élément qu’un ZIP ne doit pas contenir : un commentaire, des octets avant, entre ou après les entrées, des tailles ou des sommes de contrôle qui ne concordent pas. |
+| `sources.archive` | Tout autre élément qu’un ZIP ne doit pas contenir : un commentaire, des octets avant, entre ou après les entrées ou après les données compressées d’une entrée, un autre nom dans un champ extra, des tailles ou des sommes de contrôle qui ne concordent pas. |
 
 ## La carte du code
 
@@ -502,7 +510,7 @@ est annoncé par un nouveau `formatVersion`.
 | `package` | `bytes`, `sha256` et les `bytes` et `sha256` de chaque fichier. |
 | `reproducible` | `viewJson` et `archive`, comparés avec `--package`, sinon `null`. |
 | `listing` | `bytes`, `sha256`, `spdxLicense` et `preview` de `listing.json`. |
-| `sources` | Pour un ZIP : `kind`, `files`, `bytes`, `sha256`, `prefix` (le dossier englobant) et `ignored` (`path`, `reason`) ; `null` pour un dossier. |
+| `sources` | `kind` (`folder` ou `archive`), `files`, `bytes`, `ignored` (`path`, `reason`) et, pour un ZIP, `sha256` et `prefix` (le dossier englobant). |
 | `review` | Les pouvoirs à relire, un objet par élément (`kind`, puis ses champs). |
 | `permissions` | `keys` ; avec `--previous`, aussi `previous` (`id`, `version`), `added`, `changed`, `removed` et `reviewType` (`full` ou `quick`), sinon `null`. |
 | `diagnostics` | Les diagnostics, comme ci-dessus. |
@@ -514,7 +522,7 @@ est annoncé par un nouveau `formatVersion`.
 | `formatVersion` | `1`. |
 | `compared` | `false` quand une version est refusée ; seul `diagnostics` suit alors. |
 | `old`, `new` | `kind`, `files`, `bytes`, `sha256`, `prefix`, `ignored`, `id` et `version` de chaque version. |
-| `files` | Les fichiers modifiés, par chemin : `path`, `status` (`added`, `modified`, `removed`), `binary`, `oldSha256`, `newSha256`, `additions`, `deletions` et `hunks` (`oldStart`, `oldLines`, `newStart`, `newLines`, `lines`, chaque ligne commençant par ` `, `-`, `+` ou `\`). |
+| `files` | Les fichiers modifiés, par chemin : `path`, `status` (`added`, `modified`, `removed`), `binary`, `tooLarge`, `oldSha256`, `newSha256`, `additions`, `deletions` et `hunks` (`oldStart`, `oldLines`, `newStart`, `newLines`, `lines`, chaque ligne commençant par ` `, `-`, `+` ou `\`). |
 | `totals` | `added`, `modified`, `removed`, `additions`, `deletions`. |
 | `permissions` | `added`, `changed`, `removed` et `reviewType`, ou `null` sans deux manifestes valides. |
 | `diagnostics` | Les diagnostics. |

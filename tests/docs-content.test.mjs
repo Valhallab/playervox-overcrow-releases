@@ -173,7 +173,9 @@ for (const name of readdirSync(examples).sort()) {
     try {
       const packaged = run(["package", project, "--out", join(work, `${name}.ocpkg`)]);
       assert.equal(packaged.status, 0, packaged.stdout + packaged.stderr);
-      const admitted = run(["admit", project, "--deny-warnings"]);
+      // The examples' IDs are under `nova`, the documentation's example
+      // publisher: admitted for it, refused to anyone else.
+      const admitted = run(["admit", project, "--publisher", "nova", "--deny-warnings"]);
       assert.equal(admitted.status, 0, admitted.stdout + admitted.stderr);
     } finally {
       rmSync(work, { recursive: true, force: true });
