@@ -13,7 +13,7 @@ import { DATA_NOTICE } from "../dist/text.js";
 import { startServer } from "./support/rpc.mjs";
 
 const bin = join(dirname(fileURLToPath(import.meta.url)), "..", "dist", "index.js");
-const work = realpathSync(mkdtempSync(join(tmpdir(), "overcrow-mcp-injection-")));
+const work = realpathSync.native(mkdtempSync(join(tmpdir(), "overcrow-mcp-injection-")));
 const project = join(work, "project");
 const widget = join(project, "evil");
 after(() => rmSync(work, { recursive: true, force: true }));

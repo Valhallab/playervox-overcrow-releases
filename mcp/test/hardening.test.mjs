@@ -16,7 +16,7 @@ import { assembleRelease, fakeExecutables } from "./support/tools.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const testServer = join(here, "support", "server.mjs");
-const work = realpathSync(mkdtempSync(join(tmpdir(), "overcrow-mcp-hardening-")));
+const work = realpathSync.native(mkdtempSync(join(tmpdir(), "overcrow-mcp-hardening-")));
 after(() => rmSync(work, { recursive: true, force: true }));
 
 function widget(directory, manifestExtra = {}) {

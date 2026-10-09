@@ -10,14 +10,14 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { after, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { deflateSync } from "node:zlib";
 import { startServer } from "./support/rpc.mjs";
 
 const bin = join(dirname(fileURLToPath(import.meta.url)), "..", "dist", "index.js");
-const work = realpathSync(mkdtempSync(join(tmpdir(), "overcrow-mcp-preview-")));
+const work = realpathSync.native(mkdtempSync(join(tmpdir(), "overcrow-mcp-preview-")));
 after(() => rmSync(work, { recursive: true, force: true }));
 
 function png(width, height, padding = 0) {
@@ -83,7 +83,7 @@ test("use_preview copies a reference image to assets/preview.png, never over a f
 
 test("use_preview refuses an assets/ link that leads out of the project", async (t) => {
   const directory = widget("linked");
-  const outside = join(dirname(work), `${work.split("/").pop()}-outside`);
+  const outside = join(dirname(work), `${basename(work)}-outside`);
   mkdirSync(outside, { recursive: true });
   t.after(() => rmSync(outside, { recursive: true, force: true }));
   try {

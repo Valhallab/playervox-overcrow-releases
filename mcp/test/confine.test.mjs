@@ -14,7 +14,7 @@ import {
 } from "../dist/confine.js";
 
 const POSIX = process.platform !== "win32";
-const base = realpathSync(mkdtempSync(join(tmpdir(), "overcrow-mcp-confine-")));
+const base = realpathSync.native(mkdtempSync(join(tmpdir(), "overcrow-mcp-confine-")));
 const project = join(base, "project");
 const outside = join(base, "outside");
 mkdirSync(join(project, "my-widget", "tests"), { recursive: true });
@@ -85,7 +85,7 @@ test("hidden folders, node_modules and odd input are refused", async () => {
 
 test("roots: system folders, a disk root and the home folder are never roots", async () => {
   assert.match(await rootRefusal(parse(project).root), /root of a disk/);
-  assert.match(await rootRefusal(realpathSync(homedir())), /home folder/);
+  assert.match(await rootRefusal(realpathSync.native(homedir())), /home folder/);
   if (POSIX) {
     for (const system of ["/etc", "/usr/lib", "/proc/self", "/var/log", "/tmp", "/home"]) {
       assert.ok(await rootRefusal(system), system);

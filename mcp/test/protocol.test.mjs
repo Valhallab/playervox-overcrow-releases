@@ -18,7 +18,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const bin = join(here, "..", "dist", "index.js");
 const testServer = join(here, "support", "server.mjs");
 const repository = join(here, "..", "..");
-const work = realpathSync(mkdtempSync(join(tmpdir(), "overcrow-mcp-protocol-")));
+const work = realpathSync.native(mkdtempSync(join(tmpdir(), "overcrow-mcp-protocol-")));
 const project = join(work, "project");
 mkdirSync(project);
 cpSync(join(repository, "widgets", "clock"), join(project, "clock"), { recursive: true });
