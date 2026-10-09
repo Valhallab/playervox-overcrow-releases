@@ -1,7 +1,7 @@
 // End-to-end proof of @overcrow/mcp on a fresh copy, before the release
 // exists: the package is packed and installed from its tarball (fresh npm
 // cache), the creator tools ZIPs are assembled in the release layout from a
-// CLI built from this revision and the published 0.6.0-beta.1 runtime (the
+// CLI built from this revision and the published 0.6.0-beta.2 runtime (the
 // one that CLI pins), served by a local HTTPS server shaped like GitHub
 // (302 to an asset host), and the installed server runs with an empty
 // home folder and no OverCrow tool on PATH. A scripted MCP client (the
@@ -45,7 +45,7 @@ if (!workArg || (!published && (!cliArg || !runtimesArg))) {
 const here = dirname(fileURLToPath(import.meta.url));
 const mcp = resolve(here, "..", "..");
 const work = resolve(workArg);
-const RELEASE = "0.6.0-beta.1";
+const RELEASE = "0.6.0-beta.2";
 rmSync(work, { recursive: true, force: true });
 for (const directory of ["pkg", "install", "npm-cache", "home", "project", "zips"])
   mkdirSync(join(work, directory), { recursive: true });
