@@ -149,14 +149,14 @@ pub fn build(
         }
         body.push_str(&text);
         body.push('\n');
-        line += text.matches('\n').count() as u32 + 1;
+        line += sourcemap::line_breaks(&text) + 1;
     }
 
     // 4. One script, minified.
     let script = format!("(() => {{\n\"use strict\";\n{body}}})();\n");
     let (minified, minified_map) = minify(&script, map)?;
     // The notice and its line break come before the minified script.
-    let notice_lines = sdk::NOTICE.matches('\n').count() as u32 + 1;
+    let notice_lines = sourcemap::line_breaks(sdk::NOTICE) + 1;
     let map = minified_map.map(|minified_map| {
         let linked = ConcatSourceMapBuilder::from_owned_sourcemaps(linked_maps).into_sourcemap();
         let shipped = ConcatSourceMapBuilder::from_owned_sourcemaps(vec![(
@@ -603,7 +603,7 @@ impl Linker<'_> {
             ))
             .with_scoping(Some(scoping))
             .build(&program);
-        let prefix_lines = prefix.matches('\n').count() as u32;
+        let prefix_lines = sourcemap::line_breaks(&prefix);
         Ok((
             format!("{prefix}{}", printed.code),
             printed.map.map(SourceMap::into_owned),

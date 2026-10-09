@@ -23,6 +23,11 @@ pub struct Item {
     pub comment: Vec<u8>,
     /// Declared uncompressed size, when it must lie.
     pub declared_size: Option<u32>,
+    /// Bytes after the compressed data, counted in the compressed size.
+    pub trailing: Vec<u8>,
+    /// The CRC and sizes of a streamed entry's local header (zero by
+    /// default, as streaming writers leave them).
+    pub local_fields: Option<[u32; 3]>,
 }
 
 impl Item {
@@ -38,6 +43,8 @@ impl Item {
             extra: Vec::new(),
             comment: Vec::new(),
             declared_size: None,
+            trailing: Vec::new(),
+            local_fields: None,
         }
     }
 
@@ -104,11 +111,12 @@ pub fn archive_with(items: &[Item], prefix: &[u8], between: &[u8], comment: &[u8
     let mut out = prefix.to_vec();
     let mut central = Vec::new();
     for item in items {
-        let body = if item.deflate {
+        let mut body = if item.deflate {
             deflate(&item.data)
         } else {
             item.data.clone()
         };
+        body.extend(&item.trailing);
         let crc = crc32fast::hash(&item.data);
         let size = item.declared_size.unwrap_or(item.data.len() as u32);
         let method: u16 = if item.deflate { 8 } else { 0 };
@@ -121,7 +129,9 @@ pub fn archive_with(items: &[Item], prefix: &[u8], between: &[u8], comment: &[u8
         local.extend(method.to_le_bytes());
         local.extend([0, 0, 0x21, 0]);
         if streamed {
-            local.extend([0; 12]);
+            for field in item.local_fields.unwrap_or_default() {
+                local.extend(field.to_le_bytes());
+            }
         } else {
             local.extend(crc.to_le_bytes());
             local.extend((body.len() as u32).to_le_bytes());

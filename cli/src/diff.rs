@@ -7,7 +7,10 @@
 //!
 //! Lines are compared exactly (a changed line ending is a change). A file
 //! that is not UTF-8 or holds a NUL byte is binary: its digests are shown,
-//! not its lines.
+//! not its lines. So is a text too large to compare line by line
+//! (`tooLarge`): above `MAX_TEXT_BYTES` or `MAX_TEXT_LINES` on a side, or
+//! once `MAX_TOTAL_LINES` lines were compared: the output, the time and the
+//! memory of a diff stay bounded whatever the sources hold.
 
 use std::collections::{BTreeSet, HashMap};
 use std::io::Write as _;
@@ -30,6 +33,11 @@ const CONTEXT: usize = 3;
 /// Beyond this many edits, a file is shown as rewritten whole: the search
 /// stays within a bounded time and memory.
 const MAX_EDITS: usize = 2048;
+/// A side of a text compared line by line.
+const MAX_TEXT_BYTES: usize = 1024 * 1024;
+const MAX_TEXT_LINES: usize = 20_000;
+/// Lines (both sides) compared in one diff.
+const MAX_TOTAL_LINES: usize = 200_000;
 const NO_NEWLINE: &str = "\\ No newline at end of file";
 
 /// One step of an edit script, by index into the old and new lines.
@@ -205,6 +213,21 @@ fn hunks(old: &str, new: &str) -> (Vec<Hunk>, usize, usize) {
         .filter(|(_, edit)| !matches!(edit, Edit::Equal(..)))
         .map(|(index, _)| index)
         .collect();
+    // Old and new lines before each step of the script.
+    let mut before = Vec::with_capacity(script.len() + 1);
+    let (mut old_count, mut new_count) = (0, 0);
+    for edit in &script {
+        before.push((old_count, new_count));
+        match edit {
+            Edit::Equal(..) => {
+                old_count += 1;
+                new_count += 1;
+            }
+            Edit::Delete(_) => old_count += 1,
+            Edit::Insert(_) => new_count += 1,
+        }
+    }
+    before.push((old_count, new_count));
     let (mut additions, mut deletions) = (0, 0);
     let mut out = Vec::new();
     let mut index = 0;
@@ -242,16 +265,7 @@ fn hunks(old: &str, new: &str) -> (Vec<Hunk>, usize, usize) {
         }
         // Where the hunk starts in each file: the first line it shows, or
         // the line before it when it shows none.
-        let position =
-            |pick: fn(&Edit) -> Option<usize>| script[..start].iter().filter_map(pick).count();
-        let old_before = position(|edit| match edit {
-            Edit::Equal(a, _) | Edit::Delete(a) => Some(*a),
-            Edit::Insert(_) => None,
-        });
-        let new_before = position(|edit| match edit {
-            Edit::Equal(_, b) | Edit::Insert(b) => Some(*b),
-            Edit::Delete(_) => None,
-        });
+        let (old_before, new_before) = before[start];
         out.push(Hunk {
             old_start: if old_count == 0 {
                 old_before
@@ -277,8 +291,24 @@ fn text_of(bytes: &[u8]) -> Option<&str> {
         .filter(|text| !text.contains('\0'))
 }
 
+/// Whether a text is small enough to compare line by line, taking its
+/// lines from the diff's `budget`.
+fn comparable(texts: (&str, &str), budget: &mut usize) -> bool {
+    let lines = |text: &str| text.bytes().filter(|byte| *byte == b'\n').count() + 1;
+    let (old, new) = (lines(texts.0), lines(texts.1));
+    let fits = texts.0.len() <= MAX_TEXT_BYTES
+        && texts.1.len() <= MAX_TEXT_BYTES
+        && old <= MAX_TEXT_LINES
+        && new <= MAX_TEXT_LINES
+        && old + new <= *budget;
+    if fits {
+        *budget -= old + new;
+    }
+    fits
+}
+
 /// One changed file.
-fn file_json(path: &str, old: Option<&[u8]>, new: Option<&[u8]>) -> Value {
+fn file_json(path: &str, old: Option<&[u8]>, new: Option<&[u8]>, budget: &mut usize) -> Value {
     let status = match (old, new) {
         (None, _) => "added",
         (_, None) => "removed",
@@ -286,17 +316,19 @@ fn file_json(path: &str, old: Option<&[u8]>, new: Option<&[u8]>) -> Value {
     };
     let digest = |bytes: Option<&[u8]>| bytes.map(|bytes| hex(&sha256(bytes)));
     let texts = (old.map_or(Some(""), text_of), new.map_or(Some(""), text_of));
-    let (binary, hunks, additions, deletions) = match texts {
-        (Some(old), Some(new)) => {
+    let (binary, too_large, hunks, additions, deletions) = match texts {
+        (Some(old), Some(new)) if comparable((old, new), budget) => {
             let (hunks, additions, deletions) = hunks(old, new);
-            (false, hunks, additions, deletions)
+            (false, false, hunks, additions, deletions)
         }
-        _ => (true, Vec::new(), 0, 0),
+        (Some(_), Some(_)) => (false, true, Vec::new(), 0, 0),
+        _ => (true, false, Vec::new(), 0, 0),
     };
     json!({
         "path": path,
         "status": status,
         "binary": binary,
+        "tooLarge": too_large,
         "oldSha256": digest(old),
         "newSha256": digest(new),
         "additions": additions,
@@ -319,6 +351,7 @@ fn side_json(tree: &Tree, manifest: Option<&Manifest>) -> Value {
 /// The comparison of two trees, as JSON.
 pub fn compare(old: &Tree, new: &Tree) -> Value {
     let paths: BTreeSet<&String> = old.files.keys().chain(new.files.keys()).collect();
+    let mut budget = MAX_TOTAL_LINES;
     let files: Vec<Value> = paths
         .into_iter()
         .filter_map(|path| {
@@ -326,7 +359,7 @@ pub fn compare(old: &Tree, new: &Tree) -> Value {
                 old.files.get(path).map(Vec::as_slice),
                 new.files.get(path).map(Vec::as_slice),
             );
-            (before != after).then(|| file_json(path, before, after))
+            (before != after).then(|| file_json(path, before, after, &mut budget))
         })
         .collect();
     let count = |status: &str| files.iter().filter(|file| file["status"] == status).count();
@@ -371,6 +404,12 @@ pub fn render_human(value: &Value) -> String {
             out.push_str(&format!("Binary file {path} {status}\n"));
             continue;
         }
+        if file["tooLarge"] == true {
+            out.push_str(&format!(
+                "Large file {path} {status}: not compared line by line\n"
+            ));
+            continue;
+        }
         let (before, after) = match status {
             "added" => ("/dev/null".to_owned(), format!("b/{path}")),
             "removed" => (format!("a/{path}"), "/dev/null".to_owned()),
@@ -406,7 +445,7 @@ pub fn render_human(value: &Value) -> String {
                 .as_array()
                 .into_iter()
                 .flatten()
-                .map(|key| text(key))
+                .map(&text)
                 .collect::<Vec<_>>()
         };
         for (field, label) in [
@@ -424,7 +463,7 @@ pub fn render_human(value: &Value) -> String {
 }
 
 /// Runs `diff`: 0 when both sides were read (whether or not they differ),
-/// 1 when a side is refused.
+/// 1 when a side is refused, 2 when one cannot be read.
 pub fn run(old: &Input, new: &Input, format: Format) -> ExitCode {
     let mut report = Report::default();
     let old_tree = sourcetree::read(old, &mut report);
@@ -450,7 +489,7 @@ pub fn run(old: &Input, new: &Input, format: Format) -> ExitCode {
                 emit(&report, None, format, false, "diff");
             }
         }
-        return ExitCode::from(1);
+        return ExitCode::from(if sourcetree::io_failed(&report) { 2 } else { 1 });
     };
     let value = compare(&old_tree, &new_tree);
     let mut stdout = std::io::stdout().lock();
@@ -552,7 +591,12 @@ mod tests {
 
     #[test]
     fn binary_files_show_digests_only() {
-        let value = file_json("assets/a.png", Some(b"\x89PNG\0a"), Some(b"\x89PNG\0b"));
+        let value = file_json(
+            "assets/a.png",
+            Some(b"\x89PNG\0a"),
+            Some(b"\x89PNG\0b"),
+            &mut { MAX_TOTAL_LINES },
+        );
         assert_eq!(value["binary"], true);
         assert_eq!(value["hunks"], json!([]));
         assert_eq!(value["status"], "modified");
@@ -602,6 +646,36 @@ mod tests {
         let human = render_human(&compare(&old, &new));
         assert!(
             !human.contains('\u{1b}') && !human.contains('\u{202e}'),
+            "{human}"
+        );
+    }
+
+    #[test]
+    fn large_texts_are_not_compared_line_by_line() {
+        let big = "x\n".repeat(MAX_TEXT_LINES + 1);
+        let value = file_json("data.txt", Some(b"x\n"), Some(big.as_bytes()), &mut {
+            MAX_TOTAL_LINES
+        });
+        assert_eq!(value["tooLarge"], true);
+        assert_eq!(value["binary"], false);
+        assert_eq!(value["hunks"], json!([]));
+        // The budget of a whole diff runs out too.
+        // 13 lines each (the count includes a last, unterminated line).
+        let mut budget = 20;
+        let small = "a\nb\n".repeat(5);
+        let first = file_json("a.txt", Some(b"a\n"), Some(small.as_bytes()), &mut budget);
+        let second = file_json("b.txt", Some(b"a\n"), Some(small.as_bytes()), &mut budget);
+        assert_eq!(
+            (first["tooLarge"].clone(), second["tooLarge"].clone()),
+            (json!(false), json!(true))
+        );
+        let mut old = Tree::default();
+        let mut new = Tree::default();
+        old.files.insert("data.txt".into(), b"x\n".to_vec());
+        new.files.insert("data.txt".into(), big.into_bytes());
+        let human = render_human(&compare(&old, &new));
+        assert!(
+            human.starts_with("Large file data.txt modified: not compared line by line\n"),
             "{human}"
         );
     }

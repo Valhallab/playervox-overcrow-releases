@@ -60,7 +60,7 @@ impl Input {
     pub fn of(path: &Path) -> Option<Self> {
         if path.is_dir() {
             Some(Self::Folder(path.to_path_buf()))
-        } else if is_zip(path) {
+        } else if is_zip(path) && path.is_file() {
             Some(Self::Archive(path.to_path_buf()))
         } else {
             None
@@ -171,6 +171,16 @@ pub fn ignored(path: &str) -> Option<(String, &'static str)> {
     file_reason(components[components.len() - 1]).map(|reason| (path.to_owned(), reason))
 }
 
+/// Whether reading failed on a file error (`sources.read`) rather than on a
+/// refusal: the command then ends with status 2, not 1.
+pub fn io_failed(report: &Report) -> bool {
+    !report.diagnostics.is_empty()
+        && report
+            .diagnostics
+            .iter()
+            .all(|diagnostic| diagnostic.code == "sources.read")
+}
+
 /// Reads sources; every refusal is a diagnostic in `report`.
 pub fn read(input: &Input, report: &mut Report) -> Option<Tree> {
     match input {
@@ -213,6 +223,23 @@ fn read_archive(path: &Path, report: &mut Report) -> Option<Tree> {
         };
     let files: Vec<&zipread::Entry> = entries.iter().filter(|entry| !entry.directory).collect();
     let prefix = wrapping_folder(&files);
+    let mut refuse = |error: ZipError, entry: &zipread::Entry| {
+        report.push(
+            refusal(&Refused {
+                error,
+                entry: Some(entry.name.clone()),
+            })
+            .in_file(shown.clone()),
+        );
+    };
+    // Folders and left-out entries are inflated too, into nothing: an
+    // archive hides no byte, even where nobody reads.
+    for entry in entries.iter().filter(|entry| entry.directory) {
+        if let Err(error) = zipread::extract(&mut reader, entry, &mut std::io::sink()) {
+            refuse(error, entry);
+            return None;
+        }
+    }
     let mut tree = Tree {
         archive: Some(Archive {
             sha256: hex(&sha256(&bytes)),
@@ -222,26 +249,24 @@ fn read_archive(path: &Path, report: &mut Report) -> Option<Tree> {
     };
     for entry in files {
         let path = match &prefix {
-            Some(prefix) => match entry.name.strip_prefix(prefix.as_str()) {
-                Some(rest) => rest.trim_start_matches('/').to_owned(),
+            Some(prefix) => match entry.name.strip_prefix(&format!("{prefix}/")) {
+                Some(rest) => rest.to_owned(),
                 // Outside the wrapping folder: only left-out entries are.
                 None => entry.name.clone(),
             },
             None => entry.name.clone(),
         };
         if let Some((listed, reason)) = ignored(&path).or_else(|| ignored(&entry.name)) {
+            if let Err(error) = zipread::extract(&mut reader, entry, &mut std::io::sink()) {
+                refuse(error, entry);
+                return None;
+            }
             tree.ignored.insert(listed, reason);
             continue;
         }
         let mut output = Vec::with_capacity(entry.size as usize);
         if let Err(error) = zipread::extract(&mut reader, entry, &mut output) {
-            report.push(
-                refusal(&Refused {
-                    error,
-                    entry: Some(entry.name.clone()),
-                })
-                .in_file(shown),
-            );
+            refuse(error, entry);
             return None;
         }
         tree.files.insert(path, output);
@@ -432,7 +457,7 @@ fn walk(
         } else if tree.files.len() >= MAX_FILES {
             report.push(refusal(&Refused::from(ZipError::TooManyEntries)));
         } else {
-            match read_bounded(&entry.path(), MAX_BYTES - *total) {
+            match read_regular(&entry.path(), MAX_BYTES - *total) {
                 Ok(Some(bytes)) => {
                     *total += bytes.len() as u64;
                     tree.files.insert(path, bytes);
@@ -448,6 +473,26 @@ fn walk(
             }
         }
     }
+}
+
+/// The content of a regular file opened without following a link (a link
+/// put in place after the walk is not read), or `None` above `limit`.
+fn read_regular(path: &Path, limit: u64) -> std::io::Result<Option<Vec<u8>>> {
+    use std::io::Read as _;
+    let mut options = fs::OpenOptions::new();
+    options.read(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt as _;
+        options.custom_flags(libc::O_NOFOLLOW);
+    }
+    let file = options.open(path)?;
+    if !file.metadata()?.is_file() {
+        return Err(std::io::Error::other("not a regular file"));
+    }
+    let mut bytes = Vec::new();
+    file.take(limit.saturating_add(1)).read_to_end(&mut bytes)?;
+    Ok((bytes.len() as u64 <= limit).then_some(bytes))
 }
 
 /// Writes the files of `tree`, and only them, into a fresh folder only the
@@ -545,13 +590,10 @@ mod tests {
     }
 
     #[test]
-    fn left_out_entries_are_listed_never_extracted() {
-        let mut lying = Item::file("node_modules/x/index.js", b"tiny");
-        // A lie the reader would only see while inflating.
-        lying.declared_size = Some(5);
+    fn left_out_entries_are_listed_and_checked_but_never_kept() {
         let (tree, report) = read_zip(&zipwrite::archive(&[
             Item::file("manifest.json", b"{}"),
-            lying,
+            Item::file("node_modules/x/index.js", b"module.exports = 1;"),
             Item::stored(".env", b"SECRET=1"),
             Item::stored("dist/nova.lol-timers-1.0.0.ocpkg", b"pk"),
             Item::stored("tests/output/a.png", b"png"),
@@ -571,6 +613,24 @@ mod tests {
                 "tests/output/"
             ]
         );
+        // A left-out entry that lies about its size still refuses the
+        // archive: nothing hides where nobody reads.
+        let mut lying = Item::file("node_modules/x/index.js", &[b'a'; 4096]);
+        lying.declared_size = Some(5);
+        let (tree, report) = read_zip(&zipwrite::archive(&[
+            Item::file("manifest.json", b"{}"),
+            lying,
+        ]));
+        assert!(tree.is_none());
+        assert_eq!(codes(&report), ["sources.bomb"]);
+        // Only the wrapping folder itself is removed, with its slash.
+        let (tree, report) = read_zip(&zipwrite::archive(&[
+            Item::file("w/manifest.json", b"{}"),
+            Item::stored("wx/.env", b"SECRET=1"),
+        ]));
+        let tree = tree.unwrap_or_else(|| panic!("{:?}", codes(&report)));
+        assert_eq!(paths(&tree), ["manifest.json"]);
+        assert_eq!(tree.ignored.keys().collect::<Vec<_>>(), ["wx/.env"]);
     }
 
     #[test]

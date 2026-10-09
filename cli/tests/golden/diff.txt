@@ -2,16 +2,14 @@ Binary file assets/new.png added
 Binary file assets/old.png removed
 --- a/logic.ts
 +++ b/logic.ts
-@@ -1,7 +1,9 @@
+@@ -1,6 +1,7 @@
  export function start() {
 -  return 1;
 +  return 2;
  }
- 
  export function stop() {
    return 0;
  }
-+
 +export function reset() {}
 \ No newline at end of file
 --- a/manifest.json
@@ -23,6 +21,6 @@ Binary file assets/old.png removed
 +++ /dev/null
 @@ -1,1 +0,0 @@
 -Draft
-1 added, 2 modified, 2 removed; +4 -3 lines
+1 added, 2 modified, 2 removed; +3 -3 lines
 permission new: network:GET https://api.nova.gg/v1/timers
 review: full

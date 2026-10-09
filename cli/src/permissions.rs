@@ -5,8 +5,9 @@
 //!
 //! A network key names a route; the rest of its rule (path and query
 //! constraints, response bound) is its detail. An update whose route stays
-//! but whose detail changes asks for other authority too: such a key is
-//! `changed`, and, like an `added` one, calls for a full review.
+//! but gains a rule detail asks for other authority too: such a key is
+//! `changed` (widened), and, like an `added` one, calls for a full review,
+//! as the host asks the player again (`Permissions::widens`).
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -97,7 +98,9 @@ pub fn compare(previous: &Manifest, current: &Manifest) -> Comparison {
         .collect();
     let changed: Vec<String> = after
         .iter()
-        .filter(|(key, details)| before.get(*key).is_some_and(|old| old != *details))
+        // Widened: a rule of the route that the previous version did not
+        // have; dropping one of several rules narrows, which is no change.
+        .filter(|(key, details)| before.get(*key).is_some_and(|old| !details.is_subset(old)))
         .map(|(key, _)| key.clone())
         .collect();
     let review = if added.is_empty() && changed.is_empty() {
@@ -218,5 +221,19 @@ mod tests {
             json!("full"),
             "the JSON names the review"
         );
+    }
+
+    #[test]
+    fn dropping_one_of_several_rules_of_a_route_is_no_widening() {
+        let narrow = route("/v1/timers", json!({}));
+        let wide = route(
+            "/v1/timers",
+            json!({"queryParams": {"region": {"type": "string", "maxLength": 8}}}),
+        );
+        let before = manifest(json!({"network": [narrow.clone(), wide]}));
+        let after = manifest(json!({"network": [narrow]}));
+        let comparison = compare(&before, &after);
+        assert!(comparison.changed.is_empty() && comparison.added.is_empty());
+        assert_eq!(comparison.review, ReviewType::Quick);
     }
 }

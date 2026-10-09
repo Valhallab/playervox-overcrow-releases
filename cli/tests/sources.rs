@@ -143,15 +143,18 @@ fn admit(target: &Path, extra: &[&str]) -> (Output, Value) {
 fn an_archive_admits_to_the_same_package_as_its_folder() {
     let temporary = tempfile::tempdir().expect("temporary directory");
     let root = project(temporary.path());
-    // What a creator's folder also holds, never sent.
+    // What a creator's folder also holds, never sent: the folder and its
+    // archive leave out the same files, even inside assets/.
     fs::create_dir_all(root.join("node_modules/typescript")).expect("node_modules");
     fs::write(root.join("node_modules/typescript/package.json"), b"{}").expect("file");
     fs::write(root.join(".env"), b"TOKEN=secret").expect("file");
+    fs::create_dir_all(root.join("assets")).expect("assets");
+    fs::write(root.join("assets/.DS_Store"), b"finder").expect("file");
 
     let bundle = temporary.path().join("from-folder");
     let (output, report) = admit(&root, &["--out", path(&bundle)]);
     assert_eq!(output.status.code(), Some(0), "{report}");
-    assert_eq!(report["sources"], Value::Null);
+    assert_eq!(report["sources"]["kind"], "folder");
     let expected = fs::read(bundle.join("package.ocpkg")).expect("package");
 
     for (name, prefix, stored) in [
@@ -178,7 +181,11 @@ fn an_archive_admits_to_the_same_package_as_its_folder() {
             .iter()
             .map(|item| item["path"].as_str().expect("path"))
             .collect();
-        assert_eq!(ignored, [".env", ".gitignore", "node_modules/"], "{name}");
+        assert_eq!(
+            ignored,
+            [".env", ".gitignore", "assets/.DS_Store", "node_modules/"],
+            "{name}"
+        );
     }
 
     // The human report names the archive and what it left out.
@@ -188,7 +195,7 @@ fn an_archive_admits_to_the_same_package_as_its_folder() {
     let shown = text(&output.stdout);
     assert!(shown.contains("sources   archive,"), "{shown}");
     assert!(
-        shown.contains("left out  .env, .gitignore, node_modules/"),
+        shown.contains("left out  .env, .gitignore, assets/.DS_Store, node_modules/"),
         "{shown}"
     );
     // A listing file is part of the archive, never given beside it.
@@ -555,6 +562,11 @@ fn ids_follow_the_publisher_and_its_domains() {
         id_codes(&["--publisher", "nova"]),
         (Some(1), vec!["admission.id_not_owned".to_owned()])
     );
+    // The documentation's domain form is an example too.
+    assert_eq!(
+        id_codes(&[]),
+        (Some(1), vec!["admission.placeholder_id".to_owned()])
+    );
     edit_manifest(&root, |manifest| {
         manifest["id"] = json!("yourhandle.lol-timers")
     });
@@ -562,6 +574,23 @@ fn ids_follow_the_publisher_and_its_domains() {
         id_codes(&[]),
         (Some(1), vec!["admission.placeholder_id".to_owned()])
     );
+    // A handle nobody can register owns nothing.
+    for (id, code) in [
+        ("playervox.clock", "admission.reserved_id"),
+        ("admin.clock", "admission.reserved_id"),
+        ("com.clock", "admission.id_not_owned"),
+        ("ab.clock", "admission.id_not_owned"),
+    ] {
+        edit_manifest(&root, |manifest| manifest["id"] = json!(id));
+        assert_eq!(id_codes(&[]), (Some(1), vec![code.to_owned()]), "{id}");
+    }
+    edit_manifest(&root, |manifest| {
+        manifest["id"] = json!("contributor.clock")
+    });
+    assert_eq!(id_codes(&[]), (Some(0), vec![]));
+    // PlayerVox admits the widgets of its repository as before.
+    edit_manifest(&root, |manifest| manifest["id"] = json!("nova.lol-timers"));
+    assert_eq!(id_codes(&["--publisher", "playervox"]), (Some(0), vec![]));
     for usage in [
         &["--domain", "nova.gg"][..],
         &["--publisher", "Nova"],
@@ -613,12 +642,12 @@ fn versions(parent: &Path) -> (PathBuf, PathBuf) {
     .unwrap();
     fs::write(
         old.join("logic.ts"),
-        "export function start() {\n  return 1;\n}\n\nexport function stop() {\n  return 0;\n}\n",
+        "export function start() {\n  return 1;\n}\nexport function stop() {\n  return 0;\n}\n",
     )
     .unwrap();
     fs::write(
         new.join("logic.ts"),
-        "export function start() {\n  return 2;\n}\n\nexport function stop() {\n  return 0;\n}\n\nexport function reset() {}",
+        "export function start() {\n  return 2;\n}\nexport function stop() {\n  return 0;\n}\nexport function reset() {}",
     )
     .unwrap();
     fs::write(old.join("LICENSE"), "MIT\n").unwrap();
@@ -700,14 +729,17 @@ fn diff_refuses_a_hostile_side_and_bad_usage() {
     let value = json_of(&output);
     assert_eq!(value["compared"], false);
     assert_eq!(codes(&value), ["sources.unsafe_name"]);
+    let missing = temporary.path().join("missing.zip");
     for args in [
         &["diff", path(&old)][..],
         &["diff", path(&old), path(&old), path(&old)],
         &["diff", path(&old), "no-such-folder"],
+        &["diff", path(&old), path(&missing)],
         &["diff", path(&old), path(&old), "--bogus"],
     ] {
         assert_eq!(cli(args).status.code(), Some(2), "{args:?}");
     }
+    assert_eq!(cli(&["admit", path(&missing)]).status.code(), Some(2));
     let names: BTreeSet<String> = files(temporary.path()).into_iter().collect();
     assert!(!names.contains("x"));
 }

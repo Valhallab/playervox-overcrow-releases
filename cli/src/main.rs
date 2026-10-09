@@ -309,21 +309,16 @@ fn run_admit(arguments: &Arguments) -> Result<ExitCode, String> {
     let listing = arguments.value("--listing").map(Path::new);
     let source_map = arguments.value("--source-map");
     let mut report = Report::default();
-    // A source ZIP is admitted from the private folder it is written to,
-    // which lives until the end of the command.
+    // Sources, a folder or a ZIP, are read as the creator space receives
+    // them and admitted from the private folder they are written to, which
+    // lives until the end of the command.
     let mut work = None;
     let mut sources = None;
-    let input = if target.is_dir() {
+    let input = if let Some(source) = sourcetree::Input::of(&target) {
         if listing.is_some() {
-            return Err("--listing is for an archive; a source directory has listing.json".into());
+            return Err("--listing is for a package; the sources hold listing.json".into());
         }
-        admit::Input::Source(&target)
-    } else if sourcetree::is_zip(&target) && target.is_file() {
-        if listing.is_some() {
-            return Err("--listing is for a package; a source ZIP holds listing.json".into());
-        }
-        let Some(tree) = sourcetree::read(&sourcetree::Input::Archive(target.clone()), &mut report)
-        else {
+        let Some(tree) = sourcetree::read(&source, &mut report) else {
             let value = admit::refused_before_identity(&report, &publisher, None);
             match format {
                 Format::Json => println!("{}", sanitize::json(&value.to_string())),
@@ -332,7 +327,8 @@ fn run_admit(arguments: &Arguments) -> Result<ExitCode, String> {
                     print!("{}", admit::render_human(&value));
                 }
             }
-            return Ok(ExitCode::from(1));
+            let status = if sourcetree::io_failed(&report) { 2 } else { 1 };
+            return Ok(ExitCode::from(status));
         };
         sources = Some(tree.summary_json());
         let folder = match sourcetree::materialize(&tree) {
@@ -404,12 +400,9 @@ fn run_admit(arguments: &Arguments) -> Result<ExitCode, String> {
 
 /// `--publisher HANDLE` and its `--domain DOMAIN` options: the grammar of
 /// the catalog (the creator space applies its registration policy).
-/// `playervox` always owns `playervox.com`.
 fn publisher(arguments: &Arguments) -> Result<admit::Publisher, String> {
-    use overcrow_widget_schema::identifiers::{
-        PLAYERVOX_DOMAIN, PLAYERVOX_HANDLE, domain_syntax, handle_syntax,
-    };
-    let mut domains: Vec<String> = arguments.values("--domain").map(str::to_owned).collect();
+    use overcrow_widget_schema::identifiers::{domain_syntax, handle_syntax};
+    let domains: Vec<String> = arguments.values("--domain").map(str::to_owned).collect();
     let Some(handle) = arguments.value("--publisher") else {
         if domains.is_empty() {
             return Ok(admit::Publisher::Unknown);
@@ -423,9 +416,6 @@ fn publisher(arguments: &Arguments) -> Result<admit::Publisher, String> {
     }
     if let Some(domain) = domains.iter().find(|domain| domain_syntax(domain).is_err()) {
         return Err(format!("`{domain}` is not a publisher domain"));
-    }
-    if handle == PLAYERVOX_HANDLE && !domains.iter().any(|domain| domain == PLAYERVOX_DOMAIN) {
-        domains.push(PLAYERVOX_DOMAIN.to_owned());
     }
     Ok(admit::Publisher::Handle {
         handle: handle.to_owned(),

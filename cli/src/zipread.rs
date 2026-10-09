@@ -88,6 +88,9 @@ pub struct Entry {
     deflated: bool,
     crc32: u32,
     data_start: u64,
+    /// Under `strict_layout`, the inflater must use every compressed byte:
+    /// nothing may follow the end of the deflate stream.
+    exact: bool,
 }
 
 /// Why an archive or an entry is refused.
@@ -158,6 +161,11 @@ const LOCAL_SIGNATURE: u32 = 0x0403_4b50;
 const DESCRIPTOR_SIGNATURE: u32 = 0x0807_4b50;
 const ZIP64_LOCATOR_SIGNATURE: u32 = 0x0706_4b50;
 const ZIP64_EXTRA_ID: u16 = 0x0001;
+const STRONG_ENCRYPTION_EXTRA_ID: u16 = 0x0017;
+const AES_EXTRA_ID: u16 = 0x9901;
+/// Info-ZIP's Unicode path and comment fields: another name for the entry.
+const UNICODE_PATH_EXTRA_ID: u16 = 0x7075;
+const UNICODE_COMMENT_EXTRA_ID: u16 = 0x6375;
 const END_BYTES: u64 = 22;
 const CENTRAL_BYTES: usize = 46;
 const LOCAL_BYTES: usize = 30;
@@ -265,8 +273,16 @@ fn check_extra(extra: &[u8]) -> Result<(), ZipError> {
         let record = extra
             .get(cursor..cursor + 4)
             .ok_or(ZipError::Invalid("malformed extra field"))?;
-        if u16_at(record, 0) == ZIP64_EXTRA_ID {
-            return Err(ZipError::Invalid(ZIP64));
+        match u16_at(record, 0) {
+            ZIP64_EXTRA_ID => return Err(ZipError::Invalid(ZIP64)),
+            AES_EXTRA_ID | STRONG_ENCRYPTION_EXTRA_ID => {
+                return Err(ZipError::Invalid(ENCRYPTED));
+            }
+            // Another name or comment than the one checked and reviewed.
+            UNICODE_PATH_EXTRA_ID | UNICODE_COMMENT_EXTRA_ID => {
+                return Err(ZipError::Invalid("alternate name or comment field"));
+            }
+            _ => {}
         }
         cursor += 4 + usize::from(u16_at(record, 2));
     }
@@ -446,7 +462,9 @@ pub fn entries_with<R: Read + Seek>(
         if !safe_name(&path) || (rules.portable_names && !path.split('/').all(portable_component)) {
             return Err(refuse(ZipError::UnsafeName));
         }
-        if directory_entry && (size != 0 || crc32 != 0) {
+        // An empty deflate stream takes two bytes; a folder holds nothing
+        // more (and `sourcetree` inflates it to check).
+        if directory_entry && (size != 0 || crc32 != 0 || compressed > 2) {
             return Err(refuse(ZipError::Invalid("folder entry with data")));
         }
         if rules.attributes {
@@ -510,6 +528,7 @@ pub fn entries_with<R: Read + Seek>(
                 deflated,
                 crc32,
                 data_start: 0,
+                exact: rules.strict_layout,
             },
             flags,
             method,
@@ -577,28 +596,39 @@ pub fn entries_with<R: Read + Seek>(
     Ok(checked)
 }
 
-/// Under `portable_names`: no file is also a folder that another entry
-/// names or implies, whatever the case.
+/// Under `portable_names`: every folder is spelled one way, whatever the
+/// case (a case-insensitive file system would merge `Docs/` and `docs/`),
+/// and no file is also a folder that another entry names or implies.
 fn check_file_folder_clashes(found: &[Pending]) -> Result<(), Refused> {
-    let mut folders = std::collections::HashSet::new();
+    let refuse = |name: &str, rule: &'static str| Refused {
+        error: ZipError::Invalid(rule),
+        entry: Some(name.to_owned()),
+    };
+    // Lowercase folder path -> its spelling.
+    let mut folders: std::collections::HashMap<String, &str> = std::collections::HashMap::new();
     for pending in found {
-        let lower = pending.entry.name.to_ascii_lowercase();
-        let mut prefix = lower.as_str();
-        while let Some((parent, _)) = prefix.rsplit_once('/') {
-            folders.insert(parent.to_owned());
-            prefix = parent;
-        }
-        if pending.entry.directory {
-            folders.insert(lower);
+        let name = pending.entry.name.as_str();
+        let mut folder = if pending.entry.directory {
+            Some(name)
+        } else {
+            name.rsplit_once('/').map(|(parent, _)| parent)
+        };
+        while let Some(path) = folder {
+            match folders.get(&path.to_ascii_lowercase()) {
+                // Its parents were recorded with it.
+                Some(spelling) if *spelling == path => break,
+                Some(_) => return Err(refuse(name, DUPLICATE)),
+                None => {
+                    folders.insert(path.to_ascii_lowercase(), path);
+                }
+            }
+            folder = path.rsplit_once('/').map(|(parent, _)| parent);
         }
     }
     match found.iter().find(|pending| {
-        !pending.entry.directory && folders.contains(&pending.entry.name.to_ascii_lowercase())
+        !pending.entry.directory && folders.contains_key(&pending.entry.name.to_ascii_lowercase())
     }) {
-        Some(pending) => Err(Refused {
-            error: ZipError::Invalid(FILE_IS_FOLDER),
-            entry: Some(pending.entry.name.clone()),
-        }),
+        Some(pending) => Err(refuse(&pending.entry.name, FILE_IS_FOLDER)),
         None => Ok(()),
     }
 }
@@ -627,12 +657,18 @@ fn check_local<R: Read + Seek>(
     if u16_at(&local, 6) != pending.flags || u16_at(&local, 8) != pending.method {
         return Err(disagrees);
     }
-    // With a data descriptor (bit 3) the local fields may be zero.
-    if pending.flags & DESCRIPTOR_FLAG == 0
-        && (u32_at(&local, 14) != entry.crc32
-            || u64::from(u32_at(&local, 18)) != entry.compressed
-            || u64::from(u32_at(&local, 22)) != entry.size)
-    {
+    // With a data descriptor (bit 3) the local fields may be zero; under
+    // `strict_layout`, each is then zero or the directory's value, so that a
+    // streaming reader sees what this one sees.
+    let fields = [
+        (u32_at(&local, 14), entry.crc32),
+        (u32_at(&local, 18), entry.compressed as u32),
+        (u32_at(&local, 22), entry.size as u32),
+    ];
+    let streamed = pending.flags & DESCRIPTOR_FLAG != 0;
+    if fields.iter().any(|(local, central)| {
+        local != central && (!streamed || (rules.strict_layout && *local != 0))
+    }) {
         return Err(disagrees);
     }
     let name_length = u64::from(u16_at(&local, 26));
@@ -706,11 +742,25 @@ pub fn extract<R: Read + Seek, W: Write>(
         .seek(SeekFrom::Start(entry.data_start))
         .map_err(|_| ZipError::Io)?;
     let raw = reader.by_ref().take(entry.compressed);
-    let mut source: Box<dyn Read + '_> = if entry.deflated {
-        Box::new(flate2::read::DeflateDecoder::new(raw))
+    if entry.deflated {
+        let mut decoder = flate2::read::DeflateDecoder::new(raw);
+        copy_checked(&mut decoder, entry, output)?;
+        if entry.exact && decoder.total_in() != entry.compressed {
+            return Err(ZipError::Invalid(HIDDEN_DATA));
+        }
+        Ok(())
     } else {
-        Box::new(raw)
-    };
+        copy_checked(&mut { raw }, entry, output)
+    }
+}
+
+/// Copies `source` to `output`: exactly the entry's declared size, with
+/// its CRC-32.
+fn copy_checked<W: Write>(
+    source: &mut impl Read,
+    entry: &Entry,
+    output: &mut W,
+) -> Result<(), ZipError> {
     let mut hasher = crc32fast::Hasher::new();
     let mut buffer = vec![0_u8; 64 * 1024];
     let mut written = 0_u64;
@@ -1399,5 +1449,72 @@ mod tests {
         assert_eq!(read(&folder).unwrap_err(), ZipError::UnsafeName);
         let accented = zipwrite::archive(&[Item::stored("tools/caf\u{e9}", b"x")]);
         assert!(read(&accented).is_ok());
+    }
+
+    #[test]
+    fn nothing_may_hide_inside_an_entry() {
+        // Bytes after the end of the deflate stream.
+        let mut padded = Item::file("notes.txt", DATA);
+        padded.trailing = vec![b'x'; 300];
+        let bytes = zipwrite::archive(&[padded.clone()]);
+        let found = read_sources(&bytes).unwrap();
+        let mut output = Vec::new();
+        assert_eq!(
+            extract(&mut Cursor::new(&bytes), &found[0], &mut output).unwrap_err(),
+            ZipError::Invalid(HIDDEN_DATA)
+        );
+        // The creator tools reader keeps its behavior.
+        let bytes = zipwrite::archive(&[Item {
+            name: b"tools/a".to_vec(),
+            ..padded
+        }]);
+        let found = read(&bytes).unwrap();
+        assert!(extract(&mut Cursor::new(&bytes), &found[0], &mut Vec::new()).is_ok());
+        // A folder entry holds at most an empty deflate stream.
+        let mut empty = Item::folder("docs/");
+        empty.deflate = true;
+        assert!(read_sources(&zipwrite::archive(&[empty.clone()])).is_ok());
+        empty.trailing = vec![0; 64];
+        assert!(matches!(
+            refusal(&zipwrite::archive(&[empty])),
+            ZipError::Invalid(_)
+        ));
+        // Another name in an Info-ZIP Unicode path field.
+        let mut alias = vec![0x75, 0x70, 10, 0, 1, 0, 0, 0, 0];
+        alias.extend(b"x.ts");
+        alias.push(0);
+        assert!(matches!(
+            refusal(&zipwrite::archive(&[
+                Item::file("logic.ts", DATA).extra(&alias)
+            ])),
+            ZipError::Invalid(_)
+        ));
+    }
+
+    #[test]
+    fn a_streamed_local_header_is_zero_or_the_truth() {
+        let mut item = Item::file("logic.ts", DATA).descriptor(true);
+        let truth = read_sources(&zipwrite::archive(&[item.clone()])).unwrap();
+        assert_eq!(truth.len(), 1);
+        item.local_fields = Some([1, 2, 3]);
+        assert!(matches!(
+            refusal(&zipwrite::archive(&[item.clone()])),
+            ZipError::Invalid(_)
+        ));
+        // The creator tools reader does not look at them.
+        item.name = b"tools/a".to_vec();
+        assert!(read(&zipwrite::archive(&[item])).is_ok());
+    }
+
+    #[test]
+    fn a_folder_has_one_spelling() {
+        let bytes = zipwrite::archive(&[
+            Item::stored("Docs/a.md", b"a"),
+            Item::stored("docs/b.md", b"b"),
+        ]);
+        assert_eq!(refusal(&bytes), ZipError::Invalid(DUPLICATE));
+        let bytes =
+            zipwrite::archive(&[Item::folder("Assets/"), Item::stored("assets/a.png", b"x")]);
+        assert_eq!(refusal(&bytes), ZipError::Invalid(DUPLICATE));
     }
 }

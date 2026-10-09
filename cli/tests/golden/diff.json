@@ -10,7 +10,8 @@
       "newSha256": "28797f5dbab1aa4d2c30a859df9aaabaa0556ccefdea8a2dddb7c46140652dc5",
       "oldSha256": null,
       "path": "assets/new.png",
-      "status": "added"
+      "status": "added",
+      "tooLarge": false
     },
     {
       "additions": 0,
@@ -20,10 +21,11 @@
       "newSha256": null,
       "oldSha256": "04542ebe95646d84b002474c94faaa8ccadb316de0e25082bdb11c75e123b400",
       "path": "assets/old.png",
-      "status": "removed"
+      "status": "removed",
+      "tooLarge": false
     },
     {
-      "additions": 3,
+      "additions": 2,
       "binary": false,
       "deletions": 1,
       "hunks": [
@@ -33,24 +35,23 @@
             "-  return 1;",
             "+  return 2;",
             " }",
-            " ",
             " export function stop() {",
             "   return 0;",
             " }",
-            "+",
             "+export function reset() {}",
             "\\ No newline at end of file"
           ],
-          "newLines": 9,
+          "newLines": 7,
           "newStart": 1,
-          "oldLines": 7,
+          "oldLines": 6,
           "oldStart": 1
         }
       ],
-      "newSha256": "baff52bc4de1747b22aa931fc7f0c77b30a8885007fb75050d5a925778a9618d",
-      "oldSha256": "239fd1459cd4f20a65b1a9eed820cf6a7b2ad12cb4ed9130746fd9708def37d1",
+      "newSha256": "d6456beff08de07060914bf2210932ae358106916a896c1e6a3c8172fb41ce67",
+      "oldSha256": "c9da2d59ce0e0668e1f2ce2368341ac567190e4fdd6bacc38e6f295d6fc50e62",
       "path": "logic.ts",
-      "status": "modified"
+      "status": "modified",
+      "tooLarge": false
     },
     {
       "additions": 1,
@@ -71,7 +72,8 @@
       "newSha256": "8fd870e33a72462e6b8b7dd09eab213251332587fbeaf1a990cff23f1f1a9e77",
       "oldSha256": "2cafc9767a9a13b73907dfa0aed2f6f77737eee83de88281d2d2e45c86b26323",
       "path": "manifest.json",
-      "status": "modified"
+      "status": "modified",
+      "tooLarge": false
     },
     {
       "additions": 0,
@@ -91,12 +93,13 @@
       "newSha256": null,
       "oldSha256": "2cbfaf4c20c7513d1df2526f07cd40d1a473289ed319b7b9eec5074a7f01b60c",
       "path": "notes.md",
-      "status": "removed"
+      "status": "removed",
+      "tooLarge": false
     }
   ],
   "formatVersion": 1,
   "new": {
-    "bytes": 475,
+    "bytes": 473,
     "files": 4,
     "id": "nova.lol-timers",
     "ignored": [],
@@ -106,7 +109,7 @@
     "version": "1.1.0"
   },
   "old": {
-    "bytes": 374,
+    "bytes": 373,
     "files": 5,
     "id": "nova.lol-timers",
     "ignored": [],
@@ -125,7 +128,7 @@
   },
   "totals": {
     "added": 1,
-    "additions": 4,
+    "additions": 3,
     "deletions": 3,
     "modified": 2,
     "removed": 2

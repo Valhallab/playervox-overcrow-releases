@@ -71,7 +71,7 @@ JS
     printf '%s\n' '{"author":"Example","spdxLicense":"MIT","sourceUrl":"https://github.com/example/counter","defaultLocale":"en","localizations":[{"locale":"en","name":"Counter","description":"Counts."}]}' \
         >"$directory/listing.json"
 }
-widget example-counter com.playervox.overcrow.example-counter
+widget example-counter com.example.counter
 widget playervox-counter com.playervox.overcrow.smoke-counter
 /usr/bin/git -C "$repository" add -A
 /usr/bin/git -C "$repository" commit --quiet -m 'trusted driver fixture'
@@ -193,7 +193,7 @@ tab=$(printf '\t')
         seen[$2 " " $3 " " $4 " " $5] = 1
     }
     END {
-        exit (("widgets/example-counter playervox com.playervox.overcrow.example-counter 0.1.0" in seen) \
+        exit (("widgets/example-counter playervox com.example.counter 0.1.0" in seen) \
             && ("widgets/new-third-party third-party contributor.new-counter 0.1.0" in seen) \
             && ("widgets/playervox-counter playervox com.playervox.overcrow.smoke-counter 0.1.0" in seen)) ? 0 : 1
     }' "$stdout" || report_failure 'the receipt artifacts are wrong'

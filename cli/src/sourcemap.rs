@@ -46,24 +46,67 @@ pub struct Named {
     pub name: String,
 }
 
-/// Zero-based line and UTF-16 column of every byte offset of a text.
-struct Lines<'a> {
-    text: &'a str,
-    starts: Vec<usize>,
+/// Line breaks as JavaScript, and oxc's maps, count them: `\n`, `\r\n`,
+/// `\r`, U+2028 and U+2029. Returns the byte offset after each break.
+fn line_starts(text: &str) -> Vec<usize> {
+    let mut starts = vec![0];
+    let mut characters = text.char_indices().peekable();
+    while let Some((at, character)) = characters.next() {
+        match character {
+            '\r' if characters.peek().is_some_and(|(_, next)| *next == '\n') => {}
+            '\n' | '\r' | '\u{2028}' | '\u{2029}' => starts.push(at + character.len_utf8()),
+            _ => {}
+        }
+    }
+    starts
 }
 
-impl<'a> Lines<'a> {
-    fn new(text: &'a str) -> Self {
-        let mut starts = vec![0];
-        starts.extend(text.match_indices('\n').map(|(at, _)| at + 1));
-        Self { text, starts }
+/// The number of line breaks in `text`, counted as [`line_starts`] does.
+pub fn line_breaks(text: &str) -> u32 {
+    (line_starts(text).len() - 1) as u32
+}
+
+/// Zero-based line and UTF-16 column of every byte offset of a text, in
+/// constant time: one pass builds the line starts and, for a text that is
+/// not ASCII, the UTF-16 units before each byte.
+struct Lines {
+    starts: Vec<usize>,
+    /// UTF-16 units before each byte offset; `None` for ASCII text.
+    units: Option<Vec<u32>>,
+}
+
+impl Lines {
+    fn new(text: &str) -> Self {
+        let units = (!text.is_ascii()).then(|| {
+            let mut units = Vec::with_capacity(text.len() + 1);
+            let mut count = 0_u32;
+            for character in text.chars() {
+                for _ in 0..character.len_utf8() {
+                    units.push(count);
+                }
+                count += character.len_utf16() as u32;
+            }
+            units.push(count);
+            units
+        });
+        Self {
+            starts: line_starts(text),
+            units,
+        }
     }
 
     fn position(&self, offset: u32) -> (u32, u32) {
-        let offset = (offset as usize).min(self.text.len());
+        let offset = offset as usize;
         let line = self.starts.partition_point(|start| *start <= offset) - 1;
-        let column = self.text[self.starts[line]..offset].encode_utf16().count();
-        (line as u32, column as u32)
+        let start = self.starts[line];
+        let column = match &self.units {
+            Some(units) => {
+                let last = units.len() - 1;
+                units[offset.min(last)] - units[start.min(last)]
+            }
+            None => (offset - start) as u32,
+        };
+        (line as u32, column)
     }
 }
 
@@ -84,8 +127,8 @@ pub fn functions(name: &str, source: &str, source_type: SourceType) -> Vec<Named
     collector.found
 }
 
-struct Collector<'s> {
-    lines: Lines<'s>,
+struct Collector {
+    lines: Lines,
     /// The name the next function takes: its variable, property or method.
     pending: Option<String>,
     /// Names of the enclosing classes.
@@ -94,7 +137,7 @@ struct Collector<'s> {
     found: Vec<Named>,
 }
 
-impl Collector<'_> {
+impl Collector {
     fn record(&mut self, own: Option<&str>, span: Span) {
         let name = if self.view_table {
             Some(format!("view expression {}", self.found.len()))
@@ -120,7 +163,7 @@ impl Collector<'_> {
     }
 }
 
-impl<'a> Visit<'a> for Collector<'_> {
+impl<'a> Visit<'a> for Collector {
     fn visit_function(&mut self, it: &Function<'a>, flags: ScopeFlags) {
         let own = it.id.as_ref().map(|id| id.name.as_str());
         self.record(own, it.span);
@@ -301,5 +344,30 @@ mod tests {
         let lines = Lines::new("a\n\u{1f600}x\n");
         assert_eq!(lines.position(2 + 4), (1, 2));
         assert_eq!(lines.position(0), (0, 0));
+    }
+
+    #[test]
+    fn lines_break_where_javascript_breaks_them() {
+        let text = "a\r\nb\rc\u{2028}d\u{2029}e\nf";
+        assert_eq!(line_breaks(text), 5);
+        let lines = Lines::new(text);
+        let at = |needle: char| lines.position(text.find(needle).unwrap() as u32);
+        assert_eq!(at('b'), (1, 0));
+        assert_eq!(at('c'), (2, 0));
+        assert_eq!(at('d'), (3, 0));
+        assert_eq!(at('e'), (4, 0));
+        assert_eq!(at('f'), (5, 0));
+    }
+
+    #[test]
+    fn many_functions_on_one_line_stay_linear() {
+        // 50,000 methods on one line, after a character outside ASCII.
+        let source = format!("\u{e9};class C{{{}}}", "a(){}".repeat(50_000));
+        let found = functions("logic.ts", &source, SourceType::ts());
+        assert_eq!(found.len(), 50_000);
+        assert_eq!(found[1].name, "C.a");
+        // One UTF-16 unit for `é`, then five per method.
+        assert_eq!(found[1].start.1 - found[0].start.1, 5);
+        assert!(found[0].start.1 < 14, "{:?}", found[0]);
     }
 }

@@ -25,7 +25,9 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use overcrow_widget_schema::catalog::validate_listing;
-use overcrow_widget_schema::identifiers::{EXAMPLE_HANDLES, OwnershipError, id_owner};
+use overcrow_widget_schema::identifiers::{
+    EXAMPLE_HANDLES, HandleError, OwnershipError, id_owner, validate_handle,
+};
 use overcrow_widget_schema::json::parse_strict;
 use overcrow_widget_schema::limits::{
     MAX_HTTP_RESPONSE_BYTES, MAX_MANIFEST_BYTES, MAX_PACKAGE_BYTES, MAX_PREVIEW_BYTES,
@@ -55,12 +57,14 @@ pub const REPORT_FORMAT: u64 = 1;
 
 /// Who submits. A publisher of the creator space owns `<handle>.<name>` IDs
 /// and the IDs under its verified domains (`identifiers::id_owner`); only
-/// `playervox` owns `com.playervox.*`. The marketplace CI passes
-/// `--publisher playervox` for reviewed pushes and pull requests of the
-/// releases repository itself, never for a fork.
+/// `playervox` may use `com.playervox.*`. `playervox` is trusted as before:
+/// the marketplace CI passes `--publisher playervox` for reviewed pushes and
+/// pull requests of the releases repository itself, never for a fork, and
+/// admits every widget already merged there.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Publisher {
-    /// No publisher given: the ID is neither reserved nor an example.
+    /// No publisher given: the ID is neither reserved, nor an example, nor
+    /// under a handle nobody can register.
     Unknown,
     Handle {
         handle: String,
@@ -329,47 +333,60 @@ fn compare_submitted(path: &Path, findings: &mut Findings, report: &mut Report) 
 }
 
 /// An ID under an example handle (`nova`, `example`, `yourhandle`,
-/// `yourname`), alone or after `com`, `org` or `net`: copied from the
+/// `yourname`): `<example>.<name>`, or a domain form whose second label is
+/// one (`com.example.clock`, `gg.nova.lol-timers`). Copied from the
 /// documentation or left by `init`, and owned by nobody.
 pub fn is_example_id(id: &str) -> bool {
-    let mut segments = id.split('.');
-    let first = segments.next().unwrap_or_default();
-    let second = segments.next().unwrap_or_default();
-    EXAMPLE_HANDLES.contains(&first)
-        || (matches!(first, "com" | "org" | "net") && EXAMPLE_HANDLES.contains(&second))
+    let segments: Vec<&str> = id.split('.').collect();
+    EXAMPLE_HANDLES.contains(&segments[0])
+        || (segments.len() >= 3 && EXAMPLE_HANDLES.contains(&segments[1]))
 }
 
 fn check_identity(manifest: &Manifest, publisher: &Publisher, report: &mut Report) {
+    let id = &manifest.id;
+    let refuse = |code: &str, message: String| {
+        Diagnostic::error(code, message)
+            .in_file("manifest.json")
+            .help(ID_FORMS)
+    };
     let reserved = || {
-        Diagnostic::error(
+        refuse(
             "admission.reserved_id",
-            "com.playervox.* IDs are reserved for widgets published by PlayerVox",
+            "com.playervox.* IDs are reserved for widgets published by PlayerVox".into(),
         )
-        .in_file("manifest.json")
-        .help(ID_FORMS)
     };
     match publisher {
+        // PlayerVox admits the widgets of this repository, its own and the
+        // ones already reviewed and merged there: no ownership check.
+        _ if publisher.is_playervox() => {}
         Publisher::Unknown if manifest.has_reserved_id() => report.push(reserved()),
-        Publisher::Unknown if is_example_id(&manifest.id) => report.push(
-            Diagnostic::error(
-                "admission.placeholder_id",
-                format!("`{}` is an example ID: nobody can publish it", manifest.id),
-            )
-            .in_file("manifest.json")
-            .help(ID_FORMS),
-        ),
-        Publisher::Unknown => {}
-        Publisher::Handle { handle, domains } => match id_owner(&manifest.id, handle, domains) {
+        Publisher::Unknown if is_example_id(id) => report.push(refuse(
+            "admission.placeholder_id",
+            format!("`{id}` is an example ID: nobody can publish it"),
+        )),
+        // `<handle>.<name>` under a handle nobody can register.
+        Publisher::Unknown => {
+            if let Some((handle, _)) = id.split_once('.').filter(|(_, name)| !name.contains('.')) {
+                match validate_handle(handle) {
+                    Ok(()) => {}
+                    Err(HandleError::Reserved) => report.push(refuse(
+                        "admission.reserved_id",
+                        format!("`{id}` uses a reserved publisher handle"),
+                    )),
+                    Err(_) => report.push(refuse(
+                        "admission.id_not_owned",
+                        format!("no publisher can own `{id}`: `{handle}` cannot be a handle"),
+                    )),
+                }
+            }
+        }
+        Publisher::Handle { handle, domains } => match id_owner(id, handle, domains) {
             Ok(_) => {}
             Err(OwnershipError::Reserved) => report.push(reserved()),
-            Err(_) => report.push(
-                Diagnostic::error(
-                    "admission.id_not_owned",
-                    format!("`{}` is not an ID of the publisher {handle}", manifest.id),
-                )
-                .in_file("manifest.json")
-                .help(ID_FORMS),
-            ),
+            Err(_) => report.push(refuse(
+                "admission.id_not_owned",
+                format!("`{id}` is not an ID of the publisher {handle}"),
+            )),
         },
     }
 }

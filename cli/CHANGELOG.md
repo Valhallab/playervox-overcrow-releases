@@ -11,11 +11,13 @@ widget's sources and the embedded SDK.
 
 - `admit` takes a ZIP of the widget folder (`admit lol-timers.zip`), as the
   creator space receives it, and admits it to the same package as the
-  folder. The archive is read and inflated in memory under strict rules
+  folder; a folder is read the same way, leaving out what the creator
+  tools never send. The archive is read and inflated in memory under strict rules
   (32 MiB, 64 MiB and 2,000 files uncompressed; no link, special file,
   unsafe or non-portable name, duplicate, encryption, ZIP64, comment,
-  hidden byte or abnormal compression ratio), then only its validated
-  files are written into a private work folder. Hidden files,
+  hidden byte, alternate name or abnormal compression ratio; every entry
+  is inflated and checked, even the ones left out), then only its
+  validated files are written into a private work folder. Hidden files,
   `node_modules/`, `dist/` and the like are left out; one wrapping folder
   is accepted. New diagnostics: `sources.*`.
 - `package --source-map FILE` and `admit --source-map FILE` write the
@@ -23,15 +25,17 @@ widget's sources and the embedded SDK.
   functions (`x_overcrow_functions`). It never enters the package.
 - `diff <old> <new>`: the changes between two versions of a widget's
   sources (folders or ZIPs), unified, with line counts and the permission
-  keys added, widened and removed.
+  keys added, widened and removed. Texts above 1 MiB or 20,000 lines are
+  compared by digest only.
 - `admit --previous FILE` compares with the last approved version: same
   ID, higher version, and the permission keys
   (`network:GET https://…`, `storage`, `clipboardWrite`, `capability:…`,
   `gameEvent:…`) added, widened and removed, with the review type.
 - Widget IDs follow the creator space: `admit --publisher HANDLE
-  [--domain DOMAIN]…` checks that the ID belongs to the publisher;
-  without a publisher, example IDs (`nova.*`, `yourhandle.*`…) are
-  refused. `init` without `--id` writes `yourhandle.<dir>` and says to
+  [--domain DOMAIN]…` checks that the ID belongs to the publisher
+  (`playervox` stays trusted for the repository's widgets); without a
+  publisher, example IDs (`nova.*`, `yourhandle.*`, `gg.nova.*`…) and IDs
+  under a handle nobody can register are refused. `init` without `--id` writes `yourhandle.<dir>` and says to
   replace it. Messages give `nova.lol-timers` and `gg.nova.lol-timers` as
   examples.
 - The JSON reports of `admit` and `diff` and the exit status of every
