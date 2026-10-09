@@ -96,6 +96,16 @@ Developer, Edit Config), then restart Claude Desktop.
   widget from a template, install the SDK (it asks you first), check, test
   (it sees the images that differ), audit, package, prepare the
   submission.
+- **The widget ID** is final. Your assistant asks you for it: your
+  publisher handle in the OverCrow creator space and a name
+  (`valhallab.lol-timers`), or a domain you can verify
+  (`gg.valhallab.lol-timers`).
+- **The submission**: the server checks everything the creator space asks
+  for, then writes the ZIP of your widget's sources to `dist/`, without
+  `node_modules`, `dist`, hidden files or keys, and lists what it left out.
+  It also lists the texts to write: why the widget needs each permission,
+  the release notes and the description in English and French. Your
+  assistant drafts them with you.
 - **The audit** scores the widget out of 100 for security and for
   lightness, with a fix and an example from a
   [reference widget](widgets.md) for each finding: unused permissions,
@@ -108,9 +118,8 @@ Developer, Edit Config), then restart Claude Desktop.
 
 ## What it does not do
 
-- It never pushes, signs or publishes anything. It prepares the pull
-  request text and the commands; you run them. See
-  [publishing and review](publishing.md).
+- It never sends, signs or publishes anything. You send the ZIP and the
+  texts in the OverCrow creator space on overcrow.playervox.com.
 - It does not install your widget in OverCrow: trying it in a game is the
   [development channel](dev-channel.md) of the command-line tool.
 - It sends nothing about you: no telemetry, no account.

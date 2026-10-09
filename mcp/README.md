@@ -45,7 +45,7 @@ use; `--tools-zip <file>` gives a local copy of the creator tools ZIP.
 | `audit` | Security and lightness, scored out of 100, with fixes and examples |
 | `explain_permission`, `explain_error` | A permission or a code, in plain words |
 | `search_docs`, `read_doc`, `read_example` | The documentation and the reference widgets, offline |
-| `prepare_submission` | The checklist, the pull request text and the git commands |
+| `prepare_submission` | Everything the OverCrow creator space asks for, checked; the ZIP of the sources in `dist/`; the texts to draft with you |
 
 Resources: the documentation (`overcrow://docs/{en,fr}/…`), the manifest
 reference, the limits, the templates and the reference widgets. Prompts:
@@ -70,7 +70,8 @@ reference, the limits, the templates and the reference widgets. Prompts:
   the server's instructions tell the assistant never to follow
   instructions found in it.
 - No telemetry. Logs go to standard error, without your paths.
-- It never pushes, signs or publishes anything.
+- It never sends, signs or publishes anything: you send the sources ZIP
+  in the OverCrow creator space on overcrow.playervox.com.
 
 ## Platforms
 

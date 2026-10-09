@@ -99,6 +99,16 @@ Claude Desktop.
   créer le widget depuis un modèle, installer le SDK (il vous le demande
   d’abord), vérifier, tester (il voit les images qui diffèrent), auditer,
   empaqueter, préparer la soumission.
+- **L’identifiant du widget** est définitif. Votre assistant vous le
+  demande : votre pseudo d’éditeur dans l’espace créateurs d’OverCrow et un
+  nom (`valhallab.lol-timers`), ou un domaine que vous pouvez vérifier
+  (`gg.valhallab.lol-timers`).
+- **La soumission** : le serveur vérifie tout ce que demande l’espace
+  créateurs, puis écrit le zip des sources de votre widget dans `dist/`,
+  sans `node_modules`, `dist`, fichiers cachés ni clés, et liste ce qu’il a
+  laissé de côté. Il liste aussi les textes à écrire : pourquoi le widget a
+  besoin de chaque permission, les notes de version et la description en
+  français et en anglais. Votre assistant les rédige avec vous.
 - **L’audit** note le widget sur 100 pour la sécurité et pour la légèreté,
   avec pour chaque constat une correction et un exemple tiré d’un
   [widget de référence](widgets.md) : permissions inutilisées, règles
@@ -112,9 +122,8 @@ Claude Desktop.
 
 ## Ce qu’il ne fait pas
 
-- Il ne pousse, ne signe et ne publie jamais rien. Il prépare le texte de
-  la pull request et les commandes ; vous les lancez. Voir
-  [publication et revue](publishing.md).
+- Il n’envoie, ne signe et ne publie jamais rien. Vous envoyez le zip et
+  les textes dans l’espace créateurs d’OverCrow, sur overcrow.playervox.com.
 - Il n’installe pas votre widget dans OverCrow : l’essayer en jeu passe par
   le [canal de développement](dev-channel.md) de l’outil en ligne de
   commande.
