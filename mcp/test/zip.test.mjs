@@ -159,3 +159,13 @@ test("a corrupt deflate stream is refused, never thrown as another error", () =>
   broken.fill(0xff, entry.dataStart, entry.dataStart + entry.compressed);
   refused(broken, "invalid");
 });
+
+test("a name that is not UTF-8 is refused (found by the fuzzer)", () => {
+  const archive = makeZip([{ name: "root/xx", data: "x" }]);
+  const at = archive.indexOf(
+    Buffer.from("root/xx"),
+    archive.indexOf(Buffer.from([0x50, 0x4b, 0x01, 0x02])),
+  );
+  archive[at + 5] = 0xff;
+  refused(archive, "unsafe_name", "UTF-8");
+});

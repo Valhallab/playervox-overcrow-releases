@@ -168,9 +168,13 @@ export function readEntries(archive: Buffer, limits: ZipLimits): ZipEntry[] {
       throw new ZipError("invalid", "truncated central directory");
     }
     const nameBytes = Buffer.from(directory.subarray(nameStart, nameStart + nameLength));
-    const name = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(nameBytes, {
-      stream: false,
-    });
+    let name: string;
+    try {
+      name = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(nameBytes);
+    } catch {
+      // Found by test/fuzz-zip.mjs: a name that is not UTF-8 is refused, not thrown.
+      throw new ZipError("unsafe_name", "not UTF-8");
+    }
     if (!safeName(name)) throw new ZipError("unsafe_name", name.slice(0, 64));
     // Only regular files: no link, no directory, no device.
     let mode: number | null = null;

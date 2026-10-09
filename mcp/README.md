@@ -40,6 +40,7 @@ use; `--tools-zip <file>` gives a local copy of the creator tools ZIP.
 | `check` | Every problem, with file, line, code and fix |
 | `test` | The test scenarios; differing images are shown |
 | `update_reference_images` | Replaces reference images, after your confirmation |
+| `use_preview` | Copies a reference image to `assets/preview.png`, the marketplace preview |
 | `package`, `inspect` | The `.ocpkg`, its size and what it may do |
 | `audit` | Security and lightness, scored out of 100, with fixes and examples |
 | `explain_permission`, `explain_error` | A permission or a code, in plain words |
