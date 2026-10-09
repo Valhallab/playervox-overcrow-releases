@@ -394,24 +394,24 @@ dans le même sandbox. `overcrow-widget test` exécute la version que la CLI
 sandbox du système d’exploitation, le runtime refuse de s’exécuter et le
 dit ; la commande de test se termine alors avec le code 2.
 
-La CLI ne télécharge pas le runtime. Prenez-le dans la
-[release OverCrow 0.6.0-beta.1](https://github.com/Valhallab/playervox-overcrow-releases/releases/tag/v0.6.0-beta.1),
-vérifiez-le avec le `SHA256SUMS` de la release, puis placez-le dans le
-cache de la CLI :
+La première fois que `test` a besoin du runtime, il le télécharge : dans
+le ZIP des outils créateurs de la release OverCrow qui l’a publié, il ne
+garde que le runtime de votre plateforme, et seulement si son SHA-256 est
+celui que la CLI épingle. Le ZIP n’est pas conservé. Le runtime reste
+ensuite dans le cache de la CLI :
 
 | Plateforme | Chemin |
 | --- | --- |
-| Linux | `~/.cache/overcrow-widget/runtime/0.6.0-beta.1/overcrow-widget-headless-0.6.0-beta.1-linux-x86_64` (`$XDG_CACHE_HOME` au lieu de `~/.cache` s’il est défini), exécutable |
-| Windows | `%LOCALAPPDATA%\overcrow-widget\runtime\0.6.0-beta.1\overcrow-widget-headless-0.6.0-beta.1-windows-x86_64.exe` |
+| Linux | `~/.cache/overcrow-widget/runtime/0.6.0-beta.1/` (`$XDG_CACHE_HOME` au lieu de `~/.cache` s’il est défini) |
+| Windows | `%LOCALAPPDATA%\overcrow-widget\runtime\0.6.0-beta.1\` |
 
-```sh
-sha256sum --check --ignore-missing SHA256SUMS
-mkdir -p ~/.cache/overcrow-widget/runtime/0.6.0-beta.1
-install -m 755 overcrow-widget-headless-0.6.0-beta.1-linux-x86_64 \
-  ~/.cache/overcrow-widget/runtime/0.6.0-beta.1/
-```
+Pour travailler hors ligne, placez-y vous-même le runtime du ZIP des
+outils créateurs (exécutable sous Linux) : `test` le trouve et ne
+télécharge rien. Avec `--offline`, `test` ne télécharge jamais. Un proxy
+défini dans `HTTPS_PROXY` est utilisé.
 
-La CLI vérifie son SHA-256 avant chaque exécution. S’il manque, `test` dit
-où le placer. `--runtime <path>` exécute un autre runtime à la place, par
+La CLI vérifie son SHA-256 avant chaque exécution. Si un téléchargement
+échoue, rien n’est conservé et `test` propose de réessayer ou de passer
+`--runtime`. `--runtime <path>` exécute un autre runtime à la place, par
 exemple compilé depuis OverCrow ; la sortie dit alors que ce n’est pas le
 runtime épinglé.

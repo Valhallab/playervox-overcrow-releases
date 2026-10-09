@@ -34,22 +34,28 @@ elle utilise le dossier courant.
 ## Installation
 
 Chaque [release d’OverCrow](https://github.com/Valhallab/playervox-overcrow-releases/releases)
-contient l’outil pour Linux et Windows x86-64, avec sa licence, ses notices
-tierces et le `SHA256SUMS` de la release :
+contient les outils créateurs dans un seul ZIP,
+`overcrow-creator-tools-VERSION.zip` : l’outil pour Linux et Windows
+x86-64 avec sa licence et ses notices tierces, le runtime headless
+d’OverCrow qu’utilise [`test`](#test), un `README.txt` et un `SHA256SUMS`
+de tous les fichiers.
 
-| Plateforme | Fichier |
+| Plateforme | Fichier dans le ZIP |
 | --- | --- |
 | Linux | `overcrow-widget-VERSION-linux-x86_64` |
 | Windows | `overcrow-widget-VERSION-windows-x86_64.exe` |
 
-Vérifiez le fichier avec `SHA256SUMS`, renommez-le `overcrow-widget`
+Décompressez-le, vérifiez les fichiers, renommez l’outil `overcrow-widget`
 (`overcrow-widget.exe` sous Windows), rendez-le exécutable sous Linux
 (`chmod +x`) et placez-le dans votre `PATH`. Il n’a besoin de rien d’autre
 pour vérifier et empaqueter un widget. `overcrow-widget --version` donne sa
 version et celle du SDK qu’il embarque.
 
 ```sh
-sha256sum --check --ignore-missing SHA256SUMS
+unzip overcrow-creator-tools-VERSION.zip
+cd overcrow-creator-tools-VERSION
+sha256sum --check SHA256SUMS
+install -m 755 overcrow-widget-*-linux-x86_64 ~/.local/bin/overcrow-widget
 ```
 
 L’outil se compile aussi avec Rust depuis le
@@ -81,8 +87,6 @@ npm install --save-dev --save-exact @overcrow/sdk@1.0.0
 Gardez la version que l’outil embarque (`overcrow-widget --version`).
 `overcrow-widget doctor` signale l’absence de TypeScript, ainsi qu’un SDK
 dans `node_modules` dont la version diffère de celle que l’outil embarque.
-La CLI 1.0.0-beta.1 dit encore que le SDK n’est pas sur npm :
-`npm install` fonctionne quand même.
 
 ## Fichiers d’un projet
 
@@ -229,7 +233,8 @@ compare les images qu’il rend avec les références :
    diagnostic `test.scenario` dans son fichier ;
 3. elle exécute chaque scénario dans le [runtime headless](testing.md#le-runtime-headless)
    que l’outil épingle, ou celui donné par `--runtime`, et affiche la
-   version et le SHA-256 de ce runtime ;
+   version et le SHA-256 de ce runtime. La première fois, elle télécharge
+   le runtime épinglé ;
 4. elle compare chaque image capturée avec
    `tests/reference/<name>/<image>.png`. Une différence, un changement de
    taille ou une référence manquante fait échouer le scénario et écrit
@@ -237,7 +242,7 @@ compare les images qu’il rend avec les références :
    `<image>.diff.png`.
 
 Options : `--runtime <path>` (un autre programme `overcrow-widget-headless`),
-`--scenario <name>` (ce scénario seulement), `--update` (enregistre les
+`--offline` (ne jamais télécharger le runtime), `--scenario <name>` (ce scénario seulement), `--update` (enregistre les
 images capturées comme références : examinez-les avant de les commiter),
 `--format json`, `--no-typecheck`.
 

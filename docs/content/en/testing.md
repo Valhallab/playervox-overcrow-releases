@@ -380,23 +380,21 @@ the same sandbox. `overcrow-widget test` runs the version this CLI pins,
 system's sandbox the runtime refuses to run and says so; the test command
 then ends with status 2.
 
-The CLI does not download the runtime. Take it from the
-[OverCrow 0.6.0-beta.1 release](https://github.com/Valhallab/playervox-overcrow-releases/releases/tag/v0.6.0-beta.1),
-check it against the release's `SHA256SUMS`, and put it in the CLI's cache:
+The first time `test` needs the runtime, it downloads it: from the
+creator tools ZIP of the OverCrow release that published it, it keeps
+only your platform's runtime, and only once its SHA-256 is the one this
+CLI pins. The ZIP is not kept. The runtime then stays in the CLI's cache:
 
 | Platform | Path |
 | --- | --- |
-| Linux | `~/.cache/overcrow-widget/runtime/0.6.0-beta.1/overcrow-widget-headless-0.6.0-beta.1-linux-x86_64` (`$XDG_CACHE_HOME` instead of `~/.cache` when set), executable |
-| Windows | `%LOCALAPPDATA%\overcrow-widget\runtime\0.6.0-beta.1\overcrow-widget-headless-0.6.0-beta.1-windows-x86_64.exe` |
+| Linux | `~/.cache/overcrow-widget/runtime/0.6.0-beta.1/` (`$XDG_CACHE_HOME` instead of `~/.cache` when set) |
+| Windows | `%LOCALAPPDATA%\overcrow-widget\runtime\0.6.0-beta.1\` |
 
-```sh
-sha256sum --check --ignore-missing SHA256SUMS
-mkdir -p ~/.cache/overcrow-widget/runtime/0.6.0-beta.1
-install -m 755 overcrow-widget-headless-0.6.0-beta.1-linux-x86_64 \
-  ~/.cache/overcrow-widget/runtime/0.6.0-beta.1/
-```
+To work offline, put the runtime of the creator tools ZIP there yourself
+(executable on Linux): `test` finds it and downloads nothing. With
+`--offline`, `test` never downloads. A proxy set in `HTTPS_PROXY` is used.
 
-The CLI checks its SHA-256 before every run. When it is missing, `test`
-says where to put it. `--runtime <path>` runs another runtime instead,
-such as one built from OverCrow; the output then says it is not the pinned
-one.
+The CLI checks its SHA-256 before every run. When a download fails,
+nothing is kept and `test` says to try again or to pass `--runtime`.
+`--runtime <path>` runs another runtime instead, such as one built from
+OverCrow; the output then says it is not the pinned one.
