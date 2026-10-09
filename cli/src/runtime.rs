@@ -3,8 +3,9 @@
 //! pipeline with the same code as the application (ADR 0004 §3). The CLI
 //! never builds it. It comes either from `--runtime <path>`, or from the
 //! version this CLI pins, found in the user's cache and checked against its
-//! SHA-256 before every run. The CLI does not download it: the creator
-//! takes it from the OverCrow release that published it.
+//! SHA-256 before every run. When the cache does not hold it, the CLI
+//! downloads it from the OverCrow release that published it
+//! (`download.rs`), unless `--offline` forbids it.
 
 use std::io::Read as _;
 use std::path::{Path, PathBuf};
@@ -15,6 +16,8 @@ use overcrow_widget_scenario::SUPPORTED_SCENARIO_VERSIONS;
 use overcrow_widget_scenario::report::{INTERFACE_VERSION, RuntimeInfo};
 use overcrow_widget_schema::package::hex;
 use sha2::{Digest as _, Sha256};
+
+use crate::download::{self, Source};
 
 /// A runtime version and the SHA-256 of its executable per platform.
 pub struct Pin {
@@ -38,11 +41,6 @@ pub const PIN: Option<Pin> = Some(Pin {
         ),
     ],
 });
-
-/// The OverCrow release page that publishes the runtime of `version`.
-pub fn release_url(version: &str) -> String {
-    format!("https://github.com/Valhallab/playervox-overcrow-releases/releases/tag/v{version}")
-}
 
 /// The executable of a runtime is at most this large (a debug build of the
 /// runtime is several hundred megabytes).
@@ -93,11 +91,16 @@ pub struct Runtime {
 pub enum RuntimeError {
     /// Neither `--runtime` nor a pinned version for this platform.
     NotPinned,
-    /// The pinned version is not in the cache.
+    /// The pinned version is not in the cache, and `--offline` forbids
+    /// downloading it.
     Missing {
         path: PathBuf,
         version: &'static str,
-        sha256: &'static str,
+    },
+    /// Its download failed; nothing was kept.
+    Download {
+        version: &'static str,
+        error: crate::download::DownloadError,
     },
     /// The file's digest is not the pinned one.
     Digest {
@@ -117,17 +120,14 @@ impl std::fmt::Display for RuntimeError {
             Self::NotPinned => formatter.write_str(
                 "this CLI pins no headless runtime for this platform: pass --runtime <path to overcrow-widget-headless>",
             ),
-            Self::Missing {
-                path,
-                version,
-                sha256,
-            } => write!(
+            Self::Missing { path, version } => write!(
                 formatter,
-                "the pinned headless runtime {version} is not at {}: download {} from {}, check that its SHA-256 is {sha256}, and put it there{}; or pass --runtime",
+                "the headless runtime {version} is not in the cache ({}) and --offline forbids downloading it: run without --offline, or pass --runtime <path to overcrow-widget-headless>",
                 path.display(),
-                path.file_name().unwrap_or_default().to_string_lossy(),
-                release_url(version),
-                if cfg!(windows) { "" } else { " as an executable" },
+            ),
+            Self::Download { version, error } => write!(
+                formatter,
+                "cannot download the headless runtime {version}: {error}. Nothing was kept. Try again, or pass --runtime <path to overcrow-widget-headless>",
             ),
             Self::Digest { path, sha256 } => write!(
                 formatter,
@@ -166,6 +166,20 @@ pub fn digest(path: &Path) -> Result<String, RuntimeError> {
     Ok(hex(&digest))
 }
 
+/// The pin as `--version --format json` reports it (`runtime`), which
+/// `scripts/package-cli.sh` copies into `cli.json`: the release publisher
+/// then checks that the creator tools ZIP holds this very runtime.
+pub fn pin_json(pin: Option<&Pin>) -> serde_json::Value {
+    pin.map_or(serde_json::Value::Null, |pin| {
+        let digests: serde_json::Map<String, serde_json::Value> = pin
+            .artifacts
+            .iter()
+            .map(|(platform, digest)| ((*platform).to_owned(), (*digest).into()))
+            .collect();
+        serde_json::json!({"version": pin.version, "sha256": digests})
+    })
+}
+
 /// The pinned digest of this platform, if any.
 pub fn pinned_digest(pin: Option<&Pin>, platform: &str) -> Option<&'static str> {
     pin?.artifacts
@@ -176,8 +190,13 @@ pub fn pinned_digest(pin: Option<&Pin>, platform: &str) -> Option<&'static str> 
 
 /// Resolves the runtime: `explicit` as given (its digest is shown, and
 /// compared with the pin), or the pinned one from the cache, whose digest
-/// must match.
-pub fn resolve(explicit: Option<&Path>, pin: Option<&Pin>) -> Result<Runtime, RuntimeError> {
+/// must match. A pinned runtime missing from the cache is downloaded from
+/// `source`; with no source (`--offline`) it is an error.
+pub fn resolve(
+    explicit: Option<&Path>,
+    pin: Option<&Pin>,
+    source: Option<&Source>,
+) -> Result<Runtime, RuntimeError> {
     let platform = platform();
     let expected = pinned_digest(pin, &platform);
     let (path, sha256) = match explicit {
@@ -196,11 +215,35 @@ pub fn resolve(explicit: Option<&Path>, pin: Option<&Pin>) -> Result<Runtime, Ru
                 .join(pin.version)
                 .join(artifact_name(pin.version, &platform));
             if !path.is_file() {
-                return Err(RuntimeError::Missing {
-                    path,
+                let Some(source) = source else {
+                    return Err(RuntimeError::Missing {
+                        path,
+                        version: pin.version,
+                    });
+                };
+                let name = artifact_name(pin.version, &platform);
+                eprintln!(
+                    "Downloading the headless runtime {} ({})…",
+                    pin.version,
+                    download::archive_name(pin.version)
+                );
+                download::runtime(
+                    source,
+                    pin.version,
+                    &name,
+                    expected,
+                    &path,
+                    &mut download::Progress::new(),
+                )
+                .map_err(|error| RuntimeError::Download {
                     version: pin.version,
-                    sha256: expected,
-                });
+                    error,
+                })?;
+                eprintln!(
+                    "Headless runtime {} saved in {}",
+                    pin.version,
+                    path.parent().unwrap_or(&path).display()
+                );
             }
             let sha256 = digest(&path)?;
             if sha256 != expected {
@@ -322,15 +365,14 @@ mod tests {
                 "{platform}"
             );
         }
-        assert_eq!(
-            release_url(pin.version),
-            "https://github.com/Valhallab/playervox-overcrow-releases/releases/tag/v0.6.0-beta.1"
-        );
     }
 
     #[test]
     fn without_a_pin_the_runtime_must_be_given() {
-        assert!(matches!(resolve(None, None), Err(RuntimeError::NotPinned)));
+        assert!(matches!(
+            resolve(None, None, None),
+            Err(RuntimeError::NotPinned)
+        ));
     }
 
     #[test]

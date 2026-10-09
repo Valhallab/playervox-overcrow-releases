@@ -24,6 +24,7 @@ use serde_json::json;
 use crate::Format;
 use crate::build::{self, Built};
 use crate::diag::{Diagnostic, Report as Diagnostics};
+use crate::download;
 use crate::runtime::{self, Runtime};
 use crate::sanitize;
 
@@ -40,6 +41,8 @@ pub struct Options<'a> {
     pub typecheck: bool,
     pub format: Format,
     pub runtime: Option<&'a Path>,
+    /// Never download the pinned runtime.
+    pub offline: bool,
     pub update: bool,
     /// Only this scenario.
     pub only: Option<&'a str>,
@@ -128,7 +131,8 @@ pub fn run(root: &Path, options: &Options<'_>) -> ExitCode {
         eprintln!("overcrow-widget: {message} (https://overcrow.playervox.com/docs/en/testing/)");
         return ExitCode::from(1);
     }
-    let runtime = match runtime::resolve(options.runtime, runtime::PIN.as_ref()) {
+    let source = (!options.offline).then(download::Source::for_release);
+    let runtime = match runtime::resolve(options.runtime, runtime::PIN.as_ref(), source.as_ref()) {
         Ok(runtime) => runtime,
         Err(error) => {
             eprintln!("overcrow-widget: {error}");

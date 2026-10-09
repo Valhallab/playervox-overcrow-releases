@@ -127,16 +127,28 @@ fn stderr(output: &Output) -> String {
     String::from_utf8_lossy(&output.stderr).into_owned()
 }
 
-/// `test` without `--runtime`, with `cache` as the user's cache directory.
-fn cli_with_cache(root: &Path, cache: &Path) -> Output {
+/// `test` without `--runtime`, with `cache` as the user's cache directory
+/// and `releases` as the base URL of the downloads (a debug build only
+/// reads it; the distribution builds always download from GitHub).
+fn cli_with_cache(root: &Path, cache: &Path, releases: &str, args: &[&str]) -> Output {
     Command::new(env!("CARGO_BIN_EXE_overcrow-widget"))
         .arg("test")
         .arg(root)
         .arg("--no-typecheck")
+        .args(args)
         .env("XDG_CACHE_HOME", cache)
         .env("LOCALAPPDATA", cache)
+        .env("OVERCROW_WIDGET_TEST_RELEASES_URL", releases)
         .output()
         .expect("the CLI runs")
+}
+
+/// A base URL where nothing answers.
+fn unreachable() -> String {
+    let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("a free port");
+    let address = listener.local_addr().expect("its address");
+    drop(listener);
+    format!("http://{address}/download")
 }
 
 /// Where the pinned runtime is expected under `cache`.
@@ -152,24 +164,166 @@ fn pinned_path(cache: &Path) -> PathBuf {
         ))
 }
 
+/// A stored ZIP holding `data` under `name`.
+fn stored_zip(name: &str, data: &[u8]) -> Vec<u8> {
+    let crc = {
+        // CRC-32 (IEEE), bit by bit: test data is small.
+        let mut crc = !0_u32;
+        for byte in data {
+            crc ^= u32::from(*byte);
+            for _ in 0..8 {
+                crc = if crc & 1 == 1 {
+                    crc >> 1 ^ 0xedb8_8320
+                } else {
+                    crc >> 1
+                };
+            }
+        }
+        !crc
+    };
+    let size = (data.len() as u32).to_le_bytes();
+    let mut out = Vec::new();
+    out.extend(0x0403_4b50_u32.to_le_bytes());
+    out.extend([20, 0, 0, 0, 0, 0, 0, 0, 0x21, 0]);
+    out.extend(crc.to_le_bytes());
+    out.extend(size);
+    out.extend(size);
+    out.extend((name.len() as u16).to_le_bytes());
+    out.extend([0, 0]);
+    out.extend(name.as_bytes());
+    out.extend(data);
+    let directory = out.len() as u32;
+    let mut central = Vec::new();
+    central.extend(0x0201_4b50_u32.to_le_bytes());
+    central.extend([0x1e, 3, 20, 0, 0, 0, 0, 0, 0, 0, 0x21, 0]);
+    central.extend(crc.to_le_bytes());
+    central.extend(size);
+    central.extend(size);
+    central.extend((name.len() as u16).to_le_bytes());
+    central.extend([0; 8]);
+    central.extend((0o100_755_u32 << 16).to_le_bytes());
+    central.extend(0_u32.to_le_bytes());
+    central.extend(name.as_bytes());
+    out.extend(&central);
+    out.extend(0x0605_4b50_u32.to_le_bytes());
+    out.extend([0, 0, 0, 0, 1, 0, 1, 0]);
+    out.extend((central.len() as u32).to_le_bytes());
+    out.extend(directory.to_le_bytes());
+    out.extend([0, 0]);
+    out
+}
+
+/// A local server answering every request with `body`; returns its base
+/// URL and the paths it was asked for.
+fn serve(body: Vec<u8>) -> (String, std::sync::Arc<std::sync::Mutex<Vec<String>>>) {
+    use std::io::{BufRead as _, Write as _};
+    let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("a free port");
+    let address = listener.local_addr().expect("its address");
+    let paths = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+    let seen = paths.clone();
+    std::thread::spawn(move || {
+        for stream in listener.incoming() {
+            let Ok(mut stream) = stream else { return };
+            let mut reader = std::io::BufReader::new(stream.try_clone().expect("stream"));
+            let mut line = String::new();
+            let _ = reader.read_line(&mut line);
+            seen.lock()
+                .expect("paths")
+                .push(line.split(' ').nth(1).unwrap_or("").to_owned());
+            loop {
+                let mut header = String::new();
+                if reader.read_line(&mut header).is_err() || header.trim().is_empty() {
+                    break;
+                }
+            }
+            let mut response = format!(
+                "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+                body.len()
+            )
+            .into_bytes();
+            response.extend(&body);
+            let _ = stream.write_all(&response);
+        }
+    });
+    (format!("http://{address}/download"), paths)
+}
+
 #[test]
-fn without_the_pinned_runtime_it_says_where_to_get_it() {
+fn offline_without_the_pinned_runtime_it_says_what_to_do() {
     let (_directory, root) = project(&["start"]);
     let cache = tempfile::tempdir().expect("cache directory");
-    let output = cli_with_cache(&root, cache.path());
+    let output = cli_with_cache(&root, cache.path(), &unreachable(), &["--offline"]);
     let message = stderr(&output);
     assert_eq!(output.status.code(), Some(2), "{message}");
+    assert!(
+        message.contains("--offline forbids downloading it"),
+        "{message}"
+    );
     assert!(message.contains("--runtime"), "{message}");
+    assert!(!message.contains("Downloading"), "{message}");
     assert!(
         message.contains(
-            "https://github.com/Valhallab/playervox-overcrow-releases/releases/tag/v0.6.0-beta.1"
+            &pinned_path(cache.path())
+                .parent()
+                .unwrap()
+                .display()
+                .to_string()
+        ),
+        "{message}"
+    );
+}
+
+#[test]
+fn a_downloaded_runtime_with_another_digest_is_not_kept_nor_run() {
+    let (_directory, root) = project(&["start"]);
+    let cache = tempfile::tempdir().expect("cache directory");
+    let fake = fake(0);
+    let script = fs::read(runtime(fake.path(), 1, 0)).unwrap();
+    let name = pinned_path(cache.path())
+        .file_name()
+        .unwrap()
+        .to_string_lossy()
+        .into_owned();
+    let (releases, paths) = serve(stored_zip(
+        &format!("overcrow-creator-tools-0.6.0-beta.1/{name}"),
+        &script,
+    ));
+    let output = cli_with_cache(&root, cache.path(), &releases, &[]);
+    let message = stderr(&output);
+    assert_eq!(output.status.code(), Some(2), "{message}");
+    assert!(
+        message.contains(
+            "Downloading the headless runtime 0.6.0-beta.1 (overcrow-creator-tools-0.6.0-beta.1.zip)"
         ),
         "{message}"
     );
     assert!(
-        message.contains(&pinned_path(cache.path()).display().to_string()),
+        message.contains("cannot download the headless runtime 0.6.0-beta.1: its SHA-256 is not the pinned one. Nothing was kept. Try again, or pass --runtime"),
         "{message}"
     );
+    assert_eq!(
+        *paths.lock().unwrap(),
+        ["/download/v0.6.0-beta.1/overcrow-creator-tools-0.6.0-beta.1.zip"]
+    );
+    let kept = fs::read_dir(pinned_path(cache.path()).parent().unwrap())
+        .map(|entries| entries.count())
+        .unwrap_or(0);
+    assert_eq!(kept, 0, "neither the ZIP nor the runtime is kept");
+    assert_eq!(runs(fake.path()), 0);
+}
+
+#[test]
+fn an_unreachable_release_says_to_try_again() {
+    let (_directory, root) = project(&["start"]);
+    let cache = tempfile::tempdir().expect("cache directory");
+    let output = cli_with_cache(&root, cache.path(), &unreachable(), &[]);
+    let message = stderr(&output);
+    assert_eq!(output.status.code(), Some(2), "{message}");
+    assert!(
+        message.contains("cannot download the headless runtime 0.6.0-beta.1: no connection to the server. Nothing was kept. Try again, or pass --runtime <path to overcrow-widget-headless>"),
+        "{message}"
+    );
+    assert!(!pinned_path(cache.path()).exists());
 }
 
 #[test]
@@ -181,7 +335,7 @@ fn a_cached_runtime_with_another_digest_never_runs() {
     let path = pinned_path(cache.path());
     fs::create_dir_all(path.parent().unwrap()).unwrap();
     fs::copy(&script, &path).unwrap();
-    let output = cli_with_cache(&root, cache.path());
+    let output = cli_with_cache(&root, cache.path(), &unreachable(), &[]);
     let message = stderr(&output);
     assert_eq!(output.status.code(), Some(2), "{message}");
     assert!(message.contains("is not the pinned runtime"), "{message}");

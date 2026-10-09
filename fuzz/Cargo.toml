@@ -15,6 +15,9 @@ cargo-fuzz = true
 members = ["."]
 
 [dependencies]
+# `creator_tools_zip` includes the CLI's ZIP reader, with its two crates.
+crc32fast = "=1.5.0"
+flate2 = "=1.1.10"
 libfuzzer-sys = "=0.4.12"
 overcrow-widget-format = { path = "../crates/overcrow-widget-format" }
 overcrow-widget-schema = { path = "../crates/overcrow-widget-schema" }
@@ -67,6 +70,13 @@ bench = false
 [[bin]]
 name = "open_envelope"
 path = "fuzz_targets/open_envelope.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "creator_tools_zip"
+path = "fuzz_targets/creator_tools_zip.rs"
 test = false
 doc = false
 bench = false
