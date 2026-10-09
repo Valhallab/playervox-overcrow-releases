@@ -76,10 +76,10 @@
       "label": { "en": "Development channel", "fr": "Canal de développement" }
     },
     {
-      "slug": "ai",
-      "file": "ai.md",
+      "slug": "mcp",
+      "file": "mcp.md",
       "group": "tools",
-      "label": { "en": "Create with an AI", "fr": "Créer avec une IA" }
+      "label": { "en": "MCP", "fr": "MCP" }
     },
     {
       "slug": "reference",

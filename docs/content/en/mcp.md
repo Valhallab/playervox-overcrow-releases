@@ -1,4 +1,4 @@
-# Create with an AI (MCP)
+# MCP
 
 PlayerVox OverCrow has a server for AI assistants: `@overcrow/mcp`. Add it
 to Claude Code, Claude Desktop, Cursor, VS Code or Codex, and your
@@ -16,11 +16,27 @@ Then ask: "Create an OverCrow widget that shows…".
 
 Open your widgets folder in the assistant, then add the server.
 
+### In one command
+
 **Claude Code**, from that folder:
 
 ```sh
 claude mcp add overcrow -- npx -y @overcrow/mcp
 ```
+
+**Codex**:
+
+```sh
+codex mcp add overcrow -- npx -y @overcrow/mcp
+```
+
+**VS Code**: [install in VS Code](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522overcrow%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522%2540overcrow%252Fmcp%2522%255D%257D), or:
+
+```sh
+code --add-mcp '{"name":"overcrow","command":"npx","args":["-y","@overcrow/mcp"]}'
+```
+
+### With a configuration file
 
 **Cursor**: a `.cursor/mcp.json` file in the folder.
 
@@ -36,8 +52,7 @@ claude mcp add overcrow -- npx -y @overcrow/mcp
 }
 ```
 
-**VS Code**: [install in VS Code](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522overcrow%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522%2540overcrow%252Fmcp%2522%255D%257D),
-or a `.vscode/mcp.json` file in the folder.
+**VS Code**: a `.vscode/mcp.json` file in the folder.
 
 <!-- source: mcp/examples/vscode-mcp.json -->
 ```json
@@ -50,12 +65,6 @@ or a `.vscode/mcp.json` file in the folder.
     }
   }
 }
-```
-
-**Codex**:
-
-```sh
-codex mcp add overcrow -- npx -y @overcrow/mcp
 ```
 
 **Claude Desktop** starts its servers outside your folders: name your

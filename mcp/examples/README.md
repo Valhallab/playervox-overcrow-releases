@@ -1,7 +1,7 @@
 # Client configurations
 
 Configurations of `@overcrow/mcp` for MCP clients, quoted by the creator
-documentation ([Create with an AI](../../docs/content/en/ai.md)) and checked
+documentation ([MCP](../../docs/content/en/mcp.md)) and checked
 by `test/examples.test.mjs`.
 
 | File | Client | Where it goes |

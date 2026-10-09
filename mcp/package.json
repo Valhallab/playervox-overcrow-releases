@@ -21,7 +21,7 @@
     "url": "git+https://github.com/Valhallab/playervox-overcrow-releases.git",
     "directory": "mcp"
   },
-  "homepage": "https://overcrow.playervox.com/docs/en/ai/",
+  "homepage": "https://overcrow.playervox.com/docs/en/mcp/",
   "keywords": [
     "overcrow",
     "widget",

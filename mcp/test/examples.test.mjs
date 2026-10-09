@@ -29,14 +29,17 @@ test("the Codex configuration runs the same command", () => {
   assert.match(toml, /^args = \["-y", "@overcrow\/mcp"\]$/m);
 });
 
-test("the VS Code link of both pages installs the same server", () => {
+test("the VS Code link and command of both pages install the same server", () => {
   for (const locale of ["en", "fr"]) {
-    const page = readFileSync(join(docs, locale, "ai.md"), "utf8");
+    const page = readFileSync(join(docs, locale, "mcp.md"), "utf8");
     const link = /\]\((https:\/\/insiders\.vscode\.dev\/redirect\?url=[^)]+)\)/.exec(page)?.[1];
     assert.ok(link, locale);
     const target = decodeURIComponent(new URL(link).searchParams.get("url") ?? "");
     assert.ok(target.startsWith("vscode:mcp/install?"), target);
     const config = JSON.parse(decodeURIComponent(target.slice("vscode:mcp/install?".length)));
     assert.deepEqual(config, { name: "overcrow", command: "npx", args: SERVER });
+    // The command form installs the same thing.
+    const command = /^code --add-mcp '(.+)'$/m.exec(page)?.[1];
+    assert.deepEqual(JSON.parse(command ?? "null"), config, `${locale}: code --add-mcp`);
   }
 });

@@ -6,7 +6,7 @@ lancer dans OverCrow, le tester, l’empaqueter et le soumettre. Chaque étape
 renvoie à la page qui la traite en détail.
 
 Pour travailler plutôt avec un assistant IA, ajoutez-lui le serveur MCP
-d’OverCrow : voir [créer avec une IA](ai.md).
+d’OverCrow : voir [MCP](mcp.md).
 
 ## 1. Installer les outils
 

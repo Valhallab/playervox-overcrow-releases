@@ -62,7 +62,7 @@ documentation is on the website, in English and in French:
 [reference widgets](https://overcrow.playervox.com/docs/en/widgets/) are
 OverCrow's own built-ins. To create a widget with an AI assistant, add the
 MCP server `@overcrow/mcp`
-([create with an AI](https://overcrow.playervox.com/docs/en/ai/)). The website renders the pages of
+([MCP](https://overcrow.playervox.com/docs/en/mcp/)). The website renders the pages of
 [`docs/content/`](docs/content/README.md), which this repository owns.
 
 ## Repository map
@@ -72,7 +72,7 @@ MCP server `@overcrow/mcp`
 | `crates/` | The public widget contract, shared with OverCrow at a pinned revision: `overcrow-widget-schema` (schema and validators), `overcrow-widget-format` (`view.ocml` compiler, `style.ocss` parser), `overcrow-widget-devchannel` ([development channel](docs/dev-channel.md)), `overcrow-widget-scenario` ([test scenarios](https://overcrow.playervox.com/docs/en/testing/)) |
 | `sdk/` | `@overcrow/sdk` 1.0, the TypeScript API of widget logic, with types generated from the schema ([guide](https://overcrow.playervox.com/docs/en/logic/), [reference](https://overcrow.playervox.com/docs/en/sdk/)) |
 | `cli/` | `overcrow-widget`: `init`, `check`, `package`, `inspect`, `dev`, `doctor`, `test`, `admit` ([guide](https://overcrow.playervox.com/docs/en/cli/), [internals](docs/cli.md)) |
-| `mcp/` | `@overcrow/mcp`, the MCP server that lets an AI assistant create, check, test, audit and package widgets ([guide](https://overcrow.playervox.com/docs/en/ai/), [README](mcp/README.md)) |
+| `mcp/` | `@overcrow/mcp`, the MCP server that lets an AI assistant create, check, test, audit and package widgets ([guide](https://overcrow.playervox.com/docs/en/mcp/), [README](mcp/README.md)) |
 | `templates/` | The templates of `overcrow-widget init`: blank, counter, list, chart |
 | `docs/content/` | The creator documentation that the website renders, in English and French: guide, manifest, view, style, logic, services, forms, CLI, tests, reference, package, security, publishing |
 | `docs/` | Specifications and notes for implementers and maintainers, in English: [schema reference](docs/widget-schema-v1.md) (generated), [package and catalog format](docs/widget-package-v1.md), [development channel protocol](docs/dev-channel.md), [compiled output of the source formats](docs/widget-source-formats.md), [CLI internals](docs/cli.md), [headless runtime interface](docs/widget-testing.md), [review policy](docs/review-policy.md), [testing](docs/testing.md) |

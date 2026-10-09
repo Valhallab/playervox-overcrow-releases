@@ -18,7 +18,7 @@ An MCP server (stdio) for creating PlayerVox OverCrow widgets with an AI assista
                        by default, the client's folders or the working directory
   --tools-zip <file>   a local copy of the pinned creator tools ZIP (offline use)
   --version            print the version
-Guide: https://overcrow.playervox.com/docs/en/ai/`;
+Guide: https://overcrow.playervox.com/docs/en/mcp/`;
 
 function log(message: string): void {
   process.stderr.write(`overcrow-mcp: ${message}\n`);

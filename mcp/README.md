@@ -13,8 +13,8 @@ claude mcp add overcrow -- npx -y @overcrow/mcp
 ```
 
 Guide, other clients and offline use:
-[overcrow.playervox.com/docs/en/ai/](https://overcrow.playervox.com/docs/en/ai/)
-([français](https://overcrow.playervox.com/docs/ai/)).
+[overcrow.playervox.com/docs/en/mcp/](https://overcrow.playervox.com/docs/en/mcp/)
+([français](https://overcrow.playervox.com/docs/mcp/)).
 
 ## Clients
 
