@@ -7,8 +7,20 @@ change between betas; 1.0.0 will freeze them under semantic versioning.
 The CLI's version enters no package: a package depends only on the
 widget's sources and the embedded SDK.
 
-## Unreleased
+## 1.0.0-beta.2
 
+Released in the creator tools ZIPs of OverCrow's next GitHub release,
+`overcrow-creator-tools-<version>-<platform>.zip`, beside the headless
+runtime it pins.
+
+- `test` downloads the pinned headless runtime when the cache does not
+  hold it and `--runtime` is not given: from the creator tools ZIP of this
+  platform in the OverCrow release that published it, keeping only the
+  runtime once its SHA-256 is the pinned one. The ZIP is not kept.
+  `--offline` never downloads. HTTPS only, redirects only to GitHub's
+  hosts, size and time bounds; an `HTTPS_PROXY` is used.
+- `--version --format json` gives the CLI, widget API and SDK versions
+  and the pinned runtime; `cli.json` records that runtime.
 - `init` gives `cd <dir> && npm install && overcrow-widget check`:
   `@overcrow/sdk` 1.0.0 is on npm, so `npm install` brings TypeScript and
   the SDK types. `doctor` and the type check advise `npm install`, and

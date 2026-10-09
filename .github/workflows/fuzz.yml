@@ -33,6 +33,7 @@ jobs:
           - read_package
           - validate_compiled_view
           - open_envelope
+          - creator_tools_zip
     env:
       # libFuzzer needs a nightly compiler; the date is pinned like the
       # stable toolchain.

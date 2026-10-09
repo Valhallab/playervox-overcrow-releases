@@ -34,22 +34,26 @@ current directory without one.
 ## Installing
 
 Each [OverCrow release](https://github.com/Valhallab/playervox-overcrow-releases/releases)
-carries the tool for Linux and Windows x86-64, with its license, its
-third-party notices and the release's `SHA256SUMS`:
+carries the creator tools in one ZIP per platform: the tool with its
+license and third-party notices, OverCrow's headless runtime that
+[`test`](#test) uses, a `README.txt` and a `SHA256SUMS` of every file.
 
-| Platform | File |
-| --- | --- |
-| Linux | `overcrow-widget-VERSION-linux-x86_64` |
-| Windows | `overcrow-widget-VERSION-windows-x86_64.exe` |
+| Platform | ZIP | Tool in the ZIP |
+| --- | --- | --- |
+| Linux x86-64 | `overcrow-creator-tools-VERSION-linux-x86_64.zip` | `overcrow-widget-VERSION-linux-x86_64` |
+| Windows x64 | `overcrow-creator-tools-VERSION-windows-x86_64.zip` | `overcrow-widget-VERSION-windows-x86_64.exe` |
 
-Check the file against `SHA256SUMS`, rename it `overcrow-widget`
+Unzip it, check the files, rename the tool `overcrow-widget`
 (`overcrow-widget.exe` on Windows), make it executable on Linux
 (`chmod +x`) and put it on your `PATH`. It needs nothing else to check and
 package a widget. `overcrow-widget --version` gives its version and the SDK
 it embeds.
 
 ```sh
-sha256sum --check --ignore-missing SHA256SUMS
+unzip overcrow-creator-tools-VERSION-linux-x86_64.zip
+cd overcrow-creator-tools-VERSION-linux-x86_64
+sha256sum --check SHA256SUMS
+install -m 755 overcrow-widget-*-linux-x86_64 ~/.local/bin/overcrow-widget
 ```
 
 The tool also builds from the
@@ -80,9 +84,7 @@ npm install --save-dev --save-exact @overcrow/sdk@1.0.0
 
 Keep the version the tool embeds (`overcrow-widget --version`).
 `overcrow-widget doctor` reports a missing TypeScript, and an SDK in
-`node_modules` whose version differs from the one the tool embeds. The
-CLI 1.0.0-beta.1 still says that the SDK is not on npm: `npm install`
-works all the same.
+`node_modules` whose version differs from the one the tool embeds.
 
 ## Files of a project
 
@@ -220,7 +222,8 @@ the images it renders with the references:
    `test.scenario` diagnostic in its file;
 3. it runs each scenario in the [headless runtime](testing.md#the-headless-runtime)
    this tool pins, or the one given by `--runtime`, and prints the
-   runtime's version and SHA-256;
+   runtime's version and SHA-256. The first time, it downloads the pinned
+   runtime;
 4. it compares each captured image with
    `tests/reference/<name>/<image>.png`. A difference, a size change or a
    missing reference fails the scenario and writes
@@ -228,7 +231,7 @@ the images it renders with the references:
    `<image>.diff.png`.
 
 Options: `--runtime <path>` (another `overcrow-widget-headless` program),
-`--scenario <name>` (only that one), `--update` (records the captured
+`--offline` (never download the runtime), `--scenario <name>` (only that one), `--update` (records the captured
 images as the references: review them before you commit them),
 `--format json`, `--no-typecheck`.
 

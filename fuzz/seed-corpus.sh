@@ -28,6 +28,8 @@ seed ocss "$format"/ocss/valid/*.ocss "$format"/ocss/invalid/*.ocss \
 seed validate_manifest "$schema"/manifest/valid/*.json \
     "$schema"/manifest/invalid/*.json
 seed read_package "$schema"/package/valid/*.ocpkg "$schema"/package/invalid/*.ocpkg
+# Packages are ZIPs too: they seed the CLI's creator tools ZIP reader.
+seed creator_tools_zip "$schema"/package/valid/*.ocpkg "$schema"/package/invalid/*.ocpkg
 seed validate_compiled_view "$schema"/view/valid/*.json "$schema"/view/invalid/*.json \
     "$format"/ocml/compiled/*.view.json
 seed open_envelope "$schema"/catalog/valid/*.json "$schema"/catalog/invalid/*.json \

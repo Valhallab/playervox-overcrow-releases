@@ -1,0 +1,143 @@
+name: sdk-publish
+
+# Publishes @overcrow/sdk to npm with npm trusted publishing: npm trusts
+# this workflow of this repository (the package's settings on npmjs.com
+# name it) through GitHub's OIDC token, so no npm token exists anywhere,
+# and the package gets a provenance statement linking it to this run and
+# commit. A real publication comes from a tag `sdk-v<version>` or a manual
+# run on main; a manual run elsewhere, or with `dry-run`, checks
+# everything and publishes nothing, and so does a push of a work branch
+# that touches the SDK or this workflow (a manual run needs the workflow
+# on main first).
+on:
+  push:
+    tags: ['sdk-v*']
+    branches: ['refacto/**']
+    paths: ['sdk/**', '.github/workflows/sdk-publish.yml']
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Check the package and run npm publish --dry-run; publish nothing
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  # The OIDC token npm exchanges for a short-lived publish credential.
+  id-token: write
+
+concurrency:
+  group: sdk-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+        working-directory: sdk
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      # Trusted publishing needs npm 11.5.1 or later; Node.js 24 brings it.
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - name: Decide between publication and dry run
+        id: mode
+        env:
+          EVENT: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          REF_NAME: ${{ github.ref_name }}
+          DRY_RUN: ${{ inputs.dry-run }}
+        run: |
+          set -eu
+          npm_version=$(npm --version)
+          node -e '
+            const [major, minor, patch] = process.argv[1].split(".").map(Number);
+            if (major < 11 || (major === 11 && (minor < 5 || (minor === 5 && patch < 1)))) {
+              console.error(`npm ${process.argv[1]} cannot use trusted publishing (11.5.1 or later)`);
+              process.exit(1);
+            }' "$npm_version"
+          name=$(node -p 'require("./package.json").name')
+          version=$(node -p 'require("./package.json").version')
+          test "$name" = '@overcrow/sdk' || { echo "unexpected package $name"; exit 1; }
+          case "$REF" in
+            refs/tags/*)
+              test "$REF_NAME" = "sdk-v$version" \
+                || { echo "tag $REF_NAME does not match @overcrow/sdk $version (sdk-v$version)"; exit 1; } ;;
+          esac
+          dry_run=true
+          if test "$EVENT" = push; then
+            case "$REF" in refs/tags/sdk-v*) dry_run=false ;; esac
+          elif test "$DRY_RUN" = false; then
+            case "$REF" in
+              refs/heads/main|refs/tags/sdk-v*) dry_run=false ;;
+              *) echo "only main or a tag sdk-v$version publishes; this run is a dry run" ;;
+            esac
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "dry-run=$dry_run" >> "$GITHUB_OUTPUT"
+          echo "@overcrow/sdk $version, npm $npm_version, dry run: $dry_run"
+      - name: Refuse a version already on npm
+        id: published
+        env:
+          VERSION: ${{ steps.mode.outputs.version }}
+          DRY_RUN: ${{ steps.mode.outputs.dry-run }}
+        run: |
+          set -u
+          if npm view "@overcrow/sdk@$VERSION" version > view.out 2> view.err; then
+            if test -s view.out; then
+              if test "$DRY_RUN" = true; then
+                echo "::notice::@overcrow/sdk $VERSION is already on npm: a real run would stop here"
+                echo "exists=true" >> "$GITHUB_OUTPUT"
+              else
+                echo "@overcrow/sdk $VERSION is already on npm: raise the version in sdk/package.json"
+                exit 1
+              fi
+            fi
+          elif grep -q E404 view.err; then
+            echo "@overcrow/sdk $VERSION is not on npm yet"
+          else
+            cat view.err
+            echo 'cannot ask npm whether this version exists'
+            exit 1
+          fi
+          rm -f view.out view.err
+      # Package files are 644 whatever the umask (scripts/build.mjs), and
+      # pack:check refuses any other mode; 022 keeps the build's own files
+      # ordinary too.
+      - name: Install the pinned toolchain
+        run: |
+          umask 022
+          npm ci --ignore-scripts --no-audit --no-fund
+      - name: Check the package
+        run: |
+          umask 022
+          npm run pack:check
+      - name: Publish with provenance
+        env:
+          DRY_RUN: ${{ steps.mode.outputs.dry-run }}
+          EXISTS: ${{ steps.published.outputs.exists }}
+          VERSION: ${{ steps.mode.outputs.version }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          umask 022
+          if test "$DRY_RUN" = true; then
+            # npm refuses even a dry run over a published version: try the
+            # same package under a throwaway prerelease version instead.
+            if test "$EXISTS" = true; then
+              npm pkg set version="$VERSION-dryrun.$RUN_NUMBER"
+              npm publish --provenance --access public --tag dry-run --dry-run
+              git checkout -- package.json
+            else
+              npm publish --provenance --access public --dry-run
+            fi
+          else
+            npm publish --provenance --access public
+          fi
+      - name: The checkout stays clean
+        run: git status --porcelain --untracked-files=no | { ! grep .; }

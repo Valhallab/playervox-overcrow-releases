@@ -1,6 +1,6 @@
 [package]
 name = "overcrow-widget-cli"
-version = "1.0.0-beta.1"
+version = "1.0.0-beta.2"
 description = "overcrow-widget: the creator CLI of OverCrow widget API v1"
 edition.workspace = true
 license.workspace = true
@@ -42,6 +42,14 @@ oxc_str = "=0.152.0"
 oxc_syntax = "=0.152.0"
 oxc_transformer = "=0.152.0"
 serde_json = { workspace = true, features = ["std"] }
+# `test` downloads the pinned runtime from its OverCrow release
+# (src/download.rs): HTTPS through rustls with the ring provider and the
+# Mozilla roots, no compression feature (the archive is already deflated).
+# flate2 and crc32fast are already locked through png; they read the
+# creator tools ZIP (src/zipread.rs).
+crc32fast = "=1.5.0"
+flate2 = "=1.1.10"
+ureq = { version = "=3.3.0", default-features = false, features = ["rustls"] }
 
 # The development channel's socket peer check and Ctrl+C (`dev`, `doctor`).
 [target.'cfg(unix)'.dependencies]

@@ -9,11 +9,14 @@
 #   overcrow-widget-VERSION-windows-x86_64.exe
 #   overcrow-widget-VERSION-LICENSE.txt               the CLI's MIT license
 #   overcrow-widget-VERSION-THIRD-PARTY-NOTICES.md    cargo-about 0.9.1
-#   cli.json                                          version, commit, files
+#   cli.json                                          version, commit, the
+#                                                     pinned runtime, files
 #   SHA256SUMS                                        every file above
 #
-# These files are attached to OverCrow's GitHub release, beside the
-# application and the headless runtimes; this script publishes nothing.
+# These files go into the creator tools ZIPs of OverCrow's GitHub release,
+# beside the headless runtimes; this script publishes nothing. The pinned
+# runtime comes from the Linux binary itself (`--version --format json`):
+# the release publisher checks that the ZIP holds that very runtime.
 # The notices come from the locked graph of both targets (about.toml).
 set -eu
 
@@ -54,6 +57,20 @@ test "$(head -c 2 "$windows_binary")" = MZ \
 # checked by the workflow that built it.
 "$linux_binary" --version | grep -Fq "overcrow-widget $version " \
     || fail "$linux_binary is not overcrow-widget $version"
+command -v jq > /dev/null || fail 'jq is required'
+identity=$("$linux_binary" --version --format json)
+runtime_version=$(printf '%s' "$identity" | jq -er '.runtime.version') \
+    || fail "$linux_binary pins no headless runtime"
+runtime_linux=$(printf '%s' "$identity" | jq -er '.runtime.sha256["linux-x86_64"]') \
+    || fail 'no pinned Linux runtime'
+runtime_windows=$(printf '%s' "$identity" | jq -er '.runtime.sha256["windows-x86_64"]') \
+    || fail 'no pinned Windows runtime'
+printf '%s\n' "$runtime_version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-beta\.[0-9]+)?$' \
+    || fail "unsupported runtime version: $runtime_version"
+for digest in "$runtime_linux" "$runtime_windows"; do
+    printf '%s\n' "$digest" | grep -Eq '^[0-9a-f]{64}$' \
+        || fail "invalid pinned runtime digest: $digest"
+done
 
 mkdir -p -- "$output"
 test -z "$(ls -A -- "$output")" || fail "output directory is not empty: $output"
@@ -81,7 +98,11 @@ entry() {
 }
 {
     printf '{\n  "schemaVersion": 1,\n  "version": "%s",\n' "$version"
-    printf '  "sourceCommit": "%s",\n  "files": [\n' "$commit"
+    printf '  "sourceCommit": "%s",\n' "$commit"
+    printf '  "runtime": {\n    "version": "%s",\n' "$runtime_version"
+    printf '    "sha256": {\n      "linux-x86_64": "%s",\n' "$runtime_linux"
+    printf '      "windows-x86_64": "%s"\n    }\n  },\n' "$runtime_windows"
+    printf '  "files": [\n'
     entry "$linux_name"; printf ',\n'
     entry "$windows_name"; printf ',\n'
     entry "$license_name"; printf ',\n'

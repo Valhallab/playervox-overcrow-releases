@@ -8,6 +8,7 @@ mod channel;
 mod dev;
 mod diag;
 mod doctor;
+mod download;
 mod init;
 mod inspect;
 mod interrupt;
@@ -22,6 +23,7 @@ mod sources;
 mod test;
 mod typecheck;
 mod watch;
+mod zipread;
 
 use std::fs;
 use std::io::Write as _;
@@ -45,8 +47,8 @@ Usage:
   overcrow-widget doctor [dir] [--format human|json] [--deny-warnings]
   overcrow-widget admit [dir] [--package FILE] [--publisher playervox] [--out DIR] [--format human|json] [--deny-warnings]
   overcrow-widget admit <file.ocpkg> --listing FILE [--publisher playervox] [--format human|json]
-  overcrow-widget test [dir] [--runtime PATH] [--scenario NAME] [--update] [--format human|json] [--no-typecheck]
-  overcrow-widget --version | --help
+  overcrow-widget test [dir] [--runtime PATH] [--offline] [--scenario NAME] [--update] [--format human|json] [--no-typecheck]
+  overcrow-widget --version [--format json] | --help
 
 Exit status: 0 success (warnings allowed), 1 errors found, 2 usage or I/O error.
 `admit` ends with 1 when the submission would be refused.
@@ -162,6 +164,20 @@ fn main() -> ExitCode {
             println!("{USAGE}");
             return ExitCode::SUCCESS;
         }
+        Some("--version" | "-V")
+            if args[1..] == ["--format", "json"] || args[1..] == ["--format=json"] =>
+        {
+            println!(
+                "{}",
+                serde_json::json!({
+                    "version": env!("CARGO_PKG_VERSION"),
+                    "apiVersion": overcrow_widget_schema::API_VERSION,
+                    "sdk": sdk::VERSION,
+                    "runtime": runtime::pin_json(runtime::PIN.as_ref()),
+                })
+            );
+            return ExitCode::SUCCESS;
+        }
         Some("--version" | "-V") => {
             println!(
                 "overcrow-widget {} (widget API v{}, @overcrow/sdk {})",
@@ -223,6 +239,7 @@ fn run_test(arguments: &Arguments) -> Result<ExitCode, String> {
         &[
             "--format",
             "--no-typecheck",
+            "--offline",
             "--runtime",
             "--scenario",
             "--update",
@@ -240,6 +257,7 @@ fn run_test(arguments: &Arguments) -> Result<ExitCode, String> {
             typecheck: !arguments.flag("--no-typecheck"),
             format,
             runtime: arguments.value("--runtime").map(Path::new),
+            offline: arguments.flag("--offline"),
             update: arguments.flag("--update"),
             only: arguments.value("--scenario"),
         },
