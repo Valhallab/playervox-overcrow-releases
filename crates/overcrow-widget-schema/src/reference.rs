@@ -484,7 +484,8 @@ starts with these.\n\n| ID | English | French |\n| --- | --- | --- |\n",
         "\n### Display text\n\nPublisher names, category labels, game names, descriptions and \
 release notes are non-empty and counted in Unicode scalar values. They have no white space at \
 either end, no `<` or `>`, no control character except line feeds in descriptions and release \
-notes, and none of these invisible or blank characters: {invisible}.\n"
+notes, and none of these invisible or blank characters: {invisible}. A variation selector \
+(U+FE00 to U+FE0F) only follows a character that is not one.\n"
     );
     let _ = write!(
         out,
@@ -498,7 +499,8 @@ publishers own equal or nested domains.\n\nCatalog readers check the grammar onl
 publisher may not register a domain extension ({}) or a handle whose skeleton equals that of \
 a reserved handle ({}) or contains {}. The skeleton removes hyphens, reads `vv` as `w`, then \
 `0` as `o`, `1` and `i` as `l`, `3` as `e`, `4` as `a`, `5` as `s`, `7` as `t` and `8` as \
-`b`.\n",
+`b`. The same words may not appear in the skeleton of the ASCII letters and digits of another \
+publisher's displayed name.\n",
         code_list(DOMAIN_EXTENSIONS),
         code_list(RESERVED_HANDLES),
         code_list(RESERVED_HANDLE_WORDS),

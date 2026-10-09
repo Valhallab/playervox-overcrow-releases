@@ -32,6 +32,16 @@ Each file is one JSON object; every string is compared exactly.
   equal domains, or one a subdomain of the other. Two publishers never hold
   overlapping domains.
 
+## `names.json`
+
+`cases`: `{ "name", "handle", "expected" }`, the result of
+`validate_publisher_name(name, handle)`, what the portal accepts as a
+displayed publisher name: `ok`, `text` (not display text of at most 64
+characters on one line) or `reserved` (for a publisher other than
+`playervox`, the skeleton of the name's ASCII letters and digits, lowercase,
+contains `playervox`, `overcrow` or `valhallab`). Catalog readers check
+display text only.
+
 ## `widget-ids.json`
 
 `cases`: `{ "id", "handle", "domains", "expected", "domain"? }`, the result of

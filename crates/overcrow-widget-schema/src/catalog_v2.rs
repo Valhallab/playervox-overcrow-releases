@@ -32,11 +32,10 @@ use crate::limits::{
     MAX_CATALOG_CATEGORIES, MAX_CATALOG_LIFETIME_DAYS, MAX_CATALOG_PUBLISHERS,
     MAX_CATALOG_URL_BYTES, MAX_CATALOG_V2_BYTES, MAX_CATALOG_V2_PAYLOAD_BYTES,
     MAX_CATALOG_V2_TARGETS, MAX_CATALOG_V2_WIDGETS, MAX_CATEGORY_ID_BYTES,
-    MAX_CATEGORY_LABEL_CHARS, MAX_FEATURE_NAME_BYTES, MAX_GAME_NAME_CHARS, MAX_GAME_SLUG_BYTES,
-    MAX_HANDLE_BYTES, MAX_KEY_ID_BYTES, MAX_LISTING_DESCRIPTION_CHARS, MAX_LISTING_GAMES,
-    MAX_PACKAGE_BYTES, MAX_PREVIEW_BYTES, MAX_PUBLISHER_DOMAINS, MAX_PUBLISHER_NAME_CHARS,
-    MAX_RELEASE_NOTES_CHARS, MAX_REQUIRED_FEATURES, MAX_SPDX_LICENSE_BYTES,
-    MAX_SUPPORT_EMAIL_BYTES,
+    MAX_CATEGORY_LABEL_CHARS, MAX_GAME_NAME_CHARS, MAX_GAME_SLUG_BYTES, MAX_HANDLE_BYTES,
+    MAX_KEY_ID_BYTES, MAX_LISTING_DESCRIPTION_CHARS, MAX_LISTING_GAMES, MAX_PACKAGE_BYTES,
+    MAX_PREVIEW_BYTES, MAX_PUBLISHER_DOMAINS, MAX_PUBLISHER_NAME_CHARS, MAX_RELEASE_NOTES_CHARS,
+    MAX_SPDX_LICENSE_BYTES, MAX_SUPPORT_EMAIL_BYTES,
 };
 use crate::manifest::{ManifestError, is_reserved_id, valid_widget_id, validate_manifest_value};
 use crate::model::{Field, ValueType};
@@ -212,8 +211,8 @@ pub const WIDGET_FIELDS: &[Field] = &[
     ),
     Field::optional(
         "requires",
-        ValueType::ListOf("feature name", &MAX_REQUIRED_FEATURES),
-        "Features a reader must support to use the entry; otherwise it skips the widget and its targets.",
+        ValueType::Record("list of feature names"),
+        "Features a reader must support to use the entry. Unless it is a list of features the reader supports, the reader skips the widget and its targets.",
     ),
 ];
 
@@ -340,8 +339,8 @@ pub const TARGET_FIELDS: &[Field] = &[
     ),
     Field::optional(
         "requires",
-        ValueType::ListOf("feature name", &MAX_REQUIRED_FEATURES),
-        "Features a reader must support to use the entry; otherwise it skips the target.",
+        ValueType::Record("list of feature names"),
+        "Features a reader must support to use the entry. Unless it is a list of features the reader supports, the reader skips the target.",
     ),
 ];
 
@@ -405,7 +404,6 @@ pub enum CatalogV2Error {
     PrivacyPolicy,
     SourceUrl,
     Preview,
-    Requires,
     Manifest(ManifestError),
     Status,
     PackageRef,
@@ -449,7 +447,6 @@ impl CatalogV2Error {
             Self::PrivacyPolicy => "privacy_policy",
             Self::SourceUrl => "source_url",
             Self::Preview => "preview",
-            Self::Requires => "requires",
             Self::Manifest(_) => "manifest",
             Self::Status => "status",
             Self::PackageRef => "package_ref",
@@ -795,28 +792,20 @@ fn publishers(value: &Value) -> Result<Vec<Publisher>, CatalogV2Error> {
     Ok(publishers)
 }
 
-/// The `requires` list of an entry: `Ok(true)` when this reader supports
-/// every feature it names (or there is none).
-fn supported(entry: &Map<String, Value>) -> Result<bool, CatalogV2Error> {
-    let invalid = CatalogV2Error::Requires;
-    let Some(value) = entry.get("requires") else {
-        return Ok(true);
-    };
-    let names = value.as_array().ok_or(invalid)?;
-    if names.len() as u64 > MAX_REQUIRED_FEATURES.value {
-        return Err(invalid);
+/// Whether this reader may use an entry: `requires` absent, or a list of
+/// features it supports (an empty list included). Anything else, a
+/// malformed `requires` included, skips the entry: a requirement the reader
+/// cannot read is one it cannot honour, and skipping never refuses the
+/// catalog.
+fn supported(entry: &Map<String, Value>) -> bool {
+    match entry.get("requires") {
+        None => true,
+        Some(Value::Array(names)) => names.iter().all(|name| {
+            name.as_str()
+                .is_some_and(|name| SUPPORTED_FEATURES.contains(&name))
+        }),
+        Some(_) => false,
     }
-    let mut unique = BTreeSet::new();
-    for name in names {
-        let name = name
-            .as_str()
-            .filter(|name| identifier(name, MAX_FEATURE_NAME_BYTES.value))
-            .ok_or(invalid)?;
-        if !unique.insert(name) {
-            return Err(invalid);
-        }
-    }
-    Ok(unique.iter().all(|name| SUPPORTED_FEATURES.contains(name)))
 }
 
 fn widgets(
@@ -839,7 +828,7 @@ fn widgets(
         if !ids.insert(id.to_owned()) {
             return Err(E::DuplicateWidget);
         }
-        if !supported(entry)? {
+        if !supported(entry) {
             // Only the ID and `requires` of a skipped entry are read.
             skipped.insert(id.to_owned());
             continue;
@@ -989,7 +978,7 @@ fn targets(
     let mut identities = BTreeSet::new();
     for entry in list(value, MAX_CATALOG_V2_TARGETS.value, E::Payload)? {
         let entry = entry.as_object().ok_or(E::Payload)?;
-        if !supported(entry)? {
+        if !supported(entry) {
             continue;
         }
         // The versions of a skipped widget are skipped unread: they may use
@@ -1415,6 +1404,24 @@ mod tests {
         refused(CatalogV2Error::BuiltInId, |c| {
             c["widgets"][2]["tags"] = json!(["built-in"])
         });
+        // `built-in` needs a reserved ID too, even for the publisher playervox.
+        refused(CatalogV2Error::BuiltInId, |c| {
+            c["widgets"][0]["id"] = json!("playervox.clock");
+            c["widgets"][0]
+                .as_object_mut()
+                .expect("widget")
+                .remove("preview");
+            c["targets"][0] = target("playervox.clock", "1.0.0", 0xb1, false);
+        });
+        refused(CatalogV2Error::BuiltInId, |c| {
+            c["publishers"][0]["domains"] = json!(["playervox.com", "valhallab.com"]);
+            c["widgets"][0]["id"] = json!("com.valhallab.clock");
+            c["widgets"][0]
+                .as_object_mut()
+                .expect("widget")
+                .remove("preview");
+            c["targets"][0] = target("com.valhallab.clock", "1.0.0", 0xb1, false);
+        });
         refused(CatalogV2Error::Tag, |c| {
             c["widgets"][0]["tags"] = json!(["built-in", "featured"])
         });
@@ -1499,6 +1506,15 @@ mod tests {
                 .remove("privacyPolicyUrl");
             c["targets"][TIMERS_NEW] = target("gg.raidforge.timers", "1.2.0", 0xa2, false);
         });
+        // A network permission only on a skipped version needs no policy.
+        let mut payload = valid();
+        payload["widgets"][TIMERS]["listing"]
+            .as_object_mut()
+            .expect("listing")
+            .remove("privacyPolicyUrl");
+        payload["targets"][1]["requires"] = json!(["api-v2"]);
+        payload["targets"][TIMERS_NEW] = target("gg.raidforge.timers", "1.2.0", 0xa2, false);
+        assert!(check(&payload).is_ok());
         // Without any network version, no policy is needed.
         let mut payload = valid();
         payload["widgets"][TIMERS]["listing"]
@@ -1551,6 +1567,30 @@ mod tests {
         payload["targets"].as_array_mut().expect("list").pop();
         let catalog = check(&payload).expect("widget without target hidden");
         assert_eq!(catalog.widgets.len(), 2);
+    }
+
+    #[test]
+    fn structure_limits() {
+        refused(CatalogV2Error::Limit, |c| {
+            c["publishers"] = json!(
+                (0..1001)
+                    .map(|index| json!({"handle": format!("p{index:04}"), "name": "P"}))
+                    .collect::<Vec<_>>()
+            );
+        });
+        refused(CatalogV2Error::Limit, |c| {
+            c["widgets"] = json!(vec![json!({}); 1001])
+        });
+        refused(CatalogV2Error::Limit, |c| {
+            c["targets"] = json!(vec![json!({}); 2001])
+        });
+        refused(CatalogV2Error::Domain, |c| {
+            c["publishers"][1]["domains"] = json!(
+                (0..9)
+                    .map(|index| format!("d{index}.raidforge.gg"))
+                    .collect::<Vec<_>>()
+            );
+        });
     }
 
     #[test]
@@ -1618,15 +1658,40 @@ mod tests {
         let catalog = check(&payload).expect("widget without target hidden");
         assert_eq!(catalog.widgets.len(), 2);
 
-        refused(CatalogV2Error::Requires, |c| {
-            c["targets"][3]["requires"] = json!(["Bad Name"])
-        });
-        refused(CatalogV2Error::Requires, |c| {
-            c["targets"][3]["requires"] = json!("entitlement")
-        });
-        refused(CatalogV2Error::Requires, |c| {
-            c["widgets"][2]["requires"] = json!(["a", "a"]);
-        });
+        // A malformed `requires` never refuses the catalog: the entry is
+        // skipped, the safe reading of a requirement this reader cannot parse.
+        let nine: Vec<String> = (0..9).map(|index| format!("f{index}")).collect();
+        for requires in [
+            json!(["Bad Name"]),
+            json!(["catalog.entitlement"]),
+            json!(["a", "a"]),
+            json!(nine),
+            json!("entitlement"),
+            json!(null),
+            json!({"feature": "entitlement"}),
+            json!([3]),
+        ] {
+            let mut payload = valid();
+            payload["targets"][3]["requires"] = requires.clone();
+            let catalog = check(&payload).expect("target skipped");
+            assert_eq!(catalog.targets.len(), 3, "{requires}");
+            let mut payload = valid();
+            payload["widgets"][2]["requires"] = requires.clone();
+            let catalog = check(&payload).expect("widget skipped");
+            assert_eq!(catalog.widgets.len(), 2, "{requires}");
+            // A version of a skipped widget is skipped whatever its own
+            // `requires`.
+            payload["targets"][3]["requires"] = requires.clone();
+            assert_eq!(check(&payload).expect("skipped").targets.len(), 3);
+        }
+        // An empty list requires nothing.
+        let mut payload = valid();
+        payload["targets"][3]["requires"] = json!([]);
+        payload["widgets"][2]["requires"] = json!([]);
+        assert_eq!(
+            check(&payload).expect("empty requires"),
+            check(&valid()).expect("valid")
+        );
         refused(CatalogV2Error::Widget, |c| {
             c["widgets"][2] = json!({"id": "Bad", "requires": ["entitlement"]});
         });

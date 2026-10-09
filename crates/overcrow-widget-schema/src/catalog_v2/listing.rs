@@ -22,8 +22,8 @@ pub const PROPRIETARY_LICENSE: &str = "LicenseRef-Proprietary";
 /// embeddings and isolates, zero-width and joiner characters, line and
 /// paragraph separators (not control characters, yet line breaks), Hangul
 /// and braille fillers, Khmer and Mongolian invisible signs, interlinear
-/// annotations, musical format characters, tag characters and supplementary
-/// variation selectors. Display text never contains them, so a publisher
+/// annotations, shorthand format controls, musical format characters and the
+/// whole tag and supplementary variation selector block. Display text never contains them, so a publisher
 /// name cannot be reversed, blanked or carry hidden text.
 pub const INVISIBLE_CHARACTERS: &[RangeInclusive<char>] = &[
     '\u{00AD}'..='\u{00AD}',
@@ -40,10 +40,14 @@ pub const INVISIBLE_CHARACTERS: &[RangeInclusive<char>] = &[
     '\u{FEFF}'..='\u{FEFF}',
     '\u{FFA0}'..='\u{FFA0}',
     '\u{FFF9}'..='\u{FFFB}',
+    '\u{1BCA0}'..='\u{1BCA3}',
     '\u{1D173}'..='\u{1D17A}',
-    '\u{E0000}'..='\u{E007F}',
-    '\u{E0100}'..='\u{E01EF}',
+    '\u{E0000}'..='\u{E0FFF}',
 ];
+
+/// Variation selectors: accepted only right after a character that is not
+/// one (an emoji and its presentation selector), never in a run.
+const VARIATION_SELECTORS: RangeInclusive<char> = '\u{FE00}'..='\u{FE0F}';
 
 /// Display text: non-empty, at most `max_chars` Unicode scalar values,
 /// without leading or trailing white space, control character (except line
@@ -60,6 +64,13 @@ pub fn display_text(text: &str, max_chars: u64, lines: bool) -> bool {
                     .iter()
                     .any(|range| range.contains(&character))
         })
+        && text
+            .chars()
+            .zip(std::iter::once(None).chain(text.chars().map(Some)))
+            .all(|(character, previous)| {
+                !VARIATION_SELECTORS.contains(&character)
+                    || previous.is_some_and(|previous| !VARIATION_SELECTORS.contains(&previous))
+            })
 }
 
 /// `{ locale: text }` with `en`, at most `MAX_LISTING_LOCALIZATIONS`
@@ -122,14 +133,34 @@ pub fn link(url: &str) -> bool {
         })
 }
 
-/// Bytes accepted by `plain`, or `%` and two uppercase hexadecimal digits.
+/// Bytes accepted by `plain`, or `%` and two uppercase hexadecimal digits
+/// that encode neither an unreserved character (written plain in the
+/// canonical form, so `%2E%2E` is no hidden `..`), nor `/`, `\` or a control
+/// character.
 fn encoded(text: &str, plain: impl Fn(u8) -> bool) -> bool {
     let bytes = text.as_bytes();
-    let hex = |byte: u8| byte.is_ascii_digit() || (b'A'..=b'F').contains(&byte);
+    let digit = |byte: u8| match byte {
+        b'0'..=b'9' => Some(byte - b'0'),
+        b'A'..=b'F' => Some(byte - b'A' + 10),
+        _ => None,
+    };
     let mut index = 0;
     while index < bytes.len() {
         if bytes[index] == b'%' {
-            if !(index + 2 < bytes.len() && hex(bytes[index + 1]) && hex(bytes[index + 2])) {
+            let value = bytes
+                .get(index + 1)
+                .copied()
+                .and_then(digit)
+                .zip(bytes.get(index + 2).copied().and_then(digit))
+                .map(|(high, low)| (high << 4) | low);
+            let Some(value) = value else {
+                return false;
+            };
+            if value < 0x20
+                || value == 0x7f
+                || matches!(value, b'/' | b'\\' | b'-' | b'.' | b'_' | b'~')
+                || value.is_ascii_alphanumeric()
+            {
                 return false;
             }
             index += 3;
@@ -164,7 +195,8 @@ pub fn email(address: &str) -> bool {
 /// [`PROPRIETARY_LICENSE`]: short identifiers `[A-Za-z0-9][A-Za-z0-9.-]*`
 /// with an optional final `+`, the operators `AND`, `OR` and `WITH` (an
 /// exception after one identifier), parentheses, single spaces between
-/// words; no other `LicenseRef-` or `DocumentRef-`. Applications never check
+/// words; no other `LicenseRef-`, `DocumentRef-` or `AdditionRef-`, in any
+/// case. Applications never check
 /// the SPDX list, which grows: the catalog producer does.
 pub fn spdx_license(expression: &str) -> bool {
     if expression == PROPRIETARY_LICENSE {
@@ -292,16 +324,19 @@ impl LicenseParser<'_> {
 }
 
 /// A short SPDX identifier `[A-Za-z0-9][A-Za-z0-9.-]*`, with a final `+`
-/// when `plus`; neither an operator nor a document or license reference.
+/// when `plus`; neither an operator nor a license, document or addition
+/// reference, in any case.
 fn license_id(word: &str, plus: bool) -> bool {
     let id = if plus {
         word.strip_suffix('+').unwrap_or(word)
     } else {
         word
     };
+    let lowercase = id.to_ascii_lowercase();
     !matches!(id, "AND" | "OR" | "WITH")
-        && !id.starts_with("LicenseRef-")
-        && !id.starts_with("DocumentRef-")
+        && !["licenseref-", "documentref-", "additionref-"]
+            .iter()
+            .any(|reference| lowercase.starts_with(reference))
         && id
             .as_bytes()
             .first()
@@ -404,6 +439,18 @@ mod tests {
         ] {
             assert!(!display_text(bad, 500, true), "{bad:?}");
         }
+        // Shorthand format controls, the rest of the tag block, and
+        // variation selectors that follow nothing or another selector.
+        for bad in [
+            "Raid\u{1bca0}forge",
+            "a\u{e0080}b",
+            "a\u{e01f0}b",
+            "\u{fe0f}a",
+            "a\u{fe0f}\u{fe0f}",
+            "a\u{fe00}\u{fe0e}b",
+        ] {
+            assert!(!display_text(bad, 500, true), "{bad:?}");
+        }
         // Emoji keep their presentation selector; non-breaking spaces stay.
         assert!(display_text("Night Owl \u{2764}\u{fe0f}", 64, false));
         assert!(display_text("12\u{a0}h", 64, false));
@@ -452,6 +499,7 @@ mod tests {
             "https://docs.google.com/document/d/1AbC_x-9/edit?usp=sharing",
             "https://raidforge.notion.site/Politique-de-confidentialit%C3%A9",
             "https://github.com/raidforge/timers/issues",
+            "https://raidforge.gg/a%20b?q=%C3%A9",
         ] {
             assert!(link(ok), "{ok}");
         }
@@ -470,6 +518,14 @@ mod tests {
             "https://localhost/",
             "https://raidforge.gg/%zz",
             "https://raidforge.gg/%c3%a9",
+            "https://raidforge.gg/a/%2E%2E/privacy",
+            "https://raidforge.gg/%2E/privacy",
+            "https://raidforge.gg/%41bc",
+            "https://raidforge.gg/a%2Fb",
+            "https://raidforge.gg/a%5Cb",
+            "https://raidforge.gg/a%00b",
+            "https://raidforge.gg/a%7Fb",
+            "https://raidforge.gg/a?b=%2E",
             "https://raidforge.gg/a?",
             "https://raidforge.gg/a?b c",
             "https://raidforge.gg/a b",
@@ -548,6 +604,12 @@ mod tests {
             "GPL+2.0",
             "AND",
             "MIT/Apache-2.0",
+            "licenseref-custom",
+            "licenseref-proprietary",
+            "MIT OR LICENSEREF-Proprietary",
+            "MIT AND documentref-x",
+            "MIT WITH AdditionRef-x",
+            "MIT WITH additionref-x",
             long.as_str(),
         ] {
             assert!(!spdx_license(bad), "{bad}");

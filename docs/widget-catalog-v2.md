@@ -143,7 +143,10 @@ two in a row. Catalog readers check only this grammar. The creator portal
 also refuses, at registration, the historic generic domain extensions
 (`com`, `net`, `org`…), reserved handles and look-alikes of PlayerVox,
 OverCrow and Valhallab; the generated reference lists them, and a policy
-that grows never makes an older application refuse a catalog. A publisher
+that grows never makes an older application refuse a catalog. For the same
+reason the portal, not the reader, refuses a displayed publisher name that
+reads as PlayerVox, OverCrow or Valhallab (`Player Vox`, `0verCrow`) for
+any publisher but `playervox`. A publisher
 domain is a lowercase DNS name of at least two labels whose last label is
 not numeric, short enough for its reverse plus one name segment to fit a
 widget ID.
@@ -183,13 +186,16 @@ scalar values, never bytes. It has no white space at either end, no `<` or
 invisible or blank characters the generated reference lists (bidirectional
 controls, zero-width characters, line and paragraph separators, Hangul and
 braille fillers, tag characters…), so a name cannot be reversed, blanked or
-carry hidden text.
+carry hidden text. A variation selector (U+FE00 to U+FE0F) only follows a
+character that is not one, as an emoji's presentation selector does.
 
 A link is `https://`, a lowercase DNS host without port or user information,
 a path (`/` at least; segments of `[A-Za-z0-9._~-]` and `%XX` with uppercase
 hexadecimal digits; a final slash allowed; no empty, `.` or `..` segment), an
 optional non-empty query of `[A-Za-z0-9._~=&+-]` and `%XX`, no fragment, at
-most `MAX_CATALOG_URL_BYTES`. A support address is `local@domain`: the local
+most `MAX_CATALOG_URL_BYTES`. `%XX` never encodes an unreserved character
+(written plain in the canonical form, so `%2E%2E` cannot hide `..`), `/`,
+`\` or a control character. A support address is `local@domain`: the local
 part of `[A-Za-z0-9._+-]` without a dot at either end or two in a row, the
 domain a lowercase DNS name, at most `MAX_SUPPORT_EMAIL_BYTES`.
 
@@ -199,8 +205,8 @@ domain a lowercase DNS name, at most `MAX_SUPPORT_EMAIL_BYTES`.
 spaces between words and none inside parentheses (`MIT OR Apache-2.0`,
 `(MIT OR Apache-2.0) AND CC-BY-4.0`,
 `GPL-3.0-or-later WITH Classpath-exception-2.0`). `LicenseRef-Proprietary`
-(closed source, all rights reserved) stands alone; no other `LicenseRef-` or
-`DocumentRef-` is accepted. Applications never check identifiers against the
+(closed source, all rights reserved) stands alone; no other `LicenseRef-`,
+`DocumentRef-` or `AdditionRef-` is accepted, in any case. Applications never check identifiers against the
 SPDX list, which grows every quarter: an older application would refuse a
 whole catalog for a new identifier. The catalog producer checks them.
 
@@ -236,15 +242,19 @@ safe, and refuse what an application cannot safely ignore.
    install, show or grant something it should not goes through `requires`,
    or into a new format.
 4. **`requires`** (on a widget and on a target) names features a reader must
-   support to use the entry. A reader that does not support one of them skips
-   the entry instead of refusing the catalog: for a widget it reads only the
-   `id` and `requires`, and skips the widget with its targets, whose manifest
-   it does not read; for a target it reads only `requires`. A skipped entry is
-   never shown, installed or updated. Catalog v2 defines no feature name, so
-   a v2 reader skips any entry with `requires`. A producer puts `requires` on
+   support to use the entry. Unless `requires` is a list of features the
+   reader supports (an empty list requires nothing), the reader skips the
+   entry instead of refusing the catalog, a malformed `requires` included:
+   for a widget it reads only the `id` and `requires`, and skips the widget
+   with its targets, which it recognizes by their manifest's top-level `id`
+   without validating the manifest; for a target it reads only `requires`. A
+   skipped entry is never shown, installed or updated. Catalog v2 defines no
+   feature name, so a v2 reader skips any entry with a non-empty `requires`.
+   Producers name features `[a-z][a-z0-9-]*`. A producer puts `requires` on
    a widget only if no reader could have installed one of its versions;
    otherwise on the new targets only, so that older versions stay listed and
-   can still be revoked.
+   can still be revoked. Every future manifest keeps its `id` as a top-level
+   string; a target whose manifest would not carries its own `requires`.
 5. Anything else is a new format version, at a new path, with a new domain
    string.
 
@@ -261,7 +271,6 @@ safe, and refuse what an application cannot safely ignore.
 | `MAX_PUBLISHER_DOMAINS` | 8 |
 | `MAX_LISTING_LOCALIZATIONS` | 16 |
 | `MAX_LISTING_GAMES` | 5 |
-| `MAX_REQUIRED_FEATURES` | 8 |
 | Publisher name, description, release notes, game name, category label | 64, 500, 500, 100, 32 characters |
 
 An application in the field never changes its bounds, so they leave room for

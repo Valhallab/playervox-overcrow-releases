@@ -355,18 +355,6 @@ pub const MAX_SUPPORT_EMAIL_BYTES: Limit = fixed(
     Unit::Bytes,
     "Public support e-mail address of a listing.",
 );
-pub const MAX_REQUIRED_FEATURES: Limit = fixed(
-    "MAX_REQUIRED_FEATURES",
-    8,
-    Unit::Count,
-    "Feature names of one `requires` list.",
-);
-pub const MAX_FEATURE_NAME_BYTES: Limit = fixed(
-    "MAX_FEATURE_NAME_BYTES",
-    32,
-    Unit::Bytes,
-    "One feature name of a `requires` list.",
-);
 
 // View source and templates.
 pub const MAX_VIEW_ELEMENTS: Limit = fixed(
@@ -1225,8 +1213,6 @@ pub const ALL: &[&Limit] = &[
     &MAX_GAME_NAME_CHARS,
     &MAX_GAME_SLUG_BYTES,
     &MAX_SUPPORT_EMAIL_BYTES,
-    &MAX_REQUIRED_FEATURES,
-    &MAX_FEATURE_NAME_BYTES,
     &MAX_VIEW_ELEMENTS,
     &MAX_COMPONENTS,
     &MAX_EXPRESSION_BYTES,

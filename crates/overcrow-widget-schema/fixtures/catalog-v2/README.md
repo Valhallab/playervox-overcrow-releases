@@ -42,6 +42,7 @@ A file in `valid/` passes. A file in `invalid/` is named
 | `unknown-members` | unknown keys at every level of the payload, ignored: same result as `full` |
 | `requires-widget` | a widget whose `requires` names an unknown feature, skipped with its version (a newer manifest, unread): same result as `full` |
 | `requires-target` | a version whose `requires` names an unknown feature, skipped: same result as `full` |
+| `requires-malformed` | a widget whose `requires` is malformed (a name with a space, a dotted name), skipped with its version rather than refusing the catalog |
 
 The listed versions of `full` are real packages built from
 `../package-src/` (`clock`, `weather` at 2.2.0 and 2.3.0-beta.1, `minimal`

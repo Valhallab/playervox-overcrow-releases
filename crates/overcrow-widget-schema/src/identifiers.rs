@@ -15,9 +15,10 @@
 //! application refuse a catalog. [`validate_handle`] and [`validate_domain`]
 //! add the registration policy the creator portal applies.
 
+use crate::catalog_v2::display_text;
 use crate::limits::{
-    MAX_DNS_LABEL_BYTES, MAX_DNS_NAME_BYTES, MAX_HANDLE_BYTES, MAX_WIDGET_ID_BYTES,
-    MIN_HANDLE_BYTES,
+    MAX_DNS_LABEL_BYTES, MAX_DNS_NAME_BYTES, MAX_HANDLE_BYTES, MAX_PUBLISHER_NAME_CHARS,
+    MAX_WIDGET_ID_BYTES, MIN_HANDLE_BYTES,
 };
 use crate::manifest::{is_reserved_id, valid_widget_id};
 
@@ -153,6 +154,48 @@ impl OwnershipError {
             Self::NotOwned => "not_owned",
         }
     }
+}
+
+/// Fixed reasons a displayed publisher name is refused at registration.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum NameError {
+    /// Not display text of at most `MAX_PUBLISHER_NAME_CHARS` on one line.
+    Text,
+    /// Reads as PlayerVox, OverCrow or Valhallab for another publisher.
+    Reserved,
+}
+
+impl NameError {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Text => "text",
+            Self::Reserved => "reserved",
+        }
+    }
+}
+
+/// A displayed publisher name the creator portal accepts: display text on
+/// one line, and, for any publisher but `playervox`, no reserved word in the
+/// confusable skeleton of its ASCII letters and digits (`Player Vox`,
+/// `0verCrow`). Catalog readers check display text only.
+pub fn validate_publisher_name(name: &str, handle: &str) -> Result<(), NameError> {
+    if !display_text(name, MAX_PUBLISHER_NAME_CHARS.value, false) {
+        return Err(NameError::Text);
+    }
+    let letters: String = name
+        .chars()
+        .filter(char::is_ascii_alphanumeric)
+        .map(|character| character.to_ascii_lowercase())
+        .collect();
+    let folded = confusable_skeleton(&letters);
+    if handle != PLAYERVOX_HANDLE
+        && RESERVED_HANDLE_WORDS
+            .iter()
+            .any(|word| folded.contains(&confusable_skeleton(word)))
+    {
+        return Err(NameError::Reserved);
+    }
+    Ok(())
 }
 
 /// The handle grammar: `MIN_HANDLE_BYTES`..=`MAX_HANDLE_BYTES` of
@@ -367,6 +410,41 @@ mod tests {
         assert_eq!(handle_syntax("playervox"), Ok(()));
         assert_eq!(handle_syntax("com"), Ok(()));
         assert_eq!(handle_syntax("xn--abc"), Err(HandleError::Hyphen));
+    }
+
+    #[test]
+    fn publisher_names_cannot_impersonate_playervox() {
+        for (name, handle) in [
+            ("Raidforge", "raidforge"),
+            ("Night Owl Studio", "nightowl"),
+            ("Crow Over Studio", "crow-over"),
+            ("PlayerVox", PLAYERVOX_HANDLE),
+            ("PlayerVox OverCrow", PLAYERVOX_HANDLE),
+        ] {
+            assert_eq!(validate_publisher_name(name, handle), Ok(()), "{name}");
+        }
+        for name in [
+            "PlayerVox Official",
+            "Player Vox",
+            "P1ayer-Vox",
+            "0verCrow",
+            "OVERCROW Team",
+            "Valhallab",
+            "Team over.crow",
+        ] {
+            assert_eq!(
+                validate_publisher_name(name, "raidforge"),
+                Err(NameError::Reserved),
+                "{name}"
+            );
+        }
+        for name in [" Raidforge", "Raid\u{202e}forge", "", "Raid<forge>"] {
+            assert_eq!(
+                validate_publisher_name(name, "raidforge"),
+                Err(NameError::Text),
+                "{name:?}"
+            );
+        }
     }
 
     #[test]

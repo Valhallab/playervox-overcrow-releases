@@ -19,6 +19,7 @@ use overcrow_widget_schema::catalog_v2::{
 };
 use overcrow_widget_schema::identifiers::{
     Owner, domains_overlap, handle_syntax, id_owner, validate_domain, validate_handle,
+    validate_publisher_name,
 };
 use overcrow_widget_schema::limits::{
     MAX_CATEGORY_LABEL_CHARS, MAX_GAME_NAME_CHARS, MAX_LISTING_DESCRIPTION_CHARS,
@@ -86,6 +87,19 @@ fn identifier_vectors() {
         assert_eq!(
             Value::Bool(domains_overlap(text(case, "a"), text(case, "b"))),
             case["overlap"],
+            "{case}"
+        );
+    }
+
+    let names = vector_file("identifiers/names.json");
+    for case in cases(&names, "cases") {
+        let name = text(case, "name");
+        assert_eq!(
+            outcome(
+                validate_publisher_name(name, text(case, "handle")),
+                |error| { error.as_str() }
+            ),
+            text(case, "expected"),
             "{case}"
         );
     }
@@ -233,6 +247,9 @@ fn catalog_v2_vectors_mean_what_they_say() {
 
     assert_eq!(valid("unknown-members"), full);
     assert_eq!(valid("requires-target"), full);
+    let malformed = valid("requires-malformed");
+    assert_eq!(malformed.widgets, full.widgets[..2]);
+    assert_eq!(malformed.targets, full.targets[..3]);
     let skipped = valid("requires-widget");
     assert_eq!(skipped.widgets, full.widgets);
     assert_eq!(skipped.targets, full.targets);

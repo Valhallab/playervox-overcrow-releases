@@ -315,6 +315,13 @@ pub fn generate() -> BTreeMap<String, Vec<u8>> {
         })),
     );
     put(
+        "valid/requires-malformed",
+        envelope(&edit(&full, |c| {
+            // A malformed requirement skips the entry, never the catalog.
+            c["widgets"][2]["requires"] = json!(["Paid Widgets", "catalog.entitlement"]);
+        })),
+    );
+    put(
         "valid/requires-target",
         envelope(&edit(&full, |c| {
             list(&mut c["targets"]).push(json!({
@@ -447,6 +454,11 @@ pub fn generate() -> BTreeMap<String, Vec<u8>> {
         c["widgets"][0]["publisher"] = json!("example-labs");
         object(&mut c["widgets"][0]).remove("tags");
     });
+    signed("built_in_id--playervox-handle-id", &|c| {
+        c["widgets"][0]["id"] = json!("playervox.clock");
+        object(&mut c["widgets"][0]).remove("preview");
+        c["targets"][0]["manifest"]["id"] = json!("playervox.clock");
+    });
     signed("built_in_id--third-party", &|c| {
         c["widgets"][2]["tags"] = json!(["built-in"])
     });
@@ -459,9 +471,6 @@ pub fn generate() -> BTreeMap<String, Vec<u8>> {
             .expect("url")
             .replace("/widgets/v2/", "/widgets/v1/");
         c["widgets"][0]["preview"]["url"] = json!(url);
-    });
-    signed("requires--invalid-name", &|c| {
-        c["widgets"][2]["requires"] = json!(["Paid Widgets"])
     });
 
     // Listings.

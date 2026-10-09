@@ -64,8 +64,6 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MAX_GAME_NAME_CHARS` | 100 characters | fixed | Game name copied from the PlayerVox games database; longer names are shortened by the catalog producer. |
 | `MAX_GAME_SLUG_BYTES` | 128 bytes | fixed | Slug of a game page on playervox.com. |
 | `MAX_SUPPORT_EMAIL_BYTES` | 254 bytes | fixed | Public support e-mail address of a listing. |
-| `MAX_REQUIRED_FEATURES` | 8 | fixed | Feature names of one `requires` list. |
-| `MAX_FEATURE_NAME_BYTES` | 32 bytes | fixed | One feature name of a `requires` list. |
 | `MAX_VIEW_ELEMENTS` | 4096 | fixed | Elements written in `view.ocml`, components included. |
 | `MAX_COMPONENTS` | 64 | fixed | Local components declared in one view. |
 | `MAX_EXPRESSION_BYTES` | 1 KiB | fixed | Source length of one `{expr}` template expression. |
@@ -1780,7 +1778,7 @@ The catalog v2 is `https://overcrow.playervox.com/marketplace/widgets/v2/catalog
 | `tags` | `list of tags` | no | Distinct tags of the catalog v1 set; `built-in` only for the publisher `playervox` on a `com.playervox.*` ID. They apply to every version. |
 | `listing` | `ListingV2` | yes | Store text and links. |
 | `preview` | `PreviewV2` | no | One PNG preview for every version. |
-| `requires` | list of `feature name` ≤ `MAX_REQUIRED_FEATURES` | no | Features a reader must support to use the entry; otherwise it skips the widget and its targets. |
+| `requires` | `list of feature names` | no | Features a reader must support to use the entry. Unless it is a list of features the reader supports, the reader skips the widget and its targets. |
 
 ### `ListingV2`
 
@@ -1827,7 +1825,7 @@ The catalog v2 is `https://overcrow.playervox.com/marketplace/widgets/v2/catalog
 | `status` | `verified` \| `security-suspended` \| `revoked` | yes | As in the catalog v1. |
 | `package` | `PackageRef` | yes | As in the catalog v1, with `url` exactly `<base>packages/<id>/<version>/<sha256>.ocpkg` under the v2 base. |
 | `releaseNotes` | `LocalizedText` | no | Release notes of this version per locale, `en` required, at most `MAX_LISTING_LOCALIZATIONS` locales, each at most `MAX_RELEASE_NOTES_CHARS` characters; line feeds allowed. |
-| `requires` | list of `feature name` ≤ `MAX_REQUIRED_FEATURES` | no | Features a reader must support to use the entry; otherwise it skips the target. |
+| `requires` | `list of feature names` | no | Features a reader must support to use the entry. Unless it is a list of features the reader supports, the reader skips the target. |
 
 ### `PackageRef` v2
 
@@ -1853,10 +1851,10 @@ Readers take the categories from each catalog; PlayerVox starts with these.
 
 ### Display text
 
-Publisher names, category labels, game names, descriptions and release notes are non-empty and counted in Unicode scalar values. They have no white space at either end, no `<` or `>`, no control character except line feeds in descriptions and release notes, and none of these invisible or blank characters: U+00AD, U+034F, U+061C, U+115F–U+1160, U+17B4–U+17B5, U+180B–U+180F, U+200B–U+200F, U+2028–U+202E, U+2060–U+206F, U+2800, U+3164, U+FEFF, U+FFA0, U+FFF9–U+FFFB, U+1D173–U+1D17A, U+E0000–U+E007F, U+E0100–U+E01EF.
+Publisher names, category labels, game names, descriptions and release notes are non-empty and counted in Unicode scalar values. They have no white space at either end, no `<` or `>`, no control character except line feeds in descriptions and release notes, and none of these invisible or blank characters: U+00AD, U+034F, U+061C, U+115F–U+1160, U+17B4–U+17B5, U+180B–U+180F, U+200B–U+200F, U+2028–U+202E, U+2060–U+206F, U+2800, U+3164, U+FEFF, U+FFA0, U+FFF9–U+FFFB, U+1BCA0–U+1BCA3, U+1D173–U+1D17A, U+E0000–U+E0FFF. A variation selector (U+FE00 to U+FE0F) only follows a character that is not one.
 
 ### Publisher handles and widget ID ownership
 
 A handle is `MIN_HANDLE_BYTES`..=`MAX_HANDLE_BYTES` of `[a-z0-9-]` without a hyphen at either end or two in a row. A widget ID of two segments, `<handle>.<name>`, belongs to that handle; an ID of three segments or more belongs to the publisher owning the domain whose reverse is its prefix, the longest one when several match. `com.playervox` and `com.playervox.*` belong only to `playervox` through `playervox.com`, and only its widgets on those IDs may carry `built-in`. No two publishers own equal or nested domains.
 
-Catalog readers check the grammar only. A new publisher may not register a domain extension (`aero`, `arpa`, `asia`, `biz`, `cat`, `com`, `coop`, `edu`, `gov`, `info`, `int`, `jobs`, `mil`, `mobi`, `museum`, `name`, `net`, `org`, `post`, `pro`, `tel`, `travel`, `xxx`) or a handle whose skeleton equals that of a reserved handle (`admin`, `administrator`, `api`, `app`, `assets`, `billing`, `blog`, `catalog`, `cdn`, `creator`, `creators`, `dashboard`, `docs`, `download`, `downloads`, `help`, `legal`, `login`, `mail`, `marketplace`, `moderator`, `null`, `official`, `owner`, `payments`, `privacy`, `publisher`, `publishers`, `root`, `security`, `settings`, `signup`, `staff`, `static`, `status`, `support`, `system`, `team`, `terms`, `undefined`, `verified`, `widget`, `widgets`, `www`) or contains `overcrow`, `playervox`, `valhallab`. The skeleton removes hyphens, reads `vv` as `w`, then `0` as `o`, `1` and `i` as `l`, `3` as `e`, `4` as `a`, `5` as `s`, `7` as `t` and `8` as `b`.
+Catalog readers check the grammar only. A new publisher may not register a domain extension (`aero`, `arpa`, `asia`, `biz`, `cat`, `com`, `coop`, `edu`, `gov`, `info`, `int`, `jobs`, `mil`, `mobi`, `museum`, `name`, `net`, `org`, `post`, `pro`, `tel`, `travel`, `xxx`) or a handle whose skeleton equals that of a reserved handle (`admin`, `administrator`, `api`, `app`, `assets`, `billing`, `blog`, `catalog`, `cdn`, `creator`, `creators`, `dashboard`, `docs`, `download`, `downloads`, `help`, `legal`, `login`, `mail`, `marketplace`, `moderator`, `null`, `official`, `owner`, `payments`, `privacy`, `publisher`, `publishers`, `root`, `security`, `settings`, `signup`, `staff`, `static`, `status`, `support`, `system`, `team`, `terms`, `undefined`, `verified`, `widget`, `widgets`, `www`) or contains `overcrow`, `playervox`, `valhallab`. The skeleton removes hyphens, reads `vv` as `w`, then `0` as `o`, `1` and `i` as `l`, `3` as `e`, `4` as `a`, `5` as `s`, `7` as `t` and `8` as `b`. The same words may not appear in the skeleton of the ASCII letters and digits of another publisher's displayed name.

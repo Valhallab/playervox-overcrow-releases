@@ -619,6 +619,76 @@
       "field": "spdxLicense",
       "value": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA OR MIT",
       "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "Raid\ud82f\udca0forge",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "\ufe0fRaidforge",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "Raidforge \u2764\ufe0f\ufe0f",
+      "valid": false
+    },
+    {
+      "field": "publisherName",
+      "value": "a\udb40\udc80b",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/a/%2E%2E/privacy",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/%41bc",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/a%2Fb",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/a%5Cb",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/a%00b",
+      "valid": false
+    },
+    {
+      "field": "link",
+      "value": "https://raidforge.gg/a%20b?q=%C3%A9",
+      "valid": true
+    },
+    {
+      "field": "spdxLicense",
+      "value": "licenseref-custom",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "licenseref-proprietary",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "MIT OR LICENSEREF-Proprietary",
+      "valid": false
+    },
+    {
+      "field": "spdxLicense",
+      "value": "MIT WITH AdditionRef-x",
+      "valid": false
     }
   ]
 }
