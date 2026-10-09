@@ -37,9 +37,9 @@ export function schemaErrors(value, schema, path = "$") {
       errors.push(`${path}: above maximum`);
   }
   if (Array.isArray(value) && schema.items) {
-    value.forEach((item, index) =>
-      errors.push(...schemaErrors(item, schema.items, `${path}[${index}]`)),
-    );
+    for (const [index, item] of value.entries()) {
+      errors.push(...schemaErrors(item, schema.items, `${path}[${index}]`));
+    }
   }
   if (typeOf(value) === "object") {
     for (const key of schema.required ?? [])

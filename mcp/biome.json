@@ -1,6 +1,8 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "vcs": { "enabled": false },
+  "vcs": {
+    "enabled": false
+  },
   "files": {
     "includes": ["src/**", "scripts/**", "test/**", "!test/fixtures", "examples/**", "*.json"]
   },
@@ -11,16 +13,45 @@
     "lineWidth": 100
   },
   "javascript": {
-    "formatter": { "quoteStyle": "double", "semicolons": "always", "trailingCommas": "all" }
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "all"
+    }
   },
   "linter": {
     "enabled": true,
     "rules": {
       "preset": "recommended",
-      "suspicious": { "noConsole": { "level": "error", "options": { "allow": ["error"] } } },
-      "security": { "noGlobalEval": "error" },
-      "style": { "useNodejsImportProtocol": "error" }
+      "suspicious": {
+        "noConsole": {
+          "level": "error",
+          "options": {
+            "allow": ["error"]
+          }
+        }
+      },
+      "security": {
+        "noGlobalEval": "error"
+      },
+      "style": {
+        "useNodejsImportProtocol": "error"
+      }
     }
   },
-  "assist": { "enabled": false }
+  "assist": {
+    "enabled": false
+  },
+  "overrides": [
+    {
+      "includes": ["scripts/**", "test/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
+          }
+        }
+      }
+    }
+  ]
 }
