@@ -83,6 +83,7 @@ jobs:
           echo "dry-run=$dry_run" >> "$GITHUB_OUTPUT"
           echo "@overcrow/sdk $version, npm $npm_version, dry run: $dry_run"
       - name: Refuse a version already on npm
+        id: published
         env:
           VERSION: ${{ steps.mode.outputs.version }}
           DRY_RUN: ${{ steps.mode.outputs.dry-run }}
@@ -92,6 +93,7 @@ jobs:
             if test -s view.out; then
               if test "$DRY_RUN" = true; then
                 echo "::notice::@overcrow/sdk $VERSION is already on npm: a real run would stop here"
+                echo "exists=true" >> "$GITHUB_OUTPUT"
               else
                 echo "@overcrow/sdk $VERSION is already on npm: raise the version in sdk/package.json"
                 exit 1
@@ -119,10 +121,21 @@ jobs:
       - name: Publish with provenance
         env:
           DRY_RUN: ${{ steps.mode.outputs.dry-run }}
+          EXISTS: ${{ steps.published.outputs.exists }}
+          VERSION: ${{ steps.mode.outputs.version }}
+          RUN_NUMBER: ${{ github.run_number }}
         run: |
           umask 022
           if test "$DRY_RUN" = true; then
-            npm publish --provenance --access public --dry-run
+            # npm refuses even a dry run over a published version: try the
+            # same package under a throwaway prerelease version instead.
+            if test "$EXISTS" = true; then
+              npm pkg set version="$VERSION-dryrun.$RUN_NUMBER"
+              npm publish --provenance --access public --tag dry-run --dry-run
+              git checkout -- package.json
+            else
+              npm publish --provenance --access public --dry-run
+            fi
           else
             npm publish --provenance --access public
           fi
