@@ -168,7 +168,7 @@ pub fn digest(path: &Path) -> Result<String, RuntimeError> {
 
 /// The pin as `--version --format json` reports it (`runtime`), which
 /// `scripts/package-cli.sh` copies into `cli.json`: the release publisher
-/// then checks that the creator tools ZIP holds this very runtime.
+/// then checks that the creator tools ZIPs hold this very runtime.
 pub fn pin_json(pin: Option<&Pin>) -> serde_json::Value {
     pin.map_or(serde_json::Value::Null, |pin| {
         let digests: serde_json::Map<String, serde_json::Value> = pin
@@ -225,11 +225,12 @@ pub fn resolve(
                 eprintln!(
                     "Downloading the headless runtime {} ({})…",
                     pin.version,
-                    download::archive_name(pin.version)
+                    download::archive_name(pin.version, &platform)
                 );
                 download::runtime(
                     source,
                     pin.version,
+                    &platform,
                     &name,
                     expected,
                     &path,

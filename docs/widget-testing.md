@@ -28,7 +28,7 @@ read and execute for the AppContainer when the ACL lacks it.
 The CLI pins the runtime published with OverCrow 0.6.0-beta.1
 (`PIN` in `cli/src/runtime.rs`: its version and the two SHA-256 of that
 release's `runtimes.json`), so `--runtime` is optional: a runtime missing
-from the cache is downloaded from the creator tools ZIP of that release
+from the cache is downloaded from the creator tools ZIP of its platform in that release
 (`cli/src/download.rs`), unless `--offline` is given; `--runtime` still
 names another one, such as one built from OverCrow. Hosted CI checks the scenarios, their fixtures and reference
 images without playing them (`cli/tests/reference_widgets.rs` for the

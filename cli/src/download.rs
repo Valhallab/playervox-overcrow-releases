@@ -1,7 +1,7 @@
 //! Downloads the pinned headless runtime (`overcrow-widget test` without
 //! `--runtime` and without a cached runtime). It comes from the creator
-//! tools ZIP of the OverCrow release that published it:
-//! `https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v<version>/overcrow-creator-tools-<version>.zip`.
+//! tools ZIP of this platform in the OverCrow release that published it:
+//! `https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v<version>/overcrow-creator-tools-<version>-<platform>.zip`.
 //!
 //! The ZIP cannot be pinned (this CLI is inside it): only the runtime's
 //! SHA-256 is trusted. The ZIP goes to a temporary file in the cache, only
@@ -32,7 +32,7 @@ const REDIRECT_HOSTS: &[&str] = &[
     "objects.githubusercontent.com",
 ];
 const MAX_REDIRECTS: usize = 3;
-/// The creator tools ZIP holds two runtimes and two CLIs (about 25 MB).
+/// A creator tools ZIP holds one runtime and one CLI (about 15 MB).
 const MAX_ZIP_BYTES: u64 = 256 * 1024 * 1024;
 const ZIP_LIMITS: Limits = Limits {
     max_entries: 64,
@@ -42,9 +42,10 @@ const ZIP_LIMITS: Limits = Limits {
 const TOTAL_TIME: Duration = Duration::from_secs(15 * 60);
 const CONNECT_TIME: Duration = Duration::from_secs(30);
 
-/// The file name of the creator tools ZIP of OverCrow `version`.
-pub fn archive_name(version: &str) -> String {
-    format!("overcrow-creator-tools-{version}.zip")
+/// The file name of the creator tools ZIP of OverCrow `version` for
+/// `platform` (`linux-x86_64`, `windows-x86_64`).
+pub fn archive_name(version: &str, platform: &str) -> String {
+    format!("overcrow-creator-tools-{version}-{platform}.zip")
 }
 
 /// Where a download may go.
@@ -101,8 +102,12 @@ impl Source {
         Self::github()
     }
 
-    fn url(&self, version: &str) -> String {
-        format!("{}/v{version}/{}", self.base, archive_name(version))
+    fn url(&self, version: &str, platform: &str) -> String {
+        format!(
+            "{}/v{version}/{}",
+            self.base,
+            archive_name(version, platform)
+        )
     }
 }
 
@@ -218,16 +223,17 @@ impl Progress {
     }
 }
 
-/// Downloads the creator tools ZIP of `version` into `file`, following at
+/// Downloads the creator tools ZIP of `version` for `platform` into `file`, following at
 /// most [`MAX_REDIRECTS`] redirects to allowed hosts.
 fn fetch(
     source: &Source,
     version: &str,
+    platform: &str,
     file: &mut std::fs::File,
     progress: &mut Progress,
 ) -> Result<u64, DownloadError> {
     let deadline = Instant::now() + TOTAL_TIME;
-    let mut url = source.url(version);
+    let mut url = source.url(version, platform);
     let mut hosts = std::slice::from_ref(&source.first_host);
     for _ in 0..=MAX_REDIRECTS {
         let uri = url.parse::<Uri>().map_err(|_| DownloadError::Redirect)?;
@@ -319,11 +325,13 @@ impl<W: Write> Write for Hashing<W> {
     }
 }
 
-/// Downloads the runtime `name` of OverCrow `version` and writes it to
-/// `destination` (executable), only if its SHA-256 is `expected`.
+/// Downloads the runtime `name` of OverCrow `version` for `platform` and
+/// writes it to `destination` (executable), only if its SHA-256 is
+/// `expected`.
 pub fn runtime(
     source: &Source,
     version: &str,
+    platform: &str,
     name: &str,
     expected: &str,
     destination: &Path,
@@ -339,7 +347,7 @@ pub fn runtime(
         .prefix(".download-")
         .tempfile_in(directory)
         .map_err(|_| unwritable())?;
-    let fetched = fetch(source, version, archive.as_file_mut(), progress);
+    let fetched = fetch(source, version, platform, archive.as_file_mut(), progress);
     progress.finish();
     let length = fetched?;
     let file = archive.as_file_mut();
@@ -348,7 +356,7 @@ pub fn runtime(
     let mut reader = std::io::BufReader::new(file);
     let entries =
         zipread::entries(&mut reader, length, ZIP_LIMITS).map_err(DownloadError::Archive)?;
-    let path = format!("overcrow-creator-tools-{version}/{name}");
+    let path = format!("overcrow-creator-tools-{version}-{platform}/{name}");
     let entry = entries
         .iter()
         .find(|entry| entry.name == path)
@@ -437,8 +445,14 @@ mod tests {
 
     fn good_zip() -> Vec<u8> {
         zip(&[
-            ("overcrow-creator-tools-9.9.9/README.txt", b"read me"),
-            (&format!("overcrow-creator-tools-9.9.9/{NAME}"), RUNTIME),
+            (
+                "overcrow-creator-tools-9.9.9-linux-x86_64/README.txt",
+                b"read me",
+            ),
+            (
+                &format!("overcrow-creator-tools-9.9.9-linux-x86_64/{NAME}"),
+                RUNTIME,
+            ),
         ])
     }
 
@@ -489,6 +503,7 @@ mod tests {
         let result = runtime(
             &Source::local(base).unwrap(),
             VERSION,
+            "linux-x86_64",
             NAME,
             expected,
             &destination,
@@ -518,7 +533,7 @@ mod tests {
     fn the_runtime_of_the_archive_is_kept_with_its_pinned_digest() {
         let base = serve(Box::new(|path, _| {
             assert_eq!(
-                path, "/download/v9.9.9/overcrow-creator-tools-9.9.9.zip",
+                path, "/download/v9.9.9/overcrow-creator-tools-9.9.9-linux-x86_64.zip",
                 "the URL of the release's archive"
             );
             ok(&good_zip())
@@ -563,7 +578,10 @@ mod tests {
         let base = serve(Box::new(|_, _| {
             ok(&zip(&[
                 ("../evil", b"x"),
-                (&format!("overcrow-creator-tools-9.9.9/{NAME}"), RUNTIME),
+                (
+                    &format!("overcrow-creator-tools-9.9.9-linux-x86_64/{NAME}"),
+                    RUNTIME,
+                ),
             ]))
         }));
         let (result, cache) = download(&base, &sha(RUNTIME));
@@ -578,7 +596,10 @@ mod tests {
     #[test]
     fn an_archive_without_this_platform_is_refused() {
         let base = serve(Box::new(|_, _| {
-            ok(&zip(&[("overcrow-creator-tools-9.9.9/README.txt", b"x")]))
+            ok(&zip(&[(
+                "overcrow-creator-tools-9.9.9-linux-x86_64/README.txt",
+                b"x",
+            )]))
         }));
         let (result, _cache) = download(&base, &sha(RUNTIME));
         assert!(
@@ -667,10 +688,10 @@ mod tests {
         let source = Source::github();
         let hosts = std::slice::from_ref(&source.first_host);
         let check = |url: &str, hosts: &[String]| allowed(&url.parse().unwrap(), hosts, true);
-        assert!(check(&source.url("0.6.1-beta.1"), hosts));
+        assert!(check(&source.url("0.6.1-beta.1", "linux-x86_64"), hosts));
         assert_eq!(
-            source.url("0.6.1-beta.1"),
-            "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.6.1-beta.1/overcrow-creator-tools-0.6.1-beta.1.zip"
+            source.url("0.6.1-beta.1", "windows-x86_64"),
+            "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.6.1-beta.1/overcrow-creator-tools-0.6.1-beta.1-windows-x86_64.zip"
         );
         assert!(!check("http://github.com/x", hosts));
         assert!(!check(

@@ -1,4 +1,4 @@
-//! A strict reader of the creator tools ZIP (`overcrow-creator-tools-<v>.zip`,
+//! A strict reader of a creator tools ZIP (`overcrow-creator-tools-<v>-<platform>.zip`,
 //! assembled by OverCrow's release publisher): the downloaded runtime comes
 //! out of it. The archive cannot be pinned (the CLI is inside it), so the
 //! reader trusts nothing it declares: every entry is checked before any

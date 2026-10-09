@@ -381,9 +381,9 @@ system's sandbox the runtime refuses to run and says so; the test command
 then ends with status 2.
 
 The first time `test` needs the runtime, it downloads it: from the
-creator tools ZIP of the OverCrow release that published it, it keeps
-only your platform's runtime, and only once its SHA-256 is the one this
-CLI pins. The ZIP is not kept. The runtime then stays in the CLI's cache:
+creator tools ZIP of your platform in the OverCrow release that
+published it, it keeps only the runtime, and only once its SHA-256 is the
+one this CLI pins. The ZIP is not kept. The runtime then stays in the CLI's cache:
 
 | Platform | Path |
 | --- | --- |

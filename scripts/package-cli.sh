@@ -13,7 +13,7 @@
 #                                                     pinned runtime, files
 #   SHA256SUMS                                        every file above
 #
-# These files go into the creator tools ZIP of OverCrow's GitHub release,
+# These files go into the creator tools ZIPs of OverCrow's GitHub release,
 # beside the headless runtimes; this script publishes nothing. The pinned
 # runtime comes from the Linux binary itself (`--version --format json`):
 # the release publisher checks that the ZIP holds that very runtime.

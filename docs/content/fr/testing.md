@@ -395,9 +395,9 @@ sandbox du système d’exploitation, le runtime refuse de s’exécuter et le
 dit ; la commande de test se termine alors avec le code 2.
 
 La première fois que `test` a besoin du runtime, il le télécharge : dans
-le ZIP des outils créateurs de la release OverCrow qui l’a publié, il ne
-garde que le runtime de votre plateforme, et seulement si son SHA-256 est
-celui que la CLI épingle. Le ZIP n’est pas conservé. Le runtime reste
+le ZIP des outils créateurs de votre plateforme, dans la release OverCrow
+qui l’a publié, il ne garde que le runtime, et seulement si son SHA-256
+est celui que la CLI épingle. Le ZIP n’est pas conservé. Le runtime reste
 ensuite dans le cache de la CLI :
 
 | Plateforme | Chemin |

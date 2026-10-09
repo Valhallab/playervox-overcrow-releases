@@ -279,13 +279,14 @@ fn a_downloaded_runtime_with_another_digest_is_not_kept_nor_run() {
     let cache = tempfile::tempdir().expect("cache directory");
     let fake = fake(0);
     let script = fs::read(runtime(fake.path(), 1, 0)).unwrap();
+    let platform = format!("{}-{}", std::env::consts::OS, std::env::consts::ARCH);
     let name = pinned_path(cache.path())
         .file_name()
         .unwrap()
         .to_string_lossy()
         .into_owned();
     let (releases, paths) = serve(stored_zip(
-        &format!("overcrow-creator-tools-0.6.0-beta.1/{name}"),
+        &format!("overcrow-creator-tools-0.6.0-beta.1-{platform}/{name}"),
         &script,
     ));
     let output = cli_with_cache(&root, cache.path(), &releases, &[]);
@@ -293,7 +294,7 @@ fn a_downloaded_runtime_with_another_digest_is_not_kept_nor_run() {
     assert_eq!(output.status.code(), Some(2), "{message}");
     assert!(
         message.contains(
-            "Downloading the headless runtime 0.6.0-beta.1 (overcrow-creator-tools-0.6.0-beta.1.zip)"
+            &format!("Downloading the headless runtime 0.6.0-beta.1 (overcrow-creator-tools-0.6.0-beta.1-{platform}.zip)")
         ),
         "{message}"
     );
@@ -303,7 +304,9 @@ fn a_downloaded_runtime_with_another_digest_is_not_kept_nor_run() {
     );
     assert_eq!(
         *paths.lock().unwrap(),
-        ["/download/v0.6.0-beta.1/overcrow-creator-tools-0.6.0-beta.1.zip"]
+        [format!(
+            "/download/v0.6.0-beta.1/overcrow-creator-tools-0.6.0-beta.1-{platform}.zip"
+        )]
     );
     let kept = fs::read_dir(pinned_path(cache.path()).parent().unwrap())
         .map(|entries| entries.count())

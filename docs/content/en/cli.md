@@ -34,15 +34,14 @@ current directory without one.
 ## Installing
 
 Each [OverCrow release](https://github.com/Valhallab/playervox-overcrow-releases/releases)
-carries the creator tools in one ZIP, `overcrow-creator-tools-VERSION.zip`:
-the tool for Linux and Windows x86-64 with its license and third-party
-notices, OverCrow's headless runtime that [`test`](#test) uses, a
-`README.txt` and a `SHA256SUMS` of every file.
+carries the creator tools in one ZIP per platform: the tool with its
+license and third-party notices, OverCrow's headless runtime that
+[`test`](#test) uses, a `README.txt` and a `SHA256SUMS` of every file.
 
-| Platform | File in the ZIP |
-| --- | --- |
-| Linux | `overcrow-widget-VERSION-linux-x86_64` |
-| Windows | `overcrow-widget-VERSION-windows-x86_64.exe` |
+| Platform | ZIP | Tool in the ZIP |
+| --- | --- | --- |
+| Linux x86-64 | `overcrow-creator-tools-VERSION-linux-x86_64.zip` | `overcrow-widget-VERSION-linux-x86_64` |
+| Windows x64 | `overcrow-creator-tools-VERSION-windows-x86_64.zip` | `overcrow-widget-VERSION-windows-x86_64.exe` |
 
 Unzip it, check the files, rename the tool `overcrow-widget`
 (`overcrow-widget.exe` on Windows), make it executable on Linux
@@ -51,8 +50,8 @@ package a widget. `overcrow-widget --version` gives its version and the SDK
 it embeds.
 
 ```sh
-unzip overcrow-creator-tools-VERSION.zip
-cd overcrow-creator-tools-VERSION
+unzip overcrow-creator-tools-VERSION-linux-x86_64.zip
+cd overcrow-creator-tools-VERSION-linux-x86_64
 sha256sum --check SHA256SUMS
 install -m 755 overcrow-widget-*-linux-x86_64 ~/.local/bin/overcrow-widget
 ```

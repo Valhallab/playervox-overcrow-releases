@@ -9,13 +9,13 @@ widget's sources and the embedded SDK.
 
 ## 1.0.0-beta.2
 
-Released in the creator tools ZIP of OverCrow's next GitHub release,
-`overcrow-creator-tools-<version>.zip`, beside the headless runtime it
-pins.
+Released in the creator tools ZIPs of OverCrow's next GitHub release,
+`overcrow-creator-tools-<version>-<platform>.zip`, beside the headless
+runtime it pins.
 
 - `test` downloads the pinned headless runtime when the cache does not
-  hold it and `--runtime` is not given: from the creator tools ZIP of the
-  OverCrow release that published it, keeping only this platform's
+  hold it and `--runtime` is not given: from the creator tools ZIP of this
+  platform in the OverCrow release that published it, keeping only the
   runtime once its SHA-256 is the pinned one. The ZIP is not kept.
   `--offline` never downloads. HTTPS only, redirects only to GitHub's
   hosts, size and time bounds; an `HTTPS_PROXY` is used.

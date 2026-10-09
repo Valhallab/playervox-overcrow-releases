@@ -13,9 +13,10 @@ application belong in GitHub Release assets.
 
 Each release contains the Windows x64 installer and the Linux x64 Arch, DEB and
 RPM packages, with a release manifest and SHA-256 checksums. It also
-carries the tools of widget creators for Linux and Windows x64 in one ZIP,
-`overcrow-creator-tools-VERSION.zip`: the widget CLI `overcrow-widget` and
-the headless runtime that `overcrow-widget test` runs (the CLI downloads it
+carries the tools of widget creators in one ZIP per platform,
+`overcrow-creator-tools-VERSION-linux-x86_64.zip` and
+`overcrow-creator-tools-VERSION-windows-x86_64.zip`: the widget CLI
+`overcrow-widget` and the headless runtime that `overcrow-widget test` runs (the CLI downloads it
 by itself; 0.6.0-beta.1 attached these files one by one). A channel containing
 `release: null` has no published version yet.
 
@@ -121,7 +122,7 @@ check, including the documentation examples and the link check. Use Node.js
 The website consumes a reviewed, revision-pinned snapshot of this repository.
 `@overcrow/sdk` is published on npm by the `sdk-publish` workflow (npm
 trusted publishing, with provenance; no token); the CLI's binaries go into
-the creator tools ZIP of OverCrow's releases
+the creator tools ZIPs of OverCrow's releases
 ([release files](docs/cli.md#release-files)).
 Never publish a separate GitHub Release for the SDK or the CLI: the desktop
 updater uses this repository's stable-release API.

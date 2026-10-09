@@ -136,8 +136,9 @@ repository's own revisions ([review policy](review-policy.md)).
 ## Release files
 
 The CLI is released inside OverCrow's GitHub release, in the creator
-tools ZIP `overcrow-creator-tools-OVERCROW_VERSION.zip`, beside the
-headless runtimes of the same OverCrow version; there is no separate
+tools ZIPs `overcrow-creator-tools-OVERCROW_VERSION-PLATFORM.zip`
+(`linux-x86_64`, `windows-x86_64`), beside the headless runtime of the
+same OverCrow version and platform; there is no separate
 GitHub release for the CLI. The `cli-dist` workflow builds both platforms
 with the `dist` profile on hosted runners (Ubuntu 24.04; Windows with a
 static C runtime) and `scripts/package-cli.sh` assembles them, for CLI
@@ -152,15 +153,17 @@ version `VERSION`:
 | `cli.json` | The version, the source commit, the pinned headless runtime (`runtime`: its version and the SHA-256 of each platform's executable, as the Linux binary reports them with `--version --format json`), and each file's name, size and SHA-256. |
 | `SHA256SUMS` | The checksums of the five files above. |
 
-OverCrow's release publisher puts these files, both headless runtimes,
-their license and `runtimes.json` into the ZIP, under one directory
-`overcrow-creator-tools-OVERCROW_VERSION/`, with a `README.txt` and one
-`SHA256SUMS` over every other file. It refuses a CLI whose `runtime` is
-not the runtime of that ZIP: `overcrow-widget test` downloads the ZIP of
-the release named by its pin, so the pin must be updated to the runtime of
-the release the CLI ships in before `cli-dist` runs. The release itself
-keeps seven files: the four packages, `release.json` (which lists the
-ZIP and every file in it), the ZIP and `SHA256SUMS`.
+OverCrow's release publisher puts, into each platform's ZIP, under one
+directory `overcrow-creator-tools-OVERCROW_VERSION-PLATFORM/`: that
+platform's executable, the CLI's license, notices and `cli.json`, the
+platform's headless runtime, its license and `runtimes.json`, a
+`README.txt` and one `SHA256SUMS` over every other file. It refuses a CLI
+whose `runtime` is not the runtime of those ZIPs: `overcrow-widget test`
+downloads the ZIP of its platform in the release named by its pin, so the
+pin must be updated to the runtime of the release the CLI ships in before
+`cli-dist` runs. The release itself keeps eight files: the four packages,
+`release.json` (which lists both ZIPs and every file in them), the two
+ZIPs and `SHA256SUMS`.
 
 The workflow creates no tag and no release. The changes of each version
 are in [`cli/CHANGELOG.md`](../cli/CHANGELOG.md), those of the SDK in
