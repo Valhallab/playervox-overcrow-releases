@@ -267,6 +267,107 @@ pub const MAX_PUBLISHER_DOMAINS: Limit = fixed(
     "Domains under which one publisher owns widget IDs.",
 );
 
+// Signed catalog v2 (CR.1). An application in the field never changes its
+// bounds, so they leave room for the whole third-party catalog.
+pub const MAX_CATALOG_V2_BYTES: Limit = fixed(
+    "MAX_CATALOG_V2_BYTES",
+    4 * MIB,
+    Unit::Bytes,
+    "Signed envelope of the catalog v2.",
+);
+pub const MAX_CATALOG_V2_PAYLOAD_BYTES: Limit = fixed(
+    "MAX_CATALOG_V2_PAYLOAD_BYTES",
+    3000 * KIB,
+    Unit::Bytes,
+    "Decoded signed payload of the catalog v2; its Base64 form fits `MAX_CATALOG_V2_BYTES`.",
+);
+pub const MAX_CATALOG_V2_TARGETS: Limit = fixed(
+    "MAX_CATALOG_V2_TARGETS",
+    2000,
+    Unit::Count,
+    "Package versions listed by one catalog v2.",
+);
+pub const MAX_CATALOG_V2_WIDGETS: Limit = fixed(
+    "MAX_CATALOG_V2_WIDGETS",
+    1000,
+    Unit::Count,
+    "Widget entries of one catalog v2.",
+);
+pub const MAX_CATALOG_PUBLISHERS: Limit = fixed(
+    "MAX_CATALOG_PUBLISHERS",
+    1000,
+    Unit::Count,
+    "Publisher entries of one catalog v2.",
+);
+pub const MAX_CATALOG_CATEGORIES: Limit = fixed(
+    "MAX_CATALOG_CATEGORIES",
+    32,
+    Unit::Count,
+    "Categories of one catalog v2, `other` included.",
+);
+pub const MAX_CATEGORY_ID_BYTES: Limit =
+    fixed("MAX_CATEGORY_ID_BYTES", 32, Unit::Bytes, "Category ID.");
+pub const MAX_CATEGORY_LABEL_CHARS: Limit = fixed(
+    "MAX_CATEGORY_LABEL_CHARS",
+    32,
+    Unit::Characters,
+    "One localized category label: a filter or a chip.",
+);
+pub const MAX_PUBLISHER_NAME_CHARS: Limit = fixed(
+    "MAX_PUBLISHER_NAME_CHARS",
+    64,
+    Unit::Characters,
+    "Displayed publisher name, one line of a card.",
+);
+pub const MAX_LISTING_DESCRIPTION_CHARS: Limit = fixed(
+    "MAX_LISTING_DESCRIPTION_CHARS",
+    500,
+    Unit::Characters,
+    "Listing description of one locale in the catalog v2.",
+);
+pub const MAX_RELEASE_NOTES_CHARS: Limit = fixed(
+    "MAX_RELEASE_NOTES_CHARS",
+    500,
+    Unit::Characters,
+    "Release notes of one version in one locale.",
+);
+pub const MAX_LISTING_GAMES: Limit = fixed(
+    "MAX_LISTING_GAMES",
+    5,
+    Unit::Count,
+    "PlayerVox games a widget is listed for.",
+);
+pub const MAX_GAME_NAME_CHARS: Limit = fixed(
+    "MAX_GAME_NAME_CHARS",
+    100,
+    Unit::Characters,
+    "Game name copied from the PlayerVox games database; longer names are shortened by the catalog producer.",
+);
+pub const MAX_GAME_SLUG_BYTES: Limit = fixed(
+    "MAX_GAME_SLUG_BYTES",
+    128,
+    Unit::Bytes,
+    "Slug of a game page on playervox.com.",
+);
+pub const MAX_SUPPORT_EMAIL_BYTES: Limit = fixed(
+    "MAX_SUPPORT_EMAIL_BYTES",
+    254,
+    Unit::Bytes,
+    "Public support e-mail address of a listing.",
+);
+pub const MAX_REQUIRED_FEATURES: Limit = fixed(
+    "MAX_REQUIRED_FEATURES",
+    8,
+    Unit::Count,
+    "Feature names of one `requires` list.",
+);
+pub const MAX_FEATURE_NAME_BYTES: Limit = fixed(
+    "MAX_FEATURE_NAME_BYTES",
+    32,
+    Unit::Bytes,
+    "One feature name of a `requires` list.",
+);
+
 // View source and templates.
 pub const MAX_VIEW_ELEMENTS: Limit = fixed(
     "MAX_VIEW_ELEMENTS",
@@ -1109,6 +1210,23 @@ pub const ALL: &[&Limit] = &[
     &MIN_HANDLE_BYTES,
     &MAX_HANDLE_BYTES,
     &MAX_PUBLISHER_DOMAINS,
+    &MAX_CATALOG_V2_BYTES,
+    &MAX_CATALOG_V2_PAYLOAD_BYTES,
+    &MAX_CATALOG_V2_TARGETS,
+    &MAX_CATALOG_V2_WIDGETS,
+    &MAX_CATALOG_PUBLISHERS,
+    &MAX_CATALOG_CATEGORIES,
+    &MAX_CATEGORY_ID_BYTES,
+    &MAX_CATEGORY_LABEL_CHARS,
+    &MAX_PUBLISHER_NAME_CHARS,
+    &MAX_LISTING_DESCRIPTION_CHARS,
+    &MAX_RELEASE_NOTES_CHARS,
+    &MAX_LISTING_GAMES,
+    &MAX_GAME_NAME_CHARS,
+    &MAX_GAME_SLUG_BYTES,
+    &MAX_SUPPORT_EMAIL_BYTES,
+    &MAX_REQUIRED_FEATURES,
+    &MAX_FEATURE_NAME_BYTES,
     &MAX_VIEW_ELEMENTS,
     &MAX_COMPONENTS,
     &MAX_EXPRESSION_BYTES,
@@ -1310,4 +1428,14 @@ const _: () = {
     // A handle plus a one-letter name fits a widget ID.
     assert!(MIN_HANDLE_BYTES.value < MAX_HANDLE_BYTES.value);
     assert!(MAX_HANDLE_BYTES.value + 2 <= MAX_WIDGET_ID_BYTES.value);
+    // Catalog v2: Base64 without padding of the largest payload fits the
+    // envelope with its other fields; each widget has a target and each
+    // publisher a widget.
+    assert!(
+        MAX_CATALOG_V2_PAYLOAD_BYTES.value.div_ceil(3) * 4 + 4 * KIB < MAX_CATALOG_V2_BYTES.value
+    );
+    assert!(MAX_CATALOG_V2_PAYLOAD_BYTES.value >= MAX_CATALOG_PAYLOAD_BYTES.value);
+    assert!(MAX_CATALOG_V2_WIDGETS.value <= MAX_CATALOG_V2_TARGETS.value);
+    assert!(MAX_CATALOG_PUBLISHERS.value <= MAX_CATALOG_V2_WIDGETS.value);
+    assert!(MAX_CATALOG_CATEGORIES.value >= 7);
 };

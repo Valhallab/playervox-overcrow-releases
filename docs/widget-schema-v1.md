@@ -49,6 +49,23 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MIN_HANDLE_BYTES` | 3 bytes | fixed | Shortest publisher handle; it also keeps every two-letter country extension out of the handles. |
 | `MAX_HANDLE_BYTES` | 32 bytes | fixed | Longest publisher handle. |
 | `MAX_PUBLISHER_DOMAINS` | 8 | fixed | Domains under which one publisher owns widget IDs. |
+| `MAX_CATALOG_V2_BYTES` | 4 MiB | fixed | Signed envelope of the catalog v2. |
+| `MAX_CATALOG_V2_PAYLOAD_BYTES` | 3000 KiB | fixed | Decoded signed payload of the catalog v2; its Base64 form fits `MAX_CATALOG_V2_BYTES`. |
+| `MAX_CATALOG_V2_TARGETS` | 2000 | fixed | Package versions listed by one catalog v2. |
+| `MAX_CATALOG_V2_WIDGETS` | 1000 | fixed | Widget entries of one catalog v2. |
+| `MAX_CATALOG_PUBLISHERS` | 1000 | fixed | Publisher entries of one catalog v2. |
+| `MAX_CATALOG_CATEGORIES` | 32 | fixed | Categories of one catalog v2, `other` included. |
+| `MAX_CATEGORY_ID_BYTES` | 32 bytes | fixed | Category ID. |
+| `MAX_CATEGORY_LABEL_CHARS` | 32 characters | fixed | One localized category label: a filter or a chip. |
+| `MAX_PUBLISHER_NAME_CHARS` | 64 characters | fixed | Displayed publisher name, one line of a card. |
+| `MAX_LISTING_DESCRIPTION_CHARS` | 500 characters | fixed | Listing description of one locale in the catalog v2. |
+| `MAX_RELEASE_NOTES_CHARS` | 500 characters | fixed | Release notes of one version in one locale. |
+| `MAX_LISTING_GAMES` | 5 | fixed | PlayerVox games a widget is listed for. |
+| `MAX_GAME_NAME_CHARS` | 100 characters | fixed | Game name copied from the PlayerVox games database; longer names are shortened by the catalog producer. |
+| `MAX_GAME_SLUG_BYTES` | 128 bytes | fixed | Slug of a game page on playervox.com. |
+| `MAX_SUPPORT_EMAIL_BYTES` | 254 bytes | fixed | Public support e-mail address of a listing. |
+| `MAX_REQUIRED_FEATURES` | 8 | fixed | Feature names of one `requires` list. |
+| `MAX_FEATURE_NAME_BYTES` | 32 bytes | fixed | One feature name of a `requires` list. |
 | `MAX_VIEW_ELEMENTS` | 4096 | fixed | Elements written in `view.ocml`, components included. |
 | `MAX_COMPONENTS` | 64 | fixed | Local components declared in one view. |
 | `MAX_EXPRESSION_BYTES` | 1 KiB | fixed | Source length of one `{expr}` template expression. |

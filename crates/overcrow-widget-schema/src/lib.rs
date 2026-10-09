@@ -9,6 +9,7 @@
 //! tables is rejected; values marked provisional await the named lot.
 
 pub mod catalog;
+pub mod catalog_v2;
 pub mod compiled_view;
 pub mod icons;
 pub mod identifiers;

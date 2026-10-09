@@ -385,7 +385,12 @@ mod tests {
 
     #[test]
     fn publisher_domains_are_lowercase_dns_names() {
-        for ok in ["raidforge.gg", "eu.raidforge.gg", "xn--nuit-toile-b7a.fr", "a.co"] {
+        for ok in [
+            "raidforge.gg",
+            "eu.raidforge.gg",
+            "xn--nuit-toile-b7a.fr",
+            "a.co",
+        ] {
             assert_eq!(domain_syntax(ok), Ok(()), "{ok}");
         }
         let long = format!("{}.com", "a.".repeat(62));
@@ -406,7 +411,10 @@ mod tests {
             assert_eq!(domain_syntax(bad), Err(DomainError::Syntax), "{bad}");
         }
         assert_eq!(validate_domain("playervox.com", "playervox"), Ok(()));
-        assert_eq!(validate_domain("overcrow.playervox.com", "playervox"), Ok(()));
+        assert_eq!(
+            validate_domain("overcrow.playervox.com", "playervox"),
+            Ok(())
+        );
         assert_eq!(
             validate_domain("playervox.com", "raidforge"),
             Err(DomainError::Reserved)
@@ -438,7 +446,10 @@ mod tests {
             Ok(Owner::Domain("raidforge.gg"))
         );
         assert_eq!(owner("other.timers"), Err(OwnershipError::NotOwned));
-        assert_eq!(owner("raidforge.raid.timers"), Err(OwnershipError::NotOwned));
+        assert_eq!(
+            owner("raidforge.raid.timers"),
+            Err(OwnershipError::NotOwned)
+        );
         assert_eq!(owner("gg.raidforge"), Err(OwnershipError::NotOwned));
         assert_eq!(owner("gg.raidforgex.timers"), Err(OwnershipError::NotOwned));
         assert_eq!(owner("Bad..id"), Err(OwnershipError::InvalidId));
