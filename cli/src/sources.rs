@@ -21,6 +21,10 @@ use crate::diag::{Diagnostic, Report, closest};
 use crate::jsonpos;
 use crate::project::Project;
 
+/// How to write a widget ID, for help texts: the two forms of the creator
+/// space (`identifiers::id_owner`), with the example publisher `nova`.
+pub const ID_FORMS: &str = "use <handle>.<name> with your publisher handle from the OverCrow creator space, such as nova.lol-timers, or a reverse domain you verified, such as gg.nova.lol-timers";
+
 /// The declarative sources, validated.
 pub struct Sources {
     pub manifest: Manifest,
@@ -121,7 +125,7 @@ pub fn manifest_diagnostic(error: ManifestError, source: &str) -> Diagnostic {
         ManifestError::Id => (
             "id",
             "`id` is not a valid widget ID".into(),
-            Some("reverse-DNS, lowercase letters, digits and `-`, at least two labels: `com.example.clock`".into()),
+            Some(format!("lowercase letters, digits and `-` in at least two parts separated by dots; {ID_FORMS}")),
         ),
         ManifestError::Version => (
             "version",

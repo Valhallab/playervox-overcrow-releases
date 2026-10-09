@@ -18,6 +18,10 @@
 //!
 //! The output is a function of the sources and of this CLI only: modules
 //! are visited in a fixed order and oxc is deterministic.
+//!
+//! On request, each of the three prints (stripped, linked, minified) also
+//! gives a source map; composed, they map `logic.js` back to the sources
+//! (`crate::sourcemap`). Asking for the map never changes the code.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::Write as _;
@@ -32,6 +36,7 @@ use oxc_ecmascript::BoundNames;
 use oxc_minifier::{CompressOptions, MangleOptions, Minifier, MinifierOptions};
 use oxc_parser::Parser;
 use oxc_semantic::{Scoping, SemanticBuilder};
+use oxc_sourcemap::{ConcatSourceMapBuilder, SourceMap};
 use oxc_span::{SourceType, Span};
 use oxc_str::Ident;
 use oxc_syntax::symbol::SymbolId;
@@ -42,6 +47,7 @@ use overcrow_widget_format::ocml::{CompiledView, Role, TemplateExpression};
 use crate::diag::Diagnostic;
 use crate::lint::{self, SDK_SPECIFIER};
 use crate::sdk;
+use crate::sourcemap;
 
 /// Module IDs: `logic`, `view`, or `sdk/<path of sdk/src>`.
 const LOGIC: &str = "logic";
@@ -62,6 +68,8 @@ pub struct Bundle {
     pub code: String,
     /// Modules linked, the view table included.
     pub modules: usize,
+    /// The code map of `logic.js` (JSON), when asked for.
+    pub map: Option<String>,
 }
 
 /// A bundling failure: a diagnostic about the logic module, or an internal
@@ -73,6 +81,7 @@ pub fn build(
     logic_source: &str,
     view: &CompiledView,
     logic_exports: &BTreeSet<String>,
+    map: bool,
 ) -> Result<Bundle> {
     let table = view_module(view, logic_exports);
     let mut sources: BTreeMap<String, (String, SourceType)> = BTreeMap::new();
@@ -90,9 +99,15 @@ pub fn build(
 
     // 1. JavaScript of every module that may be reached.
     let mut javascript = BTreeMap::new();
+    let mut stripped_maps = BTreeMap::new();
     for (id, (source, source_type)) in &sources {
         let display = display_path(id, logic_path);
-        javascript.insert(id.clone(), strip_types(&display, source, *source_type)?);
+        let map_name = map.then(|| map_source(id, logic_path));
+        let (code, stripped_map) = strip_types(&display, source, *source_type, map_name)?;
+        javascript.insert(id.clone(), code);
+        if let Some(stripped_map) = stripped_map {
+            stripped_maps.insert(id.clone(), stripped_map);
+        }
     }
 
     // 2. Imports, exports and evaluation order.
@@ -123,20 +138,60 @@ pub fn build(
         logic_path,
     };
 
+    // The script starts with two lines: `(() => {` and `"use strict";`.
     let mut body = String::new();
+    let mut line = 2;
+    let mut linked_maps = Vec::new();
     for id in &order {
-        let text = linker.print(id, &javascript[id])?;
+        let (text, printed_map, prefix_lines) = linker.print(id, &javascript[id], map)?;
+        if let (Some(printed_map), Some(stripped_map)) = (printed_map, stripped_maps.remove(id)) {
+            linked_maps.push((printed_map.compose(stripped_map), line + prefix_lines));
+        }
         body.push_str(&text);
         body.push('\n');
+        line += text.matches('\n').count() as u32 + 1;
     }
 
     // 4. One script, minified.
     let script = format!("(() => {{\n\"use strict\";\n{body}}})();\n");
-    let minified = minify(&script)?;
+    let (minified, minified_map) = minify(&script, map)?;
+    // The notice and its line break come before the minified script.
+    let notice_lines = sdk::NOTICE.matches('\n').count() as u32 + 1;
+    let map = minified_map.map(|minified_map| {
+        let linked = ConcatSourceMapBuilder::from_owned_sourcemaps(linked_maps).into_sourcemap();
+        let shipped = ConcatSourceMapBuilder::from_owned_sourcemaps(vec![(
+            minified_map.compose(linked),
+            notice_lines,
+        )])
+        .into_sourcemap();
+        let originals: Vec<(String, String, SourceType)> = sources
+            .iter()
+            .map(|(id, (source, source_type))| {
+                (map_source(id, logic_path), source.clone(), *source_type)
+            })
+            .collect();
+        sourcemap::finish(&shipped, &originals)
+    });
     Ok(Bundle {
         code: format!("{}\n{minified}", sdk::NOTICE),
         modules: order.len(),
+        map,
     })
+}
+
+/// The name of a module in the code map.
+fn map_source(id: &str, logic_path: &str) -> String {
+    match id {
+        VIEW => sourcemap::VIEW_TABLE.to_owned(),
+        _ => display_path(id, logic_path),
+    }
+}
+
+fn map_options(name: Option<String>, options: CodegenOptions) -> CodegenOptions {
+    CodegenOptions {
+        source_map_path: name.map(std::path::PathBuf::from),
+        ..options
+    }
 }
 
 fn display_path(id: &str, logic_path: &str) -> String {
@@ -153,8 +208,14 @@ fn internal(message: impl Into<String>) -> Diagnostic {
 }
 
 /// Parses `source`, strips its TypeScript and prints JavaScript. Comments
-/// are kept so that `/* @__PURE__ */` annotations reach the minifier.
-fn strip_types(display: &str, source: &str, source_type: SourceType) -> Result<String> {
+/// are kept so that `/* @__PURE__ */` annotations reach the minifier. With
+/// `map_name`, also the map of the printed code back to `source`.
+fn strip_types(
+    display: &str,
+    source: &str,
+    source_type: SourceType,
+    map_name: Option<String>,
+) -> Result<(String, Option<SourceMap<'static>>)> {
     let allocator = Allocator::default();
     let parsed = Parser::new(&allocator, source, source_type).parse();
     if let Some(error) = parsed.diagnostics.first() {
@@ -171,7 +232,10 @@ fn strip_types(display: &str, source: &str, source_type: SourceType) -> Result<S
     if let Some(error) = transformed.diagnostics.first() {
         return Err(lint::oxc_diagnostic("logic.syntax", error, display, source));
     }
-    Ok(Codegen::new().build(&program).code)
+    let printed = Codegen::new()
+        .with_options(map_options(map_name, CodegenOptions::default()))
+        .build(&program);
+    Ok((printed.code, printed.map.map(SourceMap::into_owned)))
 }
 
 /// What the linker knows of one module.
@@ -442,8 +506,14 @@ impl Linker<'_> {
     }
 
     /// The module's JavaScript with its bindings renamed and its import and
-    /// export declarations removed.
-    fn print(&self, id: &str, source: &str) -> Result<String> {
+    /// export declarations removed; with `map`, also the map of the printed
+    /// code back to `source` and the number of lines put before it.
+    fn print(
+        &self,
+        id: &str,
+        source: &str,
+        map: bool,
+    ) -> Result<(String, Option<SourceMap<'static>>, u32)> {
         let module = &self.modules[id];
         let allocator = Allocator::default();
         let parsed = Parser::new(&allocator, source, SourceType::mjs()).parse();
@@ -521,17 +591,24 @@ impl Linker<'_> {
         }
         remove_module_syntax(&allocator, &mut program);
         let printed = Codegen::new()
-            .with_options(CodegenOptions {
-                comments: CommentOptions {
-                    annotation: true,
-                    ..CommentOptions::disabled()
+            .with_options(map_options(
+                map.then(|| id.to_owned()),
+                CodegenOptions {
+                    comments: CommentOptions {
+                        annotation: true,
+                        ..CommentOptions::disabled()
+                    },
+                    ..CodegenOptions::default()
                 },
-                ..CodegenOptions::default()
-            })
+            ))
             .with_scoping(Some(scoping))
-            .build(&program)
-            .code;
-        Ok(format!("{prefix}{printed}"))
+            .build(&program);
+        let prefix_lines = prefix.matches('\n').count() as u32;
+        Ok((
+            format!("{prefix}{}", printed.code),
+            printed.map.map(SourceMap::into_owned),
+            prefix_lines,
+        ))
     }
 }
 
@@ -616,7 +693,7 @@ fn remove_module_syntax<'a>(allocator: &'a Allocator, program: &mut Program<'a>)
     }
 }
 
-fn minify(script: &str) -> Result<String> {
+fn minify(script: &str, map: bool) -> Result<(String, Option<SourceMap<'static>>)> {
     let allocator = Allocator::default();
     let parsed = Parser::new(&allocator, script, SourceType::cjs().with_script(true)).parse();
     if !parsed.diagnostics.is_empty() {
@@ -631,12 +708,14 @@ fn minify(script: &str) -> Result<String> {
         ..MinifierOptions::default()
     })
     .minify(&allocator, &mut program);
-    let code = Codegen::new()
-        .with_options(CodegenOptions::minify())
+    let printed = Codegen::new()
+        .with_options(map_options(
+            map.then(|| "script.js".to_owned()),
+            CodegenOptions::minify(),
+        ))
         .with_scoping(minified.scoping)
-        .build(&program)
-        .code;
-    Ok(code)
+        .build(&program);
+    Ok((printed.code, printed.map.map(SourceMap::into_owned)))
 }
 
 // ------------------------------------------------------------- view table
@@ -712,9 +791,15 @@ mod tests {
     }
 
     fn bundle(logic: &str, view_source: &str, names: &[&str]) -> String {
-        build("logic.ts", logic, &view(view_source), &exports(names))
-            .unwrap_or_else(|diagnostic| panic!("bundles: {}", diagnostic.render(None)))
-            .code
+        build(
+            "logic.ts",
+            logic,
+            &view(view_source),
+            &exports(names),
+            false,
+        )
+        .unwrap_or_else(|diagnostic| panic!("bundles: {}", diagnostic.render(None)))
+        .code
     }
 
     const COUNTER_VIEW: &str = "<box><text>{label(state.count)}</text><button on:activate={add}><text>+</text></button></box>";
@@ -850,11 +935,147 @@ mod tests {
             logic,
             &view("<box><text>{f()}</text></box>"),
             &exports(&["f"]),
+            false,
         ) {
             Err(error) => error,
             Ok(_) => panic!("an unknown SDK export must fail"),
         };
         assert_eq!(error.code, "logic.import");
         assert!(error.message.contains("nothing"));
+    }
+
+    // ------------------------------------------------------------ code map
+
+    fn mapped(logic: &str, view_source: &str, names: &[&str]) -> Bundle {
+        build("logic.ts", logic, &view(view_source), &exports(names), true)
+            .unwrap_or_else(|diagnostic| panic!("bundles: {}", diagnostic.render(None)))
+    }
+
+    /// Zero-based line and UTF-16 column of the first `needle` in `code`.
+    fn position_of(code: &str, needle: &str) -> (u32, u32) {
+        let at = code
+            .find(needle)
+            .unwrap_or_else(|| panic!("{needle} in {code}"));
+        let line_start = code[..at].rfind('\n').map_or(0, |newline| newline + 1);
+        (
+            code[..at].matches('\n').count() as u32,
+            code[line_start..at].encode_utf16().count() as u32,
+        )
+    }
+
+    const EXPLODING: &str = r#"import { initState } from "@overcrow/sdk";
+const state = initState({ count: 0 });
+export function label(): string {
+  return String(state.count);
+}
+export function explode(): void {
+  if (state.count > 2) {
+    throw new Error("boom");
+  }
+  state.count += 1;
+}
+"#;
+    const EXPLODING_VIEW: &str = "<box><text>{label()}</text><button on:activate={explode}/></box>";
+
+    #[test]
+    fn a_thrown_error_maps_back_to_its_source_line() {
+        let built = mapped(EXPLODING, EXPLODING_VIEW, &["explode", "label"]);
+        let map = built.map.as_deref().expect("a map");
+        // The SDK throws too: the logic's throw is the one with `boom`.
+        let (line, column) = position_of(&built.code, "throw Error(`boom`)");
+        assert_eq!(
+            sourcemap::resolve(map, line, column),
+            Some(sourcemap::Resolved {
+                source: "logic.ts".into(),
+                line: 7,
+                column: 4,
+                function: Some("explode".into()),
+            }),
+            "{}",
+            built.code
+        );
+        let (line, column) = position_of(&built.code, "`boom`");
+        let resolved = sourcemap::resolve(map, line, column).expect("mapped");
+        assert_eq!((resolved.source.as_str(), resolved.line), ("logic.ts", 7));
+        assert_eq!(resolved.column, 20, "the string literal itself");
+    }
+
+    #[test]
+    fn sdk_and_view_positions_map_to_their_own_sources() {
+        let built = mapped(EXPLODING, EXPLODING_VIEW, &["explode", "label"]);
+        let map_json = built.map.expect("a map");
+        let map = oxc_sourcemap::SourceMap::from_json_string(&map_json).expect("valid map");
+        let value: serde_json::Value = serde_json::from_str(&map_json).unwrap();
+        let sources: Vec<&str> = value["sources"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|source| source.as_str().unwrap())
+            .collect();
+        let logic_lines = EXPLODING.lines().count() as u32;
+        let (mut view, mut sdk) = (false, false);
+        for token in map.get_tokens() {
+            let Some(source) = token.get_source_id() else {
+                continue;
+            };
+            let name = sources[source as usize];
+            if name == "logic.ts" {
+                assert!(token.get_src_line() < logic_lines, "inside logic.ts");
+            }
+            if name == sourcemap::VIEW_TABLE {
+                let resolved =
+                    sourcemap::resolve(&map_json, token.get_dst_line(), token.get_dst_col())
+                        .unwrap();
+                view |= resolved
+                    .function
+                    .is_some_and(|function| function.starts_with("view expression "));
+            }
+            sdk |= name.starts_with("@overcrow/sdk/");
+        }
+        assert!(view, "a position of the view table names its expression");
+        assert!(sdk, "the SDK keeps its own sources");
+        let ignored: Vec<&str> = value["ignoreList"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|index| sources[index.as_u64().unwrap() as usize])
+            .collect();
+        assert!(!ignored.is_empty());
+        assert!(
+            ignored
+                .iter()
+                .all(|name| name.starts_with("@overcrow/sdk/"))
+        );
+        let contents = value["sourcesContent"].as_array().unwrap();
+        for (name, content) in sources.iter().zip(contents) {
+            assert_eq!(
+                content.is_string(),
+                *name == sourcemap::VIEW_TABLE,
+                "{name}"
+            );
+        }
+        assert_eq!(value["file"], "logic.js");
+    }
+
+    #[test]
+    fn the_map_never_changes_the_code_and_is_deterministic() {
+        let plain = bundle(EXPLODING, EXPLODING_VIEW, &["explode", "label"]);
+        let first = mapped(EXPLODING, EXPLODING_VIEW, &["explode", "label"]);
+        let second = mapped(EXPLODING, EXPLODING_VIEW, &["explode", "label"]);
+        assert_eq!(first.code, plain);
+        assert!(!plain.contains("sourceMappingURL"));
+        assert_eq!(first.map, second.map);
+        assert!(bundle_without_map_has_none());
+    }
+
+    fn bundle_without_map_has_none() -> bool {
+        build(
+            "logic.ts",
+            EXPLODING,
+            &view(EXPLODING_VIEW),
+            &exports(&["explode", "label"]),
+            false,
+        )
+        .is_ok_and(|bundle| bundle.map.is_none())
     }
 }

@@ -1,0 +1,133 @@
+{
+  "compared": true,
+  "diagnostics": [],
+  "files": [
+    {
+      "additions": 0,
+      "binary": true,
+      "deletions": 0,
+      "hunks": [],
+      "newSha256": "28797f5dbab1aa4d2c30a859df9aaabaa0556ccefdea8a2dddb7c46140652dc5",
+      "oldSha256": null,
+      "path": "assets/new.png",
+      "status": "added"
+    },
+    {
+      "additions": 0,
+      "binary": true,
+      "deletions": 0,
+      "hunks": [],
+      "newSha256": null,
+      "oldSha256": "04542ebe95646d84b002474c94faaa8ccadb316de0e25082bdb11c75e123b400",
+      "path": "assets/old.png",
+      "status": "removed"
+    },
+    {
+      "additions": 3,
+      "binary": false,
+      "deletions": 1,
+      "hunks": [
+        {
+          "lines": [
+            " export function start() {",
+            "-  return 1;",
+            "+  return 2;",
+            " }",
+            " ",
+            " export function stop() {",
+            "   return 0;",
+            " }",
+            "+",
+            "+export function reset() {}",
+            "\\ No newline at end of file"
+          ],
+          "newLines": 9,
+          "newStart": 1,
+          "oldLines": 7,
+          "oldStart": 1
+        }
+      ],
+      "newSha256": "baff52bc4de1747b22aa931fc7f0c77b30a8885007fb75050d5a925778a9618d",
+      "oldSha256": "239fd1459cd4f20a65b1a9eed820cf6a7b2ad12cb4ed9130746fd9708def37d1",
+      "path": "logic.ts",
+      "status": "modified"
+    },
+    {
+      "additions": 1,
+      "binary": false,
+      "deletions": 1,
+      "hunks": [
+        {
+          "lines": [
+            "-{\"apiVersion\":1,\"id\":\"nova.lol-timers\",\"name\":{\"en\":\"Timers\",\"fr\":\"Minuteurs\"},\"permissions\":{\"storage\":true},\"schemaVersion\":1,\"sizing\":{\"fit\":\"none\",\"max\":{\"height\":100,\"width\":200},\"min\":{\"height\":100,\"width\":200},\"preferred\":{\"height\":100,\"width\":200}},\"version\":\"1.0.0\"}",
+            "+{\"apiVersion\":1,\"id\":\"nova.lol-timers\",\"name\":{\"en\":\"Timers\",\"fr\":\"Minuteurs\"},\"permissions\":{\"network\":[{\"method\":\"GET\",\"origin\":\"https://api.nova.gg\",\"path\":\"/v1/timers\"}],\"storage\":true},\"schemaVersion\":1,\"sizing\":{\"fit\":\"none\",\"max\":{\"height\":100,\"width\":200},\"min\":{\"height\":100,\"width\":200},\"preferred\":{\"height\":100,\"width\":200}},\"version\":\"1.1.0\"}"
+          ],
+          "newLines": 1,
+          "newStart": 1,
+          "oldLines": 1,
+          "oldStart": 1
+        }
+      ],
+      "newSha256": "8fd870e33a72462e6b8b7dd09eab213251332587fbeaf1a990cff23f1f1a9e77",
+      "oldSha256": "2cafc9767a9a13b73907dfa0aed2f6f77737eee83de88281d2d2e45c86b26323",
+      "path": "manifest.json",
+      "status": "modified"
+    },
+    {
+      "additions": 0,
+      "binary": false,
+      "deletions": 1,
+      "hunks": [
+        {
+          "lines": [
+            "-Draft"
+          ],
+          "newLines": 0,
+          "newStart": 0,
+          "oldLines": 1,
+          "oldStart": 1
+        }
+      ],
+      "newSha256": null,
+      "oldSha256": "2cbfaf4c20c7513d1df2526f07cd40d1a473289ed319b7b9eec5074a7f01b60c",
+      "path": "notes.md",
+      "status": "removed"
+    }
+  ],
+  "formatVersion": 1,
+  "new": {
+    "bytes": 475,
+    "files": 4,
+    "id": "nova.lol-timers",
+    "ignored": [],
+    "kind": "folder",
+    "prefix": null,
+    "sha256": null,
+    "version": "1.1.0"
+  },
+  "old": {
+    "bytes": 374,
+    "files": 5,
+    "id": "nova.lol-timers",
+    "ignored": [],
+    "kind": "folder",
+    "prefix": null,
+    "sha256": null,
+    "version": "1.0.0"
+  },
+  "permissions": {
+    "added": [
+      "network:GET https://api.nova.gg/v1/timers"
+    ],
+    "changed": [],
+    "removed": [],
+    "reviewType": "full"
+  },
+  "totals": {
+    "added": 1,
+    "additions": 4,
+    "deletions": 3,
+    "modified": 2,
+    "removed": 2
+  }
+}

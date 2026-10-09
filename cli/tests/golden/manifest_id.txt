@@ -3,5 +3,5 @@ error[manifest.id]: `id` is not a valid widget ID
    |
  4 |   "id": "Counter",
    |   ^
-   = help: reverse-DNS, lowercase letters, digits and `-`, at least two labels: `com.example.clock`
+   = help: lowercase letters, digits and `-` in at least two parts separated by dots; use <handle>.<name> with your publisher handle from the OverCrow creator space, such as nova.lol-timers, or a reverse domain you verified, such as gg.nova.lol-timers
 check: 1 error(s), 0 warning(s)

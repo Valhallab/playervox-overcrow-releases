@@ -8,6 +8,12 @@ use overcrow_widget_schema::manifest::{is_reserved_id, valid_widget_id};
 
 use crate::diag::Diagnostic;
 use crate::sdk;
+use crate::sources::ID_FORMS;
+
+/// The handle of the default ID, `yourhandle.<dir>`: an example handle
+/// that the creator replaces with theirs before submitting (`admit`
+/// refuses it).
+pub const PLACEHOLDER_HANDLE: &str = "yourhandle";
 
 /// Files common to every template: (path in the project, content).
 const SHARED: &[(&str, &str)] = &[
@@ -219,11 +225,13 @@ pub fn init(directory: &Path, options: &Options<'_>) -> Result<Vec<String>, Diag
     let slug = slug(directory);
     let id = match options.id {
         Some(id) => id.to_owned(),
-        None => format!("com.example.{slug}"),
+        None => format!("{PLACEHOLDER_HANDLE}.{slug}"),
     };
     if !valid_widget_id(&id) || is_reserved_id(&id) {
-        return Err(Diagnostic::error("init.id", format!("`{id}` is not a widget ID you can use"))
-            .help("pass --id with a reverse-DNS ID you control, such as com.yourname.clock; com.playervox.* is reserved"));
+        return Err(
+            Diagnostic::error("init.id", format!("`{id}` is not a widget ID you can use"))
+                .help(format!("{ID_FORMS}; com.playervox.* is reserved")),
+        );
     }
     let name = options.name.map_or_else(|| title(&slug), str::to_owned);
     if name.trim().is_empty() || name.chars().any(char::is_control) || name.len() > 64 {

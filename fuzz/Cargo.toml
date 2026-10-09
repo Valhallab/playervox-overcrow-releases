@@ -15,7 +15,8 @@ cargo-fuzz = true
 members = ["."]
 
 [dependencies]
-# `creator_tools_zip` includes the CLI's ZIP reader, with its two crates.
+# `creator_tools_zip` and `source_zip` include the CLI's ZIP reader, with
+# its two crates.
 crc32fast = "=1.5.0"
 flate2 = "=1.1.10"
 libfuzzer-sys = "=0.4.12"
@@ -77,6 +78,13 @@ bench = false
 [[bin]]
 name = "creator_tools_zip"
 path = "fuzz_targets/creator_tools_zip.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "source_zip"
+path = "fuzz_targets/source_zip.rs"
 test = false
 doc = false
 bench = false

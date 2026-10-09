@@ -21,6 +21,8 @@ use crate::typecheck;
 pub struct Options {
     /// Run the project's `tsc`.
     pub typecheck: bool,
+    /// Also build the code map of `logic.js` (never packaged).
+    pub source_map: bool,
 }
 
 pub struct Built {
@@ -30,6 +32,8 @@ pub struct Built {
     /// The `.ocpkg` bytes.
     pub archive: Vec<u8>,
     pub modules: usize,
+    /// The code map of `logic.js`, when asked for.
+    pub source_map: Option<String>,
 }
 
 /// Runs every check; returns the package when no error was found.
@@ -57,6 +61,7 @@ pub fn build(root: &Path, options: &Options, report: &mut Report) -> Option<Buil
         &project.logic,
         &sources.view,
         &logic.exports,
+        options.source_map,
     ) {
         Ok(bundle) => bundle,
         Err(diagnostic) => {
@@ -83,6 +88,7 @@ pub fn build(root: &Path, options: &Options, report: &mut Report) -> Option<Buil
     files.insert("manifest.json".to_owned(), project.manifest.clone());
     files.insert("view.json".to_owned(), sources.view.json.clone());
     files.insert("logic.js".to_owned(), bundle.code.into_bytes());
+    let source_map = bundle.map;
     files.insert("LICENSE".to_owned(), project.license.clone());
     if let Some(style) = &project.style {
         files.insert("style.ocss".to_owned(), style.clone());
@@ -121,6 +127,7 @@ pub fn build(root: &Path, options: &Options, report: &mut Report) -> Option<Buil
         files,
         archive,
         modules: bundle.modules,
+        source_map,
     })
 }
 
