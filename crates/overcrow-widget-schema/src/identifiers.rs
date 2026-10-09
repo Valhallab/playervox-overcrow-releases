@@ -15,7 +15,10 @@
 //! application refuse a catalog. [`validate_handle`] and [`validate_domain`]
 //! add the registration policy the creator portal applies.
 
-use crate::limits::{MAX_DNS_LABEL_BYTES, MAX_HANDLE_BYTES, MAX_WIDGET_ID_BYTES, MIN_HANDLE_BYTES};
+use crate::limits::{
+    MAX_DNS_LABEL_BYTES, MAX_DNS_NAME_BYTES, MAX_HANDLE_BYTES, MAX_WIDGET_ID_BYTES,
+    MIN_HANDLE_BYTES,
+};
 use crate::manifest::{is_reserved_id, valid_widget_id};
 
 pub const PLAYERVOX_HANDLE: &str = "playervox";
@@ -178,15 +181,36 @@ pub fn validate_handle(handle: &str) -> Result<(), HandleError> {
     if DOMAIN_EXTENSIONS.contains(&handle) {
         return Err(HandleError::DomainExtension);
     }
-    let letters = handle.replace('-', "");
+    let folded = confusable_skeleton(handle);
     if RESERVED_HANDLES.contains(&handle)
         || RESERVED_HANDLE_WORDS
             .iter()
-            .any(|word| letters.contains(word))
+            .any(|word| folded.contains(&confusable_skeleton(word)))
     {
         return Err(HandleError::Reserved);
     }
     Ok(())
+}
+
+/// The handle without hyphens, with the characters that read alike folded
+/// together (`0`/`o`, `1`/`i`/`l`, `3`/`e`, `4`/`a`, `5`/`s`, `7`/`t`,
+/// `8`/`b`, `vv`/`w`), so that `p1ayer-v0x` still contains `playervox`.
+fn confusable_skeleton(handle: &str) -> String {
+    handle
+        .replace('-', "")
+        .replace("vv", "w")
+        .chars()
+        .map(|character| match character {
+            '0' => 'o',
+            '1' | 'i' => 'l',
+            '3' => 'e',
+            '4' => 'a',
+            '5' => 's',
+            '7' => 't',
+            '8' => 'b',
+            other => other,
+        })
+        .collect()
 }
 
 /// A lowercase DNS name of at least two labels of `[a-z0-9-]`, each at most
@@ -194,8 +218,19 @@ pub fn validate_handle(handle: &str) -> Result<(), HandleError> {
 /// not numeric (no IPv4 address), short enough for its reverse plus a
 /// one-letter name to fit a widget ID.
 pub fn domain_syntax(domain: &str) -> Result<(), DomainError> {
-    let labels: Vec<&str> = domain.split('.').collect();
-    let valid = domain.len() as u64 + 2 <= MAX_WIDGET_ID_BYTES.value
+    if domain.len() as u64 + 2 <= MAX_WIDGET_ID_BYTES.value && dns_name(domain) {
+        Ok(())
+    } else {
+        Err(DomainError::Syntax)
+    }
+}
+
+/// A lowercase DNS name of at least two labels, at most
+/// `MAX_DNS_NAME_BYTES`, whose last label is not numeric: also the host of a
+/// listing link and the domain of a support address.
+pub(crate) fn dns_name(name: &str) -> bool {
+    let labels: Vec<&str> = name.split('.').collect();
+    name.len() as u64 <= MAX_DNS_NAME_BYTES.value
         && labels.len() >= 2
         && labels.iter().all(|label| {
             !label.is_empty()
@@ -208,12 +243,7 @@ pub fn domain_syntax(domain: &str) -> Result<(), DomainError> {
         })
         && !labels
             .last()
-            .is_some_and(|label| label.bytes().all(|byte| byte.is_ascii_digit()));
-    if valid {
-        Ok(())
-    } else {
-        Err(DomainError::Syntax)
-    }
+            .is_some_and(|label| label.bytes().all(|byte| byte.is_ascii_digit()))
 }
 
 /// A domain the publisher `handle` may verify: the grammar, and
@@ -311,6 +341,14 @@ mod tests {
             ("the-playervox-team", HandleError::Reserved),
             ("overcrow-team", HandleError::Reserved),
             ("valhallab-official", HandleError::Reserved),
+            ("p1ayervox", HandleError::Reserved),
+            ("playerv0x-fan", HandleError::Reserved),
+            ("pl4yer-v0x", HandleError::Reserved),
+            ("overcr0w", HandleError::Reserved),
+            ("0verc-r0w", HandleError::Reserved),
+            ("overcrovv", HandleError::Reserved),
+            ("va1ha11ab", HandleError::Reserved),
+            ("vaihaiiab", HandleError::Reserved),
             ("admin", HandleError::Reserved),
             ("www", HandleError::Reserved),
         ] {

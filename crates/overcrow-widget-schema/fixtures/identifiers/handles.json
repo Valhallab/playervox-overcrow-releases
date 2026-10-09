@@ -169,6 +169,56 @@
       "handle": "www",
       "registration": "reserved",
       "catalog": "ok"
+    },
+    {
+      "handle": "p1ayervox",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "playerv0x-fan",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "pl4yer-v0x",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "overcr0w",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "0verc-r0w",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "overcrovv",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "va1ha11ab",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "vaihaiiab",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "lovercrowd",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "crow-over",
+      "registration": "ok",
+      "catalog": "ok"
     }
   ]
 }
