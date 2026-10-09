@@ -17,19 +17,32 @@ use crate::limits::{
 /// rights reserved.
 pub const PROPRIETARY_LICENSE: &str = "LicenseRef-Proprietary";
 
-/// Format characters that change how text reads without being visible
-/// (soft hyphen, bidirectional controls and isolates, zero-width
-/// characters, byte-order mark). Display text never contains them, so a
-/// publisher name cannot be reversed or padded on screen.
+/// Characters that change how text reads without being visible, or that
+/// look blank: soft hyphen, combining grapheme joiner, bidirectional marks,
+/// embeddings and isolates, zero-width and joiner characters, line and
+/// paragraph separators (not control characters, yet line breaks), Hangul
+/// and braille fillers, Khmer and Mongolian invisible signs, interlinear
+/// annotations, musical format characters, tag characters and supplementary
+/// variation selectors. Display text never contains them, so a publisher
+/// name cannot be reversed, blanked or carry hidden text.
 pub const INVISIBLE_CHARACTERS: &[RangeInclusive<char>] = &[
     '\u{00AD}'..='\u{00AD}',
+    '\u{034F}'..='\u{034F}',
     '\u{061C}'..='\u{061C}',
-    '\u{180E}'..='\u{180E}',
+    '\u{115F}'..='\u{1160}',
+    '\u{17B4}'..='\u{17B5}',
+    '\u{180B}'..='\u{180F}',
     '\u{200B}'..='\u{200F}',
-    '\u{202A}'..='\u{202E}',
-    '\u{2060}'..='\u{2064}',
-    '\u{2066}'..='\u{2069}',
+    '\u{2028}'..='\u{202E}',
+    '\u{2060}'..='\u{206F}',
+    '\u{2800}'..='\u{2800}',
+    '\u{3164}'..='\u{3164}',
     '\u{FEFF}'..='\u{FEFF}',
+    '\u{FFA0}'..='\u{FFA0}',
+    '\u{FFF9}'..='\u{FFFB}',
+    '\u{1D173}'..='\u{1D17A}',
+    '\u{E0000}'..='\u{E007F}',
+    '\u{E0100}'..='\u{E01EF}',
 ];
 
 /// Display text: non-empty, at most `max_chars` Unicode scalar values,
@@ -369,6 +382,31 @@ mod tests {
         ] {
             assert!(!display_text(bad, 500, true), "{bad:?}");
         }
+        // Line separators that are not control characters, blank-looking
+        // fillers, hidden tag characters and other format characters.
+        for bad in [
+            "a\u{2028}b",
+            "a\u{2029}b",
+            "a\u{85}b",
+            "\u{3164}",
+            "a\u{3164}",
+            "a\u{115f}b",
+            "a\u{ffa0}b",
+            "a\u{2800}b",
+            "a\u{34f}b",
+            "a\u{17b4}b",
+            "a\u{180b}b",
+            "a\u{206a}b",
+            "a\u{fff9}b",
+            "a\u{1d173}b",
+            "a\u{e0041}b",
+            "a\u{e0100}b",
+        ] {
+            assert!(!display_text(bad, 500, true), "{bad:?}");
+        }
+        // Emoji keep their presentation selector; non-breaking spaces stay.
+        assert!(display_text("Night Owl \u{2764}\u{fe0f}", 64, false));
+        assert!(display_text("12\u{a0}h", 64, false));
         let accented = "é".repeat(500);
         assert!(display_text(&accented, 500, true));
         assert!(!display_text(&format!("{accented}é"), 500, true));
