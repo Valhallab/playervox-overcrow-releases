@@ -8,22 +8,10 @@ import { projects } from "../content.js";
 import { installPackages } from "../npm.js";
 import { cleanLine } from "../text.js";
 import { DESCRIPTIONS, TEMPLATE_SUMMARIES } from "../texts.js";
+import { ID_FORMS, idProblem, isPlaceholderId } from "../ids.js";
 import { fail, ok, READ_ONLY, TOOLS_MISSING, type ToolEnv, withRoots } from "./common.js";
 
-/** The CLI's ID rule (reverse DNS, lowercase labels) without the reserved PlayerVox IDs. */
-export const WIDGET_ID =
-  /^(?=.{3,128}$)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/;
 const TEMPLATES = ["blank", "counter", "list", "chart"] as const;
-
-export function idProblem(id: string): string | undefined {
-  if (!WIDGET_ID.test(id)) {
-    return "The ID must be a reverse-DNS name in lowercase, such as com.yourname.clock: at least two parts separated by dots, letters, digits and dashes.";
-  }
-  if (id === "com.playervox" || id.startsWith("com.playervox.")) {
-    return "IDs under com.playervox are reserved for widgets published by PlayerVox: use a domain you control.";
-  }
-  return undefined;
-}
 
 // biome-ignore lint/suspicious/noControlCharactersInRegex: the point is to refuse them
 const REFUSED_IN_NAME = /[\u0000-\u001f\u007f<>]/;
@@ -113,7 +101,7 @@ export function registerProjectTools(env: ToolEnv): void {
           .min(3)
           .max(128)
           .describe(
-            "Reverse-DNS widget ID under a domain the user controls, e.g. com.yourname.clock.",
+            "The widget's ID, final: <handle>.<name> with the user's publisher handle in the OverCrow creator space (such as valhallab.lol-timers), or a reverse domain the user can verify (such as gg.valhallab.lol-timers). Never com.playervox.*.",
           ),
         name: z
           .string()
@@ -162,8 +150,8 @@ export function registerProjectTools(env: ToolEnv): void {
           );
           return fail(`The widget could not be created: ${reason}`, redactor);
         }
-        const warnings = /^(com|org|net)\.example\./.test(id)
-          ? ["The ID uses example.*: replace it with a domain the user controls before submitting."]
+        const warnings = isPlaceholderId(id)
+          ? [`The ID ${id} is a placeholder: before submitting, replace it with ${ID_FORMS}.`]
           : [];
         return ok(
           {

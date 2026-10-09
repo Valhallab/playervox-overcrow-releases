@@ -286,3 +286,24 @@ timers.every(B, tick);
     ],
   );
 });
+
+test("IDs: <handle>.<name> and verified reverse domains pass; placeholders and com.playervox do not", async () => {
+  const idRules = async (id) =>
+    rules(
+      await auditWidget(
+        widget(`id-${id}`, { "manifest.json": manifest({}, { id }), LICENSE: "MIT\n" }),
+      ),
+    ).filter((rule) => /-id$/.test(rule));
+  for (const id of ["valhallab.lol-timers", "gg.valhallab.lol-timers", "example-studio.clock"])
+    assert.deepEqual(await idRules(id), [], id);
+  for (const id of ["yourhandle.clock", "example.clock", "com.example.clock", "com.yourname.clock"])
+    assert.deepEqual(await idRules(id), ["medium:example-id"], id);
+  assert.deepEqual(await idRules("com.playervox.clock"), ["high:reserved-id"]);
+  const reserved = await auditWidget(
+    widget("id-fix", { "manifest.json": manifest({}, { id: "com.playervox.x" }) }),
+  );
+  assert.match(
+    reserved.findings.find((f) => f.rule === "reserved-id").fix,
+    /<handle>\.<name>.*creator space.*reverse domain you can verify/,
+  );
+});

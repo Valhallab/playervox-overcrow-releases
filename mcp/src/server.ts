@@ -13,6 +13,7 @@ import { registerBuildTools } from "./tools/build.js";
 import { registerDocTools } from "./tools/docs.js";
 import { registerProjectTools } from "./tools/project.js";
 import { registerSetupTools } from "./tools/setup.js";
+import { registerSubmissionTool } from "./tools/submission.js";
 import { VERSION } from "./version.js";
 
 export function createServer(session: Session): McpServer {
@@ -26,6 +27,7 @@ export function createServer(session: Session): McpServer {
   registerProjectTools(env);
   registerBuildTools(env);
   registerAuditTools(env);
+  registerSubmissionTool(env);
   registerDocTools(env);
   registerResources(server);
   registerPrompts(server);

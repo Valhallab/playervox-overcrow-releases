@@ -10,6 +10,7 @@
 // one-shot retries and watchdogs, slice-by-slice parsing.
 
 import { limit, permissionsTable } from "../content.js";
+import { ID_FORMS, isPlaceholderId, isReservedId } from "../ids.js";
 import {
   callArguments,
   calls,
@@ -328,8 +329,8 @@ function secrets(context: Context): void {
         severity: "high",
         file: file.path,
         line: null,
-        message: `${file.path} usually holds secrets, and it would be published with the sources.`,
-        fix: "Delete it from the widget folder and keep secrets out of the widget: a widget is public, and anything in it can be read.",
+        message: `${file.path} usually holds secrets: it must not stay in the widget folder.`,
+        fix: "Move it out of the widget folder, and keep secrets out of the widget: anyone can read a widget's package.",
       });
     }
     if (file.text === null) continue;
@@ -354,7 +355,7 @@ function secrets(context: Context): void {
         file: file.path,
         line: index + 1,
         message: `${file.path} seems to hold ${what}.`,
-        fix: "Remove it, and revoke it at its provider: widget sources and packages are public. A widget cannot keep a secret; use an API that needs none, or one the user's own account authorizes through OverCrow.",
+        fix: "Remove it, and revoke it at its provider: anyone can read a widget's package, and reviewers read its sources. A widget cannot keep a secret; use an API that needs none, or one the user's own account authorizes through OverCrow.",
       });
     }
   }
@@ -362,7 +363,7 @@ function secrets(context: Context): void {
 
 function identity(context: Context): void {
   const id = String(context.project.manifest?.id ?? "");
-  if (id === "com.playervox" || id.startsWith("com.playervox.")) {
+  if (isReservedId(id)) {
     add(context, {
       rule: "reserved-id",
       area: "security",
@@ -370,17 +371,17 @@ function identity(context: Context): void {
       file: "manifest.json",
       line: null,
       message: `The ID ${id} is reserved for widgets published by PlayerVox.`,
-      fix: "Use a reverse-DNS ID under a domain you control, such as com.yourname.widget, and keep it: the ID is the widget's identity.",
+      fix: `Use ${ID_FORMS}. The ID is final: it can never be changed or reused.`,
     });
-  } else if (/^(com|org|net)\.example(\.|$)/.test(id)) {
+  } else if (isPlaceholderId(id)) {
     add(context, {
       rule: "example-id",
       area: "security",
       severity: "medium",
       file: "manifest.json",
       line: null,
-      message: `The ID ${id} is a placeholder: anyone could claim it.`,
-      fix: "Choose a reverse-DNS ID under a domain you control before you submit, and keep it for every version.",
+      message: `The ID ${id} is a placeholder copied from an example.`,
+      fix: `Before you submit, choose ${ID_FORMS}. The ID is final: keep it for every version.`,
     });
   }
   const files = new Set(context.project.files.map((file) => file.path));
@@ -392,7 +393,7 @@ function identity(context: Context): void {
       file: null,
       line: null,
       message: "The widget has no LICENSE file.",
-      fix: "Add the license text that matches listing.json spdxLicense (create_widget writes an MIT license).",
+      fix: "Add a LICENSE file with the text of your licence: any licence is accepted, including all rights reserved (create_widget writes the MIT licence).",
     });
   }
 }

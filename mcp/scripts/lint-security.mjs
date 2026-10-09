@@ -4,7 +4,8 @@
 // - processes: only src/run.ts imports child_process, never with a shell;
 // - network: only src/bootstrap/download.ts opens connections;
 // - environment: only src/env.ts reads process.env;
-// - deletions and file writes: only the tools cache (bootstrap/, session.ts);
+// - deletions and file writes: only the tools cache (bootstrap/, session.ts),
+//   the preview copy (tools/preview.ts) and the sources ZIP (sources.ts);
 // - stdout carries MCP messages only: no console.log;
 // - no eval, no Function constructor;
 // - the CLI's `doctor` and `dev` (they talk to a running OverCrow) are never called.
@@ -36,12 +37,12 @@ const RULES = [
   {
     name: "deletions outside the tools cache",
     pattern: /\b(rm|rmSync|unlink|unlinkSync|rmdir|rmdirSync)\(/,
-    allowed: ["bootstrap/install.ts", "bootstrap/download.ts", "session.ts"],
+    allowed: ["bootstrap/install.ts", "bootstrap/download.ts", "session.ts", "sources.ts"],
   },
   {
     name: "file writes outside the tools cache",
     pattern: /\b(writeFile|writeFileSync|appendFile|createWriteStream|copyFile|rename|mkdtemp)\(/,
-    allowed: ["bootstrap/install.ts", "bootstrap/download.ts", "tools/preview.ts"],
+    allowed: ["bootstrap/install.ts", "bootstrap/download.ts", "tools/preview.ts", "sources.ts"],
   },
   {
     name: "stdout logging",

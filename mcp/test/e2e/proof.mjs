@@ -7,8 +7,11 @@
 // home folder and no OverCrow tool on PATH. A scripted MCP client (the
 // official SDK) then goes through status → setup → create_widget →
 // install_sdk → check → test → audit → package → inspect →
-// prepare_submission. It also writes the MCP configuration for a run of
-// `claude -p` on the same setup.
+// prepare_submission, and checks the sources ZIP it writes; then it
+// prepares the submission of a copy of a reference widget that uses the
+// network (warframe-market, under the ID mcp-proof.warframe-market). It
+// also writes the MCP configuration for a run of `claude -p` on the same
+// setup (PROOF_SEED=warframe puts that copy in the project first).
 //
 //   node test/e2e/proof.mjs <work dir> <overcrow-widget binary> <runtimes dir> [--claude <prompt>]
 //   node test/e2e/proof.mjs <work dir> --published
@@ -20,7 +23,7 @@
 // (npm). Nothing is published.
 
 import { execFileSync, spawn } from "node:child_process";
-import { mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { createServer } from "node:https";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -29,6 +32,7 @@ import { StdioClientTransport } from "@modelcontextprotocol/client/stdio";
 import { certificate } from "../support/https.mjs";
 import { schemaErrors } from "../support/schema.mjs";
 import { assembleRelease, sha256 } from "../support/tools.mjs";
+import { readEntries } from "../../dist/bootstrap/zip.js";
 
 const [workArg, cliArg, runtimesArg, mode, prompt] = process.argv.slice(2);
 const published = cliArg === "--published";
@@ -200,8 +204,25 @@ note({
   })(),
 });
 
+/** A copy of the warframe-market reference widget under a creator's ID. */
+function seedWarframe() {
+  const target = join(work, "project", "warframe");
+  const source = resolve(mcp, "..", "widgets", "warframe-market");
+  cpSync(source, target, {
+    recursive: true,
+    filter: (path) => !/[\\/](node_modules|dist|output)([\\/]|$)/.test(path.slice(source.length)),
+  });
+  const manifest = readFileSync(join(target, "manifest.json"), "utf8");
+  writeFileSync(
+    join(target, "manifest.json"),
+    manifest.replace('"com.playervox.overcrow.warframe.market"', '"mcp-proof.warframe-market"'),
+  );
+  return target;
+}
+
 // 5a. Or a real client: Claude Code in print mode, with this server only.
 if (mode === "--claude") {
+  if (process.env.PROOF_SEED === "warframe") seedWarframe();
   const started = Date.now();
   const stream = join(work, "claude-stream.jsonl");
   try {
@@ -242,6 +263,29 @@ if (mode === "--claude") {
     writeFileSync(join(work, "proof-log.json"), `${JSON.stringify(log, null, 1)}\n`);
   }
   process.exit(0);
+}
+
+/** prepare_submission said ready and wrote exactly the ZIP of the sources it listed. */
+function checkSubmission(result, zip) {
+  if (!result.ready || result.sources.zip !== zip)
+    throw new Error(`not ready: ${JSON.stringify(result.checklist)}`);
+  const names = readEntries(readFileSync(join(work, "project", zip)), {
+    maxEntries: 4000,
+    maxEntryBytes: 1 << 26,
+    maxTotalBytes: 1 << 26,
+  }).map((entry) => entry.name);
+  const listed = result.sources.included.map((file) => file.path);
+  const leaked = names.filter((name) =>
+    /(^|\/)(node_modules|dist|\.[^/]+)(\/|$)|^tests\/output\//.test(name),
+  );
+  if (JSON.stringify(names) !== JSON.stringify(listed) || leaked.length > 0)
+    throw new Error(`ZIP ${zip}: ${names.join(", ")} (left out entries inside: ${leaked})`);
+  note({
+    step: `sources ZIP ${zip}`,
+    bytes: result.sources.bytes,
+    files: names.length,
+    excluded: result.sources.excluded,
+  });
 }
 
 // 5. The scripted client.
@@ -292,7 +336,7 @@ try {
   await call("create_widget", {
     directory: "pomodoro",
     template: "counter",
-    id: "com.mcp-proof.pomodoro",
+    id: "mcp-proof.pomodoro",
     name: "Pomodoro",
   });
   await call("install_sdk", { directory: "pomodoro", confirm: true });
@@ -301,8 +345,18 @@ try {
   await call("test", { directory: "pomodoro" });
   await call("audit", { directory: "pomodoro" });
   await call("package", { directory: "pomodoro" });
-  await call("inspect", { file: "pomodoro/dist/com.mcp-proof.pomodoro-0.1.0.ocpkg" });
-  await call("prepare_submission", { directory: "pomodoro" });
+  await call("inspect", { file: "pomodoro/dist/mcp-proof.pomodoro-0.1.0.ocpkg" });
+  const pomodoro = (await call("prepare_submission", { directory: "pomodoro" })).structuredContent;
+  checkSubmission(pomodoro, "pomodoro/dist/mcp-proof.pomodoro-0.1.0-sources.zip");
+
+  seedWarframe();
+  await call("install_sdk", { directory: "warframe", confirm: true });
+  await call("test", { directory: "warframe" });
+  const warframe = (await call("prepare_submission", { directory: "warframe" })).structuredContent;
+  checkSubmission(warframe, "warframe/dist/mcp-proof.warframe-market-3.1.0-sources.zip");
+  const kinds = warframe.texts.map((text) => text.kind);
+  if (!kinds.includes("permission") || !kinds.includes("privacy-policy"))
+    throw new Error(`warframe: texts lack a permission or the privacy policy: ${kinds}`);
   note({ step: "requests to the local GitHub", requests });
 } finally {
   await client.close();

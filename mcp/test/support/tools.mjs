@@ -125,13 +125,17 @@ function file(name, data) {
   return { name, size: data.length, sha256: sha256(data) };
 }
 
-/** A fake CLI and runtime: shell scripts on Linux (the probe is injected on Windows). */
-export function fakeExecutables(release = "0.6.1-beta.1") {
+/**
+ * A fake CLI and runtime: shell scripts on Linux (the probe is injected on
+ * Windows). `commands` adds arms to a `case "$1" in` of the CLI script, for
+ * the commands a test needs.
+ */
+export function fakeExecutables(release = "0.6.1-beta.1", commands = "") {
   const runtime = Buffer.from(`#!/bin/sh\necho "fake runtime ${release}"\n`);
   const runtimeSha = sha256(runtime);
   const cliScript = (platform) =>
     Buffer.from(
-      `#!/bin/sh\nif [ "$1" = "--version" ]; then echo '{"apiVersion":1,"runtime":{"sha256":{"linux-x86_64":"${runtimeSha}","windows-x86_64":"${runtimeSha}"},"version":"${release}"},"sdk":"1.0.0","version":"1.0.0-beta.2"}'; exit 0; fi\necho "fake cli ${platform}: $*" >&2\nexit 2\n`,
+      `#!/bin/sh\nif [ "$1" = "--version" ]; then echo '{"apiVersion":1,"runtime":{"sha256":{"linux-x86_64":"${runtimeSha}","windows-x86_64":"${runtimeSha}"},"version":"${release}"},"sdk":"1.0.0","version":"1.0.0-beta.2"}'; exit 0; fi\n${commands ? `case "$1" in\n${commands}\nesac\n` : ""}echo "fake cli ${platform}: $*" >&2\nexit 2\n`,
     );
   return {
     "linux-x86_64": { cli: cliScript("linux"), runtime },

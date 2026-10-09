@@ -1,10 +1,18 @@
-// Regressions of the security review of the first version: shell syntax in
-// project data never reaches the suggested commands; a link in the folders
+// Regressions of the security review of the first version: project data
+// never reaches a file name or a command unchecked; a link in the folders
 // the CLI writes into cannot lead outside the project; hostile sizes and
 // shapes cannot make the audit's text scans slow.
 
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  realpathSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -36,7 +44,7 @@ function widget(directory, manifestExtra = {}) {
   writeFileSync(join(directory, "logic.ts"), "export const x = 1;\n");
 }
 
-test("prepare_submission keeps shell syntax of the project out of its commands", async () => {
+test("prepare_submission builds nothing from unchecked project values", async () => {
   const project = join(work, "commands");
   const hostile = join(project, "x$(touch pwned)`id`");
   widget(hostile, { id: "com.evil.$(reboot)", version: '1.0.0"; rm -rf ~; echo "' });
@@ -46,12 +54,12 @@ test("prepare_submission keeps shell syntax of the project out of its commands",
     const result = (await server.call("prepare_submission", { directory: "x$(touch pwned)`id`" }))
       .result;
     assert.equal(result.isError, undefined, JSON.stringify(result).slice(0, 400));
-    const { lines } = result.structuredContent.commands;
-    for (const line of lines.filter((text) => !text.startsWith("#"))) {
-      assert.doesNotMatch(line, /\$\(|`|rm -rf|reboot|;/, line);
-    }
-    assert.ok(lines.some((line) => line.includes("<widget folder>")));
-    assert.ok(lines.some((line) => line === 'git commit -m "Add my-widget"'));
+    const content = result.structuredContent;
+    assert.equal(content.ready, false);
+    assert.equal(content.commands, undefined, "no command to run");
+    assert.equal(content.sources.zip, null);
+    assert.equal(content.checklist.find((entry) => entry.item === "Widget ID").status, "fail");
+    assert.deepEqual(readdirSync(hostile).sort(), ["logic.ts", "manifest.json"]);
   } finally {
     await server.close();
   }

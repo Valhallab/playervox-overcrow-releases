@@ -100,7 +100,7 @@ export function registerPreviewTool(env: ToolEnv): void {
             width: size.width,
             height: size.height,
             fourByThree,
-            next: `Add "preview": "assets/preview.png" to listing.json, then run check, package and prepare_submission.${fourByThree ? "" : " The image is not 4:3: the marketplace shows it in a 4:3 box."}`,
+            next: `Run check, package and prepare_submission. If the widget has a listing.json, add "preview": "assets/preview.png" to it.${fourByThree ? "" : " The image is not 4:3: the catalog shows it in a 4:3 box."}`,
           },
           `Copied ${scenario}/${image}.png to assets/preview.png (${size.width}×${size.height}, ${Math.round(info.size / 1024)} KiB).`,
           { redactor },

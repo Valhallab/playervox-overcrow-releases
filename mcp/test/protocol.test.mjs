@@ -40,7 +40,7 @@ const TOOLS = {
   package: [false, false, true, false],
   inspect: [true, false, true, false],
   audit: [true, false, true, false],
-  prepare_submission: [true, false, true, false],
+  prepare_submission: [false, false, true, false],
   explain_permission: [true, false, true, false],
   explain_error: [true, false, true, false],
   search_docs: [true, false, true, false],
