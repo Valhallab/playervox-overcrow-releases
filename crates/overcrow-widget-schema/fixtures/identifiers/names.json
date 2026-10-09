@@ -89,6 +89,61 @@
       "name": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
       "handle": "raidforge",
       "expected": "text"
+    },
+    {
+      "name": "PlayerV\u043e\u0445",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "\u0420l\u0430y\u0435rVox",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "\u03a1layerVox",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "\uff30\uff4c\uff41\uff59\uff45\uff52\uff36\uff4f\uff58",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "Pl\u00e2y\u00e8rv\u00f8x",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "Ov\u0435rcrow",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "Val\u04bballab",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "P\u0406ayerVox",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "Overcro\u051d",
+      "handle": "raidforge",
+      "expected": "reserved"
+    },
+    {
+      "name": "\u041d\u043e\u0447\u043d\u0430\u044f \u0441\u043e\u0432\u0430",
+      "handle": "nightowl",
+      "expected": "ok"
+    },
+    {
+      "name": "\u6f22\u5b57 Studio",
+      "handle": "raidforge",
+      "expected": "ok"
     }
   ]
 }

@@ -174,19 +174,51 @@ impl NameError {
     }
 }
 
+/// Letters outside ASCII that read as the letters of the reserved words:
+/// Latin letters with diacritics and Cyrillic and Greek look-alikes, with
+/// the ASCII letter they fold to. Fullwidth ASCII folds too.
+pub const CONFUSABLE_LETTERS: &[(&str, char)] = &[
+    ("àáâãäåāăąǎÀÁÂÃÄÅĀĂĄǍаАαΑ", 'a'),
+    ("ƀВЬьβΒ", 'b'),
+    ("çćĉċčÇĆĈĊČсСϲ", 'c'),
+    ("èéêëēĕėęěÈÉÊËĒĔĖĘĚеЕёЁεΕ", 'e'),
+    ("ĥħĤĦһНΗ", 'h'),
+    ("ìíîïĩīĭįıÌÍÎÏĨĪĬĮİіІιΙ", 'i'),
+    ("ĺļľŀłĹĻĽĿŁӏ", 'l'),
+    ("òóôõöøōŏőÒÓÔÕÖØŌŎŐоОοΟσ", 'o'),
+    ("рРρΡ", 'p'),
+    ("ŕŗřŔŖŘ", 'r'),
+    ("ѵѴν", 'v'),
+    ("ŵŴԝԜѡ", 'w'),
+    ("хХχΧ", 'x'),
+    ("ýÿŷÝŸŶуУγΥ", 'y'),
+];
+
+/// The lowercase ASCII letter or digit `character` reads as, if any.
+fn ascii_letter(character: char) -> Option<char> {
+    match character {
+        _ if character.is_ascii_alphanumeric() => Some(character.to_ascii_lowercase()),
+        '\u{FF10}'..='\u{FF19}' | '\u{FF21}'..='\u{FF3A}' | '\u{FF41}'..='\u{FF5A}' => {
+            char::from_u32(u32::from(character) - 0xFEE0).map(|ascii| ascii.to_ascii_lowercase())
+        }
+        _ => CONFUSABLE_LETTERS
+            .iter()
+            .find(|(letters, _)| letters.contains(character))
+            .map(|(_, ascii)| *ascii),
+    }
+}
+
 /// A displayed publisher name the creator portal accepts: display text on
 /// one line, and, for any publisher but `playervox`, no reserved word in the
-/// confusable skeleton of its ASCII letters and digits (`Player Vox`,
-/// `0verCrow`). Catalog readers check display text only.
+/// confusable skeleton of the letters and digits it reads as, once fullwidth
+/// forms and [`CONFUSABLE_LETTERS`] are folded to ASCII (`Player Vox`,
+/// `0verCrow`, `PlayerVох` in Cyrillic). Other characters are dropped.
+/// Catalog readers check display text only.
 pub fn validate_publisher_name(name: &str, handle: &str) -> Result<(), NameError> {
     if !display_text(name, MAX_PUBLISHER_NAME_CHARS.value, false) {
         return Err(NameError::Text);
     }
-    let letters: String = name
-        .chars()
-        .filter(char::is_ascii_alphanumeric)
-        .map(|character| character.to_ascii_lowercase())
-        .collect();
+    let letters: String = name.chars().filter_map(ascii_letter).collect();
     let folded = confusable_skeleton(&letters);
     if handle != PLAYERVOX_HANDLE
         && RESERVED_HANDLE_WORDS
@@ -420,6 +452,12 @@ mod tests {
             ("Crow Over Studio", "crow-over"),
             ("PlayerVox", PLAYERVOX_HANDLE),
             ("PlayerVox OverCrow", PLAYERVOX_HANDLE),
+            ("Studio d\u{e9}tente", "raidforge"),
+            (
+                "\u{41d}\u{43e}\u{447}\u{43d}\u{430}\u{44f} \u{441}\u{43e}\u{432}\u{430}",
+                "nightowl",
+            ),
+            ("\u{6f22}\u{5b57} Studio", "raidforge"),
         ] {
             assert_eq!(validate_publisher_name(name, handle), Ok(()), "{name}");
         }
@@ -431,6 +469,16 @@ mod tests {
             "OVERCROW Team",
             "Valhallab",
             "Team over.crow",
+            // Cyrillic, Greek, fullwidth and accented look-alikes.
+            "PlayerV\u{43e}\u{445}",
+            "\u{420}l\u{430}y\u{435}rVox",
+            "\u{3a1}layerVox",
+            "\u{ff30}\u{ff4c}\u{ff41}\u{ff59}\u{ff45}\u{ff52}\u{ff36}\u{ff4f}\u{ff58}",
+            "Pl\u{e2}y\u{e8}rv\u{f8}x",
+            "Ov\u{435}rcrow",
+            "Val\u{4bb}allab",
+            "P\u{406}ayerVox",
+            "Overcro\u{51d}",
         ] {
             assert_eq!(
                 validate_publisher_name(name, "raidforge"),
@@ -445,6 +493,23 @@ mod tests {
                 "{name:?}"
             );
         }
+    }
+
+    #[test]
+    fn confusable_letters_fold_to_ascii() {
+        let mut seen = std::collections::BTreeSet::new();
+        for (letters, ascii) in CONFUSABLE_LETTERS {
+            assert!(ascii.is_ascii_lowercase());
+            for letter in letters.chars() {
+                assert!(!letter.is_ascii(), "{letter}");
+                assert!(seen.insert(letter), "{letter} is listed twice");
+                assert_eq!(ascii_letter(letter), Some(*ascii));
+            }
+        }
+        assert_eq!(ascii_letter('\u{ff21}'), Some('a'));
+        assert_eq!(ascii_letter('\u{ff19}'), Some('9'));
+        assert_eq!(ascii_letter('\u{6f22}'), None);
+        assert_eq!(ascii_letter(' '), None);
     }
 
     #[test]

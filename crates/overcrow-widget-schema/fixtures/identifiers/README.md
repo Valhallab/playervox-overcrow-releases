@@ -38,9 +38,14 @@ Each file is one JSON object; every string is compared exactly.
 `validate_publisher_name(name, handle)`, what the portal accepts as a
 displayed publisher name: `ok`, `text` (not display text of at most 64
 characters on one line) or `reserved` (for a publisher other than
-`playervox`, the skeleton of the name's ASCII letters and digits, lowercase,
-contains `playervox`, `overcrow` or `valhallab`). Catalog readers check
-display text only.
+`playervox`, the skeleton of the letters and digits the name reads as
+contains `playervox`, `overcrow` or `valhallab`). Each character folds to a
+lowercase ASCII letter or digit: ASCII as is, fullwidth forms
+(U+FF10–U+FF19, U+FF21–U+FF3A, U+FF41–U+FF5A) to their ASCII letter, and the
+Latin, Cyrillic and Greek look-alikes of `CONFUSABLE_LETTERS`
+(`src/identifiers.rs`, also in the schema reference) to theirs; any other
+character is dropped. The skeleton rule of handles then applies. Catalog
+readers check display text only.
 
 ## `widget-ids.json`
 

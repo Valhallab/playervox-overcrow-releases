@@ -1857,4 +1857,21 @@ Publisher names, category labels, game names, descriptions and release notes are
 
 A handle is `MIN_HANDLE_BYTES`..=`MAX_HANDLE_BYTES` of `[a-z0-9-]` without a hyphen at either end or two in a row. A widget ID of two segments, `<handle>.<name>`, belongs to that handle; an ID of three segments or more belongs to the publisher owning the domain whose reverse is its prefix, the longest one when several match. `com.playervox` and `com.playervox.*` belong only to `playervox` through `playervox.com`, and only its widgets on those IDs may carry `built-in`. No two publishers own equal or nested domains.
 
-Catalog readers check the grammar only. A new publisher may not register a domain extension (`aero`, `arpa`, `asia`, `biz`, `cat`, `com`, `coop`, `edu`, `gov`, `info`, `int`, `jobs`, `mil`, `mobi`, `museum`, `name`, `net`, `org`, `post`, `pro`, `tel`, `travel`, `xxx`) or a handle whose skeleton equals that of a reserved handle (`admin`, `administrator`, `api`, `app`, `assets`, `billing`, `blog`, `catalog`, `cdn`, `creator`, `creators`, `dashboard`, `docs`, `download`, `downloads`, `help`, `legal`, `login`, `mail`, `marketplace`, `moderator`, `null`, `official`, `owner`, `payments`, `privacy`, `publisher`, `publishers`, `root`, `security`, `settings`, `signup`, `staff`, `static`, `status`, `support`, `system`, `team`, `terms`, `undefined`, `verified`, `widget`, `widgets`, `www`) or contains `overcrow`, `playervox`, `valhallab`. The skeleton removes hyphens, reads `vv` as `w`, then `0` as `o`, `1` and `i` as `l`, `3` as `e`, `4` as `a`, `5` as `s`, `7` as `t` and `8` as `b`. The same words may not appear in the skeleton of the ASCII letters and digits of another publisher's displayed name.
+Catalog readers check the grammar only. A new publisher may not register a domain extension (`aero`, `arpa`, `asia`, `biz`, `cat`, `com`, `coop`, `edu`, `gov`, `info`, `int`, `jobs`, `mil`, `mobi`, `museum`, `name`, `net`, `org`, `post`, `pro`, `tel`, `travel`, `xxx`) or a handle whose skeleton equals that of a reserved handle (`admin`, `administrator`, `api`, `app`, `assets`, `billing`, `blog`, `catalog`, `cdn`, `creator`, `creators`, `dashboard`, `docs`, `download`, `downloads`, `help`, `legal`, `login`, `mail`, `marketplace`, `moderator`, `null`, `official`, `owner`, `payments`, `privacy`, `publisher`, `publishers`, `root`, `security`, `settings`, `signup`, `staff`, `static`, `status`, `support`, `system`, `team`, `terms`, `undefined`, `verified`, `widget`, `widgets`, `www`) or contains `overcrow`, `playervox`, `valhallab`. The skeleton removes hyphens, reads `vv` as `w`, then `0` as `o`, `1` and `i` as `l`, `3` as `e`, `4` as `a`, `5` as `s`, `7` as `t` and `8` as `b`. The same words may not appear in the skeleton of another publisher's displayed name, read as ASCII letters and digits: fullwidth forms fold to ASCII, the look-alikes below to their letter, other characters are dropped.
+
+| Look-alikes | Letter |
+| --- | --- |
+| àáâãäåāăąǎÀÁÂÃÄÅĀĂĄǍаАαΑ | `a` |
+| ƀВЬьβΒ | `b` |
+| çćĉċčÇĆĈĊČсСϲ | `c` |
+| èéêëēĕėęěÈÉÊËĒĔĖĘĚеЕёЁεΕ | `e` |
+| ĥħĤĦһНΗ | `h` |
+| ìíîïĩīĭįıÌÍÎÏĨĪĬĮİіІιΙ | `i` |
+| ĺļľŀłĹĻĽĿŁӏ | `l` |
+| òóôõöøōŏőÒÓÔÕÖØŌŎŐоОοΟσ | `o` |
+| рРρΡ | `p` |
+| ŕŗřŔŖŘ | `r` |
+| ѵѴν | `v` |
+| ŵŴԝԜѡ | `w` |
+| хХχΧ | `x` |
+| ýÿŷÝŸŶуУγΥ | `y` |
