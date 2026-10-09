@@ -3,8 +3,8 @@
 //! pipeline with the same code as the application (ADR 0004 §3). The CLI
 //! never builds it. It comes either from `--runtime <path>`, or from the
 //! version this CLI pins, found in the user's cache and checked against its
-//! SHA-256 before every run. Downloading the pinned version arrives with the
-//! release that publishes it.
+//! SHA-256 before every run. The CLI does not download it: the creator
+//! takes it from the OverCrow release that published it.
 
 use std::io::Read as _;
 use std::path::{Path, PathBuf};
@@ -23,9 +23,26 @@ pub struct Pin {
     pub artifacts: &'static [(&'static str, &'static str)],
 }
 
-/// The runtime this CLI pins. `None` until an OverCrow release publishes the
-/// headless runtime; `--runtime` is required meanwhile.
-pub const PIN: Option<Pin> = None;
+/// The runtime this CLI pins: the one attached to OverCrow 0.6.0-beta.1,
+/// with the digests of that release's `runtimes.json`.
+pub const PIN: Option<Pin> = Some(Pin {
+    version: "0.6.0-beta.1",
+    artifacts: &[
+        (
+            "linux-x86_64",
+            "28fe005b48971398559b39580e49ebf0f34089151fd08132269dab8ceb52e4ee",
+        ),
+        (
+            "windows-x86_64",
+            "f4a152d9f43f6e0913afa350cced25ca1dc6b6f5b30eb5efc3cb43e3ded0d17d",
+        ),
+    ],
+});
+
+/// The OverCrow release page that publishes the runtime of `version`.
+pub fn release_url(version: &str) -> String {
+    format!("https://github.com/Valhallab/playervox-overcrow-releases/releases/tag/v{version}")
+}
 
 /// The executable of a runtime is at most this large (a debug build of the
 /// runtime is several hundred megabytes).
@@ -74,10 +91,14 @@ pub struct Runtime {
 /// Why no runtime can run.
 #[derive(Debug)]
 pub enum RuntimeError {
-    /// Neither `--runtime` nor a pinned version.
+    /// Neither `--runtime` nor a pinned version for this platform.
     NotPinned,
     /// The pinned version is not in the cache.
-    Missing(PathBuf),
+    Missing {
+        path: PathBuf,
+        version: &'static str,
+        sha256: &'static str,
+    },
     /// The file's digest is not the pinned one.
     Digest {
         path: PathBuf,
@@ -94,12 +115,19 @@ impl std::fmt::Display for RuntimeError {
     fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::NotPinned => formatter.write_str(
-                "this CLI pins no headless runtime yet: pass --runtime <path to overcrow-widget-headless>",
+                "this CLI pins no headless runtime for this platform: pass --runtime <path to overcrow-widget-headless>",
             ),
-            Self::Missing(path) => write!(
+            Self::Missing {
+                path,
+                version,
+                sha256,
+            } => write!(
                 formatter,
-                "the pinned headless runtime is not installed at {} (downloading it is not available yet): pass --runtime",
-                path.display()
+                "the pinned headless runtime {version} is not at {}: download {} from {}, check that its SHA-256 is {sha256}, and put it there{}; or pass --runtime",
+                path.display(),
+                path.file_name().unwrap_or_default().to_string_lossy(),
+                release_url(version),
+                if cfg!(windows) { "" } else { " as an executable" },
             ),
             Self::Digest { path, sha256 } => write!(
                 formatter,
@@ -168,7 +196,11 @@ pub fn resolve(explicit: Option<&Path>, pin: Option<&Pin>) -> Result<Runtime, Ru
                 .join(pin.version)
                 .join(artifact_name(pin.version, &platform));
             if !path.is_file() {
-                return Err(RuntimeError::Missing(path));
+                return Err(RuntimeError::Missing {
+                    path,
+                    version: pin.version,
+                    sha256: expected,
+                });
             }
             let sha256 = digest(&path)?;
             if sha256 != expected {
@@ -274,6 +306,26 @@ mod tests {
         assert_eq!(pinned_digest(Some(&PINNED), "windows-x86_64"), Some("bb"));
         assert_eq!(pinned_digest(Some(&PINNED), "linux-aarch64"), None);
         assert_eq!(pinned_digest(None, "linux-x86_64"), None);
+    }
+
+    #[test]
+    fn the_pin_covers_both_published_platforms() {
+        let pin = PIN.as_ref().expect("a pinned runtime");
+        assert_eq!(pin.version, "0.6.0-beta.1");
+        for platform in ["linux-x86_64", "windows-x86_64"] {
+            let digest = pinned_digest(Some(pin), platform).expect(platform);
+            assert_eq!(digest.len(), 64, "{platform}");
+            assert!(
+                digest
+                    .bytes()
+                    .all(|byte| matches!(byte, b'0'..=b'9' | b'a'..=b'f')),
+                "{platform}"
+            );
+        }
+        assert_eq!(
+            release_url(pin.version),
+            "https://github.com/Valhallab/playervox-overcrow-releases/releases/tag/v0.6.0-beta.1"
+        );
     }
 
     #[test]

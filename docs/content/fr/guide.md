@@ -184,7 +184,7 @@ Deux sortes de tests, décrites dans [tester un widget](testing.md) :
 ```
 
 ```sh
-overcrow-widget test --runtime path/to/overcrow-widget-headless
+overcrow-widget test
 ```
 
 ## 10. Demander ce dont vous avez besoin

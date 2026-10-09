@@ -176,7 +176,7 @@ Two kinds of tests, both described in [testing a widget](testing.md):
 ```
 
 ```sh
-overcrow-widget test --runtime path/to/overcrow-widget-headless
+overcrow-widget test
 ```
 
 ## 10. Ask for what you need

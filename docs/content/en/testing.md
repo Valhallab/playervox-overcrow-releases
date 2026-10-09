@@ -109,9 +109,9 @@ whose `name` is `<name>`. Its reference images are
 `tests/reference/<name>/<image>.png`. Neither is packaged.
 
 ```sh
-overcrow-widget test --runtime path/to/overcrow-widget-headless
-overcrow-widget test --runtime path/to/overcrow-widget-headless --scenario example
-overcrow-widget test --runtime path/to/overcrow-widget-headless --update
+overcrow-widget test
+overcrow-widget test --scenario example
+overcrow-widget test --update
 ```
 
 `--update` records the captured images as the references: look at them
@@ -371,7 +371,28 @@ are real.
 
 `overcrow-widget-headless` is OverCrow's own code without a window: it
 validates the package as the overlay does and runs the widget's logic in
-the same sandbox. `overcrow-widget test` needs its path, with `--runtime`,
-and prints its version and SHA-256. Without the operating system's sandbox
-the runtime refuses to run and says so; the test command then ends with
-status 2.
+the same sandbox. `overcrow-widget test` runs the version this CLI pins,
+0.6.0-beta.1, and prints its version and SHA-256. Without the operating
+system's sandbox the runtime refuses to run and says so; the test command
+then ends with status 2.
+
+The CLI does not download the runtime. Take it from the
+[OverCrow 0.6.0-beta.1 release](https://github.com/Valhallab/playervox-overcrow-releases/releases/tag/v0.6.0-beta.1),
+check it against the release's `SHA256SUMS`, and put it in the CLI's cache:
+
+| Platform | Path |
+| --- | --- |
+| Linux | `~/.cache/overcrow-widget/runtime/0.6.0-beta.1/overcrow-widget-headless-0.6.0-beta.1-linux-x86_64` (`$XDG_CACHE_HOME` instead of `~/.cache` when set), executable |
+| Windows | `%LOCALAPPDATA%\overcrow-widget\runtime\0.6.0-beta.1\overcrow-widget-headless-0.6.0-beta.1-windows-x86_64.exe` |
+
+```sh
+sha256sum --check --ignore-missing SHA256SUMS
+mkdir -p ~/.cache/overcrow-widget/runtime/0.6.0-beta.1
+install -m 755 overcrow-widget-headless-0.6.0-beta.1-linux-x86_64 \
+  ~/.cache/overcrow-widget/runtime/0.6.0-beta.1/
+```
+
+The CLI checks its SHA-256 before every run. When it is missing, `test`
+says where to put it. `--runtime <path>` runs another runtime instead,
+such as one built from OverCrow; the output then says it is not the pinned
+one.

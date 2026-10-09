@@ -125,8 +125,10 @@ repository's own revisions ([review policy](review-policy.md)).
 - The runtime that `test` runs is found by `--runtime <path>`, or by the
   version the CLI pins, in the cache (`$XDG_CACHE_HOME` or `~/.cache`,
   `%LOCALAPPDATA%` on Windows, under `overcrow-widget/runtime/<version>/`),
-  checked against its pinned SHA-256 before every run. No runtime is pinned:
-  `--runtime` is required. The CLI never builds the runtime
+  checked against its pinned SHA-256 before every run: `--runtime` is
+  optional. The pin is the runtime of OverCrow 0.6.0-beta.1, from that
+  release's `runtimes.json`; a missing runtime's message gives the release
+  page and the cache path. The CLI never builds nor downloads the runtime
   ([headless runtime interface](widget-testing.md)).
 
 ## Release files

@@ -127,12 +127,65 @@ fn stderr(output: &Output) -> String {
     String::from_utf8_lossy(&output.stderr).into_owned()
 }
 
+/// `test` without `--runtime`, with `cache` as the user's cache directory.
+fn cli_with_cache(root: &Path, cache: &Path) -> Output {
+    Command::new(env!("CARGO_BIN_EXE_overcrow-widget"))
+        .arg("test")
+        .arg(root)
+        .arg("--no-typecheck")
+        .env("XDG_CACHE_HOME", cache)
+        .env("LOCALAPPDATA", cache)
+        .output()
+        .expect("the CLI runs")
+}
+
+/// Where the pinned runtime is expected under `cache`.
+fn pinned_path(cache: &Path) -> PathBuf {
+    let platform = format!("{}-{}", std::env::consts::OS, std::env::consts::ARCH);
+    let suffix = if cfg!(windows) { ".exe" } else { "" };
+    cache
+        .join("overcrow-widget")
+        .join("runtime")
+        .join("0.6.0-beta.1")
+        .join(format!(
+            "overcrow-widget-headless-0.6.0-beta.1-{platform}{suffix}"
+        ))
+}
+
 #[test]
-fn without_a_pinned_runtime_it_asks_for_one() {
+fn without_the_pinned_runtime_it_says_where_to_get_it() {
     let (_directory, root) = project(&["start"]);
-    let output = cli(&root, &[]);
-    assert_eq!(output.status.code(), Some(2), "{}", stderr(&output));
-    assert!(stderr(&output).contains("--runtime"), "{}", stderr(&output));
+    let cache = tempfile::tempdir().expect("cache directory");
+    let output = cli_with_cache(&root, cache.path());
+    let message = stderr(&output);
+    assert_eq!(output.status.code(), Some(2), "{message}");
+    assert!(message.contains("--runtime"), "{message}");
+    assert!(
+        message.contains(
+            "https://github.com/Valhallab/playervox-overcrow-releases/releases/tag/v0.6.0-beta.1"
+        ),
+        "{message}"
+    );
+    assert!(
+        message.contains(&pinned_path(cache.path()).display().to_string()),
+        "{message}"
+    );
+}
+
+#[test]
+fn a_cached_runtime_with_another_digest_never_runs() {
+    let (_directory, root) = project(&["start"]);
+    let cache = tempfile::tempdir().expect("cache directory");
+    let fake = fake(0);
+    let script = runtime(fake.path(), 1, 0);
+    let path = pinned_path(cache.path());
+    fs::create_dir_all(path.parent().unwrap()).unwrap();
+    fs::copy(&script, &path).unwrap();
+    let output = cli_with_cache(&root, cache.path());
+    let message = stderr(&output);
+    assert_eq!(output.status.code(), Some(2), "{message}");
+    assert!(message.contains("is not the pinned runtime"), "{message}");
+    assert_eq!(runs(fake.path()), 0);
 }
 
 #[test]

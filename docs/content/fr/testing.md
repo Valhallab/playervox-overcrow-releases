@@ -114,9 +114,9 @@ dont le `name` vaut `<name>`. Ses images de référence sont
 empaquetés.
 
 ```sh
-overcrow-widget test --runtime path/to/overcrow-widget-headless
-overcrow-widget test --runtime path/to/overcrow-widget-headless --scenario example
-overcrow-widget test --runtime path/to/overcrow-widget-headless --update
+overcrow-widget test
+overcrow-widget test --scenario example
+overcrow-widget test --update
 ```
 
 `--update` enregistre les images capturées comme références : regardez-les
@@ -385,7 +385,29 @@ hasard sont réels.
 
 `overcrow-widget-headless` est le code d’OverCrow lui-même, sans fenêtre :
 il valide le paquet comme le fait l’overlay et exécute la logique du widget
-dans le même sandbox. `overcrow-widget test` a besoin de son chemin, donné
-par `--runtime`, et affiche sa version et son SHA-256. Sans le sandbox du
-système d’exploitation, le runtime refuse de s’exécuter et le dit ; la
-commande de test se termine alors avec le code 2.
+dans le même sandbox. `overcrow-widget test` exécute la version que la CLI
+épingle, 0.6.0-beta.1, et affiche sa version et son SHA-256. Sans le
+sandbox du système d’exploitation, le runtime refuse de s’exécuter et le
+dit ; la commande de test se termine alors avec le code 2.
+
+La CLI ne télécharge pas le runtime. Prenez-le dans la
+[release OverCrow 0.6.0-beta.1](https://github.com/Valhallab/playervox-overcrow-releases/releases/tag/v0.6.0-beta.1),
+vérifiez-le avec le `SHA256SUMS` de la release, puis placez-le dans le
+cache de la CLI :
+
+| Plateforme | Chemin |
+| --- | --- |
+| Linux | `~/.cache/overcrow-widget/runtime/0.6.0-beta.1/overcrow-widget-headless-0.6.0-beta.1-linux-x86_64` (`$XDG_CACHE_HOME` au lieu de `~/.cache` s’il est défini), exécutable |
+| Windows | `%LOCALAPPDATA%\overcrow-widget\runtime\0.6.0-beta.1\overcrow-widget-headless-0.6.0-beta.1-windows-x86_64.exe` |
+
+```sh
+sha256sum --check --ignore-missing SHA256SUMS
+mkdir -p ~/.cache/overcrow-widget/runtime/0.6.0-beta.1
+install -m 755 overcrow-widget-headless-0.6.0-beta.1-linux-x86_64 \
+  ~/.cache/overcrow-widget/runtime/0.6.0-beta.1/
+```
+
+La CLI vérifie son SHA-256 avant chaque exécution. S’il manque, `test` dit
+où le placer. `--runtime <path>` exécute un autre runtime à la place, par
+exemple compilé depuis OverCrow ; la sortie dit alors que ce n’est pas le
+runtime épinglé.
