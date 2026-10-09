@@ -10,7 +10,11 @@
 // prepare_submission. It also writes the MCP configuration for a run of
 // `claude -p` on the same setup.
 //
-//   node test/e2e/proof.mjs <work dir> <overcrow-widget binary> <runtimes dir>
+//   node test/e2e/proof.mjs <work dir> <overcrow-widget binary> <runtimes dir> [--claude <prompt>]
+//   node test/e2e/proof.mjs <work dir> --published
+//
+// --published, once the release exists: the server keeps the pin it ships
+// and downloads the creator tools from the real GitHub release.
 //
 // Not part of npm test: it needs the built CLI, the runtime and the network
 // (npm). Nothing is published.
@@ -27,7 +31,8 @@ import { schemaErrors } from "../support/schema.mjs";
 import { assembleRelease, sha256 } from "../support/tools.mjs";
 
 const [workArg, cliArg, runtimesArg, mode, prompt] = process.argv.slice(2);
-if (!workArg || !cliArg || !runtimesArg) {
+const published = cliArg === "--published";
+if (!workArg || (!published && (!cliArg || !runtimesArg))) {
   console.error(
     "usage: node test/e2e/proof.mjs <work dir> <overcrow-widget binary> <runtimes dir>",
   );
@@ -98,71 +103,77 @@ note({
   }).trim(),
 });
 
-// 2. The creator tools ZIPs, in the release layout.
-const strippedCli = join(work, "overcrow-widget-stripped");
-execFileSync("strip", ["-o", strippedCli, resolve(cliArg)]);
-const runtimes = resolve(runtimesArg);
-const release = assembleRelease({
-  release: RELEASE,
-  cliVersion: JSON.parse(
-    execFileSync(strippedCli, ["--version", "--format", "json"], { encoding: "utf8" }),
-  ).version,
-  executables: {
-    "linux-x86_64": {
-      cli: readFileSync(strippedCli),
-      runtime: readFileSync(join(runtimes, `overcrow-widget-headless-${RELEASE}-linux-x86_64`)),
-    },
-    "windows-x86_64": {
-      cli: Buffer.from("The Windows CLI is not built for this proof.\n"),
-      runtime: readFileSync(
-        join(runtimes, `overcrow-widget-headless-${RELEASE}-windows-x86_64.exe`),
-      ),
-    },
-  },
-});
-for (const [platform, zip] of Object.entries(release.zips))
-  writeFileSync(join(work, "zips", release.pin.tools[platform].name), zip);
-note({
-  step: "zips",
-  linux: {
-    bytes: release.pin.tools["linux-x86_64"].size,
-    sha256: release.pin.tools["linux-x86_64"].sha256,
-  },
-});
-
-// 3. A local "GitHub": the release URL redirects to an asset host.
-const tls = certificate();
-if (!tls) throw new Error("openssl is needed for the local HTTPS server");
-writeFileSync(join(work, "ca.pem"), tls.cert);
 const requests = [];
-const server = createServer(tls, (request, response) => {
-  requests.push(request.url);
-  const name = /\/releases\/download\/v[^/]+\/([^/]+)$/.exec(request.url ?? "")?.[1];
-  if (name) return response.writeHead(302, { location: `/assets/${name}` }).end();
-  const asset = /^\/assets\/([^/]+)$/.exec(request.url ?? "")?.[1];
-  if (asset) {
-    try {
-      const body = readFileSync(join(work, "zips", asset));
-      return response.writeHead(200, { "content-length": body.length }).end(body);
-    } catch {
-      // Not found below.
+let local;
+if (!published) {
+  // 2. The creator tools ZIPs, in the release layout.
+  const strippedCli = join(work, "overcrow-widget-stripped");
+  execFileSync("strip", ["-o", strippedCli, resolve(cliArg)]);
+  const runtimes = resolve(runtimesArg);
+  const release = assembleRelease({
+    release: RELEASE,
+    cliVersion: JSON.parse(
+      execFileSync(strippedCli, ["--version", "--format", "json"], { encoding: "utf8" }),
+    ).version,
+    executables: {
+      "linux-x86_64": {
+        cli: readFileSync(strippedCli),
+        runtime: readFileSync(join(runtimes, `overcrow-widget-headless-${RELEASE}-linux-x86_64`)),
+      },
+      "windows-x86_64": {
+        cli: Buffer.from("The Windows CLI is not built for this proof.\n"),
+        runtime: readFileSync(
+          join(runtimes, `overcrow-widget-headless-${RELEASE}-windows-x86_64.exe`),
+        ),
+      },
+    },
+  });
+  for (const [platform, zip] of Object.entries(release.zips))
+    writeFileSync(join(work, "zips", release.pin.tools[platform].name), zip);
+  note({
+    step: "zips",
+    linux: {
+      bytes: release.pin.tools["linux-x86_64"].size,
+      sha256: release.pin.tools["linux-x86_64"].sha256,
+    },
+  });
+
+  // 3. A local "GitHub": the release URL redirects to an asset host.
+  const tls = certificate();
+  if (!tls) throw new Error("openssl is needed for the local HTTPS server");
+  writeFileSync(join(work, "ca.pem"), tls.cert);
+  const server = createServer(tls, (request, response) => {
+    requests.push(request.url);
+    const name = /\/releases\/download\/v[^/]+\/([^/]+)$/.exec(request.url ?? "")?.[1];
+    if (name) return response.writeHead(302, { location: `/assets/${name}` }).end();
+    const asset = /^\/assets\/([^/]+)$/.exec(request.url ?? "")?.[1];
+    if (asset) {
+      try {
+        const body = readFileSync(join(work, "zips", asset));
+        return response.writeHead(200, { "content-length": body.length }).end(body);
+      } catch {
+        // Not found below.
+      }
     }
-  }
-  response.writeHead(404).end();
-});
-await new Promise((done) => server.listen(0, "127.0.0.1", done));
-const port = server.address().port;
+    response.writeHead(404).end();
+  });
+  await new Promise((done) => server.listen(0, "127.0.0.1", done));
+  const port = server.address().port;
+  local = { pin: release.pin, server, port };
+}
 
 // 4. The server's configuration and environment: an empty home folder, no
 // OverCrow tool on PATH, a fresh npm cache.
-const config = {
-  dist,
-  pin: release.pin,
-  releaseBase: `https://localhost:${port}`,
-  releasePort: port,
-  caFile: join(work, "ca.pem"),
-  cwd: join(work, "project"),
-};
+const config = local
+  ? {
+      dist,
+      pin: local.pin,
+      releaseBase: `https://localhost:${local.port}`,
+      releasePort: local.port,
+      caFile: join(work, "ca.pem"),
+      cwd: join(work, "project"),
+    }
+  : { dist, cwd: join(work, "project") };
 writeFileSync(join(work, "config.json"), JSON.stringify(config, null, 1));
 const serverEnv = {
   HOME: join(work, "home"),
@@ -226,8 +237,8 @@ if (mode === "--claude") {
     writeFileSync(stream, output);
   } finally {
     note({ step: "claude -p", seconds: (Date.now() - started) / 1000, requests });
-    server.close();
-    server.closeAllConnections();
+    local?.server.close();
+    local?.server.closeAllConnections();
     writeFileSync(join(work, "proof-log.json"), `${JSON.stringify(log, null, 1)}\n`);
   }
   process.exit(0);
@@ -295,7 +306,7 @@ try {
   note({ step: "requests to the local GitHub", requests });
 } finally {
   await client.close();
-  server.close();
-  server.closeAllConnections();
+  local?.server.close();
+  local?.server.closeAllConnections();
   writeFileSync(join(work, "proof-log.json"), `${JSON.stringify(log, null, 1)}\n`);
 }
