@@ -1,6 +1,6 @@
 [package]
 name = "overcrow-widget-cli"
-version = "1.0.0-beta.1"
+version = "1.0.0-beta.2"
 description = "overcrow-widget: the creator CLI of OverCrow widget API v1"
 edition.workspace = true
 license.workspace = true

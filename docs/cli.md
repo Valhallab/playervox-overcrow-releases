@@ -127,18 +127,21 @@ repository's own revisions ([review policy](review-policy.md)).
   `%LOCALAPPDATA%` on Windows, under `overcrow-widget/runtime/<version>/`),
   checked against its pinned SHA-256 before every run: `--runtime` is
   optional. The pin is the runtime of OverCrow 0.6.0-beta.1, from that
-  release's `runtimes.json`; a missing runtime's message gives the release
-  page and the cache path. The CLI never builds nor downloads the runtime
+  release's `runtimes.json`. A pinned runtime missing from the cache is
+  downloaded (`src/download.rs`) from the creator tools ZIP of its release,
+  bounded and checked as its module documentation says, unless
+  `--offline` is given. The CLI never builds the runtime
   ([headless runtime interface](widget-testing.md)).
 
 ## Release files
 
-The CLI is released as binaries attached to OverCrow's GitHub release,
-beside the application's packages and the headless runtimes of the same
-version; there is no separate GitHub release for the CLI. The `cli-dist`
-workflow builds both platforms with the `dist` profile on hosted runners
-(Ubuntu 24.04; Windows with a static C runtime) and
-`scripts/package-cli.sh` assembles them, for CLI version `VERSION`:
+The CLI is released inside OverCrow's GitHub release, in the creator
+tools ZIP `overcrow-creator-tools-OVERCROW_VERSION.zip`, beside the
+headless runtimes of the same OverCrow version; there is no separate
+GitHub release for the CLI. The `cli-dist` workflow builds both platforms
+with the `dist` profile on hosted runners (Ubuntu 24.04; Windows with a
+static C runtime) and `scripts/package-cli.sh` assembles them, for CLI
+version `VERSION`:
 
 | File | Content |
 | --- | --- |
@@ -146,17 +149,18 @@ workflow builds both platforms with the `dist` profile on hosted runners
 | `overcrow-widget-VERSION-windows-x86_64.exe` | The Windows executable. |
 | `overcrow-widget-VERSION-LICENSE.txt` | The CLI's MIT license. |
 | `overcrow-widget-VERSION-THIRD-PARTY-NOTICES.md` | The licenses of its dependencies on both targets (cargo-about 0.9.1, `about.toml`, `cli/third-party.hbs`). |
-| `cli.json` | The version, the source commit, and each file's name, size and SHA-256. |
+| `cli.json` | The version, the source commit, the pinned headless runtime (`runtime`: its version and the SHA-256 of each platform's executable, as the Linux binary reports them with `--version --format json`), and each file's name, size and SHA-256. |
 | `SHA256SUMS` | The checksums of the five files above. |
 
-On the release, the entries of this `SHA256SUMS` join the release's single
-`SHA256SUMS` (asset names are unique). A release keeps at most 20 files:
-OverCrow's update check refuses a release list holding a release with
-more. The application's six files, the CLI's five and the headless
-runtime's four make fifteen. The runtime's are its Linux and Windows
-executables and `overcrow-widget-headless-VERSION-LICENSE.md`, which
-`runtimes.json` lists, and `runtimes.json` itself; all four are in the
-single `SHA256SUMS`.
+OverCrow's release publisher puts these files, both headless runtimes,
+their license and `runtimes.json` into the ZIP, under one directory
+`overcrow-creator-tools-OVERCROW_VERSION/`, with a `README.txt` and one
+`SHA256SUMS` over every other file. It refuses a CLI whose `runtime` is
+not the runtime of that ZIP: `overcrow-widget test` downloads the ZIP of
+the release named by its pin, so the pin must be updated to the runtime of
+the release the CLI ships in before `cli-dist` runs. The release itself
+keeps seven files: the four packages, `release.json` (which lists the
+ZIP and every file in it), the ZIP and `SHA256SUMS`.
 
 The workflow creates no tag and no release. The changes of each version
 are in [`cli/CHANGELOG.md`](../cli/CHANGELOG.md), those of the SDK in
