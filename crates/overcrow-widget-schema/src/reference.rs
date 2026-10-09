@@ -9,8 +9,12 @@ use crate::catalog::{
     PACKAGE_REF_FIELDS, PREVIEW_FIELDS, PRODUCTION_BASE_URL, SEED_DOMAIN, SEED_FIELDS, TAGS,
     TARGET_FIELDS,
 };
+use crate::catalog_v2;
 use crate::compiled_view::{COMPONENT_FIELDS, NODE_KINDS, VIEW_FIELDS};
 use crate::icons::{ICON_CRATE, ICONS, LUCIDE_VERSION};
+use crate::identifiers::{
+    DOMAIN_EXTENSIONS, PLAYERVOX_DOMAIN, PLAYERVOX_HANDLE, RESERVED_HANDLE_WORDS, RESERVED_HANDLES,
+};
 use crate::ipc::{
     self, DRAW_COMMANDS, FAILURES, FRAME_KINDS, HEADER, HOST_MESSAGES, Message, PATCH_OPS,
     VM_MESSAGES,
@@ -53,6 +57,7 @@ pub fn markdown() -> String {
     ipc_section(&mut out);
     package_section(&mut out);
     catalog_section(&mut out);
+    catalog_v2_section(&mut out);
     // Sections append blank lines independently; keep at most one between blocks.
     while out.contains("\n\n\n") {
         out = out.replace("\n\n\n", "\n\n");
@@ -418,6 +423,86 @@ offline seed uses `{}`. `\\0` is one NUL byte.\n\n### Envelope\n\n",
     for tag in TAGS {
         let _ = writeln!(out, "| `{}` | {} |", tag.name, tag.summary);
     }
+}
+
+fn catalog_v2_section(out: &mut String) {
+    let _ = write!(
+        out,
+        "\n## Catalog v2\n\nThe catalog v2 is `{}{}`, beside the catalog v1, whose format never \
+changes and which keeps listing the PlayerVox widgets for the applications already released; \
+[`widget-catalog-v2.md`](widget-catalog-v2.md) specifies it. Its envelope carries an Ed25519 \
+signature, made with the key family of v1, of the domain string `{}` followed by the payload \
+bytes. A reader ignores an unknown object key of the payload, refuses an unknown value of a \
+known key, and skips an entry whose `requires` names a feature it does not support; this \
+version supports none. The envelope and the manifest stay strict.\n\n### Envelope v2\n\n",
+        catalog_v2::PRODUCTION_BASE_URL,
+        catalog_v2::CATALOG_FILE,
+        String::from_utf8_lossy(catalog_v2::CATALOG_V2_DOMAIN).replace('\0', "\\0"),
+    );
+    fields_table(out, catalog_v2::ENVELOPE_FIELDS);
+    out.push_str("### Catalog v2 payload\n\n");
+    fields_table(out, catalog_v2::CATALOG_FIELDS);
+    out.push_str("### `Category`\n\n");
+    fields_table(out, catalog_v2::CATEGORY_FIELDS);
+    out.push_str("### `Publisher`\n\n");
+    fields_table(out, catalog_v2::PUBLISHER_FIELDS);
+    out.push_str("### `Widget`\n\n");
+    fields_table(out, catalog_v2::WIDGET_FIELDS);
+    out.push_str("### `ListingV2`\n\n");
+    fields_table(out, catalog_v2::LISTING_FIELDS);
+    out.push_str("### `Game`\n\n");
+    fields_table(out, catalog_v2::GAME_FIELDS);
+    out.push_str("### `Support`\n\n");
+    fields_table(out, catalog_v2::SUPPORT_FIELDS);
+    out.push_str("### `PreviewV2`\n\n");
+    fields_table(out, catalog_v2::PREVIEW_FIELDS);
+    out.push_str("### `TargetV2`\n\n");
+    fields_table(out, catalog_v2::TARGET_FIELDS);
+    out.push_str("### `PackageRef` v2\n\n");
+    fields_table(out, catalog_v2::PACKAGE_REF_FIELDS);
+    out.push_str(
+        "### Initial categories\n\nReaders take the categories from each catalog; PlayerVox \
+starts with these.\n\n| ID | English | French |\n| --- | --- | --- |\n",
+    );
+    for (id, english, french) in catalog_v2::INITIAL_CATEGORIES {
+        let _ = writeln!(out, "| `{id}` | {english} | {french} |");
+    }
+    let invisible = catalog_v2::INVISIBLE_CHARACTERS
+        .iter()
+        .map(|range| {
+            let (start, end) = (u32::from(*range.start()), u32::from(*range.end()));
+            if start == end {
+                format!("U+{start:04X}")
+            } else {
+                format!("U+{start:04X}–U+{end:04X}")
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(", ");
+    let _ = write!(
+        out,
+        "\n### Display text\n\nPublisher names, category labels, game names, descriptions and \
+release notes are non-empty and counted in Unicode scalar values. They have no white space at \
+either end, no `<` or `>`, no control character except line feeds in descriptions and release \
+notes, and none of these invisible or blank characters: {invisible}.\n"
+    );
+    let _ = write!(
+        out,
+        "\n### Publisher handles and widget ID ownership\n\nA handle is `MIN_HANDLE_BYTES`..=\
+`MAX_HANDLE_BYTES` of `[a-z0-9-]` without a hyphen at either end or two in a row. A widget ID \
+of two segments, `<handle>.<name>`, belongs to that handle; an ID of three segments or more \
+belongs to the publisher owning the domain whose reverse is its prefix, the longest one when \
+several match. `com.playervox` and `com.playervox.*` belong only to `{PLAYERVOX_HANDLE}` \
+through `{PLAYERVOX_DOMAIN}`, and only its widgets on those IDs may carry `built-in`. No two \
+publishers own equal or nested domains.\n\nCatalog readers check the grammar only. A new \
+publisher may not register a domain extension ({}) or a handle whose skeleton equals that of \
+a reserved handle ({}) or contains {}. The skeleton removes hyphens, reads `vv` as `w`, then \
+`0` as `o`, `1` and `i` as `l`, `3` as `e`, `4` as `a`, `5` as `s`, `7` as `t` and `8` as \
+`b`.\n",
+        code_list(DOMAIN_EXTENSIONS),
+        code_list(RESERVED_HANDLES),
+        code_list(RESERVED_HANDLE_WORDS),
+    );
 }
 
 fn wrapper_section(out: &mut String) {

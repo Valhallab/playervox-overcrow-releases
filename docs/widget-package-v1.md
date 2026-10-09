@@ -74,6 +74,12 @@ repeats the whole validation at every activation.
 
 ## Catalog
 
+This section specifies the catalog v1, whose format never changes: released
+applications read it, and it lists the PlayerVox widgets. Every widget,
+PlayerVox widgets included, is also listed by the
+[catalog v2](widget-catalog-v2.md), which the applications that support it
+read instead.
+
 ### Signing
 
 The catalog is `https://overcrow.playervox.com/marketplace/widgets/v1/catalog.json`,
@@ -198,7 +204,8 @@ default consent.
 
 [`crates/overcrow-widget-schema/fixtures/`](../crates/overcrow-widget-schema/fixtures/)
 holds valid and invalid cases; an invalid case is named
-`<expected error>--<case>`, and the crate's `tests/package_format.rs` requires
+`<expected error>--<case>`, and the crate's `tests/package_format.rs` (and
+`tests/catalog_v2.rs` for the catalog v2 and identifier vectors) requires
 that exact error:
 
 | Directory | Content | Source |
@@ -210,6 +217,8 @@ that exact error:
 | `legacy-web/` | payload of a real Web API v1 catalog | hand-kept |
 | `catalog/` | signed catalogs, including that Web catalog | generated |
 | `seed/` | seed directories | generated |
+| `catalog-v2/` | signed catalogs v2 and listing field cases ([README](../crates/overcrow-widget-schema/fixtures/catalog-v2/README.md)) | generated; `fields.json` hand-written |
+| `identifiers/` | handles, publisher domains and widget ID ownership ([README](../crates/overcrow-widget-schema/fixtures/identifiers/README.md)) | hand-written |
 | `conformance-key.pub` | public conformance key | generated |
 
 Regenerate the generated fixtures after changing the format or the sources:

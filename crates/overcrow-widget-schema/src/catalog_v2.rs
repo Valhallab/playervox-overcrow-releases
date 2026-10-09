@@ -165,7 +165,7 @@ pub const PUBLISHER_FIELDS: &[Field] = &[
     Field::required(
         "handle",
         ValueType::Text(&MAX_HANDLE_BYTES),
-        "Handle grammar (see Publisher handles); readers do not check the registration policy.",
+        "Handle grammar (see Publisher handles and widget ID ownership); readers do not check the registration policy.",
     ),
     Field::required(
         "name",
@@ -188,7 +188,7 @@ pub const WIDGET_FIELDS: &[Field] = &[
     Field::required(
         "id",
         ValueType::Record("widget ID"),
-        "Widget ID of the manifest grammar, owned by the publisher (see Widget ID ownership); unique.",
+        "Widget ID of the manifest grammar, owned by the publisher (see Publisher handles and widget ID ownership); unique.",
     ),
     Field::required(
         "publisher",
