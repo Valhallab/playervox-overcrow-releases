@@ -14,7 +14,7 @@ use crate::compiled_view::{COMPONENT_FIELDS, NODE_KINDS, VIEW_FIELDS};
 use crate::icons::{ICON_CRATE, ICONS, LUCIDE_VERSION};
 use crate::identifiers::{
     CONFUSABLE_LETTERS, DOMAIN_EXTENSIONS, PLAYERVOX_DOMAIN, PLAYERVOX_HANDLE,
-    RESERVED_HANDLE_WORDS, RESERVED_HANDLES,
+    RESERVED_HANDLE_WORDS, RESERVED_HANDLES, STYLIZED_LETTERS,
 };
 use crate::ipc::{
     self, DRAW_COMMANDS, FAILURES, FRAME_KINDS, HEADER, HOST_MESSAGES, Message, PATCH_OPS,
@@ -502,10 +502,21 @@ a reserved handle ({}) or contains {}. The skeleton removes hyphens, reads `vv` 
 `0` as `o`, `1` and `i` as `l`, `3` as `e`, `4` as `a`, `5` as `s`, `7` as `t` and `8` as \
 `b`. The same words may not appear in the skeleton of another publisher's displayed name, \
 read as ASCII letters and digits: fullwidth forms fold to ASCII, the look-alikes below to their \
-letter, other characters are dropped.\n\n| Look-alikes | Letter |\n| --- | --- |\n",
+letter, other characters are dropped. Such a name may not use stylized letters either ({}), \
+except `™`. Human review covers the look-alikes no table lists.\n\n| Look-alikes | Letter |\n\
+| --- | --- |\n",
         code_list(DOMAIN_EXTENSIONS),
         code_list(RESERVED_HANDLES),
         code_list(RESERVED_HANDLE_WORDS),
+        STYLIZED_LETTERS
+            .iter()
+            .map(|block| format!(
+                "U+{:04X}–U+{:04X}",
+                u32::from(*block.start()),
+                u32::from(*block.end())
+            ))
+            .collect::<Vec<_>>()
+            .join(", "),
     );
     for (letters, ascii) in CONFUSABLE_LETTERS {
         let _ = writeln!(out, "| {letters} | `{ascii}` |");

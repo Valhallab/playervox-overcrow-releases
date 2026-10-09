@@ -15,6 +15,8 @@
 //! application refuse a catalog. [`validate_handle`] and [`validate_domain`]
 //! add the registration policy the creator portal applies.
 
+use std::ops::RangeInclusive;
+
 use crate::catalog_v2::display_text;
 use crate::limits::{
     MAX_DNS_LABEL_BYTES, MAX_DNS_NAME_BYTES, MAX_HANDLE_BYTES, MAX_PUBLISHER_NAME_CHARS,
@@ -161,6 +163,8 @@ impl OwnershipError {
 pub enum NameError {
     /// Not display text of at most `MAX_PUBLISHER_NAME_CHARS` on one line.
     Text,
+    /// Uses stylized letters that mimic Latin ones (`STYLIZED_LETTERS`).
+    Stylized,
     /// Reads as PlayerVox, OverCrow or Valhallab for another publisher.
     Reserved,
 }
@@ -169,6 +173,7 @@ impl NameError {
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Text => "text",
+            Self::Stylized => "stylized",
             Self::Reserved => "reserved",
         }
     }
@@ -194,6 +199,23 @@ pub const CONFUSABLE_LETTERS: &[(&str, char)] = &[
     ("ýÿŷÝŸŶуУγΥ", 'y'),
 ];
 
+/// Blocks of stylized letters and digits that mimic Latin ones: IPA and
+/// modifier letters, Cherokee, small capitals, superscripts and subscripts,
+/// letterlike symbols and number forms, enclosed and mathematical
+/// alphanumerics. A displayed publisher name never uses them, except the
+/// trade mark sign `™` (U+2122).
+pub const STYLIZED_LETTERS: &[RangeInclusive<char>] = &[
+    '\u{0250}'..='\u{02FF}',
+    '\u{13A0}'..='\u{13FF}',
+    '\u{1D00}'..='\u{1DBF}',
+    '\u{2070}'..='\u{209F}',
+    '\u{2100}'..='\u{218F}',
+    '\u{2460}'..='\u{24FF}',
+    '\u{AB70}'..='\u{ABBF}',
+    '\u{1D400}'..='\u{1D7FF}',
+    '\u{1F100}'..='\u{1F1FF}',
+];
+
 /// The lowercase ASCII letter or digit `character` reads as, if any.
 fn ascii_letter(character: char) -> Option<char> {
     match character {
@@ -213,10 +235,19 @@ fn ascii_letter(character: char) -> Option<char> {
 /// confusable skeleton of the letters and digits it reads as, once fullwidth
 /// forms and [`CONFUSABLE_LETTERS`] are folded to ASCII (`Player Vox`,
 /// `0verCrow`, `PlayerVох` in Cyrillic). Other characters are dropped.
-/// Catalog readers check display text only.
+/// [`STYLIZED_LETTERS`] are refused first. Catalog readers check display text
+/// only; human review covers the look-alikes no table lists.
 pub fn validate_publisher_name(name: &str, handle: &str) -> Result<(), NameError> {
     if !display_text(name, MAX_PUBLISHER_NAME_CHARS.value, false) {
         return Err(NameError::Text);
+    }
+    if name.chars().any(|character| {
+        character != '\u{2122}'
+            && STYLIZED_LETTERS
+                .iter()
+                .any(|block| block.contains(&character))
+    }) {
+        return Err(NameError::Stylized);
     }
     let letters: String = name.chars().filter_map(ascii_letter).collect();
     let folded = confusable_skeleton(&letters);
@@ -458,6 +489,7 @@ mod tests {
                 "nightowl",
             ),
             ("\u{6f22}\u{5b57} Studio", "raidforge"),
+            ("Raidforge\u{2122}", "raidforge"),
         ] {
             assert_eq!(validate_publisher_name(name, handle), Ok(()), "{name}");
         }
@@ -483,6 +515,23 @@ mod tests {
             assert_eq!(
                 validate_publisher_name(name, "raidforge"),
                 Err(NameError::Reserved),
+                "{name}"
+            );
+        }
+        // Stylized letters that mimic Latin ones are refused outright.
+        for name in [
+            "\u{1d40f}\u{1d425}\u{1d41a}\u{1d432}\u{1d41e}\u{1d42b}\u{1d415}\u{1d428}\u{1d431}",
+            "\u{1d18}\u{29f}\u{1d00}\u{28f}\u{1d07}\u{280}\u{1d20}\u{1d0f}x",
+            "\u{24c5}layervox",
+            "\u{1f13f}layervox",
+            "Raidforge\u{b2}\u{2070}",
+            "Raidforge \u{2163}",
+            "\u{13a2}\u{13ac}\u{13aa}",
+            "Raid\u{2c7}forge",
+        ] {
+            assert_eq!(
+                validate_publisher_name(name, "raidforge"),
+                Err(NameError::Stylized),
                 "{name}"
             );
         }

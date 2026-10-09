@@ -144,6 +144,46 @@
       "name": "\u6f22\u5b57 Studio",
       "handle": "raidforge",
       "expected": "ok"
+    },
+    {
+      "name": "\ud835\udc0f\ud835\udc25\ud835\udc1a\ud835\udc32\ud835\udc1e\ud835\udc2b\ud835\udc15\ud835\udc28\ud835\udc31",
+      "handle": "raidforge",
+      "expected": "stylized"
+    },
+    {
+      "name": "\u1d18\u029f\u1d00\u028f\u1d07\u0280\u1d20\u1d0fx",
+      "handle": "raidforge",
+      "expected": "stylized"
+    },
+    {
+      "name": "\u24c5layervox",
+      "handle": "raidforge",
+      "expected": "stylized"
+    },
+    {
+      "name": "\ud83c\udd3flayervox",
+      "handle": "raidforge",
+      "expected": "stylized"
+    },
+    {
+      "name": "Raidforge\u00b2\u2070",
+      "handle": "raidforge",
+      "expected": "stylized"
+    },
+    {
+      "name": "Raidforge \u2163",
+      "handle": "raidforge",
+      "expected": "stylized"
+    },
+    {
+      "name": "\u13a2\u13ac\u13aa",
+      "handle": "raidforge",
+      "expected": "stylized"
+    },
+    {
+      "name": "Raidforge\u2122",
+      "handle": "raidforge",
+      "expected": "ok"
     }
   ]
 }

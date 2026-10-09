@@ -37,7 +37,11 @@ Each file is one JSON object; every string is compared exactly.
 `cases`: `{ "name", "handle", "expected" }`, the result of
 `validate_publisher_name(name, handle)`, what the portal accepts as a
 displayed publisher name: `ok`, `text` (not display text of at most 64
-characters on one line) or `reserved` (for a publisher other than
+characters on one line), `stylized` (a character of `STYLIZED_LETTERS`:
+IPA and modifier letters, Cherokee, small capitals, superscripts and
+subscripts, letterlike symbols and number forms, enclosed and mathematical
+alphanumerics, the trade mark sign `™` excepted) or `reserved` (for a
+publisher other than
 `playervox`, the skeleton of the letters and digits the name reads as
 contains `playervox`, `overcrow` or `valhallab`). Each character folds to a
 lowercase ASCII letter or digit: ASCII as is, fullwidth forms

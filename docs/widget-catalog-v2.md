@@ -147,7 +147,9 @@ that grows never makes an older application refuse a catalog. For the same
 reason the portal, not the reader, refuses a displayed publisher name that
 reads as PlayerVox, OverCrow or Valhallab (`Player Vox`, `0verCrow`, or
 Cyrillic, Greek, fullwidth and accented look-alikes) for any publisher but
-`playervox`. A publisher
+`playervox`, and any publisher name written with stylized letters
+(mathematical, enclosed, small capitals…). Human review covers the
+look-alikes no table lists. A publisher
 domain is a lowercase DNS name of at least two labels whose last label is
 not numeric, short enough for its reverse plus one name segment to fit a
 widget ID.
