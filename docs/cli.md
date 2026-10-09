@@ -126,7 +126,7 @@ repository's own revisions ([review policy](review-policy.md)).
   version the CLI pins, in the cache (`$XDG_CACHE_HOME` or `~/.cache`,
   `%LOCALAPPDATA%` on Windows, under `overcrow-widget/runtime/<version>/`),
   checked against its pinned SHA-256 before every run: `--runtime` is
-  optional. The pin is the runtime of OverCrow 0.6.0-beta.1, from that
+  optional. The pin is the runtime of OverCrow 0.6.0-beta.2, from that
   release's `runtimes.json`. A pinned runtime missing from the cache is
   downloaded (`src/download.rs`) from the creator tools ZIP of its release,
   bounded and checked as its module documentation says, unless

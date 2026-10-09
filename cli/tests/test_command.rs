@@ -158,9 +158,9 @@ fn pinned_path(cache: &Path) -> PathBuf {
     cache
         .join("overcrow-widget")
         .join("runtime")
-        .join("0.6.0-beta.1")
+        .join("0.6.0-beta.2")
         .join(format!(
-            "overcrow-widget-headless-0.6.0-beta.1-{platform}{suffix}"
+            "overcrow-widget-headless-0.6.0-beta.2-{platform}{suffix}"
         ))
 }
 
@@ -286,7 +286,7 @@ fn a_downloaded_runtime_with_another_digest_is_not_kept_nor_run() {
         .to_string_lossy()
         .into_owned();
     let (releases, paths) = serve(stored_zip(
-        &format!("overcrow-creator-tools-0.6.0-beta.1-{platform}/{name}"),
+        &format!("overcrow-creator-tools-0.6.0-beta.2-{platform}/{name}"),
         &script,
     ));
     let output = cli_with_cache(&root, cache.path(), &releases, &[]);
@@ -294,18 +294,18 @@ fn a_downloaded_runtime_with_another_digest_is_not_kept_nor_run() {
     assert_eq!(output.status.code(), Some(2), "{message}");
     assert!(
         message.contains(
-            &format!("Downloading the headless runtime 0.6.0-beta.1 (overcrow-creator-tools-0.6.0-beta.1-{platform}.zip)")
+            &format!("Downloading the headless runtime 0.6.0-beta.2 (overcrow-creator-tools-0.6.0-beta.2-{platform}.zip)")
         ),
         "{message}"
     );
     assert!(
-        message.contains("cannot download the headless runtime 0.6.0-beta.1: its SHA-256 is not the pinned one. Nothing was kept. Try again, or pass --runtime"),
+        message.contains("cannot download the headless runtime 0.6.0-beta.2: its SHA-256 is not the pinned one. Nothing was kept. Try again, or pass --runtime"),
         "{message}"
     );
     assert_eq!(
         *paths.lock().unwrap(),
         [format!(
-            "/download/v0.6.0-beta.1/overcrow-creator-tools-0.6.0-beta.1-{platform}.zip"
+            "/download/v0.6.0-beta.2/overcrow-creator-tools-0.6.0-beta.2-{platform}.zip"
         )]
     );
     let kept = fs::read_dir(pinned_path(cache.path()).parent().unwrap())
@@ -323,7 +323,7 @@ fn an_unreachable_release_says_to_try_again() {
     let message = stderr(&output);
     assert_eq!(output.status.code(), Some(2), "{message}");
     assert!(
-        message.contains("cannot download the headless runtime 0.6.0-beta.1: no connection to the server. Nothing was kept. Try again, or pass --runtime <path to overcrow-widget-headless>"),
+        message.contains("cannot download the headless runtime 0.6.0-beta.2: no connection to the server. Nothing was kept. Try again, or pass --runtime <path to overcrow-widget-headless>"),
         "{message}"
     );
     assert!(!pinned_path(cache.path()).exists());

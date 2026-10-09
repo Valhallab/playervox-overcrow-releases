@@ -25,7 +25,7 @@ without cgroup delegation, the VM runs without its per-widget cgroup
 the report says `without-cgroup`. On Windows it grants its own executable
 read and execute for the AppContainer when the ACL lacks it.
 
-The CLI pins the runtime published with OverCrow 0.6.0-beta.1
+The CLI pins the runtime published with OverCrow 0.6.0-beta.2
 (`PIN` in `cli/src/runtime.rs`: its version and the two SHA-256 of that
 release's `runtimes.json`), so `--runtime` is optional: a runtime missing
 from the cache is downloaded from the creator tools ZIP of its platform in that release
