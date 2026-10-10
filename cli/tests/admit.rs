@@ -192,6 +192,115 @@ fn a_missing_or_invalid_listing_is_refused() {
     assert_eq!(codes(&report), ["admission.listing_missing"]);
 }
 
+/// The creator space keeps the listing itself: its builder admits the
+/// sources with `--listing optional`, where `listing.json` is only an
+/// import proposal.
+#[test]
+fn an_optional_listing_may_be_absent() {
+    let (temporary, root) = project("nova.counter", "MIT");
+    fs::remove_file(root.join("listing.json")).expect("remove listing");
+    let bundle = temporary.path().join("bundle");
+    let (output, report) = admit_json(&[
+        path(&root),
+        "--publisher",
+        "nova",
+        "--listing",
+        "optional",
+        "--out",
+        path(&bundle),
+    ]);
+    assert_eq!(output.status.code(), Some(0), "{report}");
+    assert_eq!(report["admitted"], true);
+    assert_eq!(report["listing"], Value::Null);
+    assert_eq!(report["listingPolicy"], "optional");
+    assert_eq!(codes(&report), Vec::<String>::new());
+    assert!(bundle.join("package.ocpkg").is_file());
+    assert!(!bundle.join("listing.json").exists(), "no empty listing");
+}
+
+#[test]
+fn an_invalid_optional_listing_is_a_warning() {
+    let (temporary, root) = project("nova.counter", "MIT");
+    let mut invalid = listing("MIT");
+    invalid["sourceUrl"] = json!("http://example.com/counter");
+    invalid["preview"] = json!("assets/missing.png");
+    write_listing(&root, &invalid);
+    let bundle = temporary.path().join("bundle");
+    let (output, report) = admit_json(&[
+        path(&root),
+        "--publisher",
+        "nova",
+        "--listing",
+        "optional",
+        "--out",
+        path(&bundle),
+    ]);
+    assert_eq!(output.status.code(), Some(0), "{report}");
+    assert_eq!(codes(&report), ["admission.listing"]);
+    assert_eq!(report["diagnostics"][0]["severity"], "warning");
+    assert_eq!(report["listing"], Value::Null);
+    assert!(!bundle.join("listing.json").exists());
+    // A valid listing with a bad preview: the preview is a warning too,
+    // and the listing is left out.
+    let mut bad_preview = listing("MIT");
+    bad_preview["preview"] = json!("assets/missing.png");
+    write_listing(&root, &bad_preview);
+    let (output, report) =
+        admit_json(&[path(&root), "--publisher", "nova", "--listing", "optional"]);
+    assert_eq!(output.status.code(), Some(0), "{report}");
+    assert_eq!(codes(&report), ["admission.preview"]);
+    assert_eq!(report["diagnostics"][0]["severity"], "warning");
+    assert_eq!(report["listing"], Value::Null);
+    // Warnings refuse with --deny-warnings, as always.
+    let (output, _) = admit_json(&[
+        path(&root),
+        "--publisher",
+        "nova",
+        "--listing",
+        "optional",
+        "--deny-warnings",
+    ]);
+    assert_eq!(output.status.code(), Some(1));
+    // A valid one is kept, in the report and the bundle.
+    write_listing(&root, &listing("MIT"));
+    let kept = temporary.path().join("kept");
+    let (output, report) = admit_json(&[
+        path(&root),
+        "--publisher",
+        "nova",
+        "--listing",
+        "optional",
+        "--out",
+        path(&kept),
+    ]);
+    assert_eq!(output.status.code(), Some(0), "{report}");
+    assert_eq!(report["listing"]["spdxLicense"], "MIT");
+    assert!(kept.join("listing.json").is_file());
+}
+
+#[test]
+fn a_required_listing_is_the_default() {
+    let (_temporary, root) = project("nova.counter", "MIT");
+    let (_, report) = admit_json(&[path(&root), "--publisher", "nova"]);
+    assert_eq!(report["listingPolicy"], "required");
+    fs::remove_file(root.join("listing.json")).expect("remove listing");
+    for extra in [&[][..], &["--listing", "required"][..]] {
+        let mut args = vec![path(&root), "--publisher", "nova"];
+        args.extend_from_slice(extra);
+        let (output, report) = admit_json(&args);
+        assert_eq!(output.status.code(), Some(1), "{extra:?}");
+        assert_eq!(codes(&report), ["admission.listing_missing"]);
+        assert_eq!(report["diagnostics"][0]["severity"], "error");
+    }
+    // The policy words are for sources; a package takes a listing file.
+    let output = cli(&["admit", path(&root), "--listing", "sometimes"]);
+    assert_eq!(output.status.code(), Some(2));
+    let package = root.join("missing.ocpkg");
+    fs::write(&package, b"not a package").expect("file");
+    let output = cli(&["admit", path(&package), "--listing", "optional"]);
+    assert_eq!(output.status.code(), Some(2), "{}", text(&output.stderr));
+}
+
 #[test]
 fn the_preview_must_be_a_packaged_png() {
     let (_temporary, root) = project("nova.counter", "MIT");

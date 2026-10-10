@@ -95,7 +95,12 @@ impl Diagnostic {
                 if let Some(line) = source.and_then(|text| source_line(text, self.position.line)) {
                     let number = self.position.line.to_string();
                     let pad = " ".repeat(number.len());
-                    let caret = " ".repeat(self.position.column.saturating_sub(1) as usize);
+                    // The line shown is cut at MAX_LINE_CHARS: so is the caret
+                    // (a column from elsewhere may be anything).
+                    let caret = " ".repeat(
+                        (self.position.column.saturating_sub(1) as usize)
+                            .min(crate::sanitize::MAX_LINE_CHARS),
+                    );
                     let _ = writeln!(out, " {pad} |");
                     let _ = writeln!(out, " {number} | {line}");
                     let _ = writeln!(out, " {pad} | {caret}^");
@@ -216,6 +221,18 @@ pub fn closest<'a>(name: &str, candidates: impl IntoIterator<Item = &'a str>) ->
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_column_far_past_the_line_keeps_the_caret_bounded() {
+        let diagnostic = Diagnostic::error("logic.eval", "x")
+            .in_file("logic.ts")
+            .at(Position {
+                line: 1,
+                column: u32::MAX,
+            });
+        let shown = diagnostic.render(Some("const a = 1;\n"));
+        assert!(shown.len() < 2048, "{} bytes", shown.len());
+    }
 
     #[test]
     fn renders_file_line_caret_and_help() {

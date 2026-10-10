@@ -22,6 +22,9 @@ flate2 = "=1.1.10"
 libfuzzer-sys = "=0.4.12"
 overcrow-widget-format = { path = "../crates/overcrow-widget-format" }
 overcrow-widget-schema = { path = "../crates/overcrow-widget-schema" }
+# `publish_responses` includes the CLI's reader of the publish API's
+# answers, which uses serde_json (already locked through the schema).
+serde_json = "=1.0.151"
 
 [profile.release]
 debug = 1
@@ -85,6 +88,13 @@ bench = false
 [[bin]]
 name = "source_zip"
 path = "fuzz_targets/source_zip.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "publish_responses"
+path = "fuzz_targets/publish_responses.rs"
 test = false
 doc = false
 bench = false

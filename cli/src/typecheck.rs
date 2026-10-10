@@ -41,6 +41,7 @@ pub fn run(root: &Path, logic_path: &str, report: &mut Report) {
     }
     let mut command = Command::new("node");
     command
+        .env_remove(crate::publish::secret::KEY_VARIABLE)
         .arg(tsc)
         .args(["--noEmit", "--pretty", "false", "-p", "tsconfig.json"])
         .current_dir(root)

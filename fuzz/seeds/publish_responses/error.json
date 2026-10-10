@@ -1,0 +1,1 @@
+{"code": "validation_failed", "error": "Invalid.", "fields": [{"field": "release_notes.fr", "code": "text"}], "retry_after": 60}

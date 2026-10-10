@@ -70,13 +70,17 @@ pub enum Publisher {
         handle: String,
         domains: Vec<String>,
     },
+    /// The widget of a publish key (`submit`): the creator space checked
+    /// that the publisher owns its ID when the widget was created, and
+    /// checks it again on every build. The manifest must carry that ID.
+    Key { handle: String, widget_id: String },
 }
 
 impl Publisher {
     pub fn as_str(&self) -> &str {
         match self {
             Self::Unknown => "third-party",
-            Self::Handle { handle, .. } => handle,
+            Self::Handle { handle, .. } | Self::Key { handle, .. } => handle,
         }
     }
 
@@ -85,8 +89,37 @@ impl Publisher {
     }
 }
 
+/// What `listing.json` is to an admission.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ListingPolicy {
+    /// Every submission carries its listing (the releases repository).
+    Required,
+    /// The listing lives in the creator space: a `listing.json` is only a
+    /// proposal to import, so its absence is fine and its problems are
+    /// warnings that leave it out (`--listing optional`, the builder).
+    Optional,
+}
+
+impl ListingPolicy {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Required => "required",
+            Self::Optional => "optional",
+        }
+    }
+
+    pub fn parse(text: &str) -> Option<Self> {
+        match text {
+            "required" => Some(Self::Required),
+            "optional" => Some(Self::Optional),
+            _ => None,
+        }
+    }
+}
+
 pub struct Options<'a> {
     pub publisher: Publisher,
+    pub listing: ListingPolicy,
     /// The archive a creator submitted, compared with the rebuild.
     pub package: Option<&'a Path>,
     /// The last approved version: a `manifest.json`, a `.ocpkg`, a source
@@ -98,11 +131,12 @@ pub struct Options<'a> {
     pub sources: Option<Value>,
 }
 
-/// An admitted submission: the rebuilt archive, the exact listing bytes and
-/// the report. Written by `--out` as an admission bundle.
+/// An admitted submission: the rebuilt archive, the exact listing bytes
+/// (none when an optional listing is absent or left out) and the report.
+/// Written by `--out` as an admission bundle.
 pub struct Admitted {
     pub archive: Vec<u8>,
-    pub listing: Vec<u8>,
+    pub listing: Option<Vec<u8>>,
     pub report: Value,
     /// The code map of `logic.js`, when asked for; never in the bundle.
     pub source_map: Option<String>,
@@ -149,7 +183,7 @@ pub fn admit(input: &Input<'_>, options: &Options<'_>, report: &mut Report) -> O
     let Some(mut findings) = findings else {
         return Outcome {
             admitted: None,
-            report: refused_before_identity(report, &options.publisher, options.sources.as_ref()),
+            report: refused_before_identity(report, options),
         };
     };
     check_identity(&findings.package.manifest, &options.publisher, report);
@@ -160,12 +194,12 @@ pub fn admit(input: &Input<'_>, options: &Options<'_>, report: &mut Report) -> O
         Input::Source(root) => root.join(LISTING_FILE),
         Input::Archive { listing, .. } => listing.to_path_buf(),
     };
-    check_listing(&listing, &mut findings, &options.publisher, report);
+    check_listing(&listing, &mut findings, options, report);
     let value = render_json(&findings, options, report);
     Outcome {
         admitted: (report.errors() == 0).then(|| Admitted {
             archive: findings.archive,
-            listing: findings.listing_bytes.unwrap_or_default(),
+            listing: findings.listing_bytes,
             report: value.clone(),
             source_map: findings.source_map,
         }),
@@ -234,18 +268,15 @@ fn archive(path: &Path, _listing: &Path, report: &mut Report) -> Option<Findings
 
 /// A report for a submission refused before its identity was known: a
 /// source ZIP refused by `sourcetree`, or sources that do not build.
-pub fn refused_before_identity(
-    report: &Report,
-    publisher: &Publisher,
-    sources: Option<&Value>,
-) -> Value {
+pub fn refused_before_identity(report: &Report, options: &Options<'_>) -> Value {
     json!({
         "formatVersion": REPORT_FORMAT,
         "admitted": false,
-        "publisher": publisher.as_str(),
+        "publisher": options.publisher.as_str(),
+        "listingPolicy": options.listing.as_str(),
         "id": null,
         "version": null,
-        "sources": sources,
+        "sources": options.sources,
         "permissions": null,
         "diagnostics": diagnostics_json(report),
     })
@@ -356,6 +387,17 @@ fn check_identity(manifest: &Manifest, publisher: &Publisher, report: &mut Repor
         )
     };
     match publisher {
+        Publisher::Key { widget_id, .. } => {
+            if id != widget_id {
+                report.push(refuse(
+                    "admission.id_not_owned",
+                    format!(
+                        "the publish key is for {}, not for `{id}`",
+                        sanitize::line(widget_id)
+                    ),
+                ));
+            }
+        }
         // PlayerVox admits the widgets of this repository, its own and the
         // ones already reviewed and merged there: no ownership check.
         _ if publisher.is_playervox() => {}
@@ -478,75 +520,118 @@ fn previous_manifest(path: &Path) -> Result<Manifest, String> {
 }
 
 /// `listing.json`: the Listing fields of the catalog, plus an optional
-/// `preview` naming a packaged PNG under `assets/`.
-fn check_listing(path: &Path, findings: &mut Findings, publisher: &Publisher, report: &mut Report) {
+/// `preview` naming a packaged PNG under `assets/`. Under
+/// [`ListingPolicy::Optional`], an absent listing is fine, and a listing
+/// with a problem is left out with warnings.
+fn check_listing(path: &Path, findings: &mut Findings, options: &Options<'_>, report: &mut Report) {
+    let optional = options.listing == ListingPolicy::Optional;
+    let problem = |code: &str, message: String| {
+        let diagnostic = if optional {
+            Diagnostic::warning(code, message)
+        } else {
+            Diagnostic::error(code, message)
+        };
+        diagnostic.in_file(LISTING_FILE)
+    };
+    let mut problems = Vec::new();
+    let checked = read_listing(
+        path,
+        findings,
+        &options.publisher,
+        optional,
+        &mut problems,
+        &problem,
+    );
+    let left_out = optional && !problems.is_empty();
+    for diagnostic in problems {
+        report.push(diagnostic);
+    }
+    if let Some((bytes, listing)) = checked.filter(|_| !left_out) {
+        findings.listing_bytes = Some(bytes);
+        findings.listing = Some(listing);
+    } else {
+        findings.preview = None;
+    }
+}
+
+/// Reads and checks the listing; its problems go to `problems`. Returns
+/// its bytes and value when it could be read as a Listing.
+fn read_listing(
+    path: &Path,
+    findings: &mut Findings,
+    publisher: &Publisher,
+    optional: bool,
+    problems: &mut Vec<Diagnostic>,
+    problem: &dyn Fn(&str, String) -> Diagnostic,
+) -> Option<(Vec<u8>, Value)> {
     let bytes = match read_bounded(path, MAX_LISTING_SOURCE_BYTES) {
         Ok(Some(bytes)) => bytes,
         Ok(None) => {
-            report.push(
-                Diagnostic::error("admission.listing", "listing.json is too large")
-                    .in_file(LISTING_FILE),
-            );
-            return;
+            problems.push(problem(
+                "admission.listing",
+                "listing.json is too large".into(),
+            ));
+            return None;
+        }
+        Err(error) if optional && error.kind() == std::io::ErrorKind::NotFound => return None,
+        Err(_) if optional => {
+            problems.push(problem(
+                "admission.listing",
+                "cannot read listing.json".into(),
+            ));
+            return None;
         }
         Err(_) => {
-            report.push(
-                Diagnostic::error(
+            problems.push(
+                problem(
                     "admission.listing_missing",
-                    "a submission needs listing.json next to manifest.json",
+                    "a submission needs listing.json next to manifest.json".into(),
                 )
-                .in_file(LISTING_FILE)
                 .help("see https://overcrow.playervox.com/docs/en/publishing/#the-listing"),
             );
-            return;
+            return None;
         }
     };
     let Some(Value::Object(mut object)) = parse_strict(&bytes, MAX_LISTING_SOURCE_BYTES) else {
-        report.push(
-            Diagnostic::error(
-                "admission.listing",
-                "listing.json is not one strict JSON object",
-            )
-            .in_file(LISTING_FILE),
-        );
-        return;
+        problems.push(problem(
+            "admission.listing",
+            "listing.json is not one strict JSON object".into(),
+        ));
+        return None;
     };
     let preview = object.remove("preview");
     let listing = Value::Object(object);
     if validate_listing(&listing).is_err() {
-        report.push(
-            Diagnostic::error("admission.listing", "listing.json is refused by the catalog's Listing rules")
-                .in_file(LISTING_FILE)
+        problems.push(
+            problem("admission.listing", "listing.json is refused by the catalog's Listing rules".into())
                 .help("author, spdxLicense, an https sourceUrl, defaultLocale and plain-text localizations; see https://overcrow.playervox.com/docs/en/publishing/#the-listing"),
         );
-        return;
+        return None;
     }
     match preview {
         None => {}
-        Some(Value::String(path)) => check_preview(&path, findings, report),
-        Some(_) => report.push(
-            Diagnostic::error(
-                "admission.preview",
-                "`preview` must name a PNG under assets/",
-            )
-            .in_file(LISTING_FILE),
-        ),
+        Some(Value::String(path)) => {
+            if let Some(diagnostic) = check_preview(&path, findings) {
+                problems.push(problem(&diagnostic.0, diagnostic.1));
+            }
+        }
+        Some(_) => problems.push(problem(
+            "admission.preview",
+            "`preview` must name a PNG under assets/".into(),
+        )),
     }
     let license = listing["spdxLicense"].as_str().unwrap_or_default();
     if publisher.is_playervox() && license != PLAYERVOX_LICENSE {
-        report.push(
-            Diagnostic::error(
-                "admission.license",
-                "PlayerVox widgets are published under MIT",
-            )
-            .in_file(LISTING_FILE),
-        );
+        problems.push(problem(
+            "admission.license",
+            "PlayerVox widgets are published under MIT".into(),
+        ));
     }
-    findings.listing_bytes = Some(bytes);
-    findings.listing = Some(listing);
+    Some((bytes, listing))
 }
 
-fn check_preview(path: &str, findings: &mut Findings, report: &mut Report) {
+/// Keeps the preview, or says why it is refused (code, message).
+fn check_preview(path: &str, findings: &mut Findings) -> Option<(String, String)> {
     let valid = path.starts_with("assets/")
         && path.ends_with(".png")
         && findings
@@ -555,17 +640,15 @@ fn check_preview(path: &str, findings: &mut Findings, report: &mut Report) {
             .is_some_and(|bytes| bytes.len() as u64 <= MAX_PREVIEW_BYTES.value);
     if valid {
         findings.preview = Some(path.to_owned());
+        None
     } else {
-        report.push(
-            Diagnostic::error(
-                "admission.preview",
-                format!(
-                    "`preview` must name a packaged PNG under assets/ of at most {} bytes",
-                    MAX_PREVIEW_BYTES.value
-                ),
-            )
-            .in_file(LISTING_FILE),
-        );
+        Some((
+            "admission.preview".to_owned(),
+            format!(
+                "`preview` must name a packaged PNG under assets/ of at most {} bytes",
+                MAX_PREVIEW_BYTES.value
+            ),
+        ))
     }
 }
 
@@ -665,6 +748,7 @@ fn render_json(findings: &Findings, options: &Options<'_>, report: &Report) -> V
         "formatVersion": REPORT_FORMAT,
         "admitted": report.errors() == 0,
         "publisher": publisher.as_str(),
+        "listingPolicy": options.listing.as_str(),
         "id": manifest.id,
         "version": manifest.version.to_string(),
         "reservedId": manifest.has_reserved_id(),
@@ -826,16 +910,109 @@ pub fn render_human(report: &Value) -> String {
 }
 
 /// Writes an admission bundle into `out`, which must not exist or be empty:
-/// `package.ocpkg`, `listing.json` and `report.json`.
+/// `package.ocpkg`, `listing.json` (when there is one) and `report.json`.
 pub fn write_bundle(out: &Path, admitted: &Admitted) -> std::io::Result<PathBuf> {
     if out.exists() && fs::read_dir(out)?.next().is_some() {
         return Err(std::io::Error::other("the output directory is not empty"));
     }
     fs::create_dir_all(out)?;
     fs::write(out.join("package.ocpkg"), &admitted.archive)?;
-    fs::write(out.join(LISTING_FILE), &admitted.listing)?;
+    if let Some(listing) = &admitted.listing {
+        fs::write(out.join(LISTING_FILE), listing)?;
+    }
     let mut report = serde_json::to_vec_pretty(&admitted.report).map_err(std::io::Error::other)?;
     report.push(b'\n');
     fs::write(out.join("report.json"), report)?;
     Ok(out.to_path_buf())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Admits a fresh counter project whose manifest ID is `id`.
+    fn admit_as(id: &str, publisher: Publisher) -> Vec<String> {
+        let temporary = tempfile::tempdir().expect("temporary directory");
+        let root = temporary.path().join("widget");
+        crate::init::init(
+            &root,
+            &crate::init::Options {
+                template: "counter",
+                id: Some("raidforge.counter"),
+                name: None,
+            },
+        )
+        .expect("project");
+        // `init` refuses reserved IDs: set the one under test afterwards.
+        let path = root.join("manifest.json");
+        let mut manifest: Value =
+            serde_json::from_slice(&fs::read(&path).expect("manifest")).expect("JSON");
+        manifest["id"] = json!(id);
+        fs::write(&path, manifest.to_string()).expect("manifest");
+        let options = Options {
+            publisher,
+            listing: ListingPolicy::Optional,
+            package: None,
+            previous: None,
+            source_map: false,
+            sources: None,
+        };
+        let mut report = Report::default();
+        admit(&Input::Source(&root), &options, &mut report);
+        report
+            .diagnostics
+            .iter()
+            .filter(|diagnostic| diagnostic.severity == crate::diag::Severity::Error)
+            .map(|diagnostic| diagnostic.code.clone())
+            .collect()
+    }
+
+    fn key(handle: &str, widget_id: &str) -> Publisher {
+        Publisher::Key {
+            handle: handle.to_owned(),
+            widget_id: widget_id.to_owned(),
+        }
+    }
+
+    #[test]
+    fn a_key_publisher_owns_exactly_its_widget() {
+        // A domain form: no domain is known locally, the key vouches for it.
+        assert!(
+            admit_as(
+                "gg.raidforge.timers",
+                key("raidforge", "gg.raidforge.timers")
+            )
+            .is_empty()
+        );
+        assert_eq!(
+            admit_as(
+                "gg.raidforge.other",
+                key("raidforge", "gg.raidforge.timers")
+            ),
+            ["admission.id_not_owned"]
+        );
+        // The same ID with a handle and no domain is not owned.
+        assert_eq!(
+            admit_as(
+                "gg.raidforge.timers",
+                Publisher::Handle {
+                    handle: "raidforge".into(),
+                    domains: Vec::new()
+                }
+            ),
+            ["admission.id_not_owned"]
+        );
+        // PlayerVox's key admits only its own widget too.
+        assert_eq!(
+            admit_as(
+                "com.playervox.clock",
+                key("playervox", "com.playervox.timer")
+            ),
+            ["admission.id_not_owned"]
+        );
+        assert_eq!(
+            key("raidforge", "gg.raidforge.timers").as_str(),
+            "raidforge"
+        );
+    }
 }

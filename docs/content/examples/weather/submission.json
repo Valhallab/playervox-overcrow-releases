@@ -1,0 +1,17 @@
+{
+  "releaseNotes": {
+    "en": "First version: the forecast of your city, in metric or imperial units.",
+    "fr": "Première version : les prévisions de votre ville, en unités métriques ou impériales."
+  },
+  "justifications": [
+    {
+      "permission": "network:GET https://api.example.com/v1/forecast/{city}",
+      "text": "Reads the forecast of the city the player chose, every 30 minutes at most."
+    },
+    {
+      "permission": "storage",
+      "text": "Keeps the chosen city and units between two games."
+    }
+  ],
+  "reviewMessage": "The forecast API needs no account and receives only the city."
+}

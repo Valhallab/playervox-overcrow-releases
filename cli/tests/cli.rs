@@ -375,3 +375,46 @@ fn a_relative_project_directory_runs_its_typescript() {
         "--noEmit --pretty false -p tsconfig.json"
     );
 }
+
+/// A CI sets `OVERCROW_PUBLISH_KEY` for a whole job: the CLI takes it out of
+/// its environment before anything else, so `check` (tsc through Node.js),
+/// `test` (the runtime) and the rest never pass it to a child process.
+#[cfg(unix)]
+#[test]
+fn no_child_process_sees_the_publish_key() {
+    use std::os::unix::fs::PermissionsExt as _;
+
+    const KEY: &str = "ocw_pub_q9XeT4mVb2LzR8nKc1HwY6sJ0pAfD3gUa7Bc-_dWxyz";
+    let (temporary, root) = project("counter");
+    let tsc = root.join("node_modules/typescript/lib/tsc.js");
+    fs::create_dir_all(tsc.parent().expect("parent")).expect("typescript folder");
+    fs::write(&tsc, "").expect("tsc");
+    // A `node` that records the environment it was given.
+    let bin = temporary.path().join("bin");
+    fs::create_dir_all(&bin).expect("bin");
+    let node = bin.join("node");
+    fs::write(
+        &node,
+        "#!/bin/sh\n/usr/bin/env > \"$OVERCROW_TEST_ENV_DUMP\"\n",
+    )
+    .expect("node");
+    fs::set_permissions(&node, fs::Permissions::from_mode(0o755)).expect("executable");
+    let dump = temporary.path().join("env.txt");
+    let path = format!(
+        "{}:{}",
+        bin.display(),
+        std::env::var("PATH").unwrap_or_default()
+    );
+    let output = Command::new(env!("CARGO_BIN_EXE_overcrow-widget"))
+        .args(["check", root.to_str().expect("UTF-8 path")])
+        .env("PATH", path)
+        .env("OVERCROW_TEST_ENV_DUMP", &dump)
+        .env("OVERCROW_PUBLISH_KEY", KEY)
+        .output()
+        .expect("the CLI runs");
+    let seen = fs::read_to_string(&dump)
+        .unwrap_or_else(|_| panic!("the fake node did not run: {}", text(&output.stderr)));
+    assert!(seen.contains("OVERCROW_TEST_ENV_DUMP="), "{seen}");
+    assert!(!seen.contains("OVERCROW_PUBLISH_KEY"), "{seen}");
+    assert!(!seen.contains(&KEY[8..]), "{seen}");
+}

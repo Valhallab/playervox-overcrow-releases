@@ -188,6 +188,7 @@ dependencies = [
  "libfuzzer-sys",
  "overcrow-widget-format",
  "overcrow-widget-schema",
+ "serde_json",
 ]
 
 [[package]]

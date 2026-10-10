@@ -215,6 +215,57 @@ fn an_archive_admits_to_the_same_package_as_its_folder() {
     assert_eq!(output.status.code(), Some(2));
 }
 
+/// `git archive` (what GitHub's "Download ZIP" runs) writes the commit ID as
+/// the archive comment: admitted like the folder.
+#[test]
+fn a_git_archive_admits_like_its_folder() {
+    let git = Path::new("/usr/bin/git");
+    if !git.exists() {
+        eprintln!("skipped: no /usr/bin/git");
+        return;
+    }
+    let temporary = tempfile::tempdir().expect("temporary directory");
+    let root = project(temporary.path());
+    let run = |args: &[&str]| {
+        let output = Command::new(git)
+            .current_dir(&root)
+            .args(["-c", "user.name=Nova", "-c", "user.email=nova@example.com"])
+            .args(["-c", "commit.gpgsign=false", "-c", "core.autocrlf=false"])
+            .args(args)
+            .env("GIT_CONFIG_NOSYSTEM", "1")
+            .env("HOME", temporary.path())
+            .output()
+            .expect("git runs");
+        assert!(
+            output.status.success(),
+            "git {args:?}: {}",
+            text(&output.stderr)
+        );
+    };
+    run(&["init", "--quiet"]);
+    run(&["add", "--all"]);
+    run(&["commit", "--quiet", "--message", "Timers"]);
+    let archive = temporary.path().join("lol-timers-main.zip");
+    run(&[
+        "archive",
+        "--format=zip",
+        "--prefix=lol-timers-main/",
+        "--output",
+        path(&archive),
+        "HEAD",
+    ]);
+    let bytes = fs::read(&archive).expect("archive");
+    let comment_length = u16::from_le_bytes([bytes[bytes.len() - 2], bytes[bytes.len() - 1]]);
+    assert!(comment_length > 0, "git writes the commit ID as a comment");
+
+    let (output, folder) = admit(&root, &[]);
+    assert_eq!(output.status.code(), Some(0), "{folder}");
+    let (output, report) = admit(&archive, &[]);
+    assert_eq!(output.status.code(), Some(0), "{report}");
+    assert_eq!(report["package"]["sha256"], folder["package"]["sha256"]);
+    assert_eq!(report["sources"]["prefix"], "lol-timers-main");
+}
+
 /// Runs `admit` on `archive` from an empty current folder, with an empty
 /// temporary folder of its own; returns the report.
 fn admit_hostile(sandbox: &Path, archive: &[u8]) -> (Option<i32>, Value) {
@@ -268,6 +319,8 @@ fn hostile_archives_are_refused_and_write_nothing() {
     let spread: Vec<Item> = (0..65)
         .map(|index| Item::file(&format!("data/{index}.bin"), &block))
         .collect();
+    let mut end_record_comment = b"PK\x05\x06".to_vec();
+    end_record_comment.extend([0; 18]);
     let corpus: Vec<(&str, Vec<u8>, &str)> = vec![
         (
             "parent",
@@ -282,7 +335,7 @@ fn hostile_archives_are_refused_and_write_nothing() {
         (
             "backslash",
             zipwrite::archive(&[Item::stored("..\\x", b"x")]),
-            "sources.unsafe_name",
+            "sources.backslash",
         ),
         (
             "link",
@@ -334,8 +387,13 @@ fn hostile_archives_are_refused_and_write_nothing() {
         ),
         ("zip64", zip64, "sources.zip64"),
         (
-            "comment",
-            zipwrite::archive_with(&[manifest()], b"", b"", b"hello"),
+            "long comment",
+            zipwrite::archive_with(&[manifest()], b"", b"", &[b'c'; 1025]),
+            "sources.archive",
+        ),
+        (
+            "comment with an end record",
+            zipwrite::archive_with(&[manifest()], b"", b"", &end_record_comment),
             "sources.archive",
         ),
         ("trailing", trailing, "sources.archive"),

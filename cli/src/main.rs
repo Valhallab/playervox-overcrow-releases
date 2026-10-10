@@ -17,6 +17,7 @@ mod jsonpos;
 mod lint;
 mod permissions;
 mod project;
+mod publish;
 mod runtime;
 mod sanitize;
 mod sdk;
@@ -30,6 +31,7 @@ mod testzip;
 mod typecheck;
 mod watch;
 mod zipread;
+mod zipwrite;
 
 use std::fs;
 use std::io::Write as _;
@@ -52,9 +54,14 @@ Usage:
   overcrow-widget dev [dir] [--format human|json] [--no-typecheck]
   overcrow-widget doctor [dir] [--format human|json] [--deny-warnings]
   overcrow-widget admit [dir | sources.zip] [--publisher HANDLE [--domain DOMAIN]...] [--previous FILE]
-                        [--package FILE] [--source-map FILE] [--out DIR] [--format human|json] [--deny-warnings]
+                        [--listing required|optional] [--package FILE] [--source-map FILE] [--out DIR]
+                        [--format human|json] [--deny-warnings]
   overcrow-widget admit <file.ocpkg> --listing FILE [--publisher HANDLE] [--format human|json]
   overcrow-widget diff <old> <new> [--format human|json]   (folders or source .zip files)
+  overcrow-widget submit [dir | sources.zip] [--submission FILE] [--release-notes-en TEXT]
+                         [--release-notes-fr TEXT] [--review-message TEXT] [--dry-run] [--no-wait]
+                         [--expect-sha256 HEX] [--format human|json] [--verbose]
+  overcrow-widget status [--version VERSION|ID] [--wait] [--format human|json] [--verbose]
   overcrow-widget test [dir] [--runtime PATH] [--offline] [--scenario NAME] [--update] [--format human|json] [--no-typecheck]
   overcrow-widget --version [--format json] | --help
 
@@ -63,6 +70,10 @@ Exit status: 0 success (warnings allowed), 1 errors found, 2 usage or I/O error.
 `diff` ends with 0 whether or not the sources differ, 1 when a side is refused.
 `test` ends with 1 when a scenario fails, 2 when no runtime can run.
 `dev` runs until Ctrl+C (0), or ends with 1 when the overlay ends the session.
+`submit` and `status --wait` end with 0 in review (or ready to send with --dry-run), 1 when
+something must be fixed, 2 on a usage, key, network or server error, 3 when the version waits
+in the creator space, 4 while it is still being checked. The key is read from
+OVERCROW_PUBLISH_KEY only.
 Guide: https://overcrow.playervox.com/docs/en/cli/";
 
 /// Where the guide says how to choose a widget ID.
@@ -103,6 +114,12 @@ const VALUED: &[&str] = &[
     "--source-map",
     "--repository",
     "--revision",
+    "--submission",
+    "--release-notes-en",
+    "--release-notes-fr",
+    "--review-message",
+    "--expect-sha256",
+    "--version",
 ];
 
 fn parse(mut args: impl Iterator<Item = String>) -> Result<Arguments, String> {
@@ -181,6 +198,8 @@ impl Arguments {
 }
 
 fn main() -> ExitCode {
+    // First of all: no child process of any command may inherit the key.
+    let publish_key = publish::secret::take_from_environment();
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.first().map(String::as_str) {
         None | Some("--help" | "-h" | "help") => {
@@ -226,6 +245,8 @@ fn main() -> ExitCode {
         "test" => run_test(&arguments),
         "admit" => run_admit(&arguments),
         "diff" => run_diff(&arguments),
+        "submit" => run_submit(&arguments, publish_key),
+        "status" => run_status(&arguments, publish_key),
         "snapshot-plan" => run_snapshot_plan(&arguments),
         other => Err(format!("unknown command `{other}`")),
     };
@@ -306,20 +327,29 @@ fn run_admit(arguments: &Arguments) -> Result<ExitCode, String> {
     let format = arguments.format()?;
     let publisher = publisher(arguments)?;
     let target = arguments.directory();
-    let listing = arguments.value("--listing").map(Path::new);
+    let listing = arguments.value("--listing");
     let source_map = arguments.value("--source-map");
     let mut report = Report::default();
+    let mut options = admit::Options {
+        publisher,
+        listing: admit::ListingPolicy::Required,
+        package: arguments.value("--package").map(Path::new),
+        previous: arguments.value("--previous").map(Path::new),
+        source_map: source_map.is_some(),
+        sources: None,
+    };
     // Sources, a folder or a ZIP, are read as the creator space receives
     // them and admitted from the private folder they are written to, which
     // lives until the end of the command.
     let mut work = None;
-    let mut sources = None;
     let input = if let Some(source) = sourcetree::Input::of(&target) {
-        if listing.is_some() {
-            return Err("--listing is for a package; the sources hold listing.json".into());
+        if let Some(policy) = listing {
+            options.listing = admit::ListingPolicy::parse(policy).ok_or(
+                "with sources, --listing is optional or required (listing.json is in the sources)",
+            )?;
         }
         let Some(tree) = sourcetree::read(&source, &mut report) else {
-            let value = admit::refused_before_identity(&report, &publisher, None);
+            let value = admit::refused_before_identity(&report, &options);
             match format {
                 Format::Json => println!("{}", sanitize::json(&value.to_string())),
                 Format::Human => {
@@ -330,7 +360,7 @@ fn run_admit(arguments: &Arguments) -> Result<ExitCode, String> {
             let status = if sourcetree::io_failed(&report) { 2 } else { 1 };
             return Ok(ExitCode::from(status));
         };
-        sources = Some(tree.summary_json());
+        options.sources = Some(tree.summary_json());
         let folder = match sourcetree::materialize(&tree) {
             Ok(folder) => folder,
             Err(error) => {
@@ -346,22 +376,18 @@ fn run_admit(arguments: &Arguments) -> Result<ExitCode, String> {
         {
             return Err("--package, --out and --source-map need the sources".into());
         }
+        let listing = listing
+            .filter(|listing| admit::ListingPolicy::parse(listing).is_none())
+            .ok_or("admitting an archive needs --listing FILE")?;
         admit::Input::Archive {
             package: &target,
-            listing: listing.ok_or("admitting an archive needs --listing FILE")?,
+            listing: Path::new(listing),
         }
     } else {
         return Err(format!(
             "{} is not a directory, a source .zip or a package",
             target.display()
         ));
-    };
-    let options = admit::Options {
-        publisher,
-        package: arguments.value("--package").map(Path::new),
-        previous: arguments.value("--previous").map(Path::new),
-        source_map: source_map.is_some(),
-        sources,
     };
     let outcome = admit::admit(&input, &options, &mut report);
     let deny_warnings = arguments.flag("--deny-warnings");
@@ -423,6 +449,63 @@ fn publisher(arguments: &Arguments) -> Result<admit::Publisher, String> {
     })
 }
 
+fn run_submit(arguments: &Arguments, key: Option<String>) -> Result<ExitCode, String> {
+    arguments.expect(
+        &[
+            "--submission",
+            "--release-notes-en",
+            "--release-notes-fr",
+            "--review-message",
+            "--dry-run",
+            "--no-wait",
+            "--expect-sha256",
+            "--format",
+            "--verbose",
+        ],
+        1,
+    )?;
+    let format = arguments.format()?;
+    if let Some(digest) = arguments.value("--expect-sha256")
+        && (digest.len() != 64 || !digest.bytes().all(|byte| byte.is_ascii_hexdigit()))
+    {
+        return Err("--expect-sha256 takes the 64 hexadecimal digits of a SHA-256".into());
+    }
+    Ok(publish::submit(
+        key,
+        &publish::SubmitOptions {
+            target: arguments.directory(),
+            submission: arguments.value("--submission").map(Path::new),
+            overrides: publish::texts::Overrides {
+                release_notes_en: arguments.value("--release-notes-en"),
+                release_notes_fr: arguments.value("--release-notes-fr"),
+                review_message: arguments.value("--review-message"),
+            },
+            dry_run: arguments.flag("--dry-run"),
+            no_wait: arguments.flag("--no-wait"),
+            expect_sha256: arguments.value("--expect-sha256"),
+            json: format == Format::Json,
+            verbose: arguments.flag("--verbose"),
+        },
+    ))
+}
+
+fn run_status(arguments: &Arguments, key: Option<String>) -> Result<ExitCode, String> {
+    arguments.expect(&["--version", "--wait", "--format", "--verbose"], 0)?;
+    let format = arguments.format()?;
+    if arguments.flag("--wait") && arguments.value("--version").is_none() {
+        return Err("--wait follows one version: give --version".into());
+    }
+    Ok(publish::status(
+        key,
+        &publish::StatusOptions {
+            version: arguments.value("--version"),
+            wait: arguments.flag("--wait"),
+            json: format == Format::Json,
+            verbose: arguments.flag("--verbose"),
+        },
+    ))
+}
+
 fn run_diff(arguments: &Arguments) -> Result<ExitCode, String> {
     arguments.expect(&["--format"], 2)?;
     let format = arguments.format()?;
@@ -458,6 +541,8 @@ fn run_snapshot_plan(arguments: &Arguments) -> Result<ExitCode, String> {
 }
 
 fn usage(message: &str) -> ExitCode {
+    // An argument may be a publish key given where it does not belong.
+    let message = publish::secret::redact(message);
     eprintln!("overcrow-widget: {message}\n\n{USAGE}");
     ExitCode::from(2)
 }

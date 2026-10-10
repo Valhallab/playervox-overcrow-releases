@@ -236,6 +236,7 @@ fn package_version(path: &Path) -> Option<String> {
 /// `node --version`, bounded in time and size.
 fn node_version() -> Option<String> {
     let mut child = Command::new("node")
+        .env_remove(crate::publish::secret::KEY_VARIABLE)
         .arg("--version")
         .stdin(Stdio::null())
         .stdout(Stdio::piped())

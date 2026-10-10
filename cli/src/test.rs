@@ -365,7 +365,9 @@ fn execute(
     out: &Path,
 ) -> Result<(Option<i32>, Vec<u8>, String), Fatal> {
     let mut command = Command::new(&runtime.path);
-    command.arg("run");
+    command
+        .env_remove(crate::publish::secret::KEY_VARIABLE)
+        .arg("run");
     if let Some(project) = project {
         command.arg("--project").arg(project);
     }
