@@ -140,6 +140,27 @@
       "file": "publishing.md",
       "group": "publish",
       "label": { "en": "Publishing and review", "fr": "Publication et revue" }
+    },
+    {
+      "slug": "creator-space",
+      "file": "creator-space.md",
+      "group": "publish",
+      "label": { "en": "Getting started", "fr": "Démarrer" },
+      "hidden": true
+    },
+    {
+      "slug": "publish-keys",
+      "file": "publish-keys.md",
+      "group": "publish",
+      "label": { "en": "Publish keys and CI", "fr": "Clés de publication et CI" },
+      "hidden": true
+    },
+    {
+      "slug": "verified-domain",
+      "file": "verified-domain.md",
+      "group": "publish",
+      "label": { "en": "Verified domain", "fr": "Domaine vérifié" },
+      "hidden": true
     }
   ]
 }
