@@ -1173,9 +1173,13 @@ fn a_busy_storage_is_tried_again() {
 fn an_overdue_upload_starts_a_new_submission() {
     let project = Project::new();
     let api = FakeApi::start(Some(project.previous()));
+    // A first run is cut before its answer: its state is kept.
+    api.on("create", vec![Reply::Cut]);
+    assert_eq!(code(&project.submit(&api, &[])), Some(2));
+    // Much later, the API gives that submission back without a link.
     let overdue = json!({
         "submission": {
-            "id": 700, "state": "pending_upload", "version": "1.3.1", "refused_reason": null,
+            "id": 812, "state": "pending_upload", "version": "1.3.1", "refused_reason": null,
             "archive": {"bytes": 1, "sha256": "00".repeat(32)},
             "expires_at": "2026-10-10T11:00:00+02:00", "created_at": "2026-10-10T10:00:00+02:00",
             "finalized_at": null, "version_id": null
@@ -1183,7 +1187,10 @@ fn an_overdue_upload_starts_a_new_submission() {
         "upload": null,
         "quota": {"limit": 20, "remaining": 16, "next_submission_at": null}
     });
-    api.on("create", vec![Reply::Json(200, overdue), Reply::Auto]);
+    api.on(
+        "create",
+        vec![Reply::Json(200, overdue.clone()), Reply::Auto],
+    );
     let output = project.submit(&api, &[]);
     assert_eq!(
         code(&output),
@@ -1193,8 +1200,52 @@ fn an_overdue_upload_starts_a_new_submission() {
         text(&output.stderr)
     );
     let keys = api.idempotency_keys();
-    assert_eq!(keys.len(), 2);
-    assert_ne!(keys[0], keys[1]);
+    assert_eq!(keys.len(), 5, "{keys:?}");
+    assert_eq!(keys[0], keys[3], "the second run resumes first");
+    assert_ne!(keys[3], keys[4], "then starts a new submission");
+    // A new submission without a link is the server's fault, not a reason
+    // to start another one.
+    let api = FakeApi::start(Some(project.previous()));
+    api.on("create", vec![Reply::Json(201, overdue)]);
+    let (output, report) = project.submit_json(&api, &[]);
+    assert_eq!(code(&output), Some(2), "{report}");
+    assert_eq!(api.idempotency_keys().len(), 1);
+}
+
+#[test]
+fn an_upload_the_storage_never_shows_can_be_resumed() {
+    let project = Project::new();
+    let api = FakeApi::start(Some(project.previous()));
+    api.on(
+        "finalize",
+        vec![Reply::Json(
+            409,
+            error("upload_missing", "The upload has not arrived."),
+        )],
+    );
+    let (output, report) = project.submit_json(&api, &[]);
+    assert_eq!(code(&output), Some(2), "{report}");
+    assert_eq!(report["error"]["code"], "upload_missing");
+    assert_eq!(states(&project), 1, "the next run resumes it");
+}
+
+#[test]
+fn a_long_rate_limit_stops_following_at_once() {
+    let project = Project::new();
+    let api = FakeApi::start(Some(project.previous()));
+    let mut limited = error("rate_limited", "Too many requests.");
+    limited["retry_after"] = json!(3600);
+    api.on("version", vec![Reply::Json(429, limited)]);
+    let started = std::time::Instant::now();
+    let output = project.submit(&api, &[]);
+    assert_eq!(code(&output), Some(4), "{}", text(&output.stderr));
+    assert!(started.elapsed().as_secs() < 20, "{:?}", started.elapsed());
+    let polls = api
+        .lines()
+        .iter()
+        .filter(|line| line.starts_with("GET /api/v1/publish/versions/"))
+        .count();
+    assert_eq!(polls, 1, "{:?}", api.lines());
 }
 
 #[test]

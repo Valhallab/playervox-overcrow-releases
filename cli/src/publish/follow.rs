@@ -123,6 +123,17 @@ pub fn follow(
                 }
                 current = version;
             }
+            // Limited: wait as asked, or stop following when that would be
+            // longer than following may last.
+            Err(Failure::Api { error, .. }) if error.code == "rate_limited" => {
+                let wait = error.retry_after.unwrap_or(SLOW_INTERVAL).max(1);
+                if started.elapsed() + Duration::from_secs(wait) > MAX_FOLLOW || !sleep(wait) {
+                    return End::StillChecking {
+                        interrupted: interrupt::requested(),
+                        version: current,
+                    };
+                }
+            }
             Err(failure) if worth_waiting(&failure) => {
                 let since = *failing_since.get_or_insert_with(Instant::now);
                 if since.elapsed() > MAX_FAILING {
@@ -144,13 +155,11 @@ pub fn follow(
 }
 
 /// A failure that may pass while the checks go on: the network, the
-/// server (the API's JSON errors included), a rate limit.
+/// server (the API's JSON errors included).
 fn worth_waiting(failure: &Failure) -> bool {
     match failure {
         Failure::Network(_) | Failure::Timeout | Failure::Status(500..=599) => true,
-        Failure::Api { status, error } => {
-            matches!(status, 500..=599) || error.code == "rate_limited"
-        }
+        Failure::Api { status, .. } => matches!(status, 500..=599),
         _ => false,
     }
 }

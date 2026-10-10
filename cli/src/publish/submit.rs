@@ -697,6 +697,14 @@ fn send(
                 }
             }
             "pending_upload" if reply.upload.is_some() => {}
+            // A submission just created always comes with its link.
+            "pending_upload" if !resume.resumed => {
+                return out.fail(
+                    "response",
+                    "the new submission came without its upload link",
+                    Map::new(),
+                );
+            }
             other if !restarted => {
                 // Expired or refused since the last run: a new submission.
                 let reason = submission
@@ -756,6 +764,11 @@ fn send(
                     "upload_size_mismatch" | "upload_checksum_mismatch" | "submission_expired"
                 ) {
                     resume.forget();
+                    return out.fail_request(&failure, Outcome::Error);
+                }
+                if code == "upload_missing" {
+                    // The storage never showed the upload: the next run
+                    // uploads to the same submission again.
                     return out.fail_request(&failure, Outcome::Error);
                 }
                 if super::refused_by_api(&failure) {
