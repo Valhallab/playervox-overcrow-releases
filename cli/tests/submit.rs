@@ -969,3 +969,62 @@ fn status_waits_for_the_checks() {
     let output = project.run(&api, &["status", "--wait"]);
     assert_eq!(code(&output), Some(2), "--wait needs --version");
 }
+
+/// The texts file of the documentation (`docs/content/examples/weather`)
+/// is what `submit` takes: every permission of that first version has its
+/// justification.
+#[test]
+fn the_documented_texts_file_is_accepted() {
+    let example = Path::new(env!("CARGO_MANIFEST_DIR")).join("../docs/content/examples/weather");
+    let folder = tempfile::tempdir().expect("temporary directory");
+    let root = folder.path().join("weather");
+    let mut stack = vec![PathBuf::new()];
+    while let Some(relative) = stack.pop() {
+        for entry in fs::read_dir(example.join(&relative))
+            .expect("example")
+            .flatten()
+        {
+            let name = entry.file_name();
+            if name == "node_modules" {
+                continue;
+            }
+            let path = relative.join(&name);
+            if entry.file_type().expect("type").is_dir() {
+                fs::create_dir_all(root.join(&path)).expect("folder");
+                stack.push(path);
+            } else {
+                fs::create_dir_all(root.join(&relative)).expect("folder");
+                fs::copy(entry.path(), root.join(&path)).expect("copy");
+            }
+        }
+    }
+    // The key of the stand-in API is for nova.lol-timers.
+    let manifest_path = root.join("manifest.json");
+    let mut manifest: Value =
+        serde_json::from_slice(&fs::read(&manifest_path).expect("manifest")).expect("JSON");
+    manifest["id"] = json!(fake_api::WIDGET);
+    manifest["version"] = json!("1.3.1");
+    fs::write(&manifest_path, manifest.to_string()).expect("manifest");
+    let project = Project {
+        folder,
+        root: root.clone(),
+    };
+    let api = FakeApi::start(None);
+    let texts = root.join("submission.json");
+    let (output, report) = project.submit_json(&api, &["--dry-run", "--submission", path(&texts)]);
+    assert_eq!(code(&output), Some(0), "{report}");
+    assert_eq!(
+        report["requirements"]["justifications"]["missing"],
+        json!([])
+    );
+    assert_eq!(
+        report["requirements"]["justifications"]["required"],
+        json!([
+            "network:GET https://api.example.com/v1/forecast/{city}",
+            "storage"
+        ])
+    );
+    // The workflow of the documentation is left out of what is sent.
+    let ignored = report["archive"]["ignored"].to_string();
+    assert!(ignored.contains(".github/"), "{ignored}");
+}

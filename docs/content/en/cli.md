@@ -28,6 +28,8 @@ overcrow-widget test
 | [`doctor`](#doctor) | Says what your setup has and lacks. |
 | [`admit`](#admit) | Runs the admission of the creator space on your sources, a folder or a ZIP. |
 | [`diff`](#diff) | Compares two versions of a widget's sources. |
+| [`submit`](#submit) | Sends a version to the creator space with a publish key, and follows its checks. |
+| [`status`](#status) | Shows the versions of a widget, their checks and their review. |
 
 Every command takes the project directory as its argument and uses the
 current directory without one. [Machine-readable output](#machine-readable-output)
@@ -100,7 +102,7 @@ Keep the version the tool embeds (`overcrow-widget --version`).
 | `LICENSE` | The license text of the package. The templates start with MIT; choose your own. | yes |
 | `assets/` | PNG, JPEG or WebP images; optional. Hidden files (`.DS_Store`) and what the creator tools never send (`dist/`…) are skipped, as in [source archives](#source-archives). | yes |
 | `package.json`, `tsconfig.json` | Tooling only: TypeScript and the SDK types. | no |
-| `listing.json` | The marketplace text of a [submission](publishing.md#the-listing); read by `admit`. | no |
+| `listing.json` | The marketplace text of a [submission](publishing.md#the-listing); read by `admit`. In the creator space, where the listing is edited, only a proposal to import. | no |
 | `tests/` | [Scenarios](testing.md#scenarios) (`tests/<name>.scenario.json`), their reference images (`tests/reference/`) and your unit tests. `tests/output/` holds the images of failed runs. | no |
 
 ## init
@@ -313,9 +315,9 @@ never runs your code or `tsc`:
 | `admission.reserved_id` | error | A `com.playervox.*` ID, reserved for PlayerVox; without `--publisher`, also an ID under a reserved handle (`playervox.*`, `admin.*`…). |
 | `admission.placeholder_id` | error | An example ID, without `--publisher`. |
 | `admission.id_not_owned` | error | The ID does not belong to the publisher, or, without `--publisher`, cannot belong to any. |
-| `admission.listing_missing`, `admission.listing` | error | No `listing.json`, or one that breaks the listing's rules. |
-| `admission.preview` | error | `preview` does not name a packaged PNG within bounds. |
-| `admission.license` | error | A PlayerVox widget whose license is not MIT. |
+| `admission.listing_missing`, `admission.listing` | error | No `listing.json`, or one that breaks the listing's rules (a warning with `--listing optional`). |
+| `admission.preview` | error | `preview` does not name a packaged PNG within bounds (a warning with `--listing optional`). |
+| `admission.license` | error | A PlayerVox widget whose license is not MIT (a warning with `--listing optional`). |
 | `admission.view_not_reproducible` | error | The submitted compiled view differs from what `view.ocml` compiles to. |
 | `admission.previous` | error | The previous version cannot be read. |
 | `admission.previous_mismatch` | error | The previous version is another widget. |
@@ -328,7 +330,13 @@ FILE`, `--package FILE`, `--source-map FILE` ([the code map](#the-code-map),
 written when the sources are admitted), `--out DIR` (writes the admitted
 package, its listing and a report into an empty directory), `--format
 json`, `--deny-warnings`. `admit <file.ocpkg> --listing FILE` checks an
-archive without its sources. Exit status: 0 admitted, 1 refused, 2 on a
+archive without its sources.
+
+`--listing required|optional` is for sources. `required`, the default,
+refuses sources without a valid `listing.json`. `optional` is the creator
+space's way: the listing is edited there, so `listing.json` may be absent,
+and one with a problem is left out (no listing in the report or in
+`--out`) with warnings instead of refusing the sources. Exit status: 0 admitted, 1 refused, 2 on a
 usage or file error. See [publishing and review](publishing.md).
 
 ### Permission keys
@@ -369,11 +377,187 @@ Option: `--format json`. Exit status: 0 when both versions were read,
 whether or not they differ; 1 when one is refused; 2 on a usage or file
 error (a version missing or unreadable).
 
+## submit
+
+```sh
+overcrow-widget submit --dry-run --submission submission.json
+overcrow-widget submit --submission submission.json
+```
+
+Sends a version of your widget to the OverCrow creator space, from a
+terminal, a CI job or the OverCrow MCP server, then follows its checks. It
+never asks a question: what is missing is said, with a stable
+[exit status](#exit-status). It takes the widget folder (the current one
+without argument) or a ZIP of it.
+
+### The publish key
+
+- Create it in the creator space (Publisher, Publish keys). A key can only
+  submit versions of one widget, for 1 to 365 days (90 by default), and is
+  shown once.
+- `submit` and `status` read it from the environment variable
+  `OVERCROW_PUBLISH_KEY`, and only there: never from an argument or a file
+  of the project. In a CI, keep it as a secret.
+- The tool never shows it: any `ocw_pub_…` text is masked in its output,
+  its errors and its logs. Whatever the command, it removes the variable
+  from the environment of the programs it starts (TypeScript, the runtime).
+- A key that expires within 14 days gives a warning. An expired or revoked
+  key ends with status 2: create a new one and replace the secret.
+
+### What it does
+
+1. It checks the key, and reads what the creator space needs for this
+   widget: the last approved version, the lowest version it takes now, the
+   submissions left (20 over 24 hours), whether the listing has a privacy
+   policy.
+2. It checks exactly what it will send. The folder is zipped as the
+   creator space reads it ([source archives](#source-archives)), read back
+   and admitted as the creator space admits it, `listing.json` being
+   optional; a ZIP given instead is sent byte for byte. The manifest ID
+   must be the key's widget and the version above the last approved one.
+   Each permission the version adds or widens (each permission, for a first
+   version) needs a justification, by its [key](#permission-keys). The
+   texts must follow the creator space's rules. If anything is wrong,
+   nothing is sent (status 1).
+3. It sends the archive, then follows the six checks of the creator space,
+   about a minute: manifest, version number, code analysis, package build,
+   permissions, size and resources.
+4. It ends when the version enters review (status 0), when a check fails
+   (status 1: each problem is shown on the line of your file), or when the
+   version passed its checks but waits in the creator space for what only
+   the creator space takes (status 3): a privacy policy when the widget
+   uses the network, a complete listing for a first version, or the review
+   slot of a new publisher. The link to finish there is shown.
+
+Ctrl+C while the checks run stops following them; they go on in the
+creator space, and `overcrow-widget status --version 1.3.1 --wait` follows
+them again (status 4). A run cut short before the end (network, Ctrl+C)
+resumes the same submission when you run the same command again; changed
+sources or texts make a new submission. A submission not finished within
+an hour expires, and every submission counts in the daily limit.
+
+| Option | Effect |
+| --- | --- |
+| `--submission FILE` | The texts of the version ([below](#the-texts-file)). |
+| `--release-notes-en TEXT`, `--release-notes-fr TEXT`, `--review-message TEXT` | Replace those of the file. |
+| `--dry-run` | Steps 1 and 2 only, nothing sent: what the creator space will ask for (justifications, privacy policy, review type, lowest version, submissions left) and the archive's SHA-256. |
+| `--expect-sha256 HEX` | Sends only an archive with this SHA-256, the `archive.sha256` of a `--dry-run`: what is sent is what was checked. |
+| `--no-wait` | Ends after the upload (status 4). |
+| `--format json` | One JSON object ([machine-readable output](#machine-readable-output)). |
+| `--verbose` | One line per request on the error output: method, address without its query, status and time; never a header, a key or a body. |
+
+### The texts file
+
+<!-- source: docs/content/examples/weather/submission.json -->
+```json
+{
+  "releaseNotes": {
+    "en": "First version: the forecast of your city, in metric or imperial units.",
+    "fr": "Première version : les prévisions de votre ville, en unités métriques ou impériales."
+  },
+  "justifications": [
+    {
+      "permission": "network:GET https://api.example.com/v1/forecast/{city}",
+      "text": "Reads the forecast of the city the player chose, every 30 minutes at most."
+    },
+    {
+      "permission": "storage",
+      "text": "Keeps the chosen city and units between two games."
+    }
+  ],
+  "reviewMessage": "The forecast API needs no account and receives only the city."
+}
+```
+
+| Key | Value |
+| --- | --- |
+| `releaseNotes` | The public notes of the version, shown to players: `en` (needed as soon as there are notes) and `fr`, 500 characters each, plain text, line breaks allowed. |
+| `justifications` | For the reviewer, one `{permission, text}` per new or widened permission, by its [key](#permission-keys); 500 characters each. |
+| `reviewMessage` | A private message to the reviewer, 2,000 characters. |
+
+Every key is optional; any other key is refused. The OverCrow MCP server
+writes this file.
+
+### In a CI job
+
+A GitHub Actions workflow that installs the tool ([installing](#installing))
+and submits the example widget `nova.weather` on every version tag, with
+the key in the repository's secrets:
+
+<!-- source: docs/content/examples/weather/.github/workflows/submit.yml -->
+```yaml
+# Sends the widget to the OverCrow creator space when a version tag is
+# pushed. The publish key is a secret of the repository, and the OverCrow
+# release whose creator tools to use is a variable of the repository.
+name: Submit to OverCrow
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  submit:
+    runs-on: ubuntu-24.04
+    env:
+      OVERCROW_VERSION: ${{ vars.OVERCROW_VERSION }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install overcrow-widget
+        run: |
+          tools="overcrow-creator-tools-$OVERCROW_VERSION-linux-x86_64"
+          curl --fail --location --silent --show-error --remote-name \
+            "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v$OVERCROW_VERSION/$tools.zip"
+          unzip -q "$tools.zip"
+          (cd "$tools" && sha256sum --check --quiet SHA256SUMS)
+          install -D -m 755 "$tools"/overcrow-widget-*-linux-x86_64 "$HOME/.local/bin/overcrow-widget"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Submit to OverCrow
+        run: overcrow-widget submit --submission submission.json
+        env:
+          OVERCROW_PUBLISH_KEY: ${{ secrets.OVERCROW_PUBLISH_KEY }}
+```
+
+The job fails on any status but 0. `OVERCROW_API_URL` points `submit`
+and `status` to another API, for tests only: `https://`, or `http://` to
+`127.0.0.1`, `localhost` or `[::1]`, with a warning every time. Never set
+it in a real job; the OverCrow MCP server never sets it.
+
+## status
+
+```sh
+overcrow-widget status
+overcrow-widget status --version 1.3.1 --wait
+```
+
+Shows the versions of the key's widget, with their state and review type.
+With `--version`, one version, by its number (the latest of that number)
+or its ID: its six checks and their problems, what keeps it out of review,
+the reviewer's remarks and the review delay. `--wait` follows a version
+still being checked. Options: `--version VERSION|ID`, `--wait`, `--format
+json`, `--verbose`. Status: 0 when read, 2 on an error; with `--wait`, the
+statuses of `submit`.
+
+| State | Meaning |
+| --- | --- |
+| `checking` | The checks run. |
+| `checks_failed` | A check failed: nothing reached the reviewers. |
+| `ready` | The checks passed; the version waits in the creator space. |
+| `in_review` | A person reviews it. |
+| `changes_requested`, `approved`, `rejected` | The review's decision. |
+| `published` | In the catalog. |
+| `superseded`, `discarded` | Replaced by a newer submission, or abandoned. |
+| `withdrawn`, `suspended` | Out of the catalog. |
+
 ## Source archives
 
 `admit` and `diff` take the widget folder or a ZIP of it (its name ends in
 `.zip`), as the creator space receives it. The ZIP may hold the files
 directly, or one folder that holds them all, as Windows and macOS make it.
+It may carry a short archive comment (1,024 bytes at most), as GitHub's
+"Download ZIP" and `git archive` write it; the comment is never read.
 
 Left out of both, and never sent by the creator tools: hidden files and
 folders (`.env`, `.git/`, `assets/.DS_Store`…), `node_modules/`, `dist/`,
@@ -395,14 +579,15 @@ removed at the end.
 | --- | --- |
 | `sources.archive_size` | More than 32 MiB. |
 | `sources.too_large`, `sources.too_many_files` | More than 64 MiB or 2,000 files once uncompressed. |
-| `sources.unsafe_name` | A name that could leave the widget folder (`../`, `/` first, `\`, `:`), or that some system cannot use: anything but printable ASCII, a final dot or space, `CON`, `NUL`, `COM1`… |
+| `sources.unsafe_name` | A name that could leave the widget folder (`../`, `/` first, `:`), or that some system cannot use: anything but printable ASCII, a final dot or space, `CON`, `NUL`, `COM1`… |
+| `sources.backslash` | Folders separated by `\`, as Windows PowerShell 5.1 `Compress-Archive` writes them. Send the widget folder itself in the creator space, or use [`submit`](#submit), which makes a correct ZIP. |
 | `sources.duplicate_name` | Two names that differ only by case, or a file that is also a folder. |
 | `sources.link`, `sources.special_file` | A link, or a device, a FIFO or a socket. |
 | `sources.bomb` | An entry that inflates far beyond its compressed size, or beyond its declared size. |
 | `sources.read` | The file cannot be read (exit status 2). |
 | `sources.encrypted` | An encrypted entry. |
 | `sources.zip64` | ZIP64, which sources never need. |
-| `sources.archive` | Anything else a ZIP should not hold: a comment, bytes before, between or after the entries or after an entry's compressed data, another name in an extra field, sizes or checksums that disagree. |
+| `sources.archive` | Anything else a ZIP should not hold: a comment above 1,024 bytes or holding an end record, bytes before, between or after the entries or after an entry's compressed data, another name in an extra field, sizes or checksums that disagree. |
 
 ## The code map
 
@@ -455,6 +640,7 @@ The code is `<domain>.<category>`:
 | `test` | Scenarios | `scenario`, `scenario_name`, `too_many_scenarios` |
 | `sources` | A source archive | see [source archives](#source-archives) |
 | `init`, `doctor`, `admission` | Those commands | listed above |
+| `submit` | What `submit` checks before sending | `widget_not_submittable`, `agreement_required`, `limit_reached`, `version_too_low`, `justification_missing`, `archive_too_large`, `archive_mismatch`, `release_notes`, `justification`, `review_message` |
 
 - Lines and columns start at 1; a column counts characters, not bytes.
 - An unknown name comes with the closest name that exists.
@@ -471,9 +657,9 @@ Scripts should match the codes: messages and help texts may be reworded.
 
 ## Machine-readable output
 
-With `--format json`, `admit` and `diff` print one JSON object on one line.
-Fields are only ever added; a `formatVersion` change announces any other
-change.
+With `--format json`, `admit`, `diff`, `submit` and `status` print one
+JSON object on one line. Fields are only ever added; a `formatVersion`
+change announces any other change.
 
 `admit`:
 
@@ -489,6 +675,7 @@ change.
 | `sources` | `kind` (`folder` or `archive`), `files`, `bytes`, `ignored` (`path`, `reason`) and, for a ZIP, `sha256` and `prefix` (the wrapping folder). |
 | `review` | The authority to review, one object per item (`kind`, then its fields). |
 | `permissions` | `keys`; with `--previous`, also `previous` (`id`, `version`), `added`, `changed`, `removed` and `reviewType` (`full` or `quick`), else `null`. |
+| `listingPolicy` | `required` or `optional` (`--listing`). |
 | `diagnostics` | The diagnostics, as above. |
 
 `diff`:
@@ -503,12 +690,46 @@ change.
 | `permissions` | `added`, `changed`, `removed` and `reviewType`, or `null` without two valid manifests. |
 | `diagnostics` | The diagnostics. |
 
+
+`submit` and `status`:
+
+| Field | Value |
+| --- | --- |
+| `formatVersion`, `command` | `1`; `submit` or `status`. |
+| `outcome`, `exitCode` | How the run ended (below) and its [exit status](#exit-status). |
+| `dryRun` | `submit`: whether nothing was to be sent. |
+| `key` | `name`, `hint` (the four characters after `ocw_pub_`), `expiresAt`, `expiresSoon`. |
+| `widget` | `id`; `submit`: `publisher`, `status`; `status`: `name`. |
+| `archive` | `submit`: `kind` (`folder`, zipped by the tool, or `archive`), `bytes`, `sha256`, `files`, `uncompressedBytes`, `ignored`. |
+| `local` | `submit`: `admitted`, `version`, `minimumVersion`, `previousVersion`, `permissions` (`keys`, `added`, `changed`, `removed`, `reviewType`), `diagnostics`. |
+| `requirements` | `submit`: `justifications` (`required`, `given`, `missing`, `unused`), `privacyPolicy` (`required`, `present`), `reviewType`, `submissions` (`limit`, `remaining`, `nextSubmissionAt`), `review` (`available`, `blockedBy`), `agreement` (`version`, `accepted`), `blockers` (`code`). |
+| `submission` | `submit`: `id`, `state`, `resumed`, `quota`. |
+| `version` | The creator space's version, its fields in camelCase: `id`, `version`, `state`, `reviewType`, `checks` (`key`, `status`, `diagnostics`), `reviewBlockers`, `completeInPortal` (`message`, `url`), `permissions`, `remarks`, `deadline`, `history`… |
+| `versions` | `status` without `--version`: every version. |
+| `error` | `code`, `message` and, when known, `httpStatus`, `retryAfter`, `nextSubmissionAt`, `minimumVersion`, `expiredAt`, `fields`; else `null`. |
+
+`outcome` is `ready_to_send` (`--dry-run`), `refused_locally`, `refused`
+(the creator space refused the submission), `complete_in_portal`, `error`,
+or the version's state; `status` without `--wait` has none. Error codes
+are the creator space's (`version_not_newer`, `submission_limit_reached`,
+`publish_key_expired`, `publish_key_revoked`…) or the tool's:
+`publish_key_missing`, `invalid_publish_key`, `api_url_invalid`,
+`submission_file`, `sources`, `sources.read`, `network`, `timeout`,
+`server`, `response`, `redirect`, `upload_refused`, `build_failed`,
+`not_found`. Problems found before sending are diagnostics: `sources.*`,
+`admission.*` and `submit.*` (`widget_not_submittable`,
+`agreement_required`, `limit_reached`, `version_too_low`,
+`justification_missing`, `archive_too_large`, `archive_mismatch`,
+`release_notes`, `justification`, `review_message`).
+
 ## Exit status
 
 | Status | Meaning |
 | --- | --- |
-| 0 | Success. Warnings are allowed unless `--deny-warnings`. `diff` read both versions, whether or not they differ. |
-| 1 | Errors were found; `admit` refused the sources; `diff` refused a version; a scenario of `test` failed; the overlay ended a `dev` session. |
-| 2 | A usage or file error; no overlay for `dev`; no runtime for `test`. |
+| 0 | Success. Warnings are allowed unless `--deny-warnings`. `diff` read both versions, whether or not they differ. `submit`: the version is in review (with `--dry-run`, it would enter review). |
+| 1 | Errors were found; `admit` refused the sources; `diff` refused a version; a scenario of `test` failed; the overlay ended a `dev` session. `submit`: something to fix (a check before sending, a refusal of the creator space, a failed check). |
+| 2 | A usage or file error; no overlay for `dev`; no runtime for `test`. `submit`, `status`: the key (missing, invalid, expired, revoked), the network or the server. |
+| 3 | `submit`, `status --wait`: the version passed its checks and waits in the creator space. |
+| 4 | `submit`, `status --wait`: the version is still being checked (Ctrl+C, `--no-wait`, or 15 minutes). |
 
 These meanings do not change from one version of the tool to the next.

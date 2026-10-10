@@ -9,6 +9,34 @@ widget's sources and the embedded SDK.
 
 ## Unreleased
 
+- `submit [dir | sources.zip]` sends a version to the OverCrow creator
+  space with a publish key, read from `OVERCROW_PUBLISH_KEY` only, and
+  follows its six checks until it enters review, fails a check (shown on
+  the lines of the files sent) or waits in the creator space. Before
+  sending, it checks the very archive it will upload: the folder is zipped,
+  read back and admitted as the creator space admits it; the version must
+  be newer, and each new or widened permission needs a justification.
+  `--dry-run` sends nothing and says what the creator space will ask for.
+  `--submission FILE` holds the texts (`releaseNotes`, `justifications`,
+  `reviewMessage`), `--expect-sha256` binds the upload to the archive that
+  was checked, `--no-wait` stops after the upload. A run cut short resumes
+  the same submission. The key never appears in any output, and no child
+  process of any command inherits it.
+- `status [--version VERSION|ID] [--wait]` shows the versions of the key's
+  widget, or one version with its checks, what keeps it out of review, its
+  remarks and its review delay.
+- New exit statuses for `submit` and `status --wait`: 3 (waiting in the
+  creator space) and 4 (still being checked); `--format json` prints one
+  object, `formatVersion` 1.
+- `admit --listing optional`, for sources: `listing.json` may be absent,
+  and one with a problem is left out with warnings (the creator space
+  edits the listing itself). `required` stays the default; the report
+  gains `listingPolicy`, and `--out` no longer writes an empty
+  `listing.json`.
+- Source ZIPs may carry a short comment (GitHub's "Download ZIP", `git
+  archive`); a name with `\`, as PowerShell 5.1 `Compress-Archive` writes
+  it, is refused with `sources.backslash`, which points to the creator
+  space or `submit`.
 - `admit` takes a ZIP of the widget folder (`admit lol-timers.zip`), as the
   creator space receives it, and admits it to the same package as the
   folder; a folder is read the same way, leaving out what the creator

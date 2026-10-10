@@ -63,7 +63,62 @@ and `creator_tools_zip` fuzz targets include that file.
 `cli/src/sourcetree.rs` turns a folder or a ZIP into the same sorted tree
 of files, inflated in memory; `admit` writes it into a private temporary
 folder and builds from there, and `diff` compares two trees (Myers line
-diff, a whole rewrite past 2,048 edits).
+diff, a whole rewrite past 2,048 edits). Under `Rules::SOURCES` an archive
+comment of at most 1,024 bytes is accepted (the commit ID of `git archive`
+and GitHub's "Download ZIP"), only when exactly one end record reaches the
+end of the file and the comment holds no end record signature; a `\` in a
+name has its own refusal (`sources.backslash`, PowerShell 5.1).
+`cli/src/zipwrite.rs` writes a tree back as the ZIP `submit` sends:
+sorted entries, no folder entry, extra field, comment, descriptor or
+ZIP64, a fixed date, deflate only when it shrinks the file within the
+ratio the reader allows (stored otherwise). `submit` reads its own ZIP back
+before sending it, and a test admits the bytes a stand-in server received
+like the folder.
+
+## `submit` and `status`
+
+`cli/src/publish/` talks to the creator space's publish API
+(`/api/v1/publish/*` on `https://api.playervox.com`):
+
+- `secret.rs`: `main` takes `OVERCROW_PUBLISH_KEY` out of the process
+  environment before anything else, for every command (each `Command` also
+  removes it). `PublishKey` never displays itself; `redact` masks every
+  `ocw_pub_[A-Za-z0-9_-]+` and the variable's exact value in all that
+  `submit` and `status` print, their panic hook included.
+- `client.rs`: `ureq` through rustls, no redirect ever followed (the
+  `Authorization` header never leaves the API), bounded times and answers,
+  idempotent requests tried again on a cut or a 502–504, one wait on a
+  short `rate_limited`. The signed upload gets exactly the API's headers
+  and never the key. `OVERCROW_API_URL` (tests only, in release builds
+  too: the MCP server's tests run the pinned CLI against a local API)
+  takes `https://` anywhere or `http://` to the loop only, and warns.
+- `api.rs`: the answers read into what the commands decide on; it depends
+  only on `serde_json`, and the `publish_responses` fuzz target includes
+  it. `camelize` renames the API's version for the CLI's JSON.
+- `state.rs`: the `Idempotency-Key` of a submission in progress, in
+  `<cache>/overcrow-widget/submit/` (0700, files 0600), named after a hash
+  of the API, the key and the request, never holding the key; removed
+  once the submission ends, and after a day.
+- `texts.rs`: the `--submission` file (camelCase) and the API's text rules
+  (`catalog_v2::display_text` for release notes).
+- `submit.rs`, `follow.rs`, `status.rs`, `render.rs`: the flow, the
+  following of the checks (15 minutes at most, Ctrl+C through
+  `interrupt.rs`), the human output.
+
+`submit` admits locally with `admit::Publisher::Key` (the manifest must
+carry the key's widget ID: `GET /publish/key` gives no verified domain, and
+the creator space checks ownership again on every build) and
+`--listing optional`. The creator space's builder runs
+`admit sources.zip --publisher <handle> --domain … --previous previous.zip
+--listing optional --source-map … --out … --format json`.
+
+`cli/tests/submit.rs` runs both commands against `cli/tests/support/fake_api.rs`,
+a local stand-in for the publish API and the signed upload whose answers
+follow the API's OpenAPI document; it records every request and every
+violation (no user agent, no key on the API, a key or wrong signed headers
+on the upload). A debug build only reads `OVERCROW_WIDGET_TEST_PANIC`, which
+makes `submit` and `status` panic with the key in the message, to test the
+mask.
 
 ## Calling convention of the view table
 

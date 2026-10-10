@@ -1,0 +1,32 @@
+# Sends the widget to the OverCrow creator space when a version tag is
+# pushed. The publish key is a secret of the repository, and the OverCrow
+# release whose creator tools to use is a variable of the repository.
+name: Submit to OverCrow
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  submit:
+    runs-on: ubuntu-24.04
+    env:
+      OVERCROW_VERSION: ${{ vars.OVERCROW_VERSION }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install overcrow-widget
+        run: |
+          tools="overcrow-creator-tools-$OVERCROW_VERSION-linux-x86_64"
+          curl --fail --location --silent --show-error --remote-name \
+            "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v$OVERCROW_VERSION/$tools.zip"
+          unzip -q "$tools.zip"
+          (cd "$tools" && sha256sum --check --quiet SHA256SUMS)
+          install -D -m 755 "$tools"/overcrow-widget-*-linux-x86_64 "$HOME/.local/bin/overcrow-widget"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Submit to OverCrow
+        run: overcrow-widget submit --submission submission.json
+        env:
+          OVERCROW_PUBLISH_KEY: ${{ secrets.OVERCROW_PUBLISH_KEY }}
