@@ -201,14 +201,7 @@ fn read_archive(path: &Path, report: &mut Report) -> Option<Tree> {
     let bytes = match read_bounded(path, MAX_ARCHIVE_BYTES) {
         Ok(Some(bytes)) => bytes,
         Ok(None) => {
-            report.push(
-                Diagnostic::error(
-                    "sources.archive_size",
-                    format!("the archive is larger than {} MiB", MAX_ARCHIVE_BYTES >> 20),
-                )
-                .in_file(shown)
-                .help("leave out node_modules, dist and large files the widget does not use"),
-            );
+            report.push(archive_too_large(shown));
             return None;
         }
         Err(error) => {
@@ -219,7 +212,17 @@ fn read_archive(path: &Path, report: &mut Report) -> Option<Tree> {
             return None;
         }
     };
-    let mut reader = Cursor::new(bytes.as_slice());
+    read_archive_bytes(&bytes, &shown, report)
+}
+
+/// Reads an archive already in memory, named `shown` in diagnostics.
+pub fn read_archive_bytes(bytes: &[u8], shown: &str, report: &mut Report) -> Option<Tree> {
+    let shown = shown.to_owned();
+    if bytes.len() as u64 > MAX_ARCHIVE_BYTES {
+        report.push(archive_too_large(shown));
+        return None;
+    }
+    let mut reader = Cursor::new(bytes);
     let entries =
         match zipread::entries_with(&mut reader, bytes.len() as u64, LIMITS, Rules::SOURCES) {
             Ok(entries) => entries,
@@ -249,7 +252,7 @@ fn read_archive(path: &Path, report: &mut Report) -> Option<Tree> {
     }
     let mut tree = Tree {
         archive: Some(Archive {
-            sha256: hex(&sha256(&bytes)),
+            sha256: hex(&sha256(bytes)),
             prefix: prefix.clone(),
         }),
         ..Tree::default()
@@ -279,6 +282,15 @@ fn read_archive(path: &Path, report: &mut Report) -> Option<Tree> {
         tree.files.insert(path, output);
     }
     Some(tree)
+}
+
+fn archive_too_large(shown: String) -> Diagnostic {
+    Diagnostic::error(
+        "sources.archive_size",
+        format!("the archive is larger than {} MiB", MAX_ARCHIVE_BYTES >> 20),
+    )
+    .in_file(shown)
+    .help("leave out node_modules, dist and large files the widget does not use")
 }
 
 /// The one folder that holds every kept file and `manifest.json`, when the

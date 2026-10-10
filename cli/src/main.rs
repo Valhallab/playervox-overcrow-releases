@@ -30,6 +30,7 @@ mod testzip;
 mod typecheck;
 mod watch;
 mod zipread;
+mod zipwrite;
 
 use std::fs;
 use std::io::Write as _;
