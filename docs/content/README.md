@@ -13,7 +13,7 @@ security policy.
 
 | Path | Content |
 | --- | --- |
-| `pages.json` | Navigation: the order, slug, group and localized label of each page. Both locales have every page. |
+| `pages.json` | Navigation: the order, slug, group and localized label of each page. Both locales have every page. `"hidden": true` keeps a page written ahead of what it describes off the website (neither rendered nor in the navigation) while it is checked like the others; remove it to publish the page. |
 | `en/*.md`, `fr/*.md` | The pages, in GitHub-flavored Markdown. The first `#` heading is the page title. |
 | `examples/<name>/` | Complete widget projects that the pages quote: `weather` (an HTTP API, storage) and `countdown` (a timer, a component, a canvas, a context menu, the options menu). |
 | `i18n/fr.json` | The French translation of the generated descriptions. |
@@ -28,7 +28,7 @@ Pages, by group of the navigation:
 | `build` | `manifest.md`, `view.md`, `style.md`, `logic.md`, `services.md` (services, permissions, capabilities, errors, user actions), `forms.md` (controls, forms, write intents) |
 | `tools` | `cli.md` (every command and diagnostic), `testing.md` (unit tests, scenarios, reference images), `dev-channel.md` |
 | `reference` | `reference.md` (where each answer is), `elements.md`, `style-properties.md`, `sdk.md`, `service-reference.md`, `result-shapes.md`, `limits.md` |
-| `publish` | `package.md`, `security.md`, `publishing.md` |
+| `publish` | `package.md`, `security.md`, `publishing.md`; hidden until the creator space opens to everyone: `creator-space.md` (getting started), `publish-keys.md` (publish keys and CI), `verified-domain.md` |
 
 The other documents of `docs/`, in English only, are for implementers and
 maintainers: the generated [schema reference](../widget-schema-v1.md), which
