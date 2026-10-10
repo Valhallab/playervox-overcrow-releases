@@ -319,6 +319,8 @@ fn hostile_archives_are_refused_and_write_nothing() {
     let spread: Vec<Item> = (0..65)
         .map(|index| Item::file(&format!("data/{index}.bin"), &block))
         .collect();
+    let mut end_record_comment = b"PK\x05\x06".to_vec();
+    end_record_comment.extend([0; 18]);
     let corpus: Vec<(&str, Vec<u8>, &str)> = vec![
         (
             "parent",
@@ -333,7 +335,7 @@ fn hostile_archives_are_refused_and_write_nothing() {
         (
             "backslash",
             zipwrite::archive(&[Item::stored("..\\x", b"x")]),
-            "sources.unsafe_name",
+            "sources.backslash",
         ),
         (
             "link",
@@ -385,8 +387,13 @@ fn hostile_archives_are_refused_and_write_nothing() {
         ),
         ("zip64", zip64, "sources.zip64"),
         (
-            "comment",
-            zipwrite::archive_with(&[manifest()], b"", b"", b"hello"),
+            "long comment",
+            zipwrite::archive_with(&[manifest()], b"", b"", &[b'c'; 1025]),
+            "sources.archive",
+        ),
+        (
+            "comment with an end record",
+            zipwrite::archive_with(&[manifest()], b"", b"", &end_record_comment),
             "sources.archive",
         ),
         ("trailing", trailing, "sources.archive"),
