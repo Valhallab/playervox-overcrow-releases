@@ -3,3 +3,4 @@
 //! review (`docs/content/en/cli.md`).
 
 pub mod secret;
+pub mod texts;
