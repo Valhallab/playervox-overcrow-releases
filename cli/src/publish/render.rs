@@ -121,6 +121,10 @@ pub fn blocker(value: &Value) -> String {
             "another of your widgets is in review: until one is approved, a new publisher has one at a time".into()
         }
         "agreement_acceptance_required" => "accept the new creator agreement first".into(),
+        "publish_key_revoked" => {
+            "the publish key was revoked meanwhile: send it to review in the creator space".into()
+        }
+        "widget_not_submittable" => "the widget cannot receive versions now".into(),
         _ => String::new(),
     };
     format!("  {:<28} {text}", sanitize::line(code))
@@ -148,4 +152,62 @@ pub fn remark(value: &Value) -> String {
         .or_else(|| field("message"))
         .unwrap_or_else(|| sanitize::line(&value.to_string()));
     format!("  {place}{rule}{text}")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn every_blocker_of_the_api_reads_as_a_sentence() {
+        for (value, said) in [
+            (
+                json!({"code": "justification_missing", "permissions": ["storage", "capability:x"]}),
+                "a justification is missing for: storage, capability:x",
+            ),
+            (
+                json!({"code": "privacy_policy_required"}),
+                "add a privacy policy",
+            ),
+            (
+                json!({"code": "listing_incomplete", "missing": ["description.en", "support"]}),
+                "the listing is not complete: description.en, support",
+            ),
+            (
+                json!({"code": "review_limit_new_publisher", "status": "conflict"}),
+                "one at a time",
+            ),
+            (
+                json!({"code": "agreement_acceptance_required", "version": 2}),
+                "creator agreement",
+            ),
+            (
+                json!({"code": "publish_key_revoked", "status": "conflict"}),
+                "send it to review in the creator space",
+            ),
+            (
+                json!({"code": "widget_not_submittable"}),
+                "cannot receive versions",
+            ),
+        ] {
+            let line = blocker(&value);
+            assert!(line.contains(said), "{line}");
+        }
+        assert_eq!(
+            blocker(&json!({"code": "new_rule\u{1b}[2J"})),
+            "  new_rule\\u{1b}[2J"
+        );
+    }
+
+    #[test]
+    fn remarks_show_their_place_and_rule() {
+        assert_eq!(
+            remark(
+                &json!({"file": "logic.ts", "line": 48, "rule": "4.2", "text": "Use JSON.parse."})
+            ),
+            "  logic.ts:48 [rule 4.2] Use JSON.parse."
+        );
+        assert_eq!(remark(&json!({"message": "Thanks."})), "  Thanks.");
+    }
 }
