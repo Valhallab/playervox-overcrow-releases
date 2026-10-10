@@ -6,15 +6,18 @@
 //!   archive cannot be pinned (the CLI is inside it); the caller checks the
 //!   extracted runtime's SHA-256 against the pin.
 //! - [`Rules::SOURCES`]: a creator's source archive, hostile until proven
-//!   otherwise. It adds folder entries (what archivers write), refuses links
-//!   and special files, hidden or trailing bytes, ZIP64 extra fields, entry
-//!   comments, names Windows cannot use and abnormal compression ratios.
+//!   otherwise. It adds folder entries (what archivers write) and a short
+//!   archive comment (the commit ID of `git archive` and GitHub's
+//!   "Download ZIP"), refuses links and special files, hidden or trailing
+//!   bytes, ZIP64 extra fields, entry comments, names Windows cannot use
+//!   (`\` named apart, as PowerShell 5.1 writes it) and abnormal
+//!   compression ratios.
 //!
 //! The reader trusts nothing an archive declares: every entry is checked
 //! before any byte is inflated, and one entry is then extracted within its
 //! declared size and CRC-32. Always required: one disk, no ZIP64, no
 //! encryption, stored or deflated entries, the central directory right
-//! before its end record, without an archive comment, relative names of
+//! before its end record, no other archive comment, relative names of
 //! safe components, local headers that agree with the central directory,
 //! entries that do not overlap. This file depends on nothing else in the
 //! crate: the `creator_tools_zip` and `source_zip` fuzz targets include it.
@@ -58,6 +61,10 @@ pub struct Rules {
     /// than this many times its compressed size; and no entry may declare
     /// a size deflate cannot reach from its compressed size.
     pub max_ratio: Option<u64>,
+    /// The longest archive comment, never read: GitHub's "Download ZIP" and
+    /// `git archive` write the commit ID there. It may not hold an end
+    /// record signature, so that one end record only ends the archive.
+    pub max_comment_bytes: u16,
 }
 
 impl Rules {
@@ -67,6 +74,7 @@ impl Rules {
         strict_layout: false,
         portable_names: false,
         max_ratio: None,
+        max_comment_bytes: 0,
     };
     pub const SOURCES: Self = Self {
         folders: true,
@@ -74,6 +82,7 @@ impl Rules {
         strict_layout: true,
         portable_names: true,
         max_ratio: Some(100),
+        max_comment_bytes: 1024,
     };
 }
 
@@ -151,6 +160,9 @@ pub const ENCRYPTED: &str = "encrypted entry";
 pub const DUPLICATE: &str = "duplicate entry";
 pub const FILE_IS_FOLDER: &str = "a file and a folder of the same name";
 pub const ARCHIVE_COMMENT: &str = "archive comment";
+/// A name with `\` between folders, as Windows PowerShell 5.1
+/// `Compress-Archive` writes them (under `portable_names`).
+pub const BACKSLASH: &str = "backslash in a name";
 pub const ENTRY_COMMENT: &str = "entry comment";
 pub const HIDDEN_DATA: &str = "bytes outside the entries";
 pub const LARGER_THAN_DECLARED: &str = "entry larger than declared";
@@ -327,6 +339,54 @@ struct Pending {
     name_bytes: Vec<u8>,
 }
 
+/// Where the end record starts. Without a comment allowed, it is the last
+/// 22 bytes. With one, it is the only end record whose comment length
+/// reaches the end of the archive exactly, and that comment is within the
+/// bound and holds no end record signature.
+fn end_record<R: Read + Seek>(
+    reader: &mut R,
+    length: u64,
+    max_comment: u16,
+) -> Result<u64, ZipError> {
+    let no_end = ZipError::Invalid("no end record at the end");
+    if max_comment == 0 {
+        let mut end = [0_u8; END_BYTES as usize];
+        read_at(reader, length - END_BYTES, &mut end)?;
+        if u32_at(&end, 0) != END_SIGNATURE {
+            return Err(no_end);
+        }
+        if u16_at(&end, 20) != 0 {
+            return Err(ZipError::Invalid(ARCHIVE_COMMENT));
+        }
+        return Ok(length - END_BYTES);
+    }
+    // Every comment length a record can declare, to name a long comment.
+    let tail_length = length.min(END_BYTES + u64::from(u16::MAX));
+    let mut tail = vec![0_u8; tail_length as usize];
+    read_at(reader, length - tail_length, &mut tail)?;
+    let signature = END_SIGNATURE.to_le_bytes();
+    let mut found = None;
+    for start in (0..=tail.len() - END_BYTES as usize).rev() {
+        if tail[start..start + 4] != signature {
+            continue;
+        }
+        let comment = &tail[start + END_BYTES as usize..];
+        if usize::from(u16_at(&tail, start + 20)) != comment.len() {
+            continue;
+        }
+        if found.is_some() {
+            return Err(ZipError::Invalid(ARCHIVE_COMMENT));
+        }
+        if comment.len() > usize::from(max_comment)
+            || comment.windows(4).any(|window| window == signature)
+        {
+            return Err(ZipError::Invalid(ARCHIVE_COMMENT));
+        }
+        found = Some(length - tail_length + start as u64);
+    }
+    found.ok_or(no_end)
+}
+
 /// Reads and checks the whole directory of an archive of `length` bytes
 /// under the creator tools rules.
 pub fn entries<R: Read + Seek>(
@@ -348,17 +408,9 @@ pub fn entries_with<R: Read + Seek>(
     if length < END_BYTES {
         return Err(ZipError::Invalid("too short").into());
     }
-    // The end record has no comment: neither the publisher nor the source
-    // tools write one.
-    let end_offset = length - END_BYTES;
+    let end_offset = end_record(reader, length, rules.max_comment_bytes)?;
     let mut end = [0_u8; END_BYTES as usize];
     read_at(reader, end_offset, &mut end)?;
-    if u32_at(&end, 0) != END_SIGNATURE {
-        return Err(ZipError::Invalid("no end record at the end").into());
-    }
-    if u16_at(&end, 20) != 0 {
-        return Err(ZipError::Invalid(ARCHIVE_COMMENT).into());
-    }
     let (disk, directory_disk) = (u16_at(&end, 4), u16_at(&end, 6));
     let (disk_entries, total_entries) = (u16_at(&end, 8), u16_at(&end, 10));
     let directory_size = u64::from(u32_at(&end, 12));
@@ -459,6 +511,9 @@ pub fn entries_with<R: Read + Seek>(
         let folder_name = name.strip_suffix('/').filter(|_| rules.folders);
         let directory_entry = folder_name.is_some();
         let path = folder_name.unwrap_or(&name).to_owned();
+        if rules.portable_names && path.contains('\\') {
+            return Err(refuse(ZipError::Invalid(BACKSLASH)));
+        }
         if !safe_name(&path) || (rules.portable_names && !path.split('/').all(portable_component)) {
             return Err(refuse(ZipError::UnsafeName));
         }
@@ -1293,10 +1348,6 @@ mod tests {
             refusal(&zipwrite::archive_with(&widget(), b"", b"hidden", b"")),
             hidden
         );
-        assert!(matches!(
-            refusal(&zipwrite::archive_with(&widget(), b"", b"", b"note")),
-            ZipError::Invalid(_)
-        ));
         // A descriptor that lies about the CRC.
         let mut bytes = zipwrite::archive(&[Item::file("logic.ts", DATA).descriptor(true)]);
         let at = bytes
@@ -1308,6 +1359,55 @@ mod tests {
         // The creator tools reader accepts a prefix, as it always did.
         let stub = zipwrite::archive_with(&[Item::stored("tools/a", b"x")], b"stub", b"", b"");
         assert!(read(&stub).is_ok());
+    }
+
+    #[test]
+    fn a_short_archive_comment_is_ignored() {
+        // GitHub's "Download ZIP" and `git archive` write the commit ID.
+        let commit = b"0b7f2c4e5a6d7c8b9a0f1e2d3c4b5a6978695a4b";
+        let bytes = zipwrite::archive_with(&widget(), b"", b"", commit);
+        let found = read_sources(&bytes).unwrap();
+        assert_eq!(found.len(), 3);
+        let mut output = Vec::new();
+        extract(&mut Cursor::new(&bytes), &found[1], &mut output).unwrap();
+        assert_eq!(output, DATA);
+        let longest = vec![b'c'; usize::from(Rules::SOURCES.max_comment_bytes)];
+        assert!(read_sources(&zipwrite::archive_with(&widget(), b"", b"", &longest)).is_ok());
+    }
+
+    #[test]
+    fn long_or_ambiguous_archive_comments_are_refused() {
+        let comment = ZipError::Invalid(ARCHIVE_COMMENT);
+        let long = vec![b'c'; usize::from(Rules::SOURCES.max_comment_bytes) + 1];
+        assert_eq!(
+            refusal(&zipwrite::archive_with(&widget(), b"", b"", &long)),
+            comment
+        );
+        // A comment that holds an end record could pass for another archive.
+        let mut fake = b"PK\x05\x06".to_vec();
+        fake.extend([0; 18]);
+        assert_eq!(
+            refusal(&zipwrite::archive_with(&widget(), b"", b"", &fake)),
+            comment
+        );
+        let mut inside = b"see ".to_vec();
+        inside.extend(&fake);
+        assert_eq!(
+            refusal(&zipwrite::archive_with(&widget(), b"", b"", &inside)),
+            comment
+        );
+        // A byte after the comment it declares.
+        let mut bytes = zipwrite::archive_with(&widget(), b"", b"", b"note");
+        bytes.push(b'!');
+        assert!(read_sources(&bytes).is_err());
+        // Bytes between the directory and its end record stay hidden data.
+        let mut bytes = zipwrite::archive_with(&widget(), b"", b"", b"note");
+        let end = bytes.len() - 22 - 4;
+        bytes.splice(end..end, *b"hide");
+        assert!(read_sources(&bytes).is_err());
+        // The creator tools reader still refuses any comment.
+        let tools = zipwrite::archive_with(&[Item::stored("tools/a", b"x")], b"", b"", b"note");
+        assert!(read(&tools).is_err());
     }
 
     #[test]
@@ -1353,7 +1453,6 @@ mod tests {
             "a/x ",
             "../escape",
             "/etc/passwd",
-            "a\\b",
             "C:x",
         ] {
             let mut items = widget();
@@ -1363,6 +1462,14 @@ mod tests {
                 ZipError::UnsafeName,
                 "{name:?}"
             );
+        }
+        // PowerShell 5.1 `Compress-Archive` separates folders with a backslash.
+        for name in ["assets\\icon.png", "..\\escape"] {
+            let mut items = widget();
+            items.push(Item::stored(name, b"x"));
+            let refused = read_sources(&zipwrite::archive(&items)).unwrap_err();
+            assert_eq!(refused.error, ZipError::Invalid(BACKSLASH), "{name:?}");
+            assert_eq!(refused.entry.as_deref(), Some(name));
         }
         // Not UTF-8: refused, and shown lossily.
         let mut bad = Item::stored("x", b"x");
@@ -1449,6 +1556,8 @@ mod tests {
         assert_eq!(read(&folder).unwrap_err(), ZipError::UnsafeName);
         let accented = zipwrite::archive(&[Item::stored("tools/caf\u{e9}", b"x")]);
         assert!(read(&accented).is_ok());
+        let backslash = zipwrite::archive(&[Item::stored("tools\\a", b"x")]);
+        assert_eq!(read(&backslash).unwrap_err(), ZipError::UnsafeName);
     }
 
     #[test]

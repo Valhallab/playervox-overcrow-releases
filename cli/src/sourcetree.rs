@@ -361,6 +361,15 @@ fn refusal(refused: &Refused) -> Diagnostic {
             format!("the archive uses ZIP64, which sources never need{entry}"),
             Some("make the archive with the overcrow-widget tools or a standard ZIP tool"),
         ),
+        ZipError::Invalid(zipread::BACKSLASH) => (
+            "sources.backslash",
+            format!(
+                "the archive separates folders with `\\`, as Windows PowerShell 5.1 Compress-Archive does{entry}"
+            ),
+            Some(
+                "send the widget folder itself in the creator space, or run `overcrow-widget submit`, which makes a correct ZIP",
+            ),
+        ),
         ZipError::Invalid(zipread::DUPLICATE | zipread::FILE_IS_FOLDER) => (
             "sources.duplicate_name",
             format!("two entries have the same name once case is ignored{entry}"),
@@ -662,8 +671,12 @@ mod tests {
                 "sources.duplicate_name",
             ),
             (
-                zipwrite::archive_with(&[Item::stored("a", b"1")], b"", b"", b"comment"),
+                zipwrite::archive_with(&[Item::stored("a", b"1")], b"", b"", &[b'c'; 1025]),
                 "sources.archive",
+            ),
+            (
+                zipwrite::archive(&[Item::stored("assets\\a.png", b"x")]),
+                "sources.backslash",
             ),
             (
                 b"not a zip at all, but long enough".to_vec(),
@@ -679,6 +692,47 @@ mod tests {
         encrypted.flags = 1;
         let (_, report) = read_zip(&zipwrite::archive(&[encrypted]));
         assert_eq!(codes(&report), ["sources.encrypted"]);
+    }
+
+    #[test]
+    fn a_github_download_reads_like_its_folder() {
+        // "Download ZIP": one wrapping folder, folder entries, the commit ID
+        // as the archive comment.
+        let (tree, report) = read_zip(&zipwrite::archive_with(
+            &[
+                Item::folder("lol-timers-main/"),
+                Item::file("lol-timers-main/manifest.json", b"{}"),
+                Item::folder("lol-timers-main/assets/"),
+                Item::stored("lol-timers-main/assets/a.png", b"png"),
+            ],
+            b"",
+            b"",
+            b"0b7f2c4e5a6d7c8b9a0f1e2d3c4b5a6978695a4b",
+        ));
+        let tree = tree.unwrap_or_else(|| panic!("{:?}", codes(&report)));
+        assert_eq!(paths(&tree), ["assets/a.png", "manifest.json"]);
+    }
+
+    #[test]
+    fn backslashes_point_to_the_right_tools() {
+        let (_, report) = read_zip(&zipwrite::archive(&[
+            Item::file("manifest.json", b"{}"),
+            Item::stored("assets\\icon.png", b"png"),
+        ]));
+        let diagnostic = &report.diagnostics[0];
+        assert_eq!(diagnostic.code, "sources.backslash");
+        assert!(
+            diagnostic.message.contains("Compress-Archive"),
+            "{}",
+            diagnostic.message
+        );
+        assert!(
+            diagnostic.message.contains("assets\\icon.png"),
+            "{}",
+            diagnostic.message
+        );
+        let help = diagnostic.help.as_deref().unwrap_or_default();
+        assert!(help.contains("overcrow-widget submit"), "{help}");
     }
 
     #[test]
