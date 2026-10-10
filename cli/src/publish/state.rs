@@ -200,12 +200,15 @@ fn private_directory(directory: &Path) -> Option<PathBuf> {
     if let Some(parent) = directory.parent() {
         fs::create_dir_all(parent).ok()?;
     }
-    let mut builder = fs::DirBuilder::new();
     #[cfg(unix)]
-    {
+    let builder = {
         use std::os::unix::fs::DirBuilderExt as _;
+        let mut builder = fs::DirBuilder::new();
         builder.mode(0o700);
-    }
+        builder
+    };
+    #[cfg(not(unix))]
+    let builder = fs::DirBuilder::new();
     if let Err(error) = builder.create(directory)
         && error.kind() != std::io::ErrorKind::AlreadyExists
     {
