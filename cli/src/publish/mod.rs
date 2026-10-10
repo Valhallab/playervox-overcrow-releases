@@ -180,33 +180,34 @@ fn failure_message(failure: &Failure) -> String {
     let Failure::Api { error, .. } = failure else {
         return failure.message();
     };
-    let what = failure.message();
-    match error.code.as_str() {
-        "invalid_publish_key" => format!(
-            "{what}: the key in {} is not a valid publish key; check the secret, or create a key in the creator space",
+    // The API's sentence, then what to do, as one more sentence.
+    let mut what = failure.message();
+    if !what.ends_with(['.', '!', '?']) {
+        what.push('.');
+    }
+    let then = match error.code.as_str() {
+        "invalid_publish_key" => Some(format!(
+            "Check the secret in {}, or create a publish key in the creator space.",
             secret::KEY_VARIABLE
-        ),
-        "publish_key_expired" => {
-            format!("{what}: create a new publish key in the creator space and replace the secret")
+        )),
+        "publish_key_expired" | "publish_key_revoked" => {
+            Some("Create a new publish key in the creator space and replace the secret.".to_owned())
         }
-        "publish_key_revoked" => {
-            format!("{what}: this key was revoked; create a new one in the creator space")
-        }
-        "submission_limit_reached" => match &error.next_submission_at {
-            Some(at) => format!(
-                "{what} Next submission possible at {}.",
-                crate::sanitize::line(at)
-            ),
-            None => what,
-        },
-        "version_not_newer" => match &error.minimum_version {
-            Some(minimum) => format!(
-                "{what} Use version {} or higher in manifest.json.",
+        "submission_limit_reached" => error
+            .next_submission_at
+            .as_ref()
+            .map(|at| format!("Next submission possible at {}.", crate::sanitize::line(at))),
+        "version_not_newer" => error.minimum_version.as_ref().map(|minimum| {
+            format!(
+                "Use version {} or higher in manifest.json.",
                 crate::sanitize::line(minimum)
-            ),
-            None => what,
-        },
-        _ => what,
+            )
+        }),
+        _ => None,
+    };
+    match then {
+        Some(then) => format!("{what} {then}"),
+        None => what,
     }
 }
 

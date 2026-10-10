@@ -420,15 +420,15 @@ fn key_problems_stop_everything() {
     for (answer, said) in [
         (
             error("invalid_publish_key", "Invalid publish key."),
-            "not a valid publish key",
+            "Invalid publish key. Check the secret in OVERCROW_PUBLISH_KEY",
         ),
         (
             json!({"code": "publish_key_expired", "error": "This publish key expired.", "expired_at": "2026-10-01T10:00:00+02:00"}),
-            "create a new publish key",
+            "This publish key expired. Create a new publish key in the creator space",
         ),
         (
             error("publish_key_revoked", "This publish key was revoked."),
-            "was revoked",
+            "This publish key was revoked. Create a new publish key",
         ),
     ] {
         let api = FakeApi::start(Some(project.previous()));
