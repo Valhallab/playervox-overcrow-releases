@@ -268,6 +268,7 @@ pub fn resolve(
 fn version(path: &Path) -> Result<RuntimeInfo, RuntimeError> {
     let not_a_runtime = || RuntimeError::NotARuntime(path.to_path_buf());
     let mut child = Command::new(path)
+        .env_remove(crate::publish::secret::KEY_VARIABLE)
         .args(["--version", "--format", "json"])
         .stdin(Stdio::null())
         .stdout(Stdio::piped())

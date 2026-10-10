@@ -41,6 +41,7 @@ pub fn write_plan(repository: &Path, revision: &str) -> Result<(), SnapshotError
     }
     let repository = repository.to_str().ok_or(SnapshotError)?;
     let mut child = Command::new("/usr/bin/git")
+        .env_remove(crate::publish::secret::KEY_VARIABLE)
         .args([
             "--no-replace-objects",
             "-c",

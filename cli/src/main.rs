@@ -17,6 +17,7 @@ mod jsonpos;
 mod lint;
 mod permissions;
 mod project;
+mod publish;
 mod runtime;
 mod sanitize;
 mod sdk;
@@ -183,6 +184,8 @@ impl Arguments {
 }
 
 fn main() -> ExitCode {
+    // First of all: no child process of any command may inherit the key.
+    let _publish_key = publish::secret::take_from_environment();
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.first().map(String::as_str) {
         None | Some("--help" | "-h" | "help") => {
