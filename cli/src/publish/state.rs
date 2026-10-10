@@ -65,8 +65,12 @@ impl Resume {
         }
         let path =
             directory.map(|directory| directory.join(format!("{}.json", name(origin, key, body))));
+        // A submission the API answered for is resumed whatever its age (the
+        // API says whether it expired); one never answered for only within
+        // its upload time.
         if let Some(saved) = path.as_deref().and_then(read)
-            && (saved.version_id.is_some()
+            && (saved.submission_id.is_some()
+                || saved.version_id.is_some()
                 || now.saturating_sub(saved.created_at) < PENDING_LIFETIME)
         {
             return Self {
@@ -425,6 +429,30 @@ mod tests {
         assert!(!state.resumed);
         let other = Resume::open(None, "https://a.test", &key(), &body("A"));
         assert_ne!(other.idempotency_key, state.idempotency_key);
+    }
+
+    #[test]
+    fn a_submission_the_api_answered_for_is_resumed_at_any_age() {
+        let cache = tempfile::tempdir().expect("cache");
+        let now = 1_000_000;
+        let mut state = Resume::open_at(
+            Some(cache.path()),
+            "https://a.test",
+            &key(),
+            &body("A"),
+            now,
+        );
+        state.submission_id = Some(812);
+        state.save();
+        let later = Resume::open_at(
+            Some(cache.path()),
+            "https://a.test",
+            &key(),
+            &body("A"),
+            now + 3 * 3600,
+        );
+        assert!(later.resumed, "the API will say it expired");
+        assert_eq!(later.submission_id, Some(812));
     }
 
     #[test]

@@ -462,7 +462,7 @@ expire, et chaque envoi compte dans la limite quotidienne.
 | --- | --- |
 | `--submission FILE` | Les textes de la version ([ci-dessous](#le-fichier-de-textes)). |
 | `--release-notes-en TEXT`, `--release-notes-fr TEXT`, `--review-message TEXT` | Remplacent ceux du fichier. |
-| `--dry-run` | Étapes 1 et 2 seulement, sans rien envoyer : ce que l’espace créateurs exigera (justifications, politique de confidentialité, type de revue, version minimale, envois restants) et l’empreinte SHA-256 de l’archive. |
+| `--dry-run` | Étapes 1 et 2 seulement, sans rien envoyer : ce que l’espace créateurs exigera (justifications, politique de confidentialité, type de revue, version minimale, envois restants) et l’empreinte SHA-256 de l’archive. Pour une première version, l’espace créateurs vérifie aussi toute la fiche, qu’il est seul à connaître : un essai à blanc qui finit avec 0 peut encore finir avec 3. |
 | `--expect-sha256 HEX` | N’envoie qu’une archive de cette empreinte, l’`archive.sha256` d’un `--dry-run` : ce qui part est ce qui a été vérifié. |
 | `--no-wait` | S’arrête après l’envoi (code 4). |
 | `--format json` | Un seul objet JSON ([sortie lisible par un programme](#sortie-lisible-par-un-programme)). |
@@ -747,8 +747,10 @@ d’erreur sont ceux de l’espace créateurs (`version_not_newer`,
 ou ceux de l’outil : `publish_key_missing`, `invalid_publish_key`,
 `api_url_invalid`, `submission_file`, `sources`, `sources.read`, `network`,
 `timeout`, `server`, `response`, `redirect`, `upload_refused`,
-`build_failed`, `not_found`. Les problèmes trouvés avant l’envoi sont des
-diagnostics : `sources.*`, `admission.*` et `submit.*`
+`build_failed`, `submission_state`, `not_found`, `internal`. Les problèmes
+trouvés avant l’envoi sont des diagnostics : `sources.*`,
+`project.missing_file` (ce n’est pas le dossier du widget), `admission.*`
+et `submit.*`
 (`widget_not_submittable`, `agreement_required`, `limit_reached`,
 `version_too_low`, `justification_missing`, `archive_too_large`,
 `archive_mismatch`, `release_notes`, `justification`, `review_message`).
@@ -757,7 +759,7 @@ diagnostics : `sources.*`, `admission.*` et `submit.*`
 
 | Code | Signification |
 | --- | --- |
-| 0 | Succès. Les avertissements sont admis, sauf avec `--deny-warnings`. `diff` a lu les deux versions, qu’elles diffèrent ou non. `submit` : la version est en revue (avec `--dry-run`, elle y entrerait). |
+| 0 | Succès. Les avertissements sont admis, sauf avec `--deny-warnings`. `diff` a lu les deux versions, qu’elles diffèrent ou non. `submit` : la version est en revue (avec `--dry-run`, elle y entrerait), ou déjà au-delà (approuvée, publiée, retirée). |
 | 1 | Des erreurs ont été trouvées ; `admit` a refusé les sources ; `diff` a refusé une version ; un scénario de `test` a échoué ; l’overlay a mis fin à une session `dev`. `submit` : quelque chose à corriger (une vérification avant l’envoi, un refus de l’espace créateurs, un contrôle échoué). |
 | 2 | Une erreur d’utilisation ou de fichier ; pas d’overlay pour `dev` ; pas de runtime pour `test`. `submit`, `status` : la clé (absente, invalide, expirée, révoquée), le réseau ou le serveur. |
 | 3 | `submit`, `status --wait` : la version a réussi ses contrôles et attend dans l’espace créateurs. |

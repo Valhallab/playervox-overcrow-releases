@@ -541,6 +541,8 @@ fn run_snapshot_plan(arguments: &Arguments) -> Result<ExitCode, String> {
 }
 
 fn usage(message: &str) -> ExitCode {
+    // An argument may be a publish key given where it does not belong.
+    let message = publish::secret::redact(message);
     eprintln!("overcrow-widget: {message}\n\n{USAGE}");
     ExitCode::from(2)
 }

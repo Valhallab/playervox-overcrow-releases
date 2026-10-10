@@ -440,7 +440,7 @@ an hour expires, and every submission counts in the daily limit.
 | --- | --- |
 | `--submission FILE` | The texts of the version ([below](#the-texts-file)). |
 | `--release-notes-en TEXT`, `--release-notes-fr TEXT`, `--review-message TEXT` | Replace those of the file. |
-| `--dry-run` | Steps 1 and 2 only, nothing sent: what the creator space will ask for (justifications, privacy policy, review type, lowest version, submissions left) and the archive's SHA-256. |
+| `--dry-run` | Steps 1 and 2 only, nothing sent: what the creator space will ask for (justifications, privacy policy, review type, lowest version, submissions left) and the archive's SHA-256. For a first version, the creator space also checks the whole listing, which only it knows: a dry run that ends with 0 may still end with 3. |
 | `--expect-sha256 HEX` | Sends only an archive with this SHA-256, the `archive.sha256` of a `--dry-run`: what is sent is what was checked. |
 | `--no-wait` | Ends after the upload (status 4). |
 | `--format json` | One JSON object ([machine-readable output](#machine-readable-output)). |
@@ -716,8 +716,9 @@ are the creator space's (`version_not_newer`, `submission_limit_reached`,
 `publish_key_missing`, `invalid_publish_key`, `api_url_invalid`,
 `submission_file`, `sources`, `sources.read`, `network`, `timeout`,
 `server`, `response`, `redirect`, `upload_refused`, `build_failed`,
-`not_found`. Problems found before sending are diagnostics: `sources.*`,
-`admission.*` and `submit.*` (`widget_not_submittable`,
+`submission_state`, `not_found`, `internal`. Problems found before sending
+are diagnostics: `sources.*`, `project.missing_file` (not the widget's
+folder), `admission.*` and `submit.*` (`widget_not_submittable`,
 `agreement_required`, `limit_reached`, `version_too_low`,
 `justification_missing`, `archive_too_large`, `archive_mismatch`,
 `release_notes`, `justification`, `review_message`).
@@ -726,7 +727,7 @@ are the creator space's (`version_not_newer`, `submission_limit_reached`,
 
 | Status | Meaning |
 | --- | --- |
-| 0 | Success. Warnings are allowed unless `--deny-warnings`. `diff` read both versions, whether or not they differ. `submit`: the version is in review (with `--dry-run`, it would enter review). |
+| 0 | Success. Warnings are allowed unless `--deny-warnings`. `diff` read both versions, whether or not they differ. `submit`: the version is in review (with `--dry-run`, it would enter review), or already past it (approved, published, withdrawn). |
 | 1 | Errors were found; `admit` refused the sources; `diff` refused a version; a scenario of `test` failed; the overlay ended a `dev` session. `submit`: something to fix (a check before sending, a refusal of the creator space, a failed check). |
 | 2 | A usage or file error; no overlay for `dev`; no runtime for `test`. `submit`, `status`: the key (missing, invalid, expired, revoked), the network or the server. |
 | 3 | `submit`, `status --wait`: the version passed its checks and waits in the creator space. |

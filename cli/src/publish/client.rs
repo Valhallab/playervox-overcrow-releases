@@ -75,9 +75,15 @@ impl Origin {
             "http" if local => true,
             _ => return Err(invalid()),
         };
-        let base = match authority.port_u16() {
-            Some(port) => format!("{scheme}://{host}:{port}"),
-            None => format!("{scheme}://{host}"),
+        // `host:port`, `[v6]:port`: a port given must be a port number.
+        let port_given = authority
+            .as_str()
+            .rsplit_once(':')
+            .is_some_and(|(_, port)| !port.contains(']'));
+        let base = match (port_given, authority.port_u16()) {
+            (true, Some(port)) => format!("{scheme}://{host}:{port}"),
+            (false, _) => format!("{scheme}://{host}"),
+            (true, None) => return Err(invalid()),
         };
         Ok(Self { base, local_http })
     }
@@ -86,19 +92,26 @@ impl Origin {
     /// `Some(warning)` when another API is used.
     pub fn from_environment() -> Result<(Self, Option<String>), String> {
         match std::env::var(URL_VARIABLE) {
-            Err(std::env::VarError::NotPresent) => Ok((Self::default_api(), None)),
+            Err(std::env::VarError::NotPresent) => Self::from_value(None),
             Err(std::env::VarError::NotUnicode(_)) => {
                 Err(format!("{URL_VARIABLE} is not an API origin"))
             }
-            Ok(text) => {
-                let origin = Self::parse(&text)?;
-                let warning = format!(
-                    "using the API at {} ({URL_VARIABLE}), not {DEFAULT_ORIGIN}: for tests only",
-                    origin.base
-                );
-                Ok((origin, Some(warning)))
-            }
+            Ok(text) => Self::from_value(Some(text)),
         }
+    }
+
+    /// The origin of a value of `OVERCROW_API_URL`; unset or empty is the
+    /// creator space's API.
+    pub fn from_value(value: Option<String>) -> Result<(Self, Option<String>), String> {
+        let Some(text) = value.filter(|text| !text.trim().is_empty()) else {
+            return Ok((Self::default_api(), None));
+        };
+        let origin = Self::parse(text.trim())?;
+        let warning = format!(
+            "using the API at {} ({URL_VARIABLE}), not {DEFAULT_ORIGIN}: for tests only",
+            origin.base
+        );
+        Ok((origin, Some(warning)))
     }
 
     pub fn default_api() -> Self {
@@ -545,9 +558,23 @@ mod tests {
             "api.example.test",
             "https://",
             "https://bad host",
+            "https://api.example.test:99999",
         ] {
             assert!(Origin::parse(text).is_err(), "{text}");
         }
+    }
+
+    #[test]
+    fn an_empty_variable_means_the_creator_space() {
+        for unset in [None, Some(String::new()), Some("  ".to_owned())] {
+            let (origin, warning) = Origin::from_value(unset).expect("origin");
+            assert_eq!(origin.as_str(), DEFAULT_ORIGIN);
+            assert!(warning.is_none());
+        }
+        let (origin, warning) =
+            Origin::from_value(Some("http://127.0.0.1:9".into())).expect("origin");
+        assert_eq!(origin.as_str(), "http://127.0.0.1:9");
+        assert!(warning.is_some_and(|warning| warning.contains("for tests only")));
     }
 
     #[test]

@@ -29,13 +29,11 @@ pub enum End {
     /// The version left `checking`.
     Done(Version),
     /// Still being checked: Ctrl+C, `--no-wait` or the time bound.
-    StillChecking {
-        version: Version,
-        interrupted: bool,
-    },
+    StillChecking { version: Version, interrupted: bool },
     /// The creator space gave up building it ("problem on our side").
     BuildFailed(Version),
-    Failed(Failure),
+    /// A request failed for good; the version is the last one read.
+    Failed { failure: Failure, version: Version },
 }
 
 /// The checks already printed, by key.
@@ -125,9 +123,7 @@ pub fn follow(
                 }
                 current = version;
             }
-            Err(
-                failure @ (Failure::Network(_) | Failure::Timeout | Failure::Status(500..=599)),
-            ) => {
+            Err(failure) if worth_waiting(&failure) => {
                 let since = *failing_since.get_or_insert_with(Instant::now);
                 if since.elapsed() > MAX_FAILING {
                     out.warn(&failure.message());
@@ -137,8 +133,25 @@ pub fn follow(
                     };
                 }
             }
-            Err(failure) => return End::Failed(failure),
+            Err(failure) => {
+                return End::Failed {
+                    failure,
+                    version: current,
+                };
+            }
         }
+    }
+}
+
+/// A failure that may pass while the checks go on: the network, the
+/// server (the API's JSON errors included), a rate limit.
+fn worth_waiting(failure: &Failure) -> bool {
+    match failure {
+        Failure::Network(_) | Failure::Timeout | Failure::Status(500..=599) => true,
+        Failure::Api { status, error } => {
+            matches!(status, 500..=599) || error.code == "rate_limited"
+        }
+        _ => false,
     }
 }
 

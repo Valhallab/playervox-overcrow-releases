@@ -57,7 +57,7 @@ pub struct Quota {
 pub struct Upload {
     pub method: String,
     pub url: String,
-    /// Exactly what the PUT carries, in the API's order.
+    /// Exactly what the PUT carries (sorted by name).
     pub headers: Vec<(String, String)>,
 }
 
@@ -301,13 +301,26 @@ pub fn camelize(value: &Value) -> Value {
         Value::Object(object) => Value::Object(
             object
                 .iter()
-                .map(|(key, value)| (camel_case(key), camelize(value)))
+                .map(|(key, value)| {
+                    // Maps keyed by names a creator chose (the parameters of a
+                    // network route) are kept as written.
+                    let named = DATA_MAPS.contains(&key.as_str());
+                    let value = if named {
+                        value.clone()
+                    } else {
+                        camelize(value)
+                    };
+                    (camel_case(key), value)
+                })
                 .collect(),
         ),
         Value::Array(items) => Value::Array(items.iter().map(camelize).collect()),
         other => other.clone(),
     }
 }
+
+/// Keys whose object is keyed by data, not by field names.
+const DATA_MAPS: [&str; 4] = ["pathParams", "queryParams", "path_params", "query_params"];
 
 fn camel_case(key: &str) -> String {
     let mut out = String::with_capacity(key.len());
@@ -368,7 +381,7 @@ mod tests {
 
     fn upload() -> Value {
         json!({
-            "method": "PUT", "url": "https://r2.example/overcrow-sources/incoming/a.zip?X-Amz-Signature=s",
+            "method": "PUT", "url": "https://storage.example/bucket/incoming/a.zip?X-Amz-Signature=s",
             "headers": {"Content-Length": "188416", "Content-Type": "application/zip",
                         "x-amz-checksum-sha256": "C7c=", "x-amz-sdk-checksum-algorithm": "SHA256"},
             "expires_at": "2026-10-10T10:15:00Z"
@@ -443,7 +456,7 @@ mod tests {
         assert_eq!(reply.submission.version_id, None);
         let upload = reply.upload.expect("an upload");
         assert_eq!(upload.method, "PUT");
-        assert!(upload.url.starts_with("https://r2.example/"));
+        assert!(upload.url.starts_with("https://storage.example/"));
         assert_eq!(upload.headers.len(), 4);
         assert!(
             upload
@@ -558,5 +571,12 @@ mod tests {
             json!(["a_b", 1]),
             "values stay"
         );
+        // Names a creator chose stay as written.
+        let details = json!({"permissions": {"details": [{
+            "kind": "network",
+            "pathParams": {"page_size": {"type": "slug", "maxLength": 4}},
+            "queryParams": {"a_b": {"type": "enum"}, "aB": {"type": "enum"}}
+        }]}});
+        assert_eq!(camelize(&details), details);
     }
 }

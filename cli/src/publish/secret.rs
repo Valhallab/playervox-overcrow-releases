@@ -12,6 +12,8 @@ const PREFIX: &str = "ocw_pub_";
 /// 32 random bytes in unpadded base64url.
 const SECRET_CHARS: usize = 43;
 const HIDDEN: &str = "[hidden]";
+/// The shortest value of the variable masked as it is.
+const MIN_REMEMBERED_BYTES: usize = 16;
 
 /// The value of `OVERCROW_PUBLISH_KEY`, kept to mask it even when it is
 /// not a well-formed key.
@@ -33,7 +35,9 @@ pub fn take_from_environment() -> Option<String> {
 /// Masks `raw` (trimmed) in everything [`redact`] sees from now on.
 pub fn remember(raw: &str) {
     let raw = raw.trim();
-    if !raw.is_empty()
+    // A short value (`null`, `1`) would mask ordinary text: only a value
+    // long enough to be a secret is masked as such.
+    if raw.len() >= MIN_REMEMBERED_BYTES
         && let Ok(mut remembered) = REMEMBERED.lock()
     {
         *remembered = Some(raw.to_owned());
@@ -159,6 +163,14 @@ mod tests {
         assert_eq!(redact("ocw_pub_ alone"), "ocw_pub_ alone");
         assert_eq!(redact(hidden), hidden, "masking twice changes nothing");
         assert_eq!(redact("no key here: é ✓"), "no key here: é ✓");
+    }
+
+    #[test]
+    fn a_short_value_is_not_masked_as_a_key() {
+        // `OVERCROW_PUBLISH_KEY=null` must not turn JSON's null into
+        // something else.
+        remember("null");
+        assert_eq!(redact("{\"key\":null}"), "{\"key\":null}");
     }
 
     #[test]

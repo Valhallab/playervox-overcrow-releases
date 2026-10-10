@@ -152,18 +152,15 @@ fn check_locally(
 ) -> Result<Checked, Stop> {
     let mut report = Report::default();
     let limits = &context.limits;
-    match context.widget_status.as_str() {
-        "suspended" | "removed" => report.push(
+    // A widget out of the catalog (`removed`) may be sent a new version.
+    if context.widget_status == "suspended" {
+        report.push(
             Diagnostic::error(
                 "submit.widget_not_submittable",
-                format!(
-                    "this widget is {}: it cannot receive versions",
-                    sanitize::line(&context.widget_status)
-                ),
+                "this widget is suspended: it cannot receive versions",
             )
             .help("see the widget in the creator space"),
-        ),
-        _ => {}
+        );
     }
     if !context.agreement_accepted {
         report.push(Diagnostic::error(
@@ -392,6 +389,17 @@ fn read_sources(target: &Path, out: &mut Out) -> Result<(Tree, Vec<u8>, &'static
             let Some(folder) = sourcetree::read(&input, &mut report) else {
                 return Err(refused_sources(&report, out));
             };
+            if !folder.files.contains_key("manifest.json") {
+                report.push(
+                    Diagnostic::error(
+                        "project.missing_file",
+                        "manifest.json is missing: this is not the widget's folder",
+                    )
+                    .in_file("manifest.json")
+                    .help("run submit in the widget's folder, or give its path"),
+                );
+                return Err(refused_sources(&report, out));
+            }
             (zipwrite::write(&folder.files), "folder")
         }
         sourcetree::Input::Archive(path) => {
@@ -420,14 +428,10 @@ fn read_sources(target: &Path, out: &mut Out) -> Result<(Tree, Vec<u8>, &'static
         }
     };
     let shown = target.display().to_string();
+    // A folder's ZIP is refused when the folder holds what the creator
+    // space refuses too (names that differ only by case, on a system that
+    // tells them apart).
     let Some(mut tree) = sourcetree::read_archive_bytes(&bytes, &shown, &mut report) else {
-        if kind == "folder" {
-            // Our own ZIP must read back: a bug, never the creator's.
-            return Err(Stop::error(
-                "internal",
-                "the ZIP of the sources does not read back",
-            ));
-        }
         return Err(refused_sources(&report, out));
     };
     if kind == "folder" {
@@ -650,6 +654,9 @@ fn send(
                     out.say("Nothing was sent.");
                     return out.fail_request(&failure, Outcome::Refused);
                 }
+                if failure.code() == "idempotency_key_reused" {
+                    resume.forget();
+                }
                 return out.fail_request(&failure, Outcome::Error);
             }
         };
@@ -689,7 +696,7 @@ fn send(
                     Err(failure) => return out.fail_request(&failure, Outcome::Error),
                 }
             }
-            "pending_upload" => {}
+            "pending_upload" if reply.upload.is_some() => {}
             other if !restarted => {
                 // Expired or refused since the last run: a new submission.
                 let reason = submission
@@ -697,10 +704,16 @@ fn send(
                     .as_deref()
                     .map(|reason| format!(" ({})", sanitize::line(reason)))
                     .unwrap_or_default();
+                // A pending one without a link is past its upload time.
+                let state = if other == "pending_upload" {
+                    "expired"
+                } else {
+                    other
+                };
                 out.say(&format!(
                     "The earlier submission {} is {}{reason}: starting a new one.",
                     submission.id,
-                    sanitize::line(other)
+                    sanitize::line(state)
                 ));
                 resume.forget();
                 resume.renew();
@@ -743,6 +756,13 @@ fn send(
                     "upload_size_mismatch" | "upload_checksum_mismatch" | "submission_expired"
                 ) {
                     resume.forget();
+                    return out.fail_request(&failure, Outcome::Error);
+                }
+                if super::refused_by_api(&failure) {
+                    // Refused at the last step (another version of this
+                    // number started meanwhile…): the creator's to fix.
+                    resume.forget();
+                    return out.fail_request(&failure, Outcome::Refused);
                 }
                 return out.fail_request(&failure, Outcome::Error);
             }
@@ -778,7 +798,15 @@ fn send(
                 Map::new(),
             )
         }
-        End::Failed(failure) => out.fail_request(&failure, Outcome::Error),
+        End::Failed { failure, version } => {
+            // The version exists: name it, and how to follow it.
+            out.set("version", api::camelize(&version.value));
+            out.say(&format!(
+                "Follow it with: overcrow-widget status --version {} --wait",
+                sanitize::line(&version.version)
+            ));
+            out.fail_request(&failure, Outcome::Error)
+        }
     }
 }
 
@@ -808,7 +836,9 @@ fn upload(
     loop {
         match client.put_upload(&link, archive) {
             Ok(()) => return Ok(()),
-            Err(Failure::Network(_) | Failure::Timeout) if cuts < 2 => {
+            Err(Failure::Network(_) | Failure::Timeout | Failure::Status(500..=599))
+                if cuts < 2 =>
+            {
                 cuts += 1;
                 std::thread::sleep(Duration::from_secs(1 << cuts));
             }

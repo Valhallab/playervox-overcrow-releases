@@ -254,7 +254,13 @@ fn refused_by_api(failure: &Failure) -> bool {
         failure,
         Failure::Api { status, error }
             if !matches!(status, 401 | 500..=599)
-                && !matches!(error.code.as_str(), "rate_limited" | "idempotency_key_reused" | "storage_unavailable")
+                && !matches!(
+                    error.code.as_str(),
+                    "rate_limited"
+                        | "idempotency_key_reused"
+                        | "storage_unavailable"
+                        | "insufficient_scope"
+                )
     )
 }
 
@@ -273,14 +279,15 @@ fn install_panic_hook() {
             .unwrap_or_default();
         eprintln!(
             "overcrow-widget: internal error{location}: {}",
-            redact(&message)
+            crate::sanitize::line(&redact(&message))
         );
     }));
 }
 
 /// The key, the API and a client, or the end of the run.
 fn connect(raw_key: Option<String>, verbose: bool, out: &Out) -> Result<Client, (String, String)> {
-    let raw_key = raw_key.ok_or_else(|| {
+    // An empty variable is a secret that was not set (a CI job).
+    let raw_key = raw_key.filter(|raw| !raw.trim().is_empty()).ok_or_else(|| {
         (
             "publish_key_missing".to_owned(),
             format!(
@@ -345,7 +352,7 @@ fn now_seconds() -> i64 {
 /// Unix seconds.
 fn unix_seconds(text: &str) -> Option<i64> {
     let bytes = text.as_bytes();
-    if bytes.len() < 20 || bytes[10] != b'T' {
+    if !text.is_ascii() || bytes.len() < 20 || bytes[10] != b'T' {
         return None;
     }
     let base = overcrow_widget_schema::catalog::parse_timestamp(&format!("{}Z", &text[..19]))?;
@@ -411,6 +418,8 @@ mod tests {
             "2027-01-11T11:00:00",
             "2027-01-11T11:00:00+1:00",
             "x",
+            "2027-01-11T10:00:0\u{e9}\u{2026}",
+            "2027-01-11T10:00:00+0\u{e9}:00",
         ] {
             assert_eq!(unix_seconds(bad), None, "{bad}");
         }

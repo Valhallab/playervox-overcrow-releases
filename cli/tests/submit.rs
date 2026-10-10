@@ -64,7 +64,13 @@ impl Project {
 
     /// The approved manifest: this one at 1.2.0.
     fn previous(&self) -> Value {
-        let mut manifest = self.manifest();
+        self.previous_of(&self.root)
+    }
+
+    fn previous_of(&self, root: &Path) -> Value {
+        let mut manifest: Value =
+            serde_json::from_slice(&fs::read(root.join("manifest.json")).expect("manifest"))
+                .expect("JSON");
         manifest["version"] = json!("1.2.0");
         manifest
     }
@@ -1027,4 +1033,206 @@ fn the_documented_texts_file_is_accepted() {
     // The workflow of the documentation is left out of what is sent.
     let ignored = report["archive"]["ignored"].to_string();
     assert!(ignored.contains(".github/"), "{ignored}");
+}
+
+fn states(project: &Project) -> usize {
+    fs::read_dir(project.cache().join("overcrow-widget/submit"))
+        .map(|entries| entries.count())
+        .unwrap_or(0)
+}
+
+#[test]
+fn a_refusal_at_finalize_is_the_creators() {
+    let project = Project::new();
+    let api = FakeApi::start(Some(project.previous()));
+    api.on(
+        "finalize",
+        vec![Reply::Json(
+            409,
+            error(
+                "version_in_progress",
+                "Version 1.3.1 is already being checked.",
+            ),
+        )],
+    );
+    let (output, report) = project.submit_json(&api, &[]);
+    assert_eq!(code(&output), Some(1), "{report}");
+    assert_eq!(report["outcome"], "refused");
+    assert_eq!(report["error"]["code"], "version_in_progress");
+    assert_eq!(states(&project), 0, "nothing left to resume");
+}
+
+#[test]
+fn a_server_error_while_following_is_tried_again() {
+    let project = Project::new();
+    let api = FakeApi::start(Some(project.previous()));
+    api.on(
+        "version",
+        vec![
+            Reply::Json(500, error("internal_server_error", "Something went wrong.")),
+            Reply::Auto,
+        ],
+    );
+    let output = project.submit(&api, &[]);
+    assert_eq!(code(&output), Some(0), "{}", text(&output.stderr));
+}
+
+#[test]
+fn a_version_that_cannot_be_followed_is_still_named() {
+    let project = Project::new();
+    let api = FakeApi::start(Some(project.previous()));
+    api.on(
+        "version",
+        vec![Reply::Json(404, error("not_found", "Not found."))],
+    );
+    let (output, report) = project.submit_json(&api, &[]);
+    assert_eq!(code(&output), Some(2), "{report}");
+    assert_eq!(report["version"]["id"], VERSION_ID);
+    let output = project.submit(&FakeApi::start(Some(project.previous())), &["--no-wait"]);
+    assert_eq!(code(&output), Some(4));
+    let api = FakeApi::start(Some(project.previous()));
+    api.on(
+        "version",
+        vec![Reply::Json(404, error("not_found", "Not found."))],
+    );
+    let output = project.submit(&api, &[]);
+    assert!(
+        text(&output.stdout).contains("overcrow-widget status --version 1.3.1 --wait"),
+        "{}",
+        text(&output.stdout)
+    );
+}
+
+#[test]
+fn a_folder_that_is_not_the_widget_is_refused_clearly() {
+    let project = Project::new();
+    let repository = project.folder.path().join("repository");
+    fs::create_dir_all(&repository).expect("repository");
+    fs::rename(&project.root, repository.join("widget")).expect("move");
+    let api = FakeApi::start(Some(project.previous_of(&repository.join("widget"))));
+    let output = project.run(&api, &["submit", path(&repository)]);
+    assert_eq!(
+        code(&output),
+        Some(1),
+        "{}{}",
+        text(&output.stdout),
+        text(&output.stderr)
+    );
+    assert!(
+        text(&output.stdout).contains("manifest.json"),
+        "{}",
+        text(&output.stdout)
+    );
+    assert!(!sent(&api));
+}
+
+#[cfg(target_os = "linux")]
+#[test]
+fn names_that_differ_by_case_are_refused_before_sending() {
+    let project = Project::new();
+    fs::create_dir_all(project.root.join("assets")).expect("assets");
+    fs::write(project.root.join("assets/a.png"), b"a").expect("file");
+    fs::write(project.root.join("assets/A.png"), b"b").expect("file");
+    let api = FakeApi::start(Some(project.previous()));
+    let (output, report) = project.submit_json(&api, &[]);
+    assert_eq!(code(&output), Some(1), "{report}");
+    assert!(
+        report["local"]["diagnostics"]
+            .to_string()
+            .contains("sources.duplicate_name"),
+        "{report}"
+    );
+    assert!(!sent(&api));
+}
+
+#[test]
+fn a_widget_out_of_the_catalog_may_receive_versions() {
+    let project = Project::new();
+    let api = FakeApi::start(Some(project.previous()));
+    api.context(|context| context["widget"]["status"] = json!("removed"));
+    let output = project.submit(&api, &["--dry-run"]);
+    assert_eq!(code(&output), Some(0), "{}", text(&output.stdout));
+}
+
+#[test]
+fn a_busy_storage_is_tried_again() {
+    let project = Project::new();
+    let api = FakeApi::start(Some(project.previous()));
+    api.on(
+        "upload",
+        vec![
+            Reply::Raw(503, b"<Error><Code>SlowDown</Code></Error>".to_vec()),
+            Reply::Auto,
+        ],
+    );
+    let output = project.submit(&api, &[]);
+    assert_eq!(code(&output), Some(0), "{}", text(&output.stderr));
+}
+
+#[test]
+fn an_overdue_upload_starts_a_new_submission() {
+    let project = Project::new();
+    let api = FakeApi::start(Some(project.previous()));
+    let overdue = json!({
+        "submission": {
+            "id": 700, "state": "pending_upload", "version": "1.3.1", "refused_reason": null,
+            "archive": {"bytes": 1, "sha256": "00".repeat(32)},
+            "expires_at": "2026-10-10T11:00:00+02:00", "created_at": "2026-10-10T10:00:00+02:00",
+            "finalized_at": null, "version_id": null
+        },
+        "upload": null,
+        "quota": {"limit": 20, "remaining": 16, "next_submission_at": null}
+    });
+    api.on("create", vec![Reply::Json(200, overdue), Reply::Auto]);
+    let output = project.submit(&api, &[]);
+    assert_eq!(
+        code(&output),
+        Some(0),
+        "{}{}",
+        text(&output.stdout),
+        text(&output.stderr)
+    );
+    let keys = api.idempotency_keys();
+    assert_eq!(keys.len(), 2);
+    assert_ne!(keys[0], keys[1]);
+}
+
+#[test]
+fn a_reused_idempotency_key_is_dropped() {
+    let project = Project::new();
+    let api = FakeApi::start(Some(project.previous()));
+    api.on(
+        "create",
+        vec![Reply::Json(
+            422,
+            error("idempotency_key_reused", "Another body for this key."),
+        )],
+    );
+    let output = project.submit(&api, &[]);
+    assert_eq!(code(&output), Some(2));
+    assert_eq!(states(&project), 0);
+}
+
+#[test]
+fn key_and_usage_errors_never_blame_the_creator_or_show_the_key() {
+    let project = Project::new();
+    let api = FakeApi::start(Some(project.previous()));
+    let output = project
+        .command(&api, &["submit", path(&project.root), "--format", "json"])
+        .env("OVERCROW_PUBLISH_KEY", " \n")
+        .output()
+        .expect("runs");
+    assert_eq!(json_of(&output)["error"]["code"], "publish_key_missing");
+    api.on(
+        "key",
+        vec![Reply::Json(
+            403,
+            error("insufficient_scope", "This key cannot do that."),
+        )],
+    );
+    let (output, report) = project.submit_json(&api, &[]);
+    assert_eq!(code(&output), Some(2), "{report}");
+    // A key given where it does not belong is never echoed.
+    let output = project.run(&api, &["submit", "--format", KEY]);
+    assert_eq!(code(&output), Some(2));
 }

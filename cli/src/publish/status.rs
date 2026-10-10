@@ -25,6 +25,7 @@ pub fn status(raw_key: Option<String>, options: &StatusOptions<'_>) -> ExitCode 
     super::install_panic_hook();
     let mut out = Out::new("status", options.json);
     out.set("key", Value::Null);
+    out.set("widget", Value::Null);
     let client = match super::connect(raw_key, options.verbose, &out) {
         Ok(client) => client,
         Err((code, message)) => return out.fail(&code, &message, Map::new()),
@@ -91,7 +92,10 @@ pub fn status(raw_key: Option<String>, options: &StatusOptions<'_>) -> ExitCode 
                 Map::new(),
             )
         }
-        End::Failed(failure) => out.fail_request(&failure, Outcome::Error),
+        End::Failed { failure, version } => {
+            out.set("version", api::camelize(&version.value));
+            out.fail_request(&failure, Outcome::Error)
+        }
     }
 }
 
