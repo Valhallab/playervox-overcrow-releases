@@ -37,6 +37,9 @@ seed validate_compiled_view "$schema"/view/valid/*.json "$schema"/view/invalid/*
 seed open_envelope "$schema"/catalog/valid/*.json "$schema"/catalog/invalid/*.json \
     "$schema"/seed/*/*/seed.json
 
+# Answers of the publish API, as the CLI's reader expects them.
+seed publish_responses fuzz/seeds/publish_responses/*.json
+
 # One template expression per file, taken from the golden expression tables.
 mkdir -p fuzz/corpus/expression
 index=0
