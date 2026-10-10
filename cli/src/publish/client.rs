@@ -112,10 +112,6 @@ impl Origin {
         &self.base
     }
 
-    pub fn is_local_http(&self) -> bool {
-        self.local_http
-    }
-
     /// Whether the signed upload may go to `url`: HTTPS (the API chose the
     /// storage), or, with a local test API, plain HTTP to that same API.
     pub fn upload_allowed(&self, url: &str) -> bool {
@@ -182,7 +178,7 @@ pub enum Failure {
     /// An error answer of the API.
     Api {
         status: u16,
-        error: ApiError,
+        error: Box<ApiError>,
     },
     /// An error status without an API error (a proxy's page).
     Status(u16),
@@ -270,9 +266,8 @@ fn network(error: &ureq::Error) -> Failure {
     }
 }
 
-/// An answer: status and body (2xx only reach the caller).
+/// The body of a 2xx answer.
 pub struct Answer {
-    pub status: u16,
     pub body: Vec<u8>,
 }
 
@@ -500,10 +495,13 @@ impl Client {
 /// A 2xx answer, or the failure an answer means.
 fn answer(status: u16, body: Vec<u8>) -> Result<Answer, Failure> {
     match status {
-        200..=299 => Ok(Answer { status, body }),
+        200..=299 => Ok(Answer { body }),
         300..=399 => Err(Failure::Redirect(status)),
         _ => Err(match api::parse_error(&body) {
-            Some(error) => Failure::Api { status, error },
+            Some(error) => Failure::Api {
+                status,
+                error: Box::new(error),
+            },
             None => Failure::Status(status),
         }),
     }
@@ -517,7 +515,8 @@ mod tests {
     fn the_default_origin_is_the_api() {
         let origin = Origin::parse(DEFAULT_ORIGIN).expect("origin");
         assert_eq!(origin.as_str(), "https://api.playervox.com");
-        assert!(!origin.is_local_http());
+        assert!(origin.upload_allowed("https://r2.example/a.zip"));
+        assert!(!origin.upload_allowed("http://127.0.0.1/a.zip"));
     }
 
     #[test]
@@ -534,11 +533,6 @@ mod tests {
         ] {
             assert_eq!(Origin::parse(text).expect(text).as_str(), expected);
         }
-        assert!(
-            Origin::parse("http://127.0.0.1:8080")
-                .unwrap()
-                .is_local_http()
-        );
         for text in [
             "http://api.playervox.com",
             "http://10.0.0.2:3000",

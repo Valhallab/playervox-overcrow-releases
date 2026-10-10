@@ -58,6 +58,10 @@ Usage:
                         [--format human|json] [--deny-warnings]
   overcrow-widget admit <file.ocpkg> --listing FILE [--publisher HANDLE] [--format human|json]
   overcrow-widget diff <old> <new> [--format human|json]   (folders or source .zip files)
+  overcrow-widget submit [dir | sources.zip] [--submission FILE] [--release-notes-en TEXT]
+                         [--release-notes-fr TEXT] [--review-message TEXT] [--dry-run] [--no-wait]
+                         [--expect-sha256 HEX] [--format human|json] [--verbose]
+  overcrow-widget status [--version VERSION|ID] [--wait] [--format human|json] [--verbose]
   overcrow-widget test [dir] [--runtime PATH] [--offline] [--scenario NAME] [--update] [--format human|json] [--no-typecheck]
   overcrow-widget --version [--format json] | --help
 
@@ -66,6 +70,10 @@ Exit status: 0 success (warnings allowed), 1 errors found, 2 usage or I/O error.
 `diff` ends with 0 whether or not the sources differ, 1 when a side is refused.
 `test` ends with 1 when a scenario fails, 2 when no runtime can run.
 `dev` runs until Ctrl+C (0), or ends with 1 when the overlay ends the session.
+`submit` and `status --wait` end with 0 in review (or ready to send with --dry-run), 1 when
+something must be fixed, 2 on a usage, key, network or server error, 3 when the version waits
+in the creator space, 4 while it is still being checked. The key is read from
+OVERCROW_PUBLISH_KEY only.
 Guide: https://overcrow.playervox.com/docs/en/cli/";
 
 /// Where the guide says how to choose a widget ID.
@@ -106,6 +114,12 @@ const VALUED: &[&str] = &[
     "--source-map",
     "--repository",
     "--revision",
+    "--submission",
+    "--release-notes-en",
+    "--release-notes-fr",
+    "--review-message",
+    "--expect-sha256",
+    "--version",
 ];
 
 fn parse(mut args: impl Iterator<Item = String>) -> Result<Arguments, String> {
@@ -185,7 +199,7 @@ impl Arguments {
 
 fn main() -> ExitCode {
     // First of all: no child process of any command may inherit the key.
-    let _publish_key = publish::secret::take_from_environment();
+    let publish_key = publish::secret::take_from_environment();
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.first().map(String::as_str) {
         None | Some("--help" | "-h" | "help") => {
@@ -231,6 +245,8 @@ fn main() -> ExitCode {
         "test" => run_test(&arguments),
         "admit" => run_admit(&arguments),
         "diff" => run_diff(&arguments),
+        "submit" => run_submit(&arguments, publish_key),
+        "status" => run_status(&arguments, publish_key),
         "snapshot-plan" => run_snapshot_plan(&arguments),
         other => Err(format!("unknown command `{other}`")),
     };
@@ -431,6 +447,63 @@ fn publisher(arguments: &Arguments) -> Result<admit::Publisher, String> {
         handle: handle.to_owned(),
         domains,
     })
+}
+
+fn run_submit(arguments: &Arguments, key: Option<String>) -> Result<ExitCode, String> {
+    arguments.expect(
+        &[
+            "--submission",
+            "--release-notes-en",
+            "--release-notes-fr",
+            "--review-message",
+            "--dry-run",
+            "--no-wait",
+            "--expect-sha256",
+            "--format",
+            "--verbose",
+        ],
+        1,
+    )?;
+    let format = arguments.format()?;
+    if let Some(digest) = arguments.value("--expect-sha256")
+        && (digest.len() != 64 || !digest.bytes().all(|byte| byte.is_ascii_hexdigit()))
+    {
+        return Err("--expect-sha256 takes the 64 hexadecimal digits of a SHA-256".into());
+    }
+    Ok(publish::submit(
+        key,
+        &publish::SubmitOptions {
+            target: arguments.directory(),
+            submission: arguments.value("--submission").map(Path::new),
+            overrides: publish::texts::Overrides {
+                release_notes_en: arguments.value("--release-notes-en"),
+                release_notes_fr: arguments.value("--release-notes-fr"),
+                review_message: arguments.value("--review-message"),
+            },
+            dry_run: arguments.flag("--dry-run"),
+            no_wait: arguments.flag("--no-wait"),
+            expect_sha256: arguments.value("--expect-sha256"),
+            json: format == Format::Json,
+            verbose: arguments.flag("--verbose"),
+        },
+    ))
+}
+
+fn run_status(arguments: &Arguments, key: Option<String>) -> Result<ExitCode, String> {
+    arguments.expect(&["--version", "--wait", "--format", "--verbose"], 0)?;
+    let format = arguments.format()?;
+    if arguments.flag("--wait") && arguments.value("--version").is_none() {
+        return Err("--wait follows one version: give --version".into());
+    }
+    Ok(publish::status(
+        key,
+        &publish::StatusOptions {
+            version: arguments.value("--version"),
+            wait: arguments.flag("--wait"),
+            json: format == Format::Json,
+            verbose: arguments.flag("--verbose"),
+        },
+    ))
 }
 
 fn run_diff(arguments: &Arguments) -> Result<ExitCode, String> {

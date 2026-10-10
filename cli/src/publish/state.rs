@@ -101,6 +101,16 @@ impl Resume {
         let _ = write_private(path, value.to_string().as_bytes());
     }
 
+    /// Another submission of the same request (the earlier one expired or
+    /// was refused): a new `Idempotency-Key`, kept in the same place.
+    pub fn renew(&mut self) {
+        self.created_at = now();
+        self.idempotency_key = fresh_key(&Value::String(self.idempotency_key.clone()));
+        self.submission_id = None;
+        self.version_id = None;
+        self.resumed = false;
+    }
+
     /// The submission ended: the next run starts another one.
     pub fn forget(&self) {
         if let Some(path) = &self.path {

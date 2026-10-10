@@ -25,7 +25,6 @@ pub struct KeyInfo {
 /// `GET /publish/context`: what the pre-check needs.
 #[derive(Clone, Debug)]
 pub struct Context {
-    pub widget_id: String,
     pub widget_status: String,
     pub last_approved: Option<Approved>,
     pub minimum_version: String,
@@ -60,7 +59,6 @@ pub struct Upload {
     pub url: String,
     /// Exactly what the PUT carries, in the API's order.
     pub headers: Vec<(String, String)>,
-    pub expires_at: String,
 }
 
 #[derive(Clone, Debug)]
@@ -84,7 +82,6 @@ pub struct SubmissionReply {
 /// `POST /publish/submissions/:id/finalize`.
 #[derive(Clone, Debug)]
 pub struct Finalized {
-    pub submission: Submission,
     pub version: Version,
 }
 
@@ -175,7 +172,6 @@ pub fn parse_context(bytes: &[u8]) -> Result<Context, Unreadable> {
         }),
     };
     Ok(Context {
-        widget_id: text(&answer["widget"]["widget_id"], "widget.widget_id")?,
         widget_status: text(&answer["widget"]["status"], "widget.status")?,
         last_approved,
         minimum_version: text(&answer["minimum_version"], "minimum_version")?,
@@ -222,7 +218,6 @@ fn upload(value: &Value) -> Result<Option<Upload>, Unreadable> {
         method: text(&value["method"], "upload.method")?,
         url: text(&value["url"], "upload.url")?,
         headers,
-        expires_at: text(&value["expires_at"], "upload.expires_at")?,
     }))
 }
 
@@ -240,8 +235,8 @@ pub fn parse_submission(bytes: &[u8]) -> Result<SubmissionReply, Unreadable> {
 
 pub fn parse_finalized(bytes: &[u8]) -> Result<Finalized, Unreadable> {
     let answer = Value::Object(object(bytes)?);
+    submission(&answer["submission"])?;
     Ok(Finalized {
-        submission: submission(&answer["submission"])?,
         version: version(&answer["version"])?,
     })
 }
