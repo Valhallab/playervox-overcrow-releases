@@ -39,7 +39,7 @@ valeurs qu’il remplit. Voici un manifeste avec des permissions et un menu :
 {
   "schemaVersion": 1,
   "apiVersion": 1,
-  "id": "com.example.countdown",
+  "id": "nova.countdown",
   "version": "1.0.0",
   "name": { "en": "Countdown", "fr": "Compte à rebours" },
   "sizing": {
@@ -79,7 +79,7 @@ valeurs qu’il remplit. Voici un manifeste avec des permissions et un menu :
 | --- | --- | --- | --- |
 | `schemaVersion` | entier de 1 à 1 | oui | Version du document de manifeste. |
 | `apiVersion` | entier de 1 à 1 | oui | Version de l’API des widgets ; elle sélectionne ce schéma. |
-| `id` | `widget ID` | oui | ID en DNS inversé, de 3 octets à 128 octets : au moins deux segments de `[a-z0-9-]` séparés par des points, chacun d’au plus 63 octets, sans `-` au début ni à la fin. `com.playervox` et `com.playervox.*` sont réservés aux paquets signés par PlayerVox. |
+| `id` | `widget ID` | oui | ID du widget, de 3 octets à 128 octets : au moins deux segments de `[a-z0-9-]` séparés par des points, chacun d’au plus 63 octets, sans `-` au début ni à la fin ; `<pseudo>.<nom>` avec le pseudo de l’éditeur, ou un domaine vérifié de l’éditeur, inversé, suivi d’un nom. `com.playervox` et `com.playervox.*` sont réservés aux paquets signés par PlayerVox. |
 | `version` | `version` | oui | SemVer 2.0.0 `MAJOR.MINOR.PATCH[-PRERELEASE]` sous sa forme canonique, d’au plus 64 octets ; les métadonnées de build sont refusées. |
 | `name` | `WidgetName` | oui | Nom localisé du widget, affiché par l’hôte. |
 | `sizing` | `Sizing` | oui | Règles de taille et d’ajustement appliquées par le cadre du widget. |
@@ -92,9 +92,14 @@ valeurs qu’il remplit. Voici un manifeste avec des permissions et un menu :
 ### Identité et version
 
 - **`id`** est l’identité du widget partout : dans le catalogue, dans le
-  profil de l’utilisateur, dans son stockage. Choisissez un ID en DNS
-  inversé sous un domaine que vous contrôlez, et gardez-le. Les ID sous
-  `com.playervox` sont réservés aux widgets publiés par PlayerVox.
+  profil de l’utilisateur, dans son stockage. Il s’écrit `<pseudo>.<nom>`,
+  votre pseudo d’éditeur dans l’espace créateurs d’OverCrow et un nom
+  (`nova.lol-timers`), ou, une fois un domaine vérifié, ce domaine inversé
+  et un nom (`gg.nova.lol-timers`). Un ID est définitif : il n’est jamais
+  donné à un autre widget, même après la suppression du vôtre. `nova`,
+  `example`, `yourhandle` et `yourname` sont des pseudos d’exemple sous
+  lesquels personne ne peut publier, et les ID sous `com.playervox` sont
+  réservés aux widgets publiés par PlayerVox.
 - **`version`** est une version sémantique. Une version publiée ne change
   jamais : toute modification d’un widget publié est une nouvelle version,
   supérieure.

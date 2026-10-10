@@ -7,10 +7,15 @@
 //!    source, style, logic and package check, then the host's reader);
 //! 2. a submitted archive (`--package`), if any, must carry the same
 //!    `view.json` bytes as the one compiled from `view.ocml` (ADR 0005);
-//! 3. the admission policy: the reserved `com.playervox.*` IDs, the
-//!    `listing.json` next to the manifest, the license and the preview;
+//! 3. the admission policy: the ID belongs to the publisher (or, without
+//!    one, is neither reserved nor an example), the `listing.json` next to
+//!    the manifest, the license and the preview;
 //! 4. a permission review for the maintainer: sensitive capabilities, the
-//!    declared network routes, clipboard writes and storage.
+//!    declared network routes, clipboard writes and storage; with a
+//!    previous manifest, the permission keys it adds and the review type.
+//!
+//! A source ZIP is read by [`crate::sourcetree`] and admitted from the
+//! private folder it is written to, exactly as a source folder.
 //!
 //! The report is readable or JSON. Text from the package or the listing is
 //! shown only through [`crate::sanitize`].
@@ -20,19 +25,25 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use overcrow_widget_schema::catalog::validate_listing;
+use overcrow_widget_schema::identifiers::{
+    EXAMPLE_HANDLES, HandleError, OwnershipError, id_owner, validate_handle,
+};
 use overcrow_widget_schema::json::parse_strict;
 use overcrow_widget_schema::limits::{
-    MAX_HTTP_RESPONSE_BYTES, MAX_PACKAGE_BYTES, MAX_PREVIEW_BYTES,
+    MAX_HTTP_RESPONSE_BYTES, MAX_MANIFEST_BYTES, MAX_PACKAGE_BYTES, MAX_PREVIEW_BYTES,
 };
-use overcrow_widget_schema::manifest::Manifest;
+use overcrow_widget_schema::manifest::{Manifest, validate_manifest};
 use overcrow_widget_schema::package::{Package, hex, read_package, sha256};
 use overcrow_widget_schema::permissions::capability_named;
 use serde_json::{Value, json};
 
 use crate::build;
 use crate::diag::{Diagnostic, Report};
+use crate::permissions;
 use crate::project::read_bounded;
 use crate::sanitize;
+use crate::sources::ID_FORMS;
+use crate::sourcetree;
 
 /// The marketplace text of a submission, next to `manifest.json`; never
 /// packaged.
@@ -44,21 +55,33 @@ const PLAYERVOX_LICENSE: &str = "MIT";
 /// Version of the JSON report (`report.json` of an admission bundle).
 pub const REPORT_FORMAT: u64 = 1;
 
-/// Who submits: only PlayerVox may use the reserved IDs. The marketplace CI
-/// passes `--publisher playervox` for reviewed pushes and pull requests of
-/// the releases repository itself, never for a fork.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+/// Who submits. A publisher of the creator space owns `<handle>.<name>` IDs
+/// and the IDs under its verified domains (`identifiers::id_owner`); only
+/// `playervox` may use `com.playervox.*`. `playervox` is trusted as before:
+/// the marketplace CI passes `--publisher playervox` for reviewed pushes and
+/// pull requests of the releases repository itself, never for a fork, and
+/// admits every widget already merged there.
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Publisher {
-    ThirdParty,
-    PlayerVox,
+    /// No publisher given: the ID is neither reserved, nor an example, nor
+    /// under a handle nobody can register.
+    Unknown,
+    Handle {
+        handle: String,
+        domains: Vec<String>,
+    },
 }
 
 impl Publisher {
-    pub const fn as_str(self) -> &'static str {
+    pub fn as_str(&self) -> &str {
         match self {
-            Self::ThirdParty => "third-party",
-            Self::PlayerVox => "playervox",
+            Self::Unknown => "third-party",
+            Self::Handle { handle, .. } => handle,
         }
+    }
+
+    fn is_playervox(&self) -> bool {
+        self.as_str() == overcrow_widget_schema::identifiers::PLAYERVOX_HANDLE
     }
 }
 
@@ -66,6 +89,13 @@ pub struct Options<'a> {
     pub publisher: Publisher,
     /// The archive a creator submitted, compared with the rebuild.
     pub package: Option<&'a Path>,
+    /// The last approved version: a `manifest.json`, a `.ocpkg`, a source
+    /// folder or a source ZIP.
+    pub previous: Option<&'a Path>,
+    /// Build the code map of `logic.js` (`--source-map`).
+    pub source_map: bool,
+    /// What `sourcetree` read, for a source ZIP.
+    pub sources: Option<Value>,
 }
 
 /// An admitted submission: the rebuilt archive, the exact listing bytes and
@@ -74,6 +104,8 @@ pub struct Admitted {
     pub archive: Vec<u8>,
     pub listing: Vec<u8>,
     pub report: Value,
+    /// The code map of `logic.js`, when asked for; never in the bundle.
+    pub source_map: Option<String>,
 }
 
 /// What admission found, before the verdict.
@@ -85,6 +117,9 @@ struct Findings {
     preview: Option<String>,
     reproducible: Option<bool>,
     same_archive: Option<bool>,
+    source_map: Option<String>,
+    /// The previous version and how the permissions compare with it.
+    previous: Option<(Manifest, permissions::Comparison)>,
 }
 
 /// Where the submission comes from.
@@ -114,28 +149,39 @@ pub fn admit(input: &Input<'_>, options: &Options<'_>, report: &mut Report) -> O
     let Some(mut findings) = findings else {
         return Outcome {
             admitted: None,
-            report: refused_before_identity(report, options.publisher),
+            report: refused_before_identity(report, &options.publisher, options.sources.as_ref()),
         };
     };
-    check_identity(&findings.package.manifest, options.publisher, report);
+    check_identity(&findings.package.manifest, &options.publisher, report);
+    if let Some(path) = options.previous {
+        findings.previous = compare_previous(path, &findings.package.manifest, report);
+    }
     let listing = match input {
         Input::Source(root) => root.join(LISTING_FILE),
         Input::Archive { listing, .. } => listing.to_path_buf(),
     };
-    check_listing(&listing, &mut findings, options.publisher, report);
-    let value = render_json(&findings, options.publisher, report);
+    check_listing(&listing, &mut findings, &options.publisher, report);
+    let value = render_json(&findings, options, report);
     Outcome {
         admitted: (report.errors() == 0).then(|| Admitted {
             archive: findings.archive,
             listing: findings.listing_bytes.unwrap_or_default(),
             report: value.clone(),
+            source_map: findings.source_map,
         }),
         report: value,
     }
 }
 
 fn rebuild(root: &Path, options: &Options<'_>, report: &mut Report) -> Option<Findings> {
-    let built = build::build(root, &build::Options { typecheck: false }, report)?;
+    let built = build::build(
+        root,
+        &build::Options {
+            typecheck: false,
+            source_map: options.source_map,
+        },
+        report,
+    )?;
     let package = match read_package(&built.archive) {
         Ok(package) => package,
         Err(error) => {
@@ -154,6 +200,8 @@ fn rebuild(root: &Path, options: &Options<'_>, report: &mut Report) -> Option<Fi
         preview: None,
         reproducible: None,
         same_archive: None,
+        source_map: built.source_map,
+        previous: None,
     };
     if let Some(submitted) = options.package {
         compare_submitted(submitted, &mut findings, report);
@@ -179,17 +227,26 @@ fn archive(path: &Path, _listing: &Path, report: &mut Report) -> Option<Findings
         preview: None,
         reproducible: None,
         same_archive: None,
+        source_map: None,
+        previous: None,
     })
 }
 
-/// A report for a submission refused before its identity was known.
-fn refused_before_identity(report: &Report, publisher: Publisher) -> Value {
+/// A report for a submission refused before its identity was known: a
+/// source ZIP refused by `sourcetree`, or sources that do not build.
+pub fn refused_before_identity(
+    report: &Report,
+    publisher: &Publisher,
+    sources: Option<&Value>,
+) -> Value {
     json!({
         "formatVersion": REPORT_FORMAT,
         "admitted": false,
         "publisher": publisher.as_str(),
         "id": null,
         "version": null,
+        "sources": sources,
+        "permissions": null,
         "diagnostics": diagnostics_json(report),
     })
 }
@@ -275,22 +332,154 @@ fn compare_submitted(path: &Path, findings: &mut Findings, report: &mut Report) 
     }
 }
 
-fn check_identity(manifest: &Manifest, publisher: Publisher, report: &mut Report) {
-    if manifest.has_reserved_id() && publisher != Publisher::PlayerVox {
+/// An ID under an example handle (`nova`, `example`, `yourhandle`,
+/// `yourname`): `<example>.<name>`, or a domain form whose second label is
+/// one (`com.example.clock`, `gg.nova.lol-timers`). Copied from the
+/// documentation or left by `init`, and owned by nobody.
+pub fn is_example_id(id: &str) -> bool {
+    let segments: Vec<&str> = id.split('.').collect();
+    EXAMPLE_HANDLES.contains(&segments[0])
+        || (segments.len() >= 3 && EXAMPLE_HANDLES.contains(&segments[1]))
+}
+
+fn check_identity(manifest: &Manifest, publisher: &Publisher, report: &mut Report) {
+    let id = &manifest.id;
+    let refuse = |code: &str, message: String| {
+        Diagnostic::error(code, message)
+            .in_file("manifest.json")
+            .help(ID_FORMS)
+    };
+    let reserved = || {
+        refuse(
+            "admission.reserved_id",
+            "com.playervox.* IDs are reserved for widgets published by PlayerVox".into(),
+        )
+    };
+    match publisher {
+        // PlayerVox admits the widgets of this repository, its own and the
+        // ones already reviewed and merged there: no ownership check.
+        _ if publisher.is_playervox() => {}
+        Publisher::Unknown if manifest.has_reserved_id() => report.push(reserved()),
+        Publisher::Unknown if is_example_id(id) => report.push(refuse(
+            "admission.placeholder_id",
+            format!("`{id}` is an example ID: nobody can publish it"),
+        )),
+        // `<handle>.<name>` under a handle nobody can register.
+        Publisher::Unknown => {
+            if let Some((handle, _)) = id.split_once('.').filter(|(_, name)| !name.contains('.')) {
+                match validate_handle(handle) {
+                    Ok(()) => {}
+                    Err(HandleError::Reserved) => report.push(refuse(
+                        "admission.reserved_id",
+                        format!("`{id}` uses a reserved publisher handle"),
+                    )),
+                    Err(_) => report.push(refuse(
+                        "admission.id_not_owned",
+                        format!("no publisher can own `{id}`: `{handle}` cannot be a handle"),
+                    )),
+                }
+            }
+        }
+        Publisher::Handle { handle, domains } => match id_owner(id, handle, domains) {
+            Ok(_) => {}
+            Err(OwnershipError::Reserved) => report.push(reserved()),
+            Err(_) => report.push(refuse(
+                "admission.id_not_owned",
+                format!("`{id}` is not an ID of the publisher {handle}"),
+            )),
+        },
+    }
+}
+
+/// Reads the previous version's manifest and compares it with `current`.
+fn compare_previous(
+    path: &Path,
+    current: &Manifest,
+    report: &mut Report,
+) -> Option<(Manifest, permissions::Comparison)> {
+    let shown = path.display().to_string();
+    let previous = match previous_manifest(path) {
+        Ok(previous) => previous,
+        Err(reason) => {
+            report.push(
+                Diagnostic::error(
+                    "admission.previous",
+                    format!("the previous version cannot be read: {reason}"),
+                )
+                .in_file(shown),
+            );
+            return None;
+        }
+    };
+    if previous.id != current.id {
         report.push(
             Diagnostic::error(
-                "admission.reserved_id",
-                "com.playervox.* IDs are reserved for widgets published by PlayerVox",
+                "admission.previous_mismatch",
+                format!(
+                    "the previous version is another widget: {}",
+                    sanitize::line(&previous.id)
+                ),
+            )
+            .in_file(shown),
+        );
+        return None;
+    }
+    if current.version <= previous.version {
+        report.push(
+            Diagnostic::error(
+                "admission.version_not_newer",
+                format!(
+                    "the version must be above the previous one, {}",
+                    previous.version
+                ),
             )
             .in_file("manifest.json")
-            .help("choose an ID under a reverse domain you control, for example com.example.clock"),
+            .help("raise `version` in manifest.json"),
         );
+    }
+    let comparison = permissions::compare(&previous, current);
+    Some((previous, comparison))
+}
+
+/// The manifest of a previous version: a `manifest.json`, a package, or
+/// sources (a folder or a ZIP).
+fn previous_manifest(path: &Path) -> Result<Manifest, String> {
+    let invalid = |error: overcrow_widget_schema::manifest::ManifestError| {
+        format!("its manifest is refused ({})", error.as_str())
+    };
+    if let Some(input) = sourcetree::Input::of(path) {
+        let mut report = Report::default();
+        let tree = sourcetree::read(&input, &mut report)
+            .ok_or_else(|| "the sources are refused".to_owned())?;
+        let bytes = tree
+            .files
+            .get("manifest.json")
+            .ok_or_else(|| "no manifest.json".to_owned())?;
+        return validate_manifest(bytes).map_err(invalid);
+    }
+    let package = path
+        .extension()
+        .is_some_and(|extension| extension.eq_ignore_ascii_case("ocpkg"));
+    let limit = if package {
+        MAX_PACKAGE_BYTES.value
+    } else {
+        MAX_MANIFEST_BYTES.value
+    };
+    let bytes = read_bounded(path, limit)
+        .map_err(|error| error.to_string())?
+        .ok_or_else(|| "the file is too large".to_owned())?;
+    if package {
+        read_package(&bytes)
+            .map(|package| package.manifest)
+            .map_err(|error| format!("the package is refused ({})", error.as_str()))
+    } else {
+        validate_manifest(&bytes).map_err(invalid)
     }
 }
 
 /// `listing.json`: the Listing fields of the catalog, plus an optional
 /// `preview` naming a packaged PNG under `assets/`.
-fn check_listing(path: &Path, findings: &mut Findings, publisher: Publisher, report: &mut Report) {
+fn check_listing(path: &Path, findings: &mut Findings, publisher: &Publisher, report: &mut Report) {
     let bytes = match read_bounded(path, MAX_LISTING_SOURCE_BYTES) {
         Ok(Some(bytes)) => bytes,
         Ok(None) => {
@@ -344,7 +533,7 @@ fn check_listing(path: &Path, findings: &mut Findings, publisher: Publisher, rep
         ),
     }
     let license = listing["spdxLicense"].as_str().unwrap_or_default();
-    if publisher == Publisher::PlayerVox && license != PLAYERVOX_LICENSE {
+    if publisher.is_playervox() && license != PLAYERVOX_LICENSE {
         report.push(
             Diagnostic::error(
                 "admission.license",
@@ -425,7 +614,32 @@ fn review(manifest: &Manifest) -> Vec<Value> {
     items
 }
 
-fn render_json(findings: &Findings, publisher: Publisher, report: &Report) -> Value {
+/// `permissions`: the stable keys and, with a previous version, the
+/// comparison and the review type.
+fn permissions_json(findings: &Findings) -> Value {
+    let keys: Vec<String> = permissions::keys(&findings.package.manifest)
+        .into_keys()
+        .collect();
+    match &findings.previous {
+        Some((previous, comparison)) => {
+            let mut value = comparison.to_json();
+            value["keys"] = json!(keys);
+            value["previous"] = json!({"id": previous.id, "version": previous.version.to_string()});
+            value
+        }
+        None => json!({
+            "keys": keys,
+            "previous": null,
+            "added": null,
+            "removed": null,
+            "changed": null,
+            "reviewType": null,
+        }),
+    }
+}
+
+fn render_json(findings: &Findings, options: &Options<'_>, report: &Report) -> Value {
+    let publisher = &options.publisher;
     let manifest = &findings.package.manifest;
     let files: BTreeMap<&str, Value> = findings
         .package
@@ -464,7 +678,9 @@ fn render_json(findings: &Findings, publisher: Publisher, report: &Report) -> Va
             "archive": findings.same_archive,
         },
         "listing": listing,
+        "sources": options.sources,
         "review": review(manifest),
+        "permissions": permissions_json(findings),
         "diagnostics": diagnostics,
     })
 }
@@ -504,6 +720,28 @@ pub fn render_human(report: &Value) -> String {
         ));
         if let Some(preview) = report["listing"]["preview"].as_str() {
             out.push_str(&format!("preview   {}\n", sanitize::line(preview)));
+        }
+    }
+    if let Some(sources) = report["sources"].as_object() {
+        let within = sources["prefix"]
+            .as_str()
+            .map(|prefix| format!(" (in {}/)", sanitize::line(prefix)))
+            .unwrap_or_default();
+        out.push_str(&format!(
+            "sources   {}{within}, {} files, {} bytes, sha256 {}\n",
+            text(&sources["kind"]),
+            sources["files"],
+            sources["bytes"],
+            text(&sources["sha256"])
+        ));
+        let ignored: Vec<String> = sources["ignored"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .map(|item| text(&item["path"]))
+            .collect();
+        if !ignored.is_empty() {
+            out.push_str(&format!("left out  {}\n", ignored.join(", ")));
         }
     }
     out.push_str("\nReview (authority the widget requests)\n");
@@ -550,6 +788,31 @@ pub fn render_human(report: &Value) -> String {
             _ => continue,
         };
         out.push_str(&format!("  {line}\n"));
+    }
+    let permissions = &report["permissions"];
+    if !permissions["previous"].is_null() {
+        out.push_str(&format!(
+            "\nPermissions compared with {}\n",
+            text(&permissions["previous"]["version"])
+        ));
+        let mut changes = 0;
+        for (field, label) in [
+            ("added", "new"),
+            ("changed", "widened"),
+            ("removed", "removed"),
+        ] {
+            for key in permissions[field].as_array().into_iter().flatten() {
+                changes += 1;
+                out.push_str(&format!("  {label:<9} {}\n", text(key)));
+            }
+        }
+        if changes == 0 {
+            out.push_str("  no change\n");
+        }
+        out.push_str(&format!(
+            "  review    {}\n",
+            text(&permissions["reviewType"])
+        ));
     }
     out.push_str(&format!(
         "\n{}\n",

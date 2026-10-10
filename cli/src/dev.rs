@@ -163,7 +163,14 @@ impl Session {
     /// Builds the package; a clean build waits to be sent.
     fn rebuild(&mut self, root: &Path, typecheck: bool) {
         let mut report = Report::default();
-        let built = build::build(root, &build::Options { typecheck }, &mut report);
+        let built = build::build(
+            root,
+            &build::Options {
+                typecheck,
+                source_map: false,
+            },
+            &mut report,
+        );
         let failed = emit(&report, Some(root), self.format, false, "check");
         let Some(built) = built.filter(|_| !failed) else {
             self.note("the widget has errors: fix them, it rebuilds on save");

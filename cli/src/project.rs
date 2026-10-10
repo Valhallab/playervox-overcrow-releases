@@ -18,6 +18,7 @@ use overcrow_widget_schema::limits::{
 };
 
 use crate::diag::{Diagnostic, Report};
+use crate::sourcetree;
 
 /// The logic source may be TypeScript (recommended) or JavaScript. Its bound
 /// is generous: the bundle, not the source, must fit `MAX_LOGIC_BYTES`.
@@ -238,6 +239,13 @@ fn walk_assets(
             Ok(kind) => kind,
             Err(_) => continue,
         };
+        // What the creator tools never send (`.DS_Store`, `dist/`…) is not
+        // packaged either: the creator space would not have it.
+        if (kind.is_dir() && sourcetree::left_out_folder(&path))
+            || (!kind.is_dir() && sourcetree::ignored(&path).is_some())
+        {
+            continue;
+        }
         if kind.is_dir() {
             walk_assets(&entry.path(), &path, depth + 1, assets, report);
         } else if kind.is_file() {

@@ -43,6 +43,12 @@ pub const DOMAIN_EXTENSIONS: &[&str] = &[
 /// reserved: PlayerVox, OverCrow and Valhallab look-alikes.
 pub const RESERVED_HANDLE_WORDS: &[&str] = &["overcrow", "playervox", "valhallab"];
 
+/// Handles of the public examples and of the placeholders a creator copies
+/// (`nova.lol-timers`, `yourhandle.clock`): reserved, like the RFC 2606
+/// example domains, so that nobody owns the namespace the documentation
+/// shows. The CLI also refuses widget IDs under them at admission.
+pub const EXAMPLE_HANDLES: &[&str] = &["example", "nova", "yourhandle", "yourname"];
+
 /// Handles reserved for PlayerVox services or likely to mislead players.
 pub const RESERVED_HANDLES: &[&str] = &[
     "admin",
@@ -281,7 +287,7 @@ pub fn handle_syntax(handle: &str) -> Result<(), HandleError> {
 }
 
 /// A handle a new publisher may register: the grammar, then neither a
-/// domain extension nor a reserved handle.
+/// domain extension nor a reserved or example handle.
 pub fn validate_handle(handle: &str) -> Result<(), HandleError> {
     handle_syntax(handle)?;
     if DOMAIN_EXTENSIONS.contains(&handle) {
@@ -290,6 +296,7 @@ pub fn validate_handle(handle: &str) -> Result<(), HandleError> {
     let folded = confusable_skeleton(handle);
     if RESERVED_HANDLES
         .iter()
+        .chain(EXAMPLE_HANDLES)
         .any(|reserved| confusable_skeleton(reserved) == folded)
         || RESERVED_HANDLE_WORDS
             .iter()
@@ -563,7 +570,12 @@ mod tests {
 
     #[test]
     fn policy_lists_are_sorted_and_within_the_grammar() {
-        for list in [DOMAIN_EXTENSIONS, RESERVED_HANDLE_WORDS, RESERVED_HANDLES] {
+        for list in [
+            DOMAIN_EXTENSIONS,
+            EXAMPLE_HANDLES,
+            RESERVED_HANDLE_WORDS,
+            RESERVED_HANDLES,
+        ] {
             assert!(!list.is_empty());
             assert!(list.windows(2).all(|pair| pair[0] < pair[1]), "{list:?}");
             for entry in list {
@@ -572,6 +584,9 @@ mod tests {
         }
         for extension in DOMAIN_EXTENSIONS {
             assert!(!RESERVED_HANDLES.contains(extension), "{extension}");
+        }
+        for example in EXAMPLE_HANDLES {
+            assert!(!RESERVED_HANDLES.contains(example), "{example}");
         }
     }
 

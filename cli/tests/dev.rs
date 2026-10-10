@@ -191,7 +191,7 @@ fn dev_installs_reloads_on_save_shows_safe_logs_and_removes_on_ctrl_c() {
     let output = lines(&mut child);
     let mut all = Vec::new();
     wait_line(&output, &mut all, "connected to overcrow 9.9.9-test");
-    wait_line(&output, &mut all, "installed com.example.widget sha256");
+    wait_line(&output, &mut all, "installed yourhandle.widget sha256");
     wait_line(&output, &mut all, "second");
     // A save rebuilds and reloads (the license ships as written).
     let license = root.join("LICENSE");
@@ -199,13 +199,13 @@ fn dev_installs_reloads_on_save_shows_safe_logs_and_removes_on_ctrl_c() {
     std::fs::write(&license, format!("{text}\nEdited.\n")).expect("edit");
     let before = all
         .iter()
-        .filter(|line| line.contains("installed com.example.widget"))
+        .filter(|line| line.contains("installed yourhandle.widget"))
         .count();
     loop {
-        wait_line(&output, &mut all, "installed com.example.widget");
+        wait_line(&output, &mut all, "installed yourhandle.widget");
         let now = all
             .iter()
-            .filter(|line| line.contains("installed com.example.widget"))
+            .filter(|line| line.contains("installed yourhandle.widget"))
             .count();
         if now > before {
             break;
@@ -219,7 +219,7 @@ fn dev_installs_reloads_on_save_shows_safe_logs_and_removes_on_ctrl_c() {
     let seen = server.join().expect("overlay");
     assert_eq!(seen.installs.len(), 2, "{seen:?}");
     assert_ne!(seen.installs[0], seen.installs[1]);
-    assert_eq!(seen.removed, ["com.example.widget"]);
+    assert_eq!(seen.removed, ["yourhandle.widget"]);
     // The widget's text never reaches the terminal raw.
     while let Ok(line) = output.recv_timeout(Duration::from_millis(100)) {
         all.push(line);
@@ -232,7 +232,7 @@ fn dev_installs_reloads_on_save_shows_safe_logs_and_removes_on_ctrl_c() {
         printed.contains("\\u{1b}]52;c;aGk=\\u{7}evil\\u{202e}txt"),
         "{printed}"
     );
-    assert!(printed.contains("removed com.example.widget"), "{printed}");
+    assert!(printed.contains("removed yourhandle.widget"), "{printed}");
 }
 
 #[test]

@@ -1,49 +1,117 @@
-//! A strict reader of a creator tools ZIP (`overcrow-creator-tools-<v>-<platform>.zip`,
-//! assembled by OverCrow's release publisher): the downloaded runtime comes
-//! out of it. The archive cannot be pinned (the CLI is inside it), so the
-//! reader trusts nothing it declares: every entry is checked before any
-//! byte is inflated, and one entry is then extracted within its declared
-//! size and CRC-32. The caller checks the result's SHA-256 against the pin.
+//! A strict reader of ZIP archives, with two rule sets:
 //!
-//! Accepted: one disk, no ZIP64, no encryption, stored or deflated
-//! entries, the central directory right before its end record, relative
-//! names of safe components, local headers that agree with the central
-//! directory, entries that do not overlap. This file depends on nothing
-//! else in the crate: the `creator_tools_zip` fuzz target includes it.
+//! - [`Rules::CREATOR_TOOLS`]: the creator tools ZIP
+//!   (`overcrow-creator-tools-<v>-<platform>.zip`, assembled by OverCrow's
+//!   release publisher), the downloaded runtime comes out of it. The
+//!   archive cannot be pinned (the CLI is inside it); the caller checks the
+//!   extracted runtime's SHA-256 against the pin.
+//! - [`Rules::SOURCES`]: a creator's source archive, hostile until proven
+//!   otherwise. It adds folder entries (what archivers write), refuses links
+//!   and special files, hidden or trailing bytes, ZIP64 extra fields, entry
+//!   comments, names Windows cannot use and abnormal compression ratios.
+//!
+//! The reader trusts nothing an archive declares: every entry is checked
+//! before any byte is inflated, and one entry is then extracted within its
+//! declared size and CRC-32. Always required: one disk, no ZIP64, no
+//! encryption, stored or deflated entries, the central directory right
+//! before its end record, without an archive comment, relative names of
+//! safe components, local headers that agree with the central directory,
+//! entries that do not overlap. This file depends on nothing else in the
+//! crate: the `creator_tools_zip` and `source_zip` fuzz targets include it.
 
 use std::io::{Read, Seek, SeekFrom, Write};
 
 /// Bounds of one archive.
 #[derive(Clone, Copy, Debug)]
 pub struct Limits {
+    /// Files; folder entries, when accepted, are bounded separately by the
+    /// same number.
     pub max_entries: usize,
     /// The largest uncompressed entry.
     pub max_entry_bytes: u64,
     /// The sum of every uncompressed entry.
     pub max_total_bytes: u64,
+    /// The central directory: headers, names, extra fields.
+    pub max_directory_bytes: u64,
 }
 
-/// One file of the archive, checked against its local header.
+/// What an archive may hold beyond the rules every archive follows.
+#[derive(Clone, Copy, Debug)]
+pub struct Rules {
+    /// A name ending in `/` of size 0 is a folder entry: returned with
+    /// `directory`, never needed to rebuild the tree.
+    pub folders: bool,
+    /// Unix and DOS attributes: links, reparse points, devices, FIFOs and
+    /// sockets are refused, and only folder entries may say "folder".
+    pub attributes: bool,
+    /// No entry comment; extra fields of at most `MAX_EXTRA_BYTES` that are
+    /// well-formed records and hold no ZIP64 field; entries (local header,
+    /// name, extra field, data, data descriptor) that tile the archive from
+    /// its first byte to the central directory, with no byte left over; a
+    /// data descriptor that repeats the directory's CRC and sizes.
+    pub strict_layout: bool,
+    /// Names of printable ASCII that Windows can use (no final dot or
+    /// space, no device name), unique without regard to case, and no file
+    /// that is also a folder of another entry.
+    pub portable_names: bool,
+    /// An entry declared above `RATIO_FLOOR_BYTES` may not declare more
+    /// than this many times its compressed size; and no entry may declare
+    /// a size deflate cannot reach from its compressed size.
+    pub max_ratio: Option<u64>,
+}
+
+impl Rules {
+    pub const CREATOR_TOOLS: Self = Self {
+        folders: false,
+        attributes: false,
+        strict_layout: false,
+        portable_names: false,
+        max_ratio: None,
+    };
+    pub const SOURCES: Self = Self {
+        folders: true,
+        attributes: true,
+        strict_layout: true,
+        portable_names: true,
+        max_ratio: Some(100),
+    };
+}
+
+/// One file (or folder) of the archive, checked against its local header.
 #[derive(Clone, Debug)]
 pub struct Entry {
+    /// For a folder, without its final `/`.
     pub name: String,
     pub size: u64,
+    pub directory: bool,
     compressed: u64,
     deflated: bool,
     crc32: u32,
     data_start: u64,
+    /// Under `strict_layout`, the inflater must use every compressed byte:
+    /// nothing may follow the end of the deflate stream.
+    exact: bool,
 }
 
 /// Why an archive or an entry is refused.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ZipError {
     Io,
-    /// Not a ZIP this reader accepts; the text says which rule failed.
+    /// Not a ZIP this reader accepts; the text says which rule failed. The
+    /// texts callers match are the constants of this module.
     Invalid(&'static str),
     /// An entry name that could leave the destination or clash on disk.
     UnsafeName,
-    /// More entries or bytes than the limits allow.
+    /// More bytes than the limits allow.
     TooLarge,
+    /// More files (or folder entries) than the limits allow.
+    TooManyEntries,
+    /// A symbolic link or a reparse point.
+    Link,
+    /// A device, a FIFO or a socket.
+    SpecialFile,
+    /// A compression ratio no honest entry has.
+    Bomb,
 }
 
 impl std::fmt::Display for ZipError {
@@ -53,14 +121,51 @@ impl std::fmt::Display for ZipError {
             Self::Invalid(rule) => write!(formatter, "invalid archive: {rule}"),
             Self::UnsafeName => formatter.write_str("the archive holds an unsafe file name"),
             Self::TooLarge => formatter.write_str("the archive exceeds its size bounds"),
+            Self::TooManyEntries => formatter.write_str("the archive holds too many files"),
+            Self::Link => formatter.write_str("the archive holds a link"),
+            Self::SpecialFile => {
+                formatter.write_str("the archive holds a device, a FIFO or a socket")
+            }
+            Self::Bomb => formatter.write_str("the archive declares an abnormal compression ratio"),
         }
     }
 }
 
+/// A refusal and the entry it concerns, when there is one (a name that
+/// is not UTF-8 is given lossily).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Refused {
+    pub error: ZipError,
+    pub entry: Option<String>,
+}
+
+impl From<ZipError> for Refused {
+    fn from(error: ZipError) -> Self {
+        Self { error, entry: None }
+    }
+}
+
+/// Rule texts of [`ZipError::Invalid`] that callers tell apart.
+pub const ZIP64: &str = "ZIP64";
+pub const ENCRYPTED: &str = "encrypted entry";
+pub const DUPLICATE: &str = "duplicate entry";
+pub const FILE_IS_FOLDER: &str = "a file and a folder of the same name";
+pub const ARCHIVE_COMMENT: &str = "archive comment";
+pub const ENTRY_COMMENT: &str = "entry comment";
+pub const HIDDEN_DATA: &str = "bytes outside the entries";
+pub const LARGER_THAN_DECLARED: &str = "entry larger than declared";
+
 const END_SIGNATURE: u32 = 0x0605_4b50;
 const CENTRAL_SIGNATURE: u32 = 0x0201_4b50;
 const LOCAL_SIGNATURE: u32 = 0x0403_4b50;
+const DESCRIPTOR_SIGNATURE: u32 = 0x0807_4b50;
 const ZIP64_LOCATOR_SIGNATURE: u32 = 0x0706_4b50;
+const ZIP64_EXTRA_ID: u16 = 0x0001;
+const STRONG_ENCRYPTION_EXTRA_ID: u16 = 0x0017;
+const AES_EXTRA_ID: u16 = 0x9901;
+/// Info-ZIP's Unicode path and comment fields: another name for the entry.
+const UNICODE_PATH_EXTRA_ID: u16 = 0x7075;
+const UNICODE_COMMENT_EXTRA_ID: u16 = 0x6375;
 const END_BYTES: u64 = 22;
 const CENTRAL_BYTES: usize = 46;
 const LOCAL_BYTES: usize = 30;
@@ -69,9 +174,31 @@ const ENCRYPTED_FLAGS: u16 = 1 | 1 << 6 | 1 << 13;
 /// The flags this reader understands: encryption ones (refused), deflate
 /// options (bits 1-2), data descriptor (bit 3), UTF-8 names (bit 11).
 const KNOWN_FLAGS: u16 = ENCRYPTED_FLAGS | 0b110 | 1 << 3 | 1 << 11;
-/// Every central directory header and name of an accepted archive.
-const MAX_DIRECTORY_BYTES: u64 = 64 * 1024;
+const DESCRIPTOR_FLAG: u16 = 1 << 3;
+/// The AES encryption of WinZip and 7-Zip, written as a method.
+const AES_METHOD: u16 = 99;
 const MAX_NAME_BYTES: usize = 255;
+/// The extra field of one header, under `strict_layout`: timestamps,
+/// Unix owners and NTFS times take a few dozen bytes.
+pub const MAX_EXTRA_BYTES: usize = 1024;
+/// Entries declared at most this large are never refused for their ratio:
+/// `extract` bounds them anyway.
+pub const RATIO_FLOOR_BYTES: u64 = 1 << 20;
+/// The most deflate can expand (258 bytes per 2-bit code, about 1032:1),
+/// with room for a block header.
+const DEFLATE_MAX_RATIO: u64 = 1032;
+const DEFLATE_SLACK_BYTES: u64 = 64;
+/// File type bits of a Unix mode.
+const UNIX_TYPE: u32 = 0o170_000;
+const UNIX_REGULAR: u32 = 0o100_000;
+const UNIX_FOLDER: u32 = 0o040_000;
+const UNIX_LINK: u32 = 0o120_000;
+/// Hosts of "version made by" whose high attribute bytes are a Unix mode.
+const UNIX_HOSTS: [u8; 2] = [3, 19];
+/// 7-Zip's flag saying the high attribute bytes are a Unix mode.
+const UNIX_EXTENSION_FLAG: u32 = 0x8000;
+const DOS_FOLDER: u32 = 0x10;
+const DOS_REPARSE_POINT: u32 = 0x400;
 
 fn u16_at(bytes: &[u8], offset: usize) -> u16 {
     u16::from_le_bytes([bytes[offset], bytes[offset + 1]])
@@ -109,24 +236,128 @@ fn safe_name(name: &str) -> bool {
             .all(|component| !component.is_empty() && component != "." && component != "..")
 }
 
-/// Reads and checks the whole directory of an archive of `length` bytes.
+/// A component of printable ASCII that Windows keeps as written: no final
+/// dot or space, and no device name, whatever its case and extension
+/// (`con`, `NUL.txt`, `com1.json`). [`safe_name`] already refused the
+/// other characters Windows forbids.
+pub fn portable_component(component: &str) -> bool {
+    if component.ends_with(['.', ' '])
+        || !component.bytes().all(|byte| (0x20..=0x7e).contains(&byte))
+    {
+        return false;
+    }
+    let stem = component
+        .split('.')
+        .next()
+        .unwrap_or_default()
+        .trim_end_matches(' ')
+        .to_ascii_lowercase();
+    let numbered = stem.len() == 4
+        && (stem.starts_with("com") || stem.starts_with("lpt"))
+        && stem.as_bytes()[3].is_ascii_digit();
+    !(numbered
+        || matches!(
+            stem.as_str(),
+            "con" | "prn" | "aux" | "nul" | "conin$" | "conout$"
+        ))
+}
+
+/// Checks that `extra` is a sequence of `(id, size, data)` records without
+/// a ZIP64 one.
+fn check_extra(extra: &[u8]) -> Result<(), ZipError> {
+    if extra.len() > MAX_EXTRA_BYTES {
+        return Err(ZipError::Invalid("oversized extra field"));
+    }
+    let mut cursor = 0;
+    while cursor < extra.len() {
+        let record = extra
+            .get(cursor..cursor + 4)
+            .ok_or(ZipError::Invalid("malformed extra field"))?;
+        match u16_at(record, 0) {
+            ZIP64_EXTRA_ID => return Err(ZipError::Invalid(ZIP64)),
+            AES_EXTRA_ID | STRONG_ENCRYPTION_EXTRA_ID => {
+                return Err(ZipError::Invalid(ENCRYPTED));
+            }
+            // Another name or comment than the one checked and reviewed.
+            UNICODE_PATH_EXTRA_ID | UNICODE_COMMENT_EXTRA_ID => {
+                return Err(ZipError::Invalid("alternate name or comment field"));
+            }
+            _ => {}
+        }
+        cursor += 4 + usize::from(u16_at(record, 2));
+    }
+    if cursor != extra.len() {
+        return Err(ZipError::Invalid("malformed extra field"));
+    }
+    Ok(())
+}
+
+/// The kind of entry its attributes allow, under `rules.attributes`.
+fn check_attributes(made_by: u16, attributes: u32, folder: bool) -> Result<(), ZipError> {
+    let host = (made_by >> 8) as u8;
+    if attributes & DOS_REPARSE_POINT != 0 {
+        return Err(ZipError::Link);
+    }
+    if attributes & DOS_FOLDER != 0 && !folder {
+        return Err(ZipError::Invalid("folder attributes on a file"));
+    }
+    let mode = if UNIX_HOSTS.contains(&host) || attributes & UNIX_EXTENSION_FLAG != 0 {
+        attributes >> 16
+    } else {
+        0
+    };
+    match mode & UNIX_TYPE {
+        0 => Ok(()),
+        UNIX_REGULAR if !folder => Ok(()),
+        UNIX_FOLDER if folder => Ok(()),
+        UNIX_REGULAR | UNIX_FOLDER => {
+            Err(ZipError::Invalid("attributes disagree with the entry name"))
+        }
+        UNIX_LINK => Err(ZipError::Link),
+        _ => Err(ZipError::SpecialFile),
+    }
+}
+
+/// One central directory record, before its local header is read.
+struct Pending {
+    local_offset: u64,
+    entry: Entry,
+    flags: u16,
+    method: u16,
+    name_bytes: Vec<u8>,
+}
+
+/// Reads and checks the whole directory of an archive of `length` bytes
+/// under the creator tools rules.
 pub fn entries<R: Read + Seek>(
     reader: &mut R,
     length: u64,
     limits: Limits,
 ) -> Result<Vec<Entry>, ZipError> {
+    entries_with(reader, length, limits, Rules::CREATOR_TOOLS).map_err(|refused| refused.error)
+}
+
+/// Reads and checks the whole directory of an archive of `length` bytes.
+/// Entries come back in the order of their data.
+pub fn entries_with<R: Read + Seek>(
+    reader: &mut R,
+    length: u64,
+    limits: Limits,
+    rules: Rules,
+) -> Result<Vec<Entry>, Refused> {
     if length < END_BYTES {
-        return Err(ZipError::Invalid("too short"));
+        return Err(ZipError::Invalid("too short").into());
     }
-    // The end record has no comment: the publisher writes none.
+    // The end record has no comment: neither the publisher nor the source
+    // tools write one.
     let end_offset = length - END_BYTES;
     let mut end = [0_u8; END_BYTES as usize];
     read_at(reader, end_offset, &mut end)?;
     if u32_at(&end, 0) != END_SIGNATURE {
-        return Err(ZipError::Invalid("no end record at the end"));
+        return Err(ZipError::Invalid("no end record at the end").into());
     }
     if u16_at(&end, 20) != 0 {
-        return Err(ZipError::Invalid("archive comment"));
+        return Err(ZipError::Invalid(ARCHIVE_COMMENT).into());
     }
     let (disk, directory_disk) = (u16_at(&end, 4), u16_at(&end, 6));
     let (disk_entries, total_entries) = (u16_at(&end, 8), u16_at(&end, 10));
@@ -137,34 +368,38 @@ pub fn entries<R: Read + Seek>(
         || directory_size == u64::from(u32::MAX)
         || directory_offset == u64::from(u32::MAX)
     {
-        return Err(ZipError::Invalid("ZIP64"));
+        return Err(ZipError::Invalid(ZIP64).into());
     }
     if end_offset >= 20 {
         let mut locator = [0_u8; 4];
         read_at(reader, end_offset - 20, &mut locator)?;
         if u32_at(&locator, 0) == ZIP64_LOCATOR_SIGNATURE {
-            return Err(ZipError::Invalid("ZIP64"));
+            return Err(ZipError::Invalid(ZIP64).into());
         }
     }
     if disk != 0 || directory_disk != 0 || disk_entries != total_entries {
-        return Err(ZipError::Invalid("several disks"));
+        return Err(ZipError::Invalid("several disks").into());
     }
-    if usize::from(total_entries) > limits.max_entries {
-        return Err(ZipError::TooLarge);
+    let most_entries = if rules.folders {
+        limits.max_entries.saturating_mul(2)
+    } else {
+        limits.max_entries
+    };
+    if usize::from(total_entries) > most_entries {
+        return Err(ZipError::TooManyEntries.into());
     }
-    if directory_size > MAX_DIRECTORY_BYTES {
-        return Err(ZipError::TooLarge);
+    if directory_size > limits.max_directory_bytes {
+        return Err(ZipError::TooLarge.into());
     }
     if directory_offset.checked_add(directory_size) != Some(end_offset) {
-        return Err(ZipError::Invalid(
-            "central directory not before its end record",
-        ));
+        return Err(ZipError::Invalid("central directory not before its end record").into());
     }
     let mut directory = vec![0_u8; directory_size as usize];
     read_at(reader, directory_offset, &mut directory)?;
 
-    let mut found = Vec::with_capacity(usize::from(total_entries));
+    let mut found: Vec<Pending> = Vec::with_capacity(usize::from(total_entries));
     let mut seen = std::collections::HashSet::new();
+    let (mut files, mut folders) = (0_usize, 0_usize);
     let mut total = 0_u64;
     let mut cursor = 0_usize;
     for _ in 0..total_entries {
@@ -172,8 +407,9 @@ pub fn entries<R: Read + Seek>(
             .get(cursor..cursor + CENTRAL_BYTES)
             .ok_or(ZipError::Invalid("truncated central directory"))?;
         if u32_at(header, 0) != CENTRAL_SIGNATURE {
-            return Err(ZipError::Invalid("bad central header"));
+            return Err(ZipError::Invalid("bad central header").into());
         }
+        let made_by = u16_at(header, 4);
         let flags = u16_at(header, 8);
         let method = u16_at(header, 10);
         let crc32 = u32_at(header, 16);
@@ -183,134 +419,315 @@ pub fn entries<R: Read + Seek>(
         let extra_length = usize::from(u16_at(header, 30));
         let comment_length = usize::from(u16_at(header, 32));
         let disk_start = u16_at(header, 34);
+        let attributes = u32_at(header, 38);
         let local_offset = u64::from(u32_at(header, 42));
-        if flags & ENCRYPTED_FLAGS != 0 {
-            return Err(ZipError::Invalid("encrypted entry"));
+        let name_start = cursor + CENTRAL_BYTES;
+        let name_bytes = directory
+            .get(name_start..name_start + name_length)
+            .ok_or(ZipError::Invalid("truncated central directory"))?;
+        let shown = Some(String::from_utf8_lossy(name_bytes).into_owned());
+        let refuse = |error: ZipError| Refused {
+            error,
+            entry: shown.clone(),
+        };
+        if flags & ENCRYPTED_FLAGS != 0 || method == AES_METHOD {
+            return Err(refuse(ZipError::Invalid(ENCRYPTED)));
         }
         if flags & !KNOWN_FLAGS != 0 {
-            return Err(ZipError::Invalid("unknown entry flags"));
+            return Err(refuse(ZipError::Invalid("unknown entry flags")));
         }
         let deflated = match method {
             0 => false,
             8 => true,
-            _ => return Err(ZipError::Invalid("unsupported compression method")),
+            _ => return Err(refuse(ZipError::Invalid("unsupported compression method"))),
         };
         if compressed == u64::from(u32::MAX)
             || size == u64::from(u32::MAX)
             || local_offset == u64::from(u32::MAX)
         {
-            return Err(ZipError::Invalid("ZIP64"));
+            return Err(refuse(ZipError::Invalid(ZIP64)));
         }
         if disk_start != 0 {
-            return Err(ZipError::Invalid("several disks"));
+            return Err(refuse(ZipError::Invalid("several disks")));
         }
         if !deflated && compressed != size {
-            return Err(ZipError::Invalid("stored entry sizes differ"));
+            return Err(refuse(ZipError::Invalid("stored entry sizes differ")));
         }
-        let name_start = cursor + CENTRAL_BYTES;
-        let name_bytes = directory
-            .get(name_start..name_start + name_length)
-            .ok_or(ZipError::Invalid("truncated central directory"))?;
         let name = std::str::from_utf8(name_bytes)
-            .map_err(|_| ZipError::UnsafeName)?
+            .map_err(|_| refuse(ZipError::UnsafeName))?
             .to_owned();
-        if !safe_name(&name) {
-            return Err(ZipError::UnsafeName);
+        let folder_name = name.strip_suffix('/').filter(|_| rules.folders);
+        let directory_entry = folder_name.is_some();
+        let path = folder_name.unwrap_or(&name).to_owned();
+        if !safe_name(&path) || (rules.portable_names && !path.split('/').all(portable_component)) {
+            return Err(refuse(ZipError::UnsafeName));
         }
-        // Case-insensitive file systems would merge two such names.
-        if !seen.insert(name.to_lowercase()) {
-            return Err(ZipError::Invalid("duplicate entry"));
+        // An empty deflate stream takes two bytes; a folder holds nothing
+        // more (and `sourcetree` inflates it to check).
+        if directory_entry && (size != 0 || crc32 != 0 || compressed > 2) {
+            return Err(refuse(ZipError::Invalid("folder entry with data")));
+        }
+        if rules.attributes {
+            check_attributes(made_by, attributes, directory_entry).map_err(refuse)?;
+        }
+        let extra_start = name_start + name_length;
+        let extra = directory
+            .get(extra_start..extra_start + extra_length)
+            .ok_or(ZipError::Invalid("truncated central directory"))?;
+        if rules.strict_layout {
+            if comment_length != 0 {
+                return Err(refuse(ZipError::Invalid(ENTRY_COMMENT)));
+            }
+            check_extra(extra).map_err(refuse)?;
+        }
+        // Case-insensitive file systems would merge two such names; a
+        // folder entry may repeat a folder another entry implies.
+        let key = if rules.portable_names {
+            path.to_ascii_lowercase()
+        } else {
+            path.to_lowercase()
+        };
+        if !seen.insert((directory_entry, key)) {
+            return Err(refuse(ZipError::Invalid(DUPLICATE)));
         }
         cursor = name_start
             .checked_add(name_length + extra_length + comment_length)
             .filter(|end| *end <= directory.len())
             .ok_or(ZipError::Invalid("truncated central directory"))?;
+        if directory_entry {
+            folders += 1;
+        } else {
+            files += 1;
+        }
+        if files > limits.max_entries || folders > limits.max_entries {
+            return Err(ZipError::TooManyEntries.into());
+        }
         if size > limits.max_entry_bytes {
-            return Err(ZipError::TooLarge);
+            return Err(refuse(ZipError::TooLarge));
         }
         total = total.checked_add(size).ok_or(ZipError::TooLarge)?;
         if total > limits.max_total_bytes {
-            return Err(ZipError::TooLarge);
+            return Err(refuse(ZipError::TooLarge));
         }
-        found.push((
+        if let Some(ratio) = rules.max_ratio
+            && (size
+                > compressed
+                    .saturating_mul(DEFLATE_MAX_RATIO)
+                    .saturating_add(DEFLATE_SLACK_BYTES)
+                || (size > RATIO_FLOOR_BYTES && size > compressed.saturating_mul(ratio)))
+        {
+            return Err(refuse(ZipError::Bomb));
+        }
+        found.push(Pending {
             local_offset,
-            Entry {
-                name,
+            entry: Entry {
+                name: path,
                 size,
+                directory: directory_entry,
                 compressed,
                 deflated,
                 crc32,
                 data_start: 0,
+                exact: rules.strict_layout,
             },
             flags,
             method,
-            name_bytes.to_vec(),
-        ));
+            name_bytes: name_bytes.to_vec(),
+        });
     }
     if cursor != directory.len() {
-        return Err(ZipError::Invalid("bytes after the central directory"));
+        return Err(ZipError::Invalid("bytes after the central directory").into());
+    }
+    if rules.portable_names {
+        check_file_folder_clashes(&found)?;
     }
 
     // Local headers: they must repeat the central directory, and the
-    // entries must follow one another without overlapping.
-    found.sort_by_key(|(offset, ..)| *offset);
+    // entries must follow one another without overlapping (and, under
+    // `strict_layout`, without any byte between them).
+    found.sort_by_key(|pending| pending.local_offset);
+    let starts: Vec<u64> = found
+        .iter()
+        .skip(1)
+        .map(|pending| pending.local_offset)
+        .chain([directory_offset])
+        .collect();
     let mut next_free = 0_u64;
     let mut checked = Vec::with_capacity(found.len());
-    for (local_offset, mut entry, flags, method, name_bytes) in found {
-        if local_offset < next_free {
-            return Err(ZipError::Invalid("overlapping entries"));
+    for (pending, next_start) in found.into_iter().zip(starts) {
+        let shown = Some(String::from_utf8_lossy(&pending.name_bytes).into_owned());
+        let refuse = |error: ZipError| Refused {
+            error,
+            entry: shown.clone(),
+        };
+        if pending.local_offset < next_free {
+            return Err(refuse(ZipError::Invalid("overlapping entries")));
         }
-        let mut local = [0_u8; LOCAL_BYTES];
-        if local_offset
-            .checked_add(LOCAL_BYTES as u64)
-            .is_none_or(|end| end > directory_offset)
-        {
-            return Err(ZipError::Invalid("local header outside the data"));
+        if rules.strict_layout && pending.local_offset != next_free {
+            return Err(refuse(ZipError::Invalid(HIDDEN_DATA)));
         }
-        read_at(reader, local_offset, &mut local)?;
-        if u32_at(&local, 0) != LOCAL_SIGNATURE {
-            return Err(ZipError::Invalid("bad local header"));
-        }
-        let local_flags = u16_at(&local, 6);
-        if local_flags != flags || u16_at(&local, 8) != method {
-            return Err(ZipError::Invalid(
-                "local header disagrees with the directory",
-            ));
-        }
-        // With a data descriptor (bit 3) the local fields may be zero.
-        if flags & 1 << 3 == 0
-            && (u32_at(&local, 14) != entry.crc32
-                || u64::from(u32_at(&local, 18)) != entry.compressed
-                || u64::from(u32_at(&local, 22)) != entry.size)
-        {
-            return Err(ZipError::Invalid(
-                "local header disagrees with the directory",
-            ));
-        }
-        let name_length = u64::from(u16_at(&local, 26));
-        let extra_length = u64::from(u16_at(&local, 28));
-        if name_length != name_bytes.len() as u64 {
-            return Err(ZipError::Invalid(
-                "local header disagrees with the directory",
-            ));
-        }
-        let mut local_name = vec![0_u8; name_bytes.len()];
-        read_at(reader, local_offset + LOCAL_BYTES as u64, &mut local_name)?;
-        if local_name != name_bytes {
-            return Err(ZipError::Invalid(
-                "local header disagrees with the directory",
-            ));
-        }
-        let data_start = local_offset + LOCAL_BYTES as u64 + name_length + extra_length;
+        let data_start = check_local(reader, &pending, directory_offset, rules).map_err(refuse)?;
+        let Pending {
+            mut entry, flags, ..
+        } = pending;
         let data_end = data_start
             .checked_add(entry.compressed)
             .filter(|end| *end <= directory_offset)
-            .ok_or(ZipError::Invalid("entry data outside the archive"))?;
+            .ok_or_else(|| refuse(ZipError::Invalid("entry data outside the archive")))?;
         entry.data_start = data_start;
-        next_free = data_end;
+        next_free = if rules.strict_layout {
+            let descriptor = if flags & DESCRIPTOR_FLAG == 0 {
+                0
+            } else {
+                descriptor_length(reader, &entry, data_end, next_start).map_err(refuse)?
+            };
+            if data_end + descriptor != next_start {
+                return Err(refuse(ZipError::Invalid(HIDDEN_DATA)));
+            }
+            next_start
+        } else {
+            data_end
+        };
         checked.push(entry);
     }
+    if rules.strict_layout && checked.is_empty() && directory_offset != 0 {
+        return Err(ZipError::Invalid(HIDDEN_DATA).into());
+    }
     Ok(checked)
+}
+
+/// Under `portable_names`: every folder is spelled one way, whatever the
+/// case (a case-insensitive file system would merge `Docs/` and `docs/`),
+/// and no file is also a folder that another entry names or implies.
+fn check_file_folder_clashes(found: &[Pending]) -> Result<(), Refused> {
+    let refuse = |name: &str, rule: &'static str| Refused {
+        error: ZipError::Invalid(rule),
+        entry: Some(name.to_owned()),
+    };
+    // Lowercase folder path -> its spelling.
+    let mut folders: std::collections::HashMap<String, &str> = std::collections::HashMap::new();
+    for pending in found {
+        let name = pending.entry.name.as_str();
+        let mut folder = if pending.entry.directory {
+            Some(name)
+        } else {
+            name.rsplit_once('/').map(|(parent, _)| parent)
+        };
+        while let Some(path) = folder {
+            match folders.get(&path.to_ascii_lowercase()) {
+                // Its parents were recorded with it.
+                Some(spelling) if *spelling == path => break,
+                Some(_) => return Err(refuse(name, DUPLICATE)),
+                None => {
+                    folders.insert(path.to_ascii_lowercase(), path);
+                }
+            }
+            folder = path.rsplit_once('/').map(|(parent, _)| parent);
+        }
+    }
+    match found.iter().find(|pending| {
+        !pending.entry.directory && folders.contains_key(&pending.entry.name.to_ascii_lowercase())
+    }) {
+        Some(pending) => Err(refuse(&pending.entry.name, FILE_IS_FOLDER)),
+        None => Ok(()),
+    }
+}
+
+/// Checks the local header of `pending` against the central directory;
+/// returns where its data starts.
+fn check_local<R: Read + Seek>(
+    reader: &mut R,
+    pending: &Pending,
+    directory_offset: u64,
+    rules: Rules,
+) -> Result<u64, ZipError> {
+    let (local_offset, entry) = (pending.local_offset, &pending.entry);
+    let mut local = [0_u8; LOCAL_BYTES];
+    if local_offset
+        .checked_add(LOCAL_BYTES as u64)
+        .is_none_or(|end| end > directory_offset)
+    {
+        return Err(ZipError::Invalid("local header outside the data"));
+    }
+    read_at(reader, local_offset, &mut local)?;
+    if u32_at(&local, 0) != LOCAL_SIGNATURE {
+        return Err(ZipError::Invalid("bad local header"));
+    }
+    let disagrees = ZipError::Invalid("local header disagrees with the directory");
+    if u16_at(&local, 6) != pending.flags || u16_at(&local, 8) != pending.method {
+        return Err(disagrees);
+    }
+    // With a data descriptor (bit 3) the local fields may be zero; under
+    // `strict_layout`, each is then zero or the directory's value, so that a
+    // streaming reader sees what this one sees.
+    let fields = [
+        (u32_at(&local, 14), entry.crc32),
+        (u32_at(&local, 18), entry.compressed as u32),
+        (u32_at(&local, 22), entry.size as u32),
+    ];
+    let streamed = pending.flags & DESCRIPTOR_FLAG != 0;
+    if fields.iter().any(|(local, central)| {
+        local != central && (!streamed || (rules.strict_layout && *local != 0))
+    }) {
+        return Err(disagrees);
+    }
+    let name_length = u64::from(u16_at(&local, 26));
+    let extra_length = u64::from(u16_at(&local, 28));
+    if name_length != pending.name_bytes.len() as u64 {
+        return Err(disagrees);
+    }
+    let mut local_name = vec![0_u8; pending.name_bytes.len()];
+    read_at(reader, local_offset + LOCAL_BYTES as u64, &mut local_name)?;
+    if local_name != pending.name_bytes {
+        return Err(disagrees);
+    }
+    let extra_start = local_offset + LOCAL_BYTES as u64 + name_length;
+    if rules.strict_layout {
+        if extra_length > MAX_EXTRA_BYTES as u64 || extra_start + extra_length > directory_offset {
+            return Err(ZipError::Invalid("oversized extra field"));
+        }
+        let mut extra = vec![0_u8; extra_length as usize];
+        read_at(reader, extra_start, &mut extra)?;
+        check_extra(&extra)?;
+    }
+    Ok(extra_start + extra_length)
+}
+
+/// Under `strict_layout`, the length of the data descriptor after an entry
+/// whose data ends at `data_end`: 16 bytes with its signature or 12
+/// without, repeating the directory's CRC and sizes, and ending exactly at
+/// `next_start`.
+fn descriptor_length<R: Read + Seek>(
+    reader: &mut R,
+    entry: &Entry,
+    data_end: u64,
+    next_start: u64,
+) -> Result<u64, ZipError> {
+    let room = next_start.saturating_sub(data_end);
+    let fields = |bytes: &[u8]| {
+        u32_at(bytes, 0) == entry.crc32
+            && u64::from(u32_at(bytes, 4)) == entry.compressed
+            && u64::from(u32_at(bytes, 8)) == entry.size
+    };
+    let mut bytes = [0_u8; 16];
+    match room {
+        16 => {
+            read_at(reader, data_end, &mut bytes)?;
+            if u32_at(&bytes, 0) == DESCRIPTOR_SIGNATURE && fields(&bytes[4..]) {
+                return Ok(16);
+            }
+        }
+        12 => {
+            read_at(reader, data_end, &mut bytes[..12])?;
+            if fields(&bytes) {
+                return Ok(12);
+            }
+        }
+        _ => {}
+    }
+    Err(ZipError::Invalid(
+        "data descriptor disagrees with the directory",
+    ))
 }
 
 /// Writes the uncompressed bytes of `entry` to `output`: exactly its
@@ -325,11 +742,25 @@ pub fn extract<R: Read + Seek, W: Write>(
         .seek(SeekFrom::Start(entry.data_start))
         .map_err(|_| ZipError::Io)?;
     let raw = reader.by_ref().take(entry.compressed);
-    let mut source: Box<dyn Read + '_> = if entry.deflated {
-        Box::new(flate2::read::DeflateDecoder::new(raw))
+    if entry.deflated {
+        let mut decoder = flate2::read::DeflateDecoder::new(raw);
+        copy_checked(&mut decoder, entry, output)?;
+        if entry.exact && decoder.total_in() != entry.compressed {
+            return Err(ZipError::Invalid(HIDDEN_DATA));
+        }
+        Ok(())
     } else {
-        Box::new(raw)
-    };
+        copy_checked(&mut { raw }, entry, output)
+    }
+}
+
+/// Copies `source` to `output`: exactly the entry's declared size, with
+/// its CRC-32.
+fn copy_checked<W: Write>(
+    source: &mut impl Read,
+    entry: &Entry,
+    output: &mut W,
+) -> Result<(), ZipError> {
     let mut hasher = crc32fast::Hasher::new();
     let mut buffer = vec![0_u8; 64 * 1024];
     let mut written = 0_u64;
@@ -344,7 +775,7 @@ pub fn extract<R: Read + Seek, W: Write>(
         }
         written += read as u64;
         if written > entry.size {
-            return Err(ZipError::Invalid("entry larger than declared"));
+            return Err(ZipError::Invalid(LARGER_THAN_DECLARED));
         }
         hasher.update(&buffer[..read]);
         output
@@ -369,6 +800,7 @@ mod tests {
         max_entries: 16,
         max_entry_bytes: 1 << 20,
         max_total_bytes: 4 << 20,
+        max_directory_bytes: 64 * 1024,
     };
 
     /// One entry of a test archive.
@@ -698,7 +1130,7 @@ mod tests {
                 ..LIMITS
             })
             .unwrap_err(),
-            ZipError::TooLarge
+            ZipError::TooManyEntries
         );
         assert_eq!(
             tight(Limits {
@@ -734,5 +1166,355 @@ mod tests {
             extract_named(&bytes, "bomb").unwrap_err(),
             ZipError::Invalid("entry larger than declared")
         );
+    }
+
+    // ------------------------------------------------------------ sources
+
+    use crate::testzip::{self as zipwrite, Item};
+
+    const SOURCE_LIMITS: Limits = Limits {
+        max_entries: 2000,
+        max_entry_bytes: 64 << 20,
+        max_total_bytes: 64 << 20,
+        max_directory_bytes: 4 << 20,
+    };
+
+    fn read_sources(bytes: &[u8]) -> Result<Vec<Entry>, Refused> {
+        entries_with(
+            &mut Cursor::new(bytes),
+            bytes.len() as u64,
+            SOURCE_LIMITS,
+            Rules::SOURCES,
+        )
+    }
+
+    fn refusal(bytes: &[u8]) -> ZipError {
+        read_sources(bytes).expect_err("refused").error
+    }
+
+    fn widget() -> Vec<Item> {
+        vec![
+            Item::file("manifest.json", b"{\"id\": \"nova.lol-timers\"}"),
+            Item::file("logic.ts", DATA),
+            Item::stored("LICENSE", b"MIT"),
+        ]
+    }
+
+    #[test]
+    fn source_rules_accept_what_archivers_write() {
+        let zip_r = zipwrite::archive(&[
+            Item::folder("my-widget/"),
+            Item::file("my-widget/manifest.json", b"{}").extra(&zipwrite::timestamp_extra()),
+            Item::folder("my-widget/assets/"),
+            Item::stored("my-widget/assets/icon.png", b"png"),
+        ]);
+        let found = read_sources(&zip_r).unwrap();
+        assert_eq!(
+            found
+                .iter()
+                .map(|entry| (entry.name.as_str(), entry.directory))
+                .collect::<Vec<_>>(),
+            [
+                ("my-widget", true),
+                ("my-widget/manifest.json", false),
+                ("my-widget/assets", true),
+                ("my-widget/assets/icon.png", false),
+            ]
+        );
+        // Finder streams its entries with data descriptors; Explorer
+        // writes DOS attributes.
+        let finder = zipwrite::archive(&[
+            Item::file("manifest.json", b"{}").descriptor(true),
+            Item::file("logic.ts", DATA).descriptor(false),
+        ]);
+        let found = read_sources(&finder).unwrap();
+        let mut output = Vec::new();
+        extract(&mut Cursor::new(&finder), &found[1], &mut output).unwrap();
+        assert_eq!(output, DATA);
+        let explorer = zipwrite::archive(&[
+            Item::folder("w/").windows(),
+            Item::file("w/logic.ts", DATA).windows(),
+        ]);
+        assert!(read_sources(&explorer).is_ok());
+        assert!(
+            read_sources(&zipwrite::archive(&[])).is_ok(),
+            "an empty archive"
+        );
+    }
+
+    #[test]
+    fn links_and_special_files_are_refused() {
+        for (mode, error) in [
+            (0o120_777, ZipError::Link),
+            (0o010_644, ZipError::SpecialFile),
+            (0o020_644, ZipError::SpecialFile),
+            (0o060_644, ZipError::SpecialFile),
+            (0o140_644, ZipError::SpecialFile),
+        ] {
+            let mut items = widget();
+            items.push(Item::stored("escape", b"/etc/passwd").mode(mode));
+            let refused = read_sources(&zipwrite::archive(&items)).unwrap_err();
+            assert_eq!(refused.error, error, "{mode:o}");
+            assert_eq!(refused.entry.as_deref(), Some("escape"));
+        }
+        let mut reparse = Item::stored("junction", b"").windows();
+        reparse.attributes |= 0x400;
+        assert_eq!(refusal(&zipwrite::archive(&[reparse])), ZipError::Link);
+        // 7-Zip on Windows says the high bytes are a Unix mode.
+        let mut seven = Item::stored("link", b"target").windows();
+        seven.attributes = 0x8000 | 0o120_777 << 16;
+        assert_eq!(refusal(&zipwrite::archive(&[seven])), ZipError::Link);
+        // A file that says it is a folder, and the reverse.
+        let mut items = widget();
+        items.push(Item::stored("notes", b"x").mode(0o040_755));
+        assert!(matches!(
+            refusal(&zipwrite::archive(&items)),
+            ZipError::Invalid(_)
+        ));
+        let mut items = widget();
+        items.push(Item::folder("assets/").mode(0o100_644));
+        assert!(matches!(
+            refusal(&zipwrite::archive(&items)),
+            ZipError::Invalid(_)
+        ));
+        // The creator tools reader does not look at attributes.
+        let link = zipwrite::archive(&[Item::stored("tools/a", b"x").mode(0o120_777)]);
+        assert!(read(&link).is_ok());
+    }
+
+    #[test]
+    fn hidden_and_trailing_data_is_refused() {
+        let hidden = ZipError::Invalid(HIDDEN_DATA);
+        assert_eq!(
+            refusal(&zipwrite::archive_with(&widget(), b"MZ stub", b"", b"")),
+            hidden
+        );
+        assert_eq!(
+            refusal(&zipwrite::archive_with(&widget(), b"", b"hidden", b"")),
+            hidden
+        );
+        assert!(matches!(
+            refusal(&zipwrite::archive_with(&widget(), b"", b"", b"note")),
+            ZipError::Invalid(_)
+        ));
+        // A descriptor that lies about the CRC.
+        let mut bytes = zipwrite::archive(&[Item::file("logic.ts", DATA).descriptor(true)]);
+        let at = bytes
+            .windows(4)
+            .position(|window| window == [0x50, 0x4b, 7, 8])
+            .unwrap();
+        bytes[at + 4] ^= 0xff;
+        assert!(matches!(refusal(&bytes), ZipError::Invalid(_)));
+        // The creator tools reader accepts a prefix, as it always did.
+        let stub = zipwrite::archive_with(&[Item::stored("tools/a", b"x")], b"stub", b"", b"");
+        assert!(read(&stub).is_ok());
+    }
+
+    #[test]
+    fn zip64_extra_fields_and_entry_comments_are_refused() {
+        let mut zip64 = vec![1, 0, 16, 0];
+        zip64.extend([0; 16]);
+        let mut items = widget();
+        items[1] = Item::file("logic.ts", DATA).extra(&zip64);
+        assert_eq!(
+            refusal(&zipwrite::archive(&items)),
+            ZipError::Invalid(ZIP64)
+        );
+        items[1] = Item::file("logic.ts", DATA).extra(&[0x55, 0x54, 9, 0, 1]);
+        assert_eq!(
+            refusal(&zipwrite::archive(&items)),
+            ZipError::Invalid("malformed extra field")
+        );
+        items[1] = Item::file("logic.ts", DATA);
+        items[1].comment = b"look here".to_vec();
+        assert_eq!(
+            refusal(&zipwrite::archive(&items)),
+            ZipError::Invalid(ENTRY_COMMENT)
+        );
+        let mut bytes = zipwrite::archive(&[Item::stored("logic.ts", DATA)]);
+        // Method 99 in both headers: WinZip's AES.
+        bytes[8] = 99;
+        let central = bytes.len() - 22 - (46 + 8);
+        bytes[central + 10] = 99;
+        assert_eq!(refusal(&bytes), ZipError::Invalid(ENCRYPTED));
+    }
+
+    #[test]
+    fn source_names_are_portable_and_unique() {
+        for name in [
+            "assets/caf\u{e9}.png",
+            "logic.ts\u{202e}",
+            "a/con.txt",
+            "a/NUL",
+            "a/com1.json",
+            "a/lpt9",
+            "a/conin$",
+            "a/x.",
+            "a/x ",
+            "../escape",
+            "/etc/passwd",
+            "a\\b",
+            "C:x",
+        ] {
+            let mut items = widget();
+            items.push(Item::stored(name, b"x"));
+            assert_eq!(
+                refusal(&zipwrite::archive(&items)),
+                ZipError::UnsafeName,
+                "{name:?}"
+            );
+        }
+        // Not UTF-8: refused, and shown lossily.
+        let mut bad = Item::stored("x", b"x");
+        bad.name = vec![b'a', 0xff];
+        let refused = read_sources(&zipwrite::archive(&[bad])).unwrap_err();
+        assert_eq!(refused.error, ZipError::UnsafeName);
+        assert_eq!(refused.entry.as_deref(), Some("a\u{fffd}"));
+        for names in [
+            ["logic.ts", "LOGIC.TS"],
+            ["assets/a.png", "Assets/A.png"],
+            ["assets", "assets/a.png"],
+            ["Assets", "assets/a.png"],
+        ] {
+            let items: Vec<Item> = names.iter().map(|name| Item::stored(name, b"x")).collect();
+            assert!(
+                matches!(
+                    refusal(&zipwrite::archive(&items)),
+                    ZipError::Invalid(DUPLICATE | FILE_IS_FOLDER)
+                ),
+                "{names:?}"
+            );
+        }
+        let clash = zipwrite::archive(&[Item::folder("notes/"), Item::stored("NOTES", b"x")]);
+        assert_eq!(refusal(&clash), ZipError::Invalid(FILE_IS_FOLDER));
+        // A folder entry next to the files it holds is not a duplicate.
+        let fine =
+            zipwrite::archive(&[Item::folder("assets/"), Item::stored("assets/a.png", b"x")]);
+        assert!(read_sources(&fine).is_ok());
+        assert!(portable_component("con-sole.ts") && portable_component("comic.ts"));
+    }
+
+    #[test]
+    fn abnormal_ratios_are_bombs() {
+        // 2 MiB of zeros deflate to about 2 KiB: a thousand to one.
+        let zeros = vec![0_u8; 2 << 20];
+        let bomb = zipwrite::archive(&[Item::file("data.json", &zeros)]);
+        assert_eq!(refusal(&bomb), ZipError::Bomb);
+        // Small entries are never refused for their ratio.
+        let small = zipwrite::archive(&[Item::file("data.json", &zeros[..512 << 10])]);
+        assert!(read_sources(&small).is_ok());
+        // A size deflate cannot reach is a lie, even small.
+        let mut lie = Item::file("data.json", b"tiny");
+        lie.declared_size = Some(600 << 10);
+        assert_eq!(refusal(&zipwrite::archive(&[lie])), ZipError::Bomb);
+        // A size declared smaller than the data stops the inflater.
+        let mut short = Item::file("data.json", &zeros[..64 << 10]);
+        short.declared_size = Some(1024);
+        let bytes = zipwrite::archive(&[short]);
+        let found = read_sources(&bytes).unwrap();
+        let mut output = Vec::new();
+        assert_eq!(
+            extract(&mut Cursor::new(&bytes), &found[0], &mut output).unwrap_err(),
+            ZipError::Invalid(LARGER_THAN_DECLARED)
+        );
+        assert!(output.len() <= 1024 + 64 * 1024, "bounded by one buffer");
+    }
+
+    #[test]
+    fn file_and_folder_counts_are_bounded_separately() {
+        let names: Vec<String> = (0..2001).map(|index| format!("f/{index}.txt")).collect();
+        let items: Vec<Item> = names.iter().map(|name| Item::stored(name, b"")).collect();
+        assert_eq!(
+            refusal(&zipwrite::archive(&items)),
+            ZipError::TooManyEntries
+        );
+        let items: Vec<Item> = names[..2000]
+            .iter()
+            .map(|name| Item::stored(name, b""))
+            .collect();
+        let mut with_folders = items.clone();
+        with_folders.extend((0..100).map(|index| Item::folder(&format!("d{index}/"))));
+        assert!(read_sources(&zipwrite::archive(&with_folders)).is_ok());
+        // 65 MiB declared: refused from the directory, before any inflating.
+        let mut big = Item::stored("big.bin", b"");
+        big.declared_size = Some(65 << 20);
+        big.deflate = true;
+        let refused = read_sources(&zipwrite::archive(&[big])).unwrap_err();
+        assert_eq!(refused.error, ZipError::TooLarge);
+    }
+
+    #[test]
+    fn creator_tools_rules_are_unchanged() {
+        let folder = zipwrite::archive(&[Item::folder("tools/"), Item::stored("tools/a", b"x")]);
+        assert_eq!(read(&folder).unwrap_err(), ZipError::UnsafeName);
+        let accented = zipwrite::archive(&[Item::stored("tools/caf\u{e9}", b"x")]);
+        assert!(read(&accented).is_ok());
+    }
+
+    #[test]
+    fn nothing_may_hide_inside_an_entry() {
+        // Bytes after the end of the deflate stream.
+        let mut padded = Item::file("notes.txt", DATA);
+        padded.trailing = vec![b'x'; 300];
+        let bytes = zipwrite::archive(&[padded.clone()]);
+        let found = read_sources(&bytes).unwrap();
+        let mut output = Vec::new();
+        assert_eq!(
+            extract(&mut Cursor::new(&bytes), &found[0], &mut output).unwrap_err(),
+            ZipError::Invalid(HIDDEN_DATA)
+        );
+        // The creator tools reader keeps its behavior.
+        let bytes = zipwrite::archive(&[Item {
+            name: b"tools/a".to_vec(),
+            ..padded
+        }]);
+        let found = read(&bytes).unwrap();
+        assert!(extract(&mut Cursor::new(&bytes), &found[0], &mut Vec::new()).is_ok());
+        // A folder entry holds at most an empty deflate stream.
+        let mut empty = Item::folder("docs/");
+        empty.deflate = true;
+        assert!(read_sources(&zipwrite::archive(&[empty.clone()])).is_ok());
+        empty.trailing = vec![0; 64];
+        assert!(matches!(
+            refusal(&zipwrite::archive(&[empty])),
+            ZipError::Invalid(_)
+        ));
+        // Another name in an Info-ZIP Unicode path field.
+        let mut alias = vec![0x75, 0x70, 10, 0, 1, 0, 0, 0, 0];
+        alias.extend(b"x.ts");
+        alias.push(0);
+        assert!(matches!(
+            refusal(&zipwrite::archive(&[
+                Item::file("logic.ts", DATA).extra(&alias)
+            ])),
+            ZipError::Invalid(_)
+        ));
+    }
+
+    #[test]
+    fn a_streamed_local_header_is_zero_or_the_truth() {
+        let mut item = Item::file("logic.ts", DATA).descriptor(true);
+        let truth = read_sources(&zipwrite::archive(&[item.clone()])).unwrap();
+        assert_eq!(truth.len(), 1);
+        item.local_fields = Some([1, 2, 3]);
+        assert!(matches!(
+            refusal(&zipwrite::archive(&[item.clone()])),
+            ZipError::Invalid(_)
+        ));
+        // The creator tools reader does not look at them.
+        item.name = b"tools/a".to_vec();
+        assert!(read(&zipwrite::archive(&[item])).is_ok());
+    }
+
+    #[test]
+    fn a_folder_has_one_spelling() {
+        let bytes = zipwrite::archive(&[
+            Item::stored("Docs/a.md", b"a"),
+            Item::stored("docs/b.md", b"b"),
+        ]);
+        assert_eq!(refusal(&bytes), ZipError::Invalid(DUPLICATE));
+        let bytes =
+            zipwrite::archive(&[Item::folder("Assets/"), Item::stored("assets/a.png", b"x")]);
+        assert_eq!(refusal(&bytes), ZipError::Invalid(DUPLICATE));
     }
 }

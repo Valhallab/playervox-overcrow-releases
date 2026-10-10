@@ -161,6 +161,36 @@
       "catalog": "ok"
     },
     {
+      "handle": "nova",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "n0va",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "example",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "yourhandle",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "your-name",
+      "registration": "reserved",
+      "catalog": "ok"
+    },
+    {
+      "handle": "novastudio",
+      "registration": "ok",
+      "catalog": "ok"
+    },
+    {
       "handle": "support",
       "registration": "reserved",
       "catalog": "ok"

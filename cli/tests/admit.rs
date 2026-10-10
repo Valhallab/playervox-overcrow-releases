@@ -44,7 +44,7 @@ fn project(id: &str, license: &str) -> (tempfile::TempDir, PathBuf) {
         "--template",
         "counter",
         "--id",
-        "com.example.counter",
+        "nova.counter",
     ]);
     assert!(output.status.success(), "{}", text(&output.stderr));
     // `init` refuses the reserved IDs; a PlayerVox widget sets its own.
@@ -86,13 +86,13 @@ fn codes(report: &Value) -> Vec<String> {
 
 #[test]
 fn a_third_party_submission_is_admitted_with_a_bundle_equal_to_package() {
-    let (temporary, root) = project("com.example.counter", "MIT");
-    let (output, report) = admit_json(&[path(&root)]);
+    let (temporary, root) = project("nova.counter", "MIT");
+    let (output, report) = admit_json(&[path(&root), "--publisher", "nova"]);
     assert_eq!(output.status.code(), Some(0), "{report}");
     assert_eq!(report["admitted"], true);
     assert_eq!(report["formatVersion"], 1);
-    assert_eq!(report["publisher"], "third-party");
-    assert_eq!(report["id"], "com.example.counter");
+    assert_eq!(report["publisher"], "nova");
+    assert_eq!(report["id"], "nova.counter");
     assert_eq!(report["reservedId"], false);
     assert_eq!(report["listing"]["spdxLicense"], "MIT");
     assert_eq!(report["review"], json!([]));
@@ -110,6 +110,8 @@ fn a_third_party_submission_is_admitted_with_a_bundle_equal_to_package() {
     let output = cli(&[
         "admit",
         path(&root),
+        "--publisher",
+        "nova",
         "--package",
         path(&packaged),
         "--out",
@@ -132,7 +134,14 @@ fn a_third_party_submission_is_admitted_with_a_bundle_equal_to_package() {
     assert_eq!(stored["reproducible"]["archive"], true);
 
     // A bundle never overwrites another one.
-    let output = cli(&["admit", path(&root), "--out", path(&bundle)]);
+    let output = cli(&[
+        "admit",
+        path(&root),
+        "--publisher",
+        "nova",
+        "--out",
+        path(&bundle),
+    ]);
     assert_eq!(output.status.code(), Some(2));
 }
 
@@ -154,37 +163,42 @@ fn reserved_ids_are_for_playervox_under_mit_only() {
     assert_eq!(output.status.code(), Some(1));
     assert_eq!(codes(&report), ["admission.license"]);
 
-    let output = cli(&["admit", path(&root), "--publisher", "someone"]);
+    // Another publisher does not own it; a handle outside the grammar is
+    // a usage error.
+    let (output, report) = admit_json(&[path(&root), "--publisher", "someone"]);
+    assert_eq!(output.status.code(), Some(1));
+    assert!(codes(&report).contains(&"admission.reserved_id".to_owned()));
+    let output = cli(&["admit", path(&root), "--publisher", "Some_One"]);
     assert_eq!(output.status.code(), Some(2));
 }
 
 #[test]
 fn a_missing_or_invalid_listing_is_refused() {
-    let (_temporary, root) = project("com.example.counter", "MIT");
+    let (_temporary, root) = project("nova.counter", "MIT");
     let mut invalid = listing("MIT");
     invalid["sourceUrl"] = json!("http://example.com/counter");
     write_listing(&root, &invalid);
-    let (output, report) = admit_json(&[path(&root)]);
+    let (output, report) = admit_json(&[path(&root), "--publisher", "nova"]);
     assert_eq!(output.status.code(), Some(1));
     assert_eq!(codes(&report), ["admission.listing"]);
 
     fs::write(root.join("listing.json"), "{\"author\":1,\"author\":2}").expect("listing");
-    let (_, report) = admit_json(&[path(&root)]);
+    let (_, report) = admit_json(&[path(&root), "--publisher", "nova"]);
     assert_eq!(codes(&report), ["admission.listing"]);
 
     fs::remove_file(root.join("listing.json")).expect("remove listing");
-    let (output, report) = admit_json(&[path(&root)]);
+    let (output, report) = admit_json(&[path(&root), "--publisher", "nova"]);
     assert_eq!(output.status.code(), Some(1));
     assert_eq!(codes(&report), ["admission.listing_missing"]);
 }
 
 #[test]
 fn the_preview_must_be_a_packaged_png() {
-    let (_temporary, root) = project("com.example.counter", "MIT");
+    let (_temporary, root) = project("nova.counter", "MIT");
     let mut with_preview = listing("MIT");
     with_preview["preview"] = json!("assets/preview.png");
     write_listing(&root, &with_preview);
-    let (_, report) = admit_json(&[path(&root)]);
+    let (_, report) = admit_json(&[path(&root), "--publisher", "nova"]);
     assert_eq!(codes(&report), ["admission.preview"]);
 
     fs::create_dir_all(root.join("assets")).expect("assets");
@@ -193,14 +207,14 @@ fn the_preview_must_be_a_packaged_png() {
         .write_to(&mut std::io::Cursor::new(&mut png), image::ImageFormat::Png)
         .expect("PNG");
     fs::write(root.join("assets/preview.png"), png).expect("preview");
-    let (output, report) = admit_json(&[path(&root)]);
+    let (output, report) = admit_json(&[path(&root), "--publisher", "nova"]);
     assert_eq!(output.status.code(), Some(0), "{report}");
     assert_eq!(report["listing"]["preview"], "assets/preview.png");
 }
 
 #[test]
 fn a_submitted_view_must_be_what_view_ocml_compiles_to() {
-    let (temporary, root) = project("com.example.counter", "MIT");
+    let (temporary, root) = project("nova.counter", "MIT");
     let submitted = temporary.path().join("submitted.ocpkg");
     let output = cli(&[
         "package",
@@ -217,7 +231,13 @@ fn a_submitted_view_must_be_what_view_ocml_compiles_to() {
     let changed = source.replacen("state.count += 1", "state.count += 2", 1);
     assert_ne!(changed, source, "the template increments by one");
     fs::write(&logic, changed).expect("logic");
-    let (output, report) = admit_json(&[path(&root), "--package", path(&submitted)]);
+    let (output, report) = admit_json(&[
+        path(&root),
+        "--publisher",
+        "nova",
+        "--package",
+        path(&submitted),
+    ]);
     assert_eq!(output.status.code(), Some(0), "{report}");
     assert_eq!(report["reproducible"]["viewJson"], true);
     assert_eq!(codes(&report), ["admission.package_rebuilt"]);
@@ -228,7 +248,13 @@ fn a_submitted_view_must_be_what_view_ocml_compiles_to() {
     let changed = source.replacen("<icon name=\"minus\"/>", "<icon name=\"plus\"/>", 1);
     assert_ne!(changed, source, "the template view has a minus icon");
     fs::write(&view, changed).expect("view");
-    let (output, report) = admit_json(&[path(&root), "--package", path(&submitted)]);
+    let (output, report) = admit_json(&[
+        path(&root),
+        "--publisher",
+        "nova",
+        "--package",
+        path(&submitted),
+    ]);
     assert_eq!(output.status.code(), Some(1), "{report}");
     assert_eq!(report["reproducible"]["viewJson"], false);
     assert!(codes(&report).contains(&"admission.view_not_reproducible".to_owned()));
@@ -236,7 +262,7 @@ fn a_submitted_view_must_be_what_view_ocml_compiles_to() {
 
 #[test]
 fn the_review_lists_every_requested_authority() {
-    let (_temporary, root) = project("com.example.counter", "MIT");
+    let (_temporary, root) = project("nova.counter", "MIT");
     edit_manifest(&root, |manifest| {
         manifest["permissions"] = json!({
             "network": [{"origin": "https://api.example.com", "method": "GET", "path": "/v1/count"}],
@@ -246,7 +272,7 @@ fn the_review_lists_every_requested_authority() {
             "capabilities": ["fps.read"]
         });
     });
-    let (output, report) = admit_json(&[path(&root)]);
+    let (output, report) = admit_json(&[path(&root), "--publisher", "nova"]);
     assert_eq!(output.status.code(), Some(0), "{report}");
     let kinds: Vec<&str> = report["review"]
         .as_array()
@@ -274,10 +300,10 @@ fn the_review_lists_every_requested_authority() {
             "maxResponseBytes": 3_145_728
         }]});
     });
-    let (output, report) = admit_json(&[path(&root)]);
+    let (output, report) = admit_json(&[path(&root), "--publisher", "nova"]);
     assert_eq!(output.status.code(), Some(0), "{report}");
     assert_eq!(report["review"][0]["maxResponseBytes"], 3_145_728);
-    let output = cli(&["admit", path(&root)]);
+    let output = cli(&["admit", path(&root), "--publisher", "nova"]);
     let shown = text(&output.stdout);
     assert!(
         shown.contains("/v1/count, responses up to 3145728 bytes"),
@@ -288,7 +314,7 @@ fn the_review_lists_every_requested_authority() {
     edit_manifest(&root, |manifest| {
         manifest["permissions"] = json!({"storage": true, "capabilities": ["media.read"]});
     });
-    let output = cli(&["admit", path(&root)]);
+    let output = cli(&["admit", path(&root), "--publisher", "nova"]);
     assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
     let shown = text(&output.stdout);
     assert!(shown.contains("media.read [SENSITIVE"), "{shown}");
@@ -297,12 +323,19 @@ fn the_review_lists_every_requested_authority() {
 
 #[test]
 fn package_text_never_reaches_the_terminal_raw() {
-    let (_temporary, root) = project("com.example.counter", "MIT");
+    let (_temporary, root) = project("nova.counter", "MIT");
     let mut hostile = listing("MIT");
     hostile["author"] = json!("Mallory \u{202e}gnp.exe");
     write_listing(&root, &hostile);
     for format in ["human", "json"] {
-        let output = cli(&["admit", path(&root), "--format", format]);
+        let output = cli(&[
+            "admit",
+            path(&root),
+            "--publisher",
+            "nova",
+            "--format",
+            format,
+        ]);
         let shown = text(&output.stdout) + &text(&output.stderr);
         assert!(!shown.contains('\u{202e}'), "{format}: {shown}");
     }
@@ -310,7 +343,7 @@ fn package_text_never_reaches_the_terminal_raw() {
 
 #[test]
 fn a_bare_archive_is_checked_but_not_rebuilt() {
-    let (temporary, root) = project("com.example.counter", "MIT");
+    let (temporary, root) = project("nova.counter", "MIT");
     let archive = temporary.path().join("counter.ocpkg");
     let output = cli(&[
         "package",
@@ -321,11 +354,19 @@ fn a_bare_archive_is_checked_but_not_rebuilt() {
     ]);
     assert!(output.status.success(), "{}", text(&output.stderr));
     let listing = root.join("listing.json");
-    let (output, report) = admit_json(&[path(&archive), "--listing", path(&listing)]);
+    let (output, report) = admit_json(&[
+        path(&archive),
+        "--publisher",
+        "nova",
+        "--listing",
+        path(&listing),
+    ]);
     assert_eq!(output.status.code(), Some(0), "{report}");
     assert_eq!(codes(&report), ["admission.not_rebuilt"]);
     let (output, _) = admit_json(&[
         path(&archive),
+        "--publisher",
+        "nova",
         "--listing",
         path(&listing),
         "--deny-warnings",
@@ -334,7 +375,13 @@ fn a_bare_archive_is_checked_but_not_rebuilt() {
     assert_eq!(cli(&["admit", path(&archive)]).status.code(), Some(2));
 
     fs::write(&archive, b"PK not a package").expect("archive");
-    let (output, report) = admit_json(&[path(&archive), "--listing", path(&listing)]);
+    let (output, report) = admit_json(&[
+        path(&archive),
+        "--publisher",
+        "nova",
+        "--listing",
+        path(&listing),
+    ]);
     assert_eq!(output.status.code(), Some(1));
     assert_eq!(report["id"], Value::Null);
 }

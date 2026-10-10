@@ -123,7 +123,7 @@ fn every_template_checks_packages_and_reads_back() {
         let package =
             read_package(&bytes).unwrap_or_else(|error| panic!("{template}: {}", error.as_str()));
         validate_package_style(&package).expect("style accepted");
-        assert_eq!(package.manifest.id, format!("com.example.{template}"));
+        assert_eq!(package.manifest.id, format!("yourhandle.{template}"));
         let logic = package.file("logic.js").expect("logic.js");
         assert!(logic.starts_with(b"/*! @overcrow/sdk 1.0.0 | MIT-0 |"));
         assert!(
@@ -135,7 +135,7 @@ fn every_template_checks_packages_and_reads_back() {
         assert!(inspected.status.success());
         let report = text(&inspected.stdout);
         assert!(
-            report.contains(&format!("com.example.{template} 0.1.0")),
+            report.contains(&format!("yourhandle.{template} 0.1.0")),
             "{report}"
         );
         assert!(report.contains("@overcrow/sdk 1.0.0"));
@@ -157,7 +157,7 @@ fn the_default_output_is_under_dist() {
     let summary: serde_json::Value =
         serde_json::from_slice(&output.stdout).expect("one JSON object");
     let path = PathBuf::from(summary["package"].as_str().expect("path"));
-    assert!(path.ends_with(Path::new("dist").join("com.example.counter-0.1.0.ocpkg")));
+    assert!(path.ends_with(Path::new("dist").join("yourhandle.counter-0.1.0.ocpkg")));
     assert_eq!(
         summary["bytes"].as_u64(),
         Some(fs::metadata(&path).expect("package").len())
@@ -274,7 +274,7 @@ fn golden_manifest() {
     replace(
         &root,
         "manifest.json",
-        "\"com.example.counter\"",
+        "\"yourhandle.counter\"",
         "\"Counter\"",
     );
     golden_check("manifest_id", &root, &[]);

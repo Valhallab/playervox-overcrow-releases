@@ -15,6 +15,7 @@ const LIMITS: zipread::Limits = zipread::Limits {
     max_entries: 64,
     max_entry_bytes: 1 << 20,
     max_total_bytes: 4 << 20,
+    max_directory_bytes: 64 * 1024,
 };
 
 fuzz_target!(|data: &[u8]| {

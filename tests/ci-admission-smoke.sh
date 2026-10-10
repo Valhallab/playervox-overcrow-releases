@@ -60,7 +60,7 @@ cli() {
 }
 widget() {
     directory="$repository/widgets/$1"
-    cli init "$directory" --template counter --id com.example.counter >/dev/null
+    cli init "$directory" --template counter --id contributor.counter >/dev/null
     node - "$directory/manifest.json" "$2" <<'JS'
 const fs = require('node:fs');
 const [manifestPath, id] = process.argv.slice(2);
@@ -112,7 +112,8 @@ expect_refusal() {
 }
 
 break_view() {
-    printf '%s\n' '<box>' >"$repository/widgets/example-counter/view.ocml"
+    widget new-broken contributor.broken-counter
+    printf '%s\n' '<box>' >"$repository/widgets/new-broken/view.ocml"
 }
 expect_refusal "$fork" "$(candidate broken break_view)" \
     'candidate artifact admission failed' 'a broken view'
@@ -173,7 +174,7 @@ expect_refusal "$fork" "$(candidate archive hide_file)" \
 
 touch_docs() {
     printf '\n' >>"$repository/docs/content/en/guide.md"
-    widget new-third-party com.example.new-counter
+    widget new-third-party contributor.new-counter
 }
 valid_sha=$(candidate valid touch_docs)
 valid_tree=$(/usr/bin/git -C "$repository" rev-parse --verify "$valid_sha^{tree}")
@@ -193,7 +194,7 @@ tab=$(printf '\t')
     }
     END {
         exit (("widgets/example-counter playervox com.example.counter 0.1.0" in seen) \
-            && ("widgets/new-third-party third-party com.example.new-counter 0.1.0" in seen) \
+            && ("widgets/new-third-party third-party contributor.new-counter 0.1.0" in seen) \
             && ("widgets/playervox-counter playervox com.playervox.overcrow.smoke-counter 0.1.0" in seen)) ? 0 : 1
     }' "$stdout" || report_failure 'the receipt artifacts are wrong'
 # The header, one artifact per v1 widget (the three fixtures above and the

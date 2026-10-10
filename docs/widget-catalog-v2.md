@@ -141,8 +141,10 @@ does not belong to its publisher.
 A handle is 3 to 32 bytes of `[a-z0-9-]`, without a hyphen at either end or
 two in a row. Catalog readers check only this grammar. The creator portal
 also refuses, at registration, the historic generic domain extensions
-(`com`, `net`, `org`…), reserved handles and look-alikes of PlayerVox,
-OverCrow and Valhallab; the generated reference lists them, and a policy
+(`com`, `net`, `org`…), reserved handles, the example handles of the
+documentation (`nova`, `example`, `yourhandle`, `yourname`) and
+look-alikes of PlayerVox, OverCrow and Valhallab; the generated reference
+lists them, and a policy
 that grows never makes an older application refuse a catalog. For the same
 reason the portal, not the reader, refuses a displayed publisher name that
 reads as PlayerVox, OverCrow or Valhallab (`Player Vox`, `0verCrow`, or

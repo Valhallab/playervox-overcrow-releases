@@ -30,7 +30,10 @@ cargo run -p overcrow-widget-format --example fixtures
 
 The fuzz targets cover every parser and package verifier of the widget
 contract: `ocml`, `ocss`, `expression`, `validate_manifest`, `read_package`,
-`validate_compiled_view` and `open_envelope`. They need a nightly toolchain
+`validate_compiled_view` and `open_envelope`; and the CLI's ZIP reader,
+under its two rule sets: `creator_tools_zip` (the creator tools ZIP the
+runtime is downloaded from) and `source_zip` (creators' source archives,
+whose accepted names must stay relative, portable and unique). They need a nightly toolchain
 and `cargo-fuzz` 0.13.2; the `fuzz` workflow runs each for 60 seconds on
 pull requests and pushes to `main`, and 45 minutes weekly. Seed the corpus
 from the conformance fixtures, then run a target, from the repository root:

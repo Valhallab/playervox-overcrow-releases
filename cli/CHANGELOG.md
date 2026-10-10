@@ -7,6 +7,41 @@ change between betas; 1.0.0 will freeze them under semantic versioning.
 The CLI's version enters no package: a package depends only on the
 widget's sources and the embedded SDK.
 
+## Unreleased
+
+- `admit` takes a ZIP of the widget folder (`admit lol-timers.zip`), as the
+  creator space receives it, and admits it to the same package as the
+  folder; a folder is read the same way, leaving out what the creator
+  tools never send. `package`, `check`, `dev` and `test` skip the same
+  files under `assets/` (`.DS_Store`, `dist/`…). The archive is read and inflated in memory under strict rules
+  (32 MiB, 64 MiB and 2,000 files uncompressed; no link, special file,
+  unsafe or non-portable name, duplicate, encryption, ZIP64, comment,
+  hidden byte, alternate name or abnormal compression ratio; every entry
+  is inflated and checked, even the ones left out), then only its
+  validated files are written into a private work folder. Hidden files,
+  `node_modules/`, `dist/` and the like are left out; one wrapping folder
+  is accepted. New diagnostics: `sources.*`.
+- `package --source-map FILE` and `admit --source-map FILE` write the
+  code map of `logic.js`: a Source Map v3 back to the sources, with their
+  functions (`x_overcrow_functions`). It never enters the package.
+- `diff <old> <new>`: the changes between two versions of a widget's
+  sources (folders or ZIPs), unified, with line counts and the permission
+  keys added, widened and removed. Texts above 1 MiB or 20,000 lines are
+  compared by digest only.
+- `admit --previous FILE` compares with the last approved version: same
+  ID, higher version, and the permission keys
+  (`network:GET https://…`, `storage`, `clipboardWrite`, `capability:…`,
+  `gameEvent:…`) added, widened and removed, with the review type.
+- Widget IDs follow the creator space: `admit --publisher HANDLE
+  [--domain DOMAIN]…` checks that the ID belongs to the publisher
+  (`playervox` stays trusted for the repository's widgets); without a
+  publisher, example IDs (`nova.*`, `yourhandle.*`, `gg.nova.*`…) and IDs
+  under a handle nobody can register are refused. `init` without `--id` writes `yourhandle.<dir>` and says to
+  replace it. Messages give `nova.lol-timers` and `gg.nova.lol-timers` as
+  examples.
+- The JSON reports of `admit` and `diff` and the exit status of every
+  command are documented as stable.
+
 ## 1.0.0-beta.2
 
 Released in the creator tools ZIPs of OverCrow 0.6.0-beta.2's GitHub

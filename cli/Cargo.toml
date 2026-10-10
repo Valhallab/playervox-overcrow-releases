@@ -37,6 +37,9 @@ oxc_ecmascript = "=0.152.0"
 oxc_minifier = "=0.152.0"
 oxc_parser = "=0.152.0"
 oxc_semantic = "=0.152.0"
+# The code map of logic.js (`--source-map`): composes the maps of oxc's
+# prints. Already locked as oxc_codegen's default `sourcemap` feature.
+oxc_sourcemap = "=9.0.0"
 oxc_span = "=0.152.0"
 oxc_str = "=0.152.0"
 oxc_syntax = "=0.152.0"

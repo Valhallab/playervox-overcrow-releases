@@ -7,6 +7,7 @@ mod bundle;
 mod channel;
 mod dev;
 mod diag;
+mod diff;
 mod doctor;
 mod download;
 mod init;
@@ -14,13 +15,18 @@ mod inspect;
 mod interrupt;
 mod jsonpos;
 mod lint;
+mod permissions;
 mod project;
 mod runtime;
 mod sanitize;
 mod sdk;
 mod snapshot;
+mod sourcemap;
 mod sources;
+mod sourcetree;
 mod test;
+#[cfg(test)]
+mod testzip;
 mod typecheck;
 mod watch;
 mod zipread;
@@ -41,20 +47,26 @@ overcrow-widget: create, check and package OverCrow widgets (widget API v1)
 Usage:
   overcrow-widget init <dir> [--template blank|counter|list|chart] [--id ID] [--name NAME]
   overcrow-widget check [dir] [--format human|json] [--deny-warnings] [--no-typecheck]
-  overcrow-widget package [dir] [--out FILE] [--format human|json] [--deny-warnings] [--no-typecheck]
+  overcrow-widget package [dir] [--out FILE] [--source-map FILE] [--format human|json] [--deny-warnings] [--no-typecheck]
   overcrow-widget inspect <file.ocpkg> [--format human|json]
   overcrow-widget dev [dir] [--format human|json] [--no-typecheck]
   overcrow-widget doctor [dir] [--format human|json] [--deny-warnings]
-  overcrow-widget admit [dir] [--package FILE] [--publisher playervox] [--out DIR] [--format human|json] [--deny-warnings]
-  overcrow-widget admit <file.ocpkg> --listing FILE [--publisher playervox] [--format human|json]
+  overcrow-widget admit [dir | sources.zip] [--publisher HANDLE [--domain DOMAIN]...] [--previous FILE]
+                        [--package FILE] [--source-map FILE] [--out DIR] [--format human|json] [--deny-warnings]
+  overcrow-widget admit <file.ocpkg> --listing FILE [--publisher HANDLE] [--format human|json]
+  overcrow-widget diff <old> <new> [--format human|json]   (folders or source .zip files)
   overcrow-widget test [dir] [--runtime PATH] [--offline] [--scenario NAME] [--update] [--format human|json] [--no-typecheck]
   overcrow-widget --version [--format json] | --help
 
 Exit status: 0 success (warnings allowed), 1 errors found, 2 usage or I/O error.
 `admit` ends with 1 when the submission would be refused.
+`diff` ends with 0 whether or not the sources differ, 1 when a side is refused.
 `test` ends with 1 when a scenario fails, 2 when no runtime can run.
 `dev` runs until Ctrl+C (0), or ends with 1 when the overlay ends the session.
 Guide: https://overcrow.playervox.com/docs/en/cli/";
+
+/// Where the guide says how to choose a widget ID.
+const ID_GUIDE: &str = "https://overcrow.playervox.com/docs/en/manifest/#identity-and-version";
 
 /// Where the guide says how to install TypeScript and the SDK types into a
 /// project.
@@ -86,6 +98,9 @@ const VALUED: &[&str] = &[
     "--package",
     "--listing",
     "--publisher",
+    "--domain",
+    "--previous",
+    "--source-map",
     "--repository",
     "--revision",
 ];
@@ -123,6 +138,14 @@ impl Arguments {
             .rev()
             .find(|(option, _)| option == name)
             .and_then(|(_, value)| value.as_deref())
+    }
+
+    /// Every value of a repeatable option, in order.
+    fn values<'a>(&'a self, name: &'a str) -> impl Iterator<Item = &'a str> + 'a {
+        self.options
+            .iter()
+            .filter(move |(option, _)| option == name)
+            .filter_map(|(_, value)| value.as_deref())
     }
 
     fn flag(&self, name: &str) -> bool {
@@ -202,6 +225,7 @@ fn main() -> ExitCode {
         "doctor" => run_doctor(&arguments),
         "test" => run_test(&arguments),
         "admit" => run_admit(&arguments),
+        "diff" => run_diff(&arguments),
         "snapshot-plan" => run_snapshot_plan(&arguments),
         other => Err(format!("unknown command `{other}`")),
     };
@@ -270,6 +294,9 @@ fn run_admit(arguments: &Arguments) -> Result<ExitCode, String> {
             "--package",
             "--listing",
             "--publisher",
+            "--domain",
+            "--previous",
+            "--source-map",
             "--out",
             "--format",
             "--deny-warnings",
@@ -277,33 +304,64 @@ fn run_admit(arguments: &Arguments) -> Result<ExitCode, String> {
         1,
     )?;
     let format = arguments.format()?;
-    let publisher = match arguments.value("--publisher") {
-        None => admit::Publisher::ThirdParty,
-        Some("playervox") => admit::Publisher::PlayerVox,
-        Some(other) => return Err(format!("unknown publisher `{other}`: playervox or none")),
-    };
+    let publisher = publisher(arguments)?;
     let target = arguments.directory();
     let listing = arguments.value("--listing").map(Path::new);
-    let input = if target.is_dir() {
+    let source_map = arguments.value("--source-map");
+    let mut report = Report::default();
+    // Sources, a folder or a ZIP, are read as the creator space receives
+    // them and admitted from the private folder they are written to, which
+    // lives until the end of the command.
+    let mut work = None;
+    let mut sources = None;
+    let input = if let Some(source) = sourcetree::Input::of(&target) {
         if listing.is_some() {
-            return Err("--listing is for an archive; a source directory has listing.json".into());
+            return Err("--listing is for a package; the sources hold listing.json".into());
         }
-        admit::Input::Source(&target)
+        let Some(tree) = sourcetree::read(&source, &mut report) else {
+            let value = admit::refused_before_identity(&report, &publisher, None);
+            match format {
+                Format::Json => println!("{}", sanitize::json(&value.to_string())),
+                Format::Human => {
+                    emit(&report, None, format, false, "admit");
+                    print!("{}", admit::render_human(&value));
+                }
+            }
+            let status = if sourcetree::io_failed(&report) { 2 } else { 1 };
+            return Ok(ExitCode::from(status));
+        };
+        sources = Some(tree.summary_json());
+        let folder = match sourcetree::materialize(&tree) {
+            Ok(folder) => folder,
+            Err(error) => {
+                eprintln!("overcrow-widget: cannot write the sources into a work folder: {error}");
+                return Ok(ExitCode::from(2));
+            }
+        };
+        admit::Input::Source(work.insert(folder).path())
     } else if target.is_file() {
-        if arguments.value("--package").is_some() || arguments.value("--out").is_some() {
-            return Err("--package and --out need the source directory".into());
+        if arguments.value("--package").is_some()
+            || arguments.value("--out").is_some()
+            || source_map.is_some()
+        {
+            return Err("--package, --out and --source-map need the sources".into());
         }
         admit::Input::Archive {
             package: &target,
             listing: listing.ok_or("admitting an archive needs --listing FILE")?,
         }
     } else {
-        return Err(format!("{} is not a directory or a file", target.display()));
+        return Err(format!(
+            "{} is not a directory, a source .zip or a package",
+            target.display()
+        ));
     };
-    let mut report = Report::default();
     let options = admit::Options {
         publisher,
         package: arguments.value("--package").map(Path::new),
+        previous: arguments.value("--previous").map(Path::new),
+        source_map: source_map.is_some(),
+        sources,
     };
     let outcome = admit::admit(&input, &options, &mut report);
     let deny_warnings = arguments.flag("--deny-warnings");
@@ -311,7 +369,10 @@ fn run_admit(arguments: &Arguments) -> Result<ExitCode, String> {
     match format {
         Format::Json => println!("{}", sanitize::json(&outcome.report.to_string())),
         Format::Human => {
-            let root = matches!(input, admit::Input::Source(_)).then_some(target.as_path());
+            let root = match input {
+                admit::Input::Source(root) => Some(root),
+                admit::Input::Archive { .. } => None,
+            };
             emit(&report, root, format, deny_warnings, "admit");
             print!("{}", admit::render_human(&outcome.report));
         }
@@ -319,13 +380,60 @@ fn run_admit(arguments: &Arguments) -> Result<ExitCode, String> {
     if refused {
         return Ok(ExitCode::from(1));
     }
-    if let (Some(out), Some(admitted)) = (arguments.value("--out"), &outcome.admitted)
+    let Some(admitted) = &outcome.admitted else {
+        return Ok(ExitCode::from(1));
+    };
+    if let Some(out) = arguments.value("--out")
         && let Err(error) = admit::write_bundle(Path::new(out), admitted)
     {
         eprintln!("overcrow-widget: cannot write the admission bundle {out}: {error}");
         return Ok(ExitCode::from(2));
     }
+    if let (Some(path), Some(map)) = (source_map, &admitted.source_map)
+        && let Err(error) = write_atomically(Path::new(path), map.as_bytes())
+    {
+        eprintln!("overcrow-widget: cannot write the code map {path}: {error}");
+        return Ok(ExitCode::from(2));
+    }
     Ok(ExitCode::SUCCESS)
+}
+
+/// `--publisher HANDLE` and its `--domain DOMAIN` options: the grammar of
+/// the catalog (the creator space applies its registration policy).
+fn publisher(arguments: &Arguments) -> Result<admit::Publisher, String> {
+    use overcrow_widget_schema::identifiers::{domain_syntax, handle_syntax};
+    let domains: Vec<String> = arguments.values("--domain").map(str::to_owned).collect();
+    let Some(handle) = arguments.value("--publisher") else {
+        if domains.is_empty() {
+            return Ok(admit::Publisher::Unknown);
+        }
+        return Err("--domain needs --publisher".into());
+    };
+    if handle_syntax(handle).is_err() {
+        return Err(format!(
+            "`{handle}` is not a publisher handle: 3 to 32 of a-z, 0-9 and -"
+        ));
+    }
+    if let Some(domain) = domains.iter().find(|domain| domain_syntax(domain).is_err()) {
+        return Err(format!("`{domain}` is not a publisher domain"));
+    }
+    Ok(admit::Publisher::Handle {
+        handle: handle.to_owned(),
+        domains,
+    })
+}
+
+fn run_diff(arguments: &Arguments) -> Result<ExitCode, String> {
+    arguments.expect(&["--format"], 2)?;
+    let format = arguments.format()?;
+    let [old, new] = arguments.positional.as_slice() else {
+        return Err("diff needs two sides: <old> <new>".into());
+    };
+    let side = |path: &String| {
+        sourcetree::Input::of(Path::new(path))
+            .ok_or_else(|| format!("{path} is not a folder or a source .zip"))
+    };
+    Ok(diff::run(&side(old)?, &side(new)?, format))
 }
 
 /// Maintenance command of the marketplace CI (`scripts/ci-verify.sh`): the
@@ -411,6 +519,14 @@ fn run_init(arguments: &Arguments) -> Result<ExitCode, String> {
             for file in files {
                 println!("  {file}");
             }
+            if options.id.is_none() {
+                println!(
+                    "\nThe ID is {}.<name>: replace {} in manifest.json with your\n\
+                     publisher handle before you submit ({ID_GUIDE})",
+                    init::PLACEHOLDER_HANDLE,
+                    init::PLACEHOLDER_HANDLE
+                );
+            }
             println!(
                 "\nNext: cd {directory} && npm install && overcrow-widget check\n\
                  npm install brings TypeScript and @overcrow/sdk {}, which check uses to\n\
@@ -432,7 +548,13 @@ fn run_init(arguments: &Arguments) -> Result<ExitCode, String> {
 
 fn run_build(arguments: &Arguments, write: bool) -> Result<ExitCode, String> {
     let allowed: &[&str] = if write {
-        &["--out", "--format", "--deny-warnings", "--no-typecheck"]
+        &[
+            "--out",
+            "--source-map",
+            "--format",
+            "--deny-warnings",
+            "--no-typecheck",
+        ]
     } else {
         &["--format", "--deny-warnings", "--no-typecheck"]
     };
@@ -443,8 +565,10 @@ fn run_build(arguments: &Arguments, write: bool) -> Result<ExitCode, String> {
         return Err(format!("{} is not a directory", root.display()));
     }
     let mut report = Report::default();
+    let source_map = arguments.value("--source-map").map(PathBuf::from);
     let options = build::Options {
         typecheck: !arguments.flag("--no-typecheck"),
+        source_map: source_map.is_some(),
     };
     let built = build::build(&root, &options, &mut report);
     let what = if write { "package" } else { "check" };
@@ -481,15 +605,29 @@ fn run_build(arguments: &Arguments, write: bool) -> Result<ExitCode, String> {
         eprintln!("overcrow-widget: cannot write {}: {error}", out.display());
         return Ok(ExitCode::from(2));
     }
+    if let (Some(path), Some(map)) = (&source_map, &built.source_map)
+        && let Err(error) = write_atomically(path, map.as_bytes())
+    {
+        eprintln!("overcrow-widget: cannot write {}: {error}", path.display());
+        return Ok(ExitCode::from(2));
+    }
     let digest = hex(&sha256(&built.archive));
     match format {
-        Format::Human => println!(
-            "{}  {} bytes  sha256 {digest}\n  logic.js {} bytes ({} modules linked)",
-            out.display(),
-            built.archive.len(),
-            built.files["logic.js"].len(),
-            built.modules
-        ),
+        Format::Human => {
+            println!(
+                "{}  {} bytes  sha256 {digest}\n  logic.js {} bytes ({} modules linked)",
+                out.display(),
+                built.archive.len(),
+                built.files["logic.js"].len(),
+                built.modules
+            );
+            if let Some(path) = &source_map {
+                println!(
+                    "  code map {} (keep it private, never ship it)",
+                    path.display()
+                );
+            }
+        }
         Format::Json => println!(
             "{}",
             serde_json::json!({
@@ -497,6 +635,7 @@ fn run_build(arguments: &Arguments, write: bool) -> Result<ExitCode, String> {
                 "bytes": built.archive.len(),
                 "sha256": digest,
                 "logicBytes": built.files["logic.js"].len(),
+                "sourceMap": source_map.as_ref().map(|path| path.display().to_string()),
             })
         ),
     }

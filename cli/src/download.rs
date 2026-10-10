@@ -38,6 +38,7 @@ const ZIP_LIMITS: Limits = Limits {
     max_entries: 64,
     max_entry_bytes: 256 * 1024 * 1024,
     max_total_bytes: 1024 * 1024 * 1024,
+    max_directory_bytes: 64 * 1024,
 };
 const TOTAL_TIME: Duration = Duration::from_secs(15 * 60);
 const CONNECT_TIME: Duration = Duration::from_secs(30);

@@ -110,6 +110,7 @@ pub fn run(root: &Path, options: &Options<'_>) -> ExitCode {
         root,
         &build::Options {
             typecheck: options.typecheck,
+            source_map: false,
         },
         &mut diagnostics,
     );
