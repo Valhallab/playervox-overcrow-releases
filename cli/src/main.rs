@@ -52,7 +52,8 @@ Usage:
   overcrow-widget dev [dir] [--format human|json] [--no-typecheck]
   overcrow-widget doctor [dir] [--format human|json] [--deny-warnings]
   overcrow-widget admit [dir | sources.zip] [--publisher HANDLE [--domain DOMAIN]...] [--previous FILE]
-                        [--package FILE] [--source-map FILE] [--out DIR] [--format human|json] [--deny-warnings]
+                        [--listing required|optional] [--package FILE] [--source-map FILE] [--out DIR]
+                        [--format human|json] [--deny-warnings]
   overcrow-widget admit <file.ocpkg> --listing FILE [--publisher HANDLE] [--format human|json]
   overcrow-widget diff <old> <new> [--format human|json]   (folders or source .zip files)
   overcrow-widget test [dir] [--runtime PATH] [--offline] [--scenario NAME] [--update] [--format human|json] [--no-typecheck]
@@ -306,20 +307,29 @@ fn run_admit(arguments: &Arguments) -> Result<ExitCode, String> {
     let format = arguments.format()?;
     let publisher = publisher(arguments)?;
     let target = arguments.directory();
-    let listing = arguments.value("--listing").map(Path::new);
+    let listing = arguments.value("--listing");
     let source_map = arguments.value("--source-map");
     let mut report = Report::default();
+    let mut options = admit::Options {
+        publisher,
+        listing: admit::ListingPolicy::Required,
+        package: arguments.value("--package").map(Path::new),
+        previous: arguments.value("--previous").map(Path::new),
+        source_map: source_map.is_some(),
+        sources: None,
+    };
     // Sources, a folder or a ZIP, are read as the creator space receives
     // them and admitted from the private folder they are written to, which
     // lives until the end of the command.
     let mut work = None;
-    let mut sources = None;
     let input = if let Some(source) = sourcetree::Input::of(&target) {
-        if listing.is_some() {
-            return Err("--listing is for a package; the sources hold listing.json".into());
+        if let Some(policy) = listing {
+            options.listing = admit::ListingPolicy::parse(policy).ok_or(
+                "with sources, --listing is optional or required (listing.json is in the sources)",
+            )?;
         }
         let Some(tree) = sourcetree::read(&source, &mut report) else {
-            let value = admit::refused_before_identity(&report, &publisher, None);
+            let value = admit::refused_before_identity(&report, &options);
             match format {
                 Format::Json => println!("{}", sanitize::json(&value.to_string())),
                 Format::Human => {
@@ -330,7 +340,7 @@ fn run_admit(arguments: &Arguments) -> Result<ExitCode, String> {
             let status = if sourcetree::io_failed(&report) { 2 } else { 1 };
             return Ok(ExitCode::from(status));
         };
-        sources = Some(tree.summary_json());
+        options.sources = Some(tree.summary_json());
         let folder = match sourcetree::materialize(&tree) {
             Ok(folder) => folder,
             Err(error) => {
@@ -346,22 +356,18 @@ fn run_admit(arguments: &Arguments) -> Result<ExitCode, String> {
         {
             return Err("--package, --out and --source-map need the sources".into());
         }
+        let listing = listing
+            .filter(|listing| admit::ListingPolicy::parse(listing).is_none())
+            .ok_or("admitting an archive needs --listing FILE")?;
         admit::Input::Archive {
             package: &target,
-            listing: listing.ok_or("admitting an archive needs --listing FILE")?,
+            listing: Path::new(listing),
         }
     } else {
         return Err(format!(
             "{} is not a directory, a source .zip or a package",
             target.display()
         ));
-    };
-    let options = admit::Options {
-        publisher,
-        package: arguments.value("--package").map(Path::new),
-        previous: arguments.value("--previous").map(Path::new),
-        source_map: source_map.is_some(),
-        sources,
     };
     let outcome = admit::admit(&input, &options, &mut report);
     let deny_warnings = arguments.flag("--deny-warnings");
