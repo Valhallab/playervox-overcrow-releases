@@ -3,5 +3,7 @@
 //! review (`docs/content/en/cli.md`).
 
 pub mod api;
+pub mod client;
 pub mod secret;
+pub mod state;
 pub mod texts;

@@ -63,9 +63,9 @@ pub fn artifact_name(version: &str, platform: &str) -> String {
     format!("overcrow-widget-headless-{version}-{platform}{suffix}")
 }
 
-/// Where the pinned runtimes are kept: `$XDG_CACHE_HOME` or `~/.cache` on
-/// Linux, `%LOCALAPPDATA%` on Windows.
-pub fn cache_directory() -> Option<PathBuf> {
+/// The CLI's cache: `$XDG_CACHE_HOME` or `~/.cache` on Linux,
+/// `%LOCALAPPDATA%` on Windows, then `overcrow-widget`.
+pub fn cache_root() -> Option<PathBuf> {
     let base = if cfg!(windows) {
         std::env::var_os("LOCALAPPDATA").map(PathBuf::from)
     } else {
@@ -74,7 +74,12 @@ pub fn cache_directory() -> Option<PathBuf> {
             .filter(|path| path.is_absolute())
             .or_else(|| std::env::var_os("HOME").map(|home| PathBuf::from(home).join(".cache")))
     }?;
-    Some(base.join("overcrow-widget").join("runtime"))
+    Some(base.join("overcrow-widget"))
+}
+
+/// Where the pinned runtimes are kept, in the CLI's cache.
+pub fn cache_directory() -> Option<PathBuf> {
+    cache_root().map(|root| root.join("runtime"))
 }
 
 /// A runtime ready to run.
