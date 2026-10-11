@@ -28,7 +28,7 @@ Pages, by group of the navigation:
 | `build` | `manifest.md`, `view.md`, `style.md`, `logic.md`, `services.md` (services, permissions, capabilities, errors, user actions), `forms.md` (controls, forms, write intents) |
 | `tools` | `cli.md` (every command and diagnostic), `testing.md` (unit tests, scenarios, reference images), `dev-channel.md` |
 | `reference` | `reference.md` (where each answer is), `elements.md`, `style-properties.md`, `sdk.md`, `service-reference.md`, `result-shapes.md`, `limits.md` |
-| `publish` | `package.md`, `security.md`, `publishing.md`; hidden until the creator space opens to everyone: `creator-space.md` (getting started), `publish-keys.md` (publish keys and CI), `verified-domain.md` |
+| `publish` | `package.md`, `security.md`, `publishing.md`; hidden until the creator space opens to everyone: `creator-space.md` (getting started), `publish-keys.md` (publish keys and CI), `verified-domain.md`, `publish-a-widget.md` (sending a version from the creator space), `widget-review.md` (review types, delays, appeals), `widget-listing.md` (the listing) |
 
 The other documents of `docs/`, in English only, are for implementers and
 maintainers: the generated [schema reference](../widget-schema-v1.md), which

@@ -161,6 +161,27 @@
       "group": "publish",
       "label": { "en": "Verified domain", "fr": "Domaine vérifié" },
       "hidden": true
+    },
+    {
+      "slug": "publish-a-widget",
+      "file": "publish-a-widget.md",
+      "group": "publish",
+      "label": { "en": "Publish a widget", "fr": "Publier un widget" },
+      "hidden": true
+    },
+    {
+      "slug": "widget-review",
+      "file": "widget-review.md",
+      "group": "publish",
+      "label": { "en": "Review: types, delays, appeals", "fr": "Revue : types, délais, recours" },
+      "hidden": true
+    },
+    {
+      "slug": "widget-listing",
+      "file": "widget-listing.md",
+      "group": "publish",
+      "label": { "en": "The listing: best practices", "fr": "Fiche : bonnes pratiques" },
+      "hidden": true
     }
   ]
 }
