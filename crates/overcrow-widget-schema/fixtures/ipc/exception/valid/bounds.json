@@ -1,0 +1,7 @@
+{
+  "type": "Exception",
+  "kind": "InternalError",
+  "line": 10000000,
+  "column": 10000000,
+  "count": 10000
+}

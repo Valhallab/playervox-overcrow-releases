@@ -524,7 +524,63 @@ pub const VM_MESSAGES: &[Message] = &[
         ],
         summary: "The VM reports a failure it detected. No text and no stack. After a fatal fault the VM sends what it can and exits. At most one non-fatal fault per handler and per turn; the host treats more as `protocol_violation` (P1.7).",
     },
+    Message {
+        name: "Exception",
+        frame: 2,
+        fields: &[
+            Field::required(
+                "kind",
+                ValueType::Keyword(EXCEPTION_KINDS),
+                "The built-in constructor of the thrown error, never its `name`: `Error` for a subclass or any other error object, `thrown_value` for a value that is not an error.",
+            ),
+            Field::optional(
+                "line",
+                ValueType::Integer {
+                    min: 1,
+                    max: MAX_EXCEPTION_POSITION,
+                },
+                "1-based line, in `logic.js`, of the innermost `logic.js` frame of the error's stack; sent with `column`, or neither.",
+            ),
+            Field::optional(
+                "column",
+                ValueType::Integer {
+                    min: 1,
+                    max: MAX_EXCEPTION_POSITION,
+                },
+                "1-based column of that frame as the engine counts it: UTF-8 bytes from the start of the line.",
+            ),
+            Field::required(
+                "count",
+                ValueType::Integer {
+                    min: 1,
+                    max: MAX_EXCEPTION_COUNT,
+                },
+                "Occurrences of this kind at this position since the VM last reported it.",
+            ),
+        ],
+        summary: "The VM reports the exceptions of the widget's code for its anonymous statistics: their kind and position only, never their message or stack. It adds them up and sends at most 8 at a time, at most every 10 seconds. A host may drop the excess; it is never a `protocol_violation`.",
+    },
 ];
+
+/// Kinds of `Exception`, a closed list: the anonymous statistics API
+/// counts these and nothing else.
+pub const EXCEPTION_KINDS: &[&str] = &[
+    "Error",
+    "TypeError",
+    "RangeError",
+    "ReferenceError",
+    "SyntaxError",
+    "URIError",
+    "EvalError",
+    "AggregateError",
+    "InternalError",
+    "thrown_value",
+];
+
+/// The largest line or column of an `Exception`.
+const MAX_EXCEPTION_POSITION: i64 = 10_000_000;
+/// The largest `count` of one `Exception`.
+const MAX_EXCEPTION_COUNT: i64 = 10_000;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct FaultCategory {
@@ -647,6 +703,11 @@ pub enum IpcError {
     InvalidAttribute,
     /// A VM argument missing, unknown, repeated or out of range.
     Argument,
+    /// An `Exception.kind` outside [`EXCEPTION_KINDS`].
+    Kind,
+    /// An `Exception` with `line` but no `column`, or the reverse, or a
+    /// position out of range.
+    Position,
 }
 
 impl IpcError {
@@ -661,6 +722,8 @@ impl IpcError {
             Self::Commands => "commands",
             Self::InvalidAttribute => "invalid_attribute",
             Self::Argument => "argument",
+            Self::Kind => "kind",
+            Self::Position => "position",
         }
     }
 }
@@ -689,6 +752,25 @@ fn control<'a>(
         return Err(IpcError::Shape);
     }
     Ok((object, message.fields))
+}
+
+/// Validates an `Exception` control object.
+pub fn validate_exception(value: &Value) -> Result<(), IpcError> {
+    let (object, _) = control(value, "Exception")?;
+    let kind = object["kind"].as_str().ok_or(IpcError::Shape)?;
+    if !EXCEPTION_KINDS.contains(&kind) {
+        return Err(IpcError::Kind);
+    }
+    integer_in(&object["count"], 1, MAX_EXCEPTION_COUNT).ok_or(IpcError::Shape)?;
+    let position = |name: &str| {
+        object
+            .get(name)
+            .map(|value| integer_in(value, 1, MAX_EXCEPTION_POSITION))
+    };
+    match (position("line"), position("column")) {
+        (None, None) | (Some(Some(_)), Some(Some(_))) => Ok(()),
+        _ => Err(IpcError::Position),
+    }
 }
 
 /// Validates a `Fault` control object against the view the VM runs.
