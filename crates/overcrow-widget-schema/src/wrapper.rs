@@ -19,6 +19,7 @@ use crate::limits::{
     MAX_MENU_ROWS, MAX_SLIDER_STEPS, MIN_MENU_CHOICES,
 };
 use crate::model::{Field, ValueType};
+use crate::text::hidden_character;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct RowType {
@@ -354,13 +355,15 @@ fn validate_label(label: &Value) -> Result<(), MenuError> {
     Ok(())
 }
 
-/// Non-empty, trimmed text without control characters, at most `maximum`
-/// Unicode scalar values: menu labels and widget names.
+/// Non-empty, trimmed text without control or hidden characters
+/// ([`hidden_character`]), at most `maximum` Unicode scalar values: menu
+/// labels and widget names.
 pub(crate) fn valid_label_text(text: &str, maximum: u64) -> bool {
     !text.is_empty()
         && text.trim() == text
         && text.chars().count() as u64 <= maximum
         && !text.chars().any(char::is_control)
+        && hidden_character(text).is_none()
 }
 
 fn check_fields(object: &Map<String, Value>, sets: &[&[Field]]) -> Result<(), MenuError> {
@@ -378,4 +381,28 @@ fn valid_identifier(value: &str) -> bool {
         && value
             .bytes()
             .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'-')
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn labels_refuse_hidden_characters() {
+        for text in [
+            "Clock\u{202e}",
+            "a\u{200b}b",
+            "a\u{200d}b",
+            "a\u{2066}b\u{2069}",
+            "Re\u{ad}set",
+            "x\u{feff}",
+            "a\u{e0041}",
+            "\u{fe0f}x",
+            "a\u{2028}b",
+        ] {
+            assert!(!valid_label_text(text, 64), "{text:?}");
+        }
+        assert!(valid_label_text("\u{23f1}\u{fe0f} Timer", 64));
+        assert!(valid_label_text("12\u{a0}h", 64));
+    }
 }

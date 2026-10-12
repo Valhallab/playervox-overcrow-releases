@@ -673,7 +673,7 @@ Every icon of the pinned `egui-lucide 0.1.0` crate (Lucide 1.34.0, 1777 names) i
 
 ### `WidgetName`
 
-Each text is non-empty, trimmed, without control characters and at most `MAX_WIDGET_NAME_CHARS` characters.
+Each text is non-empty, trimmed, without control characters or the invisible characters of [display text](#display-text), and at most `MAX_WIDGET_NAME_CHARS` characters.
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
@@ -784,7 +784,7 @@ Side flyout holding non-group rows.
 
 ### `MenuLabel`
 
-Each text is non-empty, trimmed, without control characters and at most `MAX_MENU_LABEL_CHARS` characters.
+Each text is non-empty, trimmed, without control characters or the invisible characters of [display text](#display-text), and at most `MAX_MENU_LABEL_CHARS` characters.
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
