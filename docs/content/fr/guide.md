@@ -250,10 +250,9 @@ utilisateurs obtiennent les widgets par le catalogue signé. Voir
 
 ## 12. Soumettre
 
-Ajoutez un `listing.json` avec le texte de la marketplace, lancez vous-même
-l’admission, puis ouvrez une pull request qui ajoute votre widget sous
-`widgets/<dir>/`, sur la branche `candidate` du
-[dépôt public](https://github.com/Valhallab/playervox-overcrow-releases) :
+Ajoutez un `listing.json` avec le texte de la marketplace et lancez
+vous-même l’admission. Les widgets ne sont plus proposés par pull request :
+vous enverrez le vôtre depuis l’espace créateurs OverCrow, à son ouverture.
 
 ```sh
 overcrow-widget admit

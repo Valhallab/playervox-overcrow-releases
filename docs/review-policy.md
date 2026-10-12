@@ -6,8 +6,11 @@ project fails admission.
 
 ## Static admission (CI)
 
-The `marketplace-ci` workflow runs on pull requests to `main` and
-`candidate` (`pull_request_target`) and on pushes to them:
+Widgets are no longer proposed by pull request: creators submit them in the
+OverCrow creator space, and PlayerVox's own widgets are sent there by the
+`overcrow-submit` workflow after each merge. The `marketplace-ci` workflow
+stays the static admission of `main`; it runs on pull requests to `main`
+(`pull_request_target`) and on pushes to it:
 
 - the admission tool, `overcrow-widget`, is built offline from the reviewed
   base revision, never from the proposed one;
@@ -18,7 +21,6 @@ The `marketplace-ci` workflow runs on pull requests to `main` and
   `.github/`, `scripts/`, `tests/`, `cli/`, `sdk/`, `mcp/`, `crates/`,
   `fuzz/`, the Cargo workspace and toolchain files, `.gitattributes`,
   `.gitignore`, `docs/widget-schema-v1.md`, `keys/` and `fixtures/keys/`;
-  `candidate` may not change `published/`;
 - each `widgets/<dir>` goes through `overcrow-widget admit` (see
   [publishing and review](content/en/publishing.md#admission-run-it-yourself)),
   with warnings denied. Proposed JavaScript,

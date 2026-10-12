@@ -1,5 +1,10 @@
 # Publishing and review
 
+> **Pull requests are closed.** Widgets are no longer proposed by pull
+> request: PlayerVox's own widgets already go through the OverCrow creator
+> space, and yours will when it opens. Until then, this page describes the
+> admission, the review and the catalog a widget goes through.
+
 Widgets reach PlayerVox OverCrow users through the signed widget catalog:
 OverCrow installs only what that catalog lists. This page goes from a
 widget's source directory to a listed version. Neither a pull request nor a

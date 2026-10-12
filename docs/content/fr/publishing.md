@@ -1,5 +1,10 @@
 # Publication et revue
 
+> **Les pull requests sont fermées.** Les widgets ne sont plus proposés par
+> pull request : ceux de PlayerVox passent déjà par l’espace créateurs
+> OverCrow, et le vôtre y passera à son ouverture. D’ici là, cette page
+> décrit l’admission, la revue et le catalogue que suit un widget.
+
 Les widgets atteignent les utilisateurs de PlayerVox OverCrow par le
 catalogue signé des widgets : OverCrow n’installe que ce que liste ce
 catalogue. Cette page va du dossier de sources d’un widget à une version

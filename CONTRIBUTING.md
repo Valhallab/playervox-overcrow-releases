@@ -5,13 +5,15 @@ are MIT-licensed, except `@overcrow/sdk`, which is MIT-0. Submit only material
 you have authority to license and preserve third-party notices. Third-party
 widgets keep their declared licenses; see [licensing scope](LICENSING.md).
 
-Tooling and documentation pull requests target `main`. Widget submissions
-target `candidate` and use the widget submission template: a widget API v1
-source directory under `widgets/<dir>/` with its `listing.json`, admitted by
-`overcrow-widget admit`; see [publishing and review](docs/content/en/publishing.md).
+Tooling and documentation pull requests target `main`. Widgets are no
+longer proposed by pull request: creators will submit theirs in the
+OverCrow creator space when it opens, and a pull request that adds a widget
+is closed. PlayerVox's own widgets live in `widgets/<dir>/`; after each merge
+on `main`, the `overcrow-submit` workflow sends their new versions to the
+creator space, where a person reviews them like any widget (a permission
+added to a widget needs its justification in `widgets/<dir>/submission.json`).
 Never commit secrets, native executable code, build output or production
-signing material. Admission and human review are required. Acceptance does
-not publish anything.
+signing material. A merge publishes nothing.
 
 The widget schema in `crates/overcrow-widget-schema/` and the source parsers
 in `crates/overcrow-widget-format/` are the security validators of the OverCrow
