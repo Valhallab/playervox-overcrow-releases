@@ -39,6 +39,7 @@ fuzz_target!(|data: &[u8]| {
                 && component != "."
                 && component != ".."
                 && zipread::portable_component(component)
+                && zipread::windows_forbidden(component).is_none()
         }));
         assert!(names.insert(entry.name.to_ascii_lowercase()));
     }

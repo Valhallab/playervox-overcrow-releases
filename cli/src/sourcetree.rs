@@ -314,7 +314,38 @@ fn wrapping_folder(files: &[&zipread::Entry]) -> Option<String> {
 }
 
 /// A refusal of the reader as a diagnostic, the entry named in the message.
+/// `` `:` does not work in a file name on Windows: assets/a:b.png ``, for
+/// the first character of `path` that Windows forbids, in the file name or
+/// in a folder's (a folder's path ends with `/`).
+fn forbidden_name(path: &str) -> Option<Diagnostic> {
+    let components: Vec<&str> = path.trim_end_matches('/').split('/').collect();
+    let (index, character) = components
+        .iter()
+        .enumerate()
+        .find_map(|(index, component)| zipread::windows_forbidden(component).map(|c| (index, c)))?;
+    let kind = if index + 1 == components.len() && !path.ends_with('/') {
+        "file"
+    } else {
+        "folder"
+    };
+    Some(
+        Diagnostic::error(
+            "sources.unsafe_name",
+            format!(
+                "`{character}` does not work in a {kind} name on Windows: {}",
+                sanitize::line(path)
+            ),
+        )
+        .help("rename it without \\ : * ? \" < > |"),
+    )
+}
+
 fn refusal(refused: &Refused) -> Diagnostic {
+    if refused.error == ZipError::UnsafeName
+        && let Some(diagnostic) = refused.entry.as_deref().and_then(forbidden_name)
+    {
+        return diagnostic;
+    }
     let entry = refused
         .entry
         .as_deref()
@@ -452,6 +483,8 @@ fn walk(
             } else if !zipread::portable_component(&name) {
                 tree.ignored
                     .insert(format!("{path}/"), "a name that is not portable ASCII");
+            } else if let Some(diagnostic) = forbidden_name(&format!("{path}/")) {
+                report.push(diagnostic.in_file(format!("{path}/")));
             } else if depth >= MAX_DEPTH {
                 report.push(
                     Diagnostic::error("sources.unsafe_name", "the folder is nested too deeply")
@@ -474,6 +507,8 @@ fn walk(
         } else if !zipread::portable_component(&name) {
             tree.ignored
                 .insert(path, "a name that is not portable ASCII");
+        } else if let Some(diagnostic) = forbidden_name(&path) {
+            report.push(diagnostic.in_file(path));
         } else if path.len() > MAX_PATH_BYTES {
             report.push(
                 Diagnostic::error(
@@ -777,6 +812,85 @@ mod tests {
         assert!(tree.ignored.contains_key(".git/"));
         #[cfg(unix)]
         assert_eq!(tree.ignored["passwd"], "a link: links are never followed");
+    }
+
+    /// Names Windows cannot hold: a Unix folder can, an upload never does.
+    #[cfg(unix)]
+    #[test]
+    fn a_folder_with_a_name_windows_forbids_is_refused() {
+        let refusal = |path: &str| {
+            let folder = tempfile::tempdir().unwrap();
+            let root = folder.path();
+            let file = root.join(path);
+            fs::create_dir_all(file.parent().unwrap()).unwrap();
+            fs::write(root.join("manifest.json"), b"{}").unwrap();
+            fs::write(&file, b"x").unwrap();
+            let mut report = Report::default();
+            let tree = read(&Input::Folder(root.to_path_buf()), &mut report);
+            assert!(tree.is_none(), "{path}");
+            let [diagnostic] = report.diagnostics.as_slice() else {
+                panic!("{path}: {:?}", codes(&report));
+            };
+            assert_eq!(diagnostic.code, "sources.unsafe_name");
+            (diagnostic.message.clone(), diagnostic.file.clone())
+        };
+        assert_eq!(
+            refusal("assets/a:b.png"),
+            (
+                "`:` does not work in a file name on Windows: assets/a:b.png".to_owned(),
+                Some("assets/a:b.png".to_owned())
+            )
+        );
+        for (path, character) in [
+            ("a\\b.ts", '\\'),
+            ("q?.json", '?'),
+            ("star*.ts", '*'),
+            ("say\"hi\".txt", '"'),
+            ("a<b>.txt", '<'),
+        ] {
+            assert_eq!(
+                refusal(path).0,
+                format!("`{character}` does not work in a file name on Windows: {path}")
+            );
+        }
+        assert_eq!(
+            refusal("x|y/logic.ts").0,
+            "`|` does not work in a folder name on Windows: x|y/"
+        );
+        // Left out first, as before: no refusal for what is never sent.
+        let folder = tempfile::tempdir().unwrap();
+        let root = folder.path();
+        fs::create_dir_all(root.join("node_modules/a:b")).unwrap();
+        fs::write(root.join("manifest.json"), b"{}").unwrap();
+        fs::write(root.join("node_modules/a:b/x.js"), b"x").unwrap();
+        fs::write(root.join(".a:b"), b"x").unwrap();
+        fs::write(root.join("CON.ts"), b"x").unwrap();
+        fs::write(root.join("x:."), b"x").unwrap();
+        let mut report = Report::default();
+        let tree = read(&Input::Folder(root.to_path_buf()), &mut report)
+            .unwrap_or_else(|| panic!("{:?}", codes(&report)));
+        assert_eq!(paths(&tree), ["manifest.json"]);
+        assert_eq!(
+            tree.ignored.keys().collect::<Vec<_>>(),
+            [".a:b", "CON.ts", "node_modules/", "x:."]
+        );
+    }
+
+    #[test]
+    fn an_archive_name_windows_forbids_is_named() {
+        let (tree, report) = read_zip(&zipwrite::archive(&[
+            Item::file("manifest.json", b"{}"),
+            Item::stored("assets/a*b.png", b"x"),
+        ]));
+        assert!(tree.is_none());
+        let [diagnostic] = report.diagnostics.as_slice() else {
+            panic!("{:?}", codes(&report));
+        };
+        assert_eq!(diagnostic.code, "sources.unsafe_name");
+        assert_eq!(
+            diagnostic.message,
+            "`*` does not work in a file name on Windows: assets/a*b.png"
+        );
     }
 
     #[test]
