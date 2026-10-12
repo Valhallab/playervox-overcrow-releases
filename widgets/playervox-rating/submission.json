@@ -1,0 +1,12 @@
+{
+  "justifications": [
+    {
+      "permission": "capability:playervox.rating.read",
+      "text": "Reads your PlayerVox rating of the Steam game you play (grade, score, criteria, review), to show it."
+    },
+    {
+      "permission": "capability:playervox.rating.write",
+      "text": "Publishes or updates your rating and optional review on PlayerVox when you confirm it in Interactive mode."
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "justifications": [
+    {
+      "permission": "capability:journal.read",
+      "text": "Reads the finished play sessions of your game, recorded on this computer and merged with your PlayerVox journal, to list them."
+    },
+    {
+      "permission": "capability:journal.delete",
+      "text": "Deletes a play session from your journal when you confirm it in the widget."
+    }
+  ]
+}

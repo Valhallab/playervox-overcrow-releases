@@ -1,0 +1,24 @@
+{
+  "justifications": [
+    {
+      "permission": "network:GET https://api.warframe.market/v2/versions",
+      "text": "Checks the version of Warframe Market's public item catalog, to download the catalog again only when it changed."
+    },
+    {
+      "permission": "network:GET https://api.warframe.market/v2/items",
+      "text": "Downloads Warframe Market's public catalog of PC items, to search items by name."
+    },
+    {
+      "permission": "network:GET https://api.warframe.market/v2/orders/item/{slug}",
+      "text": "Loads the online sellers and buyers of the item you open."
+    },
+    {
+      "permission": "storage",
+      "text": "Keeps the item catalog between games, so that a search does not download it again."
+    },
+    {
+      "permission": "clipboardWrite",
+      "text": "Copies the trade whisper of the order you click, to paste it in the game's chat."
+    }
+  ]
+}

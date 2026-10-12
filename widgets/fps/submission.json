@@ -1,0 +1,8 @@
+{
+  "justifications": [
+    {
+      "permission": "capability:fps.read",
+      "text": "Reads the game's presented frame rate from OverCrow, to show it in the widget."
+    }
+  ]
+}
