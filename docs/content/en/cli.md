@@ -403,6 +403,10 @@ without argument) or a ZIP of it.
   from the environment of the programs it starts (TypeScript, the runtime).
 - A key that expires within 14 days gives a warning. An expired or revoked
   key ends with status 2: create a new one and replace the secret.
+- Every request names the widget of the sources' `manifest.json` (header
+  `Overcrow-Widget`). A key that covers several widgets of its publisher
+  (reserved to PlayerVox for now) submits the one named; `status` then
+  takes `--widget`.
 
 ### What it does
 
@@ -428,6 +432,26 @@ without argument) or a ZIP of it.
    the creator space takes (status 3): a privacy policy when the widget
    uses the network, a complete listing for a first version, or the review
    slot of a new publisher. The link to finish there is shown.
+
+### A version the creator space already has
+
+Before checking anything else, `submit` looks for a version of the same
+number in the creator space. When it has the same sources (byte for byte,
+as `submit` zips them) or, once admitted, the same package, nothing is
+sent: the run ends on that version's state, with `outcome`
+`already_known`.
+
+- Status 0: it is published, approved, in review, or waits for your answer
+  to requested changes.
+- Status 3: it waits in the creator space (the link to finish is shown).
+- Status 1: it failed its checks, was refused, withdrawn or discarded:
+  raise the version in `manifest.json` to send other sources.
+- A version still being checked is followed, as after a submission.
+
+The same number with another package is refused before sending
+(`submit.version_known_differs`): raise the version in `manifest.json`.
+A CI job can therefore run `submit` on every push: a version already sent
+changes nothing.
 
 Ctrl+C while the checks run stops following them; they go on in the
 creator space, and `overcrow-widget status --version 1.3.1 --wait` follows
@@ -536,8 +560,10 @@ Shows the versions of the key's widget, with their state and review type.
 With `--version`, one version, by its number (the latest of that number)
 or its ID: its six checks and their problems, what keeps it out of review,
 the reviewer's remarks and the review delay. `--wait` follows a version
-still being checked. Options: `--version VERSION|ID`, `--wait`, `--format
-json`, `--verbose`. Status: 0 when read, 2 on an error; with `--wait`, the
+still being checked. `--widget ID` names the widget, for a key that covers
+several (status 2 without it, with the widgets the key covers). Options:
+`--widget ID`, `--version VERSION|ID`, `--wait`, `--format json`,
+`--verbose`. Status: 0 when read, 2 on an error; with `--wait`, the
 statuses of `submit`.
 
 | State | Meaning |
@@ -698,21 +724,24 @@ change announces any other change.
 | `formatVersion`, `command` | `1`; `submit` or `status`. |
 | `outcome`, `exitCode` | How the run ended (below) and its [exit status](#exit-status). |
 | `dryRun` | `submit`: whether nothing was to be sent. |
-| `key` | `name`, `hint` (the four characters after `ocw_pub_`), `expiresAt`, `expiresSoon`. |
+| `key` | `name`, `hint` (the four characters after `ocw_pub_`), `expiresAt`, `expiresSoon`, `widgets` (the widgets the key covers). |
 | `widget` | `id`; `submit`: `publisher`, `status`; `status`: `name`. |
 | `archive` | `submit`: `kind` (`folder`, zipped by the tool, or `archive`), `bytes`, `sha256`, `files`, `uncompressedBytes`, `ignored`. |
 | `local` | `submit`: `admitted`, `version`, `minimumVersion`, `previousVersion`, `permissions` (`keys`, `added`, `changed`, `removed`, `reviewType`), `diagnostics`. |
 | `requirements` | `submit`: `justifications` (`required`, `given`, `missing`, `unused`), `privacyPolicy` (`required`, `present`), `reviewType`, `submissions` (`limit`, `remaining`, `nextSubmissionAt`), `review` (`available`, `blockedBy`), `agreement` (`version`, `accepted`), `blockers` (`code`). |
+| `known` | `submit`: the version the creator space already has (nothing was sent): `versionId`, `state`, `match` (`sources` or `package`). |
 | `submission` | `submit`: `id`, `state`, `resumed`, `quota`. |
 | `version` | The creator space's version, its fields in camelCase: `id`, `version`, `state`, `reviewType`, `checks` (`key`, `status`, `diagnostics`), `reviewBlockers`, `completeInPortal` (`message`, `url`), `permissions`, `remarks`, `deadline`, `history`… |
 | `versions` | `status` without `--version`: every version. |
 | `error` | `code`, `message` and, when known, `httpStatus`, `retryAfter`, `nextSubmissionAt`, `minimumVersion`, `expiredAt`, `fields`; else `null`. |
 
 `outcome` is `ready_to_send` (`--dry-run`), `refused_locally`, `refused`
-(the creator space refused the submission), `complete_in_portal`, `error`,
-or the version's state; `status` without `--wait` has none. Error codes
+(the creator space refused the submission), `complete_in_portal`,
+`already_known` (nothing sent, see `known`), `error`, or the version's
+state; `status` without `--wait` has none. Error codes
 are the creator space's (`version_not_newer`, `submission_limit_reached`,
-`publish_key_expired`, `publish_key_revoked`…) or the tool's:
+`publish_key_expired`, `publish_key_revoked`, `widget_required`,
+`publish_key_widget_not_covered`…) or the tool's:
 `publish_key_missing`, `invalid_publish_key`, `api_url_invalid`,
 `submission_file`, `sources`, `sources.read`, `network`, `timeout`,
 `server`, `response`, `redirect`, `upload_refused`, `build_failed`,
@@ -721,14 +750,15 @@ are diagnostics: `sources.*`, `project.missing_file` (not the widget's
 folder), `admission.*` and `submit.*` (`widget_not_submittable`,
 `agreement_required`, `limit_reached`, `version_too_low`,
 `justification_missing`, `archive_too_large`, `archive_mismatch`,
-`release_notes`, `justification`, `review_message`).
+`version_known_differs`, `release_notes`, `justification`,
+`review_message`).
 
 ## Exit status
 
 | Status | Meaning |
 | --- | --- |
-| 0 | Success. Warnings are allowed unless `--deny-warnings`. `diff` read both versions, whether or not they differ. `submit`: the version is in review (with `--dry-run`, it would enter review), or already past it (approved, published, withdrawn). |
-| 1 | Errors were found; `admit` refused the sources; `diff` refused a version; a scenario of `test` failed; the overlay ended a `dev` session. `submit`: something to fix (a check before sending, a refusal of the creator space, a failed check). |
+| 0 | Success. Warnings are allowed unless `--deny-warnings`. `diff` read both versions, whether or not they differ. `submit`: the version is in review (with `--dry-run`, it would enter review), or already past it (approved, published, withdrawn), or the creator space already had it in review, with changes requested, approved or published. |
+| 1 | Errors were found; `admit` refused the sources; `diff` refused a version; a scenario of `test` failed; the overlay ended a `dev` session. `submit`: something to fix (a check before sending, a refusal of the creator space, a failed check, a version the creator space already refused, withdrew or discarded). |
 | 2 | A usage or file error; no overlay for `dev`; no runtime for `test`. `submit`, `status`: the key (missing, invalid, expired, revoked), the network or the server. |
 | 3 | `submit`, `status --wait`: the version passed its checks and waits in the creator space. |
 | 4 | `submit`, `status --wait`: the version is still being checked (Ctrl+C, `--no-wait`, or 15 minutes). |
