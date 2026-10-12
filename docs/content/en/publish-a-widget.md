@@ -1,7 +1,7 @@
 # Publish a widget
 
 In the creator space of PlayerVox OverCrow, at
-`overcrow.playervox.com/creators`, a widget reaches players in four steps:
+`creators.playervox.com`, a widget reaches players in four steps:
 you send its sources, they are checked automatically, PlayerVox reviews
 them, then the version is published in the catalog. This page covers the
 first two and the screen that sends a version to review; the
@@ -36,6 +36,8 @@ most, no two names that differ only by case.
 
 - A `.zip` made by Windows PowerShell 5.1 (`Compress-Archive`) separates
   folders with `\` and is refused at once: drop the folder instead.
+- A file or folder name with `\ : * ? " < > |` is refused before anything
+  is sent: Windows cannot use it. Rename it.
 - A browser reads the file a link points to, where the command-line tool
   leaves the link out. Keep links out of the widget's folder.
 - Your sources stay private: only PlayerVox reviewers read them, and every

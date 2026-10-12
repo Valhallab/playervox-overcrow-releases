@@ -232,6 +232,17 @@ fn read_at<R: Read + Seek>(reader: &mut R, offset: u64, buffer: &mut [u8]) -> Re
     reader.read_exact(buffer).map_err(|_| ZipError::Io)
 }
 
+/// The characters Windows forbids in a file or folder name, besides
+/// control characters and `/`.
+const WINDOWS_FORBIDDEN: [char; 8] = ['\\', ':', '*', '?', '"', '<', '>', '|'];
+
+/// The first character of `name` that Windows forbids in a file or folder
+/// name (`\ : * ? " < > |`), if any.
+pub fn windows_forbidden(name: &str) -> Option<char> {
+    name.chars()
+        .find(|character| WINDOWS_FORBIDDEN.contains(character))
+}
+
 /// A name is a relative path of non-empty components other than `.` and
 /// `..`, without backslashes, drive letters, control characters or a
 /// trailing slash (directories are implied, never entries).
@@ -239,10 +250,8 @@ fn safe_name(name: &str) -> bool {
     !name.is_empty()
         && name.len() <= MAX_NAME_BYTES
         && !name.starts_with('/')
-        && !name.chars().any(|character| {
-            character.is_control()
-                || matches!(character, '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|')
-        })
+        && !name.chars().any(char::is_control)
+        && windows_forbidden(name).is_none()
         && name
             .split('/')
             .all(|component| !component.is_empty() && component != "." && component != "..")
@@ -250,8 +259,9 @@ fn safe_name(name: &str) -> bool {
 
 /// A component of printable ASCII that Windows keeps as written: no final
 /// dot or space, and no device name, whatever its case and extension
-/// (`con`, `NUL.txt`, `com1.json`). [`safe_name`] already refused the
-/// other characters Windows forbids.
+/// (`con`, `NUL.txt`, `com1.json`). The other characters Windows forbids
+/// are [`windows_forbidden`]'s: [`safe_name`] refuses them in an archive,
+/// `sourcetree` in a folder.
 pub fn portable_component(component: &str) -> bool {
     if component.ends_with(['.', ' '])
         || !component.bytes().all(|byte| (0x20..=0x7e).contains(&byte))

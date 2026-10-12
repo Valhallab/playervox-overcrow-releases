@@ -205,6 +205,21 @@ fn init_refuses_existing_content_and_unknown_templates() {
         "com.playervox.clock",
     ]);
     assert_eq!(reserved.status.code(), Some(1));
+    let hidden = cli(&[
+        "init",
+        temporary.path().join("z").to_str().expect("UTF-8"),
+        "--name",
+        "Clock\u{202e}",
+    ]);
+    assert_eq!(hidden.status.code(), Some(1));
+    assert!(
+        text(&hidden.stderr).contains(
+            "error[init.name]: the widget name holds a hidden character, U+202E, at position 6"
+        ),
+        "{}",
+        text(&hidden.stderr)
+    );
+    assert!(!temporary.path().join("z").exists());
 }
 
 #[test]
@@ -278,6 +293,34 @@ fn golden_manifest() {
         "\"Counter\"",
     );
     golden_check("manifest_id", &root, &[]);
+}
+
+#[test]
+fn golden_manifest_hidden_characters() {
+    let (_temporary, root) = project("counter");
+    // Written as a JSON escape: the message still names it.
+    replace(
+        &root,
+        "manifest.json",
+        "\"fr\": \"Counter\"",
+        "\"fr\": \"Compteur\\u202e\"",
+    );
+    golden_check("manifest_name_hidden", &root, &[]);
+    replace(
+        &root,
+        "manifest.json",
+        "\"fr\": \"Compteur\\u202e\"",
+        "\"fr\": \"Compteur\"",
+    );
+    replace(
+        &root,
+        "manifest.json",
+        "\"sizing\": {",
+        "\"wrapper\": { \"menu\": [{ \"type\": \"toggle\", \"id\": \"seconds\", \
+         \"label\": { \"en\": \"Show\u{2066} seconds\", \"fr\": \"Secondes\" }, \
+         \"default\": true }] },\n  \"sizing\": {",
+    );
+    golden_check("manifest_menu_label_hidden", &root, &[]);
 }
 
 #[test]

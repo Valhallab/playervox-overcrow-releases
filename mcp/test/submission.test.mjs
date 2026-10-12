@@ -351,7 +351,7 @@ test("prepare_submission: checklist, texts to draft, and the ZIP once nothing fa
         "description:fr",
       ],
     );
-    assert.match(ready.next, /creator space on overcrow\.playervox\.com/);
+    assert.match(ready.next, /creator space, at creators\.playervox\.com/);
     const text = JSON.stringify(ready);
     for (const gone of ["pull request", "candidate", "git ", "fork"])
       assert.ok(!text.includes(gone), `no ${gone}`);

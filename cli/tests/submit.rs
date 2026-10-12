@@ -349,9 +349,7 @@ fn a_version_held_back_points_to_the_creator_space() {
         "{shown}"
     );
     assert!(
-        shown.contains(
-            "https://overcrow.playervox.com/creators/widgets/nova.lol-timers/versions/77"
-        ),
+        shown.contains("https://creators.playervox.com/widgets/nova.lol-timers/versions/77"),
         "{shown}"
     );
     let api = FakeApi::start(Some(project.previous()));
@@ -362,6 +360,18 @@ fn a_version_held_back_points_to_the_creator_space() {
     assert_eq!(
         report["version"]["completeInPortal"]["message"],
         "Complete it in the creator space"
+    );
+    // Without a link from the API, the creator space's own address.
+    let mut unlinked = fake_api::blocked_version();
+    unlinked["complete_in_portal"] = Value::Null;
+    let api = FakeApi::start(Some(project.previous()));
+    api.polls(vec![unlinked]);
+    let output = project.submit(&api, &[]);
+    assert_eq!(code(&output), Some(3));
+    let shown = text(&output.stdout);
+    assert!(
+        shown.contains("Complete it in the creator space (creators.playervox.com)."),
+        "{shown}"
     );
 }
 
@@ -1537,9 +1547,7 @@ fn a_version_waiting_in_the_creator_space_points_there_again() {
         "{shown}"
     );
     assert!(
-        shown.contains(
-            "https://overcrow.playervox.com/creators/widgets/nova.lol-timers/versions/77"
-        ),
+        shown.contains("https://creators.playervox.com/widgets/nova.lol-timers/versions/77"),
         "{shown}"
     );
 }

@@ -1,0 +1,13 @@
+{
+  "menu": [
+    {
+      "type": "toggle",
+      "id": "row",
+      "label": {
+        "en": "Show\u2066 rows\u2069",
+        "fr": "Ligne"
+      },
+      "default": true
+    }
+  ]
+}

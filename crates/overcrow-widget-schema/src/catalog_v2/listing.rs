@@ -1,7 +1,6 @@
 //! Text, links, licence and games of a catalog v2 listing.
 
 use std::collections::{BTreeMap, BTreeSet};
-use std::ops::RangeInclusive;
 
 use serde_json::Value;
 
@@ -12,42 +11,13 @@ use crate::limits::{
     MAX_CATALOG_URL_BYTES, MAX_GAME_NAME_CHARS, MAX_GAME_SLUG_BYTES, MAX_LISTING_GAMES,
     MAX_LISTING_LOCALIZATIONS, MAX_SPDX_LICENSE_BYTES, MAX_SUPPORT_EMAIL_BYTES,
 };
+/// The invisible characters display text refuses (the same as labels').
+pub use crate::text::INVISIBLE_CHARACTERS;
+use crate::text::hidden_character;
 
 /// The only `LicenseRef-` a listing may carry, alone: closed source, all
 /// rights reserved.
 pub const PROPRIETARY_LICENSE: &str = "LicenseRef-Proprietary";
-
-/// Characters that change how text reads without being visible, or that
-/// look blank: soft hyphen, combining grapheme joiner, bidirectional marks,
-/// embeddings and isolates, zero-width and joiner characters, line and
-/// paragraph separators (not control characters, yet line breaks), Hangul
-/// and braille fillers, Khmer and Mongolian invisible signs, interlinear
-/// annotations, shorthand format controls, musical format characters and the
-/// whole tag and supplementary variation selector block. Display text never contains them, so a publisher
-/// name cannot be reversed, blanked or carry hidden text.
-pub const INVISIBLE_CHARACTERS: &[RangeInclusive<char>] = &[
-    '\u{00AD}'..='\u{00AD}',
-    '\u{034F}'..='\u{034F}',
-    '\u{061C}'..='\u{061C}',
-    '\u{115F}'..='\u{1160}',
-    '\u{17B4}'..='\u{17B5}',
-    '\u{180B}'..='\u{180F}',
-    '\u{200B}'..='\u{200F}',
-    '\u{2028}'..='\u{202E}',
-    '\u{2060}'..='\u{206F}',
-    '\u{2800}'..='\u{2800}',
-    '\u{3164}'..='\u{3164}',
-    '\u{FEFF}'..='\u{FEFF}',
-    '\u{FFA0}'..='\u{FFA0}',
-    '\u{FFF9}'..='\u{FFFB}',
-    '\u{1BCA0}'..='\u{1BCA3}',
-    '\u{1D173}'..='\u{1D17A}',
-    '\u{E0000}'..='\u{E0FFF}',
-];
-
-/// Variation selectors: accepted only right after a character that is not
-/// one (an emoji and its presentation selector), never in a run.
-const VARIATION_SELECTORS: RangeInclusive<char> = '\u{FE00}'..='\u{FE0F}';
 
 /// Display text: non-empty, at most `max_chars` Unicode scalar values,
 /// without leading or trailing white space, control character (except line
@@ -58,19 +28,10 @@ pub fn display_text(text: &str, max_chars: u64, lines: bool) -> bool {
         && text.chars().count() as u64 <= max_chars
         && text.trim() == text
         && !text.contains(['<', '>'])
-        && text.chars().all(|character| {
-            (!character.is_control() || (lines && character == '\n'))
-                && !INVISIBLE_CHARACTERS
-                    .iter()
-                    .any(|range| range.contains(&character))
-        })
         && text
             .chars()
-            .zip(std::iter::once(None).chain(text.chars().map(Some)))
-            .all(|(character, previous)| {
-                !VARIATION_SELECTORS.contains(&character)
-                    || previous.is_some_and(|previous| !VARIATION_SELECTORS.contains(&previous))
-            })
+            .all(|character| !character.is_control() || (lines && character == '\n'))
+        && hidden_character(text).is_none()
 }
 
 /// `{ locale: text }` with `en`, at most `MAX_LISTING_LOCALIZATIONS`

@@ -155,7 +155,7 @@ pub fn blocked_version() -> Value {
     value["review_blockers"] = json!([{"code": "privacy_policy_required"}]);
     value["complete_in_portal"] = json!({
         "message": "Complete it in the creator space",
-        "url": format!("https://overcrow.playervox.com/creators/widgets/{WIDGET}/versions/{VERSION_ID}")
+        "url": format!("https://creators.playervox.com/widgets/{WIDGET}/versions/{VERSION_ID}")
     });
     value
 }

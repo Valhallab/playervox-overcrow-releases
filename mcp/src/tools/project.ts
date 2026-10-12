@@ -6,6 +6,7 @@ import { z } from "zod";
 import { Cli } from "../cli.js";
 import { projects } from "../content.js";
 import { installPackages } from "../npm.js";
+import { codePoint, hiddenCharacter } from "../hidden.js";
 import { cleanLine } from "../text.js";
 import { DESCRIPTIONS, TEMPLATE_SUMMARIES } from "../texts.js";
 import { ID_FORMS, idProblem, isPlaceholderId } from "../ids.js";
@@ -24,6 +25,10 @@ export function nameProblem(name: string): string | undefined {
     REFUSED_IN_NAME.test(name)
   ) {
     return "The name must be 1 to 48 characters, without spaces at either end, control characters, < or >.";
+  }
+  const hidden = hiddenCharacter(name);
+  if (hidden) {
+    return `The name holds a hidden character, ${codePoint(hidden.code)}, at position ${hidden.position}: remove it.`;
   }
   return undefined;
 }

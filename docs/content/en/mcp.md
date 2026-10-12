@@ -119,7 +119,7 @@ Developer, Edit Config), then restart Claude Desktop.
 ## What it does not do
 
 - It never sends, signs or publishes anything. You send the ZIP and the
-  texts in the OverCrow creator space on overcrow.playervox.com.
+  texts in the OverCrow creator space, at creators.playervox.com.
 - It does not install your widget in OverCrow: trying it in a game is the
   [development channel](dev-channel.md) of the command-line tool.
 - It sends nothing about you: no telemetry, no account.

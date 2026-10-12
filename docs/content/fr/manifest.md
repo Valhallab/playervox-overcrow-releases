@@ -108,7 +108,11 @@ valeurs qu’il remplit. Voici un manifeste avec des permissions et un menu :
 ### Noms
 
 `name` donne le nom qu’OverCrow affiche dans sa liste de widgets et dans ses
-menus, en anglais et en français. Les deux sont obligatoires.
+menus, en anglais et en français. Les deux sont obligatoires. Un nom
+s’affiche tel qu’il est écrit : ni caractère de contrôle, ni caractère
+invisible ou de sens d’écriture, comme U+200B (espace sans chasse) ou
+U+202E (forçage de droite à gauche). Les libellés du menu suivent la même
+règle.
 
 <!-- generated:manifest-name -->
 | Champ | Type | Obligatoire | Signification |

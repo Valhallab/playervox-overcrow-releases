@@ -123,7 +123,7 @@ Claude Desktop.
 ## Ce qu’il ne fait pas
 
 - Il n’envoie, ne signe et ne publie jamais rien. Vous envoyez le zip et
-  les textes dans l’espace créateurs d’OverCrow, sur overcrow.playervox.com.
+  les textes dans l’espace créateurs d’OverCrow, à l’adresse creators.playervox.com.
 - Il n’installe pas votre widget dans OverCrow : l’essayer en jeu passe par
   le [canal de développement](dev-channel.md) de l’outil en ligne de
   commande.

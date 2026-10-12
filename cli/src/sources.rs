@@ -15,6 +15,7 @@ use overcrow_widget_schema::limits::{
 use overcrow_widget_schema::manifest::{
     MANIFEST_FIELDS, Manifest, ManifestError, validate_manifest,
 };
+use overcrow_widget_schema::text::hidden_character;
 use overcrow_widget_schema::{style, tokens, view};
 
 use crate::diag::{Diagnostic, Report, closest};
@@ -24,6 +25,20 @@ use crate::project::Project;
 /// How to write a widget ID, for help texts: the two forms of the creator
 /// space (`identifiers::id_owner`), with the example publisher `nova`.
 pub const ID_FORMS: &str = "use <handle>.<name> with your publisher handle from the OverCrow creator space, such as nova.lol-timers, or a reverse domain you verified, such as gg.nova.lol-timers";
+
+/// How to fix a name or label that holds a hidden character.
+pub const HIDDEN_HELP: &str =
+    "remove it: names and labels show as written, without invisible or text-direction characters";
+
+/// `{subject} holds a hidden character, U+XXXX, at position N`, the
+/// position counted in characters from 1.
+pub fn hidden_message(subject: &str, index: usize, character: char) -> String {
+    format!(
+        "{subject} holds a hidden character, U+{:04X}, at position {}",
+        u32::from(character),
+        index + 1
+    )
+}
 
 /// The declarative sources, validated.
 pub struct Sources {
@@ -91,6 +106,16 @@ fn check_manifest(bytes: &[u8], report: &mut Report) -> Option<Manifest> {
 
 pub fn manifest_diagnostic(error: ManifestError, source: &str) -> Diagnostic {
     let code = format!("manifest.{}", error.as_str());
+    if let Some((path, index, character)) = hidden_label(error, source) {
+        let mut diagnostic =
+            Diagnostic::error(code, hidden_message(&format!("`{path}`"), index, character))
+                .in_file("manifest.json")
+                .help(HIDDEN_HELP);
+        if let Some(member) = jsonpos::find(source, &path) {
+            diagnostic = diagnostic.at(at_offset(source, member.key));
+        }
+        return diagnostic;
+    }
     let (path, message, help): (&str, String, Option<String>) = match error {
         ManifestError::Size => ("", "manifest.json is too large".into(), None),
         ManifestError::Json => {
@@ -197,6 +222,61 @@ pub fn manifest_diagnostic(error: ManifestError, source: &str) -> Diagnostic {
         diagnostic = diagnostic.help(help);
     }
     diagnostic
+}
+
+/// For a name or menu error, the first name or menu label that holds a
+/// hidden character: its dotted path, the character's index and the
+/// character. The schema refuses the category; this says which text.
+fn hidden_label(error: ManifestError, source: &str) -> Option<(String, usize, char)> {
+    let manifest: serde_json::Value = serde_json::from_str(source).ok()?;
+    let mut texts = Vec::new();
+    match error {
+        ManifestError::Name => label_texts(&manifest["name"], "name", &mut texts),
+        ManifestError::Wrapper => {
+            menu_labels(&manifest["wrapper"]["menu"], "wrapper.menu", &mut texts)
+        }
+        _ => return None,
+    }
+    texts.into_iter().find_map(|(path, text)| {
+        let (index, character) = hidden_character(text.as_str()?)?;
+        Some((path, index, character))
+    })
+}
+
+fn label_texts<'a>(
+    label: &'a serde_json::Value,
+    path: &str,
+    out: &mut Vec<(String, &'a serde_json::Value)>,
+) {
+    for locale in ["en", "fr"] {
+        out.push((format!("{path}.{locale}"), &label[locale]));
+    }
+}
+
+/// The label texts of the menu rows and choices under `value`.
+fn menu_labels<'a>(
+    value: &'a serde_json::Value,
+    path: &str,
+    out: &mut Vec<(String, &'a serde_json::Value)>,
+) {
+    match value {
+        serde_json::Value::Array(items) => {
+            for (index, item) in items.iter().enumerate() {
+                menu_labels(item, &format!("{path}.{index}"), out);
+            }
+        }
+        serde_json::Value::Object(members) => {
+            if let Some(label) = members.get("label") {
+                label_texts(label, &format!("{path}.label"), out);
+            }
+            for (key, member) in members {
+                if key != "label" {
+                    menu_labels(member, &format!("{path}.{key}"), out);
+                }
+            }
+        }
+        _ => {}
+    }
 }
 
 /// A shape error: name the first unknown or missing top-level field when

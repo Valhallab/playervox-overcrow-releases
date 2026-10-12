@@ -106,7 +106,10 @@ values it fills in. A manifest with permissions and a menu:
 ### Names
 
 `name` gives the name OverCrow shows in its widget list and menus, in
-English and in French. Both are required.
+English and in French. Both are required. A name shows as written: no
+control character and no invisible or text-direction character, such as
+U+200B (zero-width space) or U+202E (right-to-left override). Menu labels
+follow the same rule.
 
 <!-- generated:manifest-name -->
 | Field | Type | Required | Meaning |

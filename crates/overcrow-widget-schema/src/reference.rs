@@ -341,8 +341,9 @@ The format of the package that carries it is in [Package](#package) and \
     );
     fields_table(out, MANIFEST_FIELDS);
     out.push_str(
-        "### `WidgetName`\n\nEach text is non-empty, trimmed, without control characters and at \
-most `MAX_WIDGET_NAME_CHARS` characters.\n\n",
+        "### `WidgetName`\n\nEach text is non-empty, trimmed, without control characters or \
+the invisible characters of [display text](#display-text), and at most `MAX_WIDGET_NAME_CHARS` \
+characters.\n\n",
     );
     fields_table(out, NAME_FIELDS);
     out.push_str("### `Sizing`\n\n`min` ≤ `preferred` ≤ `max` on both axes.\n\n");
@@ -545,8 +546,9 @@ after durable acknowledgement.\n\n### `wrapper`\n\n",
         }
     }
     out.push_str(
-        "### `MenuLabel`\n\nEach text is non-empty, trimmed, without control characters and at \
-most `MAX_MENU_LABEL_CHARS` characters.\n\n",
+        "### `MenuLabel`\n\nEach text is non-empty, trimmed, without control characters or \
+the invisible characters of [display text](#display-text), and at most `MAX_MENU_LABEL_CHARS` \
+characters.\n\n",
     );
     fields_table(out, LABEL_FIELDS);
     out.push_str("### `MenuChoice`\n\n");

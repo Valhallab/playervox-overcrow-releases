@@ -589,7 +589,9 @@ Left out of both, and never sent by the creator tools: hidden files and
 folders (`.env`, `.git/`, `assets/.DS_Store`…), `node_modules/`, `dist/`,
 `tests/output/`, `__MACOSX/`, built packages, key files and system files,
 and, in a folder, links and names that are not portable ASCII. In a ZIP,
-they still count toward the bounds below and are checked like the rest.
+they still count toward the bounds below and are checked like the rest. A
+name that holds a character Windows forbids (`\ : * ? " < > |`) is
+refused, in a folder too.
 
 | Bound | Value |
 | --- | --- |
@@ -605,7 +607,7 @@ removed at the end.
 | --- | --- |
 | `sources.archive_size` | More than 32 MiB. |
 | `sources.too_large`, `sources.too_many_files` | More than 64 MiB or 2,000 files once uncompressed. |
-| `sources.unsafe_name` | A name that could leave the widget folder (`../`, `/` first, `:`), or that some system cannot use: anything but printable ASCII, a final dot or space, `CON`, `NUL`, `COM1`… |
+| `sources.unsafe_name` | A name that could leave the widget folder (`../`, `/` first), or that some system cannot use: a character Windows forbids (`\`, `:`, `*`, `?`, `"`, `<`, `>`, \|), anything but printable ASCII, a final dot or space, `CON`, `NUL`, `COM1`… The message names the character and the file. |
 | `sources.backslash` | Folders separated by `\`, as Windows PowerShell 5.1 `Compress-Archive` writes them. Send the widget folder itself in the creator space, or use [`submit`](#submit), which makes a correct ZIP. |
 | `sources.duplicate_name` | Two names that differ only by case, or a file that is also a folder. |
 | `sources.link`, `sources.special_file` | A link, or a device, a FIFO or a socket. |

@@ -1,7 +1,7 @@
 # Publier un widget
 
 Dans l’espace créateurs de PlayerVox OverCrow, à l’adresse
-`overcrow.playervox.com/creators`, un widget arrive aux joueurs en quatre
+`creators.playervox.com`, un widget arrive aux joueurs en quatre
 étapes : vous envoyez ses sources, elles sont contrôlées automatiquement,
 PlayerVox les relit, puis la version est publiée dans le catalogue. Cette
 page couvre les deux premières et l’écran qui envoie une version en revue ;
@@ -39,6 +39,8 @@ la casse.
 
 - Un `.zip` fait par Windows PowerShell 5.1 (`Compress-Archive`) sépare les
   dossiers par `\` et est refusé aussitôt : déposez plutôt le dossier.
+- Un nom de fichier ou de dossier avec `\ : * ? " < > |` est refusé avant
+  tout envoi : Windows ne peut pas l’utiliser. Renommez-le.
 - Un navigateur lit le fichier vers lequel pointe un lien, là où l’outil en
   ligne de commande laisse le lien de côté. Gardez les liens hors du dossier
   du widget.

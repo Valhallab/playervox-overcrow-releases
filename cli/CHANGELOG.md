@@ -79,6 +79,16 @@ widget's sources and the embedded SDK.
   examples.
 - The JSON reports of `admit` and `diff` and the exit status of every
   command are documented as stable.
+- The creator space is at `creators.playervox.com`: `submit` names it
+  when the API gives no link to the version.
+- A widget name or menu label that holds an invisible or text-direction
+  character (U+202E, U+200B, U+00AD…) is refused, by `init --name` too;
+  the message names the field, the character and its position.
+- A source folder with a file or folder name that holds `\ : * ? " < >
+  |` is refused (`sources.unsafe_name`), as the creator space refuses it:
+  such names do not work on Windows. The message names the character and
+  the file, for an archive too. Names left out (hidden files,
+  `node_modules/`, reserved names such as `CON`) stay left out.
 
 ## 1.0.0-beta.2
 
