@@ -37,7 +37,7 @@ jobs:
       && github.ref == 'refs/heads/main'
       && (github.event_name == 'workflow_dispatch' || vars.OVERCROW_SUBMIT == 'on')
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 60
     environment: overcrow-submit
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683

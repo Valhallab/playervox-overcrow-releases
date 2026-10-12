@@ -22,6 +22,7 @@ import { join } from "node:path";
 const args = process.argv.slice(2);
 const plan = JSON.parse(readFileSync(join(args[1], "fake.json"), "utf8"));
 appendFileSync(process.env.FAKE_LOG, JSON.stringify({ args, key: process.env.OVERCROW_PUBLISH_KEY === ${JSON.stringify(KEY)} }) + "\\n");
+if (plan.sleep) await new Promise((done) => setTimeout(done, plan.sleep));
 if (plan.stderr) process.stderr.write(plan.stderr);
 process.stdout.write(typeof plan.stdout === "string" ? plan.stdout : JSON.stringify(plan.report) + "\\n");
 process.exit(plan.code);
@@ -136,6 +137,60 @@ test("a dry run and a version sent before name what the creator space waits for"
   }
 });
 
+test("once the checks do not end, the next widgets do not wait for theirs", () => {
+  const stuck = {
+    code: 4,
+    report: { outcome: "checking", exitCode: 4, version: { version: "1.0.3", state: "checking" } },
+  };
+  const setup = scratch({ alpha: stuck, beta: IN_REVIEW, gamma: PUBLISHED });
+  try {
+    const { status, stdout, calls } = run(setup);
+    assert.equal(status, 0, stdout);
+    assert.match(stdout, /^alpha +1\.0\.3 +sent: still being checked; the creator space e-mails the result$/m);
+    assert.match(stdout, /^::warning title=alpha::/m);
+    const [alpha, beta, gamma] = calls.map((call) => call.args);
+    assert.ok(!alpha.includes("--no-wait"));
+    assert.ok(beta.includes("--no-wait") && gamma.includes("--no-wait"));
+  } finally {
+    rmSync(setup.folder, { recursive: true, force: true });
+  }
+});
+
+test("a known version followed to its end, or awaiting an answer, reads as known", () => {
+  const followed = {
+    code: 0,
+    report: { outcome: "in_review", exitCode: 0, known: { versionId: 4, state: "checking", match: "sources" },
+      version: { version: "1.0.3", state: "in_review", reviewType: "full" } },
+  };
+  const answer = {
+    code: 0,
+    report: { outcome: "already_known", exitCode: 0, known: { versionId: 5, state: "changes_requested", match: "sources" },
+      version: { version: "1.0.2", state: "changes_requested" } },
+  };
+  const setup = scratch({ alpha: followed, beta: answer });
+  try {
+    const { status, stdout } = run(setup);
+    assert.equal(status, 0, stdout);
+    assert.match(stdout, /^alpha +1\.0\.3 +already sent, checked since: in review \(full review\): nothing sent$/m);
+    assert.match(stdout, /^beta +1\.0\.2 +already in review, changes requested in the creator space: nothing sent$/m);
+    assert.match(stdout, /^::warning title=beta::/m);
+    assert.ok(!/^::warning title=alpha::/m.test(stdout));
+  } finally {
+    rmSync(setup.folder, { recursive: true, force: true });
+  }
+});
+
+test("a CLI that runs too long is stopped and said so", () => {
+  const setup = scratch({ slow: { ...PUBLISHED, sleep: 3000 } });
+  try {
+    const { status, stdout } = run(setup, ["--cli-timeout", "1"]);
+    assert.equal(status, 1);
+    assert.match(stdout, /^slow +1\.0\.0 +error: overcrow-widget was stopped after 1 seconds$/m);
+  } finally {
+    rmSync(setup.folder, { recursive: true, force: true });
+  }
+});
+
 test("a refusal fails the run after every widget ran", () => {
   const setup = scratch({ alpha: REFUSED, beta: PUBLISHED });
   try {
@@ -225,6 +280,7 @@ test("the workflow submits from main only, with the key in one step", () => {
   assert.match(workflow, /^permissions:\n {2}contents: read$/m);
   assert.match(workflow, /^ {4}environment: overcrow-submit$/m);
   assert.match(workflow, /cancel-in-progress: false/);
+  assert.match(workflow, /^ {4}timeout-minutes: 60$/m);
   assert.match(workflow, /github\.ref == 'refs\/heads\/main'/);
   assert.match(workflow, /vars\.OVERCROW_SUBMIT == 'on'/);
   assert.equal(workflow.match(/secrets\./g)?.length, 1, "the key is read once");

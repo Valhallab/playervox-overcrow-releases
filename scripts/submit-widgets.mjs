@@ -6,12 +6,16 @@
 // error for one refused or a problem, and a table in the job summary.
 //
 //   node scripts/submit-widgets.mjs --cli PATH [--dry-run] [--widgets DIR]
+//                                   [--cli-timeout SECONDS]
 //
 // The publish key is read by the CLI from OVERCROW_PUBLISH_KEY, never
 // passed on a command line, and masked in everything this script prints.
-// The run fails (status 1) when a widget ended with 1, 2 or 4, or with an
-// answer that could not be read; a version waiting in the creator space
-// (status 3) does not fail it: what it waits for is done there.
+// The run fails (status 1) when a widget ended with 1 or 2, or with an
+// answer that could not be read. A version waiting in the creator space
+// (status 3) or still being checked (status 4) does not fail it: what it
+// waits for happens there, and the creator space e-mails the result. Once
+// a version's checks do not end in time, the next widgets are sent without
+// waiting for theirs (`--no-wait`).
 import { spawnSync } from "node:child_process";
 import { appendFileSync, existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -19,7 +23,7 @@ import { fileURLToPath } from "node:url";
 
 const KEY_PATTERN = /ocw_pub_[A-Za-z0-9_-]+/g;
 /** Long enough for checks followed for 15 minutes, and the upload. */
-const CLI_TIMEOUT_MS = 20 * 60 * 1000;
+const CLI_TIMEOUT_SECONDS = 20 * 60;
 
 const STATE_WORDS = {
   published: "published",
@@ -99,6 +103,11 @@ function checkProblems(version) {
 export function describe(report, code, dryRun) {
   const version = report.version;
   const state = version?.state ?? "";
+  if (report.known && report.outcome !== "already_known") {
+    // A known version still being checked, followed to its end.
+    const review = version?.reviewType ? ` (${version.reviewType} review)` : "";
+    return `already sent, checked since: ${STATE_WORDS[state] ?? state}${review}: nothing sent`;
+  }
   switch (report.outcome) {
     case "already_known": {
       const known = report.known?.state ?? state;
@@ -119,7 +128,7 @@ export function describe(report, code, dryRun) {
     case "checks_failed":
       return `sent: refused by its checks: ${checkProblems(version) || "see the creator space"}`;
     case "checking":
-      return "sent: still being checked in the creator space";
+      return "sent: still being checked; the creator space e-mails the result";
     case "error":
       return `error: ${report.error?.message ?? report.error?.code ?? "see the log"}`;
     default:
@@ -157,15 +166,17 @@ function reviewMessage(env) {
 }
 
 function parseArguments(argv) {
-  const options = { cli: null, dryRun: false, widgets: null };
+  const options = { cli: null, dryRun: false, widgets: null, timeout: CLI_TIMEOUT_SECONDS };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--cli") options.cli = argv[++index];
     else if (argument === "--widgets") options.widgets = argv[++index];
     else if (argument === "--dry-run") options.dryRun = true;
+    else if (argument === "--cli-timeout") options.timeout = Number(argv[++index]);
     else throw new Error(`unknown argument ${argument}`);
   }
   if (!options.cli) throw new Error("--cli PATH is required");
+  if (!(options.timeout > 0)) throw new Error("--cli-timeout takes a number of seconds");
   return options;
 }
 
@@ -178,6 +189,7 @@ export function main(argv, env = process.env) {
   const say = (line) => process.stdout.write(`${logLine(mask(line, secret))}\n`);
   const rows = [];
   let failed = 0;
+  let noWait = false;
   const folders = widgetFolders(root);
   for (const name of folders) {
     const folder = join(root, name);
@@ -185,11 +197,12 @@ export function main(argv, env = process.env) {
     const submission = join(folder, "submission.json");
     if (existsSync(submission)) args.push("--submission", submission);
     if (options.dryRun) args.push("--dry-run");
+    if (noWait) args.push("--no-wait");
     const result = spawnSync(resolve(options.cli), args, {
       encoding: "utf8",
       env,
       maxBuffer: 16 * 1024 * 1024,
-      timeout: CLI_TIMEOUT_MS,
+      timeout: options.timeout * 1000,
     });
     const code = result.status;
     let report = null;
@@ -202,12 +215,17 @@ export function main(argv, env = process.env) {
     let text;
     let level = null;
     if (report === null) {
-      text = result.error ? `error: overcrow-widget did not run (${result.error.code ?? result.error.message})` : `error: overcrow-widget gave no JSON answer (status ${code})`;
+      if (result.error?.code === "ETIMEDOUT") text = `error: overcrow-widget was stopped after ${options.timeout} seconds`;
+      else if (result.error) text = `error: overcrow-widget did not run (${result.error.code ?? result.error.message})`;
+      else text = `error: overcrow-widget gave no JSON answer (status ${code})`;
       level = "error";
     } else {
       text = describe(report, code, options.dryRun);
-      if (code === 3) level = "warning";
+      const answer = report.version?.state === "changes_requested";
+      if (code === 3 || code === 4 || (code === 0 && answer)) level = "warning";
       else if (code !== 0) level = "error";
+      // The checks did not end in time: do not wait for the next ones.
+      if (code === 4) noWait = true;
     }
     const version = report?.version?.version ?? report?.local?.version ?? manifestVersion(folder);
     say(`${name.padEnd(18)} ${String(version).padEnd(7)} ${text}`);
