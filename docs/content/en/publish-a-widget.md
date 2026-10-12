@@ -1,7 +1,7 @@
 # Publish a widget
 
 In the creator space of PlayerVox OverCrow, at
-`overcrow.playervox.com/creators`, a widget reaches players in four steps:
+`creators.playervox.com`, a widget reaches players in four steps:
 you send its sources, they are checked automatically, PlayerVox reviews
 them, then the version is published in the catalog. This page covers the
 first two and the screen that sends a version to review; the

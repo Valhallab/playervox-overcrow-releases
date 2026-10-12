@@ -79,6 +79,8 @@ widget's sources and the embedded SDK.
   examples.
 - The JSON reports of `admit` and `diff` and the exit status of every
   command are documented as stable.
+- The creator space is at `creators.playervox.com`: `submit` names it
+  when the API gives no link to the version.
 
 ## 1.0.0-beta.2
 

@@ -39,7 +39,7 @@ const WAITING = {
     version: { version: "1.0.3", state: "ready",
       reviewBlockers: [{ code: "listing_incomplete", missing: ["description.en", "support"] }],
       completeInPortal: { message: "To complete in the creator space.",
-        url: "https://overcrow.playervox.com/creators/widgets/com.playervox.overcrow.fps/versions/12" } } },
+        url: "https://creators.playervox.com/widgets/com.playervox.overcrow.fps/versions/12" } } },
 };
 const REFUSED = {
   code: 1,
@@ -109,7 +109,7 @@ test("a version waiting in the creator space is a warning, not a failure", () =>
   try {
     const { status, stdout } = run(setup);
     assert.equal(status, 0, stdout);
-    assert.match(stdout, /^fps +1\.0\.3 +sent: waiting in the creator space: listing_incomplete \(description\.en, support\) → https:\/\/overcrow\.playervox\.com\/creators\/widgets\/com\.playervox\.overcrow\.fps\/versions\/12$/m);
+    assert.match(stdout, /^fps +1\.0\.3 +sent: waiting in the creator space: listing_incomplete \(description\.en, support\) → https:\/\/creators\.playervox\.com\/widgets\/com\.playervox\.overcrow\.fps\/versions\/12$/m);
     assert.match(stdout, /^::warning title=fps::sent: waiting in the creator space/m);
   } finally {
     rmSync(setup.folder, { recursive: true, force: true });
@@ -131,7 +131,7 @@ test("a dry run and a version sent before name what the creator space waits for"
   try {
     const { stdout } = run(setup, ["--dry-run"]);
     assert.match(stdout, /^alpha +1\.0\.3 +would wait in the creator space for listing_incomplete \(dry run\)$/m);
-    assert.match(stdout, /^beta +1\.0\.3 +already sent, waiting in the creator space for listing_incomplete \(description\.en, support\) → https:\/\/overcrow\.playervox\.com\/creators\/widgets\/com\.playervox\.overcrow\.fps\/versions\/12: nothing sent$/m);
+    assert.match(stdout, /^beta +1\.0\.3 +already sent, waiting in the creator space for listing_incomplete \(description\.en, support\) → https:\/\/creators\.playervox\.com\/widgets\/com\.playervox\.overcrow\.fps\/versions\/12: nothing sent$/m);
   } finally {
     rmSync(setup.folder, { recursive: true, force: true });
   }

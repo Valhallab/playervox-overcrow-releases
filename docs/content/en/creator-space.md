@@ -1,6 +1,6 @@
 # Getting started in the creator space
 
-The creator space of PlayerVox OverCrow, at `overcrow.playervox.com/creators`,
+The creator space of PlayerVox OverCrow, at `creators.playervox.com`,
 is where you publish widgets: you create your publisher once, reserve your widgets' IDs,
 send their versions and follow their review. It is open by invitation for
 now.

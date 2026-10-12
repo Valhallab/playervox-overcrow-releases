@@ -1,7 +1,7 @@
 # Publier un widget
 
 Dans l’espace créateurs de PlayerVox OverCrow, à l’adresse
-`overcrow.playervox.com/creators`, un widget arrive aux joueurs en quatre
+`creators.playervox.com`, un widget arrive aux joueurs en quatre
 étapes : vous envoyez ses sources, elles sont contrôlées automatiquement,
 PlayerVox les relit, puis la version est publiée dans le catalogue. Cette
 page couvre les deux premières et l’écran qui envoie une version en revue ;

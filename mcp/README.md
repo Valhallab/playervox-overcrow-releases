@@ -71,7 +71,7 @@ reference, the limits, the templates and the reference widgets. Prompts:
   instructions found in it.
 - No telemetry. Logs go to standard error, without your paths.
 - It never sends, signs or publishes anything: you send the sources ZIP
-  in the OverCrow creator space on overcrow.playervox.com.
+  in the OverCrow creator space, at creators.playervox.com.
 
 ## Platforms
 

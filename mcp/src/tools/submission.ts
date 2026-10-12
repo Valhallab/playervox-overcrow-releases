@@ -39,7 +39,7 @@ const VERSION = /^\d+\.\d+\.\d+$/;
 const MAX_LISTED_INCLUDED = 200;
 const MAX_LISTED_EXCLUDED = 100;
 export const SEND =
-  "The user sends the ZIP and these texts in the OverCrow creator space on overcrow.playervox.com.";
+  "The user sends the ZIP and these texts in the OverCrow creator space, at creators.playervox.com.";
 
 const KIB = 1024;
 const kib = (bytes: number) => `${Math.max(1, Math.round(bytes / KIB))} KiB`;

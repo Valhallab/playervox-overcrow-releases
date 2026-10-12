@@ -1,7 +1,7 @@
 # Démarrer dans l’espace créateurs
 
 L’espace créateurs de PlayerVox OverCrow, à l’adresse
-`overcrow.playervox.com/creators`, sert à publier des widgets : vous y créez votre éditeur une fois, réservez les
+`creators.playervox.com`, sert à publier des widgets : vous y créez votre éditeur une fois, réservez les
 identifiants de vos widgets, envoyez leurs versions et suivez leur revue. Il
 est ouvert sur invitation pour l’instant.
 
