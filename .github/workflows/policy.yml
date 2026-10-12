@@ -31,5 +31,7 @@ jobs:
           node-version: '22'
       - name: Test the link check
         run: node --test tests/check-links.test.mjs
+      - name: Test the submit job of the PlayerVox widgets
+        run: node --test tests/submit-widgets.test.mjs
       - name: Check the links of every Markdown file
         run: node scripts/check-links.mjs
