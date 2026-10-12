@@ -56,6 +56,10 @@ pour lesquels il est fait : les joueurs filtrent le catalogue par jeu.
 - **Code source public** : facultatif ; un dépôt public ajoute le badge
   « Code source public ».
 
+Tapez une adresse comme vous la connaissez (`exemple.com/confidentialite`) :
+`https://` et le `/` final sont ajoutés pour vous. Une adresse en `http://`
+est refusée.
+
 ## Depuis listing.json
 
 Les sources d’une version peuvent contenir un `listing.json`, tel que

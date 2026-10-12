@@ -43,7 +43,8 @@ The publisher is the name your widgets appear under.
   widgets' IDs start with it.
 - **Contact e-mail**: for PlayerVox to reach you. It is never shown.
 - **Website** and **logo** (square, PNG or WebP): optional, shown on your
-  publisher page.
+  publisher page. Type the website as you know it (`example.com`):
+  `https://` is added for you.
 
 Your public profile (name, about, website, logo) appears with the next
 publication of the catalog: until then the creator space says

@@ -53,6 +53,9 @@ made for: players filter the catalog by game.
 - **Public source code**: optional; a public repository adds the "Public
   source code" badge.
 
+Type an address as you know it (`example.com/privacy`): `https://` and the
+final `/` are added for you. An address in `http://` is refused.
+
 ## From listing.json
 
 A version's sources may carry a `listing.json`, as the command-line tool
