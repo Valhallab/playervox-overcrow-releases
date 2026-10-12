@@ -20,6 +20,8 @@ pub struct KeyInfo {
     /// The manifest name `{en, fr}`, or null before a first version.
     pub widget_name: Value,
     pub publisher: String,
+    /// Every widget the key covers, its own first (one for most keys).
+    pub widgets: Vec<String>,
 }
 
 /// `GET /publish/context`: what the pre-check needs.
@@ -137,15 +139,34 @@ fn flag(value: &Value, field: Unreadable) -> Result<bool, Unreadable> {
     value.as_bool().ok_or(field)
 }
 
-pub fn parse_key(bytes: &[u8]) -> Result<KeyInfo, Unreadable> {
+/// `GET /publish/key`: the key, or, for a key covering several widgets
+/// read without naming one (`widget: null`), the IDs it covers.
+pub fn parse_key(bytes: &[u8]) -> Result<Result<KeyInfo, Vec<String>>, Unreadable> {
     let answer = Value::Object(object(bytes)?);
-    Ok(KeyInfo {
+    let mut widgets = Vec::new();
+    for item in answer["widgets"].as_array().into_iter().flatten() {
+        widgets.push(text(&item["widget_id"], "widgets.widget_id")?);
+    }
+    if answer["widget"].is_null() {
+        return if widgets.is_empty() {
+            Err("widget")
+        } else {
+            Ok(Err(widgets))
+        };
+    }
+    let widget_id = text(&answer["widget"]["widget_id"], "widget.widget_id")?;
+    if widgets.is_empty() {
+        // An API from before keys covering several widgets.
+        widgets.push(widget_id.clone());
+    }
+    Ok(Ok(KeyInfo {
         name: text(&answer["name"], "name")?,
         expires_at: text(&answer["expires_at"], "expires_at")?,
-        widget_id: text(&answer["widget"]["widget_id"], "widget.widget_id")?,
+        widget_id,
         widget_name: answer["widget"]["name"].clone(),
         publisher: text(&answer["publisher"]["handle"], "publisher.handle")?,
-    })
+        widgets,
+    }))
 }
 
 fn quota(value: &Value) -> Result<Quota, Unreadable> {
@@ -402,11 +423,29 @@ mod tests {
 
     #[test]
     fn the_key_answer_is_read() {
-        let key = parse_key(&bytes(&key_answer())).expect("a key");
+        let key = parse_key(&bytes(&key_answer()))
+            .expect("a key")
+            .expect("its widget");
         assert_eq!(key.name, "GitHub Actions");
         assert_eq!(key.widget_id, "nova.lol-timers");
         assert_eq!(key.publisher, "nova");
         assert_eq!(key.expires_at, "2027-01-11T10:00:00Z");
+        // An API without `widgets`: the key's widget alone.
+        assert_eq!(key.widgets, ["nova.lol-timers"]);
+        // A key covering several widgets, read without naming one.
+        let mut several = key_answer();
+        several["widget"] = Value::Null;
+        several["widgets"] = json!([{"widget_id": "nova.lol-timers", "name": null},
+                                    {"widget_id": "nova.raid-chat", "name": null}]);
+        assert_eq!(
+            parse_key(&bytes(&several)).expect("an answer").err(),
+            Some(vec![
+                "nova.lol-timers".to_owned(),
+                "nova.raid-chat".to_owned()
+            ])
+        );
+        several["widgets"] = json!([]);
+        assert!(parse_key(&bytes(&several)).is_err());
         let mut missing = key_answer();
         missing["widget"]
             .as_object_mut()

@@ -59,8 +59,21 @@ pub fn submit(raw_key: Option<String>, options: &SubmitOptions<'_>) -> ExitCode 
         Ok(texts) => texts,
         Err(message) => return out.fail("submission_file", &message, Map::new()),
     };
+    // The sources first: the widget their manifest names is the one every
+    // request names (a key may cover several widgets of its publisher).
+    let sources = match read_sources(&options.target, &mut out) {
+        Ok(sources) => sources,
+        Err(Stop::Error { code, message }) => return out.fail(&code, &message, Map::new()),
+        Err(Stop::Refused) => {
+            out.say("Nothing was sent.");
+            return out.finish(Outcome::RefusedLocally);
+        }
+    };
     let client = match super::connect(raw_key, options.verbose, &out) {
-        Ok(client) => client,
+        Ok(client) => match manifest_id(&sources.0) {
+            Some(id) => client.with_widget(&id),
+            None => client,
+        },
         Err((code, message)) => return out.fail(&code, &message, Map::new()),
     };
     let key = match super::read_key(&client, &mut out) {
@@ -78,7 +91,7 @@ pub fn submit(raw_key: Option<String>, options: &SubmitOptions<'_>) -> ExitCode 
         "widget",
         json!({"id": key.widget_id, "publisher": key.publisher, "status": context.widget_status}),
     );
-    let checked = match check_locally(&key, &context, &texts, options, &mut out) {
+    let checked = match check_locally(&key, &context, &texts, sources, options, &mut out) {
         Ok(checked) => checked,
         Err(Stop::Error { code, message }) => return out.fail(&code, &message, Map::new()),
         Err(Stop::Refused) => {
@@ -147,6 +160,7 @@ fn check_locally(
     key: &KeyInfo,
     context: &Context,
     texts: &Texts,
+    sources: (Tree, Vec<u8>, &'static str),
     options: &SubmitOptions<'_>,
     out: &mut Out,
 ) -> Result<Checked, Stop> {
@@ -190,7 +204,7 @@ fn check_locally(
         report.push(diagnostic);
     }
 
-    let (tree, archive, kind) = read_sources(&options.target, out)?;
+    let (tree, archive, kind) = sources;
     let sha256 = hex(&sha256(&archive));
     let bound = |field: &str, default: u64| limits[field].as_u64().unwrap_or(default);
     if archive.len() as u64 > bound("archive_bytes", sourcetree::MAX_ARCHIVE_BYTES) {
@@ -448,6 +462,12 @@ fn read_sources(target: &Path, out: &mut Out) -> Result<(Tree, Vec<u8>, &'static
         }
     }
     Ok((tree, bytes, kind))
+}
+
+/// The `id` of the sources' `manifest.json`, when it can be read.
+fn manifest_id(tree: &Tree) -> Option<String> {
+    let manifest: Value = serde_json::from_slice(tree.files.get("manifest.json")?).ok()?;
+    manifest["id"].as_str().map(str::to_owned)
 }
 
 /// Records and shows why the sources are refused.

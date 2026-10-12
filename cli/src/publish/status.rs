@@ -1,5 +1,6 @@
-//! `overcrow-widget status [--version VERSION|ID] [--wait]`: the versions
-//! of the key's widget, or one version with its checks, what keeps it out
+//! `overcrow-widget status [--widget ID] [--version VERSION|ID] [--wait]`:
+//! the versions of the key's widget (or of the one named, for a key
+//! covering several), or one version with its checks, what keeps it out
 //! of review, its remarks and its review delay.
 
 use std::process::ExitCode;
@@ -15,6 +16,8 @@ use super::{Out, Outcome};
 use crate::sanitize;
 
 pub struct StatusOptions<'a> {
+    /// The widget, for a key covering several (`--widget`).
+    pub widget: Option<&'a str>,
     pub version: Option<&'a str>,
     pub wait: bool,
     pub json: bool,
@@ -27,7 +30,10 @@ pub fn status(raw_key: Option<String>, options: &StatusOptions<'_>) -> ExitCode 
     out.set("key", Value::Null);
     out.set("widget", Value::Null);
     let client = match super::connect(raw_key, options.verbose, &out) {
-        Ok(client) => client,
+        Ok(client) => match options.widget {
+            Some(id) => client.with_widget(id),
+            None => client,
+        },
         Err((code, message)) => return out.fail(&code, &message, Map::new()),
     };
     let key = match super::read_key(&client, &mut out) {

@@ -153,6 +153,7 @@ pub fn key_answer() -> Value {
         "name": "GitHub Actions", "prefix": "ocw_pub_q9Xe", "scope": "submit",
         "expires_at": "2027-01-11T11:00:00+01:00",
         "widget": {"widget_id": WIDGET, "name": {"en": "LoL Timers", "fr": "Minuteurs LoL"}},
+        "widgets": [{"widget_id": WIDGET, "name": {"en": "LoL Timers", "fr": "Minuteurs LoL"}}],
         "publisher": {"handle": "nova"}
     })
 }

@@ -1287,3 +1287,104 @@ fn key_and_usage_errors_never_blame_the_creator_or_show_the_key() {
     let output = project.run(&api, &["submit", "--format", KEY]);
     assert_eq!(code(&output), Some(2));
 }
+
+/// A key covering several widgets (the PlayerVox CI key): what it answers
+/// when no widget is named.
+fn key_of_several_widgets() -> Value {
+    let mut key = fake_api::key_answer();
+    key["widget"] = Value::Null;
+    key["widgets"] = json!([
+        {"widget_id": "nova.lol-timers", "name": null},
+        {"widget_id": "nova.raid-chat", "name": null}
+    ]);
+    key
+}
+
+#[test]
+fn every_request_names_the_widget_of_the_manifest() {
+    let project = Project::new();
+    let api = FakeApi::start(Some(project.previous()));
+    api.polls(vec![version("checking"), version("in_review")]);
+    let output = project.submit(&api, &[]);
+    assert_eq!(code(&output), Some(0), "{}", text(&output.stderr));
+    let (_, report) = project.submit_json(&api, &["--dry-run"]);
+    assert_eq!(report["key"]["widgets"], json!([fake_api::WIDGET]));
+    for request in api.requests() {
+        let expected = if request.line().starts_with("PUT /upload/") {
+            None
+        } else {
+            Some(fake_api::WIDGET)
+        };
+        assert_eq!(
+            request.header("overcrow-widget"),
+            expected,
+            "{}",
+            request.line()
+        );
+    }
+}
+
+#[test]
+fn a_widget_the_key_does_not_cover_stops_before_anything_is_sent() {
+    let project = Project::new();
+    let api = FakeApi::start(Some(project.previous()));
+    api.on(
+        "key",
+        vec![Reply::Json(
+            403,
+            error(
+                "publish_key_widget_not_covered",
+                "This publish key does not cover nova.lol-timers: use a key of that widget (creator space, Publish keys).",
+            ),
+        )],
+    );
+    let (output, report) = project.submit_json(&api, &[]);
+    assert_eq!(code(&output), Some(2), "{report}");
+    assert_eq!(report["error"]["code"], "publish_key_widget_not_covered");
+    assert!(
+        text(&output.stderr).contains("does not cover nova.lol-timers"),
+        "{}",
+        text(&output.stderr)
+    );
+    assert!(!sent(&api));
+}
+
+#[test]
+fn status_of_a_key_covering_several_widgets_asks_for_one() {
+    let project = Project::new();
+    let api = FakeApi::start(Some(project.previous()));
+    api.on("key", vec![Reply::Json(200, key_of_several_widgets())]);
+    let output = project.run(&api, &["status", "--format", "json"]);
+    assert_eq!(code(&output), Some(2), "{}", text(&output.stdout));
+    let report = json_of(&output);
+    assert_eq!(report["error"]["code"], "widget_required");
+    let message = report["error"]["message"].as_str().unwrap_or_default();
+    assert!(
+        message.contains("--widget") && message.contains("nova.lol-timers, nova.raid-chat"),
+        "{message}"
+    );
+    assert_eq!(api.lines(), ["GET /api/v1/publish/key"]);
+}
+
+#[test]
+fn status_names_the_widget_given() {
+    let project = Project::new();
+    let api = FakeApi::start(Some(project.previous()));
+    let output = project.run(&api, &["status", "--widget", "nova.raid-chat"]);
+    assert_eq!(code(&output), Some(0), "{}", text(&output.stderr));
+    for request in api.requests() {
+        assert_eq!(
+            request.header("overcrow-widget"),
+            Some("nova.raid-chat"),
+            "{}",
+            request.line()
+        );
+    }
+    let output = project.run(&api, &["status", "--widget", "Nova Raid"]);
+    assert_eq!(code(&output), Some(2));
+    assert!(
+        text(&output.stderr).contains("is not a widget ID"),
+        "{}",
+        text(&output.stderr)
+    );
+}

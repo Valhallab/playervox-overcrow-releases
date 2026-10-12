@@ -320,7 +320,23 @@ fn connect(raw_key: Option<String>, verbose: bool, out: &Out) -> Result<Client, 
 /// `GET /publish/key`, shown and recorded.
 fn read_key(client: &Client, out: &mut Out) -> Result<api::KeyInfo, Failure> {
     let answer = client.get("/api/v1/publish/key")?;
-    let key = api::parse_key(&answer.body).map_err(Failure::Response)?;
+    let key = match api::parse_key(&answer.body).map_err(Failure::Response)? {
+        Ok(key) => key,
+        Err(widgets) => {
+            let shown: Vec<String> = widgets.iter().map(|id| crate::sanitize::line(id)).collect();
+            return Err(Failure::Api {
+                status: 400,
+                error: Box::new(api::ApiError {
+                    code: "widget_required".into(),
+                    message: Some(format!(
+                        "this publish key covers several widgets: name one with --widget ({})",
+                        shown.join(", ")
+                    )),
+                    ..api::ApiError::default()
+                }),
+            });
+        }
+    };
     let soon = unix_seconds(&key.expires_at)
         .is_some_and(|expires| expires - now_seconds() < EXPIRY_NOTICE_SECONDS);
     out.set(
@@ -330,6 +346,7 @@ fn read_key(client: &Client, out: &mut Out) -> Result<api::KeyInfo, Failure> {
             "hint": client.key().hint(),
             "expiresAt": key.expires_at,
             "expiresSoon": soon,
+            "widgets": key.widgets,
         }),
     );
     out.say(&render::key_line(&key, client.key().hint()));
