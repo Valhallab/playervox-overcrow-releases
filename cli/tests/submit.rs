@@ -1384,6 +1384,46 @@ fn status_of_a_key_covering_several_widgets_asks_for_one() {
 }
 
 #[test]
+fn a_key_of_several_widgets_submits_the_widget_of_the_manifest() {
+    let project = Project::new();
+    let api = FakeApi::start(Some(project.previous()));
+    let mut key = fake_api::key_answer();
+    key["widgets"] = json!([
+        {"widget_id": "nova.raid-chat", "name": null},
+        {"widget_id": "nova.lol-timers", "name": null}
+    ]);
+    api.on("key", vec![Reply::Json(200, key)]);
+    api.polls(vec![version("checking"), version("in_review")]);
+    let (output, report) = project.submit_json(&api, &[]);
+    assert_eq!(code(&output), Some(0), "{report}");
+    assert_eq!(
+        report["key"]["widgets"],
+        json!(["nova.raid-chat", "nova.lol-timers"])
+    );
+    assert!(sent(&api));
+    assert_eq!(
+        submission_request(&api).header("overcrow-widget"),
+        Some(fake_api::WIDGET)
+    );
+}
+
+#[test]
+fn a_manifest_naming_no_widget_of_the_key_says_where_to_fix_it() {
+    let project = Project::new();
+    let api = FakeApi::start(Some(project.previous()));
+    api.on("key", vec![Reply::Json(200, key_of_several_widgets())]);
+    let (output, report) = project.submit_json(&api, &[]);
+    assert_eq!(code(&output), Some(2), "{report}");
+    assert_eq!(report["error"]["code"], "widget_required");
+    let message = report["error"]["message"].as_str().unwrap_or_default();
+    assert!(
+        message.contains("manifest.json") && !message.contains("--widget"),
+        "{message}"
+    );
+    assert!(!sent(&api));
+}
+
+#[test]
 fn status_names_the_widget_given() {
     let project = Project::new();
     let api = FakeApi::start(Some(project.previous()));

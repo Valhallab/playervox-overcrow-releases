@@ -76,7 +76,11 @@ pub fn submit(raw_key: Option<String>, options: &SubmitOptions<'_>) -> ExitCode 
         },
         Err((code, message)) => return out.fail(&code, &message, Map::new()),
     };
-    let key = match super::read_key(&client, &mut out) {
+    let key = match super::read_key(
+        &client,
+        &mut out,
+        "the id in manifest.json must be one of them",
+    ) {
         Ok(key) => key,
         Err(failure) => return out.fail_request(&failure, Outcome::Error),
     };

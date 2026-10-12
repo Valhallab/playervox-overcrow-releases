@@ -125,6 +125,9 @@ pub fn blocker(value: &Value) -> String {
             "the publish key was revoked meanwhile: send it to review in the creator space".into()
         }
         "widget_not_submittable" => "the widget cannot receive versions now".into(),
+        "publish_key_widget_not_covered" => {
+            "the publish key no longer covers this widget: send it to review in the creator space".into()
+        }
         _ => String::new(),
     };
     format!("  {:<28} {text}", sanitize::line(code))
@@ -189,6 +192,10 @@ mod tests {
             (
                 json!({"code": "widget_not_submittable"}),
                 "cannot receive versions",
+            ),
+            (
+                json!({"code": "publish_key_widget_not_covered", "status": "conflict"}),
+                "no longer covers this widget",
             ),
         ] {
             let line = blocker(&value);

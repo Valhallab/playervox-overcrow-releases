@@ -335,7 +335,8 @@ fn connect(raw_key: Option<String>, verbose: bool, out: &Out) -> Result<Client, 
 }
 
 /// `GET /publish/key`, shown and recorded.
-fn read_key(client: &Client, out: &mut Out) -> Result<api::KeyInfo, Failure> {
+/// `choose` says how to name one widget of a key that covers several.
+fn read_key(client: &Client, out: &mut Out, choose: &str) -> Result<api::KeyInfo, Failure> {
     let answer = client.get("/api/v1/publish/key")?;
     let key = match api::parse_key(&answer.body).map_err(Failure::Response)? {
         Ok(key) => key,
@@ -346,7 +347,7 @@ fn read_key(client: &Client, out: &mut Out) -> Result<api::KeyInfo, Failure> {
                 error: Box::new(api::ApiError {
                     code: "widget_required".into(),
                     message: Some(format!(
-                        "this publish key covers several widgets: name one with --widget ({})",
+                        "this publish key covers several widgets ({}): {choose}",
                         shown.join(", ")
                     )),
                     ..api::ApiError::default()

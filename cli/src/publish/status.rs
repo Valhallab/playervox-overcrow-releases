@@ -36,7 +36,7 @@ pub fn status(raw_key: Option<String>, options: &StatusOptions<'_>) -> ExitCode 
         },
         Err((code, message)) => return out.fail(&code, &message, Map::new()),
     };
-    let key = match super::read_key(&client, &mut out) {
+    let key = match super::read_key(&client, &mut out, "name one with --widget") {
         Ok(key) => key,
         Err(failure) => return out.fail_request(&failure, Outcome::Error),
     };
