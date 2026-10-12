@@ -102,13 +102,16 @@ export function describe(report, code, dryRun) {
   switch (report.outcome) {
     case "already_known": {
       const known = report.known?.state ?? state;
-      const text = `already ${STATE_WORDS[known] ?? known} in the creator space: nothing sent`;
-      return known === "ready" ? `${text}; waiting for ${waiting(version)}` : text;
+      if (known === "ready") return `already sent, waiting in the creator space for ${waiting(version)}: nothing sent`;
+      return `already ${STATE_WORDS[known] ?? known} in the creator space: nothing sent`;
     }
     case "ready_to_send":
       return "would be sent (dry run)";
-    case "complete_in_portal":
-      return dryRun ? "would wait in the creator space (dry run)" : `sent: waiting in the creator space: ${waiting(version)}`;
+    case "complete_in_portal": {
+      if (!dryRun) return `sent: waiting in the creator space: ${waiting(version)}`;
+      const codes = (report.requirements?.blockers ?? []).map((blocker) => blocker.code).join(", ");
+      return `would wait in the creator space${codes ? ` for ${codes}` : ""} (dry run)`;
+    }
     case "refused_locally":
       return `refused before sending: ${errorDiagnostics(report) || report.error?.message || "see the log"}`;
     case "refused":

@@ -115,6 +115,27 @@ test("a version waiting in the creator space is a warning, not a failure", () =>
   }
 });
 
+test("a dry run and a version sent before name what the creator space waits for", () => {
+  const dryRun = {
+    code: 3,
+    report: { outcome: "complete_in_portal", exitCode: 3, local: { version: "1.0.3" },
+      requirements: { blockers: [{ code: "listing_incomplete" }] } },
+  };
+  const sentBefore = {
+    code: 3,
+    report: { outcome: "already_known", exitCode: 3, known: { versionId: 12, state: "ready", match: "sources" },
+      version: WAITING.report.version },
+  };
+  const setup = scratch({ alpha: dryRun, beta: sentBefore });
+  try {
+    const { stdout } = run(setup, ["--dry-run"]);
+    assert.match(stdout, /^alpha +1\.0\.3 +would wait in the creator space for listing_incomplete \(dry run\)$/m);
+    assert.match(stdout, /^beta +1\.0\.3 +already sent, waiting in the creator space for listing_incomplete \(description\.en, support\) → https:\/\/overcrow\.playervox\.com\/creators\/widgets\/com\.playervox\.overcrow\.fps\/versions\/12: nothing sent$/m);
+  } finally {
+    rmSync(setup.folder, { recursive: true, force: true });
+  }
+});
+
 test("a refusal fails the run after every widget ran", () => {
   const setup = scratch({ alpha: REFUSED, beta: PUBLISHED });
   try {
