@@ -1,0 +1,12 @@
+{
+  "justifications": [
+    {
+      "permission": "capability:notes.read",
+      "text": "Reads your notes and checklists, kept by OverCrow on this computer, to show them over the game."
+    },
+    {
+      "permission": "capability:notes.write",
+      "text": "Saves the notes and checklist entries you create, edit, tick off or delete in Interactive mode."
+    }
+  ]
+}

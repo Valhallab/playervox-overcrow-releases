@@ -96,7 +96,7 @@ candidate() {
 pull_request() {
     sh "$repo_root/scripts/ci-verify.sh" \
         "$repository" "$trust_sha" "$2" pull_request \
-        Valhallab/playervox-overcrow-releases candidate \
+        Valhallab/playervox-overcrow-releases main \
         "$1" feature/widget "$private_parent" admission \
         >"$stdout" 2>"$stderr"
 }
@@ -110,6 +110,21 @@ expect_refusal() {
         || report_failure "$4 was not refused explicitly"
     test ! -s "$stdout" || report_failure "$4 produced a receipt"
 }
+
+# Widgets are no longer proposed to candidate (CR.13): both trusted drivers
+# refuse that base before anything else.
+if sh "$repo_root/scripts/ci-verify.sh" \
+        "$repository" "$trust_sha" "$trust_sha" pull_request \
+        "$same" candidate "$fork" feature/widget "$private_parent" admission \
+        >"$stdout" 2>"$stderr"; then
+    report_failure 'CI admitted a pull request to candidate'
+fi
+/usr/bin/grep -F -x 'error: CI trust metadata is invalid' "$stderr" >/dev/null \
+    || report_failure 'a pull request to candidate was not refused explicitly'
+if sh "$repo_root/tests/reject-published-change.sh" pull_request "$same" \
+        candidate "$same" release/1 published/x >"$stdout" 2>"$stderr"; then
+    report_failure 'the publication policy accepted a candidate base'
+fi
 
 break_view() {
     widget new-broken contributor.broken-counter
@@ -212,8 +227,8 @@ failing_test() {
 push_sha=$(candidate push failing_test)
 # A push is its own trusted revision: run the driver of that checkout.
 if sh "$repository/scripts/ci-verify.sh" \
-        "$repository" "$push_sha" "$push_sha" push "$same" candidate \
-        "$same" candidate "$private_parent" admission >"$stdout" 2>"$stderr"; then
+        "$repository" "$push_sha" "$push_sha" push "$same" main \
+        "$same" main "$private_parent" admission >"$stdout" 2>"$stderr"; then
     report_failure 'CI skipped the checks of an exact trusted push'
 fi
 /usr/bin/grep -F -x 'error: trusted source checks failed' "$stderr" >/dev/null \
@@ -223,8 +238,8 @@ output="$scratch/output"
 /usr/bin/install -d -m 0700 -- "$output"
 /usr/bin/git -C "$repository" checkout --quiet "$trust_sha"
 sh "$repository/scripts/ci-verify.sh" \
-    "$repository" "$trust_sha" "$trust_sha" push "$same" candidate \
-    "$same" candidate "$private_parent" admission "$output" \
+    "$repository" "$trust_sha" "$trust_sha" push "$same" main \
+    "$same" main "$private_parent" admission "$output" \
     >"$stdout" 2>"$stderr" || report_failure 'the trusted push was refused'
 /usr/bin/head -n -1 "$stdout" | /usr/bin/cmp -s - "$output/receipt.tsv" \
     || report_failure 'the written receipt differs from the printed one'

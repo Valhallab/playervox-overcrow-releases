@@ -1,0 +1,8 @@
+{
+  "justifications": [
+    {
+      "permission": "capability:session.read",
+      "text": "Reads when the current game session started, to show how long it has lasted."
+    }
+  ]
+}

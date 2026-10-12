@@ -1,0 +1,12 @@
+{
+  "justifications": [
+    {
+      "permission": "capability:twitch.chat.read",
+      "text": "Reads the messages of the public Twitch chat you choose, with emotes and replies, to show them over the game."
+    },
+    {
+      "permission": "capability:twitch.chat.compose",
+      "text": "Sends the message you type to that Twitch chat, with your Twitch account, when you send it."
+    }
+  ]
+}

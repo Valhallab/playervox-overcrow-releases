@@ -1,0 +1,12 @@
+{
+  "justifications": [
+    {
+      "permission": "capability:telemetry.read",
+      "text": "Reads the game's CPU and memory use and the temperatures this computer exposes, to show them."
+    },
+    {
+      "permission": "capability:fps.read",
+      "text": "Reads the game's frame rate, shown with CPU and memory unless you turn it off in the widget's options."
+    }
+  ]
+}

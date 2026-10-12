@@ -33,7 +33,7 @@ for repository_name in "$repository" "$head_repository"; do
 done
 
 case "$base_ref" in
-    main | candidate) ;;
+    main) ;;
     *) reject ;;
 esac
 case "$head_ref" in

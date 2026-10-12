@@ -239,10 +239,9 @@ locally stays unverified; users get widgets from the signed catalog. See
 
 ## 12. Submit
 
-Add a `listing.json` with the marketplace text, run the admission yourself,
-then open a pull request that adds your widget under `widgets/<dir>/` on the
-`candidate` branch of the
-[public repository](https://github.com/Valhallab/playervox-overcrow-releases):
+Add a `listing.json` with the marketplace text and run the admission
+yourself. Widgets are no longer proposed by pull request: you will send
+yours from the OverCrow creator space when it opens.
 
 ```sh
 overcrow-widget admit

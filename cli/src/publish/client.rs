@@ -288,9 +288,25 @@ pub struct Answer {
 pub struct Client {
     origin: Origin,
     key: PublishKey,
+    /// The widget every API request names (`Overcrow-Widget`): a key may
+    /// cover several widgets of its publisher.
+    widget: Option<String>,
     verbose: bool,
     agent: ureq::Agent,
     uploader: ureq::Agent,
+}
+
+/// Whether `id` may be sent as the `Overcrow-Widget` header: a widget ID
+/// as the creator space accepts it (`[a-z0-9][a-z0-9.-]{0,127}`).
+pub fn widget_header_allowed(id: &str) -> bool {
+    id.len() <= 128
+        && id
+            .bytes()
+            .next()
+            .is_some_and(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit())
+        && id.bytes().all(|byte| {
+            byte.is_ascii_lowercase() || byte.is_ascii_digit() || matches!(byte, b'.' | b'-')
+        })
 }
 
 impl Client {
@@ -311,8 +327,17 @@ impl Client {
             uploader: agent(UPLOAD_TIME),
             origin,
             key,
+            widget: None,
             verbose,
         }
+    }
+
+    /// Every API request from now on names `id` (never the upload). An ID
+    /// the header cannot carry is not sent: the API then answers for the
+    /// key's own widget, and the local checks refuse the ID.
+    pub fn with_widget(mut self, id: &str) -> Self {
+        self.widget = widget_header_allowed(id).then(|| id.to_owned());
+        self
     }
 
     pub fn origin(&self) -> &Origin {
@@ -393,12 +418,17 @@ impl Client {
         authorization.set_sensitive(true);
         let started = Instant::now();
         let result = match body {
-            None => self
-                .agent
-                .get(&url)
-                .header("authorization", authorization)
-                .header("accept", "application/json")
-                .call(),
+            None => {
+                let mut request = self
+                    .agent
+                    .get(&url)
+                    .header("authorization", authorization)
+                    .header("accept", "application/json");
+                if let Some(widget) = &self.widget {
+                    request = request.header("overcrow-widget", widget);
+                }
+                request.call()
+            }
             Some(bytes) => {
                 let mut request = self
                     .agent
@@ -406,6 +436,9 @@ impl Client {
                     .header("authorization", authorization)
                     .header("accept", "application/json")
                     .header("content-type", "application/json");
+                if let Some(widget) = &self.widget {
+                    request = request.header("overcrow-widget", widget);
+                }
                 if let Some(key) = idempotency {
                     request = request.header("idempotency-key", key);
                 }

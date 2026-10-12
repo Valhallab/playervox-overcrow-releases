@@ -132,8 +132,11 @@ the creator tools ZIPs of OverCrow's releases
 Never publish a separate GitHub Release for the SDK or the CLI: the desktop
 updater uses this repository's stable-release API.
 
-Widget submissions target `candidate`; tooling and documentation target `main`.
-Neither a pull request nor a merge signs or publishes a widget. See
+Tooling and documentation pull requests target `main`; widgets are not
+proposed by pull request (creators submit them in the OverCrow creator
+space). After each merge, the `overcrow-submit` workflow sends new versions
+of PlayerVox's own widgets to the creator space for review. Neither a pull
+request nor a merge signs or publishes a widget. See
 [contributing](CONTRIBUTING.md), [security](SECURITY.md) and
 [publishing and review](docs/content/en/publishing.md).
 

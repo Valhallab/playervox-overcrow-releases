@@ -61,7 +61,7 @@ Usage:
   overcrow-widget submit [dir | sources.zip] [--submission FILE] [--release-notes-en TEXT]
                          [--release-notes-fr TEXT] [--review-message TEXT] [--dry-run] [--no-wait]
                          [--expect-sha256 HEX] [--format human|json] [--verbose]
-  overcrow-widget status [--version VERSION|ID] [--wait] [--format human|json] [--verbose]
+  overcrow-widget status [--widget ID] [--version VERSION|ID] [--wait] [--format human|json] [--verbose]
   overcrow-widget test [dir] [--runtime PATH] [--offline] [--scenario NAME] [--update] [--format human|json] [--no-typecheck]
   overcrow-widget --version [--format json] | --help
 
@@ -120,6 +120,7 @@ const VALUED: &[&str] = &[
     "--review-message",
     "--expect-sha256",
     "--version",
+    "--widget",
 ];
 
 fn parse(mut args: impl Iterator<Item = String>) -> Result<Arguments, String> {
@@ -490,14 +491,26 @@ fn run_submit(arguments: &Arguments, key: Option<String>) -> Result<ExitCode, St
 }
 
 fn run_status(arguments: &Arguments, key: Option<String>) -> Result<ExitCode, String> {
-    arguments.expect(&["--version", "--wait", "--format", "--verbose"], 0)?;
+    arguments.expect(
+        &["--widget", "--version", "--wait", "--format", "--verbose"],
+        0,
+    )?;
     let format = arguments.format()?;
     if arguments.flag("--wait") && arguments.value("--version").is_none() {
         return Err("--wait follows one version: give --version".into());
     }
+    if let Some(id) = arguments.value("--widget")
+        && !publish::client::widget_header_allowed(id)
+    {
+        return Err(format!(
+            "`{}` is not a widget ID: a-z, 0-9, . and -, as in manifest.json",
+            sanitize::line(id)
+        ));
+    }
     Ok(publish::status(
         key,
         &publish::StatusOptions {
+            widget: arguments.value("--widget"),
             version: arguments.value("--version"),
             wait: arguments.flag("--wait"),
             json: format == Format::Json,

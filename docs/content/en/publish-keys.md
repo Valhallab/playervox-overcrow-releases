@@ -83,7 +83,9 @@ jobs:
 ```
 
 The job fails when the checks fail, with each problem on the line of your
-file.
+file. A version the creator space already has is not sent again: `submit`
+reports its state, so the same job may also run on every push to your main
+branch.
 
 ## Revoke a key
 

@@ -1,0 +1,8 @@
+{
+  "justifications": [
+    {
+      "permission": "capability:playervox.score.read",
+      "text": "Reads the PlayerVox community grade, score, rating count and criteria of the Steam game you play."
+    }
+  ]
+}

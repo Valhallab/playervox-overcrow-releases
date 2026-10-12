@@ -88,7 +88,7 @@ case "$event_name" in pull_request | push) ;; *)
     fail 'CI trust metadata is invalid'
     ;;
 esac
-case "$base_ref" in main | candidate) ;; *)
+case "$base_ref" in main) ;; *)
     fail 'CI trust metadata is invalid'
     ;;
 esac

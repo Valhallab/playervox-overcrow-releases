@@ -85,7 +85,9 @@ jobs:
 ```
 
 La tâche échoue quand les contrôles échouent, avec chaque problème sur la
-ligne de votre fichier.
+ligne de votre fichier. Une version que l’espace créateurs a déjà n’est pas
+renvoyée : `submit` donne son état, et la même tâche peut aussi tourner à
+chaque push sur votre branche principale.
 
 ## Révoquer une clé
 

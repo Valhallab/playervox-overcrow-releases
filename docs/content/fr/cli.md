@@ -423,6 +423,10 @@ La commande ne pose jamais de question : ce qui manque est signalé, avec un
 - Une clé qui expire dans moins de 14 jours donne un avertissement. Une clé
   expirée ou révoquée finit avec le code 2 : créez-en une autre et
   remplacez le secret.
+- Chaque requête nomme le widget du `manifest.json` des sources (en-tête
+  `Overcrow-Widget`). Une clé qui couvre plusieurs widgets de son éditeur
+  (réservée à PlayerVox pour l’instant) envoie celui qui est nommé ;
+  `status` prend alors `--widget`.
 
 ### Ce que fait la commande
 
@@ -450,6 +454,28 @@ La commande ne pose jamais de question : ce qui manque est signalé, avec un
    une politique de confidentialité si le widget utilise le réseau, une
    fiche complète pour une première version, ou la place en revue d’un
    nouvel éditeur. Le lien pour finir là-bas est affiché.
+
+### Une version que l’espace créateurs a déjà
+
+Avant toute autre vérification, `submit` cherche une version du même
+numéro dans l’espace créateurs. Si elle a les mêmes sources (octet pour
+octet, telles que `submit` les zippe) ou, une fois admise, le même paquet,
+rien n’est envoyé : la commande se termine sur l’état de cette version,
+avec `outcome` `already_known`.
+
+- Code 0 : elle est publiée, approuvée, en revue, ou attend votre réponse à
+  des modifications demandées.
+- Code 3 : elle attend dans l’espace créateurs (le lien pour finir est
+  affiché).
+- Code 1 : elle a échoué à ses contrôles, a été refusée, retirée ou
+  abandonnée : montez la version dans `manifest.json` pour envoyer d’autres
+  sources.
+- Une version encore en contrôle est suivie, comme après un envoi.
+
+Le même numéro avec un autre paquet est refusé avant l’envoi
+(`submit.version_known_differs`) : montez la version dans `manifest.json`.
+Une CI peut donc lancer `submit` à chaque push : une version déjà envoyée
+ne change rien.
 
 Ctrl+C pendant les contrôles arrête de les suivre ; ils continuent dans
 l’espace créateurs, et `overcrow-widget status --version 1.3.1 --wait` les
@@ -559,8 +585,10 @@ Montre les versions du widget de la clé, avec leur état et leur type de
 revue. Avec `--version`, une seule version, par son numéro (la plus récente
 de ce numéro) ou son ID : ses six contrôles et leurs problèmes, ce qui la
 retient avant la revue, les remarques du relecteur et le délai de revue.
-`--wait` suit une version encore en contrôle. Options : `--version
-VERSION|ID`, `--wait`, `--format json`, `--verbose`. Code de sortie : 0
+`--wait` suit une version encore en contrôle. `--widget ID` nomme le widget,
+pour une clé qui en couvre plusieurs (code 2 sans lui, avec les widgets que
+la clé couvre). Options : `--widget ID`, `--version VERSION|ID`, `--wait`,
+`--format json`, `--verbose`. Code de sortie : 0
 quand la lecture a réussi, 2 sur une erreur ; avec `--wait`, les codes de
 `submit`.
 
@@ -729,21 +757,24 @@ est annoncé par un nouveau `formatVersion`.
 | `formatVersion`, `command` | `1` ; `submit` ou `status`. |
 | `outcome`, `exitCode` | La fin de la commande (ci-dessous) et son [code de sortie](#codes-de-sortie). |
 | `dryRun` | `submit` : si rien ne devait partir. |
-| `key` | `name`, `hint` (les quatre caractères après `ocw_pub_`), `expiresAt`, `expiresSoon`. |
+| `key` | `name`, `hint` (les quatre caractères après `ocw_pub_`), `expiresAt`, `expiresSoon`, `widgets` (les widgets que la clé couvre). |
 | `widget` | `id` ; `submit` : `publisher`, `status` ; `status` : `name`. |
 | `archive` | `submit` : `kind` (`folder`, zippé par l’outil, ou `archive`), `bytes`, `sha256`, `files`, `uncompressedBytes`, `ignored`. |
 | `local` | `submit` : `admitted`, `version`, `minimumVersion`, `previousVersion`, `permissions` (`keys`, `added`, `changed`, `removed`, `reviewType`), `diagnostics`. |
 | `requirements` | `submit` : `justifications` (`required`, `given`, `missing`, `unused`), `privacyPolicy` (`required`, `present`), `reviewType`, `submissions` (`limit`, `remaining`, `nextSubmissionAt`), `review` (`available`, `blockedBy`), `agreement` (`version`, `accepted`), `blockers` (`code`). |
+| `known` | `submit` : la version que l’espace créateurs a déjà (rien n’est parti) : `versionId`, `state`, `match` (`sources` ou `package`). |
 | `submission` | `submit` : `id`, `state`, `resumed`, `quota`. |
 | `version` | La version de l’espace créateurs, ses champs en camelCase : `id`, `version`, `state`, `reviewType`, `checks` (`key`, `status`, `diagnostics`), `reviewBlockers`, `completeInPortal` (`message`, `url`), `permissions`, `remarks`, `deadline`, `history`… |
 | `versions` | `status` sans `--version` : toutes les versions. |
 | `error` | `code`, `message` et, quand ils sont connus, `httpStatus`, `retryAfter`, `nextSubmissionAt`, `minimumVersion`, `expiredAt`, `fields` ; sinon `null`. |
 
 `outcome` vaut `ready_to_send` (`--dry-run`), `refused_locally`, `refused`
-(l’espace créateurs a refusé l’envoi), `complete_in_portal`, `error`, ou
-l’état de la version ; `status` sans `--wait` n’en a pas. Les codes
+(l’espace créateurs a refusé l’envoi), `complete_in_portal`,
+`already_known` (rien n’est parti, voir `known`), `error`, ou l’état de la
+version ; `status` sans `--wait` n’en a pas. Les codes
 d’erreur sont ceux de l’espace créateurs (`version_not_newer`,
-`submission_limit_reached`, `publish_key_expired`, `publish_key_revoked`…)
+`submission_limit_reached`, `publish_key_expired`, `publish_key_revoked`,
+`widget_required`, `publish_key_widget_not_covered`…)
 ou ceux de l’outil : `publish_key_missing`, `invalid_publish_key`,
 `api_url_invalid`, `submission_file`, `sources`, `sources.read`, `network`,
 `timeout`, `server`, `response`, `redirect`, `upload_refused`,
@@ -753,14 +784,15 @@ trouvés avant l’envoi sont des diagnostics : `sources.*`,
 et `submit.*`
 (`widget_not_submittable`, `agreement_required`, `limit_reached`,
 `version_too_low`, `justification_missing`, `archive_too_large`,
-`archive_mismatch`, `release_notes`, `justification`, `review_message`).
+`archive_mismatch`, `version_known_differs`, `release_notes`,
+`justification`, `review_message`).
 
 ## Codes de sortie
 
 | Code | Signification |
 | --- | --- |
-| 0 | Succès. Les avertissements sont admis, sauf avec `--deny-warnings`. `diff` a lu les deux versions, qu’elles diffèrent ou non. `submit` : la version est en revue (avec `--dry-run`, elle y entrerait), ou déjà au-delà (approuvée, publiée, retirée). |
-| 1 | Des erreurs ont été trouvées ; `admit` a refusé les sources ; `diff` a refusé une version ; un scénario de `test` a échoué ; l’overlay a mis fin à une session `dev`. `submit` : quelque chose à corriger (une vérification avant l’envoi, un refus de l’espace créateurs, un contrôle échoué). |
+| 0 | Succès. Les avertissements sont admis, sauf avec `--deny-warnings`. `diff` a lu les deux versions, qu’elles diffèrent ou non. `submit` : la version est en revue (avec `--dry-run`, elle y entrerait), ou déjà au-delà (approuvée, publiée, retirée), ou l’espace créateurs l’avait déjà en revue, avec des modifications demandées, approuvée ou publiée. |
+| 1 | Des erreurs ont été trouvées ; `admit` a refusé les sources ; `diff` a refusé une version ; un scénario de `test` a échoué ; l’overlay a mis fin à une session `dev`. `submit` : quelque chose à corriger (une vérification avant l’envoi, un refus de l’espace créateurs, un contrôle échoué, une version que l’espace créateurs a déjà refusée, retirée ou abandonnée). |
 | 2 | Une erreur d’utilisation ou de fichier ; pas d’overlay pour `dev` ; pas de runtime pour `test`. `submit`, `status` : la clé (absente, invalide, expirée, révoquée), le réseau ou le serveur. |
 | 3 | `submit`, `status --wait` : la version a réussi ses contrôles et attend dans l’espace créateurs. |
 | 4 | `submit`, `status --wait` : la version est encore en contrôle (Ctrl+C, `--no-wait`, ou 15 minutes). |

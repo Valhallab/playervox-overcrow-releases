@@ -1,0 +1,12 @@
+{
+  "justifications": [
+    {
+      "permission": "capability:stopwatch.read",
+      "text": "Reads the stopwatch's time and state, also driven by the host's shortcuts, to show it to the hundredth of a second."
+    },
+    {
+      "permission": "capability:stopwatch.control",
+      "text": "Starts, pauses and resets the stopwatch when you click its buttons."
+    }
+  ]
+}

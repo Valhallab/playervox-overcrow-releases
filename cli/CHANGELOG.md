@@ -25,6 +25,16 @@ widget's sources and the embedded SDK.
 - `status [--version VERSION|ID] [--wait]` shows the versions of the key's
   widget, or one version with its checks, what keeps it out of review, its
   remarks and its review delay.
+- `submit` sends nothing for a version the creator space already has with
+  the same sources, or the same package once admitted: the run ends on that
+  version's state (`outcome` `already_known`, field `known`; status 0, 3 or
+  1 by state; a version still being checked is followed). The same number
+  with another package is refused (`submit.version_known_differs`). A CI job
+  may thus run `submit` on every push.
+- `submit` and `status` name their widget in every request (header
+  `Overcrow-Widget`): `submit` the id of the sources' `manifest.json`,
+  `status` the one given with `--widget ID`, needed for a key that covers
+  several widgets. The JSON `key` lists the widgets it covers.
 - New exit statuses for `submit` and `status --wait`: 3 (waiting in the
   creator space) and 4 (still being checked); `--format json` prints one
   object, `formatVersion` 1.

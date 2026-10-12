@@ -1,0 +1,8 @@
+{
+  "justifications": [
+    {
+      "permission": "capability:playervox.reviews.read",
+      "text": "Reads PlayerVox players' reviews of the game you play, three per page, or only those of the players you follow."
+    }
+  ]
+}

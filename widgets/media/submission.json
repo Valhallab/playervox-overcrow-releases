@@ -1,0 +1,12 @@
+{
+  "justifications": [
+    {
+      "permission": "capability:media.read",
+      "text": "Reads the track, artist and cover your music player is playing, to show them."
+    },
+    {
+      "permission": "capability:media.control",
+      "text": "Sends previous, play/pause and next to your music player when you click the widget's buttons in Interactive mode."
+    }
+  ]
+}
