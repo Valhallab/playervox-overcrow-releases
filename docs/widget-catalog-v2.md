@@ -166,7 +166,8 @@ changes without a new version. Widget IDs are unique.
   with default consent) is accepted only for the publisher `playervox` on a
   `com.playervox.*` ID, and applies to every version.
 - `preview` is one PNG image (`image/png`, at most `MAX_PREVIEW_BYTES`) at its
-  exact URL.
+  exact URL, at most 1024 × 768 pixels and 4 MiB once decoded: the Control
+  Center refuses a larger one, so the creator space never accepts it.
 
 ### Listing
 

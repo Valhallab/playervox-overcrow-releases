@@ -37,7 +37,7 @@ version. Les langues de l’interface du widget viennent de ses fichiers
 ## Image d’aperçu
 
 Une seule image, en anglais, pour toutes les langues : un PNG au format 4:3,
-de 480 × 360 à 1 600 × 1 200 (1 280 × 960 conseillé), 256 Kio au plus.
+de 480 × 360 à 1 024 × 768 (1 024 × 768 conseillé), 256 Kio au plus.
 Montrez le widget en situation, sans texte marketing.
 
 ## Catégorie et jeux
@@ -57,8 +57,9 @@ pour lesquels il est fait : les joueurs filtrent le catalogue par jeu.
   « Code source public ».
 
 Tapez une adresse comme vous la connaissez (`exemple.com/confidentialite`) :
-`https://` et le `/` final sont ajoutés pour vous. Une adresse en `http://`
-est refusée.
+`https://` est ajouté pour vous, et un `/` après un domaine seul
+(`exemple.com` est enregistré `https://exemple.com/`). Une adresse en
+`http://` est refusée.
 
 ## Depuis listing.json
 
