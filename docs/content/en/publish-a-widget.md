@@ -69,8 +69,9 @@ When the checks pass, the version page says what changes for players:
   address typed here is saved into the listing too.
 - **Listing.** A first version goes to review with its listing, which needs
   an English description, a license and a support contact.
-- **Release notes**, shown to players: optional, but when you write any,
-  write them in English too.
+- **Release notes**, shown to players: optional. English comes first;
+  **Add a language** adds others, 16 at most. When you write any, write
+  them in English too.
 - **Message for the review**, read only by PlayerVox: a test account,
   useful context.
 

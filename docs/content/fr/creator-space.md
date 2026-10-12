@@ -46,7 +46,8 @@ L’éditeur est le nom sous lequel vos widgets apparaissent.
 - **E-mail de contact** : pour que PlayerVox vous joigne. Il n’est jamais
   affiché.
 - **Site web** et **logo** (carré, PNG ou WebP) : facultatifs, affichés sur
-  votre page éditeur.
+  votre page éditeur. Tapez le site comme vous le connaissez
+  (`exemple.com`) : `https://` est ajouté pour vous.
 
 Votre profil public (nom, présentation, site, logo) paraît avec la prochaine
 publication du catalogue : d’ici là, l’espace créateurs indique **Visible

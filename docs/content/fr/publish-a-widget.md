@@ -75,7 +75,8 @@ les joueurs :
   le réseau. L’adresse tapée ici est aussi enregistrée dans la fiche.
 - **Fiche.** Une première version part en revue avec sa fiche, qui demande
   une description en anglais, une licence et un contact d’assistance.
-- **Notes de version**, visibles par les joueurs : facultatives, mais dès
+- **Notes de version**, visibles par les joueurs : facultatives. L’anglais
+  vient d’abord ; **Ajouter une langue** en ajoute d’autres, 16 au plus. Dès
   que vous en écrivez, écrivez-les aussi en anglais.
 - **Message pour la revue**, lu seulement par PlayerVox : un compte de test,
   un contexte utile.

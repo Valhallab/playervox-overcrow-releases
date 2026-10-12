@@ -34,8 +34,8 @@ own interface come from its `locales/` files.
 
 ## Preview image
 
-One image, in English, for every language: a PNG in 4:3, from 640 × 480 to
-1,600 × 1,200 (1,280 × 960 recommended), 256 KiB at most. Show the widget in
+One image, in English, for every language: a PNG in 4:3, from 480 × 360 to
+1,024 × 768 (1,024 × 768 recommended), 256 KiB at most. Show the widget in
 use, without marketing text.
 
 ## Category and games
@@ -52,6 +52,10 @@ made for: players filter the catalog by game.
 - **Privacy policy**: required as soon as the widget uses the network.
 - **Public source code**: optional; a public repository adds the "Public
   source code" badge.
+
+Type an address as you know it (`example.com/privacy`): `https://` is added
+for you, and a `/` after a bare domain (`example.com` is saved as
+`https://example.com/`). An address in `http://` is refused.
 
 ## From listing.json
 
