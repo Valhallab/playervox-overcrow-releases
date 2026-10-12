@@ -111,6 +111,21 @@ expect_refusal() {
     test ! -s "$stdout" || report_failure "$4 produced a receipt"
 }
 
+# Widgets are no longer proposed to candidate (CR.13): both trusted drivers
+# refuse that base before anything else.
+if sh "$repo_root/scripts/ci-verify.sh" \
+        "$repository" "$trust_sha" "$trust_sha" pull_request \
+        "$same" candidate "$fork" feature/widget "$private_parent" admission \
+        >"$stdout" 2>"$stderr"; then
+    report_failure 'CI admitted a pull request to candidate'
+fi
+/usr/bin/grep -F -x 'error: CI trust metadata is invalid' "$stderr" >/dev/null \
+    || report_failure 'a pull request to candidate was not refused explicitly'
+if sh "$repo_root/tests/reject-published-change.sh" pull_request "$same" \
+        candidate "$same" release/1 published/x >"$stdout" 2>"$stderr"; then
+    report_failure 'the publication policy accepted a candidate base'
+fi
+
 break_view() {
     widget new-broken contributor.broken-counter
     printf '%s\n' '<box>' >"$repository/widgets/new-broken/view.ocml"
