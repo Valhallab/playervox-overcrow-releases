@@ -10,7 +10,7 @@
 //! ones.
 #![allow(dead_code)]
 
-use std::collections::{HashMap, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::io::{BufRead as _, BufReader, Read as _, Write as _};
 use std::net::{TcpListener, TcpStream};
 use std::sync::{Arc, Mutex};
@@ -71,8 +71,20 @@ struct Submission {
     uploaded: Option<Vec<u8>>,
 }
 
+/// What `GET versions` lists.
+enum Listing {
+    /// Versions the creator space already has (none by default): their
+    /// summaries, and `GET versions/:id` answers each once in full.
+    Known(Vec<Value>),
+    /// For `status`: the version being polled and an older one (#70).
+    Polls,
+}
+
 struct State {
     url: String,
+    listing: Listing,
+    /// Known versions already answered in full (then the polls answer).
+    served: HashSet<u64>,
     routes: HashMap<&'static str, VecDeque<Reply>>,
     requests: Vec<Request>,
     violations: Vec<String>,
@@ -214,6 +226,8 @@ impl FakeApi {
         );
         let state = Arc::new(Mutex::new(State {
             url: url.clone(),
+            listing: Listing::Known(Vec::new()),
+            served: HashSet::new(),
             routes: HashMap::new(),
             requests: Vec::new(),
             violations: Vec::new(),
@@ -240,6 +254,16 @@ impl FakeApi {
             .unwrap()
             .routes
             .insert(route, replies.into());
+    }
+
+    /// The versions the creator space already has (`GET versions`).
+    pub fn known(&self, versions: Vec<Value>) {
+        self.state.lock().unwrap().listing = Listing::Known(versions);
+    }
+
+    /// `GET versions` lists the version being polled and an older one.
+    pub fn list_polls(&self) {
+        self.state.lock().unwrap().listing = Listing::Polls;
     }
 
     /// What `GET versions/77` answers, poll after poll.
@@ -429,6 +453,25 @@ fn respond(stream: &mut TcpStream, status: u16, body: &[u8]) {
     let _ = stream.flush();
 }
 
+/// A version as `GET versions` lists it.
+fn summary(version: &Value) -> Value {
+    [
+        "id",
+        "version",
+        "state",
+        "review_type",
+        "build_status",
+        "widget_id",
+        "created_at",
+        "name",
+        "release_notes",
+    ]
+    .iter()
+    .map(|field| ((*field).to_owned(), version[*field].clone()))
+    .collect::<serde_json::Map<String, Value>>()
+    .into()
+}
+
 fn submission_json(submission: &Submission) -> Value {
     let finalized = submission.state == "finalized";
     json!({
@@ -571,32 +614,29 @@ fn auto(state: &mut State, name: &str, id: Option<u64>, request: &Request) -> (u
             (200, Some(answer))
         }
         "versions" => {
+            if let Listing::Known(known) = &state.listing {
+                let list: Vec<Value> = known.iter().map(summary).collect();
+                return (200, Some(json!({ "versions": list })));
+            }
             let current = state
                 .polls
                 .back()
                 .cloned()
                 .unwrap_or_else(|| version("in_review"));
-            let summary: serde_json::Map<String, Value> = [
-                "id",
-                "version",
-                "state",
-                "review_type",
-                "build_status",
-                "widget_id",
-                "created_at",
-                "name",
-                "release_notes",
-            ]
-            .iter()
-            .map(|field| ((*field).to_owned(), current[*field].clone()))
-            .collect();
+            let summary = summary(&current);
             let mut older = summary.clone();
-            older.insert("id".into(), json!(70));
-            older.insert("version".into(), json!("1.3.1"));
-            older.insert("state".into(), json!("checks_failed"));
+            older["id"] = json!(70);
+            older["version"] = json!("1.3.1");
+            older["state"] = json!("checks_failed");
             (200, Some(json!({"versions": [summary, older]})))
         }
         "version" => {
+            if let Listing::Known(known) = &state.listing
+                && let Some(found) = known.iter().find(|item| item["id"].as_u64() == id).cloned()
+                && id.is_some_and(|id| state.served.insert(id))
+            {
+                return (200, Some(json!({ "version": found })));
+            }
             if id != Some(VERSION_ID) && id != Some(70) {
                 return (404, Some(error("not_found", "Not found.")));
             }

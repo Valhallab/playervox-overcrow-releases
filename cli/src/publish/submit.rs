@@ -16,7 +16,7 @@ use serde_json::{Map, Value, json};
 use super::api::{self, Context, KeyInfo, SubmissionReply};
 use super::client::{Client, Failure};
 use super::follow::{self, End, Progress};
-use super::render::Files;
+use super::render::{self, Files};
 use super::state::Resume;
 use super::texts::{self, Limits, Overrides, Texts};
 use super::{Out, Outcome};
@@ -70,7 +70,7 @@ pub fn submit(raw_key: Option<String>, options: &SubmitOptions<'_>) -> ExitCode 
         }
     };
     let client = match super::connect(raw_key, options.verbose, &out) {
-        Ok(client) => match manifest_id(&sources.0) {
+        Ok(client) => match manifest_field(&sources.0, "id") {
             Some(id) => client.with_widget(&id),
             None => client,
         },
@@ -91,7 +91,35 @@ pub fn submit(raw_key: Option<String>, options: &SubmitOptions<'_>) -> ExitCode 
         "widget",
         json!({"id": key.widget_id, "publisher": key.publisher, "status": context.widget_status}),
     );
-    let checked = match check_locally(&key, &context, &texts, sources, options, &mut out) {
+    // A version of this number the creator space already has: the same
+    // sources (or, below, the same package) are never sent again.
+    let known = match find_known(&client, &sources) {
+        Ok(known) => known,
+        Err(failure) => return out.fail_request(&failure, Outcome::Error),
+    };
+    let (known, known_package) = match known {
+        Some(found) if found.same_sources => {
+            return conclude_known(
+                &client,
+                found.version,
+                "sources",
+                &sources.0.files,
+                options,
+                out,
+            );
+        }
+        Some(found) => (Some(found.version), found.package),
+        None => (None, None),
+    };
+    let checked = match check_locally(
+        &key,
+        &context,
+        &texts,
+        sources,
+        known_package.as_deref(),
+        options,
+        &mut out,
+    ) {
         Ok(checked) => checked,
         Err(Stop::Error { code, message }) => return out.fail(&code, &message, Map::new()),
         Err(Stop::Refused) => {
@@ -99,6 +127,11 @@ pub fn submit(raw_key: Option<String>, options: &SubmitOptions<'_>) -> ExitCode 
             return out.finish(Outcome::RefusedLocally);
         }
     };
+    if checked.same_package
+        && let Some(version) = known
+    {
+        return conclude_known(&client, version, "package", &checked.files, options, out);
+    }
     if checked.refused {
         out.say("Nothing was sent.");
         return out.finish(Outcome::RefusedLocally);
@@ -152,6 +185,88 @@ struct Checked {
     /// What would keep the version out of review (the creator space says
     /// it again with `review_blockers`).
     blockers: Vec<&'static str>,
+    /// The package is the one of the version of this number the creator
+    /// space already has: nothing is sent.
+    same_package: bool,
+}
+
+/// The version of the sources' number the creator space already has.
+struct Known {
+    /// The newest version of that number, in full.
+    version: api::Version,
+    /// Its sources are, byte for byte, the archive that would be sent.
+    same_sources: bool,
+    /// Its package's digest, once built.
+    package: Option<String>,
+}
+
+/// `GET versions`, then the newest version of the sources' number, if any.
+fn find_known(
+    client: &Client,
+    sources: &(Tree, Vec<u8>, &'static str),
+) -> Result<Option<Known>, Failure> {
+    let Some(number) = manifest_field(&sources.0, "version") else {
+        return Ok(None);
+    };
+    let answer = client.get("/api/v1/publish/versions")?;
+    let versions = api::parse_versions(&answer.body).map_err(Failure::Response)?;
+    let Some(newest) = versions
+        .iter()
+        .filter(|version| version.version == number)
+        .max_by_key(|version| version.id)
+    else {
+        return Ok(None);
+    };
+    let answer = client.get(&format!("/api/v1/publish/versions/{}", newest.id))?;
+    let version = api::parse_version(&answer.body).map_err(Failure::Response)?;
+    let archive = hex(&sha256(&sources.1));
+    let same_sources = version.value["sources"]["sha256"].as_str() == Some(archive.as_str());
+    let package = version.value["package"]["sha256"]
+        .as_str()
+        .map(str::to_owned);
+    Ok(Some(Known {
+        version,
+        same_sources,
+        package,
+    }))
+}
+
+/// The end of a run whose version the creator space already has: its
+/// state, followed while it is being checked; nothing is sent.
+fn conclude_known(
+    client: &Client,
+    version: api::Version,
+    matched: &str,
+    files: &Files,
+    options: &SubmitOptions<'_>,
+    mut out: Out,
+) -> ExitCode {
+    let outcome = Outcome::known(&version.state);
+    out.set(
+        "known",
+        json!({"versionId": version.id, "state": version.state, "match": matched}),
+    );
+    out.say(&format!(
+        "Version    {} is already in the creator space (#{}, same {matched}): nothing was sent.",
+        sanitize::line(&version.version),
+        version.id
+    ));
+    if version.state == "checking" && !options.dry_run {
+        return follow_version(client, out, version, !options.no_wait, files, None);
+    }
+    let mut progress = Progress::default();
+    follow::conclude(&mut out, &version, Some(files), &mut progress);
+    match version.state.as_str() {
+        "changes_requested" => out.warn(
+            "changes were requested in the review: answer in the creator space, or send a new version",
+        ),
+        "published" | "approved" | "in_review" | "ready" | "checking" => {}
+        state => out.warn(&format!(
+            "this version is {} in the creator space: raise the version in manifest.json to send other sources",
+            render::state_words(state)
+        )),
+    }
+    out.finish(outcome)
 }
 
 /// Steps 3 of the design: everything is checked on the archive that would
@@ -161,6 +276,7 @@ fn check_locally(
     context: &Context,
     texts: &Texts,
     sources: (Tree, Vec<u8>, &'static str),
+    known_package: Option<&str>,
     options: &SubmitOptions<'_>,
     out: &mut Out,
 ) -> Result<Checked, Stop> {
@@ -260,6 +376,34 @@ fn check_locally(
         .map_err(|message| Stop::error("sources.read", message))?;
     let permissions = &admitted["permissions"];
     let version = admitted["version"].as_str().unwrap_or_default().to_owned();
+    // The creator space has this number already: the same package is a
+    // version it knows; another package needs another number.
+    if let Some(known) = known_package
+        && let Some(local) = admitted["package"]["sha256"].as_str()
+    {
+        if known == local {
+            return Ok(Checked {
+                version,
+                archive,
+                sha256,
+                files: tree.files,
+                refused: false,
+                blockers: Vec::new(),
+                same_package: true,
+            });
+        }
+        report.push(
+            Diagnostic::error(
+                "submit.version_known_differs",
+                format!(
+                    "version {} is already in the creator space with another package",
+                    sanitize::line(&version)
+                ),
+            )
+            .in_file("manifest.json")
+            .help("raise the version in manifest.json"),
+        );
+    }
     if let (Some(current), Some(minimum)) = (
         SemVer::parse(&version),
         SemVer::parse(&context.minimum_version),
@@ -382,6 +526,7 @@ fn check_locally(
         files: tree.files,
         refused: report.errors() > 0,
         blockers,
+        same_package: false,
     })
 }
 
@@ -464,10 +609,11 @@ fn read_sources(target: &Path, out: &mut Out) -> Result<(Tree, Vec<u8>, &'static
     Ok((tree, bytes, kind))
 }
 
-/// The `id` of the sources' `manifest.json`, when it can be read.
-fn manifest_id(tree: &Tree) -> Option<String> {
+/// A text field (`id`, `version`) of the sources' `manifest.json`, when it
+/// can be read.
+fn manifest_field(tree: &Tree, field: &str) -> Option<String> {
     let manifest: Value = serde_json::from_slice(tree.files.get("manifest.json")?).ok()?;
-    manifest["id"].as_str().map(str::to_owned)
+    manifest[field].as_str().map(str::to_owned)
 }
 
 /// Records and shows why the sources are refused.
@@ -801,11 +947,33 @@ fn send(
             }
         }
     };
+    follow_version(
+        client,
+        out,
+        version,
+        !options.no_wait,
+        &checked.files,
+        Some(&mut resume),
+    )
+}
+
+/// Follows a version being checked to its end; the resumable state of the
+/// run (if any) is forgotten once the version is out of `checking`.
+fn follow_version(
+    client: &Client,
+    mut out: Out,
+    version: api::Version,
+    wait: bool,
+    files: &Files,
+    mut resume: Option<&mut Resume>,
+) -> ExitCode {
     let mut progress = Progress::default();
-    match follow::follow(client, &out, version, !options.no_wait, &mut progress) {
+    match follow::follow(client, &out, version, wait, &mut progress) {
         End::Done(version) => {
-            resume.forget();
-            let outcome = follow::conclude(&mut out, &version, Some(&checked.files), &mut progress);
+            if let Some(resume) = resume.as_mut() {
+                resume.forget();
+            }
+            let outcome = follow::conclude(&mut out, &version, Some(files), &mut progress);
             out.finish(outcome)
         }
         End::StillChecking {
@@ -823,7 +991,9 @@ fn send(
             out.finish(Outcome::State("checking"))
         }
         End::BuildFailed(version) => {
-            resume.forget();
+            if let Some(resume) = resume.as_mut() {
+                resume.forget();
+            }
             out.set("version", api::camelize(&version.value));
             out.fail(
                 "build_failed",

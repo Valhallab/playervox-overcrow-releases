@@ -164,6 +164,14 @@ fn code(output: &Output) -> Option<i32> {
     output.status.code()
 }
 
+/// The `POST submissions` the API received.
+fn submission_request(api: &FakeApi) -> fake_api::Request {
+    api.requests()
+        .into_iter()
+        .find(|request| request.line() == "POST /api/v1/publish/submissions")
+        .expect("a submission")
+}
+
 fn sent(api: &FakeApi) -> bool {
     api.lines()
         .iter()
@@ -207,10 +215,11 @@ fn a_version_is_sent_checked_and_enters_review() {
     assert_eq!(api.violations(), Vec::<String>::new());
     let lines = api.lines();
     assert_eq!(
-        lines[..6],
+        lines[..7],
         [
             "GET /api/v1/publish/key",
             "GET /api/v1/publish/context",
+            "GET /api/v1/publish/versions",
             "POST /api/v1/publish/submissions",
             "PUT /upload/812",
             "POST /api/v1/publish/submissions/812/finalize",
@@ -235,7 +244,7 @@ fn a_version_is_sent_checked_and_enters_review() {
         "{stderr}"
     );
     // The request the API received, in snake_case.
-    let create = &api.requests()[2];
+    let create = &submission_request(&api);
     let body = create.json();
     assert_eq!(body["version"], "1.3.1");
     assert_eq!(body["auto_submit"], true);
@@ -287,7 +296,7 @@ fn the_json_output_is_one_object() {
     let uploaded = api.uploaded().expect("an upload");
     let digest = report["archive"]["sha256"].as_str().expect("digest");
     assert_eq!(report["archive"]["bytes"], uploaded.len());
-    assert_eq!(api.requests()[2].json()["archive"]["sha256"], digest);
+    assert_eq!(submission_request(&api).json()["archive"]["sha256"], digest);
     assert!(text(&output.stdout).lines().count() == 1);
 }
 
@@ -603,7 +612,11 @@ fn a_dry_run_sends_nothing() {
     assert_eq!(report["dryRun"], true);
     assert_eq!(
         api.lines(),
-        ["GET /api/v1/publish/key", "GET /api/v1/publish/context"]
+        [
+            "GET /api/v1/publish/key",
+            "GET /api/v1/publish/context",
+            "GET /api/v1/publish/versions"
+        ]
     );
     assert_eq!(report["requirements"]["reviewType"], "quick");
     assert_eq!(
@@ -912,6 +925,7 @@ fn a_bad_texts_file_is_a_usage_error() {
 fn status_lists_versions_and_shows_one() {
     let project = Project::new();
     let api = FakeApi::start(Some(project.previous()));
+    api.list_polls();
     let output = project.run(&api, &["status"]);
     assert_eq!(code(&output), Some(0), "{}", text(&output.stderr));
     let shown = text(&output.stdout);
@@ -931,6 +945,7 @@ fn status_lists_versions_and_shows_one() {
 
     // By number: the latest of that number; by ID: that one.
     let api = FakeApi::start(Some(project.previous()));
+    api.list_polls();
     let output = project.run(&api, &["status", "--version", "1.3.1", "--format", "json"]);
     assert_eq!(code(&output), Some(0));
     assert_eq!(json_of(&output)["version"]["id"], VERSION_ID);
@@ -939,6 +954,7 @@ fn status_lists_versions_and_shows_one() {
         Some("GET /api/v1/publish/versions/77")
     );
     let api = FakeApi::start(Some(project.previous()));
+    api.list_polls();
     let output = project.run(&api, &["status", "--version", "70"]);
     assert_eq!(code(&output), Some(0));
     assert_eq!(
@@ -950,6 +966,7 @@ fn status_lists_versions_and_shows_one() {
     assert_eq!(json_of(&output)["error"]["code"], "not_found");
     // A ready version: what keeps it out of review.
     let api = FakeApi::start(Some(project.previous()));
+    api.list_polls();
     api.polls(vec![fake_api::blocked_version()]);
     let output = project.run(&api, &["status", "--version", "77"]);
     assert_eq!(code(&output), Some(0));
@@ -1386,5 +1403,220 @@ fn status_names_the_widget_given() {
         text(&output.stderr).contains("is not a widget ID"),
         "{}",
         text(&output.stderr)
+    );
+}
+
+/// A version of the project's number (1.3.1) that the creator space
+/// already has, with these digests.
+fn known_version(state: &str, sources: &str, package: Option<&str>) -> Value {
+    let mut known = version(state);
+    known["sources"] = json!({"bytes": 1, "sha256": sources});
+    known["package"] = package.map_or(Value::Null, |sha256| json!({"bytes": 1, "sha256": sha256}));
+    known
+}
+
+/// The digest of the archive `submit` sends for the project.
+fn archive_sha256(project: &Project) -> String {
+    let api = FakeApi::start(Some(project.previous()));
+    let (_, report) = project.submit_json(&api, &["--dry-run"]);
+    report["archive"]["sha256"]
+        .as_str()
+        .expect("the archive's digest")
+        .to_owned()
+}
+
+#[test]
+fn a_version_already_published_is_not_sent_again() {
+    let project = Project::new();
+    let sources = archive_sha256(&project);
+    let api = FakeApi::start(Some(project.previous()));
+    api.known(vec![known_version(
+        "published",
+        &sources,
+        Some(&"ab".repeat(32)),
+    )]);
+    let (output, report) = project.submit_json(&api, &[]);
+    assert_eq!(code(&output), Some(0), "{report}");
+    assert!(!sent(&api));
+    assert_eq!(
+        api.lines(),
+        [
+            "GET /api/v1/publish/key",
+            "GET /api/v1/publish/context",
+            "GET /api/v1/publish/versions",
+            "GET /api/v1/publish/versions/77",
+        ]
+    );
+    assert_eq!(report["outcome"], "already_known");
+    assert_eq!(
+        report["known"],
+        json!({"versionId": 77, "state": "published", "match": "sources"})
+    );
+    let api = FakeApi::start(Some(project.previous()));
+    api.known(vec![known_version("published", &sources, None)]);
+    let output = project.submit(&api, &[]);
+    let shown = text(&output.stdout);
+    assert!(
+        shown.contains(
+            "1.3.1 is already in the creator space (#77, same sources): nothing was sent."
+        ),
+        "{shown}"
+    );
+    assert!(
+        shown.contains("nova.lol-timers 1.3.1: published"),
+        "{shown}"
+    );
+}
+
+#[test]
+fn a_dry_run_says_a_version_is_known() {
+    let project = Project::new();
+    let sources = archive_sha256(&project);
+    let api = FakeApi::start(Some(project.previous()));
+    api.known(vec![known_version("in_review", &sources, None)]);
+    let (output, report) = project.submit_json(&api, &["--dry-run"]);
+    assert_eq!(code(&output), Some(0), "{report}");
+    assert_eq!(report["outcome"], "already_known");
+    assert!(!sent(&api));
+}
+
+#[test]
+fn a_version_waiting_in_the_creator_space_points_there_again() {
+    let project = Project::new();
+    let sources = archive_sha256(&project);
+    let api = FakeApi::start(Some(project.previous()));
+    let mut waiting = fake_api::blocked_version();
+    waiting["sources"] = json!({"bytes": 1, "sha256": sources});
+    api.known(vec![waiting]);
+    let output = project.submit(&api, &[]);
+    assert_eq!(code(&output), Some(3), "{}", text(&output.stdout));
+    assert!(!sent(&api));
+    let shown = text(&output.stdout);
+    assert!(
+        shown.contains("add a privacy policy to its listing"),
+        "{shown}"
+    );
+    assert!(
+        shown.contains(
+            "https://overcrow.playervox.com/creators/widgets/nova.lol-timers/versions/77"
+        ),
+        "{shown}"
+    );
+}
+
+#[test]
+fn a_version_still_checked_is_followed_not_sent() {
+    let project = Project::new();
+    let sources = archive_sha256(&project);
+    let api = FakeApi::start(Some(project.previous()));
+    api.known(vec![known_version("checking", &sources, None)]);
+    api.polls(vec![version("in_review")]);
+    let (output, report) = project.submit_json(&api, &[]);
+    assert_eq!(code(&output), Some(0), "{report}");
+    assert!(!sent(&api));
+    assert_eq!(report["version"]["state"], "in_review");
+    assert_eq!(report["known"]["state"], "checking");
+}
+
+#[test]
+fn a_version_with_changes_requested_is_not_sent_again() {
+    let project = Project::new();
+    let sources = archive_sha256(&project);
+    let api = FakeApi::start(Some(project.previous()));
+    api.known(vec![known_version("changes_requested", &sources, None)]);
+    let output = project.submit(&api, &[]);
+    assert_eq!(code(&output), Some(0));
+    assert!(!sent(&api));
+    assert!(
+        text(&output.stderr).contains("changes were requested"),
+        "{}",
+        text(&output.stderr)
+    );
+}
+
+#[test]
+fn a_version_that_failed_is_not_sent_again() {
+    let project = Project::new();
+    let sources = archive_sha256(&project);
+    for state in ["checks_failed", "rejected", "withdrawn", "discarded"] {
+        let api = FakeApi::start(Some(project.previous()));
+        api.known(vec![known_version(state, &sources, None)]);
+        let (output, report) = project.submit_json(&api, &[]);
+        assert_eq!(code(&output), Some(1), "{state}: {report}");
+        assert!(!sent(&api), "{state}");
+        assert_eq!(report["known"]["state"], state);
+        assert!(
+            text(&output.stderr).contains("raise the version in manifest.json"),
+            "{state}: {}",
+            text(&output.stderr)
+        );
+    }
+}
+
+#[test]
+fn the_same_package_from_other_sources_is_known() {
+    let project = Project::new();
+    let package = admitted_package(&project.root, &project.root).0["sha256"]
+        .as_str()
+        .expect("the package's digest")
+        .to_owned();
+    let api = FakeApi::start(Some(project.previous()));
+    api.known(vec![known_version(
+        "published",
+        &"00".repeat(32),
+        Some(&package),
+    )]);
+    let (output, report) = project.submit_json(&api, &[]);
+    assert_eq!(code(&output), Some(0), "{report}");
+    assert!(!sent(&api));
+    assert_eq!(report["known"]["match"], "package");
+}
+
+#[test]
+fn the_same_version_with_another_package_is_refused() {
+    let project = Project::new();
+    let api = FakeApi::start(Some(project.previous()));
+    api.known(vec![known_version(
+        "published",
+        &"00".repeat(32),
+        Some(&"ab".repeat(32)),
+    )]);
+    let (output, report) = project.submit_json(&api, &[]);
+    assert_eq!(code(&output), Some(1), "{report}");
+    assert!(!sent(&api));
+    assert!(
+        report["local"]["diagnostics"]
+            .to_string()
+            .contains("submit.version_known_differs"),
+        "{report}"
+    );
+    let api = FakeApi::start(Some(project.previous()));
+    api.known(vec![known_version(
+        "published",
+        &"00".repeat(32),
+        Some(&"ab".repeat(32)),
+    )]);
+    let shown = text(&project.submit(&api, &[]).stdout);
+    assert!(
+        shown.contains("raise the version in manifest.json"),
+        "{shown}"
+    );
+}
+
+#[test]
+fn another_number_is_sent_as_usual() {
+    let project = Project::new();
+    let api = FakeApi::start(Some(project.previous()));
+    let mut older = known_version("published", &"00".repeat(32), Some(&"ab".repeat(32)));
+    older["id"] = json!(60);
+    older["version"] = json!("1.2.0");
+    api.known(vec![older]);
+    api.polls(vec![version("checking"), version("in_review")]);
+    let output = project.submit(&api, &[]);
+    assert_eq!(code(&output), Some(0), "{}", text(&output.stderr));
+    assert!(sent(&api));
+    assert!(
+        !api.lines()
+            .contains(&"GET /api/v1/publish/versions/60".to_owned())
     );
 }

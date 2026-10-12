@@ -45,6 +45,9 @@ pub enum Outcome {
     Error,
     /// `status` without `--wait`: the answer was read.
     Read,
+    /// The creator space already has this version with the same contents
+    /// (in this state): nothing was sent.
+    Known(&'static str),
 }
 
 /// The version states, as the API names them.
@@ -75,8 +78,21 @@ impl Outcome {
             .map_or(Self::Error, |known| Self::State(known))
     }
 
+    /// The outcome of a version already in the creator space, in `state`.
+    pub fn known(state: &str) -> Self {
+        STATES
+            .iter()
+            .find(|known| **known == state)
+            .map_or(Self::Error, |known| Self::Known(known))
+    }
+
     pub fn code(self) -> u8 {
         match self {
+            Self::Known(
+                "published" | "approved" | "in_review" | "changes_requested" | "checking",
+            ) => 0,
+            Self::Known("ready") => 3,
+            Self::Known(_) => 1,
             Self::ReadyToSend | Self::Read => 0,
             Self::State("in_review" | "approved" | "published" | "withdrawn") => 0,
             Self::State("checking") => 4,
@@ -95,6 +111,7 @@ impl Outcome {
             Self::CompleteInPortal => "complete_in_portal",
             Self::Error => "error",
             Self::Read => "read",
+            Self::Known(_) => "already_known",
         }
     }
 }
@@ -422,6 +439,24 @@ mod tests {
         assert_eq!(Outcome::of_state("ready").as_str(), "complete_in_portal");
         assert_eq!(Outcome::RefusedLocally.code(), 1);
         assert_eq!(Outcome::ReadyToSend.code(), 0);
+        for (state, code) in [
+            ("published", 0),
+            ("approved", 0),
+            ("in_review", 0),
+            ("changes_requested", 0),
+            ("checking", 0),
+            ("ready", 3),
+            ("checks_failed", 1),
+            ("rejected", 1),
+            ("withdrawn", 1),
+            ("suspended", 1),
+            ("superseded", 1),
+            ("discarded", 1),
+            ("unknown", 2),
+        ] {
+            assert_eq!(Outcome::known(state).code(), code, "known {state}");
+        }
+        assert_eq!(Outcome::known("published").as_str(), "already_known");
     }
 
     #[test]
