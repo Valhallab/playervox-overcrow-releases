@@ -8,6 +8,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readdirSync,
+  readFileSync,
   realpathSync,
   rmSync,
   symlinkSync,
@@ -19,6 +20,8 @@ import { fileURLToPath } from "node:url";
 import { after, test } from "node:test";
 import { auditWidget } from "../dist/audit/index.js";
 import { infiniteAnimations, viewFacts } from "../dist/audit/project.js";
+import { INVISIBLE_CHARACTERS } from "../dist/hidden.js";
+import { nameProblem } from "../dist/tools/project.js";
 import { startServer } from "./support/rpc.mjs";
 import { assembleRelease, fakeExecutables } from "./support/tools.mjs";
 
@@ -112,4 +115,33 @@ test("hostile sizes and shapes do not slow the audit down", async () => {
   writeFileSync(join(directory, "view.ocml"), "<image ".repeat(30_000));
   await auditWidget(directory);
   assert.ok(Date.now() - started < 3000, `${Date.now() - started} ms`);
+});
+
+test("a widget name with a hidden character is refused, naming it and its position", () => {
+  const hidden = (code, position) =>
+    `The name holds a hidden character, U+${code}, at position ${position}: remove it.`;
+  assert.equal(nameProblem("Clock\u202e"), hidden("202E", 6));
+  assert.equal(nameProblem("a\u200db"), hidden("200D", 2));
+  assert.equal(nameProblem("Re\u00adset"), hidden("00AD", 3));
+  // Counted in characters, not in UTF-16 units: a tag character is one.
+  assert.equal(nameProblem("\u{1F600}Clock\u{E0041}"), hidden("E0041", 7));
+  assert.equal(nameProblem("\ufe0fClock"), hidden("FE0F", 1));
+  assert.equal(nameProblem("\u23f1\ufe0f\ufe0f"), hidden("FE0F", 3));
+  // An emoji keeps its presentation selector.
+  assert.equal(nameProblem("\u23f1\ufe0f Timer"), undefined);
+  assert.equal(nameProblem("12\u00a0h"), undefined);
+});
+
+test("the hidden characters are the widget schema's", () => {
+  const schema = readFileSync(
+    join(here, "..", "..", "crates", "overcrow-widget-schema", "src", "text.rs"),
+    "utf8",
+  );
+  const start = schema.indexOf("pub const INVISIBLE_CHARACTERS");
+  const block = schema.slice(start, schema.indexOf("];", start));
+  const ranges = [...block.matchAll(/'\\u\{([0-9A-F]+)\}'\.\.='\\u\{([0-9A-F]+)\}'/g)].map(
+    (match) => [Number.parseInt(match[1], 16), Number.parseInt(match[2], 16)],
+  );
+  assert.ok(ranges.length > 10);
+  assert.deepEqual(INVISIBLE_CHARACTERS, ranges);
 });
