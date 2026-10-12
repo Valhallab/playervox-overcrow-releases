@@ -81,6 +81,9 @@ widget's sources and the embedded SDK.
   command are documented as stable.
 - The creator space is at `creators.playervox.com`: `submit` names it
   when the API gives no link to the version.
+- A widget name or menu label that holds an invisible or text-direction
+  character (U+202E, U+200B, U+00AD…) is refused, by `init --name` too;
+  the message names the field, the character and its position.
 
 ## 1.0.0-beta.2
 

@@ -1,0 +1,7 @@
+error[manifest.name]: `name.fr` holds a hidden character, U+202E, at position 9
+  --> manifest.json:8:5
+   |
+ 8 |     "fr": "Compteur\u202e"
+   |     ^
+   = help: remove it: names and labels show as written, without invisible or text-direction characters
+check: 1 error(s), 0 warning(s)

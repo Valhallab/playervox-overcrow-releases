@@ -5,10 +5,11 @@ use std::fs;
 use std::path::Path;
 
 use overcrow_widget_schema::manifest::{is_reserved_id, valid_widget_id};
+use overcrow_widget_schema::text::hidden_character;
 
 use crate::diag::Diagnostic;
 use crate::sdk;
-use crate::sources::ID_FORMS;
+use crate::sources::{HIDDEN_HELP, ID_FORMS, hidden_message};
 
 /// The handle of the default ID, `yourhandle.<dir>`: an example handle
 /// that the creator replaces with theirs before submitting (`admit`
@@ -239,6 +240,13 @@ pub fn init(directory: &Path, options: &Options<'_>) -> Result<Vec<String>, Diag
             "init.name",
             "the widget name must be 1 to 64 printable characters",
         ));
+    }
+    if let Some((index, character)) = hidden_character(&name) {
+        return Err(Diagnostic::error(
+            "init.name",
+            hidden_message("the widget name", index, character),
+        )
+        .help(HIDDEN_HELP));
     }
 
     let mut written = Vec::new();

@@ -1,0 +1,7 @@
+error[manifest.wrapper]: `wrapper.menu.0.label.en` holds a hidden character, U+2066, at position 5
+  --> manifest.json:10:73
+    |
+ 10 |   "wrapper": { "menu": [{ "type": "toggle", "id": "seconds", "label": { "en": "Show  seconds", "fr": "Secondes" }, "default": true }] },
+    |                                                                         ^
+   = help: remove it: names and labels show as written, without invisible or text-direction characters
+check: 1 error(s), 0 warning(s)
