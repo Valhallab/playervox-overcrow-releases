@@ -36,6 +36,8 @@ most, no two names that differ only by case.
 
 - A `.zip` made by Windows PowerShell 5.1 (`Compress-Archive`) separates
   folders with `\` and is refused at once: drop the folder instead.
+- A file or folder name with `\ : * ? " < > |` is refused before anything
+  is sent: Windows cannot use it. Rename it.
 - A browser reads the file a link points to, where the command-line tool
   leaves the link out. Keep links out of the widget's folder.
 - Your sources stay private: only PlayerVox reviewers read them, and every

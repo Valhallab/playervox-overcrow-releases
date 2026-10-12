@@ -618,7 +618,9 @@ créateurs : les fichiers et dossiers cachés (`.env`, `.git/`,
 `__MACOSX/`, les paquets construits, les fichiers de clés et les fichiers
 système, et, dans un dossier, les liens et les noms qui ne sont pas en
 ASCII portable. Dans un ZIP, ils comptent tout de même dans les limites
-ci-dessous et sont vérifiés comme le reste.
+ci-dessous et sont vérifiés comme le reste. Un nom qui contient un
+caractère interdit par Windows (`\ : * ? " < > |`) est refusé, dans un
+dossier aussi.
 
 | Limite | Valeur |
 | --- | --- |
@@ -634,7 +636,7 @@ travail privé, supprimé à la fin.
 | --- | --- |
 | `sources.archive_size` | Plus de 32 Mio. |
 | `sources.too_large`, `sources.too_many_files` | Plus de 64 Mio ou de 2 000 fichiers une fois décompressée. |
-| `sources.unsafe_name` | Un nom qui pourrait sortir du dossier du widget (`../`, `/` en tête, `:`), ou qu’un système ne peut pas utiliser : autre chose que de l’ASCII imprimable, un point ou une espace final, `CON`, `NUL`, `COM1`… |
+| `sources.unsafe_name` | Un nom qui pourrait sortir du dossier du widget (`../`, `/` en tête), ou qu’un système ne peut pas utiliser : un caractère interdit par Windows (`\`, `:`, `*`, `?`, `"`, `<`, `>`, \|), autre chose que de l’ASCII imprimable, un point ou une espace final, `CON`, `NUL`, `COM1`… Le message nomme le caractère et le fichier. |
 | `sources.backslash` | Des dossiers séparés par `\`, comme les écrit `Compress-Archive` de Windows PowerShell 5.1. Envoyez le dossier du widget lui-même dans l’espace créateurs, ou utilisez [`submit`](#submit), qui fait un ZIP correct. |
 | `sources.duplicate_name` | Deux noms qui ne diffèrent que par la casse, ou un fichier qui est aussi un dossier. |
 | `sources.link`, `sources.special_file` | Un lien, ou un périphérique, une FIFO ou un socket. |
