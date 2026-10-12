@@ -1,5 +1,5 @@
-//! VM contract of the schema: `Fault` categories, the `--heap-mib`
-//! argument, `ref` names used by `Draw.canvas` and node-reference
+//! VM contract of the schema: `Fault` categories, `Exception` reports, the
+//! `--heap-mib` argument, `ref` names used by `Draw.canvas` and node-reference
 //! attributes, and the encoding of `on` and `class` in scene patches. An
 //! invalid fixture is named `<expected error>--<case>`; the IPC fixtures are
 //! checked against `fixtures/view/valid/refs.json`.
@@ -11,9 +11,9 @@ use std::path::{Path, PathBuf};
 use overcrow_widget_schema::compiled_view::static_value;
 use overcrow_widget_schema::compiled_view::{ViewSummary, inspect_compiled_view};
 use overcrow_widget_schema::ipc::{
-    FAILURES, FAULT_CATEGORIES, FAULT_CATEGORY_NAMES, HEADLESS_HOST_MESSAGES, HOST_MESSAGES,
-    IpcError, parse_headless_vm_arguments, parse_vm_arguments, validate_draw, validate_fault,
-    validate_patch_attribute,
+    EXCEPTION_KINDS, FAILURES, FAULT_CATEGORIES, FAULT_CATEGORY_NAMES, HEADLESS_HOST_MESSAGES,
+    HOST_MESSAGES, IpcError, parse_headless_vm_arguments, parse_vm_arguments, validate_draw,
+    validate_exception, validate_fault, validate_patch_attribute,
 };
 use overcrow_widget_schema::json::parse_strict;
 use overcrow_widget_schema::limits::{VM_HEAP_BYTES, VM_MAX_HEAP_BYTES};
@@ -92,6 +92,38 @@ fn fault_fixtures() {
         let error = validate_fault(&value, &view).expect_err(&name);
         assert_eq!(error.as_str(), expected_error(&name), "{name}");
     }
+}
+
+#[test]
+fn exception_fixtures() {
+    for (name, value) in cases("ipc/exception/valid") {
+        validate_exception(&value).unwrap_or_else(|error| panic!("{name}: {}", error.as_str()));
+    }
+    for (name, value) in cases("ipc/exception/invalid") {
+        let error = validate_exception(&value).expect_err(&name);
+        assert_eq!(error.as_str(), expected_error(&name), "{name}");
+    }
+}
+
+#[test]
+fn exception_kinds_are_the_statistics_list() {
+    // The closed list of the anonymous statistics API: the built-in error
+    // constructors a widget can throw, then any value that is not an error.
+    assert_eq!(
+        EXCEPTION_KINDS,
+        [
+            "Error",
+            "TypeError",
+            "RangeError",
+            "ReferenceError",
+            "SyntaxError",
+            "URIError",
+            "EvalError",
+            "AggregateError",
+            "InternalError",
+            "thrown_value",
+        ]
+    );
 }
 
 #[test]

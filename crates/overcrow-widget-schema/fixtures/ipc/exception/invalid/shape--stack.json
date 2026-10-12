@@ -1,0 +1,6 @@
+{
+  "type": "Exception",
+  "kind": "Error",
+  "count": 1,
+  "stack": "    at explode (logic.js:2:1116)"
+}

@@ -1439,6 +1439,17 @@ The VM reports a failure it detected. No text and no stack. After a fatal fault 
 | `fatal` | boolean | yes | Must equal the category's `fatal`. |
 | `handler` | integer 0..=4095 | no | Expression index of the event handler that threw; required for `handler_exception`, rejected otherwise. |
 
+#### `Exception` (frame 2)
+
+The VM reports the exceptions of the widget's code for its anonymous statistics: their kind and position only, never their message or stack. It adds them up and sends at most 8 at a time, at most every 10 seconds. A host may drop the excess; it is never a `protocol_violation`.
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `kind` | `Error` \| `TypeError` \| `RangeError` \| `ReferenceError` \| `SyntaxError` \| `URIError` \| `EvalError` \| `AggregateError` \| `InternalError` \| `thrown_value` | yes | The built-in constructor of the thrown error, never its `name`: `Error` for a subclass or any other error object, `thrown_value` for a value that is not an error. |
+| `line` | integer 1..=10000000 | no | 1-based line, in `logic.js`, of the innermost `logic.js` frame of the error's stack; sent with `column`, or neither. |
+| `column` | integer 1..=10000000 | no | 1-based column of that frame as the engine counts it: UTF-8 bytes from the start of the line. |
+| `count` | integer 1..=10000 | yes | Occurrences of this kind at this position since the VM last reported it. |
+
 ### Headless test runtime
 
 The creator test runtime (`overcrow-widget test`) runs the VM on virtual time. It adds this argument and this message, which a production runtime never accepts: its VM is built without them and stops on either.
