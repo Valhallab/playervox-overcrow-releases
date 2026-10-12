@@ -34,7 +34,7 @@ own interface come from its `locales/` files.
 
 ## Preview image
 
-One image, in English, for every language: a PNG in 4:3, from 640 × 480 to
+One image, in English, for every language: a PNG in 4:3, from 480 × 360 to
 1,600 × 1,200 (1,280 × 960 recommended), 256 KiB at most. Show the widget in
 use, without marketing text.
 

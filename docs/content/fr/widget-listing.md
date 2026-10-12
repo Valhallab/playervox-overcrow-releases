@@ -37,7 +37,7 @@ version. Les langues de l’interface du widget viennent de ses fichiers
 ## Image d’aperçu
 
 Une seule image, en anglais, pour toutes les langues : un PNG au format 4:3,
-de 640 × 480 à 1 600 × 1 200 (1 280 × 960 conseillé), 256 Kio au plus.
+de 480 × 360 à 1 600 × 1 200 (1 280 × 960 conseillé), 256 Kio au plus.
 Montrez le widget en situation, sans texte marketing.
 
 ## Catégorie et jeux
