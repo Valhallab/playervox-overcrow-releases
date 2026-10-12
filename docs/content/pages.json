@@ -182,6 +182,13 @@
       "group": "publish",
       "label": { "en": "The listing: best practices", "fr": "Fiche : bonnes pratiques" },
       "hidden": true
+    },
+    {
+      "slug": "widget-statistics",
+      "file": "widget-statistics.md",
+      "group": "publish",
+      "label": { "en": "Statistics: definitions", "fr": "Statistiques : définitions" },
+      "hidden": true
     }
   ]
 }
