@@ -1,9 +1,9 @@
 # FPS
 
 `com.playervox.overcrow.fps` — the frame rate the game presents, observed
-from outside the game. A built-in of OverCrow, written against the public
-`@overcrow/sdk` and packaged with `overcrow-widget` like any creator's
-widget. MIT.
+from outside the game. A built-in of PlayerVox OverCrow, written against the
+public `@overcrow/sdk` and packaged with `overcrow-widget` like any
+creator's widget. MIT.
 
 ## What it shows
 

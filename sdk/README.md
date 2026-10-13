@@ -1,6 +1,6 @@
 # @overcrow/sdk
 
-The TypeScript API of OverCrow widget logic, for widget API v1: widget
+The TypeScript API of PlayerVox OverCrow widget logic, for widget API v1: widget
 state, host data, typed services and capabilities, subscriptions, timers,
 canvas drawing, menus, messages, logs, and date, time and number
 formatting without `Intl`.
@@ -47,7 +47,7 @@ root; never edit it by hand. `npm test` packages the end-to-end Clock of
 `logic.js` over a stand-in of the runtime surface. `testing/` is the
 public test helper, built apart into `dist/testing/`; the scenarios of
 `test/e2e/clock/tests/` and `test/e2e/stopwatch/tests/` run with
-`overcrow-widget test` and OverCrow's headless runtime.
+`overcrow-widget test` and PlayerVox OverCrow's headless runtime.
 
 MIT No Attribution (MIT-0): use, copy and bundle it without keeping any
 notice.

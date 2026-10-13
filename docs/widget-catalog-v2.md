@@ -1,9 +1,9 @@
 # Widget catalog format v2
 
-The catalog v2 lists every widget OverCrow distributes: PlayerVox widgets and
-the widgets of other publishers, open or closed source, under any licence.
-It adds what the catalog v1 cannot carry: the publisher, a verified domain,
-store categories and games, localized release notes, support and privacy
+The catalog v2 lists every widget PlayerVox OverCrow distributes: PlayerVox
+widgets and the widgets of other publishers, open or closed source, under any
+licence. It adds what the catalog v1 cannot carry: the publisher, a verified
+domain, store categories and games, localized release notes, support and privacy
 links.
 
 This document is for implementers of a host, of the catalog tooling and of

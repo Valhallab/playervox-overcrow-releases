@@ -12,10 +12,10 @@ both compile.
 
 ## The runtime
 
-`overcrow-widget-headless` is built by OverCrow's release pipeline with the
-same code as the application, for Linux and Windows x86-64; the CLI pins a
-version and its SHA-256 and never builds it. It validates the package as the
-overlay does (a reserved `com.playervox.*` ID is accepted only in its
+`overcrow-widget-headless` is built by PlayerVox OverCrow's release pipeline
+with the same code as the application, for Linux and Windows x86-64; the CLI
+pins a version and its SHA-256 and never builds it. It validates the package as
+the overlay does (a reserved `com.playervox.*` ID is accepted only in its
 ephemeral test registry, never as a built-in: the scenario sets every grant)
 and runs the widget's code in the same OS sandbox as the overlay: Bubblewrap
 and seccomp on Linux, a Less Privileged AppContainer and a Job on Windows.
@@ -25,7 +25,7 @@ without cgroup delegation, the VM runs without its per-widget cgroup
 the report says `without-cgroup`. On Windows it grants its own executable
 read and execute for the AppContainer when the ACL lacks it.
 
-The CLI pins the runtime published with OverCrow 0.7.1-beta.1
+The CLI pins the runtime published with PlayerVox OverCrow 0.7.1-beta.1
 (`PIN` in `cli/src/runtime.rs`: its version and the two SHA-256 of that
 release's `runtimes.json`), so `--runtime` is optional: a runtime missing
 from the cache is downloaded from the creator tools ZIP of its platform in that release

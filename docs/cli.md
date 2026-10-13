@@ -7,7 +7,7 @@ The widget CLI is documented for creators on the website:
 concerns those who work on the CLI itself (`cli/`, MIT): how `logic.js` is
 built, the calling convention of the view table, and maintenance.
 
-The CLI compiles the same public validators the OverCrow host runs at
+The CLI compiles the same public validators the PlayerVox OverCrow host runs at
 admission and at every activation (`crates/overcrow-widget-schema` and
 `crates/overcrow-widget-format`), so a package it accepts is a package the
 host reads.
@@ -190,8 +190,8 @@ of the repository without the ownership check other publishers get.
 - The VM's global set (`cli/src/lint.rs`, `VM_GLOBALS`) mirrors the realm
   the VM builds; update both together.
 - `dev` and `doctor` speak the [development channel](dev-channel.md)
-  through `crates/overcrow-widget-devchannel`, which the OverCrow overlay
-  links too; a change of message or bound is a new protocol version.
+  through `crates/overcrow-widget-devchannel`, which the PlayerVox OverCrow
+  overlay links too; a change of message or bound is a new protocol version.
   `cli/tests/dev.rs` runs them against a scripted overlay in a private
   runtime directory; tests must never reach the user's real overlay (no
   bare `dev` or `doctor` in `cli/tests/cli.rs`).
@@ -207,7 +207,7 @@ of the repository without the ownership check other publishers get.
   version the CLI pins, in the cache (`$XDG_CACHE_HOME` or `~/.cache`,
   `%LOCALAPPDATA%` on Windows, under `overcrow-widget/runtime/<version>/`),
   checked against its pinned SHA-256 before every run: `--runtime` is
-  optional. The pin is the runtime of OverCrow 0.7.1-beta.1, from that
+  optional. The pin is the runtime of PlayerVox OverCrow 0.7.1-beta.1, from that
   release's `runtimes.json`. A pinned runtime missing from the cache is
   downloaded (`src/download.rs`) from the creator tools ZIP of its release,
   bounded and checked as its module documentation says, unless
@@ -216,7 +216,7 @@ of the repository without the ownership check other publishers get.
 
 ## Release files
 
-The CLI is released inside OverCrow's GitHub release, in the creator
+The CLI is released inside PlayerVox OverCrow's GitHub release, in the creator
 tools ZIPs `overcrow-creator-tools-OVERCROW_VERSION-PLATFORM.zip`
 (`linux-x86_64`, `windows-x86_64`), beside the headless runtime of the
 same OverCrow version and platform; there is no separate
@@ -234,7 +234,7 @@ version `VERSION`:
 | `cli.json` | The version, the source commit, the pinned headless runtime (`runtime`: its version and the SHA-256 of each platform's executable, as the Linux binary reports them with `--version --format json`), and each file's name, size and SHA-256. |
 | `SHA256SUMS` | The checksums of the five files above. |
 
-OverCrow's release publisher puts, into each platform's ZIP, under one
+PlayerVox OverCrow's release publisher puts, into each platform's ZIP, under one
 directory `overcrow-creator-tools-OVERCROW_VERSION-PLATFORM/`: that
 platform's executable, the CLI's license, notices and `cli.json`, the
 platform's headless runtime, its license and `runtimes.json`, a

@@ -1,12 +1,13 @@
 # Widget package and catalog format v1
 
-What a package holds and how OverCrow checks it is documented for creators
-on the website: [the package](https://overcrow.playervox.com/docs/en/package/)
-and [publishing and review](https://overcrow.playervox.com/docs/en/publishing/)
+What a package holds and how PlayerVox OverCrow checks it is documented for
+creators on the website: [the
+package](https://overcrow.playervox.com/docs/en/package/) and [publishing and
+review](https://overcrow.playervox.com/docs/en/publishing/)
 ([français](https://overcrow.playervox.com/docs/package/)), from
 [`docs/content/en/package.md`](content/en/package.md) and
-[`docs/content/en/publishing.md`](content/en/publishing.md). The manifest is
-on [its own page](https://overcrow.playervox.com/docs/en/manifest/).
+[`docs/content/en/publishing.md`](content/en/publishing.md). The manifest is on
+[its own page](https://overcrow.playervox.com/docs/en/manifest/).
 
 This document keeps the specification that implementers of a host, of a
 packaging tool or of the catalog need: the exact bytes of the archive and of

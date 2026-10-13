@@ -4,9 +4,9 @@
 grade of the Steam game you play: a grade badge (S+ to F), the rounded
 overall score out of 100, the game's name on PlayerVox, the rating count
 and, if you want, the Gameplay, Art and Technology criteria. No PlayerVox
-account is needed. A built-in of OverCrow, written against the public
-`@overcrow/sdk` and packaged with `overcrow-widget` like any creator's
-widget. MIT.
+account is needed. A built-in of PlayerVox OverCrow, written against the
+public `@overcrow/sdk` and packaged with `overcrow-widget` like any
+creator's widget. MIT.
 
 ## What it shows
 

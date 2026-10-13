@@ -3,10 +3,10 @@
 `com.playervox.overcrow.twitch.chat` — the chat of one public Twitch
 channel you choose, over the game. In Interactive mode you pick the
 channel, keep favorites, scroll the history, reply and send messages; in
-Passive mode the last messages show and fade out. OverCrow holds your
-Twitch account, the connection, the channel and the favorites: the widget
-shows what OverCrow sends it and asks for the rest. A built-in of OverCrow,
-written against the public `@overcrow/sdk` and packaged with
+Passive mode the last messages show and fade out. PlayerVox OverCrow holds
+your Twitch account, the connection, the channel and the favorites: the
+widget shows what OverCrow sends it and asks for the rest. A built-in of
+OverCrow, written against the public `@overcrow/sdk` and packaged with
 `overcrow-widget` like any creator's widget. MIT.
 
 ## What it shows

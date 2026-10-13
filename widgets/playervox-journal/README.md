@@ -2,11 +2,11 @@
 
 `com.playervox.overcrow.playervox.journal` — the finished play sessions of
 the game you play, newest first, five per page: the start date and time and
-the duration of each, and a trash button to delete one. OverCrow records the
-sessions on your device without any account; with a linked PlayerVox account
-and sync enabled, it merges them with your PlayerVox journal. A built-in of
-OverCrow, written against the public `@overcrow/sdk` and packaged with
-`overcrow-widget` like any creator's widget. MIT.
+the duration of each, and a trash button to delete one. PlayerVox OverCrow
+records the sessions on your device without any account; with a linked
+PlayerVox account and sync enabled, it merges them with your PlayerVox
+journal. A built-in of OverCrow, written against the public `@overcrow/sdk`
+and packaged with `overcrow-widget` like any creator's widget. MIT.
 
 ## What it shows
 

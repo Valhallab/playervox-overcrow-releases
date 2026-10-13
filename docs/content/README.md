@@ -32,7 +32,7 @@ Pages, by group of the navigation:
 
 The other documents of `docs/`, in English only, are for implementers and
 maintainers: the generated [schema reference](../widget-schema-v1.md), which
-is the contract that OverCrow pins, the
+is the contract that PlayerVox OverCrow pins, the
 [package and catalog format](../widget-package-v1.md), the
 [protocol of the development channel](../dev-channel.md), the
 [compiled output](../widget-source-formats.md) of the source formats, the
@@ -51,8 +51,12 @@ implementers.
   sentences that say what it covers and with an example, even when most of
   it is generated.
 - **One source page per topic.** The other pages link to it.
-- **Product name.** "PlayerVox OverCrow" at the first mention of each page,
-  its title included when it names the product, then "OverCrow".
+- **Product name.** "PlayerVox OverCrow" in titles and headings, at the
+  first mention of each page, section and note, and at the first mention of
+  each paragraph; a short "OverCrow" only later in the same paragraph, when
+  the full name would weigh the sentence down. Narrow places (table cells
+  that hold a label, short status lines) keep "OverCrow". Identifiers, paths,
+  package names and code never change.
 - **Nothing that is not shipped.** A page describes what works today.
 - **Links** are relative to the file. A link to another page of the same
   language becomes a link of the website; any other link goes to this

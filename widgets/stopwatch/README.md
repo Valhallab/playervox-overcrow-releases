@@ -2,9 +2,9 @@
 
 `com.playervox.overcrow.stopwatch` — a stopwatch to the hundredth of a
 second, `HH:MM:SS.cc`, started, paused and reset with its buttons or with
-OverCrow's global shortcuts. A built-in of OverCrow, written against the
-public `@overcrow/sdk` and packaged with `overcrow-widget` like any
-creator's widget. MIT.
+PlayerVox OverCrow's global shortcuts. A built-in of OverCrow, written
+against the public `@overcrow/sdk` and packaged with `overcrow-widget` like
+any creator's widget. MIT.
 
 ## What it shows
 

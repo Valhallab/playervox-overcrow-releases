@@ -4,9 +4,9 @@
 Steam game you play: its grade badge (S+ to F) and score out of 100, and in
 Interactive mode a form with three criteria (Gameplay, Art, Technology) and
 an optional review, to publish or update the rating on PlayerVox. It needs
-your PlayerVox account. A built-in of OverCrow, written against the public
-`@overcrow/sdk` and packaged with `overcrow-widget` like any creator's
-widget. MIT.
+your PlayerVox account. A built-in of PlayerVox OverCrow, written against
+the public `@overcrow/sdk` and packaged with `overcrow-widget` like any
+creator's widget. MIT.
 
 ## What it shows
 

@@ -3,8 +3,8 @@
 `com.playervox.overcrow.media` — the track a music or video player of this
 computer is playing: its cover, its title in bold and its artists, and in
 Interactive mode the player's previous, play/pause and next buttons. A
-built-in of OverCrow, written against the public `@overcrow/sdk` and
-packaged with `overcrow-widget` like any creator's widget. MIT.
+built-in of PlayerVox OverCrow, written against the public `@overcrow/sdk`
+and packaged with `overcrow-widget` like any creator's widget. MIT.
 
 ## What it shows
 

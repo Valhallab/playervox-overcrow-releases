@@ -5,9 +5,9 @@ the Steam game you play: three reviews per page, each with its player's
 grade badge (S+ to F), name, date, score out of 100 and text, in your
 language when PlayerVox has a translation. A row of the widget's menu limits
 them to the players you follow. It needs your PlayerVox account. A built-in
-of OverCrow (it replaces the former "PlayerVox Circle" widget), written
-against the public `@overcrow/sdk` and packaged with `overcrow-widget` like
-any creator's widget. MIT.
+of PlayerVox OverCrow (it replaces the former "PlayerVox Circle" widget),
+written against the public `@overcrow/sdk` and packaged with
+`overcrow-widget` like any creator's widget. MIT.
 
 ## What it shows
 

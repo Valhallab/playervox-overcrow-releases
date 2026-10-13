@@ -7,18 +7,18 @@ widgets keep their declared licenses; see [licensing scope](LICENSING.md).
 
 Tooling and documentation pull requests target `main`. Widgets are no
 longer proposed by pull request: creators will submit theirs in the
-OverCrow creator space when it opens, and a pull request that adds a widget
-is closed. PlayerVox's own widgets live in `widgets/<dir>/`; after each merge
-on `main`, the `overcrow-submit` workflow sends their new versions to the
+PlayerVox OverCrow creator space when it opens, and a pull request that adds a
+widget is closed. PlayerVox's own widgets live in `widgets/<dir>/`; after each
+merge on `main`, the `overcrow-submit` workflow sends their new versions to the
 creator space, where a person reviews them like any widget (a permission
 added to a widget needs its justification in `widgets/<dir>/submission.json`).
 Never commit secrets, native executable code, build output or production
 signing material. A merge publishes nothing.
 
 The widget schema in `crates/overcrow-widget-schema/` and the source parsers
-in `crates/overcrow-widget-format/` are the security validators of the OverCrow
-host: changes to them or to their fuzz targets in `fuzz/` are reviewed by
-their maintainers before the host pins them. Regenerate
+in `crates/overcrow-widget-format/` are the security validators of the
+PlayerVox OverCrow host: changes to them or to their fuzz targets in `fuzz/` are
+reviewed by their maintainers before the host pins them. Regenerate
 `docs/widget-schema-v1.md`, the conformance fixtures, the compiled view
 goldens and the SDK types in the same change (see the [README](README.md) and
 [testing](docs/testing.md)).

@@ -29,9 +29,9 @@ maintainer operations against an exact reviewed revision.
 One workflow holds a secret: `overcrow-submit` runs on pushes to `main` (and
 by hand), never on pull requests, and receives a publish key from the
 `overcrow-submit` environment, which only `main` may use. The key can submit
-versions of PlayerVox's own widgets to the OverCrow creator space, where a
-person reviews them; it can neither publish, nor change a listing, nor read
-sources.
+versions of PlayerVox's own widgets to the PlayerVox OverCrow creator space,
+where a person reviews them; it can neither publish, nor change a listing, nor
+read sources.
 
 The hosted `pull_request_target` job definition comes from the default branch,
 not from the proposed revision. It fetches the exact pull-request head through
@@ -57,14 +57,14 @@ bundles to an explicit private output for the maintainers. Publication copies
 admitted bytes without rebuilding or retesting them.
 
 The deterministic development key in `fixtures/keys` is intentionally public
-and grants no production trust; release builds of OverCrow refuse it. No
-production private key, sequence state, deployment credential, or signing
+and grants no production trust; release builds of PlayerVox OverCrow refuse it.
+No production private key, sequence state, deployment credential, or signing
 path exists in this repository or its CI: the maintainers sign the catalog
 with a key kept outside both.
 
-The marketplace website cannot install software. OverCrow installs widgets
-from the signed catalog and validates every package in full before it runs,
-with the user's consent to its permissions. A development package
+The marketplace website cannot install software. PlayerVox OverCrow installs
+widgets from the signed catalog and validates every package in full before it
+runs, with the user's consent to its permissions. A development package
 (`overcrow-widget dev`) is accepted only by a debug build or by an OverCrow
 started with development installs allowed; it runs marked as unverified, with
 its declared permissions for that session only, and nothing of it persists.
@@ -77,7 +77,7 @@ account data, signing keys, or credentials in a report.
 Widgets run in a sandboxed VM process per widget, with no direct access to
 files, the network, other widgets or the game. Their permissions and
 capabilities are declared in the manifest, granted only with the user's
-consent and checked by OverCrow at each call; a sensitive capability
+consent and checked by PlayerVox OverCrow at each call; a sensitive capability
 excludes network and clipboard writes and keeps storage for the process
 lifetime only. The creator documentation describes the model:
 [security](docs/content/en/security.md).
@@ -89,4 +89,4 @@ installed copy, and offer its removal. An absent or stale catalog never invents
 a revocation. A catalog signature never bypasses package validation, user
 consent, or runtime sandboxing. Key recovery, loss and compromise follow the
 maintainers' private catalog procedure; a compromised catalog key is removed
-from OverCrow's trust anchors by an application update.
+from PlayerVox OverCrow's trust anchors by an application update.

@@ -5,7 +5,7 @@ up to eight notes, each with a title, free text and a checklist of up to 64
 entries. They are the same for every game and stay on this computer. In
 Passive mode the widget shows the active note; in Interactive mode you
 choose, create, delete and edit notes in the widget itself, and tick
-entries off. A built-in of OverCrow, written against the public
+entries off. A built-in of PlayerVox OverCrow, written against the public
 `@overcrow/sdk` and packaged with `overcrow-widget` like any creator's
 widget. MIT.
 

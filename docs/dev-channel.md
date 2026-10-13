@@ -1,8 +1,8 @@
 # The development channel, version 1: wire protocol
 
-`overcrow-widget dev` installs a widget in a running OverCrow overlay, reloads
-it when its sources change, and shows its states and logs. How to turn the
-channel on and what `dev` shows is documented for creators on the website:
+`overcrow-widget dev` installs a widget in a running PlayerVox OverCrow overlay,
+reloads it when its sources change, and shows its states and logs. How to turn
+the channel on and what `dev` shows is documented for creators on the website:
 [the development channel](https://overcrow.playervox.com/docs/en/dev-channel/)
 ([français](https://overcrow.playervox.com/docs/dev-channel/)), from
 [`docs/content/en/dev-channel.md`](content/en/dev-channel.md).

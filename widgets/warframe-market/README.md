@@ -98,8 +98,8 @@ No capability: the widget reads nothing about the user or the game.
   other, the incremental readers (strings, nesting, slices, malformed or
   oversized answers), the catalog, orders and whisper rules, the 150-offer
   cap, and a catalog of today's size that fits two storage values.
-- Scenarios, played by `overcrow-widget test` in OverCrow's headless
-  runtime, with synthetic `http.fetch` fixtures (no request reaches
+- Scenarios, played by `overcrow-widget test` in PlayerVox OverCrow's
+  headless runtime, with synthetic `http.fetch` fixtures (no request reaches
   warframe.market) and their reference images: `render` (both themes and
   languages at 100 and 150 %), `detail` (both tabs, copies, back, clicks at
   100 and 150 %), `tabs` (161 sellers: the 150 cap and "+11 more", at the

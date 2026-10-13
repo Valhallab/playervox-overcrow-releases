@@ -1,4 +1,4 @@
-# OverCrow releases
+# PlayerVox OverCrow releases
 
 Public distribution repository for PlayerVox OverCrow on Windows and Linux.
 Application source code and build history are maintained separately in a
@@ -51,8 +51,8 @@ archives contain this distribution repository, not the application source.
 
 ## Create widgets
 
-Widgets are small packages that OverCrow draws over the game: a view in
-markup (`view.ocml`), a bounded style sheet (`style.ocss`) and logic in
+Widgets are small packages that PlayerVox OverCrow draws over the game: a view
+in markup (`view.ocml`), a bounded style sheet (`style.ocss`) and logic in
 TypeScript against `@overcrow/sdk`, run in a sandboxed VM. The creator
 documentation is on the website, in English and in French:
 [overcrow.playervox.com/docs/en/](https://overcrow.playervox.com/docs/en/)
@@ -69,7 +69,7 @@ MCP server `@overcrow/mcp`
 
 | Path | Content |
 | --- | --- |
-| `crates/` | The public widget contract, shared with OverCrow at a pinned revision: `overcrow-widget-schema` (schema and validators), `overcrow-widget-format` (`view.ocml` compiler, `style.ocss` parser), `overcrow-widget-devchannel` ([development channel](docs/dev-channel.md)), `overcrow-widget-scenario` ([test scenarios](https://overcrow.playervox.com/docs/en/testing/)) |
+| `crates/` | The public widget contract, shared with PlayerVox OverCrow at a pinned revision: `overcrow-widget-schema` (schema and validators), `overcrow-widget-format` (`view.ocml` compiler, `style.ocss` parser), `overcrow-widget-devchannel` ([development channel](docs/dev-channel.md)), `overcrow-widget-scenario` ([test scenarios](https://overcrow.playervox.com/docs/en/testing/)) |
 | `sdk/` | `@overcrow/sdk` 1.0, the TypeScript API of widget logic, with types generated from the schema ([guide](https://overcrow.playervox.com/docs/en/logic/), [reference](https://overcrow.playervox.com/docs/en/sdk/)) |
 | `cli/` | `overcrow-widget`: `init`, `check`, `package`, `inspect`, `dev`, `doctor`, `test`, `admit` ([guide](https://overcrow.playervox.com/docs/en/cli/), [internals](docs/cli.md)) |
 | `mcp/` | `@overcrow/mcp`, the MCP server that lets an AI assistant create, check, test, audit and package widgets ([guide](https://overcrow.playervox.com/docs/en/mcp/), [README](mcp/README.md)) |
@@ -88,13 +88,13 @@ MCP server `@overcrow/mcp`
 
 The widget API v1 contract lives in `crates/overcrow-widget-schema/`: elements,
 style, tokens, icons, permissions, services, IPC, bounds, and the manifest,
-package, compiled-view and catalog validators. OverCrow compiles this crate at a
-pinned revision. The [schema reference](docs/widget-schema-v1.md) is generated
-from it, and the [package and catalog format](docs/widget-package-v1.md)
-specifies the `.ocpkg` v1 container. `crates/overcrow-widget-format/` parses
-the [view and style sources](docs/widget-source-formats.md) against the same
-tables. After a change, regenerate the reference, the conformance fixtures
-and the SDK types:
+package, compiled-view and catalog validators. PlayerVox OverCrow compiles this
+crate at a pinned revision. The [schema reference](docs/widget-schema-v1.md) is
+generated from it, and the [package and catalog
+format](docs/widget-package-v1.md) specifies the `.ocpkg` v1 container.
+`crates/overcrow-widget-format/` parses the [view and style
+sources](docs/widget-source-formats.md) against the same tables. After a change,
+regenerate the reference, the conformance fixtures and the SDK types:
 
 ```sh
 cargo run -p overcrow-widget-schema --example reference > docs/widget-schema-v1.md
@@ -127,13 +127,13 @@ The website consumes a reviewed, revision-pinned snapshot of this repository.
 trusted publishing, with provenance; no token; only its `publish` job, in
 the `npm-publish` environment limited to `main` and tags `sdk-v*`, gets the
 OIDC token npm trusts); the CLI's binaries go into
-the creator tools ZIPs of OverCrow's releases
+the creator tools ZIPs of PlayerVox OverCrow's releases
 ([release files](docs/cli.md#release-files)).
 Never publish a separate GitHub Release for the SDK or the CLI: the desktop
 updater uses this repository's stable-release API.
 
 Tooling and documentation pull requests target `main`; widgets are not
-proposed by pull request (creators submit them in the OverCrow creator
+proposed by pull request (creators submit them in the PlayerVox OverCrow creator
 space). After each merge, the `overcrow-submit` workflow sends new versions
 of PlayerVox's own widgets to the creator space for review. Neither a pull
 request nor a merge signs or publishes a widget. See

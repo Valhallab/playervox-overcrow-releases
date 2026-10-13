@@ -2,8 +2,8 @@
 
 `com.playervox.overcrow.performance` — the game's CPU share and memory, the
 temperatures of this computer's CPU and GPU, and the game's frame rate. A
-built-in of OverCrow, written against the public `@overcrow/sdk` and
-packaged with `overcrow-widget` like any creator's widget. MIT.
+built-in of PlayerVox OverCrow, written against the public `@overcrow/sdk`
+and packaged with `overcrow-widget` like any creator's widget. MIT.
 
 ## What it shows
 

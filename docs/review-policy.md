@@ -7,8 +7,8 @@ project fails admission.
 ## Static admission (CI)
 
 Widgets are no longer proposed by pull request: creators submit them in the
-OverCrow creator space, and PlayerVox's own widgets are sent there by the
-`overcrow-submit` workflow after each merge. The `marketplace-ci` workflow
+PlayerVox OverCrow creator space, and PlayerVox's own widgets are sent there by
+the `overcrow-submit` workflow after each merge. The `marketplace-ci` workflow
 stays the static admission of `main`; it runs on pull requests to `main`
 (`pull_request_target`) and on pushes to it:
 

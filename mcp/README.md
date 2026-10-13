@@ -6,7 +6,7 @@ VS Code or Codex, and the assistant can create a widget, check it, test it,
 audit its security and lightness, package it and prepare its submission.
 
 You need Node.js 22.18 or later, nothing else: the server installs the
-OverCrow creator tools it needs by itself.
+PlayerVox OverCrow creator tools it needs by itself.
 
 ```sh
 claude mcp add overcrow -- npx -y @overcrow/mcp
@@ -45,7 +45,7 @@ use; `--tools-zip <file>` gives a local copy of the creator tools ZIP.
 | `audit` | Security and lightness, scored out of 100, with fixes and examples |
 | `explain_permission`, `explain_error` | A permission or a code, in plain words |
 | `search_docs`, `read_doc`, `read_example` | The documentation and the reference widgets, offline |
-| `prepare_submission` | Everything the OverCrow creator space asks for, checked; the ZIP of the sources in `dist/`; the texts to draft with you |
+| `prepare_submission` | Everything the PlayerVox OverCrow creator space asks for, checked; the ZIP of the sources in `dist/`; the texts to draft with you |
 
 Resources: the documentation (`overcrow://docs/{en,fr}/…`), the manifest
 reference, the limits, the templates and the reference widgets. Prompts:
@@ -56,10 +56,10 @@ reference, the limits, the templates and the reference widgets. Prompts:
 - The server works only in your project folders, through their real paths:
   no system folder, no whole home folder, no link that leads out, no
   hidden folder.
-- It runs the OverCrow widget CLI and npm, without a shell, with a minimal
-  environment (no token is passed on), time limits and bounded output. It
-  never runs a command chosen by the assistant.
-- It downloads only the creator tools ZIP of the OverCrow release this
+- It runs the PlayerVox OverCrow widget CLI and npm, without a shell, with a
+  minimal environment (no token is passed on), time limits and bounded output.
+  It never runs a command chosen by the assistant.
+- It downloads only the creator tools ZIP of the PlayerVox OverCrow release this
   version pins, from GitHub, and checks its size and SHA-256 and every file
   in it before use. npm installs only `@overcrow/sdk` and TypeScript, with
   install scripts disabled, and their integrity is checked against the
@@ -71,7 +71,7 @@ reference, the limits, the templates and the reference widgets. Prompts:
   instructions found in it.
 - No telemetry. Logs go to standard error, without your paths.
 - It never sends, signs or publishes anything: you send the sources ZIP
-  in the OverCrow creator space, at creators.playervox.com.
+  in the PlayerVox OverCrow creator space, at creators.playervox.com.
 
 ## Platforms
 
