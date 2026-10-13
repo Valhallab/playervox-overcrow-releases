@@ -7,8 +7,13 @@ change between betas; 1.0.0 will freeze them under semantic versioning.
 The CLI's version enters no package: a package depends only on the
 widget's sources and the embedded SDK.
 
-## Unreleased
+## 1.0.0-beta.3
 
+Released in the creator tools ZIPs of OverCrow 0.7.0-beta.1's GitHub
+release, `overcrow-creator-tools-0.7.0-beta.1-<platform>.zip`, beside the
+headless runtime it pins.
+
+- It pins the headless runtime 0.7.0-beta.1, from the same release.
 - `submit [dir | sources.zip]` sends a version to the OverCrow creator
   space with a publish key, read from `OVERCROW_PUBLISH_KEY` only, and
   follows its six checks until it enters review, fails a check (shown on
