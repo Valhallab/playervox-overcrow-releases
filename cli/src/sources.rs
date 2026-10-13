@@ -24,7 +24,7 @@ use crate::project::Project;
 
 /// How to write a widget ID, for help texts: the two forms of the creator
 /// space (`identifiers::id_owner`), with the example publisher `nova`.
-pub const ID_FORMS: &str = "use <handle>.<name> with your publisher handle from the OverCrow creator space, such as nova.lol-timers, or a reverse domain you verified, such as gg.nova.lol-timers";
+pub const ID_FORMS: &str = "use <handle>.<name> with your publisher handle from the PlayerVox OverCrow creator space, such as nova.lol-timers, or a reverse domain you verified, such as gg.nova.lol-timers";
 
 /// How to fix a name or label that holds a hidden character.
 pub const HIDDEN_HELP: &str =

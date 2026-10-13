@@ -73,7 +73,7 @@ export function registerResources(server: McpServer): void {
     }),
     {
       title: "Creator documentation",
-      description: "A page of the OverCrow creator documentation.",
+      description: "A page of the PlayerVox OverCrow creator documentation.",
       mimeType: "text/markdown",
     },
     async (uri, variables) => {

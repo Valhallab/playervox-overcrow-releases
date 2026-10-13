@@ -44,7 +44,7 @@ use overcrow_widget_schema::package::{hex, read_package, sha256};
 use crate::diag::{Diagnostic, Report};
 
 const USAGE: &str = "\
-overcrow-widget: create, check and package OverCrow widgets (widget API v1)
+overcrow-widget: create, check and package PlayerVox OverCrow widgets (widget API v1)
 
 Usage:
   overcrow-widget init <dir> [--template blank|counter|list|chart] [--id ID] [--name NAME]

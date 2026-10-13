@@ -12,7 +12,7 @@ export function registerPrompts(server: McpServer): void {
     "create_widget",
     {
       title: "Create a widget",
-      description: "Create an OverCrow widget from an idea, the light and safe way.",
+      description: "Create a PlayerVox OverCrow widget from an idea, the light and safe way.",
       argsSchema: z.object({
         idea: z.string().max(2000).describe("What the widget should show or do."),
         language: z.string().max(16).optional().describe("Language of your answers (en, fr…)."),
@@ -59,7 +59,7 @@ export function registerPrompts(server: McpServer): void {
     {
       title: "Prepare the submission",
       description:
-        "Get a widget ready for the OverCrow creator space: the checks, the sources ZIP and the texts to send.",
+        "Get a widget ready for the PlayerVox OverCrow creator space: the checks, the sources ZIP and the texts to send.",
       argsSchema: z.object({ directory: z.string().max(1024).describe("The widget folder.") }),
     },
     ({ directory }) =>

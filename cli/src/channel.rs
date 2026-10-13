@@ -27,9 +27,8 @@ pub enum ConnectError {
 impl std::fmt::Display for ConnectError {
     fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Absent => {
-                formatter.write_str("no OverCrow overlay with development installs is running")
-            }
+            Self::Absent => formatter
+                .write_str("no PlayerVox OverCrow overlay with development installs is running"),
             Self::Untrusted(what) => write!(
                 formatter,
                 "the development channel is not this user's overlay ({what})"

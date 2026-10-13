@@ -81,7 +81,7 @@ pub fn run(root: &Path, options: &Options) -> ExitCode {
             eprintln!("overcrow-widget dev: {error}");
             if matches!(error, ConnectError::Absent) {
                 eprintln!(
-                    "  = help: start OverCrow with development installs allowed; \
+                    "  = help: start PlayerVox OverCrow with development installs allowed; \
                      `overcrow-widget doctor` shows how"
                 );
             }

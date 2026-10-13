@@ -246,7 +246,7 @@ fn dev_without_an_overlay_says_how_to_start_one() {
         .expect("dev");
     assert_eq!(output.status.code(), Some(2));
     let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains("no OverCrow overlay"), "{stderr}");
+    assert!(stderr.contains("no PlayerVox OverCrow overlay"), "{stderr}");
     assert!(stderr.contains("overcrow-widget doctor"), "{stderr}");
 }
 

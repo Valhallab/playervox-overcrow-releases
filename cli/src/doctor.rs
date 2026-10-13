@@ -21,7 +21,7 @@ const NODE_TIMEOUT: Duration = Duration::from_secs(10);
 
 /// How to start an overlay that allows development installs.
 #[cfg(windows)]
-pub const DEVELOPMENT_HELP: &str = "quit OverCrow (tray icon > Quit), then start it from PowerShell with development installs allowed: \
+pub const DEVELOPMENT_HELP: &str = "quit PlayerVox OverCrow (tray icon > Quit), then start it from PowerShell with development installs allowed: \
     $env:OVERCROW_WIDGET_DEVELOPMENT='1'; & \"$env:LOCALAPPDATA\\Programs\\OverCrow\\OverCrow.exe\"";
 #[cfg(not(windows))]
 pub const DEVELOPMENT_HELP: &str = "restart the overlay with development installs allowed: \
@@ -60,9 +60,9 @@ pub fn run(root: &Path, format: Format, deny_warnings: bool) -> ExitCode {
             report.push(
                 Diagnostic::warning(
                     "doctor.overcrow_missing",
-                    "OverCrow is not installed where it installs itself",
+                    "PlayerVox OverCrow is not installed where it installs itself",
                 )
-                .help("install OverCrow to run widgets in its overlay; check and package work without it"),
+                .help("install PlayerVox OverCrow to run widgets in its overlay; check and package work without it"),
             );
         }
     }
@@ -93,10 +93,10 @@ pub fn run(root: &Path, format: Format, deny_warnings: bool) -> ExitCode {
                 .help(DEVELOPMENT_HELP),
                 ConnectError::Incompatible(_) => {
                     Diagnostic::error("doctor.protocol_version", error.to_string())
-                        .help("use the overcrow-widget release that matches this OverCrow")
+                        .help("use the overcrow-widget release that matches this PlayerVox OverCrow")
                 }
                 ConnectError::Untrusted(_) => Diagnostic::error("doctor.channel_untrusted", error.to_string())
-                    .help("another program holds OverCrow's development channel; stop it and restart OverCrow"),
+                    .help("another program holds PlayerVox OverCrow's development channel; stop it and restart OverCrow"),
                 ConnectError::Refused(_) => Diagnostic::warning("doctor.channel_busy", error.to_string())
                     .help("other `dev` sessions use the overlay; stop one of them"),
                 ConnectError::Io(_) => Diagnostic::warning("doctor.channel_io", error.to_string()),

@@ -1,7 +1,7 @@
 [package]
 name = "overcrow-widget-cli"
 version = "1.0.0-beta.4"
-description = "overcrow-widget: the creator CLI of OverCrow widget API v1"
+description = "overcrow-widget: the creator CLI of PlayerVox OverCrow widget API v1"
 edition.workspace = true
 license.workspace = true
 rust-version.workspace = true

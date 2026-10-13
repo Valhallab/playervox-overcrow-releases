@@ -1,5 +1,5 @@
 /**
- * `@overcrow/sdk`: the API of OverCrow widget logic (widget API v1).
+ * `@overcrow/sdk`: the API of PlayerVox OverCrow widget logic (widget API v1).
  *
  * ```ts
  * import * as overcrow from "@overcrow/sdk";

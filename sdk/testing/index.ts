@@ -1,5 +1,5 @@
 /**
- * `@overcrow/sdk/testing`: unit tests of widget logic without OverCrow.
+ * `@overcrow/sdk/testing`: unit tests of widget logic without PlayerVox OverCrow.
  *
  * {@link installRuntime} installs a stand-in for the widget VM's runtime
  * surface (the `overcrow` global the SDK calls), with the same rules:
