@@ -1,6 +1,6 @@
 {
   "name": "@overcrow/mcp",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "MCP server that lets an AI assistant create, check, test, audit and package PlayerVox OverCrow widgets.",
   "license": "MIT",
   "type": "module",
