@@ -2,8 +2,8 @@
 
 > **Les pull requests sont fermées.** Les widgets ne sont plus proposés par
 > pull request : ceux de PlayerVox passent déjà par l’espace créateurs
-> OverCrow, et le vôtre y passera à son ouverture. D’ici là, cette page
-> décrit l’admission, la revue et le catalogue que suit un widget.
+> PlayerVox OverCrow, et le vôtre y passera à son ouverture. D’ici là, cette
+> page décrit l’admission, la revue et le catalogue que suit un widget.
 
 Les widgets atteignent les utilisateurs de PlayerVox OverCrow par le
 catalogue signé des widgets : OverCrow n’installe que ce que liste ce
@@ -91,7 +91,7 @@ n’exécute jamais votre code ni `tsc` :
 
 1. elle construit le dossier comme le fait `package` : toutes les
    vérifications des sources, du style, de la logique et du paquet, puis le
-   lecteur de paquets d’OverCrow lui-même ;
+   lecteur de paquets de PlayerVox OverCrow lui-même ;
 2. avec `--package`, la vue compilée de votre archive doit être, octet pour
    octet, le résultat de la compilation de `view.ocml` ;
 3. elle vérifie les limites du schéma, les IDs réservés, `listing.json`,
@@ -142,16 +142,16 @@ publique est dans [`keys/`](../../../keys/). Le catalogue :
   version publiée ne change jamais, et un changement est une nouvelle
   version ;
 - porte un numéro de séquence strictement croissant et expire au bout de
-  90 jours au plus : OverCrow refuse une séquence plus ancienne et un
-  catalogue expiré ;
+  90 jours au plus : PlayerVox OverCrow refuse une séquence plus ancienne et
+  un catalogue expiré ;
 - marque `built-in` les widgets de référence PlayerVox (IDs
   `com.playervox.*` uniquement) : ils sont installés sur un nouveau profil
   avec leurs permissions déclarées accordées, sauf pour une mise à jour qui
   en demande davantage.
 
-OverCrow vérifie la signature, l’empreinte du paquet, son registre et sa
-vue compilée avant l’installation, puis à chaque démarrage du widget. Voir
-[le paquet](package.md#comment-overcrow-vérifie-un-paquet).
+PlayerVox OverCrow vérifie la signature, l’empreinte du paquet, son registre
+et sa vue compilée avant l’installation, puis à chaque démarrage du widget.
+Voir [le paquet](package.md#comment-overcrow-vérifie-un-paquet).
 
 ## Mises à jour
 

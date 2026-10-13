@@ -19,7 +19,7 @@ les entoure : expressions, `if`, `for`, composants.
 ```
 
 Deux conteneurs `box`, deux éléments `text` liés à l’état et un `chart` doté
-d’une `series` : OverCrow dessine le tout, graphique compris.
+d’une `series` : PlayerVox OverCrow dessine le tout, graphique compris.
 
 ## Lire la fiche d’un élément
 
@@ -441,10 +441,10 @@ Toute autre `key` est un unique caractère imprimable.
 
 ## Tailles par défaut
 
-Les éléments qu’OverCrow dessine prennent ces tailles, en pixels logiques à
-100 %, sauf si le style définit `width` ou `height`. Tout autre élément tire
-sa taille de son contenu et du style : un `canvas` n’a pas de taille tant
-que le style ne lui en donne pas.
+Les éléments que PlayerVox OverCrow dessine prennent ces tailles, en pixels
+logiques à 100 %, sauf si le style définit `width` ou `height`. Tout autre
+élément tire sa taille de son contenu et du style : un `canvas` n’a pas de
+taille tant que le style ne lui en donne pas.
 
 <!-- generated:default-sizes -->
 | Élément | Quand | Largeur | Hauteur |

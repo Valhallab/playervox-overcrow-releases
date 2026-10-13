@@ -61,8 +61,8 @@ names. Two consequences:
 - the view itself carries no code: `view.json` refers to the functions of
   `logic.js` by number.
 
-A package holds source that OverCrow can read and check, never compiled
-bytecode.
+A package holds source that PlayerVox OverCrow can read and check, never
+compiled bytecode.
 
 ## The same bytes every time
 
@@ -79,14 +79,14 @@ package` to write it; an archive made with another zip tool is refused.
 ## The ledger
 
 `ledger.json`, written by the tool, lists every other file with its size
-and its SHA-256. OverCrow recomputes it from the archive and requires the
-same bytes. It is what ties each file to the package: a file changed,
-added or removed after packaging no longer matches.
+and its SHA-256. PlayerVox OverCrow recomputes it from the archive and
+requires the same bytes. It is what ties each file to the package: a file
+changed, added or removed after packaging no longer matches.
 
 ## How OverCrow checks a package
 
-OverCrow validates a package in full when it is admitted to the catalog,
-when it is installed, and again **each time the widget starts**:
+PlayerVox OverCrow validates a package in full when it is admitted to the
+catalog, when it is installed, and again **each time the widget starts**:
 
 1. the size of the archive, its exact layout and the checksum of each
    entry;

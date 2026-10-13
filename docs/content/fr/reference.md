@@ -28,10 +28,10 @@ ensemble ; celles qui suivent sont à garder ouvertes pendant que vous
 
 - Les tableaux des éléments, des attributs, des propriétés de style, des
   tokens, des services, des formes de résultat et des limites sont
-  **générés à partir du schéma des widgets**, les mêmes tables qu’OverCrow
-  et l’outil en ligne de commande compilent dans leurs validateurs. Une
-  vérification échoue dès qu’une page diffère du schéma, en anglais ou en
-  français.
+  **générés à partir du schéma des widgets**, les mêmes tables que
+  PlayerVox OverCrow et l’outil en ligne de commande compilent dans leurs
+  validateurs. Une vérification échoue dès qu’une page diffère du schéma, en
+  anglais ou en français.
 - Les **types du SDK** sont générés à partir du même schéma : un élément,
   une icône, une capability ou un paramètre de service erroné est donc une
   erreur TypeScript dans votre logique.
@@ -52,8 +52,8 @@ et `@overcrow/sdk` 1.0.
 Trois spécifications, dans le dépôt public, s’adressent à ceux qui
 implémentent un hôte ou un autre outil plutôt qu’un widget : la
 [référence complète du schéma, générée](../../widget-schema-v1.md), qui
-couvre aussi le protocole entre OverCrow et le processus du widget ainsi que
-les données du catalogue ; le
+couvre aussi le protocole entre PlayerVox OverCrow et le processus du widget
+ainsi que les données du catalogue ; le
 [protocole du canal de développement](../../dev-channel.md) ; et le
 [format de l’archive et du catalogue](../../widget-package-v1.md). L’auteur
 d’un widget n’en a pas besoin.

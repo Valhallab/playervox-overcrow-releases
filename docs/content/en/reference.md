@@ -26,9 +26,9 @@ together; the pages below are the ones to keep open while you write.
 
 - The tables of elements, attributes, style properties, tokens, services,
   result shapes and limits are **generated from the widget schema**, the
-  same tables that OverCrow and the command-line tool compile into their
-  validators. A check fails when a page differs from the schema, in English
-  or in French.
+  same tables that PlayerVox OverCrow and the command-line tool compile into
+  their validators. A check fails when a page differs from the schema, in
+  English or in French.
 - The **SDK types** are generated from the same schema, so a wrong element,
   icon, capability or service parameter is a TypeScript error in your
   logic.
@@ -48,8 +48,8 @@ These pages describe widget API v1 (`"apiVersion": 1` in the manifest) and
 Three specifications, in the public repository, are written for those who
 implement a host or another tool rather than a widget: the complete
 [generated schema reference](../../widget-schema-v1.md), which also covers
-the protocol between OverCrow and the widget's process and the catalog's
-payloads; the
+the protocol between PlayerVox OverCrow and the widget's process and the
+catalog's payloads; the
 [wire protocol of the development channel](../../dev-channel.md); and the
 [archive and catalog format](../../widget-package-v1.md). A widget author
 does not need them.

@@ -7,9 +7,9 @@ exact counts: this page says what each figure counts and what it leaves out.
 
 ## Where the figures come from
 
-Once a day at most, at a random time, OverCrow sends one anonymous signal
-for each widget installed from the catalog: the widget, its version, the
-day, the system (Windows or Linux), the version of OverCrow, whether the
+Once a day at most, at a random time, PlayerVox OverCrow sends one anonymous
+signal for each widget installed from the catalog: the widget, its version,
+the day, the system (Windows or Linux), the version of OverCrow, whether the
 widget was shown, installed or uninstalled that day, and its errors (kind,
 place in the code, a rounded count).
 
@@ -18,7 +18,8 @@ place in the code, a rounded count).
 - **No error message**: only the kind of an error and its place in your
   code. A message may hold personal data.
 - **On by default**: players can turn **Share anonymous statistics** off in
-  OverCrow; nothing is sent after that, and they are no longer counted.
+  PlayerVox OverCrow; nothing is sent after that, and they are no longer
+  counted.
 
 The figures are added up as the signals arrive. **Updated** gives the time
 of the last one counted.
@@ -57,7 +58,7 @@ Every chart has **View as table**, with the same figures day by day.
   version. The three newest versions keep their colour; the others add up as
   **Older**.
 - **Where your widget runs**: the share of active players on Windows and on
-  Linux, and on each version of OverCrow (the two most used, then
+  Linux, and on each version of PlayerVox OverCrow (the two most used, then
   **Others**).
 
 ## Errors
@@ -67,10 +68,10 @@ the same line of the same function is one group, whatever the version. The
 table shows the 50 most frequent groups of the period, with their versions,
 their count and their trend; **Export CSV** saves them.
 
-OverCrow reports where an error happened in the package's `logic.js`. The
-creator space traces that position back to your sources (file, line and
-function) with a map of your code built with the package and never
-published.
+PlayerVox OverCrow reports where an error happened in the package's
+`logic.js`. The creator space traces that position back to your sources
+(file, line and function) with a map of your code built with the package and
+never published.
 
 - **Being traced**: the position is shown as `logic.js:line:column` until it
   is traced.
@@ -104,9 +105,9 @@ The kind of an error is the built-in type it was created from, never the
 
 ## Player rating
 
-Players rate a widget from 0 to 100 in the OverCrow Control Center, with
-their PlayerVox account: one rating per account and per widget, which they
-can change or remove.
+Players rate a widget from 0 to 100 in the PlayerVox OverCrow Control
+Center, with their PlayerVox account: one rating per account and per widget,
+which they can change or remove.
 
 - **Score**: the mean of the ratings, rounded, with its rank: S+ from 90,
   S from 80, A from 70, B from 60, C from 40, D from 20, then F.
@@ -124,11 +125,11 @@ and on the website.
 ## Trends, not exact counts
 
 - Only the players who share their anonymous statistics are counted.
-- OverCrow rounds each error count to a step before sending it, and sends
-  at most 10 places in the code per widget and day: the error figures give
-  orders of magnitude.
+- PlayerVox OverCrow rounds each error count to a step before sending it,
+  and sends at most 10 places in the code per widget and day: the error
+  figures give orders of magnitude.
 - A day is the player's own date.
-- A player who clears OverCrow's data, then installs the widget again,
-  counts as two installs.
+- A player who clears PlayerVox OverCrow's data, then installs the widget
+  again, counts as two installs.
 - Signals that look broken or inflated are set aside before they are
   counted.

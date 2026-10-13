@@ -7,7 +7,7 @@ it by hand; it is packaged exactly as written.
 
 The file is one strict JSON object. A byte-order mark, a duplicate key,
 trailing data or an unknown field rejects it: there is no field that
-OverCrow ignores.
+PlayerVox OverCrow ignores.
 
 ## A complete example
 
@@ -93,20 +93,21 @@ values it fills in. A manifest with permissions and a menu:
 
 - **`id`** is the widget's identity everywhere: in the catalog, in the
   user's profile, in its storage. It is `<handle>.<name>`, your publisher
-  handle in the OverCrow creator space and a name (`nova.lol-timers`), or,
-  once you verified a domain, that domain reversed and a name
-  (`gg.nova.lol-timers`). An ID is final: it is never given to another
-  widget, even after yours is removed. `nova`, `example`, `yourhandle` and
-  `yourname` are example handles that nobody can publish under, and IDs
-  under `com.playervox` are reserved for widgets published by PlayerVox.
+  handle in the PlayerVox OverCrow creator space and a name
+  (`nova.lol-timers`), or, once you verified a domain, that domain reversed
+  and a name (`gg.nova.lol-timers`). An ID is final: it is never given to
+  another widget, even after yours is removed. `nova`, `example`,
+  `yourhandle` and `yourname` are example handles that nobody can publish
+  under, and IDs under `com.playervox` are reserved for widgets published by
+  PlayerVox.
 - **`version`** is a semantic version. A published version never changes:
   any change to a published widget is a new, higher version.
 - **`schemaVersion`** and **`apiVersion`** are both `1`.
 
 ### Names
 
-`name` gives the name OverCrow shows in its widget list and menus, in
-English and in French. Both are required. A name shows as written: no
+`name` gives the name PlayerVox OverCrow shows in its widget list and menus,
+in English and in French. Both are required. A name shows as written: no
 control character and no invisible or text-direction character, such as
 U+200B (zero-width space) or U+202E (right-to-left override). Menu labels
 follow the same rule.
@@ -121,9 +122,9 @@ follow the same rule.
 ## Sizes
 
 `sizing` says how large the widget is when the user adds it, how small and
-how large the user may resize it, and whether OverCrow can fit its frame to
-its content. Lengths are logical pixels at 100 % scale; the user's content
-scale (50 % to 175 %) multiplies them.
+how large the user may resize it, and whether PlayerVox OverCrow can fit its
+frame to its content. Lengths are logical pixels at 100 % scale; the user's
+content scale (50 % to 175 %) multiplies them.
 
 <!-- generated:manifest-sizing -->
 | Field | Type | Required | Meaning |
@@ -145,11 +146,11 @@ Each of `preferred`, `min` and `max` is a pair of dimensions, with
 | `height` | integer 1 to 4096 | yes | Logical pixels. |
 <!-- /generated:manifest-dimensions -->
 
-With `fit: "both"`, OverCrow sizes the frame to what the view needs, in
-both directions: the Clock grows when the user turns the seconds on. With
-`fit: "height"`, the user chooses the width and the height follows the
-content. With `fit: "none"`, the frame keeps the size the user gave it and
-the view fills it. The user can always resize by hand.
+With `fit: "both"`, PlayerVox OverCrow sizes the frame to what the view
+needs, in both directions: the Clock grows when the user turns the seconds
+on. With `fit: "height"`, the user chooses the width and the height follows
+the content. With `fit: "none"`, the frame keeps the size the user gave it
+and the view fills it. The user can always resize by hand.
 
 <!-- source: widgets/clock/manifest.json -->
 ```json
@@ -190,9 +191,9 @@ A network rule is an object of its own; its fields are described with
 
 ## The options menu
 
-Every widget has an options menu, opened from its frame. OverCrow puts its
-own rows first: opacity, content size, fit to content and, when the widget
-needs one, its account. Visibility in Passive mode is the eye in the
+Every widget has an options menu, opened from its frame. PlayerVox OverCrow
+puts its own rows first: opacity, content size, fit to content and, when the
+widget needs one, its account. Visibility in Passive mode is the eye in the
 widget's toolbar, not a menu row. `wrapper.menu` adds yours below them:
 toggles, sliders, choices, actions and groups, each with a label in both
 languages.
@@ -233,8 +234,8 @@ current value on at most 120 points. Keep labels short, in both languages.
   }
 ```
 
-OverCrow draws the rows, stores their values in the user's profile and
-gives them to the logic: read a value with `option(id, fallback)`, and
+PlayerVox OverCrow draws the rows, stores their values in the user's profile
+and gives them to the logic: read a value with `option(id, fallback)`, and
 follow changes with `onHost`. An `action` row has no value: it calls the
 handler you registered with `onMenu`. See
 [the options menu in the logic](logic.md#the-options-menu).
@@ -346,10 +347,11 @@ Each entry of `choices` is a value and its label:
 
 `requires` at the top level lists data sources the widget cannot work
 without, with the same names as a row's `requires`. On a machine that lacks
-one, OverCrow neither starts nor shows the widget and keeps its place in the
-layout; the widget comes back when the source does. Use it for a widget
-that has nothing to show otherwise, such as a frame-rate counter without a
-frame-rate source. For a single optional value, prefer a row's `requires`.
+one, PlayerVox OverCrow neither starts nor shows the widget and keeps its
+place in the layout; the widget comes back when the source does. Use it for
+a widget that has nothing to show otherwise, such as a frame-rate counter
+without a frame-rate source. For a single optional value, prefer a row's
+`requires`.
 
 ## A larger memory budget
 
@@ -368,8 +370,8 @@ leaves less room for everything else. Ask for it only when
 
 ## How the manifest is checked
 
-`overcrow-widget check` validates the manifest with the validator OverCrow
-itself runs, and points at the member it refuses:
+`overcrow-widget check` validates the manifest with the validator
+PlayerVox OverCrow itself runs, and points at the member it refuses:
 
 ```text
 error[manifest.sizing]: `sizing` is out of bounds or inconsistent
@@ -381,8 +383,8 @@ error[manifest.sizing]: `sizing` is out of bounds or inconsistent
 check: 1 error(s), 0 warning(s)
 ```
 
-OverCrow validates it again when the package is admitted to the catalog,
-when it is installed and each time the widget starts. A new version whose
-manifest asks for more than the previous one (a network rule, a game event,
-a capability, storage or the clipboard) waits until the user approves it
-in the Control Center before it replaces the installed version.
+PlayerVox OverCrow validates it again when the package is admitted to the
+catalog, when it is installed and each time the widget starts. A new version
+whose manifest asks for more than the previous one (a network rule, a game
+event, a capability, storage or the clipboard) waits until the user approves
+it in the Control Center before it replaces the installed version.

@@ -79,9 +79,9 @@ states: `button.primary:hover`. Compounds are joined by a space
 }
 ```
 
-The states are resolved by OverCrow, not by your logic: `:hover` and
-`:active` follow the pointer, `:focus` the keyboard focus, `:disabled` the
-`disabled` attribute, and `:checked` the state of a `toggle` or
+The states are resolved by PlayerVox OverCrow, not by your logic: `:hover`
+and `:active` follow the pointer, `:focus` the keyboard focus, `:disabled`
+the `disabled` attribute, and `:checked` the state of a `toggle` or
 `checkbox`. A widget is not told about pointer moves: a hover effect costs
 it nothing.
 
@@ -134,7 +134,7 @@ how the countdown example puts the time in the middle of its ring:
 }
 ```
 
-A widget cannot draw outside its frame: OverCrow clips it.
+A widget cannot draw outside its frame: PlayerVox OverCrow clips it.
 
 ## Values
 
@@ -144,17 +144,17 @@ the unit) and percentages, colours as `#rrggbb`, `#rrggbbaa` or
 tokens as `var(--name)`. The exact notation of each kind of value is in
 [values](style-properties.md#values).
 
-Lengths are logical pixels: OverCrow multiplies them by the user's content
-scale (50 % to 175 %) and by the screen's density, so `12px` is the same
-physical size on every screen. Shorthands expand as in CSS: one to four
+Lengths are logical pixels: PlayerVox OverCrow multiplies them by the user's
+content scale (50 % to 175 %) and by the screen's density, so `12px` is the
+same physical size on every screen. Shorthands expand as in CSS: one to four
 values for sides and corners, one or two for gaps.
 
 ## Design tokens
 
-A token is a value of OverCrow's design system, written `var(--name)`.
-Colour tokens change with the user's theme, light or dark: a widget styled
-with tokens follows the theme without any code. Prefer them to literal
-colours.
+A token is a value of PlayerVox OverCrow's design system, written
+`var(--name)`. Colour tokens change with the user's theme, light or dark: a
+widget styled with tokens follows the theme without any code. Prefer them to
+literal colours.
 
 <!-- source: docs/content/examples/countdown/style.ocss -->
 ```css
@@ -176,8 +176,9 @@ length. There is no fallback argument, and a widget cannot declare its own
 custom properties. All tokens are listed in
 [design tokens](style-properties.md#design-tokens).
 
-OverCrow draws the panel behind the widget (`--color-surface-panel`), its
-frame and its shadow: start from a transparent background.
+PlayerVox OverCrow draws the panel behind the widget
+(`--color-surface-panel`), its frame and its shadow: start from a
+transparent background.
 
 ## Text
 
@@ -187,8 +188,8 @@ container to style what it holds.
 
 - Three font families exist: `ui` (Noto Sans, the default), `mono` (Noto
   Sans Mono, for values) and `display` (Space Grotesk, for grades and
-  scores). OverCrow bundles them; system fonts are never used, so a widget
-  looks the same on every machine.
+  scores). PlayerVox OverCrow bundles them; system fonts are never used, so
+  a widget looks the same on every machine.
 - `font-variant-numeric: tabular-nums` gives digits one width, so a
   changing number does not move its neighbours.
 - `text-overflow: ellipsis` cuts an overflowing line with `…`;
@@ -224,9 +225,9 @@ plays a `@keyframes` block of the same sheet.
 
 Only properties that change paint, not layout, can be animated:
 `opacity`, `color`, `background-color`, `border-color` and `transform`.
-A `@keyframes` block holds only those. OverCrow runs the animation itself:
-no timer and no code of the widget run while it plays, and nothing is
-repainted when nothing changes. A widget that is hidden does not animate.
+A `@keyframes` block holds only those. PlayerVox OverCrow runs the animation
+itself: no timer and no code of the widget run while it plays, and nothing
+is repainted when nothing changes. A widget that is hidden does not animate.
 
 `@keyframes` is the only at-rule. Its name is an identifier that is not an
 animation keyword, unique in the sheet.

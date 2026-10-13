@@ -25,15 +25,15 @@ Chaque widget tourne derrière deux barrières.
    capability, un Job Object par widget, et des mitigations de processus
    qui interdisent le code dynamique et le système de fenêtres.
 
-OverCrow dessine tout lui-même : la VM envoie une description de la vue,
-jamais de pixels, et n’exécute jamais de code dans le processus d’OverCrow.
-Le survol, le focus, l’état pressé et les transitions sont résolus par
-OverCrow : un widget n’observe pas les mouvements du pointeur qu’il n’a pas
-demandés par un événement.
+PlayerVox OverCrow dessine tout lui-même : la VM envoie une description de
+la vue, jamais de pixels, et n’exécute jamais de code dans le processus
+d’OverCrow. Le survol, le focus, l’état pressé et les transitions sont
+résolus par OverCrow : un widget n’observe pas les mouvements du pointeur
+qu’il n’a pas demandés par un événement.
 
-Un dépassement de budget n’arrête que ce widget. OverCrow affiche une
-erreur fixe dans son cadre et le relance après 1, 5 puis 15 secondes, trois
-fois au plus ; une erreur de paquet ou de protocole attend que
+Un dépassement de budget n’arrête que ce widget. PlayerVox OverCrow affiche
+une erreur fixe dans son cadre et le relance après 1, 5 puis 15 secondes,
+trois fois au plus ; une erreur de paquet ou de protocole attend que
 l’utilisateur le réactive. Les chiffres figurent dans les
 [limites](limits.md#logique).
 
@@ -44,24 +44,26 @@ déclaration n’accorde rien à elle seule. À l’installation du widget, le
 Centre de contrôle propose chaque permission cochée, et l’utilisateur peut
 en décocher. Ensuite, l’utilisateur autorise ou retire chaque permission
 dans le Centre de contrôle ; en retirer une redémarre le widget sans elle.
-OverCrow vérifie de nouveau la permission à chaque appel
+PlayerVox OverCrow vérifie de nouveau la permission à chaque appel
 d’un service.
 
 Quatre permissions ouvrent les services généraux : `network` (des routes
-HTTPS exactes, par le broker d’OverCrow), `storage` (un stockage clé-valeur
-pour ce seul widget), `clipboardWrite` (l’écriture de texte, pendant une
-action de l’utilisateur) et `gameEvents` (des événements de jeu nommés).
+HTTPS exactes, par le broker de PlayerVox OverCrow), `storage` (un stockage
+clé-valeur pour ce seul widget), `clipboardWrite` (l’écriture de texte,
+pendant une action de l’utilisateur) et `gameEvents` (des événements de jeu
+nommés).
 
-Les capabilities donnent accès à des données et à des actions d’OverCrow et
-des comptes de l’utilisateur. Une capability **sensible** révèle des
-données personnelles ou le jeu en cours : un widget qui en déclare une ne
-peut pas déclarer aussi `network` ni `clipboardWrite`, et son stockage ne
-dure que le temps de son processus, pour que ces données ne puissent pas
-quitter la machine par le widget.
+Les capabilities donnent accès à des données et à des actions de
+PlayerVox OverCrow et des comptes de l’utilisateur. Une capability
+**sensible** révèle des données personnelles ou le jeu en cours : un widget
+qui en déclare une ne peut pas déclarer aussi `network` ni `clipboardWrite`,
+et son stockage ne dure que le temps de son processus, pour que ces données
+ne puissent pas quitter la machine par le widget.
 
-Les connexions aux comptes (PlayerVox, Twitch) appartiennent à OverCrow :
-la connexion, les codes et les jetons sont affichés et conservés par
-OverCrow, et un widget ne reçoit que les données que décrit sa capability.
+Les connexions aux comptes (PlayerVox, Twitch) appartiennent à
+PlayerVox OverCrow : la connexion, les codes et les jetons sont affichés et
+conservés par OverCrow, et un widget ne reçoit que les données que décrit sa
+capability.
 
 Chaque permission, chaque capability et les services qu’elle ouvre sont
 décrits dans [services et permissions](services.md). Déclarez le strict
@@ -79,17 +81,17 @@ appelés que pendant que la logique traite une vraie action de l’utilisateur
 dans le widget : un clic, une touche, une modification, la validation d’un
 formulaire. Un appel depuis un minuteur, une réponse de service ou une
 ligne du menu d’options est refusé avec `gesture_required`. Les widgets ne
-reçoivent d’entrées qu’en mode interactif d’OverCrow ; en mode passif, les
-clics les traversent. Supprimer une note ou une session du journal demande
-aussi une confirmation à l’utilisateur, dans une boîte de dialogue dessinée
-par OverCrow. Voir
+reçoivent d’entrées qu’en mode interactif de PlayerVox OverCrow ; en mode
+passif, les clics les traversent. Supprimer une note ou une session du
+journal demande aussi une confirmation à l’utilisateur, dans une boîte de
+dialogue dessinée par OverCrow. Voir
 [les appels qui demandent une action de l’utilisateur](services.md#les-appels-qui-demandent-une-action-de-lutilisateur).
 
 Ce que l’utilisateur écrit dans ses notes, dans un avis PlayerVox et dans
 le chat ne passe jamais par votre logique : un `form` doté d’un `intent` envoie les
-valeurs de ses propres champs de texte et curseurs, qu’OverCrow remplit,
-modifie et valide lui-même. Votre logique peut les lire, pas les écrire.
-Voir
+valeurs de ses propres champs de texte et curseurs, que PlayerVox OverCrow
+remplit, modifie et valide lui-même. Votre logique peut les lire, pas les
+écrire. Voir
 [les formulaires qui écrivent des données de l’utilisateur](forms.md#les-formulaires-qui-écrivent-des-données-de-lutilisateur).
 
 ## Ce qu’un widget ne peut pas faire
@@ -100,10 +102,10 @@ Voir
   l’exécution ou télécharger du code : le seul code est le `logic.js` relu
   du paquet.
 - Voir les autres widgets, leur état, leur stockage ou leurs permissions,
-  ni la mémoire, la fenêtre ou les entrées du jeu. OverCrow ne s’injecte
-  jamais dans le jeu.
+  ni la mémoire, la fenêtre ou les entrées du jeu. PlayerVox OverCrow ne
+  s’injecte jamais dans le jeu.
 - Dessiner hors de son cadre, couvrir ou imiter le cadre, les menus ou les
-  confirmations d’OverCrow.
+  confirmations de PlayerVox OverCrow.
 - Lire des jetons de compte, des cookies ou des identifiants.
 - Lire le presse-papiers.
 - Écrire des journaux en production : la sortie de `log.*` n’apparaît que
@@ -114,13 +116,13 @@ Voir
 ## Ce qu’OverCrow vérifie
 
 Chaque paquet est vérifié lors de son admission au catalogue, puis chaque
-fois qu’OverCrow le démarre : le catalogue signé, le registre de ses
-fichiers et la vue compilée doivent concorder, sinon le widget ne démarre
-pas. Voir [le paquet](package.md#comment-overcrow-vérifie-un-paquet) et
-[publication et revue](publishing.md).
+fois que PlayerVox OverCrow le démarre : le catalogue signé, le registre de
+ses fichiers et la vue compilée doivent concorder, sinon le widget ne
+démarre pas. Voir [le paquet](package.md#comment-overcrow-vérifie-un-paquet)
+et [publication et revue](publishing.md).
 
 Une version du catalogue peut être suspendue ou révoquée après sa
-publication : OverCrow arrête alors la copie installée. Voir
+publication : PlayerVox OverCrow arrête alors la copie installée. Voir
 [statuts des versions](publishing.md#statuts-des-versions).
 
 ## Signaler une vulnérabilité

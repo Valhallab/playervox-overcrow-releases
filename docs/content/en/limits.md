@@ -25,12 +25,13 @@ and a way out.
   `invalid_request`, a full quota with `quota_exceeded`, and too many
   requests at once with `busy`. See [errors](services.md#errors).
 - **While the logic runs**, exceeding a budget of the VM (the time of a
-  turn, the heap, the messages of a turn) stops the widget; OverCrow
-  restarts it a few times. See
+  turn, the heap, the messages of a turn) stops the widget;
+  PlayerVox OverCrow restarts it a few times. See
   [what happens on a failure](logic.md#what-happens-on-a-failure).
 - **In what the widget shows**, a value out of bounds (a text too long for
-  an attribute, too many nodes) is refused by OverCrow and stops the widget
-  too: bound what you show, for example the number of rows of a list.
+  an attribute, too many nodes) is refused by PlayerVox OverCrow and stops
+  the widget too: bound what you show, for example the number of rows of a
+  list.
 
 Lengths are logical pixels at 100 % content scale. Text limits count UTF-8
 bytes unless the unit says characters. KiB and MiB are 1024 and 1024²

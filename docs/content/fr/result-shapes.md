@@ -37,9 +37,10 @@ la vue en lit les membres :
 - Un membre accompagné de `offsetMinutes` est un horodatage à mettre en
   forme avec ce décalage UTC ; voir
   [heure, dates et nombres](logic.md#heure-dates-et-nombres).
-- Un identifiant `asset:` est une image qu’OverCrow détient pour le widget :
-  liez-le au `src` d’une `image` ou d’un `avatar`, ou dessinez-le sur un
-  canvas. Ce n’est pas une URL, et ses octets ne peuvent pas être lus.
+- Un identifiant `asset:` est une image que PlayerVox OverCrow détient pour
+  le widget : liez-le au `src` d’une `image` ou d’un `avatar`, ou
+  dessinez-le sur un canvas. Ce n’est pas une URL, et ses octets ne peuvent
+  pas être lus.
 - Un abonnement dont la forme est « … ou `null` » livre `null` quand il n’y
   a rien à afficher : pas de jeu actif, pas de lecteur multimédia.
 

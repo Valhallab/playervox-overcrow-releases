@@ -10,7 +10,7 @@ server installs the OverCrow tools it needs by itself.
 claude mcp add overcrow -- npx -y @overcrow/mcp
 ```
 
-Then ask: "Create an OverCrow widget that shows…".
+Then ask: "Create a PlayerVox OverCrow widget that shows…".
 
 ## Add the server
 
@@ -85,9 +85,9 @@ Developer, Edit Config), then restart Claude Desktop.
 
 ## What the server does
 
-- **The first time**, it downloads the OverCrow creator tools of your
-  computer (the [command-line tool](cli.md) and the runtime that plays the
-  [tests](testing.md), about 15 MB) from OverCrow's GitHub release. It
+- **The first time**, it downloads the PlayerVox OverCrow creator tools of
+  your computer (the [command-line tool](cli.md) and the runtime that plays
+  the [tests](testing.md), about 15 MB) from OverCrow's GitHub release. It
   checks every file against the digests written in the server, then keeps
   them in its own folder (`~/.cache/overcrow-mcp`, or
   `%LOCALAPPDATA%\overcrow-mcp` on Windows). Nothing goes on your `PATH`,
@@ -97,7 +97,7 @@ Developer, Edit Config), then restart Claude Desktop.
   (it sees the images that differ), audit, package, prepare the
   submission.
 - **The widget ID** is final. Your assistant asks you for it: your
-  publisher handle in the OverCrow creator space and a name
+  publisher handle in the PlayerVox OverCrow creator space and a name
   (`nova.lol-timers`), or a domain you can verify
   (`gg.nova.lol-timers`).
 - **The submission**: the server checks everything the creator space asks
@@ -119,9 +119,9 @@ Developer, Edit Config), then restart Claude Desktop.
 ## What it does not do
 
 - It never sends, signs or publishes anything. You send the ZIP and the
-  texts in the OverCrow creator space, at creators.playervox.com.
-- It does not install your widget in OverCrow: trying it in a game is the
-  [development channel](dev-channel.md) of the command-line tool.
+  texts in the PlayerVox OverCrow creator space, at creators.playervox.com.
+- It does not install your widget in PlayerVox OverCrow: trying it in a game
+  is the [development channel](dev-channel.md) of the command-line tool.
 - It sends nothing about you: no telemetry, no account.
 
 ## Security
@@ -129,7 +129,7 @@ Developer, Edit Config), then restart Claude Desktop.
 - **Your folders only.** The server works in the folder open in your
   assistant (or the ones given with `--root`). It refuses a system folder,
   your whole home folder, hidden folders, and links that lead outside.
-- **No command of its own choice.** The server runs the OverCrow
+- **No command of its own choice.** The server runs the PlayerVox OverCrow
   command-line tool and npm, nothing else, never through a shell.
 - **Checked downloads.** It downloads only the pinned files from GitHub,
   and checks them before use. npm installs only `@overcrow/sdk` and
@@ -145,10 +145,10 @@ Developer, Edit Config), then restart Claude Desktop.
 ## Offline
 
 Download `overcrow-creator-tools-VERSION-PLATFORM.zip` of your platform
-from OverCrow's GitHub release once, put it in your widgets folder, and ask
-your assistant to run `setup` with it (`zipPath`). Or start the server with
-`--tools-zip` and the path of the file. The file must be exactly the one
-the server pins.
+from PlayerVox OverCrow's GitHub release once, put it in your widgets
+folder, and ask your assistant to run `setup` with it (`zipPath`). Or start
+the server with `--tools-zip` and the path of the file. The file must be
+exactly the one the server pins.
 
 ## Supported computers
 

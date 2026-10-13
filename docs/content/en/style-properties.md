@@ -266,5 +266,5 @@ Lucide 1.34.0, 1777 icons.
 
 Any other name is refused, and the SDK's `IconName` type lists them all, so
 a wrong name in the logic is a TypeScript error. Within API v1 the set may
-grow but never loses or renames an icon. OverCrow draws the icons itself: a
-widget ships no icon font.
+grow but never loses or renames an icon. PlayerVox OverCrow draws the icons
+itself: a widget ships no icon font.

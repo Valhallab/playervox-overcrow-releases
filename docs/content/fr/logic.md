@@ -40,14 +40,15 @@ gestionnaires que la vue appelle avec `on:activate={increment}`.
   `setTimeout`, ni `console`, ni `Intl`, ni `require`. Les objets standard
   d’ECMAScript sont là (`Math`, `JSON`, `Date`, `Map`, `Promise`…), et le
   SDK est la seule porte de sortie.
-- Tout le reste se passe par **tours**. OverCrow envoie un événement, un
-  déclenchement de minuteur, une réponse de service ou un changement de ses
-  propres données ; votre code s’exécute ; puis la VM réévalue la vue et
-  n’envoie à OverCrow que ce qui a changé. Vous ne mettez jamais la vue à
-  jour à la main.
-- Un tour a un budget de temps, et la VM un plafond de mémoire. OverCrow
-  arrête et relance, quelques fois, un widget qui dépasse l’un ou l’autre ;
-  voir [ce qui se passe en cas d’échec](#ce-qui-se-passe-en-cas-déchec).
+- Tout le reste se passe par **tours**. PlayerVox OverCrow envoie un
+  événement, un déclenchement de minuteur, une réponse de service ou un
+  changement de ses propres données ; votre code s’exécute ; puis la VM
+  réévalue la vue et n’envoie à OverCrow que ce qui a changé. Vous ne mettez
+  jamais la vue à jour à la main.
+- Un tour a un budget de temps, et la VM un plafond de mémoire.
+  PlayerVox OverCrow arrête et relance, quelques fois, un widget qui dépasse
+  l’un ou l’autre ; voir [ce qui se passe en cas
+  d’échec](#ce-qui-se-passe-en-cas-déchec).
 
 Le seul import permis à un module de logique est `@overcrow/sdk`. Tout ce
 dont il a besoin par ailleurs se trouve dans le module lui-même.
@@ -137,8 +138,8 @@ sauf si la logique exporte le sien.
 
 ## Les données d’OverCrow : `host`
 
-`host` contient ce qu’OverCrow sait de l’utilisateur et du widget. Ses
-membres donnent toujours la dernière valeur.
+`host` contient ce que PlayerVox OverCrow sait de l’utilisateur et du
+widget. Ses membres donnent toujours la dernière valeur.
 
 | Membre | Valeur |
 | --- | --- |
@@ -153,12 +154,12 @@ membres donnent toujours la dernière valeur.
 | `host.grants` | Les capabilities accordées par l’utilisateur ; lisez-les avec `hasGrant`. |
 | `host.messages` | Les messages de la langue active ; lisez-les avec `t`. |
 
-`onHost(listener)` appelle votre écouteur quand OverCrow envoie de nouvelles
-valeurs, avec les noms des membres qui ont changé, avant la réévaluation de
-la vue. Utilisez-le quand un changement demande plus que l’affichage de la
-nouvelle valeur : réarmer un minuteur, se réabonner, redessiner un canvas.
-Un membre peut être renvoyé avec la même valeur : comparez-la à celle que
-vous avez gardée quand cela compte.
+`onHost(listener)` appelle votre écouteur quand PlayerVox OverCrow envoie de
+nouvelles valeurs, avec les noms des membres qui ont changé, avant la
+réévaluation de la vue. Utilisez-le quand un changement demande plus que
+l’affichage de la nouvelle valeur : réarmer un minuteur, se réabonner,
+redessiner un canvas. Un membre peut être renvoyé avec la même valeur :
+comparez-la à celle que vous avez gardée quand cela compte.
 
 <!-- source: widgets/stopwatch/logic.ts -->
 ```ts
@@ -175,8 +176,9 @@ ses boutons tant que `host.mode` ne vaut pas `"interactive"`.
 
 ## Le menu d’options
 
-OverCrow dessine et enregistre les lignes déclarées dans `wrapper.menu` du
-[manifeste](manifest.md#le-menu-doptions). La logique les lit :
+PlayerVox OverCrow dessine et enregistre les lignes déclarées dans
+`wrapper.menu` du [manifeste](manifest.md#le-menu-doptions). La logique les
+lit :
 
 - `option(id, fallback)` renvoie la valeur enregistrée d’une ligne de type
   bascule, curseur ou choix, ou `fallback` quand il n’y en a pas ou qu’elle
@@ -212,8 +214,8 @@ pour un service protégé : une ligne `action` peut modifier l’état, pas
 
 ## Minuteurs
 
-Il n’y a pas de `setTimeout`. Les minuteurs appartiennent à OverCrow et
-passent par `timers` :
+Il n’y a pas de `setTimeout`. Les minuteurs appartiennent à
+PlayerVox OverCrow et passent par `timers` :
 
 | Fonction | Se déclenche |
 | --- | --- |
@@ -231,7 +233,8 @@ timers.every(1000, () => {
 });
 ```
 
-Puisque les minuteurs appartiennent à OverCrow, trois règles s’appliquent :
+Puisque les minuteurs appartiennent à PlayerVox OverCrow, trois règles
+s’appliquent :
 
 - **Aucun minuteur de moins de 100 ms.** Un intervalle plus court est porté
   à cette valeur. Le mouvement relève du
@@ -278,8 +281,9 @@ function start(): void {
 ```
 
 Une durée qui doit seulement avancer à l’écran n’a besoin d’aucun minuteur :
-OverCrow fait avancer l’élément `elapsed` à partir d’un point de départ que
-la logique lui donne. Voir l’[élément `elapsed`](elements.md#elapsed).
+PlayerVox OverCrow fait avancer l’élément `elapsed` à partir d’un point de
+départ que la logique lui donne. Voir l’[élément
+`elapsed`](elements.md#elapsed).
 
 ## Heure, dates et nombres
 
@@ -349,12 +353,12 @@ export function toggleLabel(running: boolean): string {
 }
 ```
 
-Quand l’utilisateur change la langue d’OverCrow, la vue est réévaluée avec
-les nouveaux messages. En revanche, un texte que la logique a calculé puis
-rangé dans l’état ne change pas : calculez les textes dans des fonctions que
-la vue appelle, ou rafraîchissez-les dans `onHost` quand `"locale"` change.
-Le nom du widget et les libellés de son menu se trouvent dans le manifeste,
-pas dans les fichiers de langue.
+Quand l’utilisateur change la langue de PlayerVox OverCrow, la vue est
+réévaluée avec les nouveaux messages. En revanche, un texte que la logique a
+calculé puis rangé dans l’état ne change pas : calculez les textes dans des
+fonctions que la vue appelle, ou rafraîchissez-les dans `onHost` quand
+`"locale"` change. Le nom du widget et les libellés de son menu se trouvent
+dans le manifeste, pas dans les fichiers de langue.
 
 `overcrow-widget check` avertit quand la vue appelle `t("key")` avec une clé
 sans message, et refuse deux fichiers dont les clés diffèrent.
@@ -380,9 +384,10 @@ function paint(): void {
 
 Les coordonnées sont en pixels logiques, depuis le coin supérieur gauche du
 canvas ; les couleurs sont des littéraux (`#rrggbb`) ou des tokens de
-couleur. OverCrow vérifie chaque commande et les dessine lui-même : il n’y a
-ni accès aux pixels ni shader. Redessinez quand ce que vous affichez change,
-et quand `host.theme` change si vous utilisez des couleurs littérales.
+couleur. PlayerVox OverCrow vérifie chaque commande et les dessine lui-même
+: il n’y a ni accès aux pixels ni shader. Redessinez quand ce que vous
+affichez change, et quand `host.theme` change si vous utilisez des couleurs
+littérales.
 
 <!-- generated:draw-commands -->
 | Commande | Arguments | Signification |
@@ -443,17 +448,17 @@ indique par quoi le SDK remplace ce qui manque :
 | `logic.debugger` | `debugger` donne un avertissement. |
 
 Ce contrôle vous aide ; ce n’est pas lui qui protège l’utilisateur. C’est le
-rôle du sandbox, des budgets de la VM et de la vérification par OverCrow de
-tout ce que le widget envoie.
+rôle du sandbox, des budgets de la VM et de la vérification par
+PlayerVox OverCrow de tout ce que le widget envoie.
 
 ## Ce qui se passe en cas d’échec
 
 - Une exception dans un gestionnaire met fin à ce tour ; le widget continue
   de tourner, et `overcrow-widget dev` affiche la faute.
 - Un tour plus long que son budget (50 ms), un tas au-dessus de son plafond
-  ou trop de messages dans un tour arrêtent le widget. OverCrow affiche une
-  erreur fixe dans son cadre et le relance après 1, 5 puis 15 secondes,
-  trois fois au plus.
+  ou trop de messages dans un tour arrêtent le widget. PlayerVox OverCrow
+  affiche une erreur fixe dans son cadre et le relance après 1, 5 puis 15
+  secondes, trois fois au plus.
 - La promesse rejetée d’un appel de service est une erreur ordinaire de
   votre code : interceptez-la. Voir les [erreurs](services.md#erreurs).
 

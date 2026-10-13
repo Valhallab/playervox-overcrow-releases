@@ -6,8 +6,8 @@ its view in markup, style it with a small subset of CSS, and write its logic
 in TypeScript against `@overcrow/sdk`. The `overcrow-widget` command-line
 tool checks, tests and packages it; the signed catalog brings it to users.
 
-Every built-in widget of OverCrow is written this way, with the same public
-SDK, package format and sandbox as yours. Their sources are the
+Every built-in widget of PlayerVox OverCrow is written this way, with the
+same public SDK, package format and sandbox as yours. Their sources are the
 [reference widgets](widgets.md).
 
 ## What a widget is made of
@@ -52,18 +52,18 @@ export function increment(): void {
 
 - The logic runs in its own small JavaScript VM, in its own sandboxed
   process. It has no DOM, no file system, no network and no access to other
-  widgets; it reaches OverCrow only through the SDK.
+  widgets; it reaches PlayerVox OverCrow only through the SDK.
 - After each event, timer tick or service answer, the VM evaluates the view
-  again and sends OverCrow only what changed. OverCrow lays out and paints
-  the widget itself: no web engine is involved.
+  again and sends PlayerVox OverCrow only what changed. OverCrow lays out
+  and paints the widget itself: no web engine is involved.
 - Everything that reaches the outside (network, storage, clipboard, game
-  data) is a service of OverCrow, which checks the widget's declared and
-  consented permissions at each call. See
+  data) is a service of PlayerVox OverCrow, which checks the widget's
+  declared and consented permissions at each call. See
   [services and permissions](services.md).
 
-These pages call OverCrow **the host** when they describe what it does for a
-widget: the host draws the view, answers the services and keeps the user's
-data.
+These pages call PlayerVox OverCrow **the host** when they describe what it
+does for a widget: the host draws the view, answers the services and keeps
+the user's data.
 
 ## Where to start
 
@@ -74,8 +74,8 @@ data.
    [view](view.md), the [style](style.md), the [logic](logic.md),
    [services and permissions](services.md), [forms](forms.md).
 4. Use the tools: the [CLI](cli.md), [tests](testing.md) and the
-   [development channel](dev-channel.md) that runs your widget in OverCrow
-   while you write it.
+   [development channel](dev-channel.md) that runs your widget in
+   PlayerVox OverCrow while you write it.
 5. Look up an element, a style property, a service or an SDK function in the
    [reference](reference.md).
 6. Before you publish, read [the package](package.md),

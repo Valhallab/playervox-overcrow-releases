@@ -9,9 +9,10 @@ de laisser l’utilisateur écrire dans ses notes, publier sa note d’un jeu su
 PlayerVox ou envoyer un message de chat, sans que le texte passe jamais par
 le code du widget.
 
-Les widgets ne reçoivent d’entrées qu’en mode interactif d’OverCrow. En mode
-passif, un clic traverse le widget jusqu’au jeu : masquez ou désactivez ce
-qui est inutilisable, comme le font les widgets intégrés avec `host.mode`.
+Les widgets ne reçoivent d’entrées qu’en mode interactif de
+PlayerVox OverCrow. En mode passif, un clic traverse le widget jusqu’au jeu
+: masquez ou désactivez ce qui est inutilisable, comme le font les widgets
+intégrés avec `host.mode`.
 
 ## Contrôles
 
@@ -59,10 +60,10 @@ un nombre pour un curseur, du texte pour les autres.
 
 ### Champs de texte
 
-OverCrow édite lui-même le texte d’un `field` ou d’un `textarea` : le point
-d’insertion, la sélection, le copier-coller et les méthodes de saisie des
-langues qui composent leurs caractères. La logique reçoit une copie du texte
-dans chaque événement `input`.
+PlayerVox OverCrow édite lui-même le texte d’un `field` ou d’un `textarea` :
+le point d’insertion, la sélection, le copier-coller et les méthodes de
+saisie des langues qui composent leurs caractères. La logique reçoit une
+copie du texte dans chaque événement `input`.
 
 <!-- source: widgets/warframe-market/view.ocml -->
 ```xml
@@ -94,8 +95,8 @@ une indication tant que le champ est vide.
 
 Un champ envoie aussi `keydown` quand vous le demandez, avec la touche et
 ses modificateurs, pour des raccourcis comme Échap pour annuler. Les touches
-qu’OverCrow se réserve (Tab pour déplacer le focus, ses propres raccourcis,
-une composition en cours) ne sont pas transmises.
+que PlayerVox OverCrow se réserve (Tab pour déplacer le focus, ses propres
+raccourcis, une composition en cours) ne sont pas transmises.
 
 ### Le focus à l’ouverture d’un éditeur
 
@@ -110,7 +111,7 @@ champ, après son texte, comme le ferait un clic dans ce champ.
         <field class="title-field" name="title" autofocus placeholder={t("title-hint")} label={t("title-hint")} on:input={titleInput(editor.key, event.value)} on:keydown={keyed(editor.key, event.key, event.ctrl)}/>
 ```
 
-OverCrow ne donne ce focus que si l’élément apparaît pendant une
+PlayerVox OverCrow ne donne ce focus que si l’élément apparaît pendant une
 [action de l’utilisateur](services.md#les-appels-qui-demandent-une-action-de-lutilisateur),
 en mode interactif, dans le widget sur lequel l’utilisateur a agi ; quand
 plusieurs de ces éléments apparaissent ensemble, le premier de la vue le
@@ -192,25 +193,25 @@ sont pas des appels de service. C’est un formulaire doté d’un attribut
     </form>
 ```
 
-Quand l’utilisateur valide un tel formulaire, **OverCrow lit les valeurs des
-contrôles de ce formulaire et les envoie lui-même**. La logique du widget ne
-fournit jamais le texte : un widget ne peut donc ni écrire ce que
-l’utilisateur n’a pas saisi, ni valider sans lui. Le formulaire ne part que
-sur une action de l’utilisateur, en mode interactif, avec la capability
+Quand l’utilisateur valide un tel formulaire, **PlayerVox OverCrow lit les
+valeurs des contrôles de ce formulaire et les envoie lui-même**. La logique
+du widget ne fournit jamais le texte : un widget ne peut donc ni écrire ce
+que l’utilisateur n’a pas saisi, ni valider sans lui. Le formulaire ne part
+que sur une action de l’utilisateur, en mode interactif, avec la capability
 accordée.
 
 Ce que cela change pour la vue et la logique :
 
-- **Les contrôles appartiennent à OverCrow.** Les contrôles `field`,
-  `textarea` et `slider` du formulaire ne prennent pas de `value` :
+- **Les contrôles appartiennent à PlayerVox OverCrow.** Les contrôles
+  `field`, `textarea` et `slider` du formulaire ne prennent pas de `value` :
   `overcrow-widget check` le refuse (`view.bound_value`), et OverCrow arrête
   un widget qui en définit un à l’exécution. Leur attribut `name` indique à
   quel champ de l’intent chacun correspond.
-- **OverCrow les remplit** là où l’intent le prévoit : le titre, le corps et
-  la liste de tâches de la note, la note publiée par l’utilisateur. Un
-  remplissage envoie l’événement `input` du contrôle avec la valeur, pour
-  que la logique sache ce qui est affiché ; cet événement n’est pas une
-  action de l’utilisateur.
+- **PlayerVox OverCrow les remplit** là où l’intent le prévoit : le titre,
+  le corps et la liste de tâches de la note, la note publiée par
+  l’utilisateur. Un remplissage envoie l’événement `input` du contrôle avec
+  la valeur, pour que la logique sache ce qui est affiché ; cet événement
+  n’est pas une action de l’utilisateur.
 - **La logique suit par les événements `input`**, pour afficher un compteur
   ou activer le bouton, et peut désactiver les contrôles.
 - **L’issue arrive dans l’événement `submit` du formulaire** :
@@ -293,11 +294,11 @@ on répond pour `twitch.chat.send`.
 ### Plusieurs lignes d’un même champ
 
 L’intent `notes.save` prend un champ `item` par ligne de la liste de tâches.
-La logique décide des lignes du formulaire, avec un `for` ; OverCrow remplit
-le champ de chaque ligne à partir de la note enregistrée et retient quelle
-entrée de la liste de tâches il y a placée. Une ligne que la logique retire
-ou déplace garde son entrée, et une ligne ajoutée depuis est une nouvelle
-entrée.
+La logique décide des lignes du formulaire, avec un `for` ;
+PlayerVox OverCrow remplit le champ de chaque ligne à partir de la note
+enregistrée et retient quelle entrée de la liste de tâches il y a placée.
+Une ligne que la logique retire ou déplace garde son entrée, et une ligne
+ajoutée depuis est une nouvelle entrée.
 
 <!-- source: widgets/notes/view.ocml -->
 ```xml
@@ -319,11 +320,11 @@ Ctrl+Entrée ou le bouton `submit` enregistre.
 
 Deux services suppriment des données de l’utilisateur : `notes.delete` et
 `journal.delete`. Ce sont des appels ordinaires qui demandent une action de
-l’utilisateur. OverCrow demande ensuite à l’utilisateur de confirmer, dans
-une boîte de dialogue qu’il dessine lui-même, hors du widget. L’appel
-aboutit quand l’utilisateur confirme et échoue avec `cancelled` quand il
-refuse. Ne dessinez pas votre propre « Êtes-vous sûr ? » : seule la
-confirmation d’OverCrow compte.
+l’utilisateur. PlayerVox OverCrow demande ensuite à l’utilisateur de
+confirmer, dans une boîte de dialogue qu’il dessine lui-même, hors du
+widget. L’appel aboutit quand l’utilisateur confirme et échoue avec
+`cancelled` quand il refuse. Ne dessinez pas votre propre « Êtes-vous sûr ?
+» : seule la confirmation d’OverCrow compte.
 
 ## Points à vérifier pour un formulaire
 
@@ -337,5 +338,5 @@ confirmation d’OverCrow compte.
   ni sur ses curseurs, et chaque contrôle nommé est un champ de l’intent.
 - Testez-le avec un scénario : les étapes `text` saisissent du texte dans le
   champ qui a le focus, les étapes `key` appuient sur Entrée, et
-  `expect.intents` vérifie exactement ce qu’OverCrow a envoyé. Voir
-  [Tester un widget](testing.md#steps).
+  `expect.intents` vérifie exactement ce que PlayerVox OverCrow a envoyé.
+  Voir [Tester un widget](testing.md#steps).

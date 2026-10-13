@@ -59,8 +59,8 @@ valeur entre guillemets, comme un `}` isolé dans du texte, est refusé :
 Chaque élément a un contenu fixe, un jeu d’attributs et les événements qu’il
 peut envoyer. Les conteneurs (`box`, `scroll`, `list`, `form`, `popover`,
 `button`) contiennent d’autres éléments ; `text` contient du texte et des
-enfants en ligne ; les autres sont des feuilles qu’OverCrow dessine :
-`icon`, `image`, `toggle`, `slider`, `field`, `chart`, `gauge`…
+enfants en ligne ; les autres sont des feuilles que PlayerVox OverCrow
+dessine : `icon`, `image`, `toggle`, `slider`, `field`, `chart`, `gauge`…
 
 <!-- generated:element-list -->
 | Élément | Signification |
@@ -136,10 +136,10 @@ vérifiée à la compilation de la vue :
 | texte, identifiant | le texte lui-même |
 | image | un fichier du paquet : `src="assets/logo.png"` |
 
-`attr={expression}`, en revanche, lie l’attribut à une expression ; OverCrow
-vérifie chaque valeur qu’envoie le widget. Les valeurs qui n’existent qu’à
-l’exécution du widget, comme une image fournie par un service, doivent être
-liées.
+`attr={expression}`, en revanche, lie l’attribut à une expression ;
+PlayerVox OverCrow vérifie chaque valeur qu’envoie le widget. Les valeurs
+qui n’existent qu’à l’exécution du widget, comme une image fournie par un
+service, doivent être liées.
 
 Cinq attributs existent sur tous les éléments :
 
@@ -183,10 +183,10 @@ est refusé dans un `for` ou dans un composant, où il nommerait plusieurs
 
 ## Événements
 
-`on:event={handler}` demande à OverCrow d’envoyer à la logique un événement
-de l’élément. Sans cela, le widget ignore tout de l’événement : OverCrow ne
-lui signale ni les mouvements du pointeur ni les appuis de touches qu’il n’a
-pas demandés.
+`on:event={handler}` demande à PlayerVox OverCrow d’envoyer à la logique un
+événement de l’élément. Sans cela, le widget ignore tout de l’événement :
+OverCrow ne lui signale ni les mouvements du pointeur ni les appuis de
+touches qu’il n’a pas demandés.
 
 Un gestionnaire s’écrit de deux façons :
 
@@ -211,8 +211,9 @@ transporte, et chaque [élément](elements.md#éléments) liste ceux qu’il
 envoie. Certains sont des actions de l’utilisateur, pendant lesquelles un
 widget peut appeler un service protégé ; voir
 [les appels qui demandent une action de l’utilisateur](services.md#les-appels-qui-demandent-une-action-de-lutilisateur).
-Les widgets ne reçoivent d’entrées qu’en mode interactif d’OverCrow : en
-mode passif, les clics les traversent et atteignent le jeu.
+Les widgets ne reçoivent d’entrées qu’en mode interactif de
+PlayerVox OverCrow : en mode passif, les clics les traversent et atteignent
+le jeu.
 
 ## Conditions, boucles et composants
 
@@ -245,8 +246,8 @@ commentaires peuvent les en séparer.
 
 `for` répète ses enfants pour chaque entrée d’une liste. `each`, `as` et
 `key` sont tous obligatoires, et la clé doit être unique parmi les entrées
-répétées : c’est grâce à elle qu’OverCrow sait quelle ligne a bougé, est
-apparue ou a disparu.
+répétées : c’est grâce à elle que PlayerVox OverCrow sait quelle ligne a
+bougé, est apparue ou a disparu.
 
 <!-- source: widgets/warframe-market/view.ocml -->
 ```xml
@@ -258,8 +259,8 @@ apparue ou a disparu.
       </for>
 ```
 
-Pour une longue liste, placez le `for` dans un élément `list` : OverCrow ne
-met en page et ne dessine que les lignes visibles.
+Pour une longue liste, placez le `for` dans un élément `list` :
+PlayerVox OverCrow ne met en page et ne dessine que les lignes visibles.
 
 ### Composants
 

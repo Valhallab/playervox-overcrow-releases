@@ -5,8 +5,8 @@ submission: create a project, edit its view, style and logic, run it in
 OverCrow, test it, package it and submit it. Each step links to the page
 that covers it in full.
 
-To work with an AI assistant instead, add OverCrow's MCP server to it: see
-[MCP](mcp.md).
+To work with an AI assistant instead, add PlayerVox OverCrow's MCP server to
+it: see [MCP](mcp.md).
 
 ## 1. Install the tools
 
@@ -15,7 +15,7 @@ To work with an AI assistant instead, add OverCrow's MCP server to it: see
 - **Node.js 22 or later** and npm, so that `check` can type-check your
   logic with the project's own TypeScript and the SDK from npm. The CLI checks and packages without it, but
   warns that types were not checked.
-- **OverCrow**, to run the widget while you write it.
+- **PlayerVox OverCrow**, to run the widget while you write it.
 
 `overcrow-widget doctor` tells what your setup has and lacks.
 
@@ -141,8 +141,8 @@ Provide both files or neither, with the same keys. See
 overcrow-widget check
 ```
 
-`check` runs the same validators as OverCrow: manifest, view, style,
-locales, a lint of the logic against what the VM runs, the project's
+`check` runs the same validators as PlayerVox OverCrow: manifest, view,
+style, locales, a lint of the logic against what the VM runs, the project's
 TypeScript, and a package built in memory and read back. Each problem has a
 stable code, a position and a help line; see
 [diagnostics](cli.md#diagnostics).
@@ -153,13 +153,13 @@ stable code, a position and a help line; see
 overcrow-widget dev
 ```
 
-`dev` sends the widget to the OverCrow overlay running on your machine and
-reloads it each time you save. OverCrow offers this only when it was
-started with development installs allowed (`OVERCROW_WIDGET_DEVELOPMENT=1`;
-`overcrow-widget doctor` prints the commands). The widget shows an
-**Unverified · development package** marker; its declared permissions are
-granted for the session only, and nothing is stored. `log.info(…)` from your
-logic prints in the terminal. See
+`dev` sends the widget to the PlayerVox OverCrow overlay running on your
+machine and reloads it each time you save. OverCrow offers this only when it
+was started with development installs allowed
+(`OVERCROW_WIDGET_DEVELOPMENT=1`; `overcrow-widget doctor` prints the
+commands). The widget shows an **Unverified · development package** marker;
+its declared permissions are granted for the session only, and nothing is
+stored. `log.info(…)` from your logic prints in the terminal. See
 [the development channel](dev-channel.md).
 
 ## 9. Test it
@@ -168,9 +168,9 @@ Two kinds of tests, both described in [testing a widget](testing.md):
 
 - unit tests of the logic with `@overcrow/sdk/testing`, which runs your
   module with virtual time and simulated services;
-- scenarios played by `overcrow-widget test` in OverCrow's headless
-  runtime: the real VM and renderer, services answered by fixtures, and
-  images compared with references.
+- scenarios played by `overcrow-widget test` in PlayerVox OverCrow's
+  headless runtime: the real VM and renderer, services answered by fixtures,
+  and images compared with references.
 
 <!-- source: templates/counter/tests/example.scenario.json -->
 ```json
@@ -241,7 +241,7 @@ locally stays unverified; users get widgets from the signed catalog. See
 
 Add a `listing.json` with the marketplace text and run the admission
 yourself. Widgets are no longer proposed by pull request: you will send
-yours from the OverCrow creator space when it opens.
+yours from the PlayerVox OverCrow creator space when it opens.
 
 ```sh
 overcrow-widget admit

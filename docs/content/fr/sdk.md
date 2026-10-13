@@ -32,8 +32,8 @@ import {
 Le SDK est assemblé dans le `logic.js` du widget à l’empaquetage et
 s’exécute dans la VM du widget ; le charger ailleurs lève une erreur. Les
 parties inutilisées sont retirées du script assemblé. C’est une commodité,
-pas une barrière de sécurité : OverCrow vérifie chaque appel, chaque
-paramètre et chaque valeur qui sort de la VM.
+pas une barrière de sécurité : PlayerVox OverCrow vérifie chaque appel,
+chaque paramètre et chaque valeur qui sort de la VM.
 
 | Export | Nature | Résumé |
 | --- | --- | --- |
@@ -69,9 +69,9 @@ const state = initState({ values: [50] as number[] });
 
 | Export | Nature | Résumé |
 | --- | --- | --- |
-| `host` | constante | Objet figé dont les membres donnent toujours les dernières valeurs envoyées par OverCrow. |
+| `host` | constante | Objet figé dont les membres donnent toujours les dernières valeurs envoyées par PlayerVox OverCrow. |
 | `HostData` | interface | Type de `host` : `locale`, `messages`, `theme`, `region`, `scale` (en millièmes), `viewport`, `mode`, `visible`, `options`, `grants`. |
-| `onHost(listener)` | fonction | Appelle `listener` avec les noms des membres de `host` qu’OverCrow vient d’envoyer (`options` après un changement dans le menu, `visible` quand le widget est affiché ou masqué, `region`…), avant la réévaluation de la vue. Renvoie `{ cancel() }`. |
+| `onHost(listener)` | fonction | Appelle `listener` avec les noms des membres de `host` que PlayerVox OverCrow vient d’envoyer (`options` après un changement dans le menu, `visible` quand le widget est affiché ou masqué, `region`…), avant la réévaluation de la vue. Renvoie `{ cancel() }`. |
 | `HostKey` | type | Le nom d’un membre de `HostData`. |
 | `HostListener` | type | Un écouteur de `onHost`. |
 | `Viewport` | interface | `{ width, height }`, en pixels logiques. |
@@ -100,8 +100,8 @@ onHost((changed) => {
 
 ## Services
 
-Chaque service répond par l’intermédiaire d’OverCrow, qui vérifie à chaque
-appel sa permission ou sa capability, ses paramètres et l’action de
+Chaque service répond par l’intermédiaire de PlayerVox OverCrow, qui vérifie
+à chaque appel sa permission ou sa capability, ses paramètres et l’action de
 l’utilisateur.
 
 | Export | Nature | Résumé |
@@ -256,7 +256,7 @@ règles de pluriel ne font pas partie de la version 1.0.
 ## Types générés
 
 Ces types sont générés à partir du schéma des widgets : ils correspondent
-donc toujours à ce qu’OverCrow accepte.
+donc toujours à ce que PlayerVox OverCrow accepte.
 
 | Export | Résumé |
 | --- | --- |
@@ -295,7 +295,8 @@ nombre : `MAX_TIMERS`, `MIN_TIMER_INTERVAL_MS`, `MAX_SERVICE_CALLS_IN_FLIGHT`,
 
 ## Tests unitaires : `@overcrow/sdk/testing`
 
-Un second point d’entrée, jamais assemblé dans un widget, remplace OverCrow
-dans un test unitaire de la logique : `installRuntime()` fournit un temps
-virtuel, fait aboutir les appels de service et pousse les valeurs des
-abonnements. Voir les [tests unitaires](testing.md#tests-unitaires).
+Un second point d’entrée, jamais assemblé dans un widget, remplace
+PlayerVox OverCrow dans un test unitaire de la logique : `installRuntime()`
+fournit un temps virtuel, fait aboutir les appels de service et pousse les
+valeurs des abonnements. Voir les [tests
+unitaires](testing.md#tests-unitaires).

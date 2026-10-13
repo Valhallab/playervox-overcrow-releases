@@ -23,7 +23,7 @@ overcrow-widget test
 | [`check`](#check) | Validates a project without writing anything. |
 | [`package`](#package) | Checks, then writes the `.ocpkg` package. |
 | [`inspect`](#inspect) | Shows what a package holds and asks for. |
-| [`dev`](#dev) | Runs the widget in OverCrow and reloads it when you save. |
+| [`dev`](#dev) | Runs the widget in PlayerVox OverCrow and reloads it when you save. |
 | [`test`](#test) | Plays the project's test scenarios and compares their images. |
 | [`doctor`](#doctor) | Says what your setup has and lacks. |
 | [`admit`](#admit) | Runs the admission of the creator space on your sources, a folder or a ZIP. |
@@ -37,7 +37,7 @@ and [exit status](#exit-status) are stable for scripts.
 
 ## Installing
 
-Each [OverCrow release](https://github.com/Valhallab/playervox-overcrow-releases/releases)
+Each [PlayerVox OverCrow release](https://github.com/Valhallab/playervox-overcrow-releases/releases)
 carries the creator tools in one ZIP per platform: the tool with its
 license and third-party notices, OverCrow's headless runtime that
 [`test`](#test) uses, a `README.txt` and a `SHA256SUMS` of every file.
@@ -122,8 +122,8 @@ empty: `init` never overwrites a file.
 | `chart` | A live chart updated by a timer. |
 
 Pass `--id` with your widget's ID: `<handle>.<name>`, your publisher handle
-in the OverCrow creator space and a name (`nova.lol-timers`), or a reverse
-domain you verified and a name (`gg.nova.lol-timers`); see
+in the PlayerVox OverCrow creator space and a name (`nova.lol-timers`), or a
+reverse domain you verified and a name (`gg.nova.lol-timers`); see
 [the manifest](manifest.md#identity-and-version). Without `--id`, the ID is
 `yourhandle.<dir>`: replace `yourhandle` before you submit, as `admit`
 refuses it. `com.playervox.*` is reserved. Every template
@@ -141,17 +141,17 @@ Runs every check, in this order, and writes nothing:
 
 1. **Project files**: the required files are there and within their size
    bounds, one logic module, both locale files or neither.
-2. **Manifest**: OverCrow's own manifest validator.
+2. **Manifest**: PlayerVox OverCrow's own manifest validator.
 3. **View**: `view.ocml` is compiled and the result validated; static
    images must exist in `assets/`.
-4. **Style**: `style.ocss` is parsed with OverCrow's parser.
+4. **Style**: `style.ocss` is parsed with PlayerVox OverCrow's parser.
 5. **Locales**: objects of strings with valid keys, the same keys in both
    files. A `t("key")` of the view whose key has no message is a warning.
 6. **Logic**: the [lint](logic.md#what-the-logic-cannot-use), and the
    exports the view calls.
 7. **Types**: the project's `tsc --noEmit -p tsconfig.json`.
 8. **Package**: `logic.js` is built, the package is written in memory and
-   read back exactly as OverCrow will read it.
+   read back exactly as PlayerVox OverCrow will read it.
 
 Options: `--no-typecheck`, `--deny-warnings` (a warning fails the command),
 `--format json`.
@@ -180,14 +180,14 @@ holds is described in [the package](package.md).
 overcrow-widget inspect dist/nova.my-widget-0.1.0.ocpkg
 ```
 
-Validates a package as OverCrow does, then shows it as a reviewer sees it:
-the ID, version and names; the size and SHA-256 of the archive; the SDK
-version its `logic.js` contains; each permission in words (network routes
-with their parameter constraints and declared response bound, storage,
-clipboard, game events); each capability with its summary and whether it is
-sensitive or needs an account; the number of menu rows; and every file with
-its size and SHA-256. A package that OverCrow would refuse is reported
-instead, with the reason.
+Validates a package as PlayerVox OverCrow does, then shows it as a reviewer
+sees it: the ID, version and names; the size and SHA-256 of the archive; the
+SDK version its `logic.js` contains; each permission in words (network
+routes with their parameter constraints and declared response bound,
+storage, clipboard, game events); each capability with its summary and
+whether it is sensitive or needs an account; the number of menu rows; and
+every file with its size and SHA-256. A package that OverCrow would refuse
+is reported instead, with the reason.
 
 ## dev
 
@@ -195,8 +195,8 @@ instead, with the reason.
 overcrow-widget dev
 ```
 
-Runs the widget in the OverCrow overlay running on your machine, while you
-edit it:
+Runs the widget in the PlayerVox OverCrow overlay running on your machine,
+while you edit it:
 
 1. it connects to the overlay, which must have been started with
    development installs allowed;
@@ -215,7 +215,7 @@ edit it:
 Options: `--no-typecheck`, `--format json` (one JSON object per line).
 Exit status: 0 after Ctrl+C, 1 when the overlay ends the session, 2 when no
 overlay is reachable. [The development channel](dev-channel.md) says how to
-start OverCrow for it, and what each state and refusal means.
+start PlayerVox OverCrow for it, and what each state and refusal means.
 
 ## test
 
@@ -225,8 +225,8 @@ overcrow-widget test --scenario example
 overcrow-widget test --update
 ```
 
-Plays the scenarios of `tests/` in OverCrow's headless runtime and compares
-the images it renders with the references:
+Plays the scenarios of `tests/` in PlayerVox OverCrow's headless runtime and
+compares the images it renders with the references:
 
 1. it builds the package as `package` does;
 2. it reads every `tests/<name>.scenario.json` and checks it against the
@@ -268,7 +268,7 @@ overcrow-widget doctor
 | Code | Severity | Meaning |
 | --- | --- | --- |
 | `doctor.overcrow_missing` | warning | OverCrow is not installed. |
-| `doctor.development_off` | warning | No overlay allows development installs; the help gives the commands to restart OverCrow with them. |
+| `doctor.development_off` | warning | No overlay allows development installs; the help gives the commands to restart PlayerVox OverCrow with them. |
 | `doctor.channel_busy` | warning | The overlay already serves its maximum of `dev` sessions. |
 | `doctor.channel_io` | warning | The connection to the overlay failed. |
 | `doctor.channel_untrusted` | error | What answers is not this user's overlay. |
@@ -384,8 +384,8 @@ overcrow-widget submit --dry-run --submission submission.json
 overcrow-widget submit --submission submission.json
 ```
 
-Sends a version of your widget to the OverCrow creator space, from a
-terminal, a CI job or the OverCrow MCP server, then follows its checks. It
+Sends a version of your widget to the PlayerVox OverCrow creator space, from
+a terminal, a CI job or the OverCrow MCP server, then follows its checks. It
 never asks a question: what is missing is said, with a stable
 [exit status](#exit-status). It takes the widget folder (the current one
 without argument) or a ZIP of it.
@@ -499,8 +499,8 @@ an hour expires, and every submission counts in the daily limit.
 | `justifications` | For the reviewer, one `{permission, text}` per new or widened permission, by its [key](#permission-keys); 500 characters each. |
 | `reviewMessage` | A private message to the reviewer, 2,000 characters. |
 
-Every key is optional; any other key is refused. The OverCrow MCP server
-writes this file.
+Every key is optional; any other key is refused. The PlayerVox OverCrow MCP
+server writes this file.
 
 ### In a CI job
 
@@ -510,10 +510,11 @@ the key in the repository's secrets:
 
 <!-- source: docs/content/examples/weather/.github/workflows/submit.yml -->
 ```yaml
-# Sends the widget to the OverCrow creator space when a version tag is
-# pushed. The publish key is a secret of the repository, and the OverCrow
-# release whose creator tools to use is a variable of the repository.
-name: Submit to OverCrow
+# Sends the widget to the PlayerVox OverCrow creator space when a version
+# tag is pushed. The publish key is a secret of the repository, and the
+# OverCrow release whose creator tools to use is a variable of the
+# repository.
+name: Submit to PlayerVox OverCrow
 
 on:
   push:
@@ -538,7 +539,7 @@ jobs:
           (cd "$tools" && sha256sum --check --quiet SHA256SUMS)
           install -D -m 755 "$tools"/overcrow-widget-*-linux-x86_64 "$HOME/.local/bin/overcrow-widget"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      - name: Submit to OverCrow
+      - name: Submit to PlayerVox OverCrow
         run: overcrow-widget submit --submission submission.json
         env:
           OVERCROW_PUBLISH_KEY: ${{ secrets.OVERCROW_PUBLISH_KEY }}
@@ -547,7 +548,7 @@ jobs:
 The job fails on any status but 0. `OVERCROW_API_URL` points `submit`
 and `status` to another API, for tests only: `https://`, or `http://` to
 `127.0.0.1`, `localhost` or `[::1]`, with a warning every time. Never set
-it in a real job; the OverCrow MCP server never sets it.
+it in a real job; the PlayerVox OverCrow MCP server never sets it.
 
 ## status
 

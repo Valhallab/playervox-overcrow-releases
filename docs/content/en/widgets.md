@@ -33,7 +33,7 @@ license: read them, copy them, and use them as a starting point.
   scenario, framed and staged by `node scripts/compose-previews.mjs`;
 - `tests/`: unit tests of the logic, and scenarios with reference images in
   both themes, both languages and two scales, played by
-  `overcrow-widget test` in OverCrow's headless runtime;
+  `overcrow-widget test` in PlayerVox OverCrow's headless runtime;
 - `README.md`: what it shows, its menu, its permissions, how it works and
   what it costs.
 

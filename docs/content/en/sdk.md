@@ -31,8 +31,8 @@ import {
 The SDK is bundled into the widget's `logic.js` when it is packaged, and
 runs inside the widget's VM; loading it anywhere else throws an error.
 Unused parts are removed from the bundle. It is a convenience, not a
-security boundary: OverCrow checks every call, parameter and value that
-leaves the VM.
+security boundary: PlayerVox OverCrow checks every call, parameter and value
+that leaves the VM.
 
 | Export | Kind | Summary |
 | --- | --- | --- |
@@ -68,9 +68,9 @@ const state = initState({ values: [50] as number[] });
 
 | Export | Kind | Summary |
 | --- | --- | --- |
-| `host` | constant | Frozen object whose members always read the latest values sent by OverCrow. |
+| `host` | constant | Frozen object whose members always read the latest values sent by PlayerVox OverCrow. |
 | `HostData` | interface | Type of `host`: `locale`, `messages`, `theme`, `region`, `scale` (in thousandths), `viewport`, `mode`, `visible`, `options`, `grants`. |
-| `onHost(listener)` | function | Calls `listener` with the names of the `host` members that OverCrow just sent (`options` after a menu change, `visible` when shown or hidden, `region`…), before the view is evaluated again. Returns `{ cancel() }`. |
+| `onHost(listener)` | function | Calls `listener` with the names of the `host` members that PlayerVox OverCrow just sent (`options` after a menu change, `visible` when shown or hidden, `region`…), before the view is evaluated again. Returns `{ cancel() }`. |
 | `HostKey` | type | The name of a member of `HostData`. |
 | `HostListener` | type | A listener of `onHost`. |
 | `Viewport` | interface | `{ width, height }`, in logical pixels. |
@@ -99,8 +99,8 @@ onHost((changed) => {
 
 ## Services
 
-Every service answers through OverCrow, which checks its permission or
-capability, its parameters and the user action at each call.
+Every service answers through PlayerVox OverCrow, which checks its
+permission or capability, its parameters and the user action at each call.
 
 | Export | Kind | Summary |
 | --- | --- | --- |
@@ -250,7 +250,7 @@ Month and weekday names, 12-hour clocks and plural rules are not part of
 ## Generated types
 
 These types are generated from the widget schema, so they always match
-what OverCrow accepts.
+what PlayerVox OverCrow accepts.
 
 | Export | Summary |
 | --- | --- |
@@ -289,7 +289,7 @@ constants, so the code never repeats a number: `MAX_TIMERS`,
 
 ## Unit tests: `@overcrow/sdk/testing`
 
-A second entry point, never bundled into a widget, replaces OverCrow in a
-unit test of the logic: `installRuntime()` gives virtual time, settles the
-service calls and pushes the subscription values. See
-[unit tests](testing.md#unit-tests).
+A second entry point, never bundled into a widget, replaces
+PlayerVox OverCrow in a unit test of the logic: `installRuntime()` gives
+virtual time, settles the service calls and pushes the subscription values.
+See [unit tests](testing.md#unit-tests).

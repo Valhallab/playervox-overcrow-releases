@@ -15,8 +15,8 @@ builds the widget, sends it and stays in the foreground until Ctrl+C.
 
 ## Turn it on
 
-The channel exists only while OverCrow runs with development installs
-allowed: started with the environment variable
+The channel exists only while PlayerVox OverCrow runs with development
+installs allowed: started with the environment variable
 `OVERCROW_WIDGET_DEVELOPMENT=1`. Without it, the overlay opens nothing.
 
 **Linux.** Set the variable for your session's services, then restart the
@@ -34,7 +34,7 @@ systemctl --user unset-environment OVERCROW_WIDGET_DEVELOPMENT
 systemctl --user restart overcrow-overlay.service
 ```
 
-**Windows.** Quit OverCrow from its tray icon, then start it from
+**Windows.** Quit PlayerVox OverCrow from its tray icon, then start it from
 PowerShell:
 
 ```text
@@ -126,5 +126,5 @@ before a session starts. Widgets cannot use it: their sandbox has no access
 to it.
 
 This is why the channel is off by default. With it on, any program you run
-can show an unverified widget in your overlay, for as long as OverCrow
-runs. Turn it off when you are done.
+can show an unverified widget in your overlay, for as long as
+PlayerVox OverCrow runs. Turn it off when you are done.

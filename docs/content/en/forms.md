@@ -8,9 +8,9 @@ intent** is how a widget lets the user write to their notes, publish a
 rating or send a chat message, without the text ever passing through the
 widget's code.
 
-Widgets receive input only in OverCrow's Interactive mode. In Passive mode
-a click goes through the widget to the game: hide or disable what cannot be
-used, as the built-ins do with `host.mode`.
+Widgets receive input only in PlayerVox OverCrow's Interactive mode. In
+Passive mode a click goes through the widget to the game: hide or disable
+what cannot be used, as the built-ins do with `host.mode`.
 
 ## Controls
 
@@ -58,9 +58,10 @@ slider, text for the others.
 
 ### Text fields
 
-OverCrow edits the text of a `field` or a `textarea` itself: the caret, the
-selection, copy and paste, and input methods for languages that compose
-characters. The logic receives a copy of the text in each `input` event.
+PlayerVox OverCrow edits the text of a `field` or a `textarea` itself: the
+caret, the selection, copy and paste, and input methods for languages that
+compose characters. The logic receives a copy of the text in each `input`
+event.
 
 <!-- source: widgets/warframe-market/view.ocml -->
 ```xml
@@ -91,9 +92,9 @@ Binding `value` replaces what the field holds: bind it to the state your
 the field is empty.
 
 A field also sends `keydown` when you ask for it, with the key and its
-modifiers, for shortcuts such as Escape to cancel. Keys that OverCrow
-reserves (Tab to move the focus, its own shortcuts, a composition in
-progress) are not delivered.
+modifiers, for shortcuts such as Escape to cancel. Keys that
+PlayerVox OverCrow reserves (Tab to move the focus, its own shortcuts, a
+composition in progress) are not delivered.
 
 ### The focus when an editor opens
 
@@ -107,7 +108,7 @@ the caret in the field, after its text, as a click in it would.
         <field class="title-field" name="title" autofocus placeholder={t("title-hint")} label={t("title-hint")} on:input={titleInput(editor.key, event.value)} on:keydown={keyed(editor.key, event.key, event.ctrl)}/>
 ```
 
-OverCrow gives that focus only when the element appears during a
+PlayerVox OverCrow gives that focus only when the element appears during a
 [user action](services.md#calls-that-need-a-user-action), in Interactive
 mode, in the widget the user acted on; when several such elements appear
 together, the first one of the view takes it. An element that appears when
@@ -186,22 +187,23 @@ form with an `intent` attribute sends them:
     </form>
 ```
 
-When the user submits such a form, **OverCrow reads the values of the
-form's own controls and sends them itself**. The widget's logic never
+When the user submits such a form, **PlayerVox OverCrow reads the values of
+the form's own controls and sends them itself**. The widget's logic never
 supplies the text, so a widget cannot write something the user did not
 type, and cannot submit without the user: the form goes only on a user
 action, in Interactive mode, with the capability granted.
 
 What this changes for the view and the logic:
 
-- **The controls belong to OverCrow.** The `field`, `textarea` and `slider`
-  controls of the form take no `value`: `overcrow-widget check` refuses it
-  (`view.bound_value`), and OverCrow stops a widget that sets one at run
-  time. Their `name` attribute says which field of the intent each one is.
-- **OverCrow fills them** where the intent says so: the note's title, body
-  and checklist, the user's published rating. A fill sends the control's
-  `input` event with the value, so the logic knows what is shown; that
-  event is not a user action.
+- **The controls belong to PlayerVox OverCrow.** The `field`, `textarea` and
+  `slider` controls of the form take no `value`: `overcrow-widget check`
+  refuses it (`view.bound_value`), and OverCrow stops a widget that sets one
+  at run time. Their `name` attribute says which field of the intent each
+  one is.
+- **PlayerVox OverCrow fills them** where the intent says so: the note's
+  title, body and checklist, the user's published rating. A fill sends the
+  control's `input` event with the value, so the logic knows what is shown;
+  that event is not a user action.
 - **The logic follows through `input` events**, to show a counter or to
   enable the button, and may disable the controls.
 - **The outcome arrives in the form's `submit` event**: `event.outcome` is
@@ -284,10 +286,10 @@ ID for `notes.save`, the ID of the message replied to for
 ### Several rows of one field
 
 The `notes.save` intent takes one `item` field per checklist row. The
-logic decides which rows the form has, with a `for`; OverCrow fills each
-row's field from the stored note and remembers which checklist entry it
-put there. A row that the logic removes or moves keeps its entry, and a
-row added since is a new entry.
+logic decides which rows the form has, with a `for`; PlayerVox OverCrow
+fills each row's field from the stored note and remembers which checklist
+entry it put there. A row that the logic removes or moves keeps its entry,
+and a row added since is a new entry.
 
 <!-- source: widgets/notes/view.ocml -->
 ```xml
@@ -308,11 +310,11 @@ Ctrl+Enter or the `submit` button saves.
 ## Confirmations
 
 Two services delete user data: `notes.delete` and `journal.delete`. They
-are ordinary calls that need a user action, and OverCrow then asks the
-user to confirm in a dialog that it draws itself, outside the widget. The
-call resolves when the user confirms and fails with `cancelled` when they
-decline. Do not draw your own "Are you sure?": OverCrow's is the one that
-counts.
+are ordinary calls that need a user action, and PlayerVox OverCrow then asks
+the user to confirm in a dialog that it draws itself, outside the widget.
+The call resolves when the user confirms and fails with `cancelled` when
+they decline. Do not draw your own "Are you sure?": OverCrow's is the one
+that counts.
 
 ## Checklist for a form
 
@@ -325,4 +327,4 @@ counts.
   sliders, and every named control is a field of the intent.
 - Test it with a scenario: `text` steps type into the focused field,
   `key` steps press Enter, and `expect.intents` checks exactly what
-  OverCrow sent. See [testing a widget](testing.md#steps).
+  PlayerVox OverCrow sent. See [testing a widget](testing.md#steps).

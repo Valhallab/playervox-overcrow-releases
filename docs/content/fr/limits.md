@@ -27,12 +27,12 @@ une façon d’en sortir.
   requêtes simultanées avec `busy`. Voir [erreurs](services.md#erreurs).
 - **Pendant que la logique s’exécute**, dépasser un budget de la VM (la
   durée d’un tour, le tas, les messages d’un tour) arrête le widget ;
-  OverCrow le redémarre quelques fois. Voir
+  PlayerVox OverCrow le redémarre quelques fois. Voir
   [ce qui se passe en cas d’échec](logic.md#ce-qui-se-passe-en-cas-déchec).
-- **Dans ce que le widget affiche**, OverCrow refuse une valeur hors limites
-  (un texte trop long pour un attribut, trop de nœuds), ce qui arrête aussi
-  le widget : bornez ce que vous affichez, par exemple le nombre de lignes
-  d’une liste.
+- **Dans ce que le widget affiche**, PlayerVox OverCrow refuse une valeur
+  hors limites (un texte trop long pour un attribut, trop de nœuds), ce qui
+  arrête aussi le widget : bornez ce que vous affichez, par exemple le
+  nombre de lignes d’une liste.
 
 Les longueurs sont en pixels logiques, à une échelle du contenu de 100 %.
 Les limites de texte comptent des octets UTF-8, sauf quand l’unité indique

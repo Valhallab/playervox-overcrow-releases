@@ -39,13 +39,13 @@ that the view calls with `on:activate={increment}`.
   no DOM, `window`, `fetch`, `setTimeout`, `console`, `Intl` or
   `require`. The standard ECMAScript objects are there (`Math`, `JSON`,
   `Date`, `Map`, `Promise`…), and the SDK is the only way out.
-- Everything after that happens in **turns**. OverCrow sends an event, a
-  timer tick, a service answer or a change of its own data; your code runs;
-  then the VM evaluates the view again and sends OverCrow only what
-  changed. You never update the view by hand.
+- Everything after that happens in **turns**. PlayerVox OverCrow sends an
+  event, a timer tick, a service answer or a change of its own data; your
+  code runs; then the VM evaluates the view again and sends OverCrow only
+  what changed. You never update the view by hand.
 - A turn has a time budget, and the VM a memory ceiling. A widget that
-  exceeds one is stopped and restarted by OverCrow, a few times; see
-  [what happens on a failure](#what-happens-on-a-failure).
+  exceeds one is stopped and restarted by PlayerVox OverCrow, a few times;
+  see [what happens on a failure](#what-happens-on-a-failure).
 
 The only import a logic module may have is `@overcrow/sdk`. Everything else
 it needs is in the module itself.
@@ -135,8 +135,8 @@ its own.
 
 ## Data from OverCrow: `host`
 
-`host` holds what OverCrow knows about the user and the widget. Its members
-always read the latest value.
+`host` holds what PlayerVox OverCrow knows about the user and the widget.
+Its members always read the latest value.
 
 | Member | Value |
 | --- | --- |
@@ -151,11 +151,11 @@ always read the latest value.
 | `host.grants` | The capabilities the user granted; read it with `hasGrant`. |
 | `host.messages` | The messages of the active language; read them with `t`. |
 
-`onHost(listener)` calls your listener when OverCrow sends new values, with
-the names of the members that changed, before the view is evaluated again.
-Use it when a change needs more than showing the new value: re-arm a timer,
-subscribe again, redraw a canvas. A member may be sent again with the same
-value: compare it with the one you kept when that matters.
+`onHost(listener)` calls your listener when PlayerVox OverCrow sends new
+values, with the names of the members that changed, before the view is
+evaluated again. Use it when a change needs more than showing the new value:
+re-arm a timer, subscribe again, redraw a canvas. A member may be sent again
+with the same value: compare it with the one you kept when that matters.
 
 <!-- source: widgets/stopwatch/logic.ts -->
 ```ts
@@ -173,7 +173,7 @@ through the widget to the game, so the stopwatch hides its buttons unless
 ## The options menu
 
 The rows declared in `wrapper.menu` of the [manifest](manifest.md#the-options-menu)
-are drawn and stored by OverCrow. The logic reads them:
+are drawn and stored by PlayerVox OverCrow. The logic reads them:
 
 - `option(id, fallback)` returns the stored value of a toggle, slider or
   choice row, or `fallback` when there is none or it has another type;
@@ -207,7 +207,7 @@ service: an `action` row can change the state, not write to the clipboard.
 
 ## Timers
 
-There is no `setTimeout`. Timers are OverCrow's, through `timers`:
+There is no `setTimeout`. Timers are PlayerVox OverCrow's, through `timers`:
 
 | Function | Calls back |
 | --- | --- |
@@ -225,7 +225,7 @@ timers.every(1000, () => {
 });
 ```
 
-Three rules follow from OverCrow owning the timers:
+Three rules follow from PlayerVox OverCrow owning the timers:
 
 - **No timer shorter than 100 ms.** A shorter interval is raised to it.
   Motion belongs to the [style](style.md#transitions-and-animations), not to
@@ -270,8 +270,8 @@ function start(): void {
 ```
 
 A duration that only has to advance on screen needs no timer at all: the
-`elapsed` element is advanced by OverCrow from a starting point the logic
-gives it. See the [`elapsed` element](elements.md#elapsed).
+`elapsed` element is advanced by PlayerVox OverCrow from a starting point
+the logic gives it. See the [`elapsed` element](elements.md#elapsed).
 
 ## Time, dates and numbers
 
@@ -339,11 +339,11 @@ export function toggleLabel(running: boolean): string {
 }
 ```
 
-When the user changes OverCrow's language, the view is evaluated again
-with the new messages. A text that the logic computed and stored in the
-state is not: compute texts in functions the view calls, or refresh them in
-`onHost` when `"locale"` changes. The widget's name and its menu labels are
-in the manifest, not in the locales.
+When the user changes PlayerVox OverCrow's language, the view is evaluated
+again with the new messages. A text that the logic computed and stored in
+the state is not: compute texts in functions the view calls, or refresh them
+in `onHost` when `"locale"` changes. The widget's name and its menu labels
+are in the manifest, not in the locales.
 
 `overcrow-widget check` warns when the view calls `t("key")` with a key
 that has no message, and refuses two files whose keys differ.
@@ -368,8 +368,8 @@ function paint(): void {
 ```
 
 Coordinates are logical pixels from the top-left corner of the canvas;
-colours are literal (`#rrggbb`) or colour tokens. OverCrow checks every
-command and draws them itself: there is no pixel access and no shader.
+colours are literal (`#rrggbb`) or colour tokens. PlayerVox OverCrow checks
+every command and draws them itself: there is no pixel access and no shader.
 Draw again when what you show changes, and when `host.theme` changes if you
 use literal colours.
 
@@ -430,15 +430,17 @@ the SDK replacement:
 | `logic.debugger` | `debugger` is a warning. |
 
 The lint helps you; it is not what protects the user. The sandbox, the
-VM's budgets and OverCrow's check of everything the widget sends do that.
+VM's budgets and PlayerVox OverCrow's check of everything the widget sends
+do that.
 
 ## What happens on a failure
 
 - An exception in a handler ends that turn; the widget keeps running, and
   `overcrow-widget dev` shows the fault.
 - A turn longer than its budget (50 ms), a heap over its ceiling or too
-  many messages in a turn stop the widget. OverCrow shows a fixed error in
-  its frame and restarts it after 1, 5 and 15 seconds, at most three times.
+  many messages in a turn stop the widget. PlayerVox OverCrow shows a fixed
+  error in its frame and restarts it after 1, 5 and 15 seconds, at most
+  three times.
 - A rejected promise of a service call is an ordinary error of your code:
   catch it. See [errors](services.md#errors).
 

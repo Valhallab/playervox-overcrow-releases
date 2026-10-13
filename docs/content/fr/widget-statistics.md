@@ -8,19 +8,19 @@ chaque chiffre et ce qu’il laisse de côté.
 
 ## D’où viennent les chiffres
 
-Une fois par jour au plus, à un moment tiré au hasard, OverCrow envoie un
-signal anonyme pour chaque widget installé depuis le catalogue : le widget,
-sa version, le jour, le système (Windows ou Linux), la version d’OverCrow, si
-le widget a été affiché, installé ou désinstallé ce jour-là, et ses erreurs
-(type, endroit du code, nombre arrondi).
+Une fois par jour au plus, à un moment tiré au hasard, PlayerVox OverCrow
+envoie un signal anonyme pour chaque widget installé depuis le catalogue :
+le widget, sa version, le jour, le système (Windows ou Linux), la version
+d’OverCrow, si le widget a été affiché, installé ou désinstallé ce jour-là,
+et ses erreurs (type, endroit du code, nombre arrondi).
 
 - **Aucun identifiant** : rien ne désigne le joueur ni l’ordinateur, et rien
   ne relie les widgets d’un même joueur, chaque widget étant envoyé à part.
 - **Aucun message d’erreur** : seulement le type d’une erreur et son endroit
   dans votre code. Un message peut contenir des données personnelles.
 - **Activé par défaut** : les joueurs peuvent couper **Partager des
-  statistiques anonymes** dans OverCrow ; plus rien n’est envoyé ensuite, et
-  ils ne sont plus comptés.
+  statistiques anonymes** dans PlayerVox OverCrow ; plus rien n’est envoyé
+  ensuite, et ils ne sont plus comptés.
 
 Les chiffres s’additionnent à l’arrivée des signaux. **Mis à jour** donne
 l’heure du dernier signal compté.
@@ -61,8 +61,8 @@ jour.
   version. Les trois versions les plus récentes gardent leur couleur ; les
   autres s’additionnent dans **Plus anciennes**.
 - **Où tourne votre widget** : la part des joueurs actifs sous Windows et
-  sous Linux, et sur chaque version d’OverCrow (les deux plus utilisées, puis
-  **Autres**).
+  sous Linux, et sur chaque version de PlayerVox OverCrow (les deux plus
+  utilisées, puis **Autres**).
 
 ## Erreurs
 
@@ -72,10 +72,10 @@ version. Le tableau montre les 50 groupes les plus fréquents de la période,
 avec leurs versions, leur nombre et leur tendance ; **Exporter CSV** les
 enregistre.
 
-OverCrow signale où une erreur s’est produite dans le `logic.js` du paquet.
-L’espace créateurs retrouve cette position dans vos sources (fichier, ligne
-et fonction) grâce à une carte de votre code construite avec le paquet et
-jamais publiée.
+PlayerVox OverCrow signale où une erreur s’est produite dans le `logic.js`
+du paquet. L’espace créateurs retrouve cette position dans vos sources
+(fichier, ligne et fonction) grâce à une carte de votre code construite avec
+le paquet et jamais publiée.
 
 - **Retraduction en cours** : la position s’affiche en
   `logic.js:ligne:colonne` jusqu’à ce qu’elle soit retrouvée.
@@ -111,8 +111,8 @@ Le type d’une erreur est le type intégré dont elle a été créée, jamais l
 ## Note des joueurs
 
 Les joueurs notent un widget de 0 à 100 dans le Centre de contrôle
-d’OverCrow, avec leur compte PlayerVox : une note par compte et par widget,
-qu’ils peuvent modifier ou retirer.
+de PlayerVox OverCrow, avec leur compte PlayerVox : une note par compte et
+par widget, qu’ils peuvent modifier ou retirer.
 
 - **Score** : la moyenne des notes, arrondie, avec son rang : S+ dès 90, S
   dès 80, A dès 70, B dès 60, C dès 40, D dès 20, puis F.
@@ -131,11 +131,11 @@ et sur le site.
 ## Des tendances, pas des comptes exacts
 
 - Seuls les joueurs qui partagent leurs statistiques anonymes sont comptés.
-- OverCrow arrondit chaque nombre d’erreurs à un palier avant de l’envoyer,
-  et envoie au plus 10 endroits du code par widget et par jour : les chiffres
-  des erreurs donnent des ordres de grandeur.
+- PlayerVox OverCrow arrondit chaque nombre d’erreurs à un palier avant de
+  l’envoyer, et envoie au plus 10 endroits du code par widget et par jour :
+  les chiffres des erreurs donnent des ordres de grandeur.
 - Un jour est la date du joueur lui-même.
-- Un joueur qui efface les données d’OverCrow, puis réinstalle le widget,
-  compte pour deux installations.
+- Un joueur qui efface les données de PlayerVox OverCrow, puis réinstalle le
+  widget, compte pour deux installations.
 - Les signaux qui semblent cassés ou gonflés sont écartés avant d’être
   comptés.

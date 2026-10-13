@@ -82,11 +82,11 @@ une espace (descendant) ou par `>` (enfant).
 }
 ```
 
-Les états sont résolus par OverCrow, pas par votre logique : `:hover` et
-`:active` suivent le pointeur, `:focus` le focus clavier, `:disabled`
-l’attribut `disabled`, et `:checked` l’état d’un `toggle` ou d’une
-`checkbox`. OverCrow ne signale pas au widget les mouvements du pointeur :
-un effet de survol ne lui coûte rien.
+Les états sont résolus par PlayerVox OverCrow, pas par votre logique :
+`:hover` et `:active` suivent le pointeur, `:focus` le focus clavier,
+`:disabled` l’attribut `disabled`, et `:checked` l’état d’un `toggle` ou
+d’une `checkbox`. OverCrow ne signale pas au widget les mouvements du
+pointeur : un effet de survol ne lui coûte rien.
 
 Quand deux règles définissent la même propriété, le sélecteur le plus
 spécifique l’emporte : les classes et les états comptent d’abord, puis les
@@ -140,7 +140,8 @@ rebours place le temps au milieu de son anneau :
 }
 ```
 
-Un widget ne peut pas dessiner hors de son cadre : OverCrow le rogne.
+Un widget ne peut pas dessiner hors de son cadre : PlayerVox OverCrow le
+rogne.
 
 ## Valeurs
 
@@ -151,18 +152,19 @@ forme `#rrggbb`, `#rrggbbaa` ou `rgb(r g b / a)`, les durées en `ms` ou en
 `var(--name)`. La notation exacte de chaque sorte de valeur figure dans
 [valeurs](style-properties.md#valeurs).
 
-Les longueurs sont des pixels logiques : OverCrow les multiplie par
-l’échelle du contenu de l’utilisateur (de 50 % à 175 %) et par la densité de
-l’écran. `12px` a donc la même taille physique sur tous les écrans. Les
-propriétés raccourcies se développent comme en CSS : une à quatre valeurs
-pour les côtés et les coins, une ou deux pour les espacements.
+Les longueurs sont des pixels logiques : PlayerVox OverCrow les multiplie
+par l’échelle du contenu de l’utilisateur (de 50 % à 175 %) et par la
+densité de l’écran. `12px` a donc la même taille physique sur tous les
+écrans. Les propriétés raccourcies se développent comme en CSS : une à
+quatre valeurs pour les côtés et les coins, une ou deux pour les
+espacements.
 
 ## Tokens du design system
 
-Un token est une valeur du design system d’OverCrow, écrite `var(--name)`.
-Les tokens de couleur changent avec le thème de l’utilisateur, clair ou
-sombre : un widget stylé avec des tokens suit le thème sans aucun code.
-Préférez-les aux couleurs littérales.
+Un token est une valeur du design system de PlayerVox OverCrow, écrite
+`var(--name)`. Les tokens de couleur changent avec le thème de
+l’utilisateur, clair ou sombre : un widget stylé avec des tokens suit le
+thème sans aucun code. Préférez-les aux couleurs littérales.
 
 <!-- source: docs/content/examples/countdown/style.ocss -->
 ```css
@@ -185,8 +187,9 @@ pas déclarer ses propres propriétés personnalisées. Tous les tokens sont
 listés dans
 [tokens du design system](style-properties.md#tokens-du-design-system).
 
-OverCrow dessine le panneau derrière le widget (`--color-surface-panel`),
-son cadre et son ombre : partez d’un fond transparent.
+PlayerVox OverCrow dessine le panneau derrière le widget
+(`--color-surface-panel`), son cadre et son ombre : partez d’un fond
+transparent.
 
 ## Texte
 
@@ -196,8 +199,8 @@ sur un conteneur pour styler ce qu’il contient.
 
 - Il existe trois familles de police : `ui` (Noto Sans, la valeur par
   défaut), `mono` (Noto Sans Mono, pour les valeurs) et `display` (Space
-  Grotesk, pour les grades et les scores). OverCrow les embarque ; les
-  polices du système ne sont jamais utilisées : un widget a donc le même
+  Grotesk, pour les grades et les scores). PlayerVox OverCrow les embarque ;
+  les polices du système ne sont jamais utilisées : un widget a donc le même
   aspect sur toutes les machines.
 - `font-variant-numeric: tabular-nums` donne la même largeur à tous les
   chiffres : un nombre qui change ne déplace pas ses voisins.
@@ -237,9 +240,9 @@ un bloc `@keyframes` de la même feuille.
 Seules les propriétés qui modifient le dessin, et non la mise en page,
 peuvent être animées : `opacity`, `color`, `background-color`,
 `border-color` et `transform`. Un bloc `@keyframes` ne contient que
-celles-là. OverCrow exécute l’animation lui-même : aucun minuteur ni aucun
-code du widget ne tourne pendant qu’elle joue, et rien n’est redessiné quand
-rien ne change. Un widget masqué ne s’anime pas.
+celles-là. PlayerVox OverCrow exécute l’animation lui-même : aucun minuteur
+ni aucun code du widget ne tourne pendant qu’elle joue, et rien n’est
+redessiné quand rien ne change. Un widget masqué ne s’anime pas.
 
 `@keyframes` est la seule règle @. Son nom est un identifiant qui n’est pas
 un mot-clé d’animation, unique dans la feuille.

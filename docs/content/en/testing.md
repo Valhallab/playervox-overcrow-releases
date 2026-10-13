@@ -5,9 +5,9 @@ a game or an account:
 
 - **Unit tests of the logic**, in Node.js, with `@overcrow/sdk/testing`:
   fast, for the functions of `logic.ts`.
-- **Scenarios**, played by `overcrow-widget test` in OverCrow's **headless
-  runtime**: the real VM, style, layout and renderer, OverCrow's own
-  checks, simulated services, virtual time and reference images. What
+- **Scenarios**, played by `overcrow-widget test` in PlayerVox OverCrow's
+  **headless runtime**: the real VM, style, layout and renderer, OverCrow's
+  own checks, simulated services, virtual time and reference images. What
   passes there is what the overlay shows.
 
 <!-- source: templates/counter/tests/example.scenario.json -->
@@ -35,8 +35,8 @@ is "Increase", then checks the new text and image.
 by `overcrow-widget init`, otherwise
 `npm install --save-dev --save-exact @overcrow/sdk@1.0.0`.
 
-`installRuntime()` puts a stand-in for OverCrow in place before the logic
-is imported: service calls return promises that your test settles,
+`installRuntime()` puts a stand-in for PlayerVox OverCrow in place before
+the logic is imported: service calls return promises that your test settles,
 subscriptions take the values you push, timers fire when you advance the
 time, and `Date.now()` is virtual.
 
@@ -74,17 +74,17 @@ test("one timer at the next local minute, then each minute", () => {
 | --- | --- |
 | `installRuntime({ now, host })` | Installs the stand-in; `Date.now()` returns the virtual time. One at a time. |
 | `now`, `advance(ms)` | The virtual time; `advance` fires the timers that fall due, in order (a repeating one re-arms), and returns their count. |
-| `setHost(changes)` | Changes `host` as OverCrow does: `region`, `locale`, `options`… |
+| `setHost(changes)` | Changes `host` as PlayerVox OverCrow does: `region`, `locale`, `options`… |
 | `calls`, `lastCall(service)` | Every service call, with `resolve(value)` and `reject(code)`. |
 | `push(service, value)`, `fail(service, code)` | The next update, or the final failure, of the subscriptions to a service. |
 | `menu(row)` | Chooses an `action` row of the options menu. |
 | `draws`, `logs`, `timers`, `table` | What the logic sent: canvas drawings, logs, timers, and the functions of the view. |
 | `uninstall()` | Removes the stand-in and gives `Date.now` back. |
 
-The stand-in runs your logic only: it does not apply OverCrow's rules (the
-grants, the accounts, the user-action rule) and renders nothing. Scenarios
-do. The reference widgets compile their `logic.ts` with a small loader
-before importing it:
+The stand-in runs your logic only: it does not apply PlayerVox OverCrow's
+rules (the grants, the accounts, the user-action rule) and renders nothing.
+Scenarios do. The reference widgets compile their `logic.ts` with a small
+loader before importing it:
 
 <!-- source: widgets/clock/tests/load-logic.mjs -->
 ```js
@@ -143,13 +143,13 @@ Everything is optional.
 | `size` | the manifest's preferred size | `{ width, height }` of the frame, in logical pixels; the manifest's `fit` still applies. |
 | `mode` | `passive` | `interactive` gives input to the widget. |
 | `visible` | `true` | Hidden, the widget gets no timer tick. |
-| `frame` | `false` | `true` captures OverCrow's frame around the content. |
+| `frame` | `false` | `true` captures PlayerVox OverCrow's frame around the content. |
 | `background` | the theme's panel colour | `#rrggbb` behind the widget. |
 | `region` | `us`, date order of the locale | `{ numberFormat, dateOrder }`. |
 | `zone` | UTC | `{ offsetMinutes, transitions: [{ at, offsetMinutes }] }`: the user's UTC offset, and the instants at which it changes. |
 | `startAt` | 2026-01-01T00:00:00Z | The virtual time at which the widget starts, in Unix milliseconds. |
 | `options` | the rows' defaults | Values of the rows of the options menu. |
-| `grants` | `"declared"` | Or the exact list of what the user granted (`storage`, `network`, `fps.read`…): OverCrow refuses the rest. |
+| `grants` | `"declared"` | Or the exact list of what the user granted (`storage`, `network`, `fps.read`…): PlayerVox OverCrow refuses the rest. |
 | `accounts` | connected | `{ playervox, twitch }`, each `connected`, `disconnected`, `pending`, `expired` or `offline`. |
 | `features` | all | The data sources of the machine, for `requires`. |
 | `storage` | empty | The widget's storage before it starts. |
@@ -174,15 +174,16 @@ Everything is optional.
   },
 ```
 
-With an account that is not `connected`, OverCrow draws its own account
-panel over the widget, as it does for the user; capture it with `frame`.
+With an account that is not `connected`, PlayerVox OverCrow draws its own
+account panel over the widget, as it does for the user; capture it with
+`frame`.
 
 ### `fixtures`
 
-Fixtures replace where the data comes from, never OverCrow's checks. A call
-first passes the grants, its parameters, the user-action rule and the
-account check, exactly as in the overlay; only then does a fixture answer
-it. Every value must have the shape of the service's
+Fixtures replace where the data comes from, never PlayerVox OverCrow's
+checks. A call first passes the grants, its parameters, the user-action rule
+and the account check, exactly as in the overlay; only then does a fixture
+answer it. Every value must have the shape of the service's
 [result](result-shapes.md): one that does not is an error of the scenario,
 not of the widget.
 
@@ -191,7 +192,7 @@ not of the widget.
 | `subscriptions` | The value of a subscription when it starts; `publish` steps send the next ones. |
 | `calls` | The calls of a service, in order: `{ "value": … }` or `{ "error": code }`. A call beyond them is an error of the scenario. |
 | `http` | The `http.fetch` requests, each used once: `{ "request": { method, url }, "response": { status, contentType, body } }` (or `bodyBase64`), or `{ "request": …, "error": code }`. The manifest's network rules apply first, and the response bounds apply as in the overlay. |
-| `confirmations` | `accept` or `cancel`, in order, for OverCrow's confirmation of `notes.delete` and `journal.delete`. |
+| `confirmations` | `accept` or `cancel`, in order, for PlayerVox OverCrow's confirmation of `notes.delete` and `journal.delete`. |
 | `intents` | The answer to each submitted [write intent](forms.md#forms-that-write-user-data), in order: `"accepted"`, `{ "error": code }` or `"pending"`. |
 
 <!-- source: widgets/stopwatch/tests/errors.scenario.json -->
@@ -267,7 +268,7 @@ not of the widget.
     ]
 ```
 
-The codes that OverCrow gives itself (`permission_denied`,
+The codes that PlayerVox OverCrow gives itself (`permission_denied`,
 `gesture_required`, `not_connected`, `invalid_request`) cannot be written
 in a fixture: get them the real way, with `grants`, `accounts`, a call
 outside a user action, or wrong parameters. Storage, timers and the
@@ -275,9 +276,9 @@ clipboard are OverCrow's own and need no fixture.
 
 ### `assets`
 
-Images that a fixture hands to the widget, as OverCrow hands it a media
-cover or a chat emote: `{ "<name>": "<path>" }`, at most 8, each a PNG or
-JPEG of the project (`tests/assets/cover.png`). Where a result holds an
+Images that a fixture hands to the widget, as PlayerVox OverCrow hands it a
+media cover or a chat emote: `{ "<name>": "<path>" }`, at most 8, each a PNG
+or JPEG of the project (`tests/assets/cover.png`). Where a result holds an
 image handle, the fixture writes `"fixture:<name>"`.
 
 ### `steps`
@@ -313,7 +314,7 @@ was sent and nothing is in flight. There is no real waiting.
 | `state` | `starting`, `running`, `restarting`, `failed`, `refused` or `stopped`. |
 | `fault` | The last fault of the widget's VM, or `none`. |
 | `clipboard` | The last text the widget wrote to the clipboard. |
-| `intents` | Exactly these write intents were submitted since the previous `intents` expectation, in order: `{ intent, fields?, outcome? }`. `fields` are the exact values OverCrow's form sent. |
+| `intents` | Exactly these write intents were submitted since the previous `intents` expectation, in order: `{ intent, fields?, outcome? }`. `fields` are the exact values PlayerVox OverCrow's form sent. |
 
 <!-- source: templates/chart/tests/example.scenario.json -->
 ```json
@@ -365,7 +366,7 @@ bytes, on Linux and on Windows.
 - Time is virtual: `Date.now()` and `new Date()` return the scenario's
   time, timers fire when the scenario moves it.
 - `Math.random()` is seeded with a fixed value.
-- Text uses the fonts bundled with OverCrow, never the system's.
+- Text uses the fonts bundled with PlayerVox OverCrow, never the system's.
 - Rendering does not depend on the graphics card.
 
 This holds for the test runtime only: in the overlay, time and randomness
@@ -373,15 +374,15 @@ are real.
 
 ## The headless runtime
 
-`overcrow-widget-headless` is OverCrow's own code without a window: it
-validates the package as the overlay does and runs the widget's logic in
-the same sandbox. `overcrow-widget test` runs the version this CLI pins,
-0.7.1-beta.1, and prints its version and SHA-256. Without the operating
-system's sandbox the runtime refuses to run and says so; the test command
-then ends with status 2.
+`overcrow-widget-headless` is PlayerVox OverCrow's own code without a
+window: it validates the package as the overlay does and runs the widget's
+logic in the same sandbox. `overcrow-widget test` runs the version this CLI
+pins, 0.7.1-beta.1, and prints its version and SHA-256. Without the
+operating system's sandbox the runtime refuses to run and says so; the test
+command then ends with status 2.
 
 The first time `test` needs the runtime, it downloads it: from the
-creator tools ZIP of your platform in the OverCrow release that
+creator tools ZIP of your platform in the PlayerVox OverCrow release that
 published it, it keeps only the runtime, and only once its SHA-256 is the
 one this CLI pins. The ZIP is not kept. The runtime then stays in the CLI's cache:
 
@@ -397,4 +398,4 @@ To work offline, put the runtime of the creator tools ZIP there yourself
 The CLI checks its SHA-256 before every run. When a download fails,
 nothing is kept and `test` says to try again or to pass `--runtime`.
 `--runtime <path>` runs another runtime instead, such as one built from
-OverCrow; the output then says it is not the pinned one.
+PlayerVox OverCrow; the output then says it is not the pinned one.

@@ -231,7 +231,7 @@ mise à jour.
 
 ### `notes.delete`
 
-- **Nature** : appel, à réponse unique ; l’utilisateur le confirme d’abord, dans une boîte de dialogue dessinée par OverCrow
+- **Nature** : appel, à réponse unique ; l’utilisateur le confirme d’abord, dans une boîte de dialogue dessinée par PlayerVox OverCrow
 - **Exige** : capability `notes.write`
 - **Quand l’appeler** : Seulement pendant une action de l’utilisateur
 - **Paramètres** : `note` : texte ≤ 128 octets
@@ -294,7 +294,7 @@ mise à jour.
 
 ### `journal.delete`
 
-- **Nature** : appel, à réponse unique ; l’utilisateur le confirme d’abord, dans une boîte de dialogue dessinée par OverCrow
+- **Nature** : appel, à réponse unique ; l’utilisateur le confirme d’abord, dans une boîte de dialogue dessinée par PlayerVox OverCrow
 - **Exige** : capability `journal.delete`
 - **Quand l’appeler** : Seulement pendant une action de l’utilisateur
 - **Paramètres** : `session` : texte ≤ 128 octets

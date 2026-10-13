@@ -19,7 +19,7 @@ them: expressions, `if`, `for`, components.
 ```
 
 Two `box` containers, two `text` elements bound to the state, and a `chart`
-with one `series`: OverCrow draws all of it, the chart included.
+with one `series`: PlayerVox OverCrow draws all of it, the chart included.
 
 ## How to read an element
 
@@ -435,10 +435,10 @@ Any other `key` is one printable character.
 
 ## Default sizes
 
-The elements that OverCrow draws take these sizes, in logical pixels at
-100 %, unless the style sets `width` or `height`. Any other element is
-sized by its content and by the style: a `canvas` has no size until the
-style gives it one.
+The elements that PlayerVox OverCrow draws take these sizes, in logical
+pixels at 100 %, unless the style sets `width` or `height`. Any other
+element is sized by its content and by the style: a `canvas` has no size
+until the style gives it one.
 
 <!-- generated:default-sizes -->
 | Element | When | Width | Height |

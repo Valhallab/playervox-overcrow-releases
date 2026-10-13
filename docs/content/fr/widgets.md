@@ -35,7 +35,7 @@ lisez-les, copiez-les et servez-vous-en comme point de départ.
 - `tests/` : les tests unitaires de la logique, et des scénarios avec leurs
   images de référence dans les deux thèmes, les deux langues et deux
   échelles, joués par `overcrow-widget test` dans le runtime headless
-  d’OverCrow ;
+  de PlayerVox OverCrow ;
 - `README.md` : ce qu’il affiche, son menu, ses permissions, son
   fonctionnement et son coût.
 

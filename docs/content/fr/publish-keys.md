@@ -50,10 +50,11 @@ soumet le widget à chaque tag de version :
 
 <!-- source: docs/content/examples/weather/.github/workflows/submit.yml -->
 ```yaml
-# Sends the widget to the OverCrow creator space when a version tag is
-# pushed. The publish key is a secret of the repository, and the OverCrow
-# release whose creator tools to use is a variable of the repository.
-name: Submit to OverCrow
+# Sends the widget to the PlayerVox OverCrow creator space when a version
+# tag is pushed. The publish key is a secret of the repository, and the
+# OverCrow release whose creator tools to use is a variable of the
+# repository.
+name: Submit to PlayerVox OverCrow
 
 on:
   push:
@@ -78,7 +79,7 @@ jobs:
           (cd "$tools" && sha256sum --check --quiet SHA256SUMS)
           install -D -m 755 "$tools"/overcrow-widget-*-linux-x86_64 "$HOME/.local/bin/overcrow-widget"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      - name: Submit to OverCrow
+      - name: Submit to PlayerVox OverCrow
         run: overcrow-widget submit --submission submission.json
         env:
           OVERCROW_PUBLISH_KEY: ${{ secrets.OVERCROW_PUBLISH_KEY }}

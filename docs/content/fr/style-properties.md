@@ -268,5 +268,5 @@ Lucide 1.34.0, 1777 icônes.
 Tout autre nom est refusé. Le type `IconName` du SDK les liste tous : un nom
 erroné dans la logique est donc une erreur TypeScript. Au sein de l’API v1,
 le jeu d’icônes peut grandir, mais il ne perd ni ne renomme jamais une
-icône. OverCrow dessine les icônes lui-même : un widget n’embarque aucune
-police d’icônes.
+icône. PlayerVox OverCrow dessine les icônes lui-même : un widget n’embarque
+aucune police d’icônes.

@@ -8,9 +8,9 @@ avec `@overcrow/sdk`. L’outil en ligne de commande `overcrow-widget` le
 vérifie, le teste et l’empaquette ; le catalogue signé l’apporte aux
 utilisateurs.
 
-Tous les widgets intégrés d’OverCrow sont écrits ainsi, avec le même SDK
-public, le même format de paquet et le même sandbox que les vôtres. Leurs
-sources sont les [widgets de référence](widgets.md).
+Tous les widgets intégrés de PlayerVox OverCrow sont écrits ainsi, avec le
+même SDK public, le même format de paquet et le même sandbox que les vôtres.
+Leurs sources sont les [widgets de référence](widgets.md).
 
 ## De quoi est fait un widget
 
@@ -54,20 +54,20 @@ export function increment(): void {
 
 - La logique tourne dans sa propre petite VM JavaScript, dans son propre
   processus, enfermé dans un sandbox. Elle n’a ni DOM, ni système de
-  fichiers, ni réseau, ni accès aux autres widgets : elle n’atteint OverCrow
-  que par le SDK.
+  fichiers, ni réseau, ni accès aux autres widgets : elle n’atteint
+  PlayerVox OverCrow que par le SDK.
 - Après chaque événement, déclenchement de minuteur ou réponse d’un service,
-  la VM évalue de nouveau la vue et n’envoie à OverCrow que ce qui a changé.
-  OverCrow met en page et dessine le widget lui-même : aucun moteur web
-  n’intervient.
+  la VM évalue de nouveau la vue et n’envoie à PlayerVox OverCrow que ce qui
+  a changé. OverCrow met en page et dessine le widget lui-même : aucun
+  moteur web n’intervient.
 - Tout ce qui touche à l’extérieur (réseau, stockage, presse-papiers,
-  données de jeu) est un service d’OverCrow. À chaque appel, celui-ci
-  vérifie les permissions que le widget a déclarées et que l’utilisateur a
-  accordées. Voir [services et permissions](services.md).
+  données de jeu) est un service de PlayerVox OverCrow. À chaque appel,
+  celui-ci vérifie les permissions que le widget a déclarées et que
+  l’utilisateur a accordées. Voir [services et permissions](services.md).
 
-Ces pages appellent OverCrow **l’hôte** quand elles décrivent ce qu’il fait
-pour un widget : l’hôte dessine la vue, répond aux services et conserve les
-données de l’utilisateur.
+Ces pages appellent PlayerVox OverCrow **l’hôte** quand elles décrivent ce
+qu’il fait pour un widget : l’hôte dessine la vue, répond aux services et
+conserve les données de l’utilisateur.
 
 ## Par où commencer
 
@@ -80,7 +80,7 @@ données de l’utilisateur.
    [services et permissions](services.md), les [formulaires](forms.md).
 4. Servez-vous des outils : la [CLI](cli.md), les [tests](testing.md) et le
    [canal de développement](dev-channel.md), qui exécute votre widget dans
-   OverCrow pendant que vous l’écrivez.
+   PlayerVox OverCrow pendant que vous l’écrivez.
 5. Cherchez un élément, une propriété de style, un service ou une fonction
    du SDK dans la [référence](reference.md).
 6. Avant de publier, lisez [le paquet](package.md),

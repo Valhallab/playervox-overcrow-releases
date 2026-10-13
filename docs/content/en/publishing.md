@@ -1,9 +1,9 @@
 # Publishing and review
 
 > **Pull requests are closed.** Widgets are no longer proposed by pull
-> request: PlayerVox's own widgets already go through the OverCrow creator
-> space, and yours will when it opens. Until then, this page describes the
-> admission, the review and the catalog a widget goes through.
+> request: PlayerVox's own widgets already go through the PlayerVox OverCrow
+> creator space, and yours will when it opens. Until then, this page
+> describes the admission, the review and the catalog a widget goes through.
 
 Widgets reach PlayerVox OverCrow users through the signed widget catalog:
 OverCrow installs only what that catalog lists. This page goes from a
@@ -86,7 +86,7 @@ overcrow-widget admit widgets/<dir> --format json
 your code or `tsc`:
 
 1. it builds the directory as `package` does: every source, style, logic
-   and package check, then OverCrow's own package reader;
+   and package check, then PlayerVox OverCrow's own package reader;
 2. with `--package`, your archive's compiled view must be byte for byte
    what `view.ocml` compiles to;
 3. it checks the schema bounds, the reserved IDs, `listing.json`, the
@@ -135,14 +135,15 @@ outside CI with the catalog key, whose public half is in
 - lists each version with the SHA-256 and the size of its package; a
   published version never changes, and a change is a new version;
 - carries a strictly increasing sequence number and expires after at most
-  90 days: OverCrow refuses an older sequence and an expired catalog;
+  90 days: PlayerVox OverCrow refuses an older sequence and an expired
+  catalog;
 - tags PlayerVox reference widgets `built-in` (only `com.playervox.*` IDs):
   they are installed on a new profile with their declared permissions
   granted, except for an update that asks for more.
 
-OverCrow verifies the signature, the package digest, its ledger and its
-compiled view before installing, and again each time it starts the widget.
-See [the package](package.md#how-overcrow-checks-a-package).
+PlayerVox OverCrow verifies the signature, the package digest, its ledger
+and its compiled view before installing, and again each time it starts the
+widget. See [the package](package.md#how-overcrow-checks-a-package).
 
 ## Updates
 

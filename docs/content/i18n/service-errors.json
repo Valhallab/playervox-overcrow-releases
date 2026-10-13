@@ -20,8 +20,8 @@
     "fr": "Ce sur quoi portait l’appel a changé avant la réponse : un autre jeu, un autre compte, un autre lecteur multimédia, un objet supprimé entre-temps. Relisez l’état courant."
   },
   "unavailable": {
-    "en": "OverCrow's source for this data failed, or cannot act right now. A subscription that ends with it can be started again later.",
-    "fr": "La source d’OverCrow pour ces données a échoué, ou ne peut pas agir pour l’instant. Un abonnement qui se termine ainsi peut être relancé plus tard."
+    "en": "PlayerVox OverCrow's source for this data failed, or cannot act right now. A subscription that ends with it can be started again later.",
+    "fr": "La source de PlayerVox OverCrow pour ces données a échoué, ou ne peut pas agir pour l’instant. Un abonnement qui se termine ainsi peut être relancé plus tard."
   },
   "busy": {
     "en": "Too much is in progress: a confirmation is already open, a queue or the budget of network responses is full, or the provider asks to wait. Try again later.",
@@ -40,8 +40,8 @@
     "fr": "La cible ne sait pas le faire : un lecteur multimédia qui ne propose pas la commande, par exemple."
   },
   "url_invalid": {
-    "en": "`http.fetch`: the URL is not an absolute HTTPS URL that OverCrow accepts.",
-    "fr": "`http.fetch` : l’URL n’est pas une URL HTTPS absolue qu’OverCrow accepte."
+    "en": "`http.fetch`: the URL is not an absolute HTTPS URL that PlayerVox OverCrow accepts.",
+    "fr": "`http.fetch` : l’URL n’est pas une URL HTTPS absolue que PlayerVox OverCrow accepte."
   },
   "resolve_failed": {
     "en": "`http.fetch`: the host name could not be resolved.",
@@ -52,28 +52,28 @@
     "fr": "`http.fetch` : le nom d’hôte se résout en une adresse locale, privée ou non publique."
   },
   "too_many_addresses": {
-    "en": "`http.fetch`: the host name resolves to more addresses than OverCrow accepts.",
-    "fr": "`http.fetch` : le nom d’hôte se résout en plus d’adresses qu’OverCrow n’en accepte."
+    "en": "`http.fetch`: the host name resolves to more addresses than PlayerVox OverCrow accepts.",
+    "fr": "`http.fetch` : le nom d’hôte se résout en plus d’adresses que PlayerVox OverCrow n’en accepte."
   },
   "peer_mismatch": {
     "en": "`http.fetch`: the server that answered is not at one of the addresses that were resolved and checked.",
     "fr": "`http.fetch` : le serveur qui a répondu n’est pas à l’une des adresses résolues et vérifiées."
   },
   "redirect_denied": {
-    "en": "`http.fetch`: the server answered with a redirection. OverCrow follows none: declare and request the final URL.",
-    "fr": "`http.fetch` : le serveur a répondu par une redirection. OverCrow n’en suit aucune : déclarez et demandez l’URL finale."
+    "en": "`http.fetch`: the server answered with a redirection. PlayerVox OverCrow follows none: declare and request the final URL.",
+    "fr": "`http.fetch` : le serveur a répondu par une redirection. PlayerVox OverCrow n’en suit aucune : déclarez et demandez l’URL finale."
   },
   "encoding_denied": {
-    "en": "`http.fetch`: the response is compressed or encoded in a way OverCrow does not accept, or its body does not decode as `as` asks (invalid JSON or text).",
-    "fr": "`http.fetch` : la réponse est compressée ou encodée d’une façon qu’OverCrow n’accepte pas, ou son corps ne se décode pas comme `as` le demande (JSON ou texte invalide)."
+    "en": "`http.fetch`: the response is compressed or encoded in a way PlayerVox OverCrow does not accept, or its body does not decode as `as` asks (invalid JSON or text).",
+    "fr": "`http.fetch` : la réponse est compressée ou encodée d’une façon que PlayerVox OverCrow n’accepte pas, ou son corps ne se décode pas comme `as` le demande (JSON ou texte invalide)."
   },
   "content_type_denied": {
-    "en": "`http.fetch`: the media type of the response is not one that OverCrow accepts for this request.",
-    "fr": "`http.fetch` : le type de média de la réponse n’est pas de ceux qu’OverCrow accepte pour cette requête."
+    "en": "`http.fetch`: the media type of the response is not one that PlayerVox OverCrow accepts for this request.",
+    "fr": "`http.fetch` : le type de média de la réponse n’est pas de ceux que PlayerVox OverCrow accepte pour cette requête."
   },
   "response_metadata_limit": {
-    "en": "`http.fetch`: the status line or the headers of the response are malformed or exceed OverCrow's bounds.",
-    "fr": "`http.fetch` : la ligne d’état ou les en-têtes de la réponse sont mal formés ou dépassent les limites d’OverCrow."
+    "en": "`http.fetch`: the status line or the headers of the response are malformed or exceed PlayerVox OverCrow's bounds.",
+    "fr": "`http.fetch` : la ligne d’état ou les en-têtes de la réponse sont mal formés ou dépassent les limites de PlayerVox OverCrow."
   },
   "request_body_limit": {
     "en": "`http.fetch`: the request body is larger than `MAX_HTTP_REQUEST_BYTES`.",

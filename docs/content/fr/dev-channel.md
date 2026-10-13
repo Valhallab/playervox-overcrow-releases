@@ -16,10 +16,10 @@ Ctrl+C.
 
 ## L’activer
 
-Le canal n’existe que tant qu’OverCrow s’exécute avec les installations de
-développement autorisées, c’est-à-dire lancé avec la variable
-d’environnement `OVERCROW_WIDGET_DEVELOPMENT=1`. Sans elle, l’overlay
-n’ouvre rien.
+Le canal n’existe que tant que PlayerVox OverCrow s’exécute avec les
+installations de développement autorisées, c’est-à-dire lancé avec la
+variable d’environnement `OVERCROW_WIDGET_DEVELOPMENT=1`. Sans elle,
+l’overlay n’ouvre rien.
 
 **Linux.** Définissez la variable pour les services de votre session, puis
 redémarrez l’overlay :
@@ -37,8 +37,8 @@ systemctl --user unset-environment OVERCROW_WIDGET_DEVELOPMENT
 systemctl --user restart overcrow-overlay.service
 ```
 
-**Windows.** Quittez OverCrow depuis son icône de la zone de notification,
-puis lancez-le depuis PowerShell :
+**Windows.** Quittez PlayerVox OverCrow depuis son icône de la zone de
+notification, puis lancez-le depuis PowerShell :
 
 ```text
 $env:OVERCROW_WIDGET_DEVELOPMENT='1'; & "$env:LOCALAPPDATA\Programs\OverCrow\OverCrow.exe"
@@ -136,5 +136,5 @@ l’utiliser : leur sandbox n’y a pas accès.
 
 C’est pourquoi le canal est désactivé par défaut. Une fois activé, tout
 programme que vous lancez peut afficher un widget non vérifié dans votre
-overlay, aussi longtemps qu’OverCrow s’exécute. Désactivez-le quand vous
-avez terminé.
+overlay, aussi longtemps que PlayerVox OverCrow s’exécute. Désactivez-le
+quand vous avez terminé.

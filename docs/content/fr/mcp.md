@@ -11,7 +11,7 @@ il a besoin.
 claude mcp add overcrow -- npx -y @overcrow/mcp
 ```
 
-Demandez ensuite : « Crée un widget OverCrow qui affiche… ».
+Demandez ensuite : « Crée un widget PlayerVox OverCrow qui affiche… ».
 
 ## Ajouter le serveur
 
@@ -87,22 +87,22 @@ Claude Desktop.
 
 ## Ce que fait le serveur
 
-- **La première fois**, il télécharge les outils créateurs OverCrow de
-  votre ordinateur ([l’outil en ligne de commande](cli.md) et le runtime
-  qui joue les [tests](testing.md), environ 15 Mo) depuis la release GitHub
-  d’OverCrow. Il vérifie chaque fichier avec les empreintes inscrites dans
-  le serveur, puis les garde dans son propre dossier
-  (`~/.cache/overcrow-mcp`, ou `%LOCALAPPDATA%\overcrow-mcp` sous Windows).
-  Rien ne s’ajoute à votre `PATH`, et aucun droit d’administrateur n’est
-  nécessaire.
+- **La première fois**, il télécharge les outils créateurs
+  PlayerVox OverCrow de votre ordinateur ([l’outil en ligne de
+  commande](cli.md) et le runtime qui joue les [tests](testing.md), environ
+  15 Mo) depuis la release GitHub d’OverCrow. Il vérifie chaque fichier avec
+  les empreintes inscrites dans le serveur, puis les garde dans son propre
+  dossier (`~/.cache/overcrow-mcp`, ou `%LOCALAPPDATA%\overcrow-mcp` sous
+  Windows). Rien ne s’ajoute à votre `PATH`, et aucun droit d’administrateur
+  n’est nécessaire.
 - **Ensuite**, votre assistant travaille avec ses outils, dans cet ordre :
   créer le widget depuis un modèle, installer le SDK (il vous le demande
   d’abord), vérifier, tester (il voit les images qui diffèrent), auditer,
   empaqueter, préparer la soumission.
 - **L’identifiant du widget** est définitif. Votre assistant vous le
-  demande : votre pseudo d’éditeur dans l’espace créateurs d’OverCrow et un
-  nom (`nova.lol-timers`), ou un domaine que vous pouvez vérifier
-  (`gg.nova.lol-timers`).
+  demande : votre pseudo d’éditeur dans l’espace créateurs de
+  PlayerVox OverCrow et un nom (`nova.lol-timers`), ou un domaine que vous
+  pouvez vérifier (`gg.nova.lol-timers`).
 - **La soumission** : le serveur vérifie tout ce que demande l’espace
   créateurs, puis écrit le zip des sources de votre widget dans `dist/`,
   sans `node_modules`, `dist`, fichiers cachés ni clés, et liste ce qu’il a
@@ -123,10 +123,11 @@ Claude Desktop.
 ## Ce qu’il ne fait pas
 
 - Il n’envoie, ne signe et ne publie jamais rien. Vous envoyez le zip et
-  les textes dans l’espace créateurs d’OverCrow, à l’adresse creators.playervox.com.
-- Il n’installe pas votre widget dans OverCrow : l’essayer en jeu passe par
-  le [canal de développement](dev-channel.md) de l’outil en ligne de
-  commande.
+  les textes dans l’espace créateurs de PlayerVox OverCrow, à l’adresse
+  creators.playervox.com.
+- Il n’installe pas votre widget dans PlayerVox OverCrow : l’essayer en jeu
+  passe par le [canal de développement](dev-channel.md) de l’outil en ligne
+  de commande.
 - Il n’envoie rien sur vous : ni télémétrie, ni compte.
 
 ## Sécurité
@@ -136,7 +137,8 @@ Claude Desktop.
   système, votre dossier personnel entier, les dossiers cachés et les liens
   qui mènent ailleurs.
 - **Aucune commande de son choix.** Le serveur lance l’outil en ligne de
-  commande d’OverCrow et npm, rien d’autre, jamais à travers un shell.
+  commande de PlayerVox OverCrow et npm, rien d’autre, jamais à travers un
+  shell.
 - **Téléchargements vérifiés.** Il ne télécharge que les fichiers épinglés
   depuis GitHub, et les vérifie avant de s’en servir. npm n’installe que
   `@overcrow/sdk` et TypeScript, sans scripts d’installation, et leur
@@ -150,8 +152,8 @@ Claude Desktop.
 
 ## Hors ligne
 
-Téléchargez une fois depuis la release GitHub d’OverCrow le fichier
-`overcrow-creator-tools-VERSION-PLATFORME.zip` de votre plateforme,
+Téléchargez une fois depuis la release GitHub de PlayerVox OverCrow le
+fichier `overcrow-creator-tools-VERSION-PLATFORME.zip` de votre plateforme,
 placez-le dans votre dossier de widgets, et demandez à votre assistant de
 lancer `setup` avec ce fichier (`zipPath`). Ou lancez le serveur avec
 `--tools-zip` et le chemin du fichier. Le fichier doit être exactement celui

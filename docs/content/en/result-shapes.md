@@ -36,9 +36,9 @@ the view reads its members:
 - A member that goes with `offsetMinutes` is a timestamp to format with
   that UTC offset; see
   [time, dates and numbers](logic.md#time-dates-and-numbers).
-- An `asset:` handle is an image that OverCrow holds for the widget: bind
-  it to the `src` of an `image` or an `avatar`, or draw it on a canvas. It
-  is not a URL and cannot be read as bytes.
+- An `asset:` handle is an image that PlayerVox OverCrow holds for the
+  widget: bind it to the `src` of an `image` or an `avatar`, or draw it on a
+  canvas. It is not a URL and cannot be read as bytes.
 - A subscription whose shape is "… or `null`" delivers `null` when there is
   nothing to show: no active game, no media player.
 

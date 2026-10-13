@@ -64,8 +64,8 @@ ne sert pas et raccourcit les noms locaux. Deux conséquences :
 - la vue elle-même ne contient aucun code : `view.json` désigne les
   fonctions de `logic.js` par leur numéro.
 
-Un paquet contient des sources qu’OverCrow peut lire et vérifier, jamais de
-bytecode compilé.
+Un paquet contient des sources que PlayerVox OverCrow peut lire et vérifier,
+jamais de bytecode compilé.
 
 ## Les mêmes octets à chaque fois
 
@@ -84,14 +84,15 @@ produite par un autre outil zip est refusée.
 ## Le registre
 
 `ledger.json`, écrit par l’outil, liste tous les autres fichiers avec leur
-taille et leur SHA-256. OverCrow le recalcule à partir de l’archive et
-exige les mêmes octets. C’est lui qui lie chaque fichier au paquet : un
-fichier modifié, ajouté ou retiré après l’empaquetage ne correspond plus.
+taille et leur SHA-256. PlayerVox OverCrow le recalcule à partir de
+l’archive et exige les mêmes octets. C’est lui qui lie chaque fichier au
+paquet : un fichier modifié, ajouté ou retiré après l’empaquetage ne
+correspond plus.
 
 ## Comment OverCrow vérifie un paquet
 
-OverCrow valide un paquet en entier lors de son admission au catalogue,
-lors de son installation, puis **à chaque démarrage du widget** :
+PlayerVox OverCrow valide un paquet en entier lors de son admission au
+catalogue, lors de son installation, puis **à chaque démarrage du widget** :
 
 1. la taille de l’archive, sa structure exacte et la somme de contrôle de
    chaque entrée ;

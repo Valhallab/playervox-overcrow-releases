@@ -7,7 +7,7 @@ d’options. Vous l’écrivez à la main ; il est empaqueté tel quel.
 
 Le fichier est un seul objet JSON strict. Une marque d’ordre des octets, une
 clé en double, des données après l’objet ou un champ inconnu le font
-refuser : OverCrow n’ignore aucun champ.
+refuser : PlayerVox OverCrow n’ignore aucun champ.
 
 ## Un exemple complet
 
@@ -93,13 +93,13 @@ valeurs qu’il remplit. Voici un manifeste avec des permissions et un menu :
 
 - **`id`** est l’identité du widget partout : dans le catalogue, dans le
   profil de l’utilisateur, dans son stockage. Il s’écrit `<pseudo>.<nom>`,
-  votre pseudo d’éditeur dans l’espace créateurs d’OverCrow et un nom
-  (`nova.lol-timers`), ou, une fois un domaine vérifié, ce domaine inversé
-  et un nom (`gg.nova.lol-timers`). Un ID est définitif : il n’est jamais
-  donné à un autre widget, même après la suppression du vôtre. `nova`,
-  `example`, `yourhandle` et `yourname` sont des pseudos d’exemple sous
-  lesquels personne ne peut publier, et les ID sous `com.playervox` sont
-  réservés aux widgets publiés par PlayerVox.
+  votre pseudo d’éditeur dans l’espace créateurs de PlayerVox OverCrow et un
+  nom (`nova.lol-timers`), ou, une fois un domaine vérifié, ce domaine
+  inversé et un nom (`gg.nova.lol-timers`). Un ID est définitif : il n’est
+  jamais donné à un autre widget, même après la suppression du vôtre.
+  `nova`, `example`, `yourhandle` et `yourname` sont des pseudos d’exemple
+  sous lesquels personne ne peut publier, et les ID sous `com.playervox`
+  sont réservés aux widgets publiés par PlayerVox.
 - **`version`** est une version sémantique. Une version publiée ne change
   jamais : toute modification d’un widget publié est une nouvelle version,
   supérieure.
@@ -107,9 +107,9 @@ valeurs qu’il remplit. Voici un manifeste avec des permissions et un menu :
 
 ### Noms
 
-`name` donne le nom qu’OverCrow affiche dans sa liste de widgets et dans ses
-menus, en anglais et en français. Les deux sont obligatoires. Un nom
-s’affiche tel qu’il est écrit : ni caractère de contrôle, ni caractère
+`name` donne le nom que PlayerVox OverCrow affiche dans sa liste de widgets
+et dans ses menus, en anglais et en français. Les deux sont obligatoires. Un
+nom s’affiche tel qu’il est écrit : ni caractère de contrôle, ni caractère
 invisible ou de sens d’écriture, comme U+200B (espace sans chasse) ou
 U+202E (forçage de droite à gauche). Les libellés du menu suivent la même
 règle.
@@ -124,10 +124,10 @@ règle.
 ## Tailles
 
 `sizing` indique la taille du widget quand l’utilisateur l’ajoute, jusqu’où
-celui-ci peut le réduire et l’agrandir, et si OverCrow peut ajuster son
-cadre à son contenu. Les longueurs sont en pixels logiques, à une échelle de
-100 % ; l’échelle du contenu choisie par l’utilisateur (de 50 % à 175 %)
-les multiplie.
+celui-ci peut le réduire et l’agrandir, et si PlayerVox OverCrow peut
+ajuster son cadre à son contenu. Les longueurs sont en pixels logiques, à
+une échelle de 100 % ; l’échelle du contenu choisie par l’utilisateur (de 50
+% à 175 %) les multiplie.
 
 <!-- generated:manifest-sizing -->
 | Champ | Type | Obligatoire | Signification |
@@ -149,12 +149,12 @@ les multiplie.
 | `height` | entier de 1 à 4096 | oui | Pixels logiques. |
 <!-- /generated:manifest-dimensions -->
 
-Avec `fit: "both"`, OverCrow donne au cadre la taille dont la vue a besoin,
-dans les deux directions : l’Horloge grandit quand l’utilisateur active les
-secondes. Avec `fit: "height"`, l’utilisateur choisit la largeur et la
-hauteur suit le contenu. Avec `fit: "none"`, le cadre garde la taille que
-l’utilisateur lui a donnée et la vue le remplit. L’utilisateur peut toujours
-redimensionner à la main.
+Avec `fit: "both"`, PlayerVox OverCrow donne au cadre la taille dont la vue
+a besoin, dans les deux directions : l’Horloge grandit quand l’utilisateur
+active les secondes. Avec `fit: "height"`, l’utilisateur choisit la largeur
+et la hauteur suit le contenu. Avec `fit: "none"`, le cadre garde la taille
+que l’utilisateur lui a donnée et la vue le remplit. L’utilisateur peut
+toujours redimensionner à la main.
 
 <!-- source: widgets/clock/manifest.json -->
 ```json
@@ -196,12 +196,13 @@ les [règles réseau](services.md#règles-réseau).
 
 ## Le menu d’options
 
-Chaque widget a un menu d’options, ouvert depuis son cadre. OverCrow y place
-d’abord ses propres lignes : opacité, taille du contenu, ajustement au
-contenu et, si le widget en a besoin, son compte. La visibilité en mode
-passif est l’œil de la barre d’outils du widget, pas une ligne du menu.
-`wrapper.menu` ajoute les vôtres en dessous : bascules, curseurs, choix,
-actions et groupes, chacun avec un libellé dans les deux langues.
+Chaque widget a un menu d’options, ouvert depuis son cadre.
+PlayerVox OverCrow y place d’abord ses propres lignes : opacité, taille du
+contenu, ajustement au contenu et, si le widget en a besoin, son compte. La
+visibilité en mode passif est l’œil de la barre d’outils du widget, pas une
+ligne du menu. `wrapper.menu` ajoute les vôtres en dessous : bascules,
+curseurs, choix, actions et groupes, chacun avec un libellé dans les deux
+langues.
 
 Le menu prend la largeur de sa ligne la plus large, de 248 à 320 points.
 Au-delà, un libellé se termine par « … » et s’affiche en entier dans une
@@ -240,8 +241,8 @@ libellés courts, dans les deux langues.
   }
 ```
 
-OverCrow dessine les lignes, enregistre leurs valeurs dans le profil de
-l’utilisateur et les donne à la logique : lisez une valeur avec
+PlayerVox OverCrow dessine les lignes, enregistre leurs valeurs dans le
+profil de l’utilisateur et les donne à la logique : lisez une valeur avec
 `option(id, fallback)` et suivez les changements avec `onHost`. Une ligne
 `action` n’a pas de valeur : elle appelle le gestionnaire que vous avez
 enregistré avec `onMenu`. Voir
@@ -357,8 +358,8 @@ Chaque entrée de `choices` est une valeur et son libellé :
 Au premier niveau du manifeste, `requires` liste les sources de données sans
 lesquelles le widget ne peut pas fonctionner, avec les mêmes noms que le
 `requires` d’une ligne. Sur une machine à laquelle il en manque une,
-OverCrow ne démarre pas le widget, ne l’affiche pas et conserve sa place
-dans la disposition ; le widget revient quand la source revient.
+PlayerVox OverCrow ne démarre pas le widget, ne l’affiche pas et conserve sa
+place dans la disposition ; le widget revient quand la source revient.
 Utilisez-le pour un widget qui n’a rien d’autre à afficher, comme un
 compteur d’images par seconde sans source de fréquence d’images. Pour une
 seule valeur facultative, préférez le `requires` d’une ligne.
@@ -380,8 +381,8 @@ grand laisse donc moins de place à tout le reste. Ne le demandez que si
 
 ## Comment le manifeste est vérifié
 
-`overcrow-widget check` valide le manifeste avec le validateur qu’OverCrow
-exécute lui-même, et désigne le membre qu’il refuse :
+`overcrow-widget check` valide le manifeste avec le validateur que
+PlayerVox OverCrow exécute lui-même, et désigne le membre qu’il refuse :
 
 ```text
 error[manifest.sizing]: `sizing` is out of bounds or inconsistent
@@ -393,9 +394,9 @@ error[manifest.sizing]: `sizing` is out of bounds or inconsistent
 check: 1 error(s), 0 warning(s)
 ```
 
-OverCrow le valide de nouveau quand le paquet est admis dans le catalogue,
-quand il est installé et à chaque démarrage du widget. Une nouvelle version
-dont le manifeste demande plus que la précédente (une règle réseau, un
-événement de jeu, une capability, le stockage ou le presse-papiers) attend
-que l’utilisateur l’approuve dans le Centre de contrôle avant de remplacer
-la version installée.
+PlayerVox OverCrow le valide de nouveau quand le paquet est admis dans le
+catalogue, quand il est installé et à chaque démarrage du widget. Une
+nouvelle version dont le manifeste demande plus que la précédente (une règle
+réseau, un événement de jeu, une capability, le stockage ou le
+presse-papiers) attend que l’utilisateur l’approuve dans le Centre de
+contrôle avant de remplacer la version installée.

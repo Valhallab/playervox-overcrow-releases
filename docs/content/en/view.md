@@ -57,8 +57,8 @@ in text, are refused: write `&lbrace;` and `&rbrace;`.
 Each element has a fixed content, a set of attributes and the events it can
 send. Containers (`box`, `scroll`, `list`, `form`, `popover`, `button`)
 hold other elements; `text` holds text and inline children; the others are
-leaves that OverCrow draws: `icon`, `image`, `toggle`, `slider`, `field`,
-`chart`, `gauge`…
+leaves that PlayerVox OverCrow draws: `icon`, `image`, `toggle`, `slider`,
+`field`, `chart`, `gauge`…
 
 <!-- generated:element-list -->
 | Element | Meaning |
@@ -132,9 +132,10 @@ view is compiled:
 | text, identifier | the text itself |
 | image | a file of the package: `src="assets/logo.png"` |
 
-`attr={expression}` binds the attribute to an expression instead; OverCrow
-checks every value the widget sends. Values that exist only when the widget
-runs, such as an image handed by a service, must be bound.
+`attr={expression}` binds the attribute to an expression instead;
+PlayerVox OverCrow checks every value the widget sends. Values that exist
+only when the widget runs, such as an image handed by a service, must be
+bound.
 
 Five attributes exist on every element:
 
@@ -176,8 +177,8 @@ a component, where it would name several nodes.
 
 ## Events
 
-`on:event={handler}` asks OverCrow to send an event of the element to the
-logic. Without it, the widget does not hear about the event at all: a
+`on:event={handler}` asks PlayerVox OverCrow to send an event of the element
+to the logic. Without it, the widget does not hear about the event at all: a
 widget is not told about pointer moves or key presses it has not asked for.
 
 A handler is written in one of two ways:
@@ -202,8 +203,8 @@ The events are `activate`, `contextmenu`, `wheel`, `keydown`, `input`,
 and each [element](elements.md#elements) lists the ones it sends. Some of
 them are user actions, during which a widget may call a protected service;
 see [calls that need a user action](services.md#calls-that-need-a-user-action).
-Widgets receive input only in OverCrow's Interactive mode: in Passive mode,
-clicks go through them to the game.
+Widgets receive input only in PlayerVox OverCrow's Interactive mode: in
+Passive mode, clicks go through them to the game.
 
 ## Conditions, loops and components
 
@@ -236,7 +237,7 @@ may separate them.
 
 `for` repeats its children for each item of a list. `each`, `as` and `key`
 are all required, and the key must be unique among the repeated items: it
-is how OverCrow knows which row moved, appeared or went away.
+is how PlayerVox OverCrow knows which row moved, appeared or went away.
 
 <!-- source: widgets/warframe-market/view.ocml -->
 ```xml
@@ -248,8 +249,8 @@ is how OverCrow knows which row moved, appeared or went away.
       </for>
 ```
 
-For a long list, put the `for` in a `list` element: OverCrow lays out and
-paints only the rows that are visible.
+For a long list, put the `for` in a `list` element: PlayerVox OverCrow lays
+out and paints only the rows that are visible.
 
 ### Components
 

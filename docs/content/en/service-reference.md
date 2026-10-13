@@ -229,7 +229,7 @@ update.
 
 ### `notes.delete`
 
-- **Kind**: call, answered once; the user confirms it first, in a dialog drawn by OverCrow
+- **Kind**: call, answered once; the user confirms it first, in a dialog drawn by PlayerVox OverCrow
 - **Requires**: capability `notes.write`
 - **When it can be called**: Only during a user action
 - **Parameters**: `note`: text ≤ 128 bytes
@@ -292,7 +292,7 @@ update.
 
 ### `journal.delete`
 
-- **Kind**: call, answered once; the user confirms it first, in a dialog drawn by OverCrow
+- **Kind**: call, answered once; the user confirms it first, in a dialog drawn by PlayerVox OverCrow
 - **Requires**: capability `journal.delete`
 - **When it can be called**: Only during a user action
 - **Parameters**: `session`: text ≤ 128 bytes

@@ -6,10 +6,10 @@ bureau, sans jeu et sans compte :
 - **Les tests unitaires de la logique**, dans Node.js, avec
   `@overcrow/sdk/testing` : rapides, pour les fonctions de `logic.ts`.
 - **Les scénarios**, joués par `overcrow-widget test` dans le **runtime
-  headless** d’OverCrow : la vraie VM, le vrai style, la vraie mise en page
-  et le vrai moteur de rendu, les vérifications d’OverCrow lui-même, des
-  services simulés, un temps virtuel et des images de référence. Ce qui
-  passe là est ce que l’overlay affiche.
+  headless** de PlayerVox OverCrow : la vraie VM, le vrai style, la vraie
+  mise en page et le vrai moteur de rendu, les vérifications d’OverCrow
+  lui-même, des services simulés, un temps virtuel et des images de
+  référence. Ce qui passe là est ce que l’overlay affiche.
 
 <!-- source: templates/counter/tests/example.scenario.json -->
 ```json
@@ -37,11 +37,11 @@ image.
 projet créé par `overcrow-widget init`, sinon
 `npm install --save-dev --save-exact @overcrow/sdk@1.0.0`.
 
-`installRuntime()` met en place une doublure d’OverCrow avant l’import de la
-logique : les appels de service renvoient des promesses que votre test
-résout ou rejette, les abonnements reçoivent les valeurs que vous poussez,
-les minuteurs se déclenchent quand vous avancez le temps, et `Date.now()`
-est virtuel.
+`installRuntime()` met en place une doublure de PlayerVox OverCrow avant
+l’import de la logique : les appels de service renvoient des promesses que
+votre test résout ou rejette, les abonnements reçoivent les valeurs que vous
+poussez, les minuteurs se déclenchent quand vous avancez le temps, et
+`Date.now()` est virtuel.
 
 <!-- source: widgets/clock/tests/logic.test.mjs -->
 ```js
@@ -77,7 +77,7 @@ test("one timer at the next local minute, then each minute", () => {
 | --- | --- |
 | `installRuntime({ now, host })` | Installe la doublure ; `Date.now()` renvoie le temps virtuel. Une seule à la fois. |
 | `now`, `advance(ms)` | Le temps virtuel ; `advance` déclenche, dans l’ordre, les minuteurs arrivés à échéance (un minuteur répétitif se réarme) et renvoie leur nombre. |
-| `setHost(changes)` | Modifie `host` comme le fait OverCrow : `region`, `locale`, `options`… |
+| `setHost(changes)` | Modifie `host` comme le fait PlayerVox OverCrow : `region`, `locale`, `options`… |
 | `calls`, `lastCall(service)` | Chaque appel de service, avec `resolve(value)` et `reject(code)`. |
 | `push(service, value)`, `fail(service, code)` | La prochaine mise à jour, ou l’échec final, des abonnements à un service. |
 | `menu(row)` | Choisit une ligne `action` du menu d’options. |
@@ -85,10 +85,10 @@ test("one timer at the next local minute, then each minute", () => {
 | `uninstall()` | Retire la doublure et restaure `Date.now`. |
 
 La doublure n’exécute que votre logique : elle n’applique pas les règles
-d’OverCrow (les autorisations accordées, les comptes, la règle de l’action
-de l’utilisateur) et ne rend rien. Les scénarios, eux, le font. Les widgets
-de référence compilent leur `logic.ts` avec un petit chargeur avant de
-l’importer :
+de PlayerVox OverCrow (les autorisations accordées, les comptes, la règle de
+l’action de l’utilisateur) et ne rend rien. Les scénarios, eux, le font. Les
+widgets de référence compilent leur `logic.ts` avec un petit chargeur avant
+de l’importer :
 
 <!-- source: widgets/clock/tests/load-logic.mjs -->
 ```js
@@ -149,13 +149,13 @@ Tout est facultatif.
 | `size` | la taille préférée du manifeste | `{ width, height }` du cadre, en pixels logiques ; le `fit` du manifeste s’applique quand même. |
 | `mode` | `passive` | `interactive` donne les entrées au widget. |
 | `visible` | `true` | Masqué, le widget ne reçoit aucun déclenchement de minuteur. |
-| `frame` | `false` | `true` capture le cadre d’OverCrow autour du contenu. |
+| `frame` | `false` | `true` capture le cadre de PlayerVox OverCrow autour du contenu. |
 | `background` | la couleur de panneau du thème | `#rrggbb` derrière le widget. |
 | `region` | `us`, ordre de date de la langue | `{ numberFormat, dateOrder }`. |
 | `zone` | UTC | `{ offsetMinutes, transitions: [{ at, offsetMinutes }] }` : le décalage UTC de l’utilisateur, et les instants où il change. |
 | `startAt` | 2026-01-01T00:00:00Z | Le temps virtuel auquel le widget démarre, en millisecondes Unix. |
 | `options` | les valeurs par défaut des lignes | Les valeurs des lignes du menu d’options. |
-| `grants` | `"declared"` | Ou la liste exacte de ce que l’utilisateur a accordé (`storage`, `network`, `fps.read`…) : OverCrow refuse le reste. |
+| `grants` | `"declared"` | Ou la liste exacte de ce que l’utilisateur a accordé (`storage`, `network`, `fps.read`…) : PlayerVox OverCrow refuse le reste. |
 | `accounts` | connectés | `{ playervox, twitch }`, chacun valant `connected`, `disconnected`, `pending`, `expired` ou `offline`. |
 | `features` | toutes | Les sources de données de la machine, pour `requires`. |
 | `storage` | vide | Le stockage du widget avant son démarrage. |
@@ -180,15 +180,15 @@ Tout est facultatif.
   },
 ```
 
-Avec un compte qui n’est pas `connected`, OverCrow dessine son propre
-panneau de compte par-dessus le widget, comme il le fait pour
+Avec un compte qui n’est pas `connected`, PlayerVox OverCrow dessine son
+propre panneau de compte par-dessus le widget, comme il le fait pour
 l’utilisateur ; capturez-le avec `frame`.
 
 ### `fixtures`
 
 Les fixtures remplacent la provenance des données, jamais les vérifications
-d’OverCrow. Un appel franchit d’abord les mêmes contrôles que dans
-l’overlay : autorisations accordées, paramètres, règle de l’action de
+de PlayerVox OverCrow. Un appel franchit d’abord les mêmes contrôles que
+dans l’overlay : autorisations accordées, paramètres, règle de l’action de
 l’utilisateur et compte. C’est seulement ensuite qu’une fixture lui répond.
 Chaque valeur doit avoir la forme du [résultat](result-shapes.md) du
 service : une valeur qui ne l’a pas est une erreur du scénario, pas du
@@ -199,7 +199,7 @@ widget.
 | `subscriptions` | La valeur d’un abonnement à son démarrage ; les étapes `publish` envoient les suivantes. |
 | `calls` | Les réponses aux appels d’un service, dans l’ordre : `{ "value": … }` ou `{ "error": code }`. Un appel au-delà est une erreur du scénario. |
 | `http` | Les réponses aux requêtes `http.fetch`, chacune utilisée une fois : `{ "request": { method, url }, "response": { status, contentType, body } }` (ou `bodyBase64`), ou `{ "request": …, "error": code }`. Les règles réseau du manifeste s’appliquent d’abord, et les limites de réponse s’appliquent comme dans l’overlay. |
-| `confirmations` | `accept` ou `cancel`, dans l’ordre, pour la confirmation par OverCrow de `notes.delete` et `journal.delete`. |
+| `confirmations` | `accept` ou `cancel`, dans l’ordre, pour la confirmation par PlayerVox OverCrow de `notes.delete` et `journal.delete`. |
 | `intents` | La réponse à chaque [intent d’écriture](forms.md#les-formulaires-qui-écrivent-des-données-de-lutilisateur) envoyé, dans l’ordre : `"accepted"`, `{ "error": code }` ou `"pending"`. |
 
 <!-- source: widgets/stopwatch/tests/errors.scenario.json -->
@@ -275,7 +275,7 @@ widget.
     ]
 ```
 
-Les codes qu’OverCrow attribue lui-même (`permission_denied`,
+Les codes que PlayerVox OverCrow attribue lui-même (`permission_denied`,
 `gesture_required`, `not_connected`, `invalid_request`) ne peuvent pas
 s’écrire dans une fixture : obtenez-les par la voie réelle, avec `grants`,
 `accounts`, un appel hors d’une action de l’utilisateur ou des paramètres
@@ -284,11 +284,11 @@ d’OverCrow et n’ont besoin d’aucune fixture.
 
 ### `assets`
 
-Des images qu’une fixture remet au widget, comme OverCrow lui remet la
-pochette d’un média ou une emote du chat : `{ "<name>": "<path>" }`, 8 au
-plus, chacune étant un PNG ou un JPEG du projet (`tests/assets/cover.png`).
-Là où un résultat contient un identifiant d’image, la fixture écrit
-`"fixture:<name>"`.
+Des images qu’une fixture remet au widget, comme PlayerVox OverCrow lui
+remet la pochette d’un média ou une emote du chat :
+`{ "<name>": "<path>" }`, 8 au plus, chacune étant un PNG ou un JPEG du
+projet (`tests/assets/cover.png`). Là où un résultat contient un identifiant
+d’image, la fixture écrit `"fixture:<name>"`.
 
 ### `steps`
 
@@ -324,7 +324,7 @@ qu’il a reçu et plus rien n’est en cours. Il n’y a aucune attente réelle
 | `state` | `starting`, `running`, `restarting`, `failed`, `refused` ou `stopped`. |
 | `fault` | La dernière faute de la VM du widget, ou `none`. |
 | `clipboard` | Le dernier texte que le widget a écrit dans le presse-papiers. |
-| `intents` | Exactement ces intents d’écriture ont été envoyés depuis la vérification `intents` précédente, dans l’ordre : `{ intent, fields?, outcome? }`. `fields` contient les valeurs exactes que le formulaire d’OverCrow a envoyées. |
+| `intents` | Exactement ces intents d’écriture ont été envoyés depuis la vérification `intents` précédente, dans l’ordre : `{ intent, fields?, outcome? }`. `fields` contient les valeurs exactes que le formulaire de PlayerVox OverCrow a envoyées. |
 
 <!-- source: templates/chart/tests/example.scenario.json -->
 ```json
@@ -378,8 +378,8 @@ mêmes octets, sous Linux comme sous Windows.
 - Le temps est virtuel : `Date.now()` et `new Date()` renvoient le temps du
   scénario, et les minuteurs se déclenchent quand le scénario l’avance.
 - `Math.random()` est initialisé avec une graine fixe.
-- Le texte utilise les polices fournies avec OverCrow, jamais celles du
-  système.
+- Le texte utilise les polices fournies avec PlayerVox OverCrow, jamais
+  celles du système.
 - Le rendu ne dépend pas de la carte graphique.
 
 Cela ne vaut que pour le runtime de test : dans l’overlay, le temps et le
@@ -387,18 +387,18 @@ hasard sont réels.
 
 ## Le runtime headless
 
-`overcrow-widget-headless` est le code d’OverCrow lui-même, sans fenêtre :
-il valide le paquet comme le fait l’overlay et exécute la logique du widget
-dans le même sandbox. `overcrow-widget test` exécute la version que la CLI
-épingle, 0.7.1-beta.1, et affiche sa version et son SHA-256. Sans le
-sandbox du système d’exploitation, le runtime refuse de s’exécuter et le
+`overcrow-widget-headless` est le code de PlayerVox OverCrow lui-même, sans
+fenêtre : il valide le paquet comme le fait l’overlay et exécute la logique
+du widget dans le même sandbox. `overcrow-widget test` exécute la version
+que la CLI épingle, 0.7.1-beta.1, et affiche sa version et son SHA-256. Sans
+le sandbox du système d’exploitation, le runtime refuse de s’exécuter et le
 dit ; la commande de test se termine alors avec le code 2.
 
 La première fois que `test` a besoin du runtime, il le télécharge : dans
-le ZIP des outils créateurs de votre plateforme, dans la release OverCrow
-qui l’a publié, il ne garde que le runtime, et seulement si son SHA-256
-est celui que la CLI épingle. Le ZIP n’est pas conservé. Le runtime reste
-ensuite dans le cache de la CLI :
+le ZIP des outils créateurs de votre plateforme, dans la release
+PlayerVox OverCrow qui l’a publié, il ne garde que le runtime, et seulement
+si son SHA-256 est celui que la CLI épingle. Le ZIP n’est pas conservé. Le
+runtime reste ensuite dans le cache de la CLI :
 
 | Plateforme | Chemin |
 | --- | --- |
@@ -413,5 +413,5 @@ défini dans `HTTPS_PROXY` est utilisé.
 La CLI vérifie son SHA-256 avant chaque exécution. Si un téléchargement
 échoue, rien n’est conservé et `test` propose de réessayer ou de passer
 `--runtime`. `--runtime <path>` exécute un autre runtime à la place, par
-exemple compilé depuis OverCrow ; la sortie dit alors que ce n’est pas le
-runtime épinglé.
+exemple compilé depuis PlayerVox OverCrow ; la sortie dit alors que ce n’est
+pas le runtime épinglé.

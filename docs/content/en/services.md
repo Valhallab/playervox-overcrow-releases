@@ -28,8 +28,8 @@ Two kinds of authority exist, both declared in `permissions` of
 - four **permissions** for general services: `network`, `storage`,
   `clipboardWrite` and `gameEvents`;
 - **capabilities**, listed under `permissions.capabilities`, for the data
-  and actions of OverCrow itself and of the user's accounts: the frame
-  rate, the media player, notes, PlayerVox ratings, Twitch chat…
+  and actions of PlayerVox OverCrow itself and of the user's accounts: the
+  frame rate, the media player, notes, PlayerVox ratings, Twitch chat…
 
 <!-- source: docs/content/examples/weather/manifest.json -->
 ```json
@@ -89,9 +89,9 @@ async function readStored(key: string): Promise<JsonValue | undefined> {
 }
 ```
 
-**A subscription** takes a listener. OverCrow calls it with the current
-value at once, then with each new value, until you `cancel()` it or it
-ends with a failure. The listener comes last; a service with parameters
+**A subscription** takes a listener. PlayerVox OverCrow calls it with the
+current value at once, then with each new value, until you `cancel()` it or
+it ends with a failure. The listener comes last; a service with parameters
 takes them first.
 
 <!-- source: widgets/media/logic.ts -->
@@ -123,10 +123,10 @@ Services are grouped in namespaces of the SDK: `storage`, `http`,
 `twitch`). Every service, with its parameters and its result, is in the
 [service reference](service-reference.md).
 
-OverCrow checks every call when it arrives, in this order: the permission
-or capability, the parameters, the user action when the service needs one,
-then the account when it needs one. The SDK's types help you call a
-service right; they are not what enforces the rules.
+PlayerVox OverCrow checks every call when it arrives, in this order: the
+permission or capability, the parameters, the user action when the service
+needs one, then the account when it needs one. The SDK's types help you call
+a service right; they are not what enforces the rules.
 
 ## Errors
 
@@ -160,20 +160,20 @@ subscription that fails delivers the same error in its last update.
 | `gesture_required` | The service can be called only during a user action, and this call was not made while one was handled, or that action already allowed another call. |
 | `not_connected` | The service needs the user's PlayerVox or Twitch account, which is not connected at the moment. |
 | `stale_context` | What the call was about changed before the answer: another game, another account, another media player, an object deleted meanwhile. Read the current state again. |
-| `unavailable` | OverCrow's source for this data failed, or cannot act right now. A subscription that ends with it can be started again later. |
+| `unavailable` | PlayerVox OverCrow's source for this data failed, or cannot act right now. A subscription that ends with it can be started again later. |
 | `busy` | Too much is in progress: a confirmation is already open, a queue or the budget of network responses is full, or the provider asks to wait. Try again later. |
 | `cancelled` | The user declined the confirmation, or left Interactive mode while it was open. |
 | `quota_exceeded` | A quota is full: the storage, the timers, the notes, the favourite channels. |
 | `unsupported` | The target cannot do this: a media player that does not offer the command, for instance. |
-| `url_invalid` | `http.fetch`: the URL is not an absolute HTTPS URL that OverCrow accepts. |
+| `url_invalid` | `http.fetch`: the URL is not an absolute HTTPS URL that PlayerVox OverCrow accepts. |
 | `resolve_failed` | `http.fetch`: the host name could not be resolved. |
 | `address_denied` | `http.fetch`: the host name resolves to a local, private or otherwise non-public address. |
-| `too_many_addresses` | `http.fetch`: the host name resolves to more addresses than OverCrow accepts. |
+| `too_many_addresses` | `http.fetch`: the host name resolves to more addresses than PlayerVox OverCrow accepts. |
 | `peer_mismatch` | `http.fetch`: the server that answered is not at one of the addresses that were resolved and checked. |
-| `redirect_denied` | `http.fetch`: the server answered with a redirection. OverCrow follows none: declare and request the final URL. |
-| `encoding_denied` | `http.fetch`: the response is compressed or encoded in a way OverCrow does not accept, or its body does not decode as `as` asks (invalid JSON or text). |
-| `content_type_denied` | `http.fetch`: the media type of the response is not one that OverCrow accepts for this request. |
-| `response_metadata_limit` | `http.fetch`: the status line or the headers of the response are malformed or exceed OverCrow's bounds. |
+| `redirect_denied` | `http.fetch`: the server answered with a redirection. PlayerVox OverCrow follows none: declare and request the final URL. |
+| `encoding_denied` | `http.fetch`: the response is compressed or encoded in a way PlayerVox OverCrow does not accept, or its body does not decode as `as` asks (invalid JSON or text). |
+| `content_type_denied` | `http.fetch`: the media type of the response is not one that PlayerVox OverCrow accepts for this request. |
+| `response_metadata_limit` | `http.fetch`: the status line or the headers of the response are malformed or exceed PlayerVox OverCrow's bounds. |
 | `request_body_limit` | `http.fetch`: the request body is larger than 256 KiB. |
 | `response_body_limit` | `http.fetch`: the response body is larger than the bound of the network rule (`maxResponseBytes`, or 1 MiB without it and for `as: "image"`). |
 | `image_invalid` | `http.fetch` with `as: "image"`: the response is not a PNG, JPEG or WebP image within the image limits. |
@@ -185,8 +185,8 @@ Three habits cover most cases:
 
 - **Show a state, not an error message.** The codes are for your logic;
   the user sees "Forecast unavailable", not `transport_failed`.
-- **Retry a subscription that ended.** A source of OverCrow can fail while
-  the widget runs (the media player's session, for instance): the
+- **Retry a subscription that ended.** A source of PlayerVox OverCrow can
+  fail while the widget runs (the media player's session, for instance): the
   subscription ends with `unavailable`. Subscribe again a few seconds later
   with `timers.after`; OverCrow restarts the source for the new
   subscription. The Media widget waits five seconds:
@@ -231,10 +231,11 @@ The same call from a timer, from the answer of another service, from
 
 - One user action allows one protected call. Call the service directly in
   the handler, not after an `await` on something else.
-- Widgets receive input only in OverCrow's Interactive mode, so a protected
-  call can only happen there.
+- Widgets receive input only in PlayerVox OverCrow's Interactive mode, so a
+  protected call can only happen there.
 - `notes.delete` and `journal.delete` also ask the user to confirm, in a
-  dialog drawn by OverCrow; a declined confirmation is `cancelled`.
+  dialog drawn by PlayerVox OverCrow; a declined confirmation is
+  `cancelled`.
 
 The tables below say, for each service, when it can be called.
 
@@ -326,8 +327,8 @@ Each path and query parameter has a constraint:
 | `string` | `{ maxLength }` | Query parameters only; any text without control characters; `maxLength` from 1 to 256 bytes. |
 <!-- /generated:parameter-constraints -->
 
-The request leaves through OverCrow's broker, never from the widget's
-process. The broker:
+The request leaves through PlayerVox OverCrow's broker, never from the
+widget's process. The broker:
 
 - refuses any URL that no rule allows (`permission_denied`), before any
   DNS query;
@@ -363,8 +364,8 @@ once.
 
 ### Storage
 
-`storage` is a key-value store that OverCrow keeps for your widget only:
-`storage.get({ key })`, `storage.set({ key, value })`,
+`storage` is a key-value store that PlayerVox OverCrow keeps for your widget
+only: `storage.get({ key })`, `storage.set({ key, value })`,
 `storage.remove({ key })` and `storage.keys()`. A value is any JSON value.
 There is no file access.
 
@@ -403,7 +404,7 @@ user action. A widget cannot read the clipboard.
 ```
 
 Text that the user selects in a `text` element with the `selectable`
-attribute is copied by OverCrow itself, and needs no permission.
+attribute is copied by PlayerVox OverCrow itself, and needs no permission.
 
 ### Game events
 
@@ -413,9 +414,9 @@ attribute is copied by OverCrow itself, and needs no permission.
 
 ## Capabilities
 
-A capability gives access to data or actions that OverCrow holds: what the
-game's use of the machine, the media player, the user's notes, their
-PlayerVox and Twitch accounts.
+A capability gives access to data or actions that PlayerVox OverCrow holds:
+what the game's use of the machine, the media player, the user's notes,
+their PlayerVox and Twitch accounts.
 
 <!-- generated:capability-list -->
 | Capability | Sensitive | Account | Meaning |
@@ -494,9 +495,9 @@ widget needs both an HTTP API and a sensitive capability, make two widgets.
 ### Accounts
 
 Some capabilities need the user's PlayerVox or Twitch account. The
-connection belongs to OverCrow: it draws the sign-in, keeps the tokens and
-shows its own panel over the widget while the account is signed out. A
-widget never sees a token; it receives only the data its capability
+connection belongs to PlayerVox OverCrow: it draws the sign-in, keeps the
+tokens and shows its own panel over the widget while the account is signed
+out. A widget never sees a token; it receives only the data its capability
 describes, and its calls fail with `not_connected` while the account is
 not connected.
 
