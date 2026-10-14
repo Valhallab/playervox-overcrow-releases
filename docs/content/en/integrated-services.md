@@ -8,7 +8,8 @@ names it and that the player allows uses that connection. The widget never
 sees the key or the token.
 
 Steam and Twitch come first. A widget cannot declare its own account on
-them ([Third-party accounts](accounts.md)): it names the service.
+them ([Third-party accounts](accounts.md)), nor use one of their addresses
+or pages for another account: it names the service.
 
 ## Naming a service
 
@@ -47,6 +48,9 @@ In this version, integrated services are read-only for widgets:
 - those rules stay on the paths the service allows and never reach a
   refused one (Steam's trades and game server tokens, Twitch's stream key
   and extension secrets). A path parameter counts as any value there.
+- on Twitch, each endpoint needs the scope it reads, asked for by the
+  widget itself: the connection is shared, and a widget never reaches what
+  only another widget's scope opens.
 
 The Twitch chat of PlayerVox OverCrow uses the same Twitch connection,
 through its own capabilities: a widget never asks for the chat's scopes.
@@ -85,7 +89,7 @@ OverCrow's own Twitch account.
 | Service | Connection | Key or token sent to | Images | Allowed paths | Refused paths |
 | --- | --- | --- | --- | --- | --- |
 | `steam` | personal key | `https://api.steampowered.com` | `https://avatars.steamstatic.com`, `https://avatars.fastly.steamstatic.com`, `https://avatars.akamai.steamstatic.com`, `https://steamcdn-a.akamaihd.net`, `https://cdn.akamai.steamstatic.com`, `https://shared.akamai.steamstatic.com`, `https://shared.fastly.steamstatic.com` | `/ISteamUser/`, `/IPlayerService/`, `/ISteamUserStats/`, `/ISteamApps/`, `/ISteamNews/` | `/IEconService/`, `/IGameServersService/`, `/IBroadcastService/`, `/ISteamUserAuth/`, `/IAuthenticationService/`, `/ITwoFactorService/`, `/IEconMarketService/`, `/ISteamMicroTxn/`, `/ISteamMicroTxnSandbox/` |
-| `twitch` | OAuth sign-in | `https://api.twitch.tv` | `https://static-cdn.jtvnw.net` | `/helix/` | `/helix/streams/key`, `/helix/extensions/`, `/helix/eventsub/` |
+| `twitch` | OAuth sign-in | `https://api.twitch.tv` | `https://static-cdn.jtvnw.net` | `/helix/streams`, `/helix/users`, `/helix/channels`, `/helix/games`, `/helix/games/top`, `/helix/clips`, `/helix/videos`, `/helix/schedule`, `/helix/search/categories`, `/helix/search/channels`, `/helix/chat/emotes`, `/helix/chat/emotes/global`, `/helix/chat/badges`, `/helix/chat/badges/global`, `/helix/goals` (`channel:read:goals`), `/helix/channels/followers` (`moderator:read:followers`), `/helix/hypetrain/status` (`channel:read:hype_train`), `/helix/polls` (`channel:read:polls`), `/helix/predictions` (`channel:read:predictions`), `/helix/subscriptions` (`channel:read:subscriptions`), `/helix/bits/leaderboard` (`bits:read`), `/helix/charity/campaigns` (`channel:read:charity`), `/helix/charity/donations` (`channel:read:charity`), `/helix/channels/ads` (`channel:read:ads`), `/helix/channels/vips` (`channel:read:vips`), `/helix/chat/chatters` (`moderator:read:chatters`) | `/helix/streams/key`, `/helix/extensions/`, `/helix/eventsub/` |
 <!-- /generated:integrated-services -->
 
 ### Scopes

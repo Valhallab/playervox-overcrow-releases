@@ -513,9 +513,7 @@ fn validate_account(value: &Value) -> Result<Account, ManifestError> {
         if !canonical_https_origin(origin) || !unique.insert(origin) {
             return Err(invalid);
         }
-        if INTEGRATED_SERVICES.iter().any(|service| {
-            service.secret_origins.contains(&origin) || service.endpoint_origins().contains(&origin)
-        }) {
+        if belongs_to_a_service(origin) {
             return Err(ManifestError::AccountService);
         }
     }
@@ -575,6 +573,17 @@ fn validate_account(value: &Value) -> Result<Account, ManifestError> {
             if !unique.contains(origin) {
                 return Err(invalid);
             }
+        }
+    }
+    // Nor does it send the player to a service's pages: the player would get
+    // their real Steam key, or sign in at Twitch, for another server.
+    let pages = key
+        .iter()
+        .map(|key| key.page.as_str())
+        .chain(oauth.iter().flat_map(OAuth::endpoints));
+    for url in pages {
+        if belongs_to_a_service(url) {
+            return Err(ManifestError::AccountService);
         }
     }
     // Last, so that the dedicated code names the only fault.
@@ -671,6 +680,24 @@ fn validate_service_account(
         oauth,
         canonical: value.to_string(),
         service: Some(service),
+    })
+}
+
+/// Whether an `https://` origin or URL is an integrated service's: one of
+/// its origins, or a host under one of its domains.
+fn belongs_to_a_service(url: &str) -> bool {
+    let host = url
+        .strip_prefix("https://")
+        .unwrap_or(url)
+        .split(['/', ':', '?', '#'])
+        .next()
+        .unwrap_or_default()
+        .to_ascii_lowercase();
+    INTEGRATED_SERVICES.iter().any(|service| {
+        service.owns_host(&host)
+            || service
+                .all_origins()
+                .any(|origin| origin.strip_prefix("https://") == Some(host.as_str()))
     })
 }
 
@@ -1096,11 +1123,18 @@ pub(crate) fn validate_account_routes(
                 return Err(ManifestError::AccountOrigin);
             }
         }
+        // The token is shared: a widget reaches only what its own scopes open.
+        let scopes: Vec<&str> = account
+            .oauth
+            .iter()
+            .flat_map(|oauth| &oauth.scopes)
+            .map(|scope| scope.name.as_str())
+            .collect();
         for rule in &rules {
             let method = rule["method"].as_str().unwrap_or_default();
             if !service.methods.contains(&method)
                 || (service.secret_origins.contains(&origin(rule).as_str())
-                    && !service.route_path_allowed(&path(rule)))
+                    && !service.route_path_allowed(&path(rule), &scopes))
             {
                 return Err(ManifestError::ServiceRoute);
             }

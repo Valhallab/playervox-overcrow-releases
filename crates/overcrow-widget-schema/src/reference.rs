@@ -650,11 +650,14 @@ and every widget granted `account:<service>` shares the connection.\n\n",
         "### Integrated services\n\nDefined by PlayerVox, read-only for widgets in version 1: \
 with a service, every network rule uses one of its methods and targets one of its origins; \
 only rules on an origin that receives the secret name the service, stay within an allowed \
-path prefix and cannot reach a refused one (segments compared without case and without final \
-dots, a path parameter matching any segment). A manifest that names a service needs its \
+path and cannot reach a refused one (segments compared without case and without final dots, \
+a path parameter matching any segment). A path ending with `/` is a prefix; another is one \
+endpoint, opened only by the scope it names when the widget asks for that scope itself: the \
+token is shared by the widgets of the service. A declared account never uses an address of a \
+service (its origins, or a host under its domains). A manifest that names a service needs its \
 feature. Once a released application announces it, an addition takes a new feature name.\n\n\
-| Service | Name | Feature | Mode | Secret origins | Image origins | Methods | Allowed paths | Refused paths |\n\
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n",
+| Service | Name | Feature | Mode | Domains | Secret origins | Image origins | Methods | Allowed paths | Refused paths |\n\
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n",
     );
     let list = |items: &[&str]| {
         items
@@ -664,9 +667,18 @@ feature. Once a released application announces it, an addition takes a new featu
             .join(", ")
     };
     for service in INTEGRATED_SERVICES {
+        let allowed = service
+            .allowed_paths
+            .iter()
+            .map(|allowed| match allowed.scope {
+                Some(scope) => format!("`{}` (`{scope}`)", allowed.path),
+                None => format!("`{}`", allowed.path),
+            })
+            .collect::<Vec<_>>()
+            .join(", ");
         let _ = writeln!(
             out,
-            "| `{}` | {} | `{}` | {} | {} | {} | {} | {} | {} |",
+            "| `{}` | {} | `{}` | {} | {} | {} | {} | {} | {} | {} |",
             service.id,
             service.name,
             service.feature,
@@ -674,10 +686,11 @@ feature. Once a released application announces it, an addition takes a new featu
                 AccountMode::Key => "key",
                 AccountMode::OAuth => "oauth",
             },
+            list(service.domains),
             list(service.secret_origins),
             list(service.origins),
             list(service.methods),
-            list(service.allowed_paths),
+            allowed,
             list(service.refused_paths),
         );
     }

@@ -243,11 +243,18 @@ fn scopes_are_among_those_the_service_offers() {
             entry(value)["scopes"] = scopes;
         });
     }
+    // Without scopes, only the public endpoints stay open.
+    let public = |value: &mut Value| {
+        route(value, 0)["path"] = json!("/helix/streams");
+        route(value, 1)["path"] = json!("/helix/users");
+    };
     accepted(&twitch(), "no scope", |value| {
         entry(value).as_object_mut().unwrap().remove("scopes");
+        public(value);
     });
     accepted(&twitch(), "an empty list", |value| {
         entry(value)["scopes"] = json!([]);
+        public(value);
     });
     accepted(&twitch(), "every scope the service offers", |value| {
         entry(value)["scopes"] = TWITCH.scopes.iter().map(|scope| scope.name).collect();
@@ -310,6 +317,11 @@ fn any_change_of_the_declaration_widens() {
     );
     let mut value = twitch();
     entry(&mut value)["scopes"] = json!(["channel:read:goals"]);
+    // The followers' route needs its scope: it goes with it.
+    value["permissions"]["network"]
+        .as_array_mut()
+        .unwrap()
+        .remove(1);
     assert!(
         validate(&value)
             .expect("fewer scopes")
@@ -559,4 +571,110 @@ fn the_service_keyword_list_is_the_table() {
         .map(|service| service.id)
         .collect();
     assert_eq!(keywords, ids.as_slice());
+}
+
+/// A declared account never sends the player to a service's pages or
+/// addresses: the player would fetch their real Steam key for another
+/// service, or sign in at Twitch for a publisher's server.
+#[test]
+fn a_declared_account_never_uses_a_services_addresses() {
+    let mut on_key_page = declared("runlog", "Run Log", "https://api.runlog.example");
+    entry(&mut on_key_page)["key"]["page"] = json!("https://steamcommunity.com/dev/apikey");
+    assert_eq!(
+        validate(&on_key_page).err(),
+        Some("account_service"),
+        "the Steam key page"
+    );
+    for origin in [
+        "https://store.steampowered.com",
+        "https://partner.steam-api.com",
+        "https://gql.twitch.tv",
+        "https://static-cdn.jtvnw.net",
+    ] {
+        let value = declared("runlog", "Run Log", origin);
+        assert_eq!(validate(&value).err(), Some("account_service"), "{origin}");
+    }
+    let mut oauth = declared("runlog", "Run Log", "https://api.runlog.example");
+    let account = entry(&mut oauth).as_object_mut().unwrap();
+    account.remove("send");
+    account.remove("key");
+    account.insert("mode".into(), json!("oauth"));
+    account.insert(
+        "origins".into(),
+        json!(["https://api.runlog.example", "https://id.runlog.example"]),
+    );
+    account.insert(
+        "oauth".into(),
+        json!({
+            "clientId": "nova-run-log",
+            "flow": "loopback",
+            "authorize": "https://id.twitch.tv/oauth2/authorize",
+            "token": "https://id.runlog.example/token",
+            "scopes": [{"name": "runs:read", "access": "read"}]
+        }),
+    );
+    assert_eq!(
+        validate(&oauth).err(),
+        Some("account_service"),
+        "Twitch's sign-in page"
+    );
+}
+
+#[test]
+fn look_alike_letters_never_hide_a_services_name() {
+    for name in ["ЅТЕАМ", "Ѕteam", "Τwitch", "ТWITCH", "Stеаm"] {
+        let value = declared("runlog", name, "https://api.runlog.example");
+        assert_eq!(validate(&value).err(), Some("account_service"), "{name}");
+    }
+}
+
+/// The Twitch token is shared: a widget reaches only the endpoints whose
+/// scope it asked for itself, never one granted for another widget.
+#[test]
+fn a_twitch_route_needs_the_scope_the_widget_asked_for() {
+    refused(
+        &twitch(),
+        "service_route",
+        "a scope another widget asked for",
+        |value| {
+            route(value, 0)["path"] = json!("/helix/hypetrain/status");
+        },
+    );
+    refused(
+        &twitch(),
+        "service_route",
+        "an endpoint of no scope offered",
+        |value| {
+            route(value, 0)["path"] = json!("/helix/moderation/banned");
+        },
+    );
+    refused(
+        &twitch(),
+        "service_route",
+        "the goals without their scope",
+        |value| {
+            entry(value)["scopes"] = json!(["moderator:read:followers"]);
+        },
+    );
+    refused(
+        &twitch(),
+        "service_route",
+        "a deeper path than the endpoint",
+        |value| {
+            route(value, 0)["path"] = json!("/helix/goals/{id}");
+            route(value, 0)["pathParams"] = json!({"id": {"type": "slug", "maxLength": 32}});
+        },
+    );
+    accepted(&twitch(), "a public endpoint without a scope", |value| {
+        entry(value)["scopes"] = json!(["moderator:read:followers"]);
+        route(value, 0)["path"] = json!("/helix/streams");
+    });
+    accepted(&twitch(), "the endpoint of a scope it asked for", |value| {
+        entry(value)["scopes"] = json!([
+            "channel:read:goals",
+            "moderator:read:followers",
+            "channel:read:hype_train"
+        ]);
+        route(value, 0)["path"] = json!("/helix/hypetrain/status");
+    });
 }

@@ -20,7 +20,9 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 
-use overcrow_widget_schema::accounts::{RESERVED_ACCOUNT_IDS, account_id_grammar, valid_account_id};
+use overcrow_widget_schema::accounts::{
+    RESERVED_ACCOUNT_IDS, account_id_grammar, valid_account_id,
+};
 use overcrow_widget_schema::ipc::FAULT_CATEGORY_NAMES;
 use overcrow_widget_schema::limits::{
     MAX_CLIPBOARD_BYTES, MAX_CONTENT_SCALE, MAX_HTTP_DECLARED_RESPONSE_BYTES,

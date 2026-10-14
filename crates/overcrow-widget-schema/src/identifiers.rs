@@ -608,7 +608,7 @@ mod tests {
 
     /// The generated table is sorted (it is searched by halves), lists each
     /// character once, never ASCII nor a stylized block, and folds to the
-    /// reserved words' letters only.
+    /// reserved words' and the integrated services' letters only.
     #[test]
     fn unicode_confusables_are_sorted_and_fold_to_reserved_letters() {
         for pair in UNICODE_CONFUSABLE_LETTERS.windows(2) {
@@ -617,7 +617,7 @@ mod tests {
         for (look_alike, ascii) in UNICODE_CONFUSABLE_LETTERS {
             assert!(!look_alike.is_ascii(), "{look_alike}");
             assert!(
-                "abcehiloprvwxy01348".contains(*ascii),
+                "abcehilmoprstvwxy0134578".contains(*ascii),
                 "{look_alike} → {ascii}"
             );
             assert!(

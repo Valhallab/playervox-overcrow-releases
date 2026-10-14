@@ -95,6 +95,43 @@ pub struct ServiceScope {
     pub label: Text,
 }
 
+/// A path a route on a secret origin may take.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ServicePath {
+    /// Literal segments, compared without case.
+    pub path: &'static str,
+    /// `true`: the route is exactly this path; `false`: it starts with it.
+    pub exact: bool,
+    /// The scope the widget must ask for itself. The token is shared by the
+    /// widgets of the service: a widget never reaches what only another
+    /// widget's scope opens.
+    pub scope: Option<&'static str>,
+}
+
+const fn prefix(path: &'static str) -> ServicePath {
+    ServicePath {
+        path,
+        exact: false,
+        scope: None,
+    }
+}
+
+const fn endpoint(path: &'static str, scope: Option<&'static str>) -> ServicePath {
+    ServicePath {
+        path,
+        exact: true,
+        scope,
+    }
+}
+
+impl ServicePath {
+    /// Whether the route's segments take this path.
+    fn admits(&self, route: &[&str]) -> bool {
+        let own = segments(self.path);
+        within(route, &own) && (!self.exact || route.len() == own.len())
+    }
+}
+
 #[derive(Debug, Eq, PartialEq)]
 pub struct IntegratedService {
     pub id: &'static str,
@@ -105,11 +142,13 @@ pub struct IntegratedService {
     pub secret_origins: &'static [&'static str],
     /// Other origins of the service (images): never the secret.
     pub origins: &'static [&'static str],
+    /// The registrable domains of the service: a declared account never
+    /// uses an address under them (origins, key page, OAuth endpoints).
+    pub domains: &'static [&'static str],
     /// Methods of the routes of a widget that names the service.
     pub methods: &'static [&'static str],
-    /// Path prefixes, in literal segments and without case, that a route on
-    /// a secret origin stays within.
-    pub allowed_paths: &'static [&'static str],
+    /// The paths a route on a secret origin may take.
+    pub allowed_paths: &'static [ServicePath],
     /// Path prefixes no route on a secret origin may reach.
     pub refused_paths: &'static [&'static str],
     /// Statuses by which the service refuses the secret.
@@ -152,13 +191,23 @@ pub const STEAM: IntegratedService = IntegratedService {
         "https://shared.akamai.steamstatic.com",
         "https://shared.fastly.steamstatic.com",
     ],
+    domains: &[
+        "steampowered.com",
+        "steamcommunity.com",
+        "steamstatic.com",
+        "steam-api.com",
+        "steamgames.com",
+        "steamcontent.com",
+        "steamusercontent.com",
+    ],
     methods: &["GET"],
+    // The key has no scopes: every widget of the service reads the same.
     allowed_paths: &[
-        "/ISteamUser/",
-        "/IPlayerService/",
-        "/ISteamUserStats/",
-        "/ISteamApps/",
-        "/ISteamNews/",
+        prefix("/ISteamUser/"),
+        prefix("/IPlayerService/"),
+        prefix("/ISteamUserStats/"),
+        prefix("/ISteamApps/"),
+        prefix("/ISteamNews/"),
     ],
     refused_paths: &[
         "/IEconService/",
@@ -217,8 +266,40 @@ pub const TWITCH: IntegratedService = IntegratedService {
     mode: AccountMode::OAuth,
     secret_origins: &["https://api.twitch.tv"],
     origins: &["https://static-cdn.jtvnw.net"],
+    domains: &["twitch.tv", "jtvnw.net", "twitchcdn.net", "twitchsvc.net"],
     methods: &["GET"],
-    allowed_paths: &["/helix/"],
+    // Each endpoint with the scope it reads: public data needs none.
+    allowed_paths: &[
+        endpoint("/helix/streams", None),
+        endpoint("/helix/users", None),
+        endpoint("/helix/channels", None),
+        endpoint("/helix/games", None),
+        endpoint("/helix/games/top", None),
+        endpoint("/helix/clips", None),
+        endpoint("/helix/videos", None),
+        endpoint("/helix/schedule", None),
+        endpoint("/helix/search/categories", None),
+        endpoint("/helix/search/channels", None),
+        endpoint("/helix/chat/emotes", None),
+        endpoint("/helix/chat/emotes/global", None),
+        endpoint("/helix/chat/badges", None),
+        endpoint("/helix/chat/badges/global", None),
+        endpoint("/helix/goals", Some("channel:read:goals")),
+        endpoint(
+            "/helix/channels/followers",
+            Some("moderator:read:followers"),
+        ),
+        endpoint("/helix/hypetrain/status", Some("channel:read:hype_train")),
+        endpoint("/helix/polls", Some("channel:read:polls")),
+        endpoint("/helix/predictions", Some("channel:read:predictions")),
+        endpoint("/helix/subscriptions", Some("channel:read:subscriptions")),
+        endpoint("/helix/bits/leaderboard", Some("bits:read")),
+        endpoint("/helix/charity/campaigns", Some("channel:read:charity")),
+        endpoint("/helix/charity/donations", Some("channel:read:charity")),
+        endpoint("/helix/channels/ads", Some("channel:read:ads")),
+        endpoint("/helix/channels/vips", Some("channel:read:vips")),
+        endpoint("/helix/chat/chatters", Some("moderator:read:chatters")),
+    ],
     refused_paths: &[
         // The broadcast key.
         "/helix/streams/key",
@@ -321,13 +402,30 @@ impl IntegratedService {
             .unwrap_or_default()
     }
 
+    /// Whether the host `host` (lowercase) is one of the service's domains or
+    /// under one.
+    pub fn owns_host(&self, host: &str) -> bool {
+        self.domains.iter().any(|domain| {
+            host == *domain
+                || host
+                    .strip_suffix(domain)
+                    .is_some_and(|rest| rest.ends_with('.'))
+        })
+    }
+
+    /// Whether `scopes`, the scopes a widget asked for, open this path.
+    fn opens(&self, route: &[&str], scopes: &[&str]) -> bool {
+        self.allowed_paths.iter().any(|allowed| {
+            allowed.admits(route) && allowed.scope.is_none_or(|scope| scopes.contains(&scope))
+        })
+    }
+
     /// Whether a declared route path (with `{name}` parameters), on a secret
-    /// origin, stays within an allowed prefix and cannot reach a refused one.
-    pub fn route_path_allowed(&self, path: &str) -> bool {
+    /// origin, takes an allowed path that `scopes` (the widget's own) open,
+    /// and cannot reach a refused one.
+    pub fn route_path_allowed(&self, path: &str, scopes: &[&str]) -> bool {
         let route = segments(path);
-        self.allowed_paths
-            .iter()
-            .any(|prefix| within(&route, &segments(prefix)))
+        self.opens(&route, scopes)
             && !self
                 .refused_paths
                 .iter()
@@ -339,7 +437,7 @@ impl IntegratedService {
     /// manifest said. The path must already be in the form the URL parser
     /// sends: literal segments only (no `.` or `..` segment, backslash,
     /// percent sign, query or fragment), no empty segment but a final `/`.
-    pub fn request_path_allowed(&self, path: &str) -> bool {
+    pub fn request_path_allowed(&self, path: &str, scopes: &[&str]) -> bool {
         let Some(rest) = path.strip_prefix('/') else {
             return false;
         };
@@ -350,10 +448,7 @@ impl IntegratedService {
         });
         let request = segments(path);
         canonical
-            && self
-                .allowed_paths
-                .iter()
-                .any(|prefix| within(&request, &segments(prefix)))
+            && self.opens(&request, scopes)
             && !self
                 .refused_paths
                 .iter()
@@ -449,7 +544,12 @@ mod tests {
     fn paths_are_literal_segments_and_refusals_are_not_allowed_whole() {
         for service in INTEGRATED_SERVICES {
             assert!(!service.allowed_paths.is_empty(), "{}", service.id);
-            for prefix in service.allowed_paths.iter().chain(service.refused_paths) {
+            let allowed: Vec<&str> = service
+                .allowed_paths
+                .iter()
+                .map(|allowed| allowed.path)
+                .collect();
+            for prefix in allowed.iter().chain(service.refused_paths) {
                 assert!(prefix.starts_with('/'), "{prefix}");
                 let parts = segments(prefix);
                 assert!(!parts.is_empty(), "{prefix}");
@@ -461,7 +561,7 @@ mod tests {
             // A refused prefix never contains a whole allowed one: refusing
             // it would leave nothing of that interface.
             for refused in service.refused_paths {
-                for allowed in service.allowed_paths {
+                for allowed in &allowed {
                     assert!(
                         !within(&segments(allowed), &segments(refused)),
                         "{refused} covers {allowed}"
@@ -550,15 +650,126 @@ mod tests {
         }
     }
 
+    /// Every scope Twitch offers, so that a path test is about the path.
+    const ALL_TWITCH: &[&str] = &[
+        "channel:read:goals",
+        "moderator:read:followers",
+        "channel:read:hype_train",
+        "channel:read:polls",
+        "channel:read:predictions",
+        "channel:read:subscriptions",
+        "bits:read",
+        "channel:read:charity",
+        "channel:read:ads",
+        "channel:read:vips",
+        "moderator:read:chatters",
+    ];
+
+    #[test]
+    fn every_scope_opens_endpoints_and_every_endpoint_scope_is_offered() {
+        assert_eq!(
+            ALL_TWITCH,
+            TWITCH
+                .scopes
+                .iter()
+                .map(|scope| scope.name)
+                .collect::<Vec<_>>()
+        );
+        for service in INTEGRATED_SERVICES {
+            for allowed in service.allowed_paths {
+                if let Some(scope) = allowed.scope {
+                    assert!(service.scope(scope).is_some(), "{scope} is offered");
+                    assert!(
+                        allowed.exact,
+                        "{}: a scoped path is one endpoint",
+                        allowed.path
+                    );
+                }
+            }
+            for scope in service.scopes {
+                assert!(
+                    service
+                        .allowed_paths
+                        .iter()
+                        .any(|allowed| allowed.scope == Some(scope.name)),
+                    "{} opens an endpoint",
+                    scope.name
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn a_scoped_endpoint_needs_the_widgets_own_scope() {
+        assert!(TWITCH.route_path_allowed("/helix/goals", &["channel:read:goals"]));
+        assert!(!TWITCH.route_path_allowed("/helix/goals", &["moderator:read:followers"]));
+        assert!(!TWITCH.route_path_allowed("/helix/goals", &[]));
+        assert!(TWITCH.route_path_allowed("/helix/streams", &[]));
+        assert!(
+            !TWITCH.route_path_allowed("/helix/goals/{id}", ALL_TWITCH),
+            "exact"
+        );
+        assert!(!TWITCH.route_path_allowed("/helix/moderation/banned", ALL_TWITCH));
+        assert!(!TWITCH.request_path_allowed("/helix/subscriptions", &["bits:read"]));
+        assert!(
+            TWITCH.request_path_allowed("/helix/subscriptions", &["channel:read:subscriptions"])
+        );
+    }
+
+    #[test]
+    fn a_service_owns_its_domains_and_their_subdomains() {
+        for host in [
+            "steampowered.com",
+            "api.steampowered.com",
+            "store.steampowered.com",
+            "partner.steam-api.com",
+        ] {
+            assert!(STEAM.owns_host(host), "{host}");
+        }
+        for host in [
+            "notsteampowered.com",
+            "steampowered.com.example",
+            "example.com",
+        ] {
+            assert!(!STEAM.owns_host(host), "{host}");
+        }
+        assert!(TWITCH.owns_host("gql.twitch.tv"));
+        assert!(!TWITCH.owns_host("mytwitch.tv"));
+        // Every address of a service is its own: origins, pages, endpoints.
+        for service in INTEGRATED_SERVICES {
+            let mut urls: Vec<&str> = service.all_origins().collect();
+            urls.extend(service.key.iter().map(|key| key.page));
+            urls.extend(service.oauth.iter().flat_map(|oauth| oauth.endpoints()));
+            for url in urls {
+                let host = url
+                    .trim_start_matches("https://")
+                    .split(['/', ':'])
+                    .next()
+                    .unwrap_or_default();
+                assert!(
+                    service.owns_host(host) || service.all_origins().any(|origin| origin == url),
+                    "{url}"
+                );
+            }
+        }
+    }
+
     #[test]
     fn route_paths_stay_within_the_allowed_interfaces() {
+        // A parameter may take any value, a refused segment's included.
+        let refused = segments("/IEconService/");
+        assert!(may_reach(
+            &segments("/{interface}/GetTradeOffers/v1/"),
+            &refused
+        ));
+        assert!(!may_reach(&segments("/ISteamUser/{method}/v1/"), &refused));
         for path in [
             "/ISteamUser/GetPlayerSummaries/v2/",
             "/isteamuser/getplayersummaries/v2/",
             "/ISteamUserStats/GetPlayerAchievements/v1/",
             "/IPlayerService/GetRecentlyPlayedGames/v1/",
         ] {
-            assert!(STEAM.route_path_allowed(path), "{path}");
+            assert!(STEAM.route_path_allowed(path, &[]), "{path}");
         }
         for path in [
             "/IStoreService/GetAppList/v1/",
@@ -568,14 +779,14 @@ mod tests {
             "/IGameServersService/GetAccountList/v1/",
             "/",
         ] {
-            assert!(!STEAM.route_path_allowed(path), "{path}");
+            assert!(!STEAM.route_path_allowed(path, &[]), "{path}");
         }
         for path in [
             "/helix/goals",
             "/helix/channels/followers",
             "/helix/streams",
         ] {
-            assert!(TWITCH.route_path_allowed(path), "{path}");
+            assert!(TWITCH.route_path_allowed(path, ALL_TWITCH), "{path}");
         }
         for path in [
             "/helix/streams/key",
@@ -587,23 +798,23 @@ mod tests {
             "/kraken/streams",
             "/{version}/goals",
         ] {
-            assert!(!TWITCH.route_path_allowed(path), "{path}");
+            assert!(!TWITCH.route_path_allowed(path, ALL_TWITCH), "{path}");
         }
     }
 
     #[test]
     fn the_host_checks_the_path_it_sends() {
-        assert!(STEAM.request_path_allowed("/ISteamUser/GetPlayerSummaries/v2/"));
-        assert!(TWITCH.request_path_allowed("/helix/streams"));
+        assert!(STEAM.request_path_allowed("/ISteamUser/GetPlayerSummaries/v2/", &[]));
+        assert!(TWITCH.request_path_allowed("/helix/streams", &[]));
         for path in [
             "/IEconService/CancelTradeOffer/v1/",
             "/IECONSERVICE/CancelTradeOffer/v1/",
             "/ISteamUser%2F../IEconService/x",
             "/{x}/GetPlayerSummaries/v2/",
         ] {
-            assert!(!STEAM.request_path_allowed(path), "{path}");
+            assert!(!STEAM.request_path_allowed(path, &[]), "{path}");
         }
-        assert!(!TWITCH.request_path_allowed("/helix/streams/key"));
+        assert!(!TWITCH.request_path_allowed("/helix/streams/key", ALL_TWITCH));
     }
 
     /// The host checks the path the URL parser will send: a dot segment,
@@ -624,22 +835,36 @@ mod tests {
             "/ISteamUser/Get PlayerSummaries/v2/",
             "",
         ] {
-            assert!(!STEAM.request_path_allowed(path), "{path}");
+            assert!(!STEAM.request_path_allowed(path, &[]), "{path}");
         }
-        assert!(STEAM.request_path_allowed("/ISteamUser/GetPlayerSummaries/v2"));
+        assert!(STEAM.request_path_allowed("/ISteamUser/GetPlayerSummaries/v2", &[]));
     }
 
     /// A server may drop the final dots of a segment (`key.` is `key`): a
     /// refused prefix is compared without them.
     #[test]
     fn final_dots_never_hide_a_refused_segment() {
+        // The refused prefixes guard what an allowed prefix may still cover
+        // (a path refused later, a future interface): checked directly.
+        let refused = segments("/helix/streams/key");
+        for path in [
+            "/helix/streams/key.",
+            "/helix/streams/KEY..",
+            "/helix/streams/key/x",
+        ] {
+            assert!(may_reach(&segments(path), &refused), "{path}");
+        }
+        assert!(!may_reach(&segments("/helix/streams/keys"), &refused));
         for path in [
             "/helix/streams/key.",
             "/helix/streams/key..",
             "/helix/eventsub./x",
         ] {
-            assert!(!TWITCH.route_path_allowed(path), "route {path}");
-            assert!(!TWITCH.request_path_allowed(path), "request {path}");
+            assert!(!TWITCH.route_path_allowed(path, ALL_TWITCH), "route {path}");
+            assert!(
+                !TWITCH.request_path_allowed(path, ALL_TWITCH),
+                "request {path}"
+            );
         }
     }
 }

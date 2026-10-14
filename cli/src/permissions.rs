@@ -326,7 +326,8 @@ mod tests {
     fn goals(entry: Value) -> Manifest {
         manifest(json!({
             "accounts": [entry],
-            "network": [{"method": "GET", "origin": "https://api.twitch.tv", "path": "/helix/goals",
+            // A public endpoint: every variant below opens it.
+            "network": [{"method": "GET", "origin": "https://api.twitch.tv", "path": "/helix/streams",
                          "account": "twitch"}],
         }))
     }
@@ -359,7 +360,7 @@ mod tests {
 
     fn manifest_without_account() -> Manifest {
         manifest(json!({
-            "network": [{"method": "GET", "origin": "https://api.twitch.tv", "path": "/helix/goals"}],
+            "network": [{"method": "GET", "origin": "https://api.twitch.tv", "path": "/helix/streams"}],
         }))
     }
 }

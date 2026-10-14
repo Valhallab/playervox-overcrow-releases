@@ -228,13 +228,13 @@ pub fn manifest_diagnostic(error: ManifestError, source: &str) -> Diagnostic {
         ),
         ManifestError::AccountService => (
             "permissions.accounts",
-            "this account is an integrated service: its ID, name or origins are Steam's or Twitch's".into(),
+            "this account is an integrated service's: its ID, name, origins, key page or OAuth endpoints are Steam's or Twitch's".into(),
             Some("name the service instead, `{ \"service\": \"steam\" }` or `{ \"service\": \"twitch\" }`: PlayerVox OverCrow connects it once and applies its guards; see the Integrated services section of docs/widget-schema-v1.md".into()),
         ),
         ManifestError::ServiceRoute => (
             "permissions.network",
             "a network rule of a widget with an integrated service is not one the service allows".into(),
-            Some("integrated services are read-only: use `GET`, and stay on the paths the service allows (Steam: ISteamUser, IPlayerService, ISteamUserStats, ISteamApps, ISteamNews; Twitch: /helix/ without the stream key, extensions or EventSub)".into()),
+            Some("integrated services are read-only: use `GET`, and stay on the paths the service allows (Steam: ISteamUser, IPlayerService, ISteamUserStats, ISteamApps, ISteamNews; Twitch: its listed /helix/ endpoints, each with the scope it reads in your `scopes`); see the Integrated services section of docs/widget-schema-v1.md".into()),
         ),
         ManifestError::AccountOrigin => (
             "permissions.network",
