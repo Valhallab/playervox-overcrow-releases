@@ -7,6 +7,19 @@ change between betas; 1.0.0 will freeze them under semantic versioning.
 The CLI's version enters no package: a package depends only on the
 widget's sources and the embedded SDK.
 
+## 1.0.0-beta.6
+
+Released in the creator tools ZIPs of PlayerVox OverCrow 0.7.3-beta.1's
+GitHub release, `overcrow-creator-tools-0.7.3-beta.1-<platform>.zip`,
+beside the headless runtime it pins.
+
+- It pins the headless runtime 0.7.3-beta.1, from the same release.
+- `package`, `test` and the update of reference images write each output
+  through a temporary file with a random name, and refuse an output folder
+  or file that is a link.
+- `submit` explains a publish key paused because the member who created it
+  is suspended (`publish_key_owner_suspended`).
+
 ## 1.0.0-beta.5
 
 Released in the creator tools ZIPs of PlayerVox OverCrow 0.7.2-beta.1's

@@ -377,7 +377,7 @@ are real.
 `overcrow-widget-headless` is PlayerVox OverCrow's own code without a
 window: it validates the package as the overlay does and runs the widget's
 logic in the same sandbox. `overcrow-widget test` runs the version this CLI
-pins, 0.7.2-beta.1, and prints its version and SHA-256. Without the
+pins, 0.7.3-beta.1, and prints its version and SHA-256. Without the
 operating system's sandbox the runtime refuses to run and says so; the test
 command then ends with status 2.
 
@@ -388,8 +388,8 @@ one this CLI pins. The ZIP is not kept. The runtime then stays in the CLI's cach
 
 | Platform | Path |
 | --- | --- |
-| Linux | `~/.cache/overcrow-widget/runtime/0.7.2-beta.1/` (`$XDG_CACHE_HOME` instead of `~/.cache` when set) |
-| Windows | `%LOCALAPPDATA%\overcrow-widget\runtime\0.7.2-beta.1\` |
+| Linux | `~/.cache/overcrow-widget/runtime/0.7.3-beta.1/` (`$XDG_CACHE_HOME` instead of `~/.cache` when set) |
+| Windows | `%LOCALAPPDATA%\overcrow-widget\runtime\0.7.3-beta.1\` |
 
 To work offline, put the runtime of the creator tools ZIP there yourself
 (executable on Linux): `test` finds it and downloads nothing. With
