@@ -52,6 +52,7 @@ export type DateOrder = Region["dateOrder"];
 /** A manifest permission. */
 export type Permission =
   | "network"
+  | "accounts"
   | "storage"
   | "clipboardWrite"
   | "gameEvents"
@@ -134,6 +135,8 @@ export interface CapabilityServices {
 export interface PermissionServices {
   /** Exact HTTPS routes reachable through the host broker, at most `MAX_NETWORK_RULES` rules. */
   readonly "network": "http.fetch";
+  /** The user's account on one third-party service, kept by the host and added to the network rules that name it; at most `MAX_ACCOUNTS`. */
+  readonly "accounts": never;
   /** Host-managed key-value storage partitioned by widget ID, within `STORAGE_QUOTA_BYTES`. */
   readonly "storage": "storage.get" | "storage.set" | "storage.remove" | "storage.keys";
   /** Text clipboard writes on a current Interactive gesture. */

@@ -1913,7 +1913,7 @@ The catalog v2 is `https://overcrow.playervox.com/marketplace/widgets/v2/catalog
 | `status` | `verified` \| `security-suspended` \| `revoked` | yes | As in the catalog v1. |
 | `package` | `PackageRef` | yes | As in the catalog v1, with `url` exactly `<base>packages/<id>/<version>/<sha256>.ocpkg` under the v2 base. |
 | `releaseNotes` | `LocalizedText` | no | Release notes of this version per locale, `en` required, at most `MAX_LISTING_LOCALIZATIONS` locales, each at most `MAX_RELEASE_NOTES_CHARS` characters; line feeds allowed. |
-| `requires` | `list of feature names` | no | Features a reader must support to use the entry. Unless it is a list of features the reader supports, the reader skips the target. |
+| `requires` | `list of feature names` | no | Features a reader must support to use the entry, naming every feature its manifest needs (`account-key`, `account-oauth`). Unless it is a list of features the reader supports that covers the manifest's, the reader skips the target. |
 
 ### `PackageRef` v2
 

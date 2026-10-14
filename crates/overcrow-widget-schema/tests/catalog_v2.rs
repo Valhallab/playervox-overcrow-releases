@@ -175,7 +175,7 @@ fn catalog_v2(bytes: &[u8]) -> Result<CatalogV2, String> {
     UnparsedPublicKey::new(&ED25519, conformance_key().public_key().as_ref())
         .verify(&envelope.signed_message(), &envelope.signature)
         .map_err(|_| "signature".to_owned())?;
-    catalog_v2::validate_catalog(&envelope.payload, NOW, Origin::Production)
+    catalog_v2::validate_catalog(&envelope.payload, NOW, Origin::Production, &[])
         .map_err(|error| error.as_str().to_owned())
 }
 

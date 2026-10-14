@@ -13,6 +13,11 @@
 //! an unknown value of a known key is refused, and an entry whose `requires`
 //! names a feature this reader does not support is skipped rather than
 //! refusing the catalog. The envelope and the manifest stay strict.
+//!
+//! The reader passes the features it supports: pinning a schema that knows
+//! a grammar announces nothing (ADR 0009). A target whose manifest needs a
+//! feature its own `requires` does not name is a producer error, skipped
+//! too, never a refusal of the catalog.
 
 mod listing;
 
@@ -37,7 +42,9 @@ use crate::limits::{
     MAX_PREVIEW_BYTES, MAX_PUBLISHER_DOMAINS, MAX_PUBLISHER_NAME_CHARS, MAX_RELEASE_NOTES_CHARS,
     MAX_SPDX_LICENSE_BYTES, MAX_SUPPORT_EMAIL_BYTES,
 };
-use crate::manifest::{ManifestError, is_reserved_id, valid_widget_id, validate_manifest_value};
+use crate::manifest::{
+    Manifest, ManifestError, is_reserved_id, valid_widget_id, validate_manifest_value,
+};
 use crate::model::{Field, ValueType};
 use crate::package::hex;
 
@@ -74,9 +81,12 @@ pub const INITIAL_CATEGORIES: &[(&str, &str, &str)] = &[
     (CATEGORY_OTHER, "Other", "Autre"),
 ];
 
-/// Feature names of `requires` this reader supports. Catalog v2 defines
-/// none: any `requires` makes a v2 reader skip the entry.
-pub const SUPPORTED_FEATURES: &[&str] = &[];
+pub use crate::accounts::{FEATURE_ACCOUNT_KEY, FEATURE_ACCOUNT_OAUTH};
+
+/// Every feature name of `requires` this schema defines. A reader passes
+/// the ones it implements to [`validate_catalog`]; a tool that only shows
+/// entries (the website) may pass them all.
+pub const KNOWN_FEATURES: &[&str] = &[FEATURE_ACCOUNT_KEY, FEATURE_ACCOUNT_OAUTH];
 
 pub const ENVELOPE_FIELDS: &[Field] = &[
     Field::required(
@@ -340,7 +350,7 @@ pub const TARGET_FIELDS: &[Field] = &[
     Field::optional(
         "requires",
         ValueType::Record("list of feature names"),
-        "Features a reader must support to use the entry. Unless it is a list of features the reader supports, the reader skips the target.",
+        "Features a reader must support to use the entry, naming every feature its manifest needs (`account-key`, `account-oauth`). Unless it is a list of features the reader supports that covers the manifest's, the reader skips the target.",
     ),
 ];
 
@@ -601,12 +611,14 @@ pub const fn base_url(origin: Origin) -> &'static str {
     }
 }
 
-/// Validates a verified catalog v2 payload at `now` (Unix seconds). Skipped
-/// entries and widgets left without a target are not returned.
+/// Validates a verified catalog v2 payload at `now` (Unix seconds) for a
+/// reader that supports the features `supported`. Skipped entries and
+/// widgets left without a target are not returned.
 pub fn validate_catalog(
     payload: &[u8],
     now: i64,
     origin: Origin,
+    supported: &[&str],
 ) -> Result<CatalogV2, CatalogV2Error> {
     use CatalogV2Error as E;
     if payload.len() as u64 > MAX_CATALOG_V2_PAYLOAD_BYTES.value {
@@ -632,8 +644,14 @@ pub fn validate_catalog(
         })?;
     let categories = categories(&object["categories"])?;
     let publishers = publishers(&object["publishers"])?;
-    let (mut widgets, skipped) = widgets(&object["widgets"], &categories, &publishers, origin)?;
-    let targets = targets(&object["targets"], &widgets, &skipped, origin)?;
+    let (mut widgets, skipped) = widgets(
+        &object["widgets"],
+        &categories,
+        &publishers,
+        origin,
+        supported,
+    )?;
+    let targets = targets(&object["targets"], &widgets, &skipped, origin, supported)?;
 
     // A widget without a retained version (all skipped, or none listed) is
     // not shown.
@@ -797,15 +815,30 @@ fn publishers(value: &Value) -> Result<Vec<Publisher>, CatalogV2Error> {
 /// malformed `requires` included, skips the entry: a requirement the reader
 /// cannot read is one it cannot honour, and skipping never refuses the
 /// catalog.
-fn supported(entry: &Map<String, Value>) -> bool {
+fn supported(entry: &Map<String, Value>, features: &[&str]) -> bool {
     match entry.get("requires") {
         None => true,
-        Some(Value::Array(names)) => names.iter().all(|name| {
-            name.as_str()
-                .is_some_and(|name| SUPPORTED_FEATURES.contains(&name))
-        }),
+        Some(Value::Array(names)) => names
+            .iter()
+            .all(|name| name.as_str().is_some_and(|name| features.contains(&name))),
         Some(_) => false,
     }
+}
+
+/// Whether the target's own `requires` names every feature its manifest
+/// needs. It is read only once [`supported`] accepted the entry.
+fn requires_cover(entry: &Map<String, Value>, manifest: &Manifest) -> bool {
+    let named: BTreeSet<&str> = entry
+        .get("requires")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(Value::as_str)
+        .collect();
+    manifest
+        .features()
+        .iter()
+        .all(|feature| named.contains(feature))
 }
 
 fn widgets(
@@ -813,6 +846,7 @@ fn widgets(
     categories: &[Category],
     publishers: &[Publisher],
     origin: Origin,
+    features: &[&str],
 ) -> Result<(Vec<Widget>, BTreeSet<String>), CatalogV2Error> {
     use CatalogV2Error as E;
     let mut widgets: Vec<Widget> = Vec::new();
@@ -828,7 +862,7 @@ fn widgets(
         if !ids.insert(id.to_owned()) {
             return Err(E::DuplicateWidget);
         }
-        if !supported(entry) {
+        if !supported(entry, features) {
             // Only the ID and `requires` of a skipped entry are read.
             skipped.insert(id.to_owned());
             continue;
@@ -972,13 +1006,14 @@ fn targets(
     widgets: &[Widget],
     skipped_widgets: &BTreeSet<String>,
     origin: Origin,
+    features: &[&str],
 ) -> Result<Vec<TargetV2>, CatalogV2Error> {
     use CatalogV2Error as E;
     let mut kept = Vec::new();
     let mut identities = BTreeSet::new();
     for entry in list(value, MAX_CATALOG_V2_TARGETS.value, E::Payload)? {
         let entry = entry.as_object().ok_or(E::Payload)?;
-        if !supported(entry) {
+        if !supported(entry, features) {
             continue;
         }
         // The versions of a skipped widget are skipped unread: they may use
@@ -994,6 +1029,11 @@ fn targets(
             return Err(E::Payload);
         }
         let manifest = validate_manifest_value(entry["manifest"].clone()).map_err(E::Manifest)?;
+        if !requires_cover(entry, &manifest) {
+            // A producer error: an older reader that knows the grammar but
+            // not the feature would otherwise install the version.
+            continue;
+        }
         let widget = widgets
             .iter()
             .find(|widget| widget.id == manifest.id)
@@ -1182,10 +1222,15 @@ mod tests {
     }
 
     fn check(payload: &Value) -> Result<CatalogV2, CatalogV2Error> {
+        check_with(payload, &[])
+    }
+
+    fn check_with(payload: &Value, supported: &[&str]) -> Result<CatalogV2, CatalogV2Error> {
         validate_catalog(
             &serde_json::to_vec(payload).expect("payload"),
             now(),
             Origin::Production,
+            supported,
         )
     }
 
@@ -1288,14 +1333,14 @@ mod tests {
         let text = serde_json::to_string(&long)
             .expect("payload")
             .replace(PRODUCTION_BASE_URL, DEVELOPMENT_BASE_URL);
-        assert!(validate_catalog(text.as_bytes(), now(), Origin::Development).is_ok());
+        assert!(validate_catalog(text.as_bytes(), now(), Origin::Development, &[]).is_ok());
         assert_eq!(
-            validate_catalog(text.as_bytes(), now(), Origin::Production).map(|_| ()),
+            validate_catalog(text.as_bytes(), now(), Origin::Production, &[]).map(|_| ()),
             Err(CatalogV2Error::Time)
         );
         let bytes = serde_json::to_vec(&valid()).expect("payload");
         assert_eq!(
-            validate_catalog(&bytes, now(), Origin::Development).map(|_| ()),
+            validate_catalog(&bytes, now(), Origin::Development, &[]).map(|_| ()),
             Err(CatalogV2Error::Preview)
         );
     }
@@ -1701,5 +1746,83 @@ mod tests {
                 .expect("list")
                 .push(json!({"id": "nightowl.focus", "requires": ["entitlement"]}));
         });
+    }
+
+    /// `nightowl.focus` 0.3.0 with a key account (`account-key`).
+    fn with_account(payload: &mut Value, requires: Option<Value>) {
+        payload["widgets"][2]["listing"]["privacyPolicyUrl"] =
+            json!("https://nightowl.example/privacy");
+        let target = &mut payload["targets"][3];
+        target["manifest"]["permissions"] = json!({
+            "accounts": [{
+                "id": "steam",
+                "name": "Steam",
+                "mode": "key",
+                "origins": ["https://api.steampowered.com"],
+                "send": {"header": "X-WebAPI-Key"},
+                "key": {
+                    "format": {"charset": "hex", "minLength": 32, "maxLength": 32},
+                    "page": "https://steamcommunity.com/dev/apikey"
+                }
+            }],
+            "network": [{
+                "origin": "https://api.steampowered.com",
+                "method": "GET",
+                "path": "/ISteamUser/GetPlayerSummaries/v2/",
+                "account": "steam"
+            }]
+        });
+        if let Some(requires) = requires {
+            target["requires"] = requires;
+        }
+    }
+
+    fn has_focus(catalog: &CatalogV2) -> bool {
+        catalog
+            .targets
+            .iter()
+            .any(|target| target.target.manifest.id == "nightowl.focus")
+    }
+
+    #[test]
+    fn the_reader_passes_the_features_it_supports() {
+        assert_eq!(KNOWN_FEATURES, ["account-key", "account-oauth"]);
+        let mut payload = valid();
+        with_account(&mut payload, Some(json!(["account-key"])));
+        // A reader that does not announce the feature skips the target and
+        // keeps the catalog; the widget left without a version is hidden.
+        let catalog = check_with(&payload, &[]).expect("skipped, not refused");
+        assert!(!has_focus(&catalog));
+        assert_eq!(catalog.widgets.len(), 2);
+        let catalog = check_with(&payload, &["account-oauth"]).expect("skipped");
+        assert!(!has_focus(&catalog));
+        // A reader that announces it keeps it.
+        let catalog = check_with(&payload, &["account-key"]).expect("kept");
+        assert!(has_focus(&catalog));
+        assert_eq!(catalog.widgets.len(), 3);
+        let catalog = check_with(&payload, KNOWN_FEATURES).expect("kept");
+        assert!(has_focus(&catalog));
+    }
+
+    #[test]
+    fn a_target_whose_manifest_needs_more_than_its_requires_is_skipped() {
+        for requires in [None, Some(json!([])), Some(json!(["account-oauth"]))] {
+            let mut payload = valid();
+            with_account(&mut payload, requires.clone());
+            let catalog = check_with(&payload, KNOWN_FEATURES).expect("skipped, not refused");
+            assert!(!has_focus(&catalog), "{requires:?}");
+        }
+    }
+
+    #[test]
+    fn a_widget_whose_requires_is_not_held_is_skipped_with_its_targets() {
+        let mut payload = valid();
+        with_account(&mut payload, Some(json!(["account-key"])));
+        payload["widgets"][2]["requires"] = json!(["account-key"]);
+        let catalog = check_with(&payload, &[]).expect("skipped");
+        assert_eq!(catalog.widgets.len(), 2);
+        assert!(!has_focus(&catalog));
+        let catalog = check_with(&payload, &["account-key"]).expect("kept");
+        assert!(has_focus(&catalog));
     }
 }
