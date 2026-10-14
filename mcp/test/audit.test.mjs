@@ -346,7 +346,7 @@ test("a field that asks for a key, a token or a password is reported, not its lo
     "each asking field, by line, the localized one included",
   );
   assert.ok(found.every((finding) => finding.severity === "high" && finding.file === "view.ocml"));
-  assert.match(found[0].fix, /permissions\.accounts/);
+  assert.match(found[0].fix, /publication rule 3\.5/);
 });
 
 test("routes that return or trade secrets are reported", async () => {
@@ -395,7 +395,10 @@ test("routes that return or trade secrets are reported", async () => {
   assert.match(trades[0].fix, /never touches Steam item trades/);
 });
 
-test("the secret rule points to OverCrow's accounts", async () => {
+// Until an application release announces account-key, the fixes name no
+// manifest field that the published apps would refuse (the release lot
+// points them to permissions.accounts again).
+test("the secret fix names no unreleased manifest field", async () => {
   const key = ["api", "_key"].join("");
   const directory = widget("secret-fix", {
     "manifest.json": manifest({}),
@@ -404,5 +407,5 @@ test("the secret rule points to OverCrow's accounts", async () => {
   const result = await auditWidget(directory);
   const finding = result.findings.find((f) => f.rule === "secret");
   assert.ok(finding);
-  assert.match(finding.fix, /permissions\.accounts/);
+  assert.doesNotMatch(finding.fix, /permissions\.accounts/);
 });
