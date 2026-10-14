@@ -20,44 +20,46 @@ A widget never asks for a password, and never for a key in one of its own
 fields: every keystroke of a widget field reaches the widget's code, and the
 field shows on a stream.
 
+Steam and Twitch are **integrated services**: the player connects them once
+in PlayerVox OverCrow, and your widgets name them with
+`{ "service": "steam" }` instead of declaring an account; a declared
+account cannot target them. See [Integrated services](integrated-services.md).
+
 ## A personal key
 
 Declare the account in `permissions.accounts`, then name it with `account`
 on each route that needs the key:
 
-<!-- source: docs/content/examples/steam-stats/manifest.json -->
+<!-- source: docs/content/examples/run-log/manifest.json -->
 ```json
     "accounts": [
       {
-        "id": "steam",
-        "name": "Steam",
+        "id": "runlog",
+        "name": "Run Log",
         "mode": "key",
-        "origins": ["https://api.steampowered.com"],
-        "send": { "header": "X-WebAPI-Key" },
+        "origins": ["https://api.runlog.example"],
+        "send": { "header": "X-Api-Key" },
         "key": {
-          "format": { "charset": "hex", "minLength": 32, "maxLength": 32 },
-          "page": "https://steamcommunity.com/dev/apikey"
+          "format": { "charset": "alnum", "minLength": 32, "maxLength": 32 },
+          "page": "https://runlog.example/settings/api"
         },
         "refusedStatus": [401, 403]
       }
     ],
     "network": [
       {
-        "origin": "https://api.steampowered.com",
+        "origin": "https://api.runlog.example",
         "method": "GET",
-        "path": "/ISteamUser/GetPlayerSummaries/v2/",
-        "queryParams": {
-          "steamids": { "type": "slug", "maxLength": 17, "required": true }
-        },
+        "path": "/v1/me/runs/latest",
         "maxResponseBytes": 16384,
 ```
 
-- `id` names the account: the permission is `account:steam`, and the SDK
+- `id` names the account: the permission is `account:runlog`, and the SDK
   calls use it.
-- `name` is the service's name as OverCrow shows it ("Steam account").
+- `name` is the service's name as OverCrow shows it ("Run Log account").
 - `origins` lists the service's addresses. With an account, every network
   rule of the widget targets one of them.
-- `send` says where the key goes: a header (`{ "header": "X-WebAPI-Key" }`,
+- `send` says where the key goes: a header (`{ "header": "X-Api-Key" }`,
   or `Authorization` with a `scheme`), or a query parameter
   (`{ "query": "key" }`) when the service accepts nothing else.
 - `key.format` lets OverCrow refuse a mistyped key before sending it;
@@ -130,12 +132,12 @@ The widget follows the state of the account with `account.subscribe`:
 the account's name, its scopes or its secret.
 The SDK exports them as `account` (its type is `AccountServices`), with the
 `AccountStatus` shape, and `hasGrant` takes an `AccountGrant` such as
-`account:steam`.
+`account:runlog`.
 
-<!-- source: docs/content/examples/steam-stats/logic.ts -->
+<!-- source: docs/content/examples/run-log/logic.ts -->
 ```ts
 // Read again as soon as the key is saved or replaced.
-account.subscribe({ id: "steam" }, (update) => {
+account.subscribe({ id: "runlog" }, (update) => {
   if (update.ok && update.value.state === "connected") {
     void load();
   }
@@ -146,11 +148,11 @@ A call on a route of the account fails with `not_connected` while the
 account is not connected, and with `account_refused` when the service has
 just refused the secret. OverCrow shows its own panel; the widget waits:
 
-<!-- source: docs/content/examples/steam-stats/logic.ts -->
+<!-- source: docs/content/examples/run-log/logic.ts -->
 ```ts
   } catch (error) {
-    // not_connected until the user saves a key, account_refused when Steam
-    // refuses it: OverCrow shows its own panel, the widget only waits.
+    // not_connected until the player saves a key, account_refused when the
+    // service refuses it: OverCrow shows its own panel, the widget waits.
     const code = error instanceof ServiceError ? error.code : "";
     state.status = code === "not_connected" || code === "account_refused" ? code : "unavailable";
   }
@@ -172,8 +174,8 @@ export function connect(): void {
 
 In a [test scenario](testing.md), `host.accounts` gives the state of each
 account by ID: `playervox` and `twitch`, and the accounts the manifest
-declares (`connected` by default; `connected`, `disconnected`, `pending`,
-`refused` or `expired`). An HTTP fixture adds `"account": "steam"` to its
+declares or the integrated services it names (`connected` by default; `connected`, `disconnected`, `pending`,
+`refused` or `expired`). An HTTP fixture adds `"account": "runlog"` to its
 `request` when the request is sent with the account: a fixture answers only
 a request sent as it says, so the scenario checks that the key goes where
 it should. A fixture whose status is in `refusedStatus` plays a refusal.
@@ -190,8 +192,7 @@ The reviewer checks, for a widget with an account:
 - that each route that can change the account, and each `write` scope, is
   justified;
 - that no route creates, lists or returns keys, tokens or connections (a
-  Twitch stream key, extension secrets, Streamlabs socket tokens), and that
-  no route touches Steam item trades (`IEconService`);
+  Twitch stream key, extension secrets, Streamlabs socket tokens);
 - that no field of the widget asks for a key, a token or a password;
 - the widget with a test account at the service. Never put a key or a
   password in the message for the review.

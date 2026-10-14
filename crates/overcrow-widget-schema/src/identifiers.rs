@@ -294,6 +294,17 @@ pub fn reads_as_reserved_name(name: &str) -> bool {
             .any(|word| folded.contains(&confusable_skeleton(word)))
 }
 
+/// Whether a displayed name reads as one of `words` (lowercase ASCII
+/// letters), by the same folding as [`reads_as_reserved_name`]: a declared
+/// account named like an integrated service (`Steam`, `Tw1tch`).
+pub fn reads_as_any(name: &str, words: &[&str]) -> bool {
+    let letters: String = name.chars().filter_map(ascii_letter).collect();
+    let folded = confusable_skeleton(&letters);
+    words
+        .iter()
+        .any(|word| folded.contains(&confusable_skeleton(word)))
+}
+
 /// The handle grammar: `MIN_HANDLE_BYTES`..=`MAX_HANDLE_BYTES` of
 /// `[a-z0-9-]`, without a hyphen at either end or two in a row (no
 /// look-alike of a punycode `xn--` label).

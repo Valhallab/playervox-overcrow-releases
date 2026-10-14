@@ -26,12 +26,12 @@
     "storage": true,
     "accounts": [
       {
-        "id": "steam",
-        "name": "Steam",
+        "id": "runlog",
+        "name": "Run Log",
         "mode": "key",
         "origins": [
-          "https://api.steampowered.com",
-          "https://avatars.steamstatic.com"
+          "https://api.runlog.example",
+          "https://img.runlog.example"
         ],
         "send": {
           "header": "X-WebAPI-Key"
@@ -42,7 +42,7 @@
             "minLength": 32,
             "maxLength": 32
           },
-          "page": "https://steamcommunity.com/dev/apikey"
+          "page": "https://runlog.example/settings/api"
         },
         "refusedStatus": [
           500
@@ -51,7 +51,7 @@
     ],
     "network": [
       {
-        "origin": "https://api.steampowered.com",
+        "origin": "https://api.runlog.example",
         "method": "GET",
         "path": "/ISteamUser/GetPlayerSummaries/v2/",
         "queryParams": {
@@ -62,10 +62,10 @@
           }
         },
         "maxResponseBytes": 65536,
-        "account": "steam"
+        "account": "runlog"
       },
       {
-        "origin": "https://avatars.steamstatic.com",
+        "origin": "https://img.runlog.example",
         "method": "GET",
         "path": "/{file}",
         "pathParams": {

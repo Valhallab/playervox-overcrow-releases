@@ -4,7 +4,7 @@
   "sourceUrl": "https://github.com/example/steam-stats-widget",
   "defaultLocale": "en",
   "localizations": [
-    { "locale": "en", "name": "Steam stats", "description": "Your Steam name and the game you are playing, read with your own Steam Web API key. PlayerVox OverCrow keeps the key and sends it only to Steam." },
-    { "locale": "fr", "name": "Stats Steam", "description": "Votre nom Steam et le jeu en cours, lus avec votre propre clé de l’API Web Steam. PlayerVox OverCrow garde la clé et ne l’envoie qu’à Steam." }
+    { "locale": "en", "name": "Steam stats", "description": "Your Steam name and the game you are playing, read with the Steam account you connected in PlayerVox OverCrow. The widget never sees your key." },
+    { "locale": "fr", "name": "Stats Steam", "description": "Votre nom Steam et le jeu en cours, lus avec le compte Steam connecté dans PlayerVox OverCrow. Le widget ne voit jamais votre clé." }
   ]
 }

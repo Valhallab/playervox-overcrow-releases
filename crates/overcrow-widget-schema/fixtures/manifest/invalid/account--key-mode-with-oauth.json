@@ -26,13 +26,13 @@
     "storage": true,
     "accounts": [
       {
-        "id": "steam",
-        "name": "Steam",
+        "id": "runlog",
+        "name": "Run Log",
         "mode": "key",
         "origins": [
-          "https://api.steampowered.com",
-          "https://avatars.steamstatic.com",
-          "https://id.twitch.tv"
+          "https://api.runlog.example",
+          "https://img.runlog.example",
+          "https://id.streamstats.example"
         ],
         "send": {
           "header": "X-WebAPI-Key"
@@ -43,7 +43,7 @@
             "minLength": 32,
             "maxLength": 32
           },
-          "page": "https://steamcommunity.com/dev/apikey"
+          "page": "https://runlog.example/settings/api"
         },
         "refusedStatus": [
           401,
@@ -52,11 +52,11 @@
         "oauth": {
           "clientId": "abcdefghijklmnopqrstuvwxyz0123",
           "flow": "device",
-          "device": "https://id.twitch.tv/oauth2/device",
-          "verify": "https://www.twitch.tv/activate",
-          "token": "https://id.twitch.tv/oauth2/token",
-          "revoke": "https://id.twitch.tv/oauth2/revoke",
-          "validate": "https://id.twitch.tv/oauth2/validate",
+          "device": "https://id.streamstats.example/oauth2/device",
+          "verify": "https://streamstats.example/activate",
+          "token": "https://id.streamstats.example/oauth2/token",
+          "revoke": "https://id.streamstats.example/oauth2/revoke",
+          "validate": "https://id.streamstats.example/oauth2/validate",
           "scopes": [
             {
               "name": "moderator:read:followers",
@@ -70,7 +70,7 @@
     ],
     "network": [
       {
-        "origin": "https://api.steampowered.com",
+        "origin": "https://api.runlog.example",
         "method": "GET",
         "path": "/ISteamUser/GetPlayerSummaries/v2/",
         "queryParams": {
@@ -81,10 +81,10 @@
           }
         },
         "maxResponseBytes": 65536,
-        "account": "steam"
+        "account": "runlog"
       },
       {
-        "origin": "https://avatars.steamstatic.com",
+        "origin": "https://img.runlog.example",
         "method": "GET",
         "path": "/{file}",
         "pathParams": {

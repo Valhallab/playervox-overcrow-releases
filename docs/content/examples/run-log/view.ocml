@@ -1,0 +1,11 @@
+<!-- The player's latest run. The key is entered in OverCrow's own panel. -->
+<box class="stats">
+  <text class="game">{state.game}</text>
+  <text class="time">{state.time}</text>
+  <box class="footer">
+    <text class="status">{t(state.status)}</text>
+    <button class="refresh" label={t("refresh")} on:activate={refresh}>
+      <icon name="refresh-cw"/>
+    </button>
+  </box>
+</box>

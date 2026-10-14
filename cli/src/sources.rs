@@ -224,7 +224,17 @@ pub fn manifest_diagnostic(error: ManifestError, source: &str) -> Diagnostic {
         ManifestError::Account => (
             "permissions.accounts",
             "`permissions.accounts` is invalid".into(),
-            Some("at most one account: an `id` of lowercase letters, digits and `-` (not `playervox` or `twitch`), the service's `name`, `mode` `key` with `send` and `key`, or `oauth` with `oauth`, 1 to 4 HTTPS `origins`; a `send.query` no route of the account declares; see the Accounts section of docs/widget-schema-v1.md".into()),
+            Some("exactly one entry: an integrated service, `{ \"service\": \"steam\" }` or `{ \"service\": \"twitch\", \"scopes\": [...] }` with scopes the service offers; or a declared account: an `id` of lowercase letters, digits and `-` (not `playervox` or `twitch`), the service's `name`, `mode` `key` with `send` and `key`, or `oauth` with `oauth`, 1 to 4 HTTPS `origins`, a `send.query` no route of the account declares; see the Accounts section of docs/widget-schema-v1.md".into()),
+        ),
+        ManifestError::AccountService => (
+            "permissions.accounts",
+            "this account is an integrated service: its ID, name or origins are Steam's or Twitch's".into(),
+            Some("name the service instead, `{ \"service\": \"steam\" }` or `{ \"service\": \"twitch\" }`: PlayerVox OverCrow connects it once and applies its guards; see the Integrated services section of docs/widget-schema-v1.md".into()),
+        ),
+        ManifestError::ServiceRoute => (
+            "permissions.network",
+            "a network rule of a widget with an integrated service is not one the service allows".into(),
+            Some("integrated services are read-only: use `GET`, and stay on the paths the service allows (Steam: ISteamUser, IPlayerService, ISteamUserStats, ISteamApps, ISteamNews; Twitch: /helix/ without the stream key, extensions or EventSub)".into()),
         ),
         ManifestError::AccountOrigin => (
             "permissions.network",
@@ -799,6 +809,10 @@ fn unused_origins(manifest: &Manifest) -> Vec<String> {
     let Some(account) = manifest.account() else {
         return Vec::new();
     };
+    // An integrated service's origins come from its table.
+    if account.service.is_some() {
+        return Vec::new();
+    }
     let rules = manifest.value["permissions"]["network"]
         .as_array()
         .cloned()
@@ -895,12 +909,15 @@ mod tests {
     use crate::diag::Severity;
     use serde_json::json;
 
-    fn steam(origins: serde_json::Value, extra_rules: Vec<serde_json::Value>) -> serde_json::Value {
+    fn runlog(
+        origins: serde_json::Value,
+        extra_rules: Vec<serde_json::Value>,
+    ) -> serde_json::Value {
         let mut network = vec![json!({
-            "origin": "https://api.steampowered.com",
+            "origin": "https://api.runlog.example",
             "method": "GET",
             "path": "/ISteamUser/GetPlayerSummaries/v2/",
-            "account": "steam"
+            "account": "runlog"
         })];
         network.extend(extra_rules);
         json!({
@@ -917,14 +934,14 @@ mod tests {
             },
             "permissions": {
                 "accounts": [{
-                    "id": "steam",
-                    "name": "Steam",
+                    "id": "runlog",
+                    "name": "Run Log",
                     "mode": "key",
                     "origins": origins,
                     "send": {"header": "X-WebAPI-Key"},
                     "key": {
                         "format": {"charset": "hex", "minLength": 32, "maxLength": 32},
-                        "page": "https://steamcommunity.com/dev/apikey"
+                        "page": "https://runlog.example/settings/api"
                     }
                 }],
                 "network": network
@@ -947,6 +964,8 @@ mod tests {
             ManifestError::AccountOverlap,
             ManifestError::AccountEndpoint,
             ManifestError::AccountScope,
+            ManifestError::AccountService,
+            ManifestError::ServiceRoute,
         ] {
             let diagnostic = manifest_diagnostic(error, "{}");
             assert_eq!(diagnostic.code, format!("manifest.{}", error.as_str()));
@@ -955,7 +974,7 @@ mod tests {
                 "{error:?}"
             );
         }
-        let mut manifest = steam(json!(["https://api.steampowered.com"]), Vec::new());
+        let mut manifest = runlog(json!(["https://api.runlog.example"]), Vec::new());
         manifest["permissions"]["clipboardWrite"] = json!(true);
         let report = checked(&manifest);
         let diagnostic = &report.diagnostics[0];
@@ -965,10 +984,10 @@ mod tests {
             "{}",
             diagnostic.message
         );
-        let overlap = steam(
-            json!(["https://api.steampowered.com"]),
+        let overlap = runlog(
+            json!(["https://api.runlog.example"]),
             vec![json!({
-                "origin": "https://api.steampowered.com",
+                "origin": "https://api.runlog.example",
                 "method": "GET",
                 "path": "/ISteamUser/{method}/v2/",
                 "pathParams": {"method": {"type": "slug", "maxLength": 32}}
@@ -983,12 +1002,48 @@ mod tests {
     }
 
     #[test]
+    fn a_service_brings_its_origins_and_its_refusals_say_what_to_do() {
+        let mut manifest = runlog(json!(["https://api.runlog.example"]), Vec::new());
+        manifest["permissions"] = json!({
+            "accounts": [{"service": "steam"}],
+            "network": [{
+                "origin": "https://api.steampowered.com",
+                "method": "GET",
+                "path": "/ISteamUser/GetPlayerSummaries/v2/",
+                "account": "steam"
+            }]
+        });
+        // The service's image origins are its table's: no unused origin.
+        assert!(checked(&manifest).diagnostics.is_empty());
+        manifest["permissions"]["network"][0]["path"] = json!("/IEconService/GetTradeOffers/v1/");
+        let report = checked(&manifest);
+        assert_eq!(report.diagnostics[0].code, "manifest.service_route");
+        assert!(
+            report.diagnostics[0]
+                .help
+                .as_deref()
+                .is_some_and(|help| help.contains("read-only")),
+            "{:?}",
+            report.diagnostics[0].help
+        );
+        let mut imitation = runlog(json!(["https://api.runlog.example"]), Vec::new());
+        imitation["permissions"]["accounts"][0]["name"] = json!("Steam");
+        let report = checked(&imitation);
+        assert_eq!(report.diagnostics[0].code, "manifest.account_service");
+        assert!(
+            report.diagnostics[0]
+                .help
+                .as_deref()
+                .is_some_and(|help| help.contains("\"service\": \"steam\"")),
+            "{:?}",
+            report.diagnostics[0].help
+        );
+    }
+
+    #[test]
     fn an_origin_no_route_uses_is_a_warning() {
-        let report = checked(&steam(
-            json!([
-                "https://api.steampowered.com",
-                "https://cdn.steamstatic.com"
-            ]),
+        let report = checked(&runlog(
+            json!(["https://api.runlog.example", "https://cdn.runlog.example"]),
             Vec::new(),
         ));
         let codes: Vec<(&str, Severity)> = report
@@ -1000,10 +1055,10 @@ mod tests {
         assert!(
             report.diagnostics[0]
                 .message
-                .contains("https://cdn.steamstatic.com")
+                .contains("https://cdn.runlog.example")
         );
         assert!(
-            checked(&steam(json!(["https://api.steampowered.com"]), Vec::new()))
+            checked(&runlog(json!(["https://api.runlog.example"]), Vec::new()))
                 .diagnostics
                 .is_empty()
         );
@@ -1011,8 +1066,11 @@ mod tests {
 
     #[test]
     fn the_origin_of_an_oauth_endpoint_is_used() {
-        let mut manifest = steam(
-            json!(["https://api.twitch.tv", "https://id.twitch.tv"]),
+        let mut manifest = runlog(
+            json!([
+                "https://api.streamstats.example",
+                "https://id.streamstats.example"
+            ]),
             Vec::new(),
         );
         let account = &mut manifest["permissions"]["accounts"][0];
@@ -1023,12 +1081,12 @@ mod tests {
         account["oauth"] = json!({
             "clientId": "abc",
             "flow": "device",
-            "device": "https://id.twitch.tv/oauth2/device",
-            "verify": "https://www.twitch.tv/activate",
-            "token": "https://id.twitch.tv/oauth2/token",
+            "device": "https://id.streamstats.example/oauth2/device",
+            "verify": "https://streamstats.example/activate",
+            "token": "https://id.streamstats.example/oauth2/token",
             "scopes": [{"name": "user:read:email", "access": "read"}]
         });
-        manifest["permissions"]["network"][0]["origin"] = json!("https://api.twitch.tv");
+        manifest["permissions"]["network"][0]["origin"] = json!("https://api.streamstats.example");
         manifest["permissions"]["network"][0]["path"] = json!("/helix/users");
         assert!(checked(&manifest).diagnostics.is_empty());
     }

@@ -1,0 +1,17 @@
+{
+  "releaseNotes": {
+    "en": "First version: your latest run.",
+    "fr": "Première version : votre dernière course."
+  },
+  "justifications": [
+    {
+      "permission": "account:runlog",
+      "text": "Reads the player's own latest run with their Run Log key, in a header, on one GET route; it writes nothing."
+    },
+    {
+      "permission": "network:GET https://api.runlog.example/v1/me/runs/latest",
+      "text": "Reads the latest run, every 5 minutes at most."
+    }
+  ],
+  "reviewMessage": "Test with any Run Log account and its key from runlog.example/settings/api."
+}

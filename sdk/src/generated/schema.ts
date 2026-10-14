@@ -901,12 +901,12 @@ export interface ServiceParamsMap {
   };
   /** Parameters of `account.subscribe`. */
   readonly "account.subscribe": {
-    /** `id` of an account the manifest declares and the user granted. */
+    /** `id` of an account the manifest declares, or of the integrated service it names, that the user granted. */
     readonly id: string;
   };
   /** Parameters of `account.connect`. */
   readonly "account.connect": {
-    /** `id` of an account the manifest declares and the user granted. */
+    /** `id` of an account the manifest declares, or of the integrated service it names, that the user granted. */
     readonly id: string;
   };
 }

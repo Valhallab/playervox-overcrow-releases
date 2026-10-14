@@ -27,28 +27,28 @@ fn key() -> Value {
     base(json!({
         "storage": true,
         "accounts": [{
-            "id": "steam",
-            "name": "Steam",
+            "id": "runlog",
+            "name": "Run Log",
             "mode": "key",
-            "origins": ["https://api.steampowered.com", "https://avatars.steamstatic.com"],
+            "origins": ["https://api.runlog.example", "https://img.runlog.example"],
             "send": {"header": "X-WebAPI-Key"},
             "key": {
                 "format": {"charset": "hex", "minLength": 32, "maxLength": 32},
-                "page": "https://steamcommunity.com/dev/apikey"
+                "page": "https://runlog.example/settings/api"
             },
             "refusedStatus": [401, 403]
         }],
         "network": [
             {
-                "origin": "https://api.steampowered.com",
+                "origin": "https://api.runlog.example",
                 "method": "GET",
                 "path": "/ISteamUser/GetPlayerSummaries/v2/",
                 "queryParams": {"steamids": {"type": "slug", "maxLength": 17, "required": true}},
                 "maxResponseBytes": 65536,
-                "account": "steam"
+                "account": "runlog"
             },
             {
-                "origin": "https://api.steampowered.com",
+                "origin": "https://api.runlog.example",
                 "method": "GET",
                 "path": "/ISteamUserStats/GetPlayerAchievements/v1/",
                 "queryParams": {
@@ -56,10 +56,10 @@ fn key() -> Value {
                     "appid": {"type": "integer", "min": 1, "max": 99_999_999, "required": true},
                     "l": {"type": "enum", "values": ["english", "french"]}
                 },
-                "account": "steam"
+                "account": "runlog"
             },
             {
-                "origin": "https://avatars.steamstatic.com",
+                "origin": "https://img.runlog.example",
                 "method": "GET",
                 "path": "/{file}",
                 "pathParams": {"file": {"type": "slug", "maxLength": 64}}
@@ -73,24 +73,24 @@ fn device() -> Value {
     base(json!({
         "accounts": [{
             "id": "twitch-api",
-            "name": "Twitch",
+            "name": "Stream Stats",
             "mode": "oauth",
-            "origins": ["https://api.twitch.tv", "https://id.twitch.tv"],
+            "origins": ["https://api.streamstats.example", "https://id.streamstats.example"],
             "oauth": {
                 "clientId": "abcdefghijklmnopqrstuvwxyz0123",
                 "flow": "device",
-                "device": "https://id.twitch.tv/oauth2/device",
-                "verify": "https://www.twitch.tv/activate",
-                "token": "https://id.twitch.tv/oauth2/token",
-                "revoke": "https://id.twitch.tv/oauth2/revoke",
-                "validate": "https://id.twitch.tv/oauth2/validate",
+                "device": "https://id.streamstats.example/oauth2/device",
+                "verify": "https://streamstats.example/activate",
+                "token": "https://id.streamstats.example/oauth2/token",
+                "revoke": "https://id.streamstats.example/oauth2/revoke",
+                "validate": "https://id.streamstats.example/oauth2/validate",
                 "scopes": [{"name": "moderator:read:followers", "access": "read"}],
                 "scopeParam": "scopes",
                 "clientIdHeader": "Client-Id"
             }
         }],
         "network": [{
-            "origin": "https://api.twitch.tv",
+            "origin": "https://api.streamstats.example",
             "method": "GET",
             "path": "/helix/channels/followers",
             "queryParams": {"broadcaster_id": {"type": "slug", "maxLength": 32, "required": true}},
@@ -175,7 +175,7 @@ fn account(value: &mut Value) -> &mut Value {
 fn the_examples_of_the_design_are_accepted() {
     let steam = validate(&key()).expect("key");
     let account = steam.account().expect("declared");
-    assert_eq!(account.id, "steam");
+    assert_eq!(account.id, "runlog");
     assert_eq!(account.mode, AccountMode::Key);
     assert_eq!(account.refused_status, [401, 403]);
     assert!(account.required, "required by default");
@@ -245,7 +245,7 @@ fn one_account_at_most() {
             .push(second);
     });
     refused(&key(), "shape", "not a list", |value| {
-        value["permissions"]["accounts"] = json!({"id": "steam"});
+        value["permissions"]["accounts"] = json!({"id": "runlog"});
     });
     // An empty list needs no feature, yet a reader that does not know the
     // field refuses it: the whole catalog would break for older readers.
@@ -270,7 +270,6 @@ fn account_id_grammar() {
         "st--eam",
         "st_eam",
         "playervox",
-        "twitch",
         "",
     ] {
         refused(&key(), "account", id, |value| {
@@ -378,16 +377,13 @@ fn origins_are_distinct_canonical_https() {
             "https://b.example",
             "https://c.example",
             "https://d.example",
-            "https://api.steampowered.com"
+            "https://api.runlog.example"
         ]),
-        json!([
-            "https://api.steampowered.com",
-            "https://api.steampowered.com"
-        ]),
+        json!(["https://api.runlog.example", "https://api.runlog.example"]),
         json!(["http://api.steampowered.com"]),
         json!(["https://127.0.0.1"]),
-        json!(["https://api.steampowered.com:443"]),
-        json!(["https://api.steampowered.com/"]),
+        json!(["https://api.runlog.example:443"]),
+        json!(["https://api.runlog.example/"]),
         json!(["https://API.steampowered.com"]),
         json!([3]),
     ] {
@@ -520,7 +516,7 @@ fn send_query_belongs_to_the_host() {
     accepted(&key(), "declared by a route without the account", |value| {
         account(value)["send"] = json!({"query": "key"});
         value["permissions"]["network"][2] = json!({
-            "origin": "https://avatars.steamstatic.com",
+            "origin": "https://img.runlog.example",
             "method": "GET",
             "path": "/{file}",
             "pathParams": {"file": {"type": "slug", "maxLength": 64}},
@@ -562,10 +558,10 @@ fn key_format_and_page() {
     });
     for page in [
         "http://steamcommunity.com/dev/apikey",
-        "https://steamcommunity.com/dev/apikey#key",
+        "https://runlog.example/settings/api#key",
         "https://me@steamcommunity.com/dev/apikey",
         "https://steamcommunity.com",
-        "https://steamcommunity.com/dev/apikey?app={id}",
+        "https://runlog.example/settings/api?app={id}",
         "steamcommunity.com/dev/apikey",
     ] {
         refused(&key(), "account", page, |value| {
@@ -631,7 +627,8 @@ fn oauth_client_and_flow() {
         "account",
         "device flow with authorize",
         |value| {
-            account(value)["oauth"]["authorize"] = json!("https://id.twitch.tv/oauth2/authorize");
+            account(value)["oauth"]["authorize"] =
+                json!("https://id.streamstats.example/oauth2/authorize");
         },
     );
     refused(
@@ -667,11 +664,11 @@ fn oauth_endpoints_are_static_https() {
     for field in ["token", "device", "verify", "revoke", "validate"] {
         for url in [
             "http://id.twitch.tv/oauth2/x",
-            "https://id.twitch.tv/oauth2/x?a=b",
-            "https://id.twitch.tv/oauth2/x#f",
+            "https://id.streamstats.example/oauth2/x?a=b",
+            "https://id.streamstats.example/oauth2/x#f",
             "https://me@id.twitch.tv/oauth2/x",
             "https://10.0.0.1/oauth2/x",
-            "https://id.twitch.tv",
+            "https://id.streamstats.example",
         ] {
             refused(&device(), "account", &format!("{field} {url}"), |value| {
                 account(value)["oauth"][field] = json!(url);
@@ -808,7 +805,7 @@ fn an_account_excludes_sensitive_capabilities_and_the_clipboard() {
 
 fn rule(path: &str, account: Option<&str>) -> Value {
     let mut rule = json!({
-        "origin": "https://api.steampowered.com",
+        "origin": "https://api.runlog.example",
         "method": "GET",
         "path": path,
     });
@@ -840,7 +837,7 @@ fn overlapping_routes_carry_the_same_account() {
             &format!("{first} {second}"),
             |value| {
                 value["permissions"]["network"] =
-                    json!([rule(first, Some("steam")), rule(second, None)]);
+                    json!([rule(first, Some("runlog")), rule(second, None)]);
             },
         );
         refused(
@@ -849,12 +846,12 @@ fn overlapping_routes_carry_the_same_account() {
             &format!("{second} {first}"),
             |value| {
                 value["permissions"]["network"] =
-                    json!([rule(first, None), rule(second, Some("steam"))]);
+                    json!([rule(first, None), rule(second, Some("runlog"))]);
             },
         );
         accepted(&key(), "same account", |value| {
             value["permissions"]["network"] =
-                json!([rule(first, Some("steam")), rule(second, Some("steam"))]);
+                json!([rule(first, Some("runlog")), rule(second, Some("runlog"))]);
         });
     }
     for (first, second) in [
@@ -865,13 +862,13 @@ fn overlapping_routes_carry_the_same_account() {
     ] {
         accepted(&key(), "no common URL", |value| {
             value["permissions"]["network"] =
-                json!([rule(first, Some("steam")), rule(second, None)]);
+                json!([rule(first, Some("runlog")), rule(second, None)]);
         });
     }
     accepted(&key(), "different methods", |value| {
         let mut post = rule("/v1/me", None);
         post["method"] = json!("POST");
-        value["permissions"]["network"] = json!([rule("/v1/me", Some("steam")), post]);
+        value["permissions"]["network"] = json!([rule("/v1/me", Some("runlog")), post]);
     });
     refused(
         &key(),
@@ -880,7 +877,7 @@ fn overlapping_routes_carry_the_same_account() {
         |value| {
             let mut with_query = rule("/v1/me", None);
             with_query["queryParams"] = json!({"a": {"type": "slug", "maxLength": 4}});
-            value["permissions"]["network"] = json!([rule("/v1/me", Some("steam")), with_query]);
+            value["permissions"]["network"] = json!([rule("/v1/me", Some("runlog")), with_query]);
         },
     );
 }
@@ -888,11 +885,11 @@ fn overlapping_routes_carry_the_same_account() {
 #[test]
 fn routes_never_target_an_oauth_endpoint() {
     for endpoint in [
-        "https://id.twitch.tv/oauth2/token",
-        "https://id.twitch.tv/oauth2/device",
-        "https://id.twitch.tv/oauth2/revoke",
-        "https://id.twitch.tv/oauth2/validate",
-        "https://www.twitch.tv/activate",
+        "https://id.streamstats.example/oauth2/token",
+        "https://id.streamstats.example/oauth2/device",
+        "https://id.streamstats.example/oauth2/revoke",
+        "https://id.streamstats.example/oauth2/validate",
+        "https://streamstats.example/activate",
     ] {
         let (origin, path) = endpoint
             .strip_prefix("https://")
@@ -931,7 +928,7 @@ fn routes_never_target_an_oauth_endpoint() {
                 .as_array_mut()
                 .expect("rules")
                 .push(json!({
-                    "origin": "https://id.twitch.tv",
+                    "origin": "https://id.streamstats.example",
                     "method": "GET",
                     "path": "/oauth2/{step}",
                     "pathParams": {"step": {"type": "enum", "values": ["keys"]}}
@@ -963,7 +960,7 @@ fn routes_never_target_an_oauth_endpoint() {
             .as_array_mut()
             .expect("rules")
             .push(json!({
-                "origin": "https://api.twitch.tv",
+                "origin": "https://api.streamstats.example",
                 "method": "GET",
                 "path": "/oauth2/token",
                 "account": "twitch-api"
@@ -975,7 +972,7 @@ fn routes_never_target_an_oauth_endpoint() {
 fn any_change_of_the_declaration_widens() {
     let before = validate(&key()).expect("valid").permissions;
     let mut changed = key();
-    account(&mut changed)["origins"] = json!(["https://api.steampowered.com"]);
+    account(&mut changed)["origins"] = json!(["https://api.runlog.example"]);
     changed["permissions"]["network"]
         .as_array_mut()
         .expect("rules")
@@ -1016,7 +1013,7 @@ fn a_route_reaches_an_endpoint_whatever_its_case_or_final_slash() {
     for path in ["/OAuth2/Token", "/oauth2/token/", "/OAUTH2/{step}/"] {
         refused(&device(), "account_endpoint", path, |value| {
             let mut rule = json!({
-                "origin": "https://id.twitch.tv",
+                "origin": "https://id.streamstats.example",
                 "method": "POST",
                 "path": path,
                 "account": "twitch-api"
@@ -1167,7 +1164,7 @@ fn a_route_reaches_an_endpoint_through_a_format_suffix() {
                 .as_array_mut()
                 .expect("rules")
                 .push(json!({
-                    "origin": "https://id.twitch.tv",
+                    "origin": "https://id.streamstats.example",
                     "method": "POST",
                     "path": path,
                     "account": "twitch-api"

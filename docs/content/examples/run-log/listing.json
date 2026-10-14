@@ -1,0 +1,10 @@
+{
+  "author": "Nova",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/example/run-log-widget",
+  "defaultLocale": "en",
+  "localizations": [
+    { "locale": "en", "name": "Run log", "description": "Your latest run on Run Log, read with your own Run Log key. PlayerVox OverCrow keeps the key and sends it only to Run Log." },
+    { "locale": "fr", "name": "Journal de course", "description": "Votre dernière course sur Run Log, lue avec votre propre clé Run Log. PlayerVox OverCrow garde la clé et ne l’envoie qu’à Run Log." }
+  ]
+}
