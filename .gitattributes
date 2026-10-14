@@ -1,5 +1,7 @@
 # Manifest ledgers describe exact package bytes on every operating system.
 /widgets/** -text
+# Copied byte for byte into the widgets above (scripts/sync-shared-widgets.mjs).
+/widgets-shared/** text eol=lf
 # Conformance fixtures and the generated references are compared byte for byte.
 /crates/overcrow-widget-schema/fixtures/** -text
 /docs/widget-schema-v1.md text eol=lf
