@@ -907,8 +907,38 @@ pub fn render_human(report: &Value) -> String {
                 } else {
                     "personal key"
                 };
+                let detail = if item["mode"] == "oauth" {
+                    let oauth = &item["oauth"];
+                    let scopes: Vec<String> = oauth["scopes"]
+                        .as_array()
+                        .into_iter()
+                        .flatten()
+                        .map(|scope| {
+                            format!("{} ({})", text(&scope["name"]), text(&scope["access"]))
+                        })
+                        .collect();
+                    let page = if oauth["flow"] == "device" {
+                        &oauth["verify"]
+                    } else {
+                        &oauth["authorize"]
+                    };
+                    format!(
+                        "OAuth client {} ({}), sign-in page {}, scopes {}",
+                        text(&oauth["clientId"]),
+                        text(&oauth["flow"]),
+                        text(page),
+                        scopes.join(", ")
+                    )
+                } else {
+                    let send = &item["send"];
+                    let carrier = match send["header"].as_str() {
+                        Some(_) => format!("header {}", text(&send["header"])),
+                        None => format!("query parameter {}", text(&send["query"])),
+                    };
+                    format!("key in {carrier}, from {}", text(&item["key"]["page"]))
+                };
                 format!(
-                    "account         {} ({}), {mode}, sent only to {}{}",
+                    "account         {} ({}), {mode}, sent only to {}{}\n                    {detail}",
                     text(&item["name"]),
                     text(&item["id"]),
                     origins.join(", "),
@@ -1203,5 +1233,22 @@ mod tests {
             "{text}"
         );
         assert!(text.contains("other           futureKind"), "{text}");
+        // The pages a user is sent to and what is asked for are shown too.
+        assert!(
+            text.contains("OAuth client nova-overcrow-widget (loopback), sign-in page https://quests.example/oauth/authorize, scopes quests:read (read)"),
+            "{text}"
+        );
+        let key = json!({"kind": "account", "id": "steam", "name": "Steam", "mode": "key",
+            "origins": ["https://api.steampowered.com"], "writes": false,
+            "send": {"header": "X-WebAPI-Key"},
+            "key": {"format": {"charset": "hex", "minLength": 32, "maxLength": 32},
+                    "page": "https://steamcommunity.com/dev/apikey"}});
+        let mut report = report;
+        report["review"] = json!([key]);
+        let text = render_human(&report);
+        assert!(
+            text.contains("key in header X-WebAPI-Key, from https://steamcommunity.com/dev/apikey"),
+            "{text}"
+        );
     }
 }

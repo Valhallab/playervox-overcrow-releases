@@ -303,6 +303,9 @@ const SECRET_ROUTES: { origin: string; path: string }[] = [
   { origin: "https://api.twitch.tv", path: "/helix/extensions/jwt/secrets" },
   { origin: "https://streamlabs.com", path: "/socket/token" },
   { origin: "https://streamlabs.com", path: "/legacy/token" },
+  // The ingestion key of a YouTube live stream (`cdn.ingestionInfo.streamName`).
+  { origin: "https://www.googleapis.com", path: "/youtube/v3/livestreams" },
+  { origin: "https://youtube.googleapis.com", path: "/youtube/v3/livestreams" },
 ];
 
 /** Whether a route seems to create, list or return keys or tokens. */

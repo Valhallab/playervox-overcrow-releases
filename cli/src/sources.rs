@@ -793,8 +793,6 @@ fn uses_t(view: &CompiledView) -> bool {
     view.functions.iter().any(|name| name == "t")
 }
 
-/// Warns about `t("key")` calls whose literal key has no message. Keys
-/// computed at runtime cannot be checked.
 /// Origins of the account that neither a network rule nor an OAuth
 /// endpoint uses.
 fn unused_origins(manifest: &Manifest) -> Vec<String> {
@@ -824,6 +822,8 @@ fn unused_origins(manifest: &Manifest) -> Vec<String> {
         .collect()
 }
 
+/// Warns about `t("key")` calls whose literal key has no message. Keys
+/// computed at runtime cannot be checked.
 fn check_message_keys(
     view: &CompiledView,
     messages: &BTreeMap<String, String>,

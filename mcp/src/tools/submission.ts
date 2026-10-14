@@ -427,7 +427,27 @@ export function describeReview(item: Record<string, unknown>): string {
         ? item.origins.slice(0, 8).map((origin) => cleanLine(String(origin), 200))
         : [];
       const mode = item.mode === "oauth" ? "OAuth sign-in" : "personal key";
-      return `${cleanLine(String(item.name), 32)} account (${cleanLine(String(item.id), 32)}), ${mode}, sent only to ${origins.join(", ")}${item.writes ? "; can change the user's account" : ""}.`;
+      const oauth = (item.oauth ?? {}) as Record<string, unknown>;
+      const key = (item.key ?? {}) as Record<string, unknown>;
+      const scopes = Array.isArray(oauth.scopes)
+        ? (oauth.scopes as Record<string, unknown>[])
+            .slice(0, 16)
+            .map(
+              (scope) =>
+                `${cleanLine(String(scope.name), 128)} (${cleanLine(String(scope.access), 8)})`,
+            )
+        : [];
+      const page =
+        item.mode === "oauth"
+          ? oauth.flow === "device"
+            ? oauth.verify
+            : oauth.authorize
+          : key.page;
+      const detail =
+        item.mode === "oauth"
+          ? ` OAuth client ${cleanLine(String(oauth.clientId), 128)}, sign-in page ${cleanLine(String(page), 512)}, scopes ${scopes.join(", ")}.`
+          : ` Key page ${cleanLine(String(page), 512)}.`;
+      return `${cleanLine(String(item.name), 32)} account (${cleanLine(String(item.id), 32)}), ${mode}, sent only to ${origins.join(", ")}${item.writes ? "; can change the user's account" : ""}.${detail}`;
     }
     case "capability":
       return `Capability ${cleanLine(String(item.name), 64)}${item.sensitive ? " (sensitive)" : ""}${item.account ? `, needs a ${cleanLine(String(item.account), 32)} account` : ""}.`;

@@ -361,6 +361,7 @@ test("routes that return or trade secrets are reported", async () => {
         route("https://api.twitch.tv", "/helix/extensions/jwt/secrets"),
         route("https://streamlabs.com", "/api/v2.0/socket/token"),
         route("https://api.example.org", "/v1/tokenizer"),
+        route("https://www.googleapis.com", "/youtube/v3/liveStreams"),
         route("https://api.example.org", "/v1/weather"),
         route("https://api.steampowered.com", "/IEconService/GetTradeOffers/v1/"),
         route("https://api.steampowered.com", "/ieconservice/CancelTradeOffer/v1/"),
@@ -373,7 +374,7 @@ test("routes that return or trade secrets are reported", async () => {
   const messages = (rule) =>
     result.findings.filter((finding) => finding.rule === rule).map((finding) => finding.message);
   const tokens = messages("token-route");
-  assert.equal(tokens.length, 6, tokens.join("\n"));
+  assert.equal(tokens.length, 7, tokens.join("\n"));
   for (const path of [
     "/oauth/token",
     "/v1/API-Key/list",
@@ -381,6 +382,7 @@ test("routes that return or trade secrets are reported", async () => {
     "/helix/streams/key",
     "/helix/extensions/jwt/secrets",
     "/socket/token",
+    "/youtube/v3/liveStreams",
   ])
     assert.ok(
       tokens.some((message) => message.includes(path)),
