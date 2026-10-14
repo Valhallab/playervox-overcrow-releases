@@ -336,11 +336,20 @@ impl IntegratedService {
 
     /// Whether a concrete request path the host is about to send, on a
     /// secret origin, is allowed: the host's own check, whatever the
-    /// manifest said. A percent sign refuses it (no decoded form to compare).
+    /// manifest said. The path must already be in the form the URL parser
+    /// sends: literal segments only (no `.` or `..` segment, backslash,
+    /// percent sign, query or fragment), no empty segment but a final `/`.
     pub fn request_path_allowed(&self, path: &str) -> bool {
+        let Some(rest) = path.strip_prefix('/') else {
+            return false;
+        };
+        let parts: Vec<&str> = rest.split('/').collect();
+        let canonical = parts.iter().enumerate().all(|(index, part)| {
+            crate::manifest::valid_literal_segment(part)
+                || (part.is_empty() && index == parts.len() - 1)
+        });
         let request = segments(path);
-        !path.contains('%')
-            && request.iter().all(|segment| !is_placeholder(segment))
+        canonical
             && self
                 .allowed_paths
                 .iter()
@@ -372,11 +381,12 @@ fn within(path: &[&str], prefix: &[&str]) -> bool {
 }
 
 /// The path may start with the prefix: each of its first segments is a
-/// parameter (any value) or the prefix's literal, without case.
+/// parameter (any value) or the prefix's literal, without case and without
+/// final dots, which a server may drop (`key.` reads as `key`).
 fn may_reach(path: &[&str], prefix: &[&str]) -> bool {
     path.len() >= prefix.len()
         && prefix.iter().zip(path).all(|(expected, segment)| {
-            is_placeholder(segment) || segment.eq_ignore_ascii_case(expected)
+            is_placeholder(segment) || segment.trim_end_matches('.').eq_ignore_ascii_case(expected)
         })
 }
 
@@ -594,5 +604,42 @@ mod tests {
             assert!(!STEAM.request_path_allowed(path), "{path}");
         }
         assert!(!TWITCH.request_path_allowed("/helix/streams/key"));
+    }
+
+    /// The host checks the path the URL parser will send: a dot segment,
+    /// a backslash (read as `/` for `https`) or an empty segment would be
+    /// normalized away after the check.
+    #[test]
+    fn the_host_refuses_a_path_that_normalizes_elsewhere() {
+        for path in [
+            "/ISteamUser/../IEconService/CancelTradeOffer/v1/",
+            "/ISteamUser/./GetPlayerSummaries/v2/",
+            "/ISteamUser/x/../../IEconService/CancelTradeOffer/v1/",
+            "/ISteamUser\\..\\IEconService/CancelTradeOffer/v1/",
+            "/ISteamUser//GetPlayerSummaries/v2/",
+            "//IEconService/CancelTradeOffer/v1/",
+            "ISteamUser/GetPlayerSummaries/v2/",
+            "/ISteamUser/GetPlayerSummaries/v2/?key=x",
+            "/ISteamUser/GetPlayerSummaries/v2/#x",
+            "/ISteamUser/Get PlayerSummaries/v2/",
+            "",
+        ] {
+            assert!(!STEAM.request_path_allowed(path), "{path}");
+        }
+        assert!(STEAM.request_path_allowed("/ISteamUser/GetPlayerSummaries/v2"));
+    }
+
+    /// A server may drop the final dots of a segment (`key.` is `key`): a
+    /// refused prefix is compared without them.
+    #[test]
+    fn final_dots_never_hide_a_refused_segment() {
+        for path in [
+            "/helix/streams/key.",
+            "/helix/streams/key..",
+            "/helix/eventsub./x",
+        ] {
+            assert!(!TWITCH.route_path_allowed(path), "route {path}");
+            assert!(!TWITCH.request_path_allowed(path), "request {path}");
+        }
     }
 }
