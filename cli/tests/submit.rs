@@ -455,6 +455,13 @@ fn key_problems_stop_everything() {
             error("publish_key_revoked", "This publish key was revoked."),
             "This publish key was revoked. Create a new publish key",
         ),
+        (
+            error(
+                "publish_key_owner_suspended",
+                "The account that created this publish key is suspended.",
+            ),
+            "is suspended. Use a publish key created by another member of the publisher, or wait for the suspension to end.",
+        ),
     ] {
         let api = FakeApi::start(Some(project.previous()));
         api.on("key", vec![Reply::Json(401, answer.clone())]);

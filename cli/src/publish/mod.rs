@@ -210,6 +210,10 @@ fn failure_message(failure: &Failure) -> String {
         "publish_key_expired" | "publish_key_revoked" => {
             Some("Create a new publish key in the creator space and replace the secret.".to_owned())
         }
+        "publish_key_owner_suspended" => Some(
+            "Use a publish key created by another member of the publisher, or wait for the suspension to end."
+                .to_owned(),
+        ),
         "submission_limit_reached" => error
             .next_submission_at
             .as_ref()

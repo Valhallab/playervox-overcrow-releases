@@ -743,7 +743,8 @@ change announces any other change.
 `already_known` (nothing sent, see `known`), `error`, or the version's
 state; `status` without `--wait` has none. Error codes
 are the creator space's (`version_not_newer`, `submission_limit_reached`,
-`publish_key_expired`, `publish_key_revoked`, `widget_required`,
+`publish_key_expired`, `publish_key_revoked`,
+`publish_key_owner_suspended`, `widget_required`,
 `publish_key_widget_not_covered`…) or the tool's:
 `publish_key_missing`, `invalid_publish_key`, `api_url_invalid`,
 `submission_file`, `sources`, `sources.read`, `network`, `timeout`,

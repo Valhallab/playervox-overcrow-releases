@@ -780,7 +780,8 @@ est annoncé par un nouveau `formatVersion`.
 version ; `status` sans `--wait` n’en a pas. Les codes
 d’erreur sont ceux de l’espace créateurs (`version_not_newer`,
 `submission_limit_reached`, `publish_key_expired`, `publish_key_revoked`,
-`widget_required`, `publish_key_widget_not_covered`…)
+`publish_key_owner_suspended`, `widget_required`,
+`publish_key_widget_not_covered`…)
 ou ceux de l’outil : `publish_key_missing`, `invalid_publish_key`,
 `api_url_invalid`, `submission_file`, `sources`, `sources.read`, `network`,
 `timeout`, `server`, `response`, `redirect`, `upload_refused`,
