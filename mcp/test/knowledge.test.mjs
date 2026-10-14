@@ -52,6 +52,11 @@ test("explanations of permissions and codes", () => {
   assert.equal(media.sensitive, true);
   assert.match(media.advice, /network or clipboardWrite/);
   assert.equal(explainPermission("root.access", "en"), undefined);
+  const account = explainPermission("account:steam", "en");
+  assert.equal(account.kind, "account");
+  assert.match(account.meaning, /never sees/);
+  assert.match(account.advice, /origins/);
+  assert.equal(explainPermission("account:Steam", "en"), undefined);
   assert.equal(explainError("permission_denied", "en").kind, "service");
   assert.equal(explainError("logic.eval", "en").kind, "diagnostic");
   assert.equal(explainError("manifest.network_rule", "en").kind, "domain");

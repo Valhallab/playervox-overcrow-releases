@@ -173,8 +173,33 @@ const PERMISSION_ADVICE: Record<string, string> = {
     "Each capability needs the user's consent. A sensitive capability cannot be combined with network or clipboardWrite (OverCrow refuses the manifest): the data it reads cannot leave the computer.",
 };
 
+const ACCOUNT_MEANING: Record<Locale, string> = {
+  en: "The user's account on another service, declared in permissions.accounts. PlayerVox OverCrow keeps the key or sign-in, asks for it in its own panel, and adds it only to the network rules that name the account: the widget never sees it.",
+  fr: "Le compte de l'utilisateur sur un autre service, déclaré dans permissions.accounts. PlayerVox OverCrow garde la clé ou la connexion, la demande dans son propre panneau et ne l'ajoute qu'aux règles réseau qui nomment le compte : le widget ne la voit jamais.",
+};
+
+const ACCOUNT_ADVICE =
+  "Declare only the service's origins (its API, its images, its OAuth endpoints) and name the account on each route that needs it. Read by default: a route that writes, or a write scope, is justified and reviewed. Never ask for a key in a widget field. Handle not_connected and account_refused, and follow the state with account.subscribe.";
+
 /** The meaning of a permission or capability, what it allows, and how to keep it narrow. */
 export function explainPermission(name: string, locale: Locale) {
+  const account = /^account:([a-z][a-z0-9-]{1,31})$/.exec(name)?.[1];
+  if (account !== undefined && !account.endsWith("-") && !account.includes("--")) {
+    return {
+      name,
+      kind: "account" as const,
+      meaning: ACCOUNT_MEANING[locale],
+      withSensitiveCapability: locale === "en" ? "manifest rejected" : "manifeste refusé",
+      services: [
+        { service: "account.subscribe", when: "always" },
+        { service: "account.connect", when: "on a user action" },
+      ],
+      sensitive: null,
+      account,
+      advice: ACCOUNT_ADVICE,
+      docs: docUrl("services", locale),
+    };
+  }
   const table = permissionsTable();
   const permission = table.permissions[name];
   if (permission) {

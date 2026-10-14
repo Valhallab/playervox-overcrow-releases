@@ -420,12 +420,19 @@ function textsToWrite(
   return texts;
 }
 
-function describeReview(item: Record<string, unknown>): string {
+export function describeReview(item: Record<string, unknown>): string {
   switch (item.kind) {
+    case "account": {
+      const origins = Array.isArray(item.origins)
+        ? item.origins.slice(0, 8).map((origin) => cleanLine(String(origin), 200))
+        : [];
+      const mode = item.mode === "oauth" ? "OAuth sign-in" : "personal key";
+      return `${cleanLine(String(item.name), 32)} account (${cleanLine(String(item.id), 32)}), ${mode}, sent only to ${origins.join(", ")}${item.writes ? "; can change the user's account" : ""}.`;
+    }
     case "capability":
       return `Capability ${cleanLine(String(item.name), 64)}${item.sensitive ? " (sensitive)" : ""}${item.account ? `, needs a ${cleanLine(String(item.account), 32)} account` : ""}.`;
     case "network":
-      return `Network: ${cleanLine(String(item.method), 8)} ${cleanLine(String(item.origin), 200)}${cleanLine(String(item.path), 300)}, responses up to ${size(Number(item.maxResponseBytes))}.`;
+      return `Network: ${cleanLine(String(item.method), 8)} ${cleanLine(String(item.origin), 200)}${cleanLine(String(item.path), 300)}, responses up to ${size(Number(item.maxResponseBytes))}${typeof item.account === "string" ? `, with the ${cleanLine(item.account, 32)} account` : ""}.`;
     case "clipboardWrite":
       return "Clipboard: writes text when the user acts.";
     case "storage":

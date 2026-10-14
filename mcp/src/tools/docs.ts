@@ -34,13 +34,13 @@ export function registerDocTools(env: ToolEnv): void {
           .min(1)
           .max(64)
           .describe(
-            "network, storage, clipboardWrite, gameEvents, or a capability such as media.read.",
+            "network, storage, clipboardWrite, gameEvents, a capability such as media.read, or account:<id>.",
           ),
         locale: LOCALE,
       }),
       outputSchema: z.object({
         name: z.string(),
-        kind: z.enum(["permission", "capability"]),
+        kind: z.enum(["permission", "capability", "account"]),
         meaning: z.string(),
         withSensitiveCapability: z.string().nullable(),
         services: z.array(z.object({ service: z.string(), when: z.string() })),
