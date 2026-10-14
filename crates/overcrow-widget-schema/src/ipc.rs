@@ -242,8 +242,8 @@ pub const HOST_MESSAGES: &[Message] = &[
             ),
             Field::required(
                 "grants",
-                ValueType::Record("capability names"),
-                "Consented capabilities.",
+                ValueType::Record("capability names and account grants"),
+                "Consented capabilities, and `account:<id>` for each consented third-party account.",
             ),
         ],
         summary: "Starts the VM. The VM answers `Ready` within `VM_READY_TIMEOUT_MS`.",

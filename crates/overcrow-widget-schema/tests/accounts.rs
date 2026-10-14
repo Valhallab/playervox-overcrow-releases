@@ -1044,3 +1044,39 @@ fn stream_key_scopes_are_refused_in_any_spelling() {
         });
     }
 }
+
+#[test]
+fn account_services_need_a_declared_and_granted_account() {
+    use overcrow_widget_schema::results::shape;
+    use overcrow_widget_schema::services::{Requirement, SERVICE_ERRORS, SERVICES, ServiceKind};
+    let service = |name: &str| {
+        SERVICES
+            .iter()
+            .find(|service| service.name == name)
+            .unwrap_or_else(|| panic!("{name} is a service"))
+    };
+    let subscribe = service("account.subscribe");
+    assert_eq!(subscribe.requires, Requirement::Account);
+    assert_eq!(subscribe.kind, ServiceKind::Subscribe);
+    assert!(!subscribe.gesture);
+    let connect = service("account.connect");
+    assert_eq!(connect.requires, Requirement::Account);
+    assert_eq!(connect.kind, ServiceKind::Call);
+    assert!(connect.gesture, "the panel opens on a click only");
+    for service in [subscribe, connect] {
+        assert_eq!(service.params.len(), 1);
+        assert_eq!(service.params[0].name, "id");
+        assert!(service.params[0].required);
+    }
+    assert!(SERVICE_ERRORS.contains(&"account_refused"));
+    let status = shape("AccountStatus").expect("named shape");
+    for state in ["signed_out", "pending", "connected", "refused", "expired"] {
+        assert!(status.shape.matches(&json!({ "state": state })), "{state}");
+    }
+    assert!(!status.shape.matches(&json!({"state": "offline"})));
+    assert!(
+        !status
+            .shape
+            .matches(&json!({"state": "connected", "name": "me"}))
+    );
+}

@@ -942,7 +942,7 @@ Authority is checked by the host at every call, immediately before acting. Gestu
 | `storage.set` | permission `storage` | call | no | no | `key`: text ≤ `MAX_STORAGE_KEY_BYTES`; `value`: JSON | `null`; `quota_exceeded` beyond `STORAGE_QUOTA_BYTES` | `null` | fixed |
 | `storage.remove` | permission `storage` | call | no | no | `key`: text ≤ `MAX_STORAGE_KEY_BYTES` | `null` | `null` | fixed |
 | `storage.keys` | permission `storage` | call | no | no | none | list of keys | list of text | fixed |
-| `http.fetch` | permission `network` | call | no | no | `url`: text ≤ `MAX_REQUEST_URL_BYTES`; `method`: `GET` \| `POST` \| `PUT` \| `PATCH` \| `DELETE`; `contentType?`: `application/json` \| `text/plain`; `as`: `json` \| `text` \| `bytes` \| `image` | `{ status, contentType }` with the body as raw payload ≤ the rule's `maxResponseBytes` (`MAX_HTTP_RESPONSE_BYTES` when absent), or `{ status, asset }` from a body ≤ `MAX_HTTP_RESPONSE_BYTES` | `HttpResponse` | fixed |
+| `http.fetch` | permission `network` | call | no | no | `url`: text ≤ `MAX_REQUEST_URL_BYTES`; `method`: `GET` \| `POST` \| `PUT` \| `PATCH` \| `DELETE`; `contentType?`: `application/json` \| `text/plain`; `as`: `json` \| `text` \| `bytes` \| `image` | `{ status, contentType }` with the body as raw payload ≤ the rule's `maxResponseBytes` (`MAX_HTTP_RESPONSE_BYTES` when absent), or `{ status, asset }` from a body ≤ `MAX_HTTP_RESPONSE_BYTES`; on a rule that names an account, `not_connected` while it is not connected and `account_refused` when the service refused its secret | `HttpResponse` | fixed |
 | `clipboard.writeText` | permission `clipboardWrite` | call | yes | no | `text`: text ≤ `MAX_CLIPBOARD_BYTES` | `null` | `null` | fixed |
 | `gameEvents.subscribe` | permission `gameEvents` | subscribe | no | no | none | `{ event, at }` for each declared event | `GameEvent` | fixed |
 | `session.subscribe` | capability `session.read` | subscribe | no | no | none | `{ elapsedMs, at }` counted from the start of the game process, or `null` without an active game | `Session` or `null` | fixed |
@@ -971,6 +971,8 @@ Authority is checked by the host at every call, immediately before acting. Gestu
 | `twitch.chat.join` | capability `twitch.chat.read` | call | yes | no | `channel`: text ≤ `MAX_CHAT_CHANNEL_BYTES` | `null`; the host remembers the channel and rejoins it when the widget starts | `null` | fixed |
 | `twitch.chat.leave` | capability `twitch.chat.read` | call | yes | no | none | `null`; the host forgets the channel | `null` | fixed |
 | `twitch.chat.favorite` | capability `twitch.chat.read` | call | yes | no | `channel`: text ≤ `MAX_CHAT_CHANNEL_BYTES`; `favorite`: boolean | `null`; `quota_exceeded` beyond `MAX_CHAT_FAVORITES` | `null` | fixed |
+| `account.subscribe` | a declared, granted account (`id`) | subscribe | no | no | `id`: identifier ≤ `MAX_ACCOUNT_ID_BYTES` | `{ state }` at once, then at each change: `signed_out`, `pending` (a sign-in step is open), `connected`, `refused` (the service refused the key) or `expired` (the service asks to sign in again). The widget never sees the secret, the account's name or its scopes; with `required`, the host covers the content until the account is connected | `AccountStatus` | fixed |
+| `account.connect` | a declared, granted account (`id`) | call | yes | no | `id`: identifier ≤ `MAX_ACCOUNT_ID_BYTES` | `null`; the host shows its account panel for this account, in its current state: the widget's own button for an account that is not `required` | `null` | fixed |
 
 ### Result shapes
 
@@ -982,7 +984,7 @@ Failure of a call or of a subscription, and of a `submit` intent. `{ code }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
-| `code` | `invalid_request` \| `permission_denied` \| `gesture_required` \| `not_connected` \| `stale_context` \| `unavailable` \| `busy` \| `cancelled` \| `quota_exceeded` \| `unsupported` \| `url_invalid` \| `resolve_failed` \| `address_denied` \| `too_many_addresses` \| `peer_mismatch` \| `redirect_denied` \| `encoding_denied` \| `content_type_denied` \| `response_metadata_limit` \| `request_body_limit` \| `response_body_limit` \| `image_invalid` \| `timeout` \| `transport_failed` | Failure code. |
+| `code` | `invalid_request` \| `permission_denied` \| `gesture_required` \| `not_connected` \| `account_refused` \| `stale_context` \| `unavailable` \| `busy` \| `cancelled` \| `quota_exceeded` \| `unsupported` \| `url_invalid` \| `resolve_failed` \| `address_denied` \| `too_many_addresses` \| `peer_mismatch` \| `redirect_denied` \| `encoding_denied` \| `content_type_denied` \| `response_metadata_limit` \| `request_body_limit` \| `response_body_limit` \| `image_invalid` \| `timeout` \| `transport_failed` | Failure code. |
 
 #### `HttpResponse`
 
@@ -1248,6 +1250,14 @@ One chat message. `{ id, author, color, badges, fragments, reply, deleted, recei
 | `deleted` | boolean | Deleted by a moderator. |
 | `receivedAt` | integer | When the host received the message, in Unix milliseconds of the host's clock: compare it with `Date.now()` to age a message (the Passive fade), also after a `reset`. |
 
+#### `AccountStatus`
+
+State of a third-party account the widget declares. `{ state }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `state` | `signed_out` \| `pending` \| `connected` \| `refused` \| `expired` | State of the account; connection is host chrome. |
+
 #### `TwitchChat`
 
 Twitch chat state. `{ account, channel, joinState, failure, favorites, canSend, generation, reset, messages, removed, skipped }`
@@ -1266,7 +1276,7 @@ Twitch chat state. `{ account, channel, joinState, failure, favorites, canSend, 
 | `removed` | list of text | IDs of removed messages. |
 | `skipped` | integer | New messages the host left out since the previous update, because the chat is faster than it delivers; 0 with `reset`. A removal is never left out. |
 
-Service error codes: `invalid_request`, `permission_denied`, `gesture_required`, `not_connected`, `stale_context`, `unavailable`, `busy`, `cancelled`, `quota_exceeded`, `unsupported`, `url_invalid`, `resolve_failed`, `address_denied`, `too_many_addresses`, `peer_mismatch`, `redirect_denied`, `encoding_denied`, `content_type_denied`, `response_metadata_limit`, `request_body_limit`, `response_body_limit`, `image_invalid`, `timeout`, `transport_failed`.
+Service error codes: `invalid_request`, `permission_denied`, `gesture_required`, `not_connected`, `account_refused`, `stale_context`, `unavailable`, `busy`, `cancelled`, `quota_exceeded`, `unsupported`, `url_invalid`, `resolve_failed`, `address_denied`, `too_many_addresses`, `peer_mismatch`, `redirect_denied`, `encoding_denied`, `content_type_denied`, `response_metadata_limit`, `request_body_limit`, `response_body_limit`, `image_invalid`, `timeout`, `transport_failed`.
 
 ### Write intents
 
@@ -1359,7 +1369,7 @@ Starts the VM. The VM answers `Ready` within `VM_READY_TIMEOUT_MS`.
 | `mode` | `passive` \| `interactive` | yes | Overlay mode. |
 | `visible` | boolean | yes | Whether the widget is shown. |
 | `options` | `menu values` | yes | Durable `wrapper.menu` values by row ID. |
-| `grants` | `capability names` | yes | Consented capabilities. |
+| `grants` | `capability names and account grants` | yes | Consented capabilities, and `account:<id>` for each consented third-party account. |
 
 #### `Event` (frame 1)
 

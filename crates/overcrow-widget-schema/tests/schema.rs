@@ -420,6 +420,10 @@ fn services_reference_declared_authority() {
     for service in services::SERVICES {
         match service.requires {
             services::Requirement::None => {}
+            services::Requirement::Account => {
+                assert!(service.name.starts_with("account."), "{}", service.name);
+                assert_eq!(service.params.first().map(|p| p.name), Some("id"));
+            }
             services::Requirement::Permission(name) => {
                 assert!(permissions::permission(name).is_some(), "{}", service.name);
             }
