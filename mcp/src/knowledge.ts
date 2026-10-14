@@ -181,14 +181,33 @@ const ACCOUNT_MEANING: Record<Locale, string> = {
 const ACCOUNT_ADVICE =
   "Declare only the service's origins (its API, its images, its OAuth endpoints) and name the account on each route that needs it. Read by default: a route that writes, or a write scope, is justified and reviewed. Never ask for a key in a widget field. Handle not_connected and account_refused, and follow the state with account.subscribe.";
 
+/** Integrated services: PlayerVox defines them and the player connects each once. */
+const INTEGRATED_SERVICES: Record<string, { name: string }> = {
+  steam: { name: "Steam" },
+  twitch: { name: "Twitch" },
+};
+
+const SERVICE_MEANING: Record<Locale, (name: string) => string> = {
+  en: (name) =>
+    `The user's ${name} account, an integrated service of PlayerVox OverCrow: the player connects ${name} once in the Control Center, and every widget they allow uses that connection. OverCrow keeps the key or token and adds it only to the widget's routes that name the service: the widget never sees it.`,
+  fr: (name) =>
+    `Le compte ${name} de l'utilisateur, un service intégré de PlayerVox OverCrow : le joueur connecte ${name} une fois dans le Centre de contrôle, et chaque widget qu'il autorise utilise cette connexion. OverCrow garde la clé ou le jeton et ne l'ajoute qu'aux routes du widget qui nomment le service : le widget ne la voit jamais.`,
+};
+
+const SERVICE_ADVICE =
+  "The widget's routes to an integrated service are read-only (GET), on its origins, and stay on the paths PlayerVox allows (never Steam's trades, never Twitch's stream key). Ask Twitch only for the scopes the widget reads. Handle not_connected and account_refused, and follow the state with account.subscribe.";
+
 /** The meaning of a permission or capability, what it allows, and how to keep it narrow. */
 export function explainPermission(name: string, locale: Locale) {
   const account = /^account:([a-z][a-z0-9-]{1,31})$/.exec(name)?.[1];
   if (account !== undefined && !account.endsWith("-") && !account.includes("--")) {
+    const service = Object.hasOwn(INTEGRATED_SERVICES, account)
+      ? INTEGRATED_SERVICES[account]
+      : null;
     return {
       name,
       kind: "account" as const,
-      meaning: ACCOUNT_MEANING[locale],
+      meaning: service ? SERVICE_MEANING[locale](service.name) : ACCOUNT_MEANING[locale],
       withSensitiveCapability: locale === "en" ? "manifest rejected" : "manifeste refusé",
       services: [
         { service: "account.subscribe", when: "always" },
@@ -196,7 +215,7 @@ export function explainPermission(name: string, locale: Locale) {
       ],
       sensitive: null,
       account,
-      advice: ACCOUNT_ADVICE,
+      advice: service ? SERVICE_ADVICE : ACCOUNT_ADVICE,
       docs: docUrl("services", locale),
     };
   }

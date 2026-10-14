@@ -280,6 +280,42 @@ function networkRules(context: Context): void {
   }
 }
 
+/** Origins and names of the services PlayerVox OverCrow integrates itself. */
+const INTEGRATED_SERVICE_ORIGINS = new Set([
+  "https://api.steampowered.com",
+  "https://api.twitch.tv",
+  "https://id.twitch.tv",
+  "https://www.twitch.tv",
+]);
+const INTEGRATED_SERVICE_IDS = new Set(["steam", "twitch"]);
+const INTEGRATED_SERVICE_NAMES = /\b(?:steam|twitch)\b/i;
+
+/** A declared account on Steam or Twitch: OverCrow integrates them itself,
+ * and refuses a widget's own account on them. */
+function integratedServiceAccount(context: Context): void {
+  const accounts = permissionsOf(context.project).accounts;
+  if (!Array.isArray(accounts)) return;
+  accounts.forEach((entry, index) => {
+    if (typeof entry !== "object" || entry === null || "service" in entry) return;
+    const declared = entry as Record<string, unknown>;
+    const origins = Array.isArray(declared.origins) ? declared.origins.map(String) : [];
+    const imitates =
+      INTEGRATED_SERVICE_IDS.has(String(declared.id ?? "")) ||
+      INTEGRATED_SERVICE_NAMES.test(String(declared.name ?? "")) ||
+      origins.some((origin) => INTEGRATED_SERVICE_ORIGINS.has(origin));
+    if (!imitates) return;
+    add(context, {
+      rule: "integrated-service",
+      area: "security",
+      severity: "high",
+      file: "manifest.json",
+      line: null,
+      message: `permissions.accounts[${index}] declares the widget's own account on Steam or Twitch.`,
+      fix: "Steam and Twitch are services PlayerVox OverCrow integrates itself: the player connects them once, and a widget cannot declare its own account on them (OverCrow refuses the manifest).",
+    });
+  });
+}
+
 /** Words of a path that name keys, tokens or sign-in steps. */
 const SECRET_ROUTE_WORDS = new Set([
   "token",
@@ -853,6 +889,7 @@ export function runRules(project: WidgetProject): Finding[] {
   secrets(context);
   asksForSecret(context);
   if (project.manifest) {
+    integratedServiceAccount(context);
     unusedAuthority(context);
     networkRules(context);
     largeResponses(context);

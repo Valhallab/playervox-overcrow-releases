@@ -416,6 +416,43 @@ test("prepare_submission never writes the ZIP through a dist/ link out of the pr
   }
 });
 
+test("the review of an integrated service names it and its scopes", async () => {
+  const { describeReview } = await import("../dist/tools/submission.js");
+  const text = describeReview({
+    kind: "account",
+    id: "twitch",
+    service: "twitch",
+    name: "Twitch",
+    mode: "oauth",
+    origins: ["https://api.twitch.tv"],
+    imageOrigins: ["https://static-cdn.jtvnw.net"],
+    scopes: [
+      {
+        name: "channel:read:goals",
+        access: "read",
+        label: { en: "your goals", fr: "vos objectifs" },
+      },
+    ],
+    writes: false,
+    routes: ["GET https://api.twitch.tv/helix/goals"],
+  });
+  assert.match(
+    text,
+    /Twitch integrated service \(twitch\), sent only to https:\/\/api\.twitch\.tv; scopes channel:read:goals \(read\)\./,
+  );
+  assert.match(
+    describeReview({
+      kind: "account",
+      id: "steam",
+      service: "steam",
+      name: "Steam",
+      origins: [],
+      scopes: [],
+    }),
+    /no scope/,
+  );
+});
+
 test("the review of an account says where the secret goes and whether it writes", async () => {
   const { describeReview } = await import("../dist/tools/submission.js");
   const text = describeReview({
