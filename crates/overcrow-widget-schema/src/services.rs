@@ -239,7 +239,7 @@ pub const SERVICES: &[Service] = &[
                 "`image` decodes the body in the host and returns an `asset:` handle.",
             ),
         ],
-        "`{ status, contentType }` with the body as raw payload ≤ the rule's `maxResponseBytes` (`MAX_HTTP_RESPONSE_BYTES` when absent), or `{ status, asset }` from a body ≤ `MAX_HTTP_RESPONSE_BYTES`; on a rule that names an account, `not_connected` while it is not connected and `account_refused` when the service refused its secret",
+        "`{ status, contentType }` with the body as raw payload ≤ the rule's `maxResponseBytes` (`MAX_HTTP_RESPONSE_BYTES` when absent), or `{ status, asset }` from a body ≤ `MAX_HTTP_RESPONSE_BYTES`",
         Status::Fixed,
     )
     .returning(Shape::Named("HttpResponse")),

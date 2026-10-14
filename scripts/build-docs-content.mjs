@@ -16,8 +16,12 @@
 //   node scripts/build-docs-content.mjs            rewrite the regions
 //   node scripts/build-docs-content.mjs --check    fail when one is stale
 //   node scripts/build-docs-content.mjs --missing  print the catalog entries to write
+//
+// What the schema defines ahead of a release (UNRELEASED) shows only in the
+// regions of hidden pages (`"hidden": true` in pages.json): a public page
+// describes what works today.
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join, relative } from "node:path";
+import { basename, dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { children, parseSchemaReference, records } from "./lib/schema-reference.mjs";
@@ -129,6 +133,7 @@ const WORDS = {
       services: "Services",
       data: "Notes, reviews and chat",
       tests: "Reference images",
+      accounts: "Third-party accounts",
     },
   },
   fr: {
@@ -233,6 +238,7 @@ const WORDS = {
       services: "Services",
       data: "Notes, avis et chat",
       tests: "Images de référence",
+      accounts: "Comptes tiers",
     },
   },
 };
@@ -405,7 +411,42 @@ const LIMIT_GROUPS = {
     "MAX_CHAT_CHANNEL_BYTES",
   ],
   tests: ["PARITY_CHANNEL_TOLERANCE", "PARITY_MAX_DIFFERENT_PIXELS"],
+  accounts: [
+    "MAX_ACCOUNTS",
+    "MAX_ACCOUNT_ORIGINS",
+    "MAX_ACCOUNT_ID_BYTES",
+    "MAX_ACCOUNT_NAME_CHARS",
+    "MIN_ACCOUNT_KEY_BYTES",
+    "MAX_ACCOUNT_KEY_BYTES",
+    "MAX_ACCOUNT_URL_BYTES",
+    "MAX_HEADER_NAME_BYTES",
+    "MAX_AUTH_SCHEME_BYTES",
+    "MAX_OAUTH_CLIENT_ID_BYTES",
+    "MAX_OAUTH_SCOPES",
+    "MAX_OAUTH_SCOPE_BYTES",
+  ],
 };
+
+// Defined by the schema, not shipped by any released application yet:
+// third-party accounts (`account-key`, `account-oauth`). Only hidden pages
+// show them; the release removes the entries. Each entry must still exist,
+// or the build fails.
+export const UNRELEASED = {
+  // `<section>:<field>` of a fields table.
+  fields: new Set(["Manifest > Permissions:accounts", "Permissions > Network rules:account"]),
+  permissions: new Set(["accounts"]),
+  services: new Set(["account.subscribe", "account.connect"]),
+  errors: new Set(["account_refused"]),
+  shapes: new Set(["AccountStatus"]),
+  limitGroups: new Set(["accounts"]),
+};
+
+/** Files of the pages written ahead of their release. */
+const HIDDEN_FILES = new Set(
+  JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..", "docs", "content", "pages.json"), "utf8"))
+    .pages.filter((page) => page.hidden === true)
+    .map((page) => page.file),
+);
 const HOST_LIMITS = new Set([
   "MAX_LEDGER_BYTES",
   "MAX_CATALOG_BYTES",
@@ -527,10 +568,16 @@ function fill(shape, values) {
 
 /** Translates the schema's English for one locale and records what it used. */
 class Translator {
-  constructor(locale, usage) {
+  constructor(locale, usage, hidden = false) {
     this.locale = locale;
     this.usage = usage;
     this.w = WORDS[locale];
+    this.hidden = hidden;
+  }
+
+  /** Whether the page shows `name` of an UNRELEASED kind. */
+  shows(kind, name) {
+    return this.hidden || !UNRELEASED[kind].has(name);
   }
 
   lookup(table, key) {
@@ -611,7 +658,9 @@ const formCell = (t, intent) => `[${t.w.form} ${code(intent)}](forms.md#${anchor
 function fields(t, path, { name = t.w.field, index = 0 } = {}) {
   return table(
     [name, t.w.type, t.w.required, t.w.meaning],
-    records(sections, path, index).map((field) => [
+    records(sections, path, index)
+      .filter((field) => t.shows("fields", `${path}:${field.Field.replaceAll("`", "")}`))
+      .map((field) => [
       field.Field,
       t.type(field.Type),
       t.yesNo(field.Required),
@@ -662,7 +711,9 @@ function permissions(t) {
 function permissionList(t) {
   return table(
     [t.w.permission, t.w.meaning, t.w.withSensitive],
-    records(sections, "Permissions").map((entry) => [
+    records(sections, "Permissions")
+      .filter((entry) => t.shows("permissions", entry.Permission.replaceAll("`", "")))
+      .map((entry) => [
       entry.Permission,
       t.text(entry.Meaning),
       t.type(entry["With a sensitive capability"]),
@@ -818,17 +869,20 @@ function linkShapes(t, text, page) {
   );
 }
 
-function services(t) {
+function services(t, only = null) {
   return blocks(
     records(sections, "Services")
       .filter((entry) => !INTERNAL_SERVICES.has(entry.Service.replaceAll("`", "")))
+      .filter((entry) => t.shows("services", entry.Service.replaceAll("`", "")))
+      .filter((entry) => only === null || only.has(entry.Service.replaceAll("`", "")))
       .flatMap((entry) => {
         const name = entry.Service.replaceAll("`", "");
         if (entry.Kind !== "call" && entry.Kind !== "subscribe") {
           throw new Error(`service ${name} has the unknown kind "${entry.Kind}"`);
         }
         const kind = t.w[entry.Kind] + (entry.Confirmation === "yes" ? `${t.w.semicolon}${t.w.confirmed}` : "");
-        const shape = linkShapes(t, t.type(entry.Shape), "result-shapes.md");
+        // The shapes of a subset are on its own page.
+        const shape = linkShapes(t, t.type(entry.Shape), only === null ? "result-shapes.md" : "");
         const result = t.text(entry.Result);
         const label = entry.Kind === "subscribe" ? t.w.update : t.w.result;
         const item = (title, value) => `- **${title}**${t.w.colon}${value}`;
@@ -847,10 +901,12 @@ function services(t) {
   );
 }
 
-function resultShapes(t) {
+function resultShapes(t, only = null) {
   return blocks(
     children(sections, "Services > Result shapes")
       .filter((shape) => !SKIPPED_SHAPES.has(shape.name))
+      .filter((shape) => t.shows("shapes", shape.name))
+      .filter((shape) => only === null || only.has(shape.name))
       .flatMap((shape) => {
         const intro = shape.section.intro.join(" ").match(/^(.*?\.) (`\{.*)$/);
         if (!intro) {
@@ -896,7 +952,7 @@ function errorCodes(t) {
   }
   return table(
     [t.w.code, t.w.meaning],
-    codes.map((name) => {
+    codes.filter((name) => t.shows("errors", name)).map((name) => {
       const meaning = serviceErrors[name][t.locale];
       if (typeof meaning !== "string" || meaning.trim() === "") {
         throw new Error(`docs/content/i18n/service-errors.json: ${name} has no ${t.locale} text`);
@@ -934,7 +990,9 @@ function limits(t) {
     );
   }
   return blocks(
-    Object.entries(LIMIT_GROUPS).flatMap(([group, names]) => [
+    Object.entries(LIMIT_GROUPS)
+      .filter(([group]) => t.shows("limitGroups", group))
+      .flatMap(([group, names]) => [
       `### ${t.w.limitGroups[group]}`,
       table(
         [t.w.limit, t.w.value, t.w.meaning],
@@ -1038,9 +1096,18 @@ const GENERATORS = {
   capabilities,
   "capability-list": capabilityList,
   "network-rule-fields": (t) => fields(t, "Permissions > Network rules"),
+  // Third-party accounts (hidden pages until their release).
+  "account-fields": (t) => fields(t, "Permissions > Accounts"),
+  "account-send": (t) => fields(t, "Permissions > AccountSend"),
+  "account-key": (t) => fields(t, "Permissions > AccountKey"),
+  "key-format": (t) => fields(t, "Permissions > KeyFormat"),
+  "account-oauth": (t) => fields(t, "Permissions > AccountOAuth"),
+  "account-scope": (t) => fields(t, "Permissions > AccountScope"),
+  "account-services": (t) => services(t, UNRELEASED.services),
+  "account-shapes": (t) => resultShapes(t, UNRELEASED.shapes),
   "parameter-constraints": parameterConstraints,
-  services,
-  "result-shapes": resultShapes,
+  services: (t) => services(t),
+  "result-shapes": (t) => resultShapes(t),
   "write-intents": writeIntents,
   "error-codes": errorCodes,
   "draw-commands": drawCommands,
@@ -1061,7 +1128,7 @@ const newUsage = () => ({
 
 /** The file with every generated region rewritten. */
 export function render(file, locale, text, usage = newUsage()) {
-  const translator = new Translator(locale, usage);
+  const translator = new Translator(locale, usage, HIDDEN_FILES.has(basename(file)));
   return text.replace(
     /<!-- generated:([a-z][a-z0-9-]*) -->\n[\s\S]*?<!-- \/generated:([a-z][a-z0-9-]*) -->/g,
     (_whole, name, end) => {
@@ -1081,7 +1148,31 @@ export function render(file, locale, text, usage = newUsage()) {
   );
 }
 
+/** The UNRELEASED entries the schema no longer defines: a list left behind. */
+export function staleUnreleased() {
+  const field = (entry) => {
+    const [path, name] = entry.split(":");
+    return records(sections, path).some((record) => record.Field === code(name));
+  };
+  const listed = {
+    fields: field,
+    permissions: (name) => records(sections, "Permissions").some((entry) => entry.Permission === code(name)),
+    services: (name) => records(sections, "Services").some((entry) => entry.Service === code(name)),
+    errors: (name) => union("ServiceErrorCode").includes(name),
+    shapes: (name) => children(sections, "Services > Result shapes").some((shape) => shape.name === name),
+    limitGroups: (name) => Object.hasOwn(LIMIT_GROUPS, name),
+  };
+  return Object.entries(UNRELEASED).flatMap(([kind, names]) =>
+    [...names].filter((name) => !listed[kind](name)).map((name) => `${kind}: ${name}`),
+  );
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const leftBehind = staleUnreleased();
+  if (leftBehind.length > 0) {
+    console.error(`UNRELEASED names what the schema no longer defines: ${leftBehind.join(", ")}`);
+    process.exit(1);
+  }
   const check = process.argv.includes("--check");
   const listMissing = process.argv.includes("--missing");
   const usage = newUsage();

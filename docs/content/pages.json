@@ -52,6 +52,13 @@
       "label": { "en": "Services and permissions", "fr": "Services et permissions" }
     },
     {
+      "slug": "accounts",
+      "file": "accounts.md",
+      "group": "build",
+      "label": { "en": "Third-party accounts", "fr": "Comptes tiers" },
+      "hidden": true
+    },
+    {
       "slug": "forms",
       "file": "forms.md",
       "group": "build",
@@ -188,6 +195,13 @@
       "file": "widget-statistics.md",
       "group": "publish",
       "label": { "en": "Statistics: definitions", "fr": "Statistiques : définitions" },
+      "hidden": true
+    },
+    {
+      "slug": "compatible-services",
+      "file": "compatible-services.md",
+      "group": "publish",
+      "label": { "en": "Make your service work with widgets", "fr": "Rendre votre service compatible" },
       "hidden": true
     }
   ]

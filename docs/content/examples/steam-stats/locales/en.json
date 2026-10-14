@@ -1,0 +1,11 @@
+{
+  "steam-id": "Steam ID",
+  "steam-id-hint": "17 digits",
+  "loading": "Loading…",
+  "updated": "Up to date",
+  "no-id": "Enter your Steam ID",
+  "not_connected": "Waiting for your Steam key",
+  "account_refused": "Steam refused the key",
+  "unavailable": "Steam is unavailable",
+  "refresh": "Refresh"
+}

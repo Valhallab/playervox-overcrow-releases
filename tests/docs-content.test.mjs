@@ -182,3 +182,22 @@ for (const name of readdirSync(examples).sort()) {
     }
   });
 }
+
+test("public pages show nothing of what is not released yet", async () => {
+  const { UNRELEASED } = await import("../scripts/build-docs-content.mjs");
+  const words = [
+    ...UNRELEASED.services,
+    ...UNRELEASED.errors,
+    ...UNRELEASED.shapes,
+    "permissions.accounts",
+    "account:<id>",
+  ];
+  for (const page of pages.pages.filter((entry) => entry.hidden !== true)) {
+    for (const locale of pages.locales) {
+      const text = readFileSync(join(content, locale, page.file), "utf8");
+      for (const word of words) {
+        assert.ok(!text.includes(word), `${locale}/${page.file} shows ${word}`);
+      }
+    }
+  }
+});
