@@ -212,8 +212,8 @@ Pour un widget qui a un compte, le relecteur vérifie :
 <!-- generated:account-fields -->
 | Champ | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
-| `id` | identifiant ≤ 32 octets | oui | `[a-z][a-z0-9-]` de 2 à 32 octets octets, sans `-` final ni double ; `playervox` et `twitch` sont réservés. La clé de permission est `account:<id>` ; une règle réseau le nomme dans `account`. |
-| `name` | texte ≤ 32 caractères | oui | Le nom du service tel que l’hôte l’affiche, texte simple d’au plus 32 caractères caractères ; un nom qui se lit comme PlayerVox, OverCrow ou Valhallab est refusé. |
+| `id` | identifiant ≤ 32 octets | oui | `[a-z][a-z0-9-]` de 2 octets à 32 octets, sans `-` final ni double ; `playervox` et `twitch` sont réservés. La clé de permission est `account:<id>` ; une règle réseau le nomme dans `account`. |
+| `name` | texte ≤ 32 caractères | oui | Le nom du service tel que l’hôte l’affiche, texte simple d’au plus 32 caractères ; un nom qui se lit comme PlayerVox, OverCrow ou Valhallab est refusé. |
 | `mode` | `key` \| `oauth` | oui | `key` : une clé ou un jeton personnel que l’utilisateur colle dans le panneau de l’hôte. `oauth` : une connexion avec le client OAuth public de l’éditeur. Seul l’objet du mode est présent. |
 | `origins` | liste de `origin` ≤ 4 | oui | Origines HTTPS canoniques et distinctes du service, comme dans les règles réseau. Toute règle réseau du widget vise l’une d’elles. |
 | `required` | booléen | non | Par défaut `true` : l’hôte couvre le contenu tant que le compte n’est pas connecté. `false` : le widget fonctionne sans lui et ouvre le panneau de l’hôte avec `account.connect`. |

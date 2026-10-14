@@ -247,7 +247,9 @@ fn one_account_at_most() {
     refused(&key(), "shape", "not a list", |value| {
         value["permissions"]["accounts"] = json!({"id": "steam"});
     });
-    accepted(&key(), "an empty list", |value| {
+    // An empty list needs no feature, yet a reader that does not know the
+    // field refuses it: the whole catalog would break for older readers.
+    refused(&key(), "account", "an empty list", |value| {
         value["permissions"]["accounts"] = json!([]);
         for rule in value["permissions"]["network"]
             .as_array_mut()
@@ -1114,4 +1116,62 @@ fn scope_names_and_client_ids_read_the_same_everywhere() {
     accepted(&device(), "a dotted client ID", |value| {
         account(value)["oauth"]["clientId"] = json!("123-abc.apps.example~x_y");
     });
+}
+
+#[test]
+fn a_stream_key_scope_is_named_only_when_nothing_else_is_wrong() {
+    refused(
+        &device(),
+        "account",
+        "with a token outside origins",
+        |value| {
+            account(value)["oauth"]["scopes"] =
+                json!([{"name": "channel:read:stream_key", "access": "read"}]);
+            account(value)["oauth"]["token"] = json!("https://login.nova.example/token");
+        },
+    );
+    refused(
+        &device(),
+        "account",
+        "with an invalid validate endpoint",
+        |value| {
+            account(value)["oauth"]["scopes"] =
+                json!([{"name": "channel:read:stream_key", "access": "read"}]);
+            account(value)["oauth"]["validate"] = json!("http://id.twitch.tv/oauth2/validate");
+        },
+    );
+}
+
+#[test]
+fn more_headers_the_broker_or_the_connection_owns_are_refused() {
+    for header in [
+        "Http2-Settings",
+        "Cookie2",
+        "Max-Forwards",
+        "Alt-Used",
+        "Early-Data",
+        "Priority",
+        "X-Forwarded",
+    ] {
+        refused(&key(), "account", header, |value| {
+            account(value)["send"] = json!({ "header": header });
+        });
+    }
+}
+
+#[test]
+fn a_route_reaches_an_endpoint_through_a_format_suffix() {
+    for path in ["/oauth2/token.json", "/OAuth2/Token.XML"] {
+        refused(&device(), "account_endpoint", path, |value| {
+            value["permissions"]["network"]
+                .as_array_mut()
+                .expect("rules")
+                .push(json!({
+                    "origin": "https://id.twitch.tv",
+                    "method": "POST",
+                    "path": path,
+                    "account": "twitch-api"
+                }));
+        });
+    }
 }

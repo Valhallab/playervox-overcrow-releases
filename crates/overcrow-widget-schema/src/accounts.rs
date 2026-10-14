@@ -40,22 +40,30 @@ pub const RESERVED_ACCOUNT_IDS: &[&str] = &["playervox", "twitch"];
 /// authority; never a carrier of an account's secret or client ID.
 pub const FORBIDDEN_HEADERS: &[&str] = &[
     "accept",
+    "alt-used",
     "connection",
     "cookie",
+    "cookie2",
+    "early-data",
     "expect",
     "forwarded",
     "host",
+    "http2-settings",
     "keep-alive",
+    "max-forwards",
     "origin",
+    "priority",
     "range",
     "referer",
     "set-cookie",
+    "set-cookie2",
     "te",
     "trailer",
     "transfer-encoding",
     "upgrade",
     "user-agent",
     "via",
+    "x-forwarded",
     "x-real-ip",
 ];
 
@@ -78,12 +86,12 @@ pub const ACCOUNT_FIELDS: &[Field] = &[
     Field::required(
         "id",
         ValueType::Identifier(&MAX_ACCOUNT_ID_BYTES),
-        "`[a-z][a-z0-9-]` of 2 to `MAX_ACCOUNT_ID_BYTES` bytes, without a final or double `-`; `playervox` and `twitch` are reserved. The permission key is `account:<id>`; a network rule names it in `account`.",
+        "`[a-z][a-z0-9-]` of 2 bytes to `MAX_ACCOUNT_ID_BYTES`, without a final or double `-`; `playervox` and `twitch` are reserved. The permission key is `account:<id>`; a network rule names it in `account`.",
     ),
     Field::required(
         "name",
         ValueType::Chars(&MAX_ACCOUNT_NAME_CHARS),
-        "The service's name as the host shows it, plain text of at most `MAX_ACCOUNT_NAME_CHARS` characters; a name that reads as PlayerVox, OverCrow or Valhallab is refused.",
+        "The service's name as the host shows it, plain text of at most `MAX_ACCOUNT_NAME_CHARS`; a name that reads as PlayerVox, OverCrow or Valhallab is refused.",
     ),
     Field::required(
         "mode",
@@ -419,7 +427,9 @@ impl Account {
 /// `permissions.accounts`.
 pub(crate) fn validate_accounts(value: &Value) -> Result<Vec<Account>, ManifestError> {
     let list = value.as_array().ok_or(ManifestError::Shape)?;
-    if list.len() as u64 > MAX_ACCOUNTS.value {
+    // An empty list needs no feature, yet a reader that does not know the
+    // field refuses the manifest (and with it the whole catalog).
+    if list.is_empty() || list.len() as u64 > MAX_ACCOUNTS.value {
         return Err(ManifestError::Account);
     }
     list.iter().map(validate_account).collect()
@@ -491,6 +501,10 @@ fn validate_account(value: &Value) -> Result<Account, ManifestError> {
         (AccountMode::OAuth, None, None, Some(oauth)) => (None, None, Some(validate_oauth(oauth)?)),
         _ => return Err(invalid),
     };
+    let (oauth, stream_key) = match oauth {
+        Some((oauth, stream_key)) => (Some(oauth), stream_key),
+        None => (None, false),
+    };
     // The host sends the code and the PKCE verifier to `token`, the device
     // request to `device`, tokens to `revoke` and `validate`: those go to the
     // service only. The browser opens `authorize` and `verify` with nothing
@@ -508,6 +522,10 @@ fn validate_account(value: &Value) -> Result<Account, ManifestError> {
                 return Err(invalid);
             }
         }
+    }
+    // Last, so that the dedicated code names the only fault.
+    if stream_key {
+        return Err(ManifestError::AccountScope);
     }
     Ok(Account {
         id: id.to_owned(),
@@ -660,7 +678,9 @@ fn validate_key(value: &Value) -> Result<KeySettings, ManifestError> {
     })
 }
 
-fn validate_oauth(value: &Value) -> Result<OAuth, ManifestError> {
+/// The OAuth object, and whether a scope would expose the stream key: the
+/// caller reports it once the rest of the declaration is valid.
+fn validate_oauth(value: &Value) -> Result<(OAuth, bool), ManifestError> {
     let invalid = ManifestError::Account;
     let object = value.as_object().ok_or(ManifestError::Shape)?;
     if !has_exact_fields(object, &[OAUTH_FIELDS]) {
@@ -758,12 +778,7 @@ fn validate_oauth(value: &Value) -> Result<OAuth, ManifestError> {
             Some(header.to_owned())
         }
     };
-    // Checked once the declaration is otherwise valid, so the dedicated
-    // code names the only fault.
-    if stream_key {
-        return Err(ManifestError::AccountScope);
-    }
-    Ok(OAuth {
+    let oauth = OAuth {
         client_id: client_id.to_owned(),
         flow,
         authorize,
@@ -775,7 +790,8 @@ fn validate_oauth(value: &Value) -> Result<OAuth, ManifestError> {
         scopes: parsed,
         scope_param,
         client_id_header,
-    })
+    };
+    Ok((oauth, stream_key))
 }
 
 /// A byte of a scope name: what services name scopes with (`read:user`,
@@ -862,13 +878,21 @@ pub fn paths_may_overlap(a: &str, b: &str) -> bool {
             })
 }
 
-/// A path lowercased without its final `/`, for the endpoint check.
+/// A path lowercased, without its final `/` and without a format suffix on
+/// its last segment (`token.json`), for the endpoint check: a service may
+/// serve all of them as the same endpoint.
 fn loose_path(path: &str) -> String {
     let path = path.to_ascii_lowercase();
-    match path.strip_suffix('/') {
-        Some(stripped) if !stripped.is_empty() => stripped.to_owned(),
-        _ => path,
-    }
+    let path = match path.strip_suffix('/') {
+        Some(stripped) if !stripped.is_empty() => stripped,
+        _ => path.as_str(),
+    };
+    let (head, last) = path.rsplit_once('/').unwrap_or(("", path));
+    let last = match last.split_once('.') {
+        Some((stem, _)) if !stem.is_empty() && !last.starts_with('{') => stem,
+        _ => last,
+    };
+    format!("{head}/{last}")
 }
 
 fn account_of(rule: &Map<String, Value>) -> Option<&str> {

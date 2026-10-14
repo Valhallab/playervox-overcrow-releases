@@ -203,8 +203,8 @@ The reviewer checks, for a widget with an account:
 <!-- generated:account-fields -->
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `id` | identifier ≤ 32 bytes | yes | `[a-z][a-z0-9-]` of 2 to 32 bytes bytes, without a final or double `-`; `playervox` and `twitch` are reserved. The permission key is `account:<id>`; a network rule names it in `account`. |
-| `name` | text ≤ 32 characters | yes | The service's name as the host shows it, plain text of at most 32 characters characters; a name that reads as PlayerVox, OverCrow or Valhallab is refused. |
+| `id` | identifier ≤ 32 bytes | yes | `[a-z][a-z0-9-]` of 2 bytes to 32 bytes, without a final or double `-`; `playervox` and `twitch` are reserved. The permission key is `account:<id>`; a network rule names it in `account`. |
+| `name` | text ≤ 32 characters | yes | The service's name as the host shows it, plain text of at most 32 characters; a name that reads as PlayerVox, OverCrow or Valhallab is refused. |
 | `mode` | `key` \| `oauth` | yes | `key`: a personal key or token the user pastes in the host's panel. `oauth`: a sign-in with the publisher's public OAuth client. Exactly the object of the mode is present. |
 | `origins` | list of `origin` ≤ 4 | yes | Distinct canonical HTTPS origins of the service, as in network rules. Every network rule of the widget targets one of them. |
 | `required` | boolean | no | Default `true`: the host covers the content until the account is connected. `false`: the widget works without it and opens the host's panel with `account.connect`. |

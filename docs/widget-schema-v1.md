@@ -725,7 +725,7 @@ Keys are the permissions of [Permissions](#permissions); a sensitive capability 
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `accounts` | list of `Account` ≤ `MAX_ACCOUNTS` | no | The user's account on a third-party service, which the host keeps and adds to the network rules that name it; the widget never sees the secret. With an account, every network rule targets one of its `origins`, and no sensitive capability or `clipboardWrite` is allowed. |
+| `accounts` | list of `Account` ≤ `MAX_ACCOUNTS` | no | The user's account on a third-party service, which the host keeps and adds to the network rules that name it; the widget never sees the secret. Present only with one account. With an account, every network rule targets one of its `origins`, and no sensitive capability or `clipboardWrite` is allowed. |
 | `network` | list of `NetworkRule` ≤ `MAX_NETWORK_RULES` | no | Distinct network rules. |
 | `storage` | boolean | no | Host key-value storage; default `false`. |
 | `clipboardWrite` | boolean | no | Clipboard text writes; default `false`. |
@@ -873,8 +873,8 @@ Declaring a permission or capability grants nothing: activation requires consent
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `id` | identifier ≤ `MAX_ACCOUNT_ID_BYTES` | yes | `[a-z][a-z0-9-]` of 2 to `MAX_ACCOUNT_ID_BYTES` bytes, without a final or double `-`; `playervox` and `twitch` are reserved. The permission key is `account:<id>`; a network rule names it in `account`. |
-| `name` | text ≤ `MAX_ACCOUNT_NAME_CHARS` | yes | The service's name as the host shows it, plain text of at most `MAX_ACCOUNT_NAME_CHARS` characters; a name that reads as PlayerVox, OverCrow or Valhallab is refused. |
+| `id` | identifier ≤ `MAX_ACCOUNT_ID_BYTES` | yes | `[a-z][a-z0-9-]` of 2 bytes to `MAX_ACCOUNT_ID_BYTES`, without a final or double `-`; `playervox` and `twitch` are reserved. The permission key is `account:<id>`; a network rule names it in `account`. |
+| `name` | text ≤ `MAX_ACCOUNT_NAME_CHARS` | yes | The service's name as the host shows it, plain text of at most `MAX_ACCOUNT_NAME_CHARS`; a name that reads as PlayerVox, OverCrow or Valhallab is refused. |
 | `mode` | `key` \| `oauth` | yes | `key`: a personal key or token the user pastes in the host's panel. `oauth`: a sign-in with the publisher's public OAuth client. Exactly the object of the mode is present. |
 | `origins` | list of `origin` ≤ `MAX_ACCOUNT_ORIGINS` | yes | Distinct canonical HTTPS origins of the service, as in network rules. Every network rule of the widget targets one of them. |
 | `required` | boolean | no | Default `true`: the host covers the content until the account is connected. `false`: the widget works without it and opens the host's panel with `account.connect`. |

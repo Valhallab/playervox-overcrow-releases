@@ -140,7 +140,7 @@ pub const PERMISSION_FIELDS: &[Field] = &[
     Field::optional(
         "accounts",
         ValueType::ListOf("Account", &MAX_ACCOUNTS),
-        "The user's account on a third-party service, which the host keeps and adds to the network rules that name it; the widget never sees the secret. With an account, every network rule targets one of its `origins`, and no sensitive capability or `clipboardWrite` is allowed.",
+        "The user's account on a third-party service, which the host keeps and adds to the network rules that name it; the widget never sees the secret. Present only with one account. With an account, every network rule targets one of its `origins`, and no sensitive capability or `clipboardWrite` is allowed.",
     ),
     Field::optional(
         "network",
