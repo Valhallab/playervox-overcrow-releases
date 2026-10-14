@@ -75,7 +75,7 @@ fn device() -> Value {
             "id": "twitch-api",
             "name": "Twitch",
             "mode": "oauth",
-            "origins": ["https://api.twitch.tv"],
+            "origins": ["https://api.twitch.tv", "https://id.twitch.tv"],
             "oauth": {
                 "clientId": "abcdefghijklmnopqrstuvwxyz0123",
                 "flow": "device",
@@ -106,7 +106,11 @@ fn loopback() -> Value {
             "id": "quests",
             "name": "Quest Log",
             "mode": "oauth",
-            "origins": ["https://api.quests.example", "https://img.quests.example"],
+            "origins": [
+                "https://api.quests.example",
+                "https://img.quests.example",
+                "https://quests.example"
+            ],
             "oauth": {
                 "clientId": "nova-overcrow-widget",
                 "flow": "loopback",
@@ -899,7 +903,10 @@ fn routes_never_target_an_oauth_endpoint() {
                 "account_endpoint",
                 &format!("{method} {endpoint}"),
                 |value| {
-                    account(value)["origins"] = json!(["https://api.twitch.tv", origin]);
+                    let origins = account(value)["origins"].as_array_mut().expect("origins");
+                    if !origins.contains(&json!(origin)) {
+                        origins.push(json!(origin));
+                    }
                     value["permissions"]["network"]
                         .as_array_mut()
                         .expect("rules")
@@ -918,7 +925,6 @@ fn routes_never_target_an_oauth_endpoint() {
         "account_endpoint",
         "a parameter covers the endpoint",
         |value| {
-            account(value)["origins"] = json!(["https://api.twitch.tv", "https://id.twitch.tv"]);
             value["permissions"]["network"]
                 .as_array_mut()
                 .expect("rules")
@@ -979,4 +985,62 @@ fn any_change_of_the_declaration_widens() {
     let without = validate(&without).expect("valid").permissions;
     assert!(before.widens(&without), "adding the account widens");
     assert!(!without.widens(&before), "removing it does not");
+}
+
+#[test]
+fn endpoints_that_receive_a_secret_are_on_the_accounts_origins() {
+    // The host sends the code and PKCE verifier to `token`, tokens to
+    // `revoke` and `validate`: a publisher's server there would get them.
+    for field in ["token", "device", "revoke", "validate"] {
+        refused(&device(), "account", field, |value| {
+            account(value)["oauth"][field] = json!("https://login.nova.example/oauth2/x");
+        });
+    }
+    refused(&loopback(), "account", "loopback token", |value| {
+        account(value)["oauth"]["token"] = json!("https://tokens.nova.example/token");
+    });
+    // The pages the browser opens receive nothing from the host.
+    accepted(&loopback(), "authorize on another origin", |value| {
+        account(value)["oauth"]["authorize"] = json!("https://auth.quests.example/authorize");
+    });
+    accepted(&device(), "verify on another origin", |value| {
+        account(value)["oauth"]["verify"] = json!("https://activate.example/code");
+    });
+}
+
+#[test]
+fn a_route_reaches_an_endpoint_whatever_its_case_or_final_slash() {
+    // A service may serve `/OAuth2/Token/` as its token endpoint.
+    for path in ["/OAuth2/Token", "/oauth2/token/", "/OAUTH2/{step}/"] {
+        refused(&device(), "account_endpoint", path, |value| {
+            let mut rule = json!({
+                "origin": "https://id.twitch.tv",
+                "method": "POST",
+                "path": path,
+                "account": "twitch-api"
+            });
+            if path.contains('{') {
+                rule["pathParams"] = json!({"step": {"type": "slug", "maxLength": 16}});
+            }
+            value["permissions"]["network"]
+                .as_array_mut()
+                .expect("rules")
+                .push(rule);
+        });
+    }
+}
+
+#[test]
+fn stream_key_scopes_are_refused_in_any_spelling() {
+    for name in [
+        "channel:read:stream-key",
+        "Stream.Key",
+        "stream:key",
+        "streamKey",
+        "read_STREAM__KEY",
+    ] {
+        refused(&device(), "account_scope", name, |value| {
+            account(value)["oauth"]["scopes"] = json!([{"name": name, "access": "read"}]);
+        });
+    }
 }

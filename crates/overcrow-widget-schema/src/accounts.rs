@@ -69,9 +69,10 @@ pub const FORBIDDEN_HEADER_PREFIXES: &[&str] = &[
     "x-forwarded-",
 ];
 
-/// Scope words refused in any case: they would hand the broadcast key to
-/// the widget.
-pub const FORBIDDEN_SCOPE_WORDS: &[&str] = &["stream_key", "streamkey"];
+/// Scope words refused whatever their case and separators (`stream_key`,
+/// `stream-key`, `Stream.Key`…): they would hand the broadcast key to the
+/// widget.
+pub const FORBIDDEN_SCOPE_WORDS: &[&str] = &["streamkey"];
 
 pub const ACCOUNT_FIELDS: &[Field] = &[
     Field::required(
@@ -195,7 +196,7 @@ pub const OAUTH_FIELDS: &[Field] = &[
     Field::required(
         "token",
         ValueType::Text(&MAX_ACCOUNT_URL_BYTES),
-        "Token endpoint.",
+        "Token endpoint. `token`, `device`, `revoke` and `validate` are on one of the account's `origins`: the host sends them the code, the verifier or tokens.",
     ),
     Field::optional(
         "device",
@@ -238,7 +239,7 @@ pub const OAUTH_SCOPE_FIELDS: &[Field] = &[
     Field::required(
         "name",
         ValueType::Text(&MAX_OAUTH_SCOPE_BYTES),
-        "Printable ASCII without space, `\"` or `\\`; a name containing `stream_key` or `streamkey` in any case is refused.",
+        "Printable ASCII without space, `\"` or `\\`; a name whose letters and digits contain `streamkey` in any case (`stream_key`, `stream-key`…) is refused.",
     ),
     Field::required(
         "access",
@@ -490,6 +491,24 @@ fn validate_account(value: &Value) -> Result<Account, ManifestError> {
         (AccountMode::OAuth, None, None, Some(oauth)) => (None, None, Some(validate_oauth(oauth)?)),
         _ => return Err(invalid),
     };
+    // The host sends the code and the PKCE verifier to `token`, the device
+    // request to `device`, tokens to `revoke` and `validate`: those go to the
+    // service only. The browser opens `authorize` and `verify` with nothing
+    // secret.
+    if let Some(oauth) = &oauth {
+        let receivers = [
+            Some(&oauth.token),
+            oauth.device.as_ref(),
+            oauth.revoke.as_ref(),
+            oauth.validate.as_ref(),
+        ];
+        for endpoint in receivers.into_iter().flatten() {
+            let (origin, _) = https_url(endpoint, false).ok_or(invalid)?;
+            if !unique.contains(origin) {
+                return Err(invalid);
+            }
+        }
+    }
     Ok(Account {
         id: id.to_owned(),
         name: name.to_owned(),
@@ -709,10 +728,15 @@ fn validate_oauth(value: &Value) -> Result<OAuth, ManifestError> {
             Some("write") => ScopeAccess::Write,
             _ => return Err(invalid),
         };
-        let lower = name.to_ascii_lowercase();
+        // Letters and digits only: a separator never hides a word.
+        let folded: String = name
+            .chars()
+            .filter(char::is_ascii_alphanumeric)
+            .map(|character| character.to_ascii_lowercase())
+            .collect();
         stream_key |= FORBIDDEN_SCOPE_WORDS
             .iter()
-            .any(|word| lower.contains(word));
+            .any(|word| folded.contains(word));
         parsed.push(Scope {
             name: name.to_owned(),
             access,
@@ -831,6 +855,15 @@ pub fn paths_may_overlap(a: &str, b: &str) -> bool {
             })
 }
 
+/// A path lowercased without its final `/`, for the endpoint check.
+fn loose_path(path: &str) -> String {
+    let path = path.to_ascii_lowercase();
+    match path.strip_suffix('/') {
+        Some(stripped) if !stripped.is_empty() => stripped.to_owned(),
+        _ => path,
+    }
+}
+
 fn account_of(rule: &Map<String, Value>) -> Option<&str> {
     rule.get("account").and_then(Value::as_str)
 }
@@ -884,8 +917,11 @@ pub(crate) fn validate_account_routes(
         for endpoint in oauth.endpoints() {
             let (endpoint_origin, endpoint_path) =
                 https_url(endpoint, false).ok_or(ManifestError::Account)?;
+            // A service may read paths without case or a final `/`: the
+            // check is wider than the broker's matcher.
             if rules.iter().any(|rule| {
-                origin(rule) == endpoint_origin && paths_may_overlap(&path(rule), endpoint_path)
+                origin(rule) == endpoint_origin
+                    && paths_may_overlap(&loose_path(&path(rule)), &loose_path(endpoint_path))
             }) {
                 return Err(ManifestError::AccountEndpoint);
             }

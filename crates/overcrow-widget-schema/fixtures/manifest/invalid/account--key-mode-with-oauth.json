@@ -31,7 +31,8 @@
         "mode": "key",
         "origins": [
           "https://api.steampowered.com",
-          "https://avatars.steamstatic.com"
+          "https://avatars.steamstatic.com",
+          "https://id.twitch.tv"
         ],
         "send": {
           "header": "X-WebAPI-Key"

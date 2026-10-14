@@ -29,7 +29,8 @@
         "name": "Twitch",
         "mode": "oauth",
         "origins": [
-          "https://api.twitch.tv"
+          "https://api.twitch.tv",
+          "https://id.twitch.tv"
         ],
         "oauth": {
           "clientId": "abcdefghijklmnopqrstuvwxyz0123",

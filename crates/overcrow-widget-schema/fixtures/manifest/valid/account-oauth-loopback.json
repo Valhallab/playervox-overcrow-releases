@@ -30,7 +30,8 @@
         "mode": "oauth",
         "origins": [
           "https://api.quests.example",
-          "https://img.quests.example"
+          "https://img.quests.example",
+          "https://quests.example"
         ],
         "oauth": {
           "clientId": "nova-overcrow-widget",
