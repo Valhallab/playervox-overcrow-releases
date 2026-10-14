@@ -126,7 +126,7 @@ export function registerSubmissionTool(env: ToolEnv): void {
         let review: Record<string, unknown>[] = [];
         if (tools) {
           const cli = new Cli(tools);
-          const typecheck = await mayTypeCheck(session.cacheRoot, target);
+          const typecheck = await mayTypeCheck(session.options.pin.npm.typescript, target);
           const check = await cli.check(target, ctx.mcpReq.signal, typecheck);
           const errors = check.diagnostics.filter((d) => d.severity === "error").length;
           const warnings = check.diagnostics.length - errors;

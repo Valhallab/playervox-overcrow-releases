@@ -219,7 +219,7 @@ async function runTests(
     target,
     update ? ["tests/output", "tests/reference"] : ["tests/output"],
   );
-  const typecheck = await mayTypeCheck(env.session.cacheRoot, target);
+  const typecheck = await mayTypeCheck(env.session.options.pin.npm.typescript, target);
   const result = await cli.test(target, { scenario, update, typecheck }, signal);
   const { diagnostics } = shapeDiagnostics(result.diagnostics);
   if (!result.ran) {
@@ -331,7 +331,7 @@ export function registerBuildTools(env: ToolEnv): void {
         const cli = await cliOf(env);
         if (!cli) return fail(TOOLS_MISSING);
         const target = await widgetDirectory(confinement, directory);
-        const typecheck = await mayTypeCheck(env.session.cacheRoot, target);
+        const typecheck = await mayTypeCheck(env.session.options.pin.npm.typescript, target);
         const result = await cli.check(target, ctx.mcpReq.signal, typecheck);
         const { errors, warnings } = counts(result.diagnostics);
         const shaped = shapeDiagnostics(result.diagnostics);
@@ -469,7 +469,7 @@ export function registerBuildTools(env: ToolEnv): void {
         }
         await checkOutputs(confinement, target, ["dist"]);
         const out = join(target, "dist", `${id}-${version}.ocpkg`);
-        const typecheck = await mayTypeCheck(env.session.cacheRoot, target);
+        const typecheck = await mayTypeCheck(env.session.options.pin.npm.typescript, target);
         const result = await cli.package(target, out, ctx.mcpReq.signal, typecheck);
         const shaped = shapeDiagnostics(result.diagnostics);
         const skipped = typecheck ? "" : ` ${TYPECHECK_SKIPPED}`;

@@ -8,6 +8,12 @@ import { makeZip } from "./zip.mjs";
 
 export const sha256 = (data) => createHash("sha256").update(data).digest("hex");
 
+/** The TypeScript files the test pins accept (typescript.ts): stand-ins for the real ones. */
+export const PINNED_TSC = {
+  "lib/tsc.js": 'module.exports = require("./_tsc.js");\n',
+  "lib/_tsc.js": "// the pinned compiler\n",
+};
+
 const NPM = {
   "@overcrow/sdk": {
     version: "1.0.0",
@@ -18,6 +24,9 @@ const NPM = {
     version: "6.0.3",
     integrity:
       "sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==",
+    files: Object.fromEntries(
+      Object.entries(PINNED_TSC).map(([file, text]) => [file, sha256(Buffer.from(text))]),
+    ),
   },
 };
 

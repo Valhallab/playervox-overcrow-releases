@@ -10,7 +10,6 @@ import { codePoint, hiddenCharacter } from "../hidden.js";
 import { cleanLine } from "../text.js";
 import { DESCRIPTIONS, TEMPLATE_SUMMARIES } from "../texts.js";
 import { ID_FORMS, idProblem, isPlaceholderId } from "../ids.js";
-import { recordTypeScript } from "../typescript.js";
 import { fail, ok, READ_ONLY, TOOLS_MISSING, type ToolEnv, withRoots } from "./common.js";
 
 const TEMPLATES = ["blank", "counter", "list", "chart"] as const;
@@ -219,10 +218,6 @@ export function registerProjectTools(env: ToolEnv): void {
           );
         }
         const checks = await installPackages(target, pins, ctx.mcpReq.signal);
-        // npm checked the published integrity: check, package and test may
-        // now run this TypeScript (typescript.ts).
-        const cacheRoot = session.cacheRoot;
-        if (cacheRoot) await recordTypeScript(cacheRoot, target);
         // Exactly the advertised fields: clients check the output schema strictly.
         const installed = checks.map(({ name, version, integrityMatches }) => ({
           name,

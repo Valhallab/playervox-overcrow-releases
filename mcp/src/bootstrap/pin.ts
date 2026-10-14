@@ -26,12 +26,23 @@ export interface PinnedPackage {
   integrity: string;
 }
 
+/**
+ * TypeScript also pins the SHA-256 of the two files `tsc` runs
+ * (`lib/tsc.js`, which loads `lib/_tsc.js`), read from that tarball: a
+ * project's TypeScript runs only when its files are these (typescript.ts).
+ */
+export interface PinnedTypeScript extends PinnedPackage {
+  files: Record<(typeof TYPESCRIPT_FILES)[number], string>;
+}
+
+export const TYPESCRIPT_FILES = ["lib/tsc.js", "lib/_tsc.js"] as const;
+
 export interface Pin {
   /** OverCrow release version, e.g. `0.6.1-beta.1`; null before the release exists. */
   release: string | null;
   tools: Partial<Record<Platform, PinnedTools>>;
   /** The npm packages a widget project installs: the SDK and TypeScript. */
-  npm: { sdk: PinnedPackage; typescript: PinnedPackage };
+  npm: { sdk: PinnedPackage; typescript: PinnedTypeScript };
 }
 
 export const RELEASES_REPOSITORY = "Valhallab/playervox-overcrow-releases";
@@ -65,7 +76,22 @@ export function validatePin(value: unknown): Pin {
     if (typeof integrity !== "string" || !INTEGRITY.test(integrity)) fail(`${name} integrity`);
     return { version: version as string, integrity: integrity as string };
   };
-  const npmPins = { sdk: pinnedPackage("@overcrow/sdk"), typescript: pinnedPackage("typescript") };
+  const files = ((packages.typescript ?? {}) as Record<string, unknown>).files;
+  if (typeof files !== "object" || files === null) fail("typescript files");
+  const fileDigests = files as Record<string, unknown>;
+  if (Object.keys(fileDigests).sort().join() !== [...TYPESCRIPT_FILES].sort().join())
+    fail("typescript files");
+  for (const file of TYPESCRIPT_FILES) {
+    const digest = fileDigests[file];
+    if (typeof digest !== "string" || !HEX64.test(digest)) fail(`typescript ${file} digest`);
+  }
+  const npmPins = {
+    sdk: pinnedPackage("@overcrow/sdk"),
+    typescript: {
+      ...pinnedPackage("typescript"),
+      files: fileDigests as PinnedTypeScript["files"],
+    },
+  };
   if (release === null) return { release: null, tools: {}, npm: npmPins };
   if (typeof release !== "string" || !VERSION.test(release)) fail("release version");
   if (typeof tools !== "object" || tools === null) fail("tools");
