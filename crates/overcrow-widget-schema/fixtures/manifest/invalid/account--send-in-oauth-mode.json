@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "nova.live-followers",
+  "version": "1.0.0",
+  "name": {
+    "en": "Live followers",
+    "fr": "Followers en direct"
+  },
+  "sizing": {
+    "fit": "height",
+    "preferred": {
+      "width": 300,
+      "height": 170
+    },
+    "min": {
+      "width": 280,
+      "height": 140
+    },
+    "max": {
+      "width": 480,
+      "height": 480
+    }
+  },
+  "permissions": {
+    "accounts": [
+      {
+        "id": "twitch-api",
+        "name": "Twitch",
+        "mode": "oauth",
+        "origins": [
+          "https://api.twitch.tv"
+        ],
+        "oauth": {
+          "clientId": "abcdefghijklmnopqrstuvwxyz0123",
+          "flow": "device",
+          "device": "https://id.twitch.tv/oauth2/device",
+          "verify": "https://www.twitch.tv/activate",
+          "token": "https://id.twitch.tv/oauth2/token",
+          "revoke": "https://id.twitch.tv/oauth2/revoke",
+          "validate": "https://id.twitch.tv/oauth2/validate",
+          "scopes": [
+            {
+              "name": "moderator:read:followers",
+              "access": "read"
+            }
+          ],
+          "scopeParam": "scopes",
+          "clientIdHeader": "Client-Id"
+        },
+        "send": {
+          "header": "X-Key"
+        }
+      }
+    ],
+    "network": [
+      {
+        "origin": "https://api.twitch.tv",
+        "method": "GET",
+        "path": "/helix/channels/followers",
+        "queryParams": {
+          "broadcaster_id": {
+            "type": "slug",
+            "maxLength": 32,
+            "required": true
+          }
+        },
+        "account": "twitch-api"
+      }
+    ]
+  }
+}

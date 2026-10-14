@@ -4,6 +4,10 @@
 use std::fmt::Write;
 
 use crate::API_VERSION;
+use crate::accounts::{
+    ACCOUNT_FIELDS, ACCOUNT_KEY_FIELDS, ACCOUNT_SEND_FIELDS, FEATURE_ACCOUNT_KEY,
+    FEATURE_ACCOUNT_OAUTH, KEY_FORMAT_FIELDS, OAUTH_FIELDS, OAUTH_SCOPE_FIELDS,
+};
 use crate::catalog::{
     CATALOG_DOMAIN, CATALOG_FIELDS, CATALOG_FILE, ENVELOPE_FIELDS, LISTING_FIELDS,
     PACKAGE_REF_FIELDS, PREVIEW_FIELDS, PRODUCTION_BASE_URL, SEED_DOMAIN, SEED_FIELDS, TAGS,
@@ -603,6 +607,28 @@ requires consent recorded by the host.\n\n\
             status(capability.status),
             capability.summary
         );
+    }
+    let _ = write!(
+        out,
+        "\n### Accounts\n\n`permissions.accounts` declares the user's account on one \
+third-party service (ADR 0009). The host keeps the secret, asks for it in its own panel in \
+Interactive mode, adds it to the requests of the network rules that name the account and to no \
+other, and never gives it to the widget. A manifest with a `key` account needs the catalog \
+feature `{FEATURE_ACCOUNT_KEY}`, with an `oauth` account `{FEATURE_ACCOUNT_OAUTH}`. With an \
+account, every network rule targets one of its `origins`, no sensitive capability or \
+`clipboardWrite` is allowed, two rules of the same origin and method that may match one URL \
+name the same account or none, and no rule targets a declared OAuth endpoint.\n\n"
+    );
+    fields_table(out, ACCOUNT_FIELDS);
+    for (title, fields) in [
+        ("AccountSend", ACCOUNT_SEND_FIELDS),
+        ("AccountKey", ACCOUNT_KEY_FIELDS),
+        ("KeyFormat", KEY_FORMAT_FIELDS),
+        ("AccountOAuth", OAUTH_FIELDS),
+        ("AccountScope", OAUTH_SCOPE_FIELDS),
+    ] {
+        let _ = write!(out, "### `{title}`\n\n");
+        fields_table(out, fields);
     }
 }
 

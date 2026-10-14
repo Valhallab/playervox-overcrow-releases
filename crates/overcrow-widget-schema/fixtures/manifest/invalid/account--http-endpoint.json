@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "nova.quest-log",
+  "version": "1.0.0",
+  "name": {
+    "en": "Quest log",
+    "fr": "Journal de quêtes"
+  },
+  "sizing": {
+    "fit": "height",
+    "preferred": {
+      "width": 300,
+      "height": 170
+    },
+    "min": {
+      "width": 280,
+      "height": 140
+    },
+    "max": {
+      "width": 480,
+      "height": 480
+    }
+  },
+  "permissions": {
+    "accounts": [
+      {
+        "id": "quests",
+        "name": "Quest Log",
+        "mode": "oauth",
+        "origins": [
+          "https://api.quests.example",
+          "https://img.quests.example"
+        ],
+        "oauth": {
+          "clientId": "nova-overcrow-widget",
+          "flow": "loopback",
+          "authorize": "https://quests.example/oauth/authorize",
+          "token": "http://quests.example/oauth/token",
+          "revoke": "https://quests.example/oauth/revoke",
+          "scopes": [
+            {
+              "name": "quests:read",
+              "access": "read"
+            },
+            {
+              "name": "quests:track",
+              "access": "write"
+            }
+          ]
+        }
+      }
+    ],
+    "network": [
+      {
+        "origin": "https://api.quests.example",
+        "method": "GET",
+        "path": "/v1/me/quests",
+        "queryParams": {
+          "status": {
+            "type": "enum",
+            "values": [
+              "active",
+              "done"
+            ]
+          }
+        },
+        "account": "quests"
+      },
+      {
+        "origin": "https://api.quests.example",
+        "method": "POST",
+        "path": "/v1/me/quests/{id}/track",
+        "pathParams": {
+          "id": {
+            "type": "integer",
+            "min": 1,
+            "max": 9007199254740991
+          }
+        },
+        "account": "quests"
+      },
+      {
+        "origin": "https://img.quests.example",
+        "method": "GET",
+        "path": "/icons/{file}",
+        "pathParams": {
+          "file": {
+            "type": "slug",
+            "maxLength": 64
+          }
+        }
+      }
+    ]
+  }
+}

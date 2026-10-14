@@ -10,9 +10,10 @@ use std::collections::BTreeSet;
 
 use serde_json::{Map, Value};
 
+use crate::accounts::{Account, validate_account_routes, validate_accounts};
 use crate::json::{has_exact_fields, integer_in, parse_strict};
 use crate::limits::{
-    MAX_DNS_LABEL_BYTES, MAX_DNS_NAME_BYTES, MAX_ENUM_VALUE_BYTES, MAX_ENUM_VALUES,
+    MAX_ACCOUNTS, MAX_DNS_LABEL_BYTES, MAX_DNS_NAME_BYTES, MAX_ENUM_VALUE_BYTES, MAX_ENUM_VALUES,
     MAX_GAME_EVENTS, MAX_HTTP_DECLARED_RESPONSE_BYTES, MAX_MANIFEST_BYTES, MAX_NETWORK_PATH_BYTES,
     MAX_NETWORK_RULES, MAX_PARAMETER_NAME_BYTES, MAX_PATH_PARAMS, MAX_QUERY_PARAMS,
     MAX_SLUG_PARAMETER_BYTES, MAX_STRING_PARAMETER_BYTES, MAX_WIDGET_EDGE_PX, MAX_WIDGET_ID_BYTES,
@@ -137,6 +138,11 @@ pub const VM_FIELDS: &[Field] = &[Field::required(
 
 pub const PERMISSION_FIELDS: &[Field] = &[
     Field::optional(
+        "accounts",
+        ValueType::ListOf("Account", &MAX_ACCOUNTS),
+        "The user's account on a third-party service, which the host keeps and adds to the network rules that name it; the widget never sees the secret. With an account, every network rule targets one of its `origins`, and no sensitive capability or `clipboardWrite` is allowed.",
+    ),
+    Field::optional(
         "network",
         ValueType::ListOf("NetworkRule", &MAX_NETWORK_RULES),
         "Distinct network rules.",
@@ -187,6 +193,20 @@ pub enum ManifestError {
     Wrapper,
     /// `requires` is not a list of distinct host features.
     Requires,
+    /// `permissions.accounts`: more than one account, or a declaration
+    /// outside its grammar, or a `send.query` a route of the account
+    /// declares.
+    Account,
+    /// With an account, a network rule whose origin is not one of the
+    /// account's `origins`.
+    AccountOrigin,
+    /// Two rules of the same origin and method that may match one URL name
+    /// different accounts (or one names none).
+    AccountOverlap,
+    /// A network rule on a declared OAuth endpoint.
+    AccountEndpoint,
+    /// An OAuth scope that would hand the broadcast key to the widget.
+    AccountScope,
 }
 
 impl ManifestError {
@@ -208,6 +228,11 @@ impl ManifestError {
             Self::SensitiveEgress => "sensitive_egress",
             Self::Wrapper => "wrapper",
             Self::Requires => "requires",
+            Self::Account => "account",
+            Self::AccountOrigin => "account_origin",
+            Self::AccountOverlap => "account_overlap",
+            Self::AccountEndpoint => "account_endpoint",
+            Self::AccountScope => "account_scope",
         }
     }
 }
@@ -223,12 +248,29 @@ pub struct Manifest {
     pub permissions: Permissions,
     /// Host data sources the widget needs (`requires`); empty when absent.
     pub requires: BTreeSet<&'static str>,
+    /// The declared third-party account, at most `MAX_ACCOUNTS`.
+    pub accounts: Vec<Account>,
     pub value: Value,
 }
 
 impl Manifest {
     pub fn has_reserved_id(&self) -> bool {
         is_reserved_id(&self.id)
+    }
+
+    /// The catalog v2 features a reader must support to run this manifest
+    /// (`account-key`, `account-oauth`); empty for a manifest without an
+    /// account.
+    pub fn features(&self) -> BTreeSet<&'static str> {
+        self.accounts
+            .iter()
+            .map(|account| account.mode.feature())
+            .collect()
+    }
+
+    /// The declared account, if any.
+    pub fn account(&self) -> Option<&Account> {
+        self.accounts.first()
     }
 }
 
@@ -241,6 +283,9 @@ pub struct Permissions {
     pub clipboard_write: bool,
     pub game_events: BTreeSet<String>,
     pub capabilities: BTreeSet<&'static str>,
+    /// Each account declaration in compact JSON with sorted keys: any
+    /// change of a declaration is a new item.
+    pub accounts: BTreeSet<String>,
 }
 
 impl Permissions {
@@ -252,6 +297,7 @@ impl Permissions {
             || (self.clipboard_write && !previous.clipboard_write)
             || !self.game_events.is_subset(&previous.game_events)
             || !self.capabilities.is_subset(&previous.capabilities)
+            || !self.accounts.is_subset(&previous.accounts)
     }
 
     pub fn has_sensitive_capability(&self) -> bool {
@@ -304,9 +350,9 @@ pub fn validate_manifest_value(value: Value) -> Result<Manifest, ManifestError> 
         Some(vm) => validate_vm(vm)?,
         None => VM_HEAP_BYTES.value,
     };
-    let permissions = match object.get("permissions") {
+    let (permissions, accounts) = match object.get("permissions") {
         Some(permissions) => validate_permissions(permissions)?,
-        None => Permissions::default(),
+        None => (Permissions::default(), Vec::new()),
     };
     if let Some(wrapper) = object.get("wrapper") {
         validate_wrapper(wrapper).map_err(|_| ManifestError::Wrapper)?;
@@ -321,6 +367,7 @@ pub fn validate_manifest_value(value: Value) -> Result<Manifest, ManifestError> 
         heap_bytes,
         permissions,
         requires,
+        accounts,
         value,
     })
 }
@@ -425,7 +472,7 @@ fn validate_vm(vm: &Value) -> Result<u64, ManifestError> {
     Ok(heap as u64 * MIB)
 }
 
-fn validate_permissions(permissions: &Value) -> Result<Permissions, ManifestError> {
+fn validate_permissions(permissions: &Value) -> Result<(Permissions, Vec<Account>), ManifestError> {
     let object = permissions.as_object().ok_or(ManifestError::Shape)?;
     if !has_exact_fields(object, &[PERMISSION_FIELDS]) {
         return Err(ManifestError::Shape);
@@ -440,6 +487,11 @@ fn validate_permissions(permissions: &Value) -> Result<Permissions, ManifestErro
             .as_array()
             .map(Vec::as_slice)
             .ok_or(ManifestError::Shape),
+    };
+
+    let accounts = match object.get("accounts") {
+        None => Vec::new(),
+        Some(accounts) => validate_accounts(accounts)?,
     };
 
     let rules = list("network")?;
@@ -485,13 +537,25 @@ fn validate_permissions(permissions: &Value) -> Result<Permissions, ManifestErro
         clipboard_write: flag("clipboardWrite")?,
         game_events,
         capabilities,
+        accounts: accounts
+            .iter()
+            .map(|account| account.canonical.clone())
+            .collect(),
     };
     if permissions.has_sensitive_capability()
         && (!permissions.network.is_empty() || permissions.clipboard_write)
     {
         return Err(ManifestError::SensitiveEgress);
     }
-    Ok(permissions)
+    // ADR 0009: an account confines the widget to its service, without a
+    // sensitive capability or the clipboard.
+    if !accounts.is_empty()
+        && (permissions.has_sensitive_capability() || permissions.clipboard_write)
+    {
+        return Err(ManifestError::SensitiveEgress);
+    }
+    validate_account_routes(&accounts, rules)?;
+    Ok((permissions, accounts))
 }
 
 /// One network rule: the exact-route grammar of the Web runtime, kept
@@ -517,6 +581,13 @@ fn validate_network_rule(rule: &Value) -> Result<(), ManifestError> {
     };
     let path_params = parameters("pathParams", MAX_PATH_PARAMS.value)?;
     let query_params = parameters("queryParams", MAX_QUERY_PARAMS.value)?;
+    // Which declared account it names is checked with the account.
+    if object
+        .get("account")
+        .is_some_and(|account| !account.is_string())
+    {
+        return Err(invalid);
+    }
     if let Some(bound) = object.get("maxResponseBytes")
         && integer_in(bound, 1, MAX_HTTP_DECLARED_RESPONSE_BYTES.value as i64).is_none()
     {
@@ -641,7 +712,7 @@ fn validate_constraint(constraint: &Value, query: bool) -> Result<(), ManifestEr
 /// `https://host[:port]` exactly as a URL parser would serialize it: a
 /// lowercase DNS name with at least two labels, no IP literal, no default
 /// port, no user information, path, query or fragment.
-fn canonical_https_origin(origin: &str) -> bool {
+pub(crate) fn canonical_https_origin(origin: &str) -> bool {
     let Some(authority) = origin.strip_prefix("https://") else {
         return false;
     };
@@ -673,7 +744,7 @@ fn canonical_https_origin(origin: &str) -> bool {
         })
 }
 
-fn valid_parameter_name(name: &str) -> bool {
+pub(crate) fn valid_parameter_name(name: &str) -> bool {
     !name.is_empty()
         && name.len() as u64 <= MAX_PARAMETER_NAME_BYTES.value
         && name.as_bytes()[0].is_ascii_alphabetic()
@@ -682,7 +753,7 @@ fn valid_parameter_name(name: &str) -> bool {
             .all(|byte| byte.is_ascii_alphanumeric() || byte == b'_')
 }
 
-fn valid_literal_segment(value: &str) -> bool {
+pub(crate) fn valid_literal_segment(value: &str) -> bool {
     !value.is_empty()
         && value != "."
         && value != ".."

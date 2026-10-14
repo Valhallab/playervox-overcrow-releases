@@ -8,6 +8,7 @@
 //! renders them as `docs/widget-schema-v1.md`. Anything absent from these
 //! tables is rejected; values marked provisional await the named lot.
 
+pub mod accounts;
 pub mod catalog;
 pub mod catalog_v2;
 pub mod compiled_view;

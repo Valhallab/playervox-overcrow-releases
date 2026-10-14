@@ -193,10 +193,40 @@ pub fn manifest_diagnostic(error: ManifestError, source: &str) -> Diagnostic {
                 Some(format!("capabilities: {}", names.join(", "))),
             )
         }
+        ManifestError::SensitiveEgress if declares_account(source) => (
+            "permissions",
+            "a widget with an account cannot use a sensitive capability or `clipboardWrite`".into(),
+            Some("the account confines the widget to its service: drop the sensitive capabilities and clipboard access, or the account".into()),
+        ),
         ManifestError::SensitiveEgress => (
             "permissions",
             "a sensitive capability cannot be combined with `network` or `clipboardWrite`".into(),
             Some("drop the network rules and clipboard access, or the sensitive capability".into()),
+        ),
+        ManifestError::Account => (
+            "permissions.accounts",
+            "`permissions.accounts` is invalid".into(),
+            Some("at most one account: an `id` of lowercase letters, digits and `-` (not `playervox` or `twitch`), the service's `name`, `mode` `key` with `send` and `key`, or `oauth` with `oauth`, 1 to 4 HTTPS `origins`; a `send.query` no route of the account declares; see the Accounts section of docs/widget-schema-v1.md".into()),
+        ),
+        ManifestError::AccountOrigin => (
+            "permissions.network",
+            "with an account, every network rule must target one of the account's `origins`".into(),
+            Some("add the rule's origin to `origins` if it belongs to the service, or remove the rule".into()),
+        ),
+        ManifestError::AccountOverlap => (
+            "permissions.network",
+            "two network rules of the same origin and method may match the same URL but do not name the same `account`".into(),
+            Some("give both rules the same `account`, or make their paths differ by a literal segment".into()),
+        ),
+        ManifestError::AccountEndpoint => (
+            "permissions.network",
+            "a network rule targets an OAuth endpoint of the account".into(),
+            Some("OverCrow alone calls `authorize`, `token`, `device`, `verify`, `revoke` and `validate`: remove the rule".into()),
+        ),
+        ManifestError::AccountScope => (
+            "permissions.accounts",
+            "an OAuth scope would give the stream key to the widget".into(),
+            Some("remove the scopes that contain `stream_key` or `streamkey`".into()),
         ),
         ManifestError::Wrapper => (
             "wrapper",
@@ -222,6 +252,15 @@ pub fn manifest_diagnostic(error: ManifestError, source: &str) -> Diagnostic {
         diagnostic = diagnostic.help(help);
     }
     diagnostic
+}
+
+/// Whether the manifest source declares an account.
+fn declares_account(source: &str) -> bool {
+    serde_json::from_str::<serde_json::Value>(source).is_ok_and(|manifest| {
+        manifest["permissions"]["accounts"]
+            .as_array()
+            .is_some_and(|accounts| !accounts.is_empty())
+    })
 }
 
 /// For a name or menu error, the first name or menu label that holds a
