@@ -96,7 +96,25 @@ fn at_offset(source: &str, offset: usize) -> Position {
 
 fn check_manifest(bytes: &[u8], report: &mut Report) -> Option<Manifest> {
     let error = match validate_manifest(bytes) {
-        Ok(manifest) => return Some(manifest),
+        Ok(manifest) => {
+            let source = String::from_utf8_lossy(bytes);
+            for origin in unused_origins(&manifest) {
+                let mut diagnostic = Diagnostic::warning(
+                    "manifest.unused_origin",
+                    format!(
+                        "no network rule targets `{}`, an origin of the account",
+                        crate::sanitize::line(&origin)
+                    ),
+                )
+                .in_file("manifest.json")
+                .help("remove it from `origins`, or add the route that needs it");
+                if let Some(member) = jsonpos::find(&source, "permissions.accounts") {
+                    diagnostic = diagnostic.at(at_offset(&source, member.key));
+                }
+                report.push(diagnostic);
+            }
+            return Some(manifest);
+        }
         Err(error) => error,
     };
     let source = String::from_utf8_lossy(bytes);
@@ -777,6 +795,35 @@ fn uses_t(view: &CompiledView) -> bool {
 
 /// Warns about `t("key")` calls whose literal key has no message. Keys
 /// computed at runtime cannot be checked.
+/// Origins of the account that neither a network rule nor an OAuth
+/// endpoint uses.
+fn unused_origins(manifest: &Manifest) -> Vec<String> {
+    let Some(account) = manifest.account() else {
+        return Vec::new();
+    };
+    let rules = manifest.value["permissions"]["network"]
+        .as_array()
+        .cloned()
+        .unwrap_or_default();
+    let endpoints: Vec<&str> = account
+        .oauth
+        .as_ref()
+        .map(|oauth| oauth.endpoints())
+        .unwrap_or_default();
+    account
+        .origins
+        .iter()
+        .filter(|origin| {
+            !rules.iter().any(|rule| rule["origin"] == origin.as_str())
+                && !endpoints.iter().any(|endpoint| {
+                    overcrow_widget_schema::accounts::https_url(endpoint, false)
+                        .is_some_and(|(endpoint_origin, _)| endpoint_origin == origin.as_str())
+                })
+        })
+        .cloned()
+        .collect()
+}
+
 fn check_message_keys(
     view: &CompiledView,
     messages: &BTreeMap<String, String>,
@@ -839,5 +886,150 @@ fn collect_t_keys(expr: &Expr, keys: &mut BTreeSet<String>) {
             .iter()
             .for_each(|(_, value)| collect_t_keys(value, keys)),
         Expr::Null | Expr::Bool(_) | Expr::Number(_) | Expr::String(_) | Expr::Name(_) => {}
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::diag::Severity;
+    use serde_json::json;
+
+    fn steam(origins: serde_json::Value, extra_rules: Vec<serde_json::Value>) -> serde_json::Value {
+        let mut network = vec![json!({
+            "origin": "https://api.steampowered.com",
+            "method": "GET",
+            "path": "/ISteamUser/GetPlayerSummaries/v2/",
+            "account": "steam"
+        })];
+        network.extend(extra_rules);
+        json!({
+            "schemaVersion": 1,
+            "apiVersion": 1,
+            "id": "nova.steam-stats",
+            "version": "1.0.0",
+            "name": {"en": "Steam stats", "fr": "Stats Steam"},
+            "sizing": {
+                "fit": "none",
+                "preferred": {"width": 300, "height": 170},
+                "min": {"width": 300, "height": 170},
+                "max": {"width": 300, "height": 170}
+            },
+            "permissions": {
+                "accounts": [{
+                    "id": "steam",
+                    "name": "Steam",
+                    "mode": "key",
+                    "origins": origins,
+                    "send": {"header": "X-WebAPI-Key"},
+                    "key": {
+                        "format": {"charset": "hex", "minLength": 32, "maxLength": 32},
+                        "page": "https://steamcommunity.com/dev/apikey"
+                    }
+                }],
+                "network": network
+            }
+        })
+    }
+
+    fn checked(manifest: &serde_json::Value) -> Report {
+        let mut report = Report::default();
+        let source = serde_json::to_string_pretty(manifest).expect("JSON");
+        check_manifest(source.as_bytes(), &mut report);
+        report
+    }
+
+    #[test]
+    fn each_account_error_says_what_to_fix() {
+        for error in [
+            ManifestError::Account,
+            ManifestError::AccountOrigin,
+            ManifestError::AccountOverlap,
+            ManifestError::AccountEndpoint,
+            ManifestError::AccountScope,
+        ] {
+            let diagnostic = manifest_diagnostic(error, "{}");
+            assert_eq!(diagnostic.code, format!("manifest.{}", error.as_str()));
+            assert!(
+                diagnostic.help.is_some_and(|help| !help.is_empty()),
+                "{error:?}"
+            );
+        }
+        let mut manifest = steam(json!(["https://api.steampowered.com"]), Vec::new());
+        manifest["permissions"]["clipboardWrite"] = json!(true);
+        let report = checked(&manifest);
+        let diagnostic = &report.diagnostics[0];
+        assert_eq!(diagnostic.code, "manifest.sensitive_egress");
+        assert!(
+            diagnostic.message.contains("account"),
+            "{}",
+            diagnostic.message
+        );
+        let overlap = steam(
+            json!(["https://api.steampowered.com"]),
+            vec![json!({
+                "origin": "https://api.steampowered.com",
+                "method": "GET",
+                "path": "/ISteamUser/{method}/v2/",
+                "pathParams": {"method": {"type": "slug", "maxLength": 32}}
+            })],
+        );
+        let report = checked(&overlap);
+        assert_eq!(report.diagnostics[0].code, "manifest.account_overlap");
+        assert!(
+            report.diagnostics[0].position.line > 0,
+            "points at the rules"
+        );
+    }
+
+    #[test]
+    fn an_origin_no_route_uses_is_a_warning() {
+        let report = checked(&steam(
+            json!([
+                "https://api.steampowered.com",
+                "https://cdn.steamstatic.com"
+            ]),
+            Vec::new(),
+        ));
+        let codes: Vec<(&str, Severity)> = report
+            .diagnostics
+            .iter()
+            .map(|diagnostic| (diagnostic.code.as_str(), diagnostic.severity))
+            .collect();
+        assert_eq!(codes, [("manifest.unused_origin", Severity::Warning)]);
+        assert!(
+            report.diagnostics[0]
+                .message
+                .contains("https://cdn.steamstatic.com")
+        );
+        assert!(
+            checked(&steam(json!(["https://api.steampowered.com"]), Vec::new()))
+                .diagnostics
+                .is_empty()
+        );
+    }
+
+    #[test]
+    fn the_origin_of_an_oauth_endpoint_is_used() {
+        let mut manifest = steam(
+            json!(["https://api.twitch.tv", "https://id.twitch.tv"]),
+            Vec::new(),
+        );
+        let account = &mut manifest["permissions"]["accounts"][0];
+        account["mode"] = json!("oauth");
+        let object = account.as_object_mut().expect("account");
+        object.remove("send");
+        object.remove("key");
+        account["oauth"] = json!({
+            "clientId": "abc",
+            "flow": "device",
+            "device": "https://id.twitch.tv/oauth2/device",
+            "verify": "https://www.twitch.tv/activate",
+            "token": "https://id.twitch.tv/oauth2/token",
+            "scopes": [{"name": "user:read:email", "access": "read"}]
+        });
+        manifest["permissions"]["network"][0]["origin"] = json!("https://api.twitch.tv");
+        manifest["permissions"]["network"][0]["path"] = json!("/helix/users");
+        assert!(checked(&manifest).diagnostics.is_empty());
     }
 }

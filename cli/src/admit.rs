@@ -657,6 +657,45 @@ fn check_preview(path: &str, findings: &mut Findings) -> Option<(String, String)
 fn review(manifest: &Manifest) -> Vec<Value> {
     let permissions = &manifest.permissions;
     let mut items = Vec::new();
+    let rules = manifest.value["permissions"]["network"]
+        .as_array()
+        .cloned()
+        .unwrap_or_default();
+    // Each account first: what reaches the user's account elsewhere.
+    for (account, declared) in manifest.accounts.iter().zip(
+        manifest.value["permissions"]["accounts"]
+            .as_array()
+            .into_iter()
+            .flatten(),
+    ) {
+        let routes: Vec<&Value> = rules
+            .iter()
+            .filter(|rule| rule["account"].as_str() == Some(account.id.as_str()))
+            .collect();
+        let writes = account.has_write_scope() || routes.iter().any(|rule| rule["method"] != "GET");
+        items.push(json!({
+            "kind": "account",
+            "id": account.id,
+            "name": account.name,
+            "mode": declared["mode"],
+            "required": account.required,
+            "origins": account.origins,
+            "send": declared.get("send"),
+            "key": declared.get("key"),
+            "oauth": declared.get("oauth"),
+            "refusedStatus": account.refused_status,
+            "writes": writes,
+            "routes": routes
+                .iter()
+                .map(|rule| format!(
+                    "{} {}{}",
+                    rule["method"].as_str().unwrap_or_default(),
+                    rule["origin"].as_str().unwrap_or_default(),
+                    rule["path"].as_str().unwrap_or_default()
+                ))
+                .collect::<Vec<_>>(),
+        }));
+    }
     for name in &permissions.capabilities {
         let capability = capability_named(name);
         items.push(json!({
@@ -679,6 +718,7 @@ fn review(manifest: &Manifest) -> Vec<Value> {
                     .get("maxResponseBytes")
                     .cloned()
                     .unwrap_or(json!(MAX_HTTP_RESPONSE_BYTES.value)),
+                "account": rule.get("account"),
             }));
         }
     }
@@ -831,7 +871,9 @@ pub fn render_human(report: &Value) -> String {
     out.push_str("\nReview (authority the widget requests)\n");
     let items = report["review"].as_array().cloned().unwrap_or_default();
     if items.is_empty() {
-        out.push_str("  nothing: no capability, network, clipboard, storage or game event\n");
+        out.push_str(
+            "  nothing: no account, capability, network, clipboard, storage or game event\n",
+        );
     }
     for item in items {
         let line = match item["kind"].as_str() {
@@ -853,12 +895,40 @@ pub fn render_human(report: &Value) -> String {
                     }
                 )
             }
+            Some("account") => {
+                let origins: Vec<String> = item["origins"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .map(&text)
+                    .collect();
+                let mode = if item["mode"] == "oauth" {
+                    "OAuth sign-in"
+                } else {
+                    "personal key"
+                };
+                format!(
+                    "account         {} ({}), {mode}, sent only to {}{}",
+                    text(&item["name"]),
+                    text(&item["id"]),
+                    origins.join(", "),
+                    if item["writes"] == true {
+                        " [CAN CHANGE THE ACCOUNT]"
+                    } else {
+                        ""
+                    }
+                )
+            }
             Some("network") => format!(
-                "network         {} {}{}, responses up to {} bytes",
+                "network         {} {}{}, responses up to {} bytes{}",
                 text(&item["method"]),
                 text(&item["origin"]),
                 text(&item["path"]),
-                text(&item["maxResponseBytes"])
+                text(&item["maxResponseBytes"]),
+                item["account"]
+                    .as_str()
+                    .map(|account| format!(", with account {}", sanitize::line(account)))
+                    .unwrap_or_default()
             ),
             Some("clipboardWrite") => "clipboardWrite  text on a user gesture".to_owned(),
             Some("storage") => {
@@ -869,7 +939,8 @@ pub fn render_human(report: &Value) -> String {
                 }
             }
             Some("gameEvent") => format!("gameEvent       {}", text(&item["name"])),
-            _ => continue,
+            // A kind this CLI does not know stays visible.
+            _ => format!("other           {}", text(&item["kind"])),
         };
         out.push_str(&format!("  {line}\n"));
     }
@@ -1014,5 +1085,123 @@ mod tests {
             key("raidforge", "gg.raidforge.timers").as_str(),
             "raidforge"
         );
+    }
+
+    fn manifest(permissions: Value) -> Manifest {
+        let value = json!({
+            "schemaVersion": 1,
+            "apiVersion": 1,
+            "id": "nova.quest-log",
+            "version": "1.0.0",
+            "name": {"en": "Quest log", "fr": "Journal de quêtes"},
+            "sizing": {
+                "fit": "none",
+                "preferred": {"width": 300, "height": 170},
+                "min": {"width": 300, "height": 170},
+                "max": {"width": 300, "height": 170}
+            },
+            "permissions": permissions,
+        });
+        validate_manifest(value.to_string().as_bytes()).expect("valid test manifest")
+    }
+
+    fn quests(write_scope: bool, post: bool) -> Manifest {
+        let access = if write_scope { "write" } else { "read" };
+        let mut network = vec![
+            json!({"origin": "https://api.quests.example", "method": "GET", "path": "/v1/me/quests", "account": "quests"}),
+            json!({"origin": "https://img.quests.example", "method": "GET", "path": "/icons/{file}",
+                   "pathParams": {"file": {"type": "slug", "maxLength": 64}}}),
+        ];
+        if post {
+            network.push(
+                json!({"origin": "https://api.quests.example", "method": "POST",
+                                "path": "/v1/me/track", "account": "quests"}),
+            );
+        }
+        manifest(json!({
+            "accounts": [{
+                "id": "quests",
+                "name": "Quest Log",
+                "mode": "oauth",
+                "origins": ["https://api.quests.example", "https://img.quests.example", "https://quests.example"],
+                "oauth": {
+                    "clientId": "nova-overcrow-widget",
+                    "flow": "loopback",
+                    "authorize": "https://quests.example/oauth/authorize",
+                    "token": "https://quests.example/oauth/token",
+                    "scopes": [{"name": "quests:read", "access": access}]
+                }
+            }],
+            "network": network,
+        }))
+    }
+
+    #[test]
+    fn the_review_shows_the_account_first_with_its_routes() {
+        let items = review(&quests(false, false));
+        let account = &items[0];
+        assert_eq!(account["kind"], "account");
+        assert_eq!(account["id"], "quests");
+        assert_eq!(account["name"], "Quest Log");
+        assert_eq!(account["mode"], "oauth");
+        assert_eq!(account["required"], true);
+        assert_eq!(account["refusedStatus"], json!([401]));
+        assert_eq!(account["send"], Value::Null);
+        assert_eq!(account["key"], Value::Null);
+        assert_eq!(account["oauth"]["clientId"], "nova-overcrow-widget");
+        assert_eq!(account["oauth"]["scopes"][0]["access"], "read");
+        assert_eq!(account["writes"], false);
+        assert_eq!(
+            account["routes"],
+            json!(["GET https://api.quests.example/v1/me/quests"])
+        );
+        let network: Vec<&Value> = items
+            .iter()
+            .filter(|item| item["kind"] == "network")
+            .collect();
+        assert_eq!(network[0]["account"], "quests");
+        assert_eq!(network[1]["account"], Value::Null);
+    }
+
+    #[test]
+    fn a_write_route_or_scope_marks_the_account_as_writing() {
+        assert_eq!(review(&quests(true, false))[0]["writes"], true);
+        let posting = review(&quests(false, true));
+        assert_eq!(posting[0]["writes"], true);
+        assert_eq!(
+            posting[0]["routes"],
+            json!([
+                "GET https://api.quests.example/v1/me/quests",
+                "POST https://api.quests.example/v1/me/track"
+            ])
+        );
+    }
+
+    #[test]
+    fn the_human_review_shows_accounts_and_names_unknown_kinds() {
+        let report = json!({
+            "id": "nova.quest-log",
+            "version": "1.0.0",
+            "publisher": "nova",
+            "package": {"bytes": 1, "sha256": "00"},
+            "reproducible": {"viewJson": true},
+            "review": [
+                review(&quests(false, true))[0].clone(),
+                {"kind": "network", "method": "GET", "origin": "https://api.quests.example",
+                 "path": "/v1/me/quests", "maxResponseBytes": 1024, "account": "quests"},
+                {"kind": "futureKind"}
+            ],
+            "permissions": {"previous": null},
+        });
+        let text = render_human(&report);
+        assert!(
+            text.contains("account         Quest Log (quests), OAuth sign-in, sent only to https://api.quests.example, https://img.quests.example, https://quests.example [CAN CHANGE THE ACCOUNT]"),
+            "{text}"
+        );
+        assert!(
+            text.contains("/v1/me/quests, responses up to 1024 bytes, with account quests"),
+            "{text}"
+        );
+        assert!(text.contains("other           futureKind"), "{text}");
     }
 }
