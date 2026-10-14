@@ -1080,3 +1080,38 @@ fn account_services_need_a_declared_and_granted_account() {
             .matches(&json!({"state": "connected", "name": "me"}))
     );
 }
+
+#[test]
+fn scope_names_and_client_ids_read_the_same_everywhere() {
+    // A service decodes `%XX` and splits on `+` or `,`: such a name would
+    // request another scope than the one reviewed, or hide `stream_key`.
+    for name in [
+        "channel:read:stream%5Fkey",
+        "user:read+channel:read:stream_key",
+        "user:read,admin",
+        "a&scope=admin",
+        "a=b",
+        "a?b",
+        "a#b",
+        "a;b",
+        "é",
+    ] {
+        refused(&device(), "account", name, |value| {
+            account(value)["oauth"]["scopes"] = json!([{"name": name, "access": "read"}]);
+        });
+    }
+    accepted(&device(), "a URL scope", |value| {
+        account(value)["oauth"]["scopes"] = json!([
+            {"name": "https://www.example.com/auth/read.only", "access": "read"},
+            {"name": "user-read_private", "access": "read"}
+        ]);
+    });
+    for client in ["abc&scope=admin", "abc%26", "abc+def", "abc/def", "abc:def"] {
+        refused(&device(), "account", client, |value| {
+            account(value)["oauth"]["clientId"] = json!(client);
+        });
+    }
+    accepted(&device(), "a dotted client ID", |value| {
+        account(value)["oauth"]["clientId"] = json!("123-abc.apps.example~x_y");
+    });
+}

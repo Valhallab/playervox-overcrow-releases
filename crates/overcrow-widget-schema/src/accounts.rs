@@ -181,7 +181,7 @@ pub const OAUTH_FIELDS: &[Field] = &[
     Field::required(
         "clientId",
         ValueType::Text(&MAX_OAUTH_CLIENT_ID_BYTES),
-        "The publisher's public client at the service: printable ASCII without space. There is no client secret.",
+        "The publisher's public client at the service: ASCII letters, digits, `-`, `.`, `_` and `~`. There is no client secret.",
     ),
     Field::required(
         "flow",
@@ -239,7 +239,7 @@ pub const OAUTH_SCOPE_FIELDS: &[Field] = &[
     Field::required(
         "name",
         ValueType::Text(&MAX_OAUTH_SCOPE_BYTES),
-        "Printable ASCII without space, `\"` or `\\`; a name whose letters and digits contain `streamkey` in any case (`stream_key`, `stream-key`…) is refused.",
+        "ASCII letters, digits, `-`, `.`, `_`, `:` and `/`, nothing a service decodes or splits on; a name whose letters and digits contain `streamkey` in any case (`stream_key`, `stream-key`…) is refused.",
     ),
     Field::required(
         "access",
@@ -669,7 +669,9 @@ fn validate_oauth(value: &Value) -> Result<OAuth, ManifestError> {
     let client_id = object["clientId"].as_str().ok_or(invalid)?;
     if client_id.is_empty()
         || client_id.len() as u64 > MAX_OAUTH_CLIENT_ID_BYTES.value
-        || !client_id.bytes().all(|byte| byte.is_ascii_graphic())
+        || !client_id
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'.' | b'_' | b'~'))
     {
         return Err(invalid);
     }
@@ -716,9 +718,7 @@ fn validate_oauth(value: &Value) -> Result<OAuth, ManifestError> {
         let name = scope["name"].as_str().ok_or(invalid)?;
         if name.is_empty()
             || name.len() as u64 > MAX_OAUTH_SCOPE_BYTES.value
-            || !name
-                .bytes()
-                .all(|byte| byte.is_ascii_graphic() && byte != b'"' && byte != b'\\')
+            || !name.bytes().all(scope_byte)
             || !names.insert(name)
         {
             return Err(invalid);
@@ -776,6 +776,13 @@ fn validate_oauth(value: &Value) -> Result<OAuth, ManifestError> {
         scope_param,
         client_id_header,
     })
+}
+
+/// A byte of a scope name: what services name scopes with (`read:user`,
+/// `user-read-private`, `https://…/auth/x.readonly`), and nothing a service
+/// decodes (`%`) or splits on (`+`, `,`, space, `&`…).
+fn scope_byte(byte: u8) -> bool {
+    byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'.' | b'_' | b':' | b'/')
 }
 
 /// `https://<canonical origin><path>[?<query>]` of at most

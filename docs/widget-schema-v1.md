@@ -910,7 +910,7 @@ Declaring a permission or capability grants nothing: activation requires consent
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `clientId` | text ≤ `MAX_OAUTH_CLIENT_ID_BYTES` | yes | The publisher's public client at the service: printable ASCII without space. There is no client secret. |
+| `clientId` | text ≤ `MAX_OAUTH_CLIENT_ID_BYTES` | yes | The publisher's public client at the service: ASCII letters, digits, `-`, `.`, `_` and `~`. There is no client secret. |
 | `flow` | `loopback` \| `device` | yes | `loopback`: the system browser and a `http://127.0.0.1:<port>/callback` redirect, PKCE S256. `device`: a code the user enters on the service's page (RFC 8628). |
 | `authorize` | text ≤ `MAX_ACCOUNT_URL_BYTES` | no | Authorization endpoint; `loopback` only, required there. Every endpoint is an `https://` canonical origin and path, without query, fragment or credentials. |
 | `token` | text ≤ `MAX_ACCOUNT_URL_BYTES` | yes | Token endpoint. `token`, `device`, `revoke` and `validate` are on one of the account's `origins`: the host sends them the code, the verifier or tokens. |
@@ -926,7 +926,7 @@ Declaring a permission or capability grants nothing: activation requires consent
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `name` | text ≤ `MAX_OAUTH_SCOPE_BYTES` | yes | Printable ASCII without space, `"` or `\`; a name whose letters and digits contain `streamkey` in any case (`stream_key`, `stream-key`…) is refused. |
+| `name` | text ≤ `MAX_OAUTH_SCOPE_BYTES` | yes | ASCII letters, digits, `-`, `.`, `_`, `:` and `/`, nothing a service decodes or splits on; a name whose letters and digits contain `streamkey` in any case (`stream_key`, `stream-key`…) is refused. |
 | `access` | `read` \| `write` | yes | Whether the scope can change the user's account; `write` is shown to the user and reviewed. |
 
 ## Services
