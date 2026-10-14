@@ -24,6 +24,7 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use overcrow_widget_schema::accounts::{AccountMode, ScopeAccess};
 use overcrow_widget_schema::catalog::validate_listing;
 use overcrow_widget_schema::identifiers::{
     EXAMPLE_HANDLES, HandleError, OwnershipError, id_owner, validate_handle,
@@ -673,9 +674,65 @@ fn review(manifest: &Manifest) -> Vec<Value> {
             .filter(|rule| rule["account"].as_str() == Some(account.id.as_str()))
             .collect();
         let writes = account.has_write_scope() || routes.iter().any(|rule| rule["method"] != "GET");
+        let routes: Vec<String> = routes
+            .iter()
+            .map(|rule| {
+                format!(
+                    "{} {}{}",
+                    rule["method"].as_str().unwrap_or_default(),
+                    rule["origin"].as_str().unwrap_or_default(),
+                    rule["path"].as_str().unwrap_or_default()
+                )
+            })
+            .collect();
+        // An integrated service: PlayerVox's definition, the scopes the
+        // widget asks for and its routes; nothing for the reviewer to check
+        // about origins or sending.
+        if let Some(service) = account.service {
+            let scopes: Vec<Value> = account
+                .oauth
+                .iter()
+                .flat_map(|oauth| &oauth.scopes)
+                .map(|scope| {
+                    let label = service.scope(&scope.name).map(|offered| offered.label);
+                    json!({
+                        "name": scope.name,
+                        "access": match scope.access {
+                            ScopeAccess::Read => "read",
+                            ScopeAccess::Write => "write",
+                        },
+                        "label": label.map(|label| json!({"en": label.en, "fr": label.fr})),
+                    })
+                })
+                .collect();
+            items.push(json!({
+                "kind": "account",
+                "id": account.id,
+                "service": service.id,
+                "name": account.name,
+                "mode": match account.mode {
+                    AccountMode::Key => "key",
+                    AccountMode::OAuth => "oauth",
+                },
+                "required": account.required,
+                "origins": service.secret_origins,
+                "imageOrigins": service.origins,
+                "send": Value::Null,
+                "key": Value::Null,
+                "oauth": Value::Null,
+                "refusedStatus": account.refused_status,
+                "scopes": scopes,
+                "writes": writes,
+                "routes": routes,
+            }));
+            continue;
+        }
         items.push(json!({
             "kind": "account",
             "id": account.id,
+            "service": Value::Null,
+            "scopes": Value::Null,
+            "imageOrigins": Value::Null,
             "name": account.name,
             "mode": declared["mode"],
             "required": account.required,
@@ -685,15 +742,7 @@ fn review(manifest: &Manifest) -> Vec<Value> {
             "oauth": declared.get("oauth"),
             "refusedStatus": account.refused_status,
             "writes": writes,
-            "routes": routes
-                .iter()
-                .map(|rule| format!(
-                    "{} {}{}",
-                    rule["method"].as_str().unwrap_or_default(),
-                    rule["origin"].as_str().unwrap_or_default(),
-                    rule["path"].as_str().unwrap_or_default()
-                ))
-                .collect::<Vec<_>>(),
+            "routes": routes,
         }));
     }
     for name in &permissions.capabilities {
@@ -892,6 +941,31 @@ pub fn render_human(report: &Value) -> String {
                         String::new()
                     } else {
                         format!(" [{}]", notes.join(", "))
+                    }
+                )
+            }
+            Some("account") if item["service"].is_string() => {
+                let origins: Vec<String> = item["origins"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .map(&text)
+                    .collect();
+                let scopes: Vec<String> = item["scopes"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .map(|scope| format!("{} ({})", text(&scope["name"]), text(&scope["access"])))
+                    .collect();
+                format!(
+                    "account         {} ({}), integrated service, sent only to {}\n                    {}",
+                    text(&item["name"]),
+                    text(&item["service"]),
+                    origins.join(", "),
+                    if scopes.is_empty() {
+                        "no scope".to_owned()
+                    } else {
+                        format!("scopes {}", scopes.join(", "))
                     }
                 )
             }
@@ -1238,17 +1312,67 @@ mod tests {
             text.contains("OAuth client nova-overcrow-widget (loopback), sign-in page https://quests.example/oauth/authorize, scopes quests:read (read)"),
             "{text}"
         );
-        let key = json!({"kind": "account", "id": "steam", "name": "Steam", "mode": "key",
-            "origins": ["https://api.steampowered.com"], "writes": false,
-            "send": {"header": "X-WebAPI-Key"},
+        let key = json!({"kind": "account", "id": "runlog", "name": "Run Log", "mode": "key",
+            "origins": ["https://api.runlog.example"], "writes": false, "service": null,
+            "send": {"header": "X-Api-Key"},
             "key": {"format": {"charset": "hex", "minLength": 32, "maxLength": 32},
-                    "page": "https://steamcommunity.com/dev/apikey"}});
+                    "page": "https://runlog.example/settings/api"}});
         let mut report = report;
         report["review"] = json!([key]);
         let text = render_human(&report);
         assert!(
-            text.contains("key in header X-WebAPI-Key, from https://steamcommunity.com/dev/apikey"),
+            text.contains("key in header X-Api-Key, from https://runlog.example/settings/api"),
             "{text}"
         );
+        report["review"] = json!([review(&live_goals())[0].clone()]);
+        let text = render_human(&report);
+        assert!(
+            text.contains("account         Twitch (twitch), integrated service, sent only to https://api.twitch.tv\n                    scopes channel:read:goals (read)"),
+            "{text}"
+        );
+    }
+
+    fn live_goals() -> Manifest {
+        manifest(json!({
+            "accounts": [{"service": "twitch", "scopes": ["channel:read:goals"]}],
+            "network": [
+                {"origin": "https://api.twitch.tv", "method": "GET", "path": "/helix/goals", "account": "twitch"},
+                {"origin": "https://static-cdn.jtvnw.net", "method": "GET", "path": "/jtv_user_pictures/{file}",
+                 "pathParams": {"file": {"type": "slug", "maxLength": 128}}},
+            ],
+        }))
+    }
+
+    #[test]
+    fn the_review_shows_an_integrated_service_with_its_scopes() {
+        let items = review(&live_goals());
+        let account = &items[0];
+        assert_eq!(account["kind"], "account");
+        assert_eq!(account["id"], "twitch");
+        assert_eq!(account["service"], "twitch");
+        assert_eq!(account["name"], "Twitch");
+        assert_eq!(account["mode"], "oauth");
+        assert_eq!(account["origins"], json!(["https://api.twitch.tv"]));
+        assert_eq!(
+            account["imageOrigins"],
+            json!(["https://static-cdn.jtvnw.net"])
+        );
+        assert_eq!(account["send"], Value::Null);
+        assert_eq!(account["oauth"], Value::Null);
+        assert_eq!(account["refusedStatus"], json!([401]));
+        assert_eq!(
+            account["scopes"],
+            json!([{"name": "channel:read:goals", "access": "read",
+                    "label": {"en": "your goals", "fr": "vos objectifs"}}])
+        );
+        assert_eq!(account["writes"], false);
+        assert_eq!(
+            account["routes"],
+            json!(["GET https://api.twitch.tv/helix/goals"])
+        );
+        // A declared account says it is none.
+        let declared = review(&quests(false, false));
+        assert_eq!(declared[0]["service"], Value::Null);
+        assert_eq!(declared[0]["scopes"], Value::Null);
     }
 }
