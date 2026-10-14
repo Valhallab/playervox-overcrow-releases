@@ -2,7 +2,7 @@
 // `creatorTools` entry of its release.json (each platform's ZIP and every
 // file in it, with sizes and SHA-256) into src/bootstrap/pin.json, with the
 // npm integrity of the SDK (sdk/package.json's version) and of the
-// TypeScript of the templates.
+// TypeScript of the templates, with the SHA-256 of the files tsc runs.
 //
 //   node scripts/pin-release.mjs <version>    write the pin
 //   node scripts/pin-release.mjs --check      the committed pin matches the
@@ -13,6 +13,7 @@
 
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
+import { gunzipSync } from "node:zlib";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -34,13 +35,54 @@ async function get(url) {
   return Buffer.from(await response.arrayBuffer());
 }
 
-async function npmIntegrity(name, version) {
+async function npmDist(name, version) {
   const body = await get(`https://registry.npmjs.org/${name.replace("/", "%2f")}/${version}`);
   if (!body) throw new Error(`${name}@${version} is not on npm`);
-  const integrity = JSON.parse(body.toString("utf8")).dist?.integrity;
-  if (!/^sha512-[A-Za-z0-9+/]{86}==$/.test(integrity ?? ""))
+  const dist = JSON.parse(body.toString("utf8")).dist ?? {};
+  if (!/^sha512-[A-Za-z0-9+/]{86}==$/.test(dist.integrity ?? ""))
     throw new Error(`${name}@${version}: no sha512 integrity`);
-  return integrity;
+  return dist;
+}
+
+async function npmIntegrity(name, version) {
+  return (await npmDist(name, version)).integrity;
+}
+
+// The SHA-256 of the files tsc runs (src/typescript.ts), read from the
+// tarball once its npm integrity is checked.
+const TYPESCRIPT_FILES = ["lib/tsc.js", "lib/_tsc.js"];
+
+async function typescriptPin(version) {
+  const { integrity, tarball } = await npmDist("typescript", version);
+  if (!/^https:\/\/registry\.npmjs\.org\//.test(tarball ?? ""))
+    throw new Error("typescript: tarball URL");
+  const archive = await get(tarball);
+  if (!archive || `sha512-${createHash("sha512").update(archive).digest("base64")}` !== integrity)
+    throw new Error(`typescript@${version}: the tarball does not match its integrity`);
+  const tar = gunzipSync(archive);
+  const files = {};
+  for (let offset = 0; offset + 512 <= tar.length; ) {
+    const header = tar.subarray(offset, offset + 512);
+    const field = (start, end) =>
+      header.subarray(start, end).toString("utf8").replace(/\0.*$/s, "");
+    const name = `${field(345, 500) ? `${field(345, 500)}/` : ""}${field(0, 100)}`;
+    if (!name) break;
+    const size = Number.parseInt(field(124, 136).trim() || "0", 8);
+    const path = name.replace(/^package\//, "");
+    if (TYPESCRIPT_FILES.includes(path)) {
+      files[path] = createHash("sha256")
+        .update(tar.subarray(offset + 512, offset + 512 + size))
+        .digest("hex");
+    }
+    offset += 512 + Math.ceil(size / 512) * 512;
+  }
+  if (TYPESCRIPT_FILES.some((file) => !files[file]))
+    throw new Error(`typescript@${version}: ${TYPESCRIPT_FILES.join(" or ")} missing`);
+  return {
+    version,
+    integrity,
+    files: Object.fromEntries(TYPESCRIPT_FILES.map((file) => [file, files[file]])),
+  };
 }
 
 /** The pin of `version`, from its published release.json; null when not published. */
@@ -81,7 +123,7 @@ async function pinOf(version) {
     tools,
     npm: {
       "@overcrow/sdk": { version: sdk, integrity: await npmIntegrity("@overcrow/sdk", sdk) },
-      typescript: { version: typescript, integrity: await npmIntegrity("typescript", typescript) },
+      typescript: await typescriptPin(typescript),
     },
   };
 }
