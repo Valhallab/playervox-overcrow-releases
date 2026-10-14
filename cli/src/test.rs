@@ -529,13 +529,18 @@ fn compare(
     }
 }
 
+/// Writes the rendering (and its difference) beside the scenario's output,
+/// never through a link the project holds there.
 fn save_actual(output: &Path, name: &str, actual: &RgbaImage, reference: Option<&RgbaImage>) {
-    if std::fs::create_dir_all(output).is_err() {
-        return;
-    }
-    let _ = actual.save(output.join(format!("{name}.actual.png")));
+    let save = |image: &RgbaImage, file: String| {
+        let mut bytes = std::io::Cursor::new(Vec::new());
+        if image.write_to(&mut bytes, image::ImageFormat::Png).is_ok() {
+            let _ = crate::write_atomically(&output.join(file), bytes.get_ref());
+        }
+    };
+    save(actual, format!("{name}.actual.png"));
     if let Some(reference) = reference {
-        let _ = diff_image(reference, actual).save(output.join(format!("{name}.diff.png")));
+        save(&diff_image(reference, actual), format!("{name}.diff.png"));
     }
 }
 
@@ -650,5 +655,39 @@ fn show_human(outcome: &Outcome) {
                 let _ = writeln!(out, "  log {}: {line}", sanitize::line(&log.level));
             }
         }
+    }
+}
+
+#[cfg(all(test, unix))]
+mod tests {
+    use super::*;
+
+    /// A project may hold links where the renderings go: they are never
+    /// written through.
+    #[test]
+    fn save_actual_never_writes_through_a_link() {
+        let temporary = tempfile::tempdir().expect("temporary directory");
+        let outside = temporary.path().join("outside");
+        std::fs::write(&outside, "sentinel").expect("sentinel");
+        let output = temporary.path().join("output");
+        std::fs::create_dir_all(&output).expect("output");
+        std::os::unix::fs::symlink(&outside, output.join("frame.actual.png")).expect("link");
+        std::os::unix::fs::symlink(&outside, output.join("frame.diff.png")).expect("link");
+
+        let image = RgbaImage::new(2, 2);
+        save_actual(&output, "frame", &image, Some(&image));
+
+        assert_eq!(
+            std::fs::read_to_string(&outside).expect("sentinel"),
+            "sentinel"
+        );
+    }
+
+    #[test]
+    fn save_actual_writes_a_png() {
+        let temporary = tempfile::tempdir().expect("temporary directory");
+        save_actual(temporary.path(), "frame", &RgbaImage::new(2, 2), None);
+        let bytes = std::fs::read(temporary.path().join("frame.actual.png")).expect("png");
+        assert!(bytes.starts_with(b"\x89PNG"));
     }
 }

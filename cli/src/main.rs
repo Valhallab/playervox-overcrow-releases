@@ -741,21 +741,38 @@ fn run_build(arguments: &Arguments, write: bool) -> Result<ExitCode, String> {
 }
 
 /// Writes through a temporary file in the same directory, then renames, so
-/// a failed run never leaves a truncated package.
+/// a failed run never leaves a truncated package. A project may come from
+/// someone else: the folder and the file must not be links, and the
+/// temporary file gets a fresh random name, so no link planted in the
+/// project leads the write outside it.
 fn write_atomically(path: &Path, bytes: &[u8]) -> std::io::Result<()> {
-    if let Some(parent) = path
+    let parent = path
         .parent()
         .filter(|parent| !parent.as_os_str().is_empty())
-    {
-        fs::create_dir_all(parent)?;
+        .unwrap_or(Path::new("."));
+    fs::create_dir_all(parent)?;
+    refuse_link(parent)?;
+    refuse_link(path)?;
+    let mut temporary = tempfile::NamedTempFile::new_in(parent)?;
+    temporary.write_all(bytes)?;
+    temporary
+        .persist(path)
+        .map(|_| ())
+        .map_err(|error| error.error)
+}
+
+/// An error when `path` is a symbolic link (or, on Windows, a junction).
+fn refuse_link(path: &Path) -> std::io::Result<()> {
+    match fs::symlink_metadata(path) {
+        Ok(metadata) if metadata.file_type().is_symlink() => Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            format!(
+                "{} is a link; write to a real folder or file",
+                path.display()
+            ),
+        )),
+        _ => Ok(()),
     }
-    let mut temporary = path.as_os_str().to_owned();
-    temporary.push(".tmp");
-    let temporary = PathBuf::from(temporary);
-    fs::write(&temporary, bytes)?;
-    fs::rename(&temporary, path).inspect_err(|_| {
-        let _ = fs::remove_file(&temporary);
-    })
 }
 
 fn run_inspect(arguments: &Arguments) -> Result<ExitCode, String> {

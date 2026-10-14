@@ -461,3 +461,52 @@ fn no_child_process_sees_the_publish_key() {
     assert!(!seen.contains("OVERCROW_PUBLISH_KEY"), "{seen}");
     assert!(!seen.contains(&KEY[8..]), "{seen}");
 }
+
+/// A project may come from someone else: links it holds under the output
+/// folder never lead a write outside it.
+#[cfg(unix)]
+#[test]
+fn package_never_writes_through_a_link_in_the_output() {
+    let (temporary, root) = project("counter");
+    let outside = temporary.path().join("outside");
+    fs::write(&outside, "sentinel").expect("sentinel");
+    let dist = root.join("dist");
+    fs::create_dir_all(&dist).expect("dist");
+    let package = dist.join("yourhandle.counter-0.1.0.ocpkg");
+    std::os::unix::fs::symlink(&outside, dist.join("yourhandle.counter-0.1.0.ocpkg.tmp"))
+        .expect("link");
+
+    let output = cli(&["package", root.to_str().expect("UTF-8"), "--no-typecheck"]);
+    assert!(output.status.success(), "{}", text(&output.stderr));
+    assert_eq!(fs::read_to_string(&outside).expect("sentinel"), "sentinel");
+    assert!(
+        !fs::symlink_metadata(&package)
+            .expect("package")
+            .file_type()
+            .is_symlink()
+    );
+
+    fs::remove_file(&package).expect("remove package");
+    std::os::unix::fs::symlink(&outside, &package).expect("link");
+    let output = cli(&["package", root.to_str().expect("UTF-8"), "--no-typecheck"]);
+    assert!(!output.status.success());
+    assert!(
+        text(&output.stderr).contains("link"),
+        "{}",
+        text(&output.stderr)
+    );
+    assert_eq!(fs::read_to_string(&outside).expect("sentinel"), "sentinel");
+}
+
+#[cfg(unix)]
+#[test]
+fn package_refuses_an_output_folder_that_is_a_link() {
+    let (temporary, root) = project("counter");
+    let elsewhere = temporary.path().join("elsewhere");
+    fs::create_dir_all(&elsewhere).expect("elsewhere");
+    std::os::unix::fs::symlink(&elsewhere, root.join("dist")).expect("link");
+
+    let output = cli(&["package", root.to_str().expect("UTF-8"), "--no-typecheck"]);
+    assert!(!output.status.success());
+    assert_eq!(fs::read_dir(&elsewhere).expect("elsewhere").count(), 0);
+}
