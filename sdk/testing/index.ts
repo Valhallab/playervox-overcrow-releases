@@ -93,9 +93,17 @@ export interface TestTimer {
   readonly dueAt: number;
 }
 
+/** State of a third-party account, as `account.subscribe` reports it. */
+export type TestAccountState = "signed_out" | "pending" | "connected" | "refused" | "expired";
+
+const ACCOUNT_STATES: readonly string[] = ["signed_out", "pending", "connected", "refused", "expired"];
+
 export interface InstallOptions {
   /** Changes to {@link HOST}. */
   readonly host?: Partial<TestHost>;
+  /** State of each declared account by ID: an `account.subscribe` of a
+   * listed account gets it at once, as from the host. */
+  readonly accounts?: Readonly<Record<string, TestAccountState>>;
   /** The virtual time, Unix milliseconds; 0 by default. */
   readonly now?: number;
 }
@@ -125,6 +133,11 @@ export interface TestRuntime {
   push(service: string, value: unknown): number;
   /** Ends the service's running subscriptions with a failure code. */
   fail(service: string, code: string): number;
+  /** State of each account the test set, by ID. */
+  readonly accounts: Readonly<Record<string, TestAccountState>>;
+  /** Changes an account's state and sends it to the running
+   * `account.subscribe` subscriptions of that account. Returns their number. */
+  setAccount(id: string, state: TestAccountState): number;
   /** Chooses an `action` row of the wrapper menu. */
   menu(row: string): void;
   /** The last call of `service`. */
@@ -165,6 +178,20 @@ export function installRuntime(options: InstallOptions = {}): TestRuntime {
     throw new Error("a runtime is installed already: uninstall() it first");
   }
   let host: TestHost = Object.freeze({ ...HOST, ...options.host });
+  const accounts: Record<string, TestAccountState> = {};
+  const accountState = (state: string): TestAccountState => {
+    if (!ACCOUNT_STATES.includes(state)) {
+      throw new RangeError(`not an account state: ${state}`);
+    }
+    return state as TestAccountState;
+  };
+  for (const [id, state] of Object.entries(options.accounts ?? {})) {
+    accounts[id] = accountState(state);
+  }
+  const accountOf = (params: unknown): string | undefined => {
+    const id = (params as { id?: unknown } | null | undefined)?.id;
+    return typeof id === "string" ? id : undefined;
+  };
   let now = options.now ?? 0;
   let nextId = 1;
   let order = 0;
@@ -220,6 +247,10 @@ export function installRuntime(options: InstallOptions = {}): TestRuntime {
     subscribe(service: string, params: unknown, update: Update) {
       const entry: SubscriptionEntry = { id: nextId++, service, params, cancelled: false, update };
       subscriptions.push(entry);
+      const id = service === "account.subscribe" ? accountOf(params) : undefined;
+      if (id !== undefined && Object.hasOwn(accounts, id)) {
+        update({ value: { state: accounts[id] }, final: false });
+      }
       return {
         cancel() {
           entry.cancelled = true;
@@ -321,6 +352,17 @@ export function installRuntime(options: InstallOptions = {}): TestRuntime {
       for (const entry of targets) {
         entry.cancelled = true;
         entry.update({ error: { code }, final: true });
+      }
+      return targets.length;
+    },
+    get accounts() {
+      return Object.freeze({ ...accounts });
+    },
+    setAccount(id, state) {
+      accounts[id] = accountState(state);
+      const targets = running("account.subscribe").filter((entry) => accountOf(entry.params) === id);
+      for (const entry of targets) {
+        entry.update({ value: { state }, final: false });
       }
       return targets.length;
     },

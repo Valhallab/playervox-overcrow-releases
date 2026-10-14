@@ -1,0 +1,13 @@
+<!-- Active quests once the account is connected; until then, the widget's
+     own button, which opens OverCrow's sign-in panel. -->
+<box class="quests">
+  <if test={state.signedIn}>
+    <text class="count">{activeText(state.active)}</text>
+  </if>
+  <else>
+    <button class="connect" label={t("connect")} on:activate={connect}>
+      <text>{t("connect")}</text>
+    </button>
+  </else>
+  <text class="status">{t(state.status)}</text>
+</box>

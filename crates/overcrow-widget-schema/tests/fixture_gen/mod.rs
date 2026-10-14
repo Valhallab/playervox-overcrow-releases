@@ -514,6 +514,32 @@ fn envelope(domain: &[u8], payload: &Value) -> Vec<u8> {
     encode_envelope(CONFORMANCE_KEY_ID, &bytes, &sign(domain, &bytes))
 }
 
+/// A target whose manifest declares a key account: it needs the catalog v2
+/// feature `account-key`, which the catalog v1 and the seed never carry.
+fn with_account(target: &Value) -> Value {
+    edit(target, |target| {
+        target["manifest"]["permissions"] = json!({
+            "accounts": [{
+                "id": "steam",
+                "name": "Steam",
+                "mode": "key",
+                "origins": ["https://api.steampowered.com"],
+                "send": {"header": "X-WebAPI-Key"},
+                "key": {
+                    "format": {"charset": "hex", "minLength": 32, "maxLength": 32},
+                    "page": "https://steamcommunity.com/dev/apikey"
+                }
+            }],
+            "network": [{
+                "origin": "https://api.steampowered.com",
+                "method": "GET",
+                "path": "/ISteamUser/GetPlayerSummaries/v2/",
+                "account": "steam"
+            }]
+        });
+    })
+}
+
 fn edit(value: &Value, change: impl FnOnce(&mut Value)) -> Value {
     let mut value = value.clone();
     change(&mut value);
@@ -652,6 +678,10 @@ fn catalogs(out: &mut BTreeMap<String, Vec<u8>>, packages: &BTreeMap<&str, Built
         }),
     );
     signed_invalid("sequence--zero", edit(&full, |c| c["sequence"] = json!(0)));
+    signed_invalid(
+        "features--account-target",
+        catalog_payload(vec![clock.clone(), with_account(&weather)]),
+    );
     signed_invalid(
         "time--fractional-seconds",
         edit(&full, |c| {
@@ -875,6 +905,10 @@ fn seeds(out: &mut BTreeMap<String, Vec<u8>>, packages: &BTreeMap<&str, Built>) 
             &seed_payload(vec![edit(&clock, |t| {
                 t.as_object_mut().expect("target").remove("tags");
             })]),
+        ),
+        invalid(
+            "features--account-target",
+            &seed_payload(vec![with_account(&clock)]),
         ),
         invalid(
             "seed_target--revoked",

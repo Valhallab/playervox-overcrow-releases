@@ -312,6 +312,9 @@ pub enum CatalogError {
     PackageDigest,
     Package(PackageError),
     ManifestMismatch,
+    /// A target whose manifest needs a catalog v2 feature (an account): the
+    /// catalog v1 and the seed never carry one (ADR 0009).
+    Features,
 }
 
 impl CatalogError {
@@ -344,6 +347,7 @@ impl CatalogError {
             Self::PackageDigest => "package_digest",
             Self::Package(_) => "package",
             Self::ManifestMismatch => "manifest_mismatch",
+            Self::Features => "features",
         }
     }
 }
@@ -619,6 +623,9 @@ fn target_entry(value: &Value, origin: Origin) -> Result<Target, CatalogError> {
     }
     let manifest =
         validate_manifest_value(object["manifest"].clone()).map_err(CatalogError::Manifest)?;
+    if !manifest.features().is_empty() {
+        return Err(CatalogError::Features);
+    }
 
     let built_in = match object.get("tags") {
         None => false,

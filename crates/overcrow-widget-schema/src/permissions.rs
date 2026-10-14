@@ -28,6 +28,11 @@ pub const PERMISSIONS: &[Permission] = &[
         with_sensitive: SensitiveRule::Forbidden,
     },
     Permission {
+        name: "accounts",
+        summary: "The user's account on one third-party service, kept by the host and added to the network rules that name it; at most `MAX_ACCOUNTS`.",
+        with_sensitive: SensitiveRule::Forbidden,
+    },
+    Permission {
         name: "storage",
         summary: "Host-managed key-value storage partitioned by widget ID, within `STORAGE_QUOTA_BYTES`.",
         with_sensitive: SensitiveRule::ProcessLifetime,
@@ -84,6 +89,11 @@ pub const NETWORK_RULE_FIELDS: &[Field] = &[
             max: MAX_HTTP_DECLARED_RESPONSE_BYTES.value as i64,
         },
         "Largest response body of this route, 1..=`MAX_HTTP_DECLARED_RESPONSE_BYTES`; `MAX_HTTP_RESPONSE_BYTES` when absent. Not for `as: \"image\"`, which keeps `MAX_HTTP_RESPONSE_BYTES`. When several rules allow a request, the largest bound applies.",
+    ),
+    Field::optional(
+        "account",
+        ValueType::Identifier(&crate::limits::MAX_ACCOUNT_ID_BYTES),
+        "`id` of the declared account: the host adds the user's secret to the requests this rule allows, and to no other. Two rules of the same origin and method that may match one URL name the same account, or none; no rule targets a declared OAuth endpoint.",
     ),
 ];
 

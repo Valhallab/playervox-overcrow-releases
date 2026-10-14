@@ -468,6 +468,15 @@ pub const SHAPES: &[NamedShape] = &[
         "One chat message.",
     ),
     named(
+        "AccountStatus",
+        Shape::Record(&[member(
+            "state",
+            Shape::Keyword(&["signed_out", "pending", "connected", "refused", "expired"]),
+            "State of the account; connection is host chrome.",
+        )]),
+        "State of a third-party account the widget declares.",
+    ),
+    named(
         "TwitchChat",
         Shape::Record(&[
             member(

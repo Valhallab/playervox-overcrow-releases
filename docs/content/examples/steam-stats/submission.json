@@ -1,0 +1,21 @@
+{
+  "releaseNotes": {
+    "en": "First version: your Steam name and the game you are playing.",
+    "fr": "Première version : votre nom Steam et le jeu en cours."
+  },
+  "justifications": [
+    {
+      "permission": "account:steam",
+      "text": "Reads the player's own Steam profile with their Steam Web API key, in a header, on one GET route; it writes nothing."
+    },
+    {
+      "permission": "network:GET https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/",
+      "text": "Reads the player's name and current game, every 5 minutes at most."
+    },
+    {
+      "permission": "storage",
+      "text": "Keeps the player's public Steam ID between two games."
+    }
+  ],
+  "reviewMessage": "Test with any Steam account and its key from steamcommunity.com/dev/apikey; the widget sends only the Steam ID the player typed."
+}

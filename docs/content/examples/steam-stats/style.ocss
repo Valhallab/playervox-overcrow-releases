@@ -1,0 +1,28 @@
+.stats {
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+}
+
+.game {
+  color: var(--color-text-muted);
+}
+
+.footer {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.status {
+  color: var(--color-text-muted);
+}
+
+.refresh {
+  width: var(--icon-button-size);
+  height: var(--icon-button-size);
+  border-radius: var(--radius-md);
+}
+
+.refresh:hover {
+  background: var(--color-surface-hover);
+}

@@ -1,5 +1,5 @@
 import { runtime } from "./runtime.js";
-import type { Capability, Locale, Mode, Region, Theme } from "./generated/schema.js";
+import type { AccountGrant, Capability, Locale, Mode, Region, Theme } from "./generated/schema.js";
 
 /** A stored `wrapper.menu` value: a toggle, a slider or a choice. */
 export type MenuValue = boolean | number | string;
@@ -36,8 +36,9 @@ export interface HostData {
   readonly visible: boolean;
   /** Stored `wrapper.menu` values by row ID. */
   readonly options: Readonly<Record<string, MenuValue>>;
-  /** Capabilities the user granted. */
-  readonly grants: readonly Capability[];
+  /** Capabilities the user granted, and `account:<id>` for each declared
+   * third-party account the user granted. */
+  readonly grants: readonly (Capability | AccountGrant)[];
 }
 
 const read = (name: string): never => runtime().host[name] as never;
@@ -122,9 +123,9 @@ export function onHost(listener: HostListener): { cancel(): void } {
   };
 }
 
-/** Whether the user granted `capability`. */
-export function hasGrant(capability: Capability): boolean {
-  return host.grants.includes(capability);
+/** Whether the user granted `grant`: a capability, or `account:<id>`. */
+export function hasGrant(grant: Capability | AccountGrant): boolean {
+  return host.grants.includes(grant);
 }
 
 /**

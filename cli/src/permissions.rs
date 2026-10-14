@@ -1,13 +1,15 @@
 //! Stable keys of the authority a manifest requests, and what an update
 //! adds to it. The keys are shared with the creator space and its MCP
 //! server: `network:<METHOD> <origin><path>`, `storage`, `clipboardWrite`,
-//! `capability:<name>` and `gameEvent:<name>`.
+//! `capability:<name>`, `gameEvent:<name>` and `account:<id>`.
 //!
 //! A network key names a route; the rest of its rule (path and query
 //! constraints, response bound) is its detail. An update whose route stays
 //! but gains a rule detail asks for other authority too: such a key is
 //! `changed` (widened), and, like an `added` one, calls for a full review,
-//! as the host asks the player again (`Permissions::widens`).
+//! as the host asks the player again (`Permissions::widens`). An account's
+//! detail is its whole declaration: any change of it is `changed`, and a
+//! route that gains `account` is a changed route.
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -80,6 +82,11 @@ pub fn keys(manifest: &Manifest) -> BTreeMap<String, BTreeSet<String>> {
     }
     for event in &permissions.game_events {
         keys.entry(format!("gameEvent:{event}")).or_default();
+    }
+    for account in &manifest.accounts {
+        keys.entry(format!("account:{}", account.id))
+            .or_default()
+            .insert(account.canonical.clone());
     }
     keys
 }
@@ -235,5 +242,84 @@ mod tests {
         let comparison = compare(&before, &after);
         assert!(comparison.changed.is_empty() && comparison.added.is_empty());
         assert_eq!(comparison.review, ReviewType::Quick);
+    }
+
+    fn nova_account(origins: Value) -> Value {
+        json!({
+            "id": "nova",
+            "name": "Nova",
+            "mode": "key",
+            "origins": origins,
+            "send": {"header": "X-Nova-Key"},
+            "key": {
+                "format": {"charset": "alnum", "minLength": 16, "maxLength": 64},
+                "page": "https://nova.gg/settings/keys"
+            }
+        })
+    }
+
+    #[test]
+    fn an_account_is_keyed_by_its_id_with_its_declaration_as_detail() {
+        let manifest = manifest(json!({
+            "accounts": [nova_account(json!(["https://api.nova.gg"]))],
+            "network": [route("/v1/timers", json!({"account": "nova"}))],
+        }));
+        let keys = keys(&manifest);
+        let detail = keys.get("account:nova").expect("account key");
+        assert_eq!(detail.len(), 1);
+        let declaration: Value =
+            serde_json::from_str(detail.iter().next().expect("detail")).expect("JSON");
+        assert_eq!(declaration["send"]["header"], "X-Nova-Key");
+        assert!(keys.contains_key("network:GET https://api.nova.gg/v1/timers"));
+    }
+
+    #[test]
+    fn adding_an_account_needs_a_full_review() {
+        let before = manifest(json!({"network": [route("/v1/timers", json!({}))]}));
+        let after = manifest(json!({
+            "accounts": [nova_account(json!(["https://api.nova.gg"]))],
+            "network": [route("/v1/timers", json!({"account": "nova"}))],
+        }));
+        let comparison = compare(&before, &after);
+        assert_eq!(comparison.added, ["account:nova"]);
+        // The route that now carries the secret is widened too.
+        assert_eq!(
+            comparison.changed,
+            ["network:GET https://api.nova.gg/v1/timers"]
+        );
+        assert_eq!(comparison.review, ReviewType::Full);
+        // Back: the route's rule differs again, which the keys cannot tell
+        // from a widening; the review stays full.
+        let back = compare(&after, &before);
+        assert_eq!(back.removed, ["account:nova"]);
+        assert_eq!(back.changed, ["network:GET https://api.nova.gg/v1/timers"]);
+        assert_eq!(back.review, ReviewType::Full);
+    }
+
+    #[test]
+    fn any_change_of_the_declaration_is_changed() {
+        let with = |origins: Value, send: Value| {
+            let mut account = nova_account(origins);
+            account["send"] = send;
+            manifest(json!({
+                "accounts": [account],
+                "network": [route("/v1/timers", json!({"account": "nova"}))],
+            }))
+        };
+        let before = with(
+            json!(["https://api.nova.gg"]),
+            json!({"header": "X-Nova-Key"}),
+        );
+        for after in [
+            with(
+                json!(["https://api.nova.gg", "https://cdn.nova.gg"]),
+                json!({"header": "X-Nova-Key"}),
+            ),
+            with(json!(["https://api.nova.gg"]), json!({"query": "key"})),
+        ] {
+            let comparison = compare(&before, &after);
+            assert_eq!(comparison.changed, ["account:nova"]);
+            assert_eq!(comparison.review, ReviewType::Full);
+        }
     }
 }

@@ -1011,6 +1011,78 @@ pub const MAX_STRING_PARAMETER_BYTES: Limit = fixed(
     Unit::Bytes,
     "Largest `maxLength` of a `string` query parameter constraint, as today.",
 );
+pub const MAX_ACCOUNTS: Limit = fixed(
+    "MAX_ACCOUNTS",
+    1,
+    Unit::Count,
+    "Third-party accounts declared by one package: one service per widget, so no relay between two.",
+);
+pub const MAX_ACCOUNT_ORIGINS: Limit = fixed(
+    "MAX_ACCOUNT_ORIGINS",
+    4,
+    Unit::Count,
+    "`origins` of one account.",
+);
+pub const MAX_ACCOUNT_ID_BYTES: Limit = fixed(
+    "MAX_ACCOUNT_ID_BYTES",
+    32,
+    Unit::Bytes,
+    "`id` of one account.",
+);
+pub const MAX_ACCOUNT_NAME_CHARS: Limit = fixed(
+    "MAX_ACCOUNT_NAME_CHARS",
+    32,
+    Unit::Characters,
+    "`name` of one account: the service's display name.",
+);
+pub const MIN_ACCOUNT_KEY_BYTES: Limit = fixed(
+    "MIN_ACCOUNT_KEY_BYTES",
+    8,
+    Unit::Bytes,
+    "Smallest `minLength` of a key format.",
+);
+pub const MAX_ACCOUNT_KEY_BYTES: Limit = fixed(
+    "MAX_ACCOUNT_KEY_BYTES",
+    512,
+    Unit::Bytes,
+    "Largest `maxLength` of a key format.",
+);
+pub const MAX_ACCOUNT_URL_BYTES: Limit = fixed(
+    "MAX_ACCOUNT_URL_BYTES",
+    512,
+    Unit::Bytes,
+    "One URL of an account declaration: the key page or an OAuth endpoint.",
+);
+pub const MAX_HEADER_NAME_BYTES: Limit = fixed(
+    "MAX_HEADER_NAME_BYTES",
+    64,
+    Unit::Bytes,
+    "Name of the header that carries an account's secret or OAuth client ID.",
+);
+pub const MAX_AUTH_SCHEME_BYTES: Limit = fixed(
+    "MAX_AUTH_SCHEME_BYTES",
+    16,
+    Unit::Bytes,
+    "`scheme` sent before a key in `Authorization`.",
+);
+pub const MAX_OAUTH_CLIENT_ID_BYTES: Limit = fixed(
+    "MAX_OAUTH_CLIENT_ID_BYTES",
+    128,
+    Unit::Bytes,
+    "`clientId` of an OAuth account.",
+);
+pub const MAX_OAUTH_SCOPES: Limit = fixed(
+    "MAX_OAUTH_SCOPES",
+    16,
+    Unit::Count,
+    "`scopes` of an OAuth account.",
+);
+pub const MAX_OAUTH_SCOPE_BYTES: Limit = fixed(
+    "MAX_OAUTH_SCOPE_BYTES",
+    128,
+    Unit::Bytes,
+    "Name of one OAuth scope.",
+);
 pub const MAX_DNS_LABEL_BYTES: Limit = fixed(
     "MAX_DNS_LABEL_BYTES",
     63,
@@ -1320,6 +1392,18 @@ pub const ALL: &[&Limit] = &[
     &MAX_PARAMETER_NAME_BYTES,
     &MAX_SLUG_PARAMETER_BYTES,
     &MAX_STRING_PARAMETER_BYTES,
+    &MAX_ACCOUNTS,
+    &MAX_ACCOUNT_ORIGINS,
+    &MAX_ACCOUNT_ID_BYTES,
+    &MAX_ACCOUNT_NAME_CHARS,
+    &MIN_ACCOUNT_KEY_BYTES,
+    &MAX_ACCOUNT_KEY_BYTES,
+    &MAX_ACCOUNT_URL_BYTES,
+    &MAX_HEADER_NAME_BYTES,
+    &MAX_AUTH_SCHEME_BYTES,
+    &MAX_OAUTH_CLIENT_ID_BYTES,
+    &MAX_OAUTH_SCOPES,
+    &MAX_OAUTH_SCOPE_BYTES,
     &MAX_DNS_LABEL_BYTES,
     &MAX_DNS_NAME_BYTES,
     &MAX_OBJECT_ID_BYTES,

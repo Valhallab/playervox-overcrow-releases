@@ -210,6 +210,31 @@ function networkRules(context: Context): void {
         },
       });
     }
+    if (returnsSecrets(origin, path)) {
+      add(context, {
+        rule: "token-route",
+        area: "security",
+        severity: "medium",
+        file: "manifest.json",
+        line: null,
+        message: `${where} (${route}) looks like a route that creates, lists or returns keys or tokens.`,
+        fix: "A widget never requests such a route: its answer would hand a secret to the widget's code, and the review refuses it. Remove the route.",
+      });
+    }
+    if (
+      origin === "https://api.steampowered.com" &&
+      path.toLowerCase().startsWith("/ieconservice/")
+    ) {
+      add(context, {
+        rule: "trade-route",
+        area: "security",
+        severity: "high",
+        file: "manifest.json",
+        line: null,
+        message: `${where} (${route}) reaches Steam's item trades (IEconService).`,
+        fix: "A widget never touches Steam item trades: with the user's key, these routes read and cancel trade offers, the base of the Steam API key scam. Remove the route.",
+      });
+    }
     if (method !== "GET") {
       add(context, {
         rule: "sends-data",
@@ -253,6 +278,113 @@ function networkRules(context: Context): void {
       fix: "Each server is a party that learns when the user plays. Keep only the ones the feature needs.",
     });
   }
+}
+
+/** Words of a path that name keys, tokens or sign-in steps. */
+const SECRET_ROUTE_WORDS = new Set([
+  "token",
+  "tokens",
+  "oauth",
+  "oauth2",
+  "authorize",
+  "revoke",
+  "introspect",
+  "apikey",
+  "apikeys",
+  "credential",
+  "credentials",
+  "secret",
+  "secrets",
+]);
+
+/** Routes of a service known to return a secret, whatever their words. */
+const SECRET_ROUTES: { origin: string; path: string }[] = [
+  { origin: "https://api.twitch.tv", path: "/helix/streams/key" },
+  { origin: "https://api.twitch.tv", path: "/helix/extensions/jwt/secrets" },
+  { origin: "https://streamlabs.com", path: "/socket/token" },
+  { origin: "https://streamlabs.com", path: "/legacy/token" },
+  // The ingestion key of a YouTube live stream (`cdn.ingestionInfo.streamName`).
+  { origin: "https://www.googleapis.com", path: "/youtube/v3/livestreams" },
+  { origin: "https://youtube.googleapis.com", path: "/youtube/v3/livestreams" },
+];
+
+/** Whether a route seems to create, list or return keys or tokens. */
+function returnsSecrets(origin: string, path: string): boolean {
+  const lower = path.toLowerCase();
+  if (SECRET_ROUTES.some((known) => known.origin === origin && lower.endsWith(known.path)))
+    return true;
+  const words = lower.split(/[^a-z0-9]+/).filter(Boolean);
+  return words.some(
+    (word, index) =>
+      SECRET_ROUTE_WORDS.has(word) ||
+      (word === "api" && (words[index + 1] === "key" || words[index + 1] === "keys")),
+  );
+}
+
+/** Labels of a text field that ask for a key, a token or a password. */
+const SECRET_FIELD_PATTERNS: RegExp[] = [
+  /\bapi[\s_-]?keys?\b/i,
+  /\b(?:access|auth|oauth|bearer|personal|api|refresh|session)[\s_-]+tokens?\b/i,
+  /\b(?:paste|enter|your)\s+(?:the\s+|your\s+)?(?:api\s+)?(?:key|token)s?\b/i,
+  /\bpass(?:word|phrase)s?\b/i,
+  /\b(?:client|api)[\s_-]?secrets?\b/i,
+  /\bsecret\s+(?:key|token)s?\b/i,
+  /\bmots?\s+de\s+passe\b/i,
+  /\bcl[ée]s?\s+(?:d['’]\s?)?api\b/i,
+  /\bcl[ée]s?\s+(?:secr[èe]te|personnelle|d['’]acc[èe]s)/i,
+  /\bjetons?\s+(?:d['’]\s?)?(?:acc[èe]s|api|authentification)/i,
+  /\b(?:votre|collez|saisissez|entrez)\s+(?:votre\s+)?(?:cl[ée]|jeton)/i,
+];
+
+/** The locale messages of the project, by key, every language merged. */
+function localeTexts(project: WidgetProject): Map<string, string[]> {
+  const out = new Map<string, string[]>();
+  for (const file of project.files) {
+    if (!/^locales\/[a-z]{2}(-[A-Z]{2})?\.json$/.test(file.path) || file.text === null) continue;
+    let messages: unknown;
+    try {
+      messages = JSON.parse(file.text);
+    } catch {
+      continue;
+    }
+    if (typeof messages !== "object" || messages === null) continue;
+    for (const [key, value] of Object.entries(messages)) {
+      if (typeof value === "string") out.set(key, [...(out.get(key) ?? []), value]);
+    }
+  }
+  return out;
+}
+
+/** A `field` or `textarea` whose label or placeholder asks for a secret:
+ * every keystroke of a widget field reaches the widget's code. */
+function asksForSecret(context: Context): void {
+  const view = context.project.view;
+  if (!view || view.length > 256 * 1024) return;
+  const messages = localeTexts(context.project);
+  view.split("\n").forEach((full, index) => {
+    const text = full.slice(0, 4096);
+    for (const tag of text.matchAll(/<(?:field|textarea)\b[^>]*>/g)) {
+      const shown: string[] = [];
+      for (const attribute of tag[0].matchAll(
+        /\b(?:label|placeholder)=(?:"([^"]*)"|\{\s*t\(\s*"([^"]+)"\s*\)\s*\})/g,
+      )) {
+        if (attribute[1] !== undefined) shown.push(attribute[1]);
+        if (attribute[2] !== undefined) shown.push(...(messages.get(attribute[2]) ?? []));
+      }
+      if (!shown.some((label) => SECRET_FIELD_PATTERNS.some((pattern) => pattern.test(label))))
+        continue;
+      add(context, {
+        rule: "asks-for-secret",
+        area: "security",
+        severity: "high",
+        file: "view.ocml",
+        line: index + 1,
+        message: "A field of the widget asks for a key, a token or a password.",
+        fix: "Never ask for a key, a token or a password in a widget field: every keystroke reaches the widget's code, and the field shows on a stream (publication rule 3.5).",
+      });
+      break;
+    }
+  });
 }
 
 /** Brace depth of the token at `index` (0 = top level of the module). */
@@ -719,6 +851,7 @@ export function runRules(project: WidgetProject): Finding[] {
   };
   identity(context);
   secrets(context);
+  asksForSecret(context);
   if (project.manifest) {
     unusedAuthority(context);
     networkRules(context);

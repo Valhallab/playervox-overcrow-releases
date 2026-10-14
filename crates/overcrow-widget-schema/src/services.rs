@@ -8,9 +8,9 @@
 //! time with the `offsetMinutes` the host sends next to them.
 
 use crate::limits::{
-    MAX_CHAT_CHANNEL_BYTES, MAX_CHAT_MESSAGE_CHARS, MAX_CLIPBOARD_BYTES, MAX_NOTE_BODY_BYTES,
-    MAX_NOTE_ITEMS, MAX_NOTE_TITLE_BYTES, MAX_OBJECT_ID_BYTES, MAX_REQUEST_URL_BYTES,
-    MAX_REVIEW_CHARS, MAX_STORAGE_KEY_BYTES, MIN_TIMER_INTERVAL_MS,
+    MAX_ACCOUNT_ID_BYTES, MAX_CHAT_CHANNEL_BYTES, MAX_CHAT_MESSAGE_CHARS, MAX_CLIPBOARD_BYTES,
+    MAX_NOTE_BODY_BYTES, MAX_NOTE_ITEMS, MAX_NOTE_TITLE_BYTES, MAX_OBJECT_ID_BYTES,
+    MAX_REQUEST_URL_BYTES, MAX_REVIEW_CHARS, MAX_STORAGE_KEY_BYTES, MIN_TIMER_INTERVAL_MS,
 };
 use crate::model::{Field, Status, ValueType};
 use crate::results::Shape;
@@ -20,6 +20,9 @@ pub enum Requirement {
     None,
     Permission(&'static str),
     Capability(&'static str),
+    /// A third-party account the manifest declares and the user granted
+    /// (`account:<id>`), named by the call's `id` parameter.
+    Account,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -62,6 +65,11 @@ const MEDIA_PLAYER: &[Field] = &[Field::optional(
     "player",
     OBJECT_ID,
     "Player ID from `media.subscribe`; guards against a player change.",
+)];
+const ACCOUNT: &[Field] = &[Field::required(
+    "id",
+    ValueType::Identifier(&MAX_ACCOUNT_ID_BYTES),
+    "`id` of an account the manifest declares and the user granted.",
 )];
 const CURSOR: &[Field] = &[Field::optional(
     "cursor",
@@ -494,6 +502,25 @@ pub const SERVICES: &[Service] = &[
         Status::Fixed,
     ))
     .returning(Shape::Null),
+    Service {
+        name: "account.subscribe",
+        requires: Requirement::Account,
+        kind: ServiceKind::Subscribe,
+        gesture: false,
+        confirm: false,
+        params: ACCOUNT,
+        result: "`{ state }` at once, then at each change: `signed_out`, `pending` (a sign-in step is open), `connected`, `refused` (the service refused the key) or `expired` (the service asks to sign in again). The widget never sees the secret, the account's name or its scopes; with `required`, the host covers the content until the account is connected",
+        returns: Shape::Named("AccountStatus"),
+        status: Status::Fixed,
+    },
+    gesture(call(
+        "account.connect",
+        Requirement::Account,
+        ACCOUNT,
+        "`null`; the host shows its account panel for this account, in its current state: the widget's own button for an account that is not `required`",
+        Status::Fixed,
+    ))
+    .returning(Shape::Null),
 ];
 
 /// Closed failure codes of `ServiceResult`; network codes are the broker's.
@@ -502,6 +529,7 @@ pub const SERVICE_ERRORS: &[&str] = &[
     "permission_denied",
     "gesture_required",
     "not_connected",
+    "account_refused",
     "stale_context",
     "unavailable",
     "busy",

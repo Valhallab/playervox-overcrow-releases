@@ -1,0 +1,17 @@
+{
+  "releaseNotes": {
+    "en": "First version: your active quests.",
+    "fr": "Première version : vos quêtes en cours."
+  },
+  "justifications": [
+    {
+      "permission": "account:quests",
+      "text": "Reads the player's own quests with the read scope quests:read, through the public client nova-overcrow-widget registered at Quest Log."
+    },
+    {
+      "permission": "network:GET https://api.quests.example/v1/me/quests",
+      "text": "Counts the player's active quests, every 10 minutes at most."
+    }
+  ],
+  "reviewMessage": "The client nova-overcrow-widget is public, with PKCE and a 127.0.0.1 redirect; it needs no secret."
+}

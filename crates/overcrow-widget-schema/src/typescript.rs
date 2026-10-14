@@ -129,6 +129,9 @@ fn capabilities(out: &mut String) {
     }
     finish(out);
     out.push_str(
+        "\n/** The grant of a third-party account the manifest declares: `account:<id>`. */\nexport type AccountGrant = `account:${string}`;\n",
+    );
+    out.push_str(
         "\n/** Capabilities that reveal user data: a widget declaring one gets no `network` or `clipboardWrite`, and only process-lifetime storage. */\nexport type SensitiveCapability =\n",
     );
     for capability in CAPABILITIES
@@ -148,7 +151,7 @@ fn capabilities(out: &mut String) {
             Requirement::Permission(name) => {
                 by_permission.entry(name).or_default().push(service.name)
             }
-            Requirement::None => {}
+            Requirement::None | Requirement::Account => {}
         }
     }
     out.push_str("\n/** The services each capability authorizes. */\nexport interface CapabilityServices {\n");
@@ -498,6 +501,9 @@ fn method(out: &mut String, indent: &str, name: &str, service: &Service) {
                 text,
                 " Requires the `{capability}` capability, granted by the user."
             );
+        }
+        Requirement::Account => {
+            text.push_str(" Requires the account `id` the manifest declares, granted by the user.");
         }
     }
     if service.gesture {

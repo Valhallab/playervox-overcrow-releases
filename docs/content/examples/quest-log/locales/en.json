@@ -1,0 +1,10 @@
+{
+  "active": "{n} active quests",
+  "connect": "Connect Quest Log",
+  "signed_out": "Not connected",
+  "pending": "Connecting…",
+  "connected": "Up to date",
+  "refused": "Access refused",
+  "expired": "Connect again",
+  "unavailable": "Quest Log is unavailable"
+}

@@ -415,3 +415,50 @@ test("prepare_submission never writes the ZIP through a dist/ link out of the pr
     await server.close();
   }
 });
+
+test("the review of an account says where the secret goes and whether it writes", async () => {
+  const { describeReview } = await import("../dist/tools/submission.js");
+  const text = describeReview({
+    kind: "account",
+    id: "steam",
+    name: "Steam",
+    mode: "key",
+    origins: ["https://api.steampowered.com"],
+    writes: true,
+    key: { page: "https://steamcommunity.com/dev/apikey" },
+    routes: ["GET https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/"],
+  });
+  assert.match(text, /Key page https:\/\/steamcommunity\.com\/dev\/apikey/);
+  const oauth = describeReview({
+    kind: "account",
+    id: "quests",
+    name: "Quest Log",
+    mode: "oauth",
+    origins: ["https://api.quests.example"],
+    writes: false,
+    oauth: {
+      clientId: "nova-overcrow-widget",
+      flow: "loopback",
+      authorize: "https://quests.example/oauth/authorize",
+      scopes: [{ name: "quests:read", access: "read" }],
+    },
+  });
+  assert.match(
+    oauth,
+    /sign-in page https:\/\/quests\.example\/oauth\/authorize, scopes quests:read \(read\)/,
+  );
+  assert.match(text, /Steam account \(steam\), personal key/);
+  assert.match(text, /only to https:\/\/api\.steampowered\.com/);
+  assert.match(text, /can change the user's account/);
+  assert.match(
+    describeReview({
+      kind: "network",
+      method: "GET",
+      origin: "https://a.example",
+      path: "/x",
+      maxResponseBytes: 10,
+      account: "steam",
+    }),
+    /with the steam account/,
+  );
+});

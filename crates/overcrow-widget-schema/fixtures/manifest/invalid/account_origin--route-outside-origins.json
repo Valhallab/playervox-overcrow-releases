@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "nova.steam-stats",
+  "version": "1.0.0",
+  "name": {
+    "en": "Steam stats",
+    "fr": "Stats Steam"
+  },
+  "sizing": {
+    "fit": "height",
+    "preferred": {
+      "width": 300,
+      "height": 170
+    },
+    "min": {
+      "width": 280,
+      "height": 140
+    },
+    "max": {
+      "width": 480,
+      "height": 480
+    }
+  },
+  "permissions": {
+    "storage": true,
+    "accounts": [
+      {
+        "id": "steam",
+        "name": "Steam",
+        "mode": "key",
+        "origins": [
+          "https://api.steampowered.com",
+          "https://avatars.steamstatic.com"
+        ],
+        "send": {
+          "header": "X-WebAPI-Key"
+        },
+        "key": {
+          "format": {
+            "charset": "hex",
+            "minLength": 32,
+            "maxLength": 32
+          },
+          "page": "https://steamcommunity.com/dev/apikey"
+        },
+        "refusedStatus": [
+          401,
+          403
+        ]
+      }
+    ],
+    "network": [
+      {
+        "origin": "https://api.steampowered.com",
+        "method": "GET",
+        "path": "/ISteamUser/GetPlayerSummaries/v2/",
+        "queryParams": {
+          "steamids": {
+            "type": "slug",
+            "maxLength": 17,
+            "required": true
+          }
+        },
+        "maxResponseBytes": 65536,
+        "account": "steam"
+      },
+      {
+        "origin": "https://cdn.example.org",
+        "method": "GET",
+        "path": "/{file}",
+        "pathParams": {
+          "file": {
+            "type": "slug",
+            "maxLength": 64
+          }
+        }
+      }
+    ]
+  }
+}

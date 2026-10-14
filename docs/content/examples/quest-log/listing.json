@@ -1,0 +1,10 @@
+{
+  "author": "Nova",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/example/quest-log-widget",
+  "defaultLocale": "en",
+  "localizations": [
+    { "locale": "en", "name": "Quest log", "description": "Your active quests on Quest Log. Connect your account in one click: PlayerVox OverCrow keeps the connection and sends it only to Quest Log." },
+    { "locale": "fr", "name": "Journal de quêtes", "description": "Vos quêtes en cours sur Quest Log. Connectez votre compte en un clic : PlayerVox OverCrow garde la connexion et ne l’envoie qu’à Quest Log." }
+  ]
+}

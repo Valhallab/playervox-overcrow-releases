@@ -52,6 +52,7 @@ export type DateOrder = Region["dateOrder"];
 /** A manifest permission. */
 export type Permission =
   | "network"
+  | "accounts"
   | "storage"
   | "clipboardWrite"
   | "gameEvents"
@@ -76,6 +77,9 @@ export type Capability =
   | "journal.delete"
   | "twitch.chat.read"
   | "twitch.chat.compose";
+
+/** The grant of a third-party account the manifest declares: `account:<id>`. */
+export type AccountGrant = `account:${string}`;
 
 /** Capabilities that reveal user data: a widget declaring one gets no `network` or `clipboardWrite`, and only process-lifetime storage. */
 export type SensitiveCapability =
@@ -134,6 +138,8 @@ export interface CapabilityServices {
 export interface PermissionServices {
   /** Exact HTTPS routes reachable through the host broker, at most `MAX_NETWORK_RULES` rules. */
   readonly "network": "http.fetch";
+  /** The user's account on one third-party service, kept by the host and added to the network rules that name it; at most `MAX_ACCOUNTS`. */
+  readonly "accounts": never;
   /** Host-managed key-value storage partitioned by widget ID, within `STORAGE_QUOTA_BYTES`. */
   readonly "storage": "storage.get" | "storage.set" | "storage.remove" | "storage.keys";
   /** Text clipboard writes on a current Interactive gesture. */
@@ -372,6 +378,7 @@ export type ServiceErrorCode =
   | "permission_denied"
   | "gesture_required"
   | "not_connected"
+  | "account_refused"
   | "stale_context"
   | "unavailable"
   | "busy"
@@ -396,7 +403,7 @@ export type ServiceErrorCode =
 /** Failure of a call or of a subscription, and of a `submit` intent. */
 export interface ServiceErrorPayload {
   /** Failure code. */
-  readonly code: "invalid_request" | "permission_denied" | "gesture_required" | "not_connected" | "stale_context" | "unavailable" | "busy" | "cancelled" | "quota_exceeded" | "unsupported" | "url_invalid" | "resolve_failed" | "address_denied" | "too_many_addresses" | "peer_mismatch" | "redirect_denied" | "encoding_denied" | "content_type_denied" | "response_metadata_limit" | "request_body_limit" | "response_body_limit" | "image_invalid" | "timeout" | "transport_failed";
+  readonly code: "invalid_request" | "permission_denied" | "gesture_required" | "not_connected" | "account_refused" | "stale_context" | "unavailable" | "busy" | "cancelled" | "quota_exceeded" | "unsupported" | "url_invalid" | "resolve_failed" | "address_denied" | "too_many_addresses" | "peer_mismatch" | "redirect_denied" | "encoding_denied" | "content_type_denied" | "response_metadata_limit" | "request_body_limit" | "response_body_limit" | "image_invalid" | "timeout" | "transport_failed";
 }
 
 /** Answer of `http.fetch`. */
@@ -701,6 +708,12 @@ export interface ChatMessage {
   readonly receivedAt: number;
 }
 
+/** State of a third-party account the widget declares. */
+export interface AccountStatus {
+  /** State of the account; connection is host chrome. */
+  readonly state: "signed_out" | "pending" | "connected" | "refused" | "expired";
+}
+
 /** Twitch chat state. */
 export interface TwitchChat {
   /** Twitch account state; sign-in is host chrome. */
@@ -886,6 +899,16 @@ export interface ServiceParamsMap {
     /** Add or remove. */
     readonly favorite: boolean;
   };
+  /** Parameters of `account.subscribe`. */
+  readonly "account.subscribe": {
+    /** `id` of an account the manifest declares and the user granted. */
+    readonly id: string;
+  };
+  /** Parameters of `account.connect`. */
+  readonly "account.connect": {
+    /** `id` of an account the manifest declares and the user granted. */
+    readonly id: string;
+  };
 }
 
 /** The result of each call, and each update of each subscription. */
@@ -962,6 +985,10 @@ export interface ServiceResultMap {
   readonly "twitch.chat.leave": null;
   /** `twitch.chat.favorite`: `null`; `quota_exceeded` beyond `MAX_CHAT_FAVORITES`. */
   readonly "twitch.chat.favorite": null;
+  /** `account.subscribe`: `{ state }` at once, then at each change: `signed_out`, `pending` (a sign-in step is open), `connected`, `refused` (the service refused the key) or `expired` (the service asks to sign in again). The widget never sees the secret, the account's name or its scopes; with `required`, the host covers the content until the account is connected. */
+  readonly "account.subscribe": AccountStatus;
+  /** `account.connect`: `null`; the host shows its account panel for this account, in its current state: the widget's own button for an account that is not `required`. */
+  readonly "account.connect": null;
 }
 
 /** Services answered once. */
@@ -989,7 +1016,8 @@ export type CallServiceName =
   | "journal.delete"
   | "twitch.chat.join"
   | "twitch.chat.leave"
-  | "twitch.chat.favorite";
+  | "twitch.chat.favorite"
+  | "account.connect";
 
 /** Services that send updates until cancelled. */
 export type SubscribeServiceName =
@@ -1004,7 +1032,8 @@ export type SubscribeServiceName =
   | "playervox.rating.subscribe"
   | "playervox.reviews.subscribe"
   | "journal.subscribe"
-  | "twitch.chat.subscribe";
+  | "twitch.chat.subscribe"
+  | "account.subscribe";
 
 /** Services accepted only while a gesture event is handled. */
 export type GestureServiceName =
@@ -1021,4 +1050,5 @@ export type GestureServiceName =
   | "journal.delete"
   | "twitch.chat.join"
   | "twitch.chat.leave"
-  | "twitch.chat.favorite";
+  | "twitch.chat.favorite"
+  | "account.connect";

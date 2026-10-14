@@ -1,0 +1,17 @@
+.quests {
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+}
+
+.count {
+  font-variant-numeric: tabular-nums;
+}
+
+.status {
+  color: var(--color-text-muted);
+}
+
+.connect {
+  border-radius: var(--radius-md);
+}

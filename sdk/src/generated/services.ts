@@ -5,6 +5,17 @@ import { group } from "../services.js";
 import type { Listener, Subscription } from "../services.js";
 import type { ServiceParamsMap as P, ServiceResultMap as R } from "./schema.js";
 
+/** The `account.*` services. */
+export interface AccountServices {
+  /** `account.subscribe`. Requires the account `id` the manifest declares, granted by the user. Updates: `{ state }` at once, then at each change: `signed_out`, `pending` (a sign-in step is open), `connected`, `refused` (the service refused the key) or `expired` (the service asks to sign in again). The widget never sees the secret, the account's name or its scopes; with `required`, the host covers the content until the account is connected. */
+  subscribe(params: P["account.subscribe"], listener: Listener<R["account.subscribe"]>): Subscription;
+  /** `account.connect`. Requires the account `id` the manifest declares, granted by the user. Call it while handling a gesture event (`activate`, `keydown`…), or it fails with `gesture_required`. Result: `null`; the host shows its account panel for this account, in its current state: the widget's own button for an account that is not `required`. */
+  connect(params: P["account.connect"]): Promise<R["account.connect"]>;
+}
+
+/** The `account.*` services. */
+export const account: AccountServices = /* @__PURE__ */ group("account", ["subscribe", "connect"]);
+
 /** The `clipboard.*` services. */
 export interface ClipboardServices {
   /** `clipboard.writeText`. Requires the `clipboardWrite` permission. Call it while handling a gesture event (`activate`, `keydown`…), or it fails with `gesture_required`. Result: `null`. */

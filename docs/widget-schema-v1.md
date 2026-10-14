@@ -171,6 +171,18 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MAX_PARAMETER_NAME_BYTES` | 32 bytes | fixed | Name of one path or query parameter, as today. |
 | `MAX_SLUG_PARAMETER_BYTES` | 128 bytes | fixed | Largest `maxLength` of a `slug` parameter constraint, as today. |
 | `MAX_STRING_PARAMETER_BYTES` | 256 bytes | fixed | Largest `maxLength` of a `string` query parameter constraint, as today. |
+| `MAX_ACCOUNTS` | 1 | fixed | Third-party accounts declared by one package: one service per widget, so no relay between two. |
+| `MAX_ACCOUNT_ORIGINS` | 4 | fixed | `origins` of one account. |
+| `MAX_ACCOUNT_ID_BYTES` | 32 bytes | fixed | `id` of one account. |
+| `MAX_ACCOUNT_NAME_CHARS` | 32 characters | fixed | `name` of one account: the service's display name. |
+| `MIN_ACCOUNT_KEY_BYTES` | 8 bytes | fixed | Smallest `minLength` of a key format. |
+| `MAX_ACCOUNT_KEY_BYTES` | 512 bytes | fixed | Largest `maxLength` of a key format. |
+| `MAX_ACCOUNT_URL_BYTES` | 512 bytes | fixed | One URL of an account declaration: the key page or an OAuth endpoint. |
+| `MAX_HEADER_NAME_BYTES` | 64 bytes | fixed | Name of the header that carries an account's secret or OAuth client ID. |
+| `MAX_AUTH_SCHEME_BYTES` | 16 bytes | fixed | `scheme` sent before a key in `Authorization`. |
+| `MAX_OAUTH_CLIENT_ID_BYTES` | 128 bytes | fixed | `clientId` of an OAuth account. |
+| `MAX_OAUTH_SCOPES` | 16 | fixed | `scopes` of an OAuth account. |
+| `MAX_OAUTH_SCOPE_BYTES` | 128 bytes | fixed | Name of one OAuth scope. |
 | `MAX_DNS_LABEL_BYTES` | 63 bytes | fixed | One dot-separated label of a network origin host or of a widget ID. |
 | `MAX_DNS_NAME_BYTES` | 253 bytes | fixed | Host name of one network origin. |
 | `MAX_OBJECT_ID_BYTES` | 128 bytes | fixed | Opaque object ID or cursor exchanged with a capability service. |
@@ -713,6 +725,7 @@ Keys are the permissions of [Permissions](#permissions); a sensitive capability 
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
+| `accounts` | list of `Account` ≤ `MAX_ACCOUNTS` | no | The user's account on a third-party service, which the host keeps and adds to the network rules that name it; the widget never sees the secret. Present only with one account. With an account, every network rule targets one of its `origins`, and no sensitive capability or `clipboardWrite` is allowed. |
 | `network` | list of `NetworkRule` ≤ `MAX_NETWORK_RULES` | no | Distinct network rules. |
 | `storage` | boolean | no | Host key-value storage; default `false`. |
 | `clipboardWrite` | boolean | no | Clipboard text writes; default `false`. |
@@ -805,6 +818,7 @@ Declaring a permission or capability grants nothing: activation requires consent
 | Permission | With a sensitive capability | Meaning |
 | --- | --- | --- |
 | `network` | manifest rejected | Exact HTTPS routes reachable through the host broker, at most `MAX_NETWORK_RULES` rules. |
+| `accounts` | manifest rejected | The user's account on one third-party service, kept by the host and added to the network rules that name it; at most `MAX_ACCOUNTS`. |
 | `storage` | process-lifetime data only | Host-managed key-value storage partitioned by widget ID, within `STORAGE_QUOTA_BYTES`. |
 | `clipboardWrite` | manifest rejected | Text clipboard writes on a current Interactive gesture. |
 | `gameEvents` | allowed | Named semantic game events `overcrow.game.<name>.v1`, at most `MAX_GAME_EVENTS`. |
@@ -820,6 +834,7 @@ Declaring a permission or capability grants nothing: activation requires consent
 | `pathParams` | `name → ParameterConstraint` | no | Constraint of every `{name}` segment, at most `MAX_PATH_PARAMS`. |
 | `queryParams` | `name → ParameterConstraint` | no | Allowed query parameters, at most `MAX_QUERY_PARAMS`, each optionally `required`; others are refused. |
 | `maxResponseBytes` | integer 1..=3145728 | no | Largest response body of this route, 1..=`MAX_HTTP_DECLARED_RESPONSE_BYTES`; `MAX_HTTP_RESPONSE_BYTES` when absent. Not for `as: "image"`, which keeps `MAX_HTTP_RESPONSE_BYTES`. When several rules allow a request, the largest bound applies. |
+| `account` | identifier ≤ `MAX_ACCOUNT_ID_BYTES` | no | `id` of the declared account: the host adds the user's secret to the requests this rule allows, and to no other. Two rules of the same origin and method that may match one URL name the same account, or none; no rule targets a declared OAuth endpoint. |
 
 ### `ParameterConstraint` types
 
@@ -851,6 +866,68 @@ Declaring a permission or capability grants nothing: activation requires consent
 | `journal.delete` | yes | none | fixed | Delete a journal session after native confirmation; cloud rows need PlayerVox. |
 | `twitch.chat.read` | yes | Twitch | fixed | Join, read and leave a Twitch channel chat, and keep favourite channels. |
 | `twitch.chat.compose` | yes | Twitch | fixed | Send a chat message through a host-bound intent; the host allows 20 messages per 30 s and answers `busy` beyond. |
+
+### Accounts
+
+`permissions.accounts` declares the user's account on one third-party service (ADR 0009). The host keeps the secret, asks for it in its own panel in Interactive mode, adds it to the requests of the network rules that name the account and to no other, and never gives it to the widget. A manifest with a `key` account needs the catalog feature `account-key`, with an `oauth` account `account-oauth`. With an account, every network rule targets one of its `origins`, no sensitive capability or `clipboardWrite` is allowed, two rules of the same origin and method that may match one URL name the same account or none, and no rule targets a declared OAuth endpoint.
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `id` | identifier ≤ `MAX_ACCOUNT_ID_BYTES` | yes | `[a-z][a-z0-9-]` of 2 bytes to `MAX_ACCOUNT_ID_BYTES`, without a final or double `-`; `playervox` and `twitch` are reserved. The permission key is `account:<id>`; a network rule names it in `account`. |
+| `name` | text ≤ `MAX_ACCOUNT_NAME_CHARS` | yes | The service's name as the host shows it, plain text of at most `MAX_ACCOUNT_NAME_CHARS`; a name that reads as PlayerVox, OverCrow or Valhallab is refused. |
+| `mode` | `key` \| `oauth` | yes | `key`: a personal key or token the user pastes in the host's panel. `oauth`: a sign-in with the publisher's public OAuth client. Exactly the object of the mode is present. |
+| `origins` | list of `origin` ≤ `MAX_ACCOUNT_ORIGINS` | yes | Distinct canonical HTTPS origins of the service, as in network rules. Every network rule of the widget targets one of them. |
+| `required` | boolean | no | Default `true`: the host covers the content until the account is connected. `false`: the widget works without it and opens the host's panel with `account.connect`. |
+| `refusedStatus` | `list of 401 and 403` | no | Distinct statuses, among 401 and 403, by which the service refuses the secret on a route of the account; default `[401]`. Such a response marks the account refused (key) or expired (OAuth) and the call fails with `account_refused`. |
+| `send` | `AccountSend` | no | Key mode only, required there: how the host sends the key. |
+| `key` | `AccountKey` | no | Key mode only, required there. |
+| `oauth` | `AccountOAuth` | no | OAuth mode only, required there. The host always sends `Authorization: Bearer <token>`. |
+
+### `AccountSend`
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `header` | text ≤ `MAX_HEADER_NAME_BYTES` | no | Header that carries the key: an HTTP token, not a header the host sets itself (`Host`, `Cookie`, `Content-*`, `Accept*`, `If-*`, `User-Agent`, `Referer`, `Origin`, `Connection`, `Proxy-*`, `Sec-*`, `X-Forwarded-*`…). Exactly one of `header` and `query`. |
+| `scheme` | text ≤ `MAX_AUTH_SCHEME_BYTES` | no | With `header: "Authorization"` only: a word `[A-Za-z][A-Za-z0-9-]*` sent before the key (`<scheme> <key>`). |
+| `query` | text ≤ `MAX_PARAMETER_NAME_BYTES` | no | Query parameter that carries the key, a parameter name of the network rules; no route of the account declares it in `queryParams`. Prefer a header. |
+
+### `AccountKey`
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `format` | `KeyFormat` | yes | What a key looks like; the host refuses another one at entry. |
+| `page` | text ≤ `MAX_ACCOUNT_URL_BYTES` | yes | The service's page where a user gets a key: `https://` canonical origin, path and optional static query, no fragment or credentials. The host opens it on a click in its panel. |
+
+### `KeyFormat`
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `charset` | `hex` \| `alnum` \| `base64url` \| `base64` \| `printable` | yes | Characters of a key: `hex` (`0-9a-fA-F`), `alnum` (ASCII letters and digits), `base64url` (`alnum`, `-`, `_`, `=`), `base64` (`alnum`, `+`, `/`, `=`) or `printable` (ASCII `!` to `~`). |
+| `minLength` | integer 8..=512 | yes | Shortest key, `MIN_ACCOUNT_KEY_BYTES`..=`maxLength`. |
+| `maxLength` | integer 8..=512 | yes | Longest key, `minLength`..=`MAX_ACCOUNT_KEY_BYTES`. |
+
+### `AccountOAuth`
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `clientId` | text ≤ `MAX_OAUTH_CLIENT_ID_BYTES` | yes | The publisher's public client at the service: ASCII letters, digits, `-`, `.`, `_` and `~`. There is no client secret. |
+| `flow` | `loopback` \| `device` | yes | `loopback`: the system browser and a `http://127.0.0.1:<port>/callback` redirect, PKCE S256. `device`: a code the user enters on the service's page (RFC 8628). |
+| `authorize` | text ≤ `MAX_ACCOUNT_URL_BYTES` | no | Authorization endpoint; `loopback` only, required there. Every endpoint is an `https://` canonical origin and path, without query, fragment or credentials. |
+| `token` | text ≤ `MAX_ACCOUNT_URL_BYTES` | yes | Token endpoint. `token`, `device`, `revoke` and `validate` are on one of the account's `origins`: the host sends them the code, the verifier or tokens. |
+| `device` | text ≤ `MAX_ACCOUNT_URL_BYTES` | no | Device authorization endpoint; `device` only, required there. |
+| `verify` | text ≤ `MAX_ACCOUNT_URL_BYTES` | no | The page where the user enters the code; `device` only, required there. The service's `verification_uri` must equal it. |
+| `revoke` | text ≤ `MAX_ACCOUNT_URL_BYTES` | no | Revocation endpoint (RFC 7009), called at sign-out. |
+| `validate` | text ≤ `MAX_ACCOUNT_URL_BYTES` | no | Token validation endpoint, called with the token at sign-in and hourly while the widget runs; a status of `refusedStatus` marks the account expired. Its body is never read. |
+| `scopes` | list of `AccountScope` ≤ `MAX_OAUTH_SCOPES` | yes | Scopes the host requests, distinct by name. |
+| `scopeParam` | `scope` \| `scopes` | no | Name of the scopes parameter of the host's requests to `device` and `token`; default `scope`. The authorization request always uses `scope`. |
+| `clientIdHeader` | text ≤ `MAX_HEADER_NAME_BYTES` | no | Header that also carries `clientId` on the routes of the account (Twitch: `Client-Id`); the rules of `send.header`, `Authorization` excluded. |
+
+### `AccountScope`
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `name` | text ≤ `MAX_OAUTH_SCOPE_BYTES` | yes | ASCII letters, digits, `-`, `.`, `_`, `:` and `/`, nothing a service decodes or splits on; a name whose letters and digits contain `streamkey` in any case (`stream_key`, `stream-key`…) is refused. |
+| `access` | `read` \| `write` | yes | Whether the scope can change the user's account; `write` is shown to the user and reviewed. |
 
 ## Services
 
@@ -894,6 +971,8 @@ Authority is checked by the host at every call, immediately before acting. Gestu
 | `twitch.chat.join` | capability `twitch.chat.read` | call | yes | no | `channel`: text ≤ `MAX_CHAT_CHANNEL_BYTES` | `null`; the host remembers the channel and rejoins it when the widget starts | `null` | fixed |
 | `twitch.chat.leave` | capability `twitch.chat.read` | call | yes | no | none | `null`; the host forgets the channel | `null` | fixed |
 | `twitch.chat.favorite` | capability `twitch.chat.read` | call | yes | no | `channel`: text ≤ `MAX_CHAT_CHANNEL_BYTES`; `favorite`: boolean | `null`; `quota_exceeded` beyond `MAX_CHAT_FAVORITES` | `null` | fixed |
+| `account.subscribe` | a declared, granted account (`id`) | subscribe | no | no | `id`: identifier ≤ `MAX_ACCOUNT_ID_BYTES` | `{ state }` at once, then at each change: `signed_out`, `pending` (a sign-in step is open), `connected`, `refused` (the service refused the key) or `expired` (the service asks to sign in again). The widget never sees the secret, the account's name or its scopes; with `required`, the host covers the content until the account is connected | `AccountStatus` | fixed |
+| `account.connect` | a declared, granted account (`id`) | call | yes | no | `id`: identifier ≤ `MAX_ACCOUNT_ID_BYTES` | `null`; the host shows its account panel for this account, in its current state: the widget's own button for an account that is not `required` | `null` | fixed |
 
 ### Result shapes
 
@@ -905,7 +984,7 @@ Failure of a call or of a subscription, and of a `submit` intent. `{ code }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
-| `code` | `invalid_request` \| `permission_denied` \| `gesture_required` \| `not_connected` \| `stale_context` \| `unavailable` \| `busy` \| `cancelled` \| `quota_exceeded` \| `unsupported` \| `url_invalid` \| `resolve_failed` \| `address_denied` \| `too_many_addresses` \| `peer_mismatch` \| `redirect_denied` \| `encoding_denied` \| `content_type_denied` \| `response_metadata_limit` \| `request_body_limit` \| `response_body_limit` \| `image_invalid` \| `timeout` \| `transport_failed` | Failure code. |
+| `code` | `invalid_request` \| `permission_denied` \| `gesture_required` \| `not_connected` \| `account_refused` \| `stale_context` \| `unavailable` \| `busy` \| `cancelled` \| `quota_exceeded` \| `unsupported` \| `url_invalid` \| `resolve_failed` \| `address_denied` \| `too_many_addresses` \| `peer_mismatch` \| `redirect_denied` \| `encoding_denied` \| `content_type_denied` \| `response_metadata_limit` \| `request_body_limit` \| `response_body_limit` \| `image_invalid` \| `timeout` \| `transport_failed` | Failure code. |
 
 #### `HttpResponse`
 
@@ -1171,6 +1250,14 @@ One chat message. `{ id, author, color, badges, fragments, reply, deleted, recei
 | `deleted` | boolean | Deleted by a moderator. |
 | `receivedAt` | integer | When the host received the message, in Unix milliseconds of the host's clock: compare it with `Date.now()` to age a message (the Passive fade), also after a `reset`. |
 
+#### `AccountStatus`
+
+State of a third-party account the widget declares. `{ state }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `state` | `signed_out` \| `pending` \| `connected` \| `refused` \| `expired` | State of the account; connection is host chrome. |
+
 #### `TwitchChat`
 
 Twitch chat state. `{ account, channel, joinState, failure, favorites, canSend, generation, reset, messages, removed, skipped }`
@@ -1189,7 +1276,7 @@ Twitch chat state. `{ account, channel, joinState, failure, favorites, canSend, 
 | `removed` | list of text | IDs of removed messages. |
 | `skipped` | integer | New messages the host left out since the previous update, because the chat is faster than it delivers; 0 with `reset`. A removal is never left out. |
 
-Service error codes: `invalid_request`, `permission_denied`, `gesture_required`, `not_connected`, `stale_context`, `unavailable`, `busy`, `cancelled`, `quota_exceeded`, `unsupported`, `url_invalid`, `resolve_failed`, `address_denied`, `too_many_addresses`, `peer_mismatch`, `redirect_denied`, `encoding_denied`, `content_type_denied`, `response_metadata_limit`, `request_body_limit`, `response_body_limit`, `image_invalid`, `timeout`, `transport_failed`.
+Service error codes: `invalid_request`, `permission_denied`, `gesture_required`, `not_connected`, `account_refused`, `stale_context`, `unavailable`, `busy`, `cancelled`, `quota_exceeded`, `unsupported`, `url_invalid`, `resolve_failed`, `address_denied`, `too_many_addresses`, `peer_mismatch`, `redirect_denied`, `encoding_denied`, `content_type_denied`, `response_metadata_limit`, `request_body_limit`, `response_body_limit`, `image_invalid`, `timeout`, `transport_failed`.
 
 ### Write intents
 
@@ -1282,7 +1369,7 @@ Starts the VM. The VM answers `Ready` within `VM_READY_TIMEOUT_MS`.
 | `mode` | `passive` \| `interactive` | yes | Overlay mode. |
 | `visible` | boolean | yes | Whether the widget is shown. |
 | `options` | `menu values` | yes | Durable `wrapper.menu` values by row ID. |
-| `grants` | `capability names` | yes | Consented capabilities. |
+| `grants` | `capability names and account grants` | yes | Consented capabilities, and `account:<id>` for each consented third-party account. |
 
 #### `Event` (frame 1)
 
@@ -1836,7 +1923,7 @@ The catalog v2 is `https://overcrow.playervox.com/marketplace/widgets/v2/catalog
 | `status` | `verified` \| `security-suspended` \| `revoked` | yes | As in the catalog v1. |
 | `package` | `PackageRef` | yes | As in the catalog v1, with `url` exactly `<base>packages/<id>/<version>/<sha256>.ocpkg` under the v2 base. |
 | `releaseNotes` | `LocalizedText` | no | Release notes of this version per locale, `en` required, at most `MAX_LISTING_LOCALIZATIONS` locales, each at most `MAX_RELEASE_NOTES_CHARS` characters; line feeds allowed. |
-| `requires` | `list of feature names` | no | Features a reader must support to use the entry. Unless it is a list of features the reader supports, the reader skips the target. |
+| `requires` | `list of feature names` | no | Features a reader must support to use the entry, naming every feature its manifest needs (`account-key`, `account-oauth`). Unless it is a list of features the reader supports that covers the manifest's, the reader skips the target. |
 
 ### `PackageRef` v2
 

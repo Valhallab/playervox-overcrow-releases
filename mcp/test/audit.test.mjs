@@ -307,3 +307,105 @@ test("IDs: <handle>.<name> and verified reverse domains pass; placeholders and c
     /<handle>\.<name>.*creator space.*reverse domain you can verify/,
   );
 });
+
+test("a field that asks for a key, a token or a password is reported, not its look-alikes", async () => {
+  const fields = (labels) =>
+    labels
+      .map((label, index) => `  <field label="${label}" value={state.f${index}} on:input={typed}/>`)
+      .join("\n");
+  const asking = [
+    "Steam Web API key",
+    "Paste your token",
+    "Personal access token",
+    "Password",
+    "Mot de passe",
+    "Votre clé d'API",
+    "Collez votre jeton",
+    "Client secret",
+  ];
+  const harmless = [
+    "Token count",
+    "Steam ID",
+    "Secret Santa",
+    "Key binding",
+    "Player name",
+    "Jeton de partie gagnés",
+  ];
+  const directory = widget("asks-for-secret", {
+    "manifest.json": manifest({}),
+    "view.ocml": `<column>\n${fields(asking)}\n${fields(harmless)}\n  <field placeholder={t("key-hint")} value={state.k} on:input={typed}/>\n</column>\n`,
+    "locales/en.json": JSON.stringify({ "key-hint": "Your API key" }),
+    "locales/fr.json": JSON.stringify({ "key-hint": "Votre clé API" }),
+    "logic.ts": `export function typed(): void {}\n`,
+  });
+  const result = await auditWidget(directory);
+  const found = result.findings.filter((finding) => finding.rule === "asks-for-secret");
+  assert.deepEqual(
+    found.map((finding) => finding.line),
+    [2, 3, 4, 5, 6, 7, 8, 9, 16],
+    "each asking field, by line, the localized one included",
+  );
+  assert.ok(found.every((finding) => finding.severity === "high" && finding.file === "view.ocml"));
+  assert.match(found[0].fix, /publication rule 3\.5/);
+});
+
+test("routes that return or trade secrets are reported", async () => {
+  const route = (origin, path) => ({ origin, method: "GET", path });
+  const directory = widget("secret-routes", {
+    "manifest.json": manifest({
+      network: [
+        route("https://api.example.org", "/oauth/token"),
+        route("https://api.example.org", "/v1/API-Key/list"),
+        route("https://api.example.org", "/v1/credentials"),
+        route("https://api.twitch.tv", "/helix/streams/key"),
+        route("https://api.twitch.tv", "/helix/extensions/jwt/secrets"),
+        route("https://streamlabs.com", "/api/v2.0/socket/token"),
+        route("https://api.example.org", "/v1/tokenizer"),
+        route("https://www.googleapis.com", "/youtube/v3/liveStreams"),
+        route("https://api.example.org", "/v1/weather"),
+        route("https://api.steampowered.com", "/IEconService/GetTradeOffers/v1/"),
+        route("https://api.steampowered.com", "/ieconservice/CancelTradeOffer/v1/"),
+        route("https://api.steampowered.com", "/ISteamUser/GetPlayerSummaries/v2/"),
+      ],
+    }),
+    "logic.ts": `export const urls = ["https://api.example.org/v1/weather"];\n`,
+  });
+  const result = await auditWidget(directory);
+  const messages = (rule) =>
+    result.findings.filter((finding) => finding.rule === rule).map((finding) => finding.message);
+  const tokens = messages("token-route");
+  assert.equal(tokens.length, 7, tokens.join("\n"));
+  for (const path of [
+    "/oauth/token",
+    "/v1/API-Key/list",
+    "/v1/credentials",
+    "/helix/streams/key",
+    "/helix/extensions/jwt/secrets",
+    "/socket/token",
+    "/youtube/v3/liveStreams",
+  ])
+    assert.ok(
+      tokens.some((message) => message.includes(path)),
+      path,
+    );
+  assert.ok(!tokens.some((message) => message.includes("/v1/weather")));
+  const trades = result.findings.filter((finding) => finding.rule === "trade-route");
+  assert.equal(trades.length, 2);
+  assert.ok(trades.every((finding) => finding.severity === "high"));
+  assert.match(trades[0].fix, /never touches Steam item trades/);
+});
+
+// Until an application release announces account-key, the fixes name no
+// manifest field that the published apps would refuse (the release lot
+// points them to permissions.accounts again).
+test("the secret fix names no unreleased manifest field", async () => {
+  const key = ["api", "_key"].join("");
+  const directory = widget("secret-fix", {
+    "manifest.json": manifest({}),
+    "logic.ts": `const ${key} = "${"a".repeat(24)}";\nexport const used = ${key};\n`,
+  });
+  const result = await auditWidget(directory);
+  const finding = result.findings.find((f) => f.rule === "secret");
+  assert.ok(finding);
+  assert.doesNotMatch(finding.fix, /permissions\.accounts/);
+});

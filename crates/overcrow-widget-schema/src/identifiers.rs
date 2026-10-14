@@ -276,6 +276,24 @@ pub fn validate_publisher_name(name: &str, handle: &str) -> Result<(), NameError
     Ok(())
 }
 
+/// Whether a displayed name (a third-party account's `name`) uses stylized
+/// letters or reads as PlayerVox, OverCrow or Valhallab, by the folding of
+/// [`validate_publisher_name`].
+pub fn reads_as_reserved_name(name: &str) -> bool {
+    let stylized = name.chars().any(|character| {
+        character != '\u{2122}'
+            && STYLIZED_LETTERS
+                .iter()
+                .any(|block| block.contains(&character))
+    });
+    let letters: String = name.chars().filter_map(ascii_letter).collect();
+    let folded = confusable_skeleton(&letters);
+    stylized
+        || RESERVED_HANDLE_WORDS
+            .iter()
+            .any(|word| folded.contains(&confusable_skeleton(word)))
+}
+
 /// The handle grammar: `MIN_HANDLE_BYTES`..=`MAX_HANDLE_BYTES` of
 /// `[a-z0-9-]`, without a hyphen at either end or two in a row (no
 /// look-alike of a punycode `xn--` label).
