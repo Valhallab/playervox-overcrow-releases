@@ -64,6 +64,11 @@ reference, the limits, the templates and the reference widgets. Prompts:
   in it before use. npm installs only `@overcrow/sdk` and TypeScript, with
   install scripts disabled, and their integrity is checked against the
   pinned published packages.
+- A project's own code never runs: check, test and package type-check only
+  with the TypeScript `install_sdk` installed, while its files are
+  unchanged. Otherwise they skip the type check and say so; run
+  `install_sdk` to check the types.
+- Text that reaches the assistant carries no invisible character.
 - Replacing reference images and installing packages need an explicit
   confirmation; the server deletes nothing in your project.
 - Text read from your files and from the tools is returned marked as data:

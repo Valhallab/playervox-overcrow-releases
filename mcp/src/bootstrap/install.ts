@@ -183,6 +183,23 @@ export async function prepareCacheRoot(cacheRoot: string): Promise<void> {
   }
 }
 
+/**
+ * Replaces one small file of the cache root (0600), atomically: written
+ * under a fresh name, then renamed. Used for the TypeScript installs that
+ * check may run (typescript.ts).
+ */
+export async function writeCacheFile(cacheRoot: string, name: string, data: string): Promise<void> {
+  await prepareCacheRoot(cacheRoot);
+  const temporary = join(cacheRoot, `.${name}.${randomBytes(8).toString("hex")}`);
+  await writeDurably(temporary, Buffer.from(data), 0o600);
+  try {
+    await rename(temporary, join(cacheRoot, name));
+  } catch (error) {
+    await rm(temporary, { force: true });
+    throw error;
+  }
+}
+
 async function writeDurably(path: string, data: Buffer, mode: number): Promise<void> {
   const handle = await open(path, "wx", mode);
   try {

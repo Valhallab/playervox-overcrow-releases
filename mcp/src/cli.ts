@@ -108,9 +108,10 @@ export class Cli {
   }
 
   /** `check <dir> --format json`: diagnostics, and whether there is no error. */
-  async check(directory: string, signal?: AbortSignal) {
+  /** `typecheck: false` adds `--no-typecheck` (see typescript.ts). */
+  async check(directory: string, signal?: AbortSignal, typecheck = true) {
     const result = await this.run(
-      ["check", directory, "--format", "json"],
+      ["check", directory, "--format", "json", ...(typecheck ? [] : ["--no-typecheck"])],
       directory,
       TIMEOUTS.check,
       signal,
@@ -123,9 +124,16 @@ export class Cli {
   }
 
   /** `package <dir> --out <file> --format json`. */
-  async package(directory: string, out: string, signal?: AbortSignal) {
+  async package(directory: string, out: string, signal?: AbortSignal, typecheck = true) {
     const result = await this.run(
-      ["package", directory, `--out=${out}`, "--format", "json"],
+      [
+        "package",
+        directory,
+        `--out=${out}`,
+        "--format",
+        "json",
+        ...(typecheck ? [] : ["--no-typecheck"]),
+      ],
       directory,
       TIMEOUTS.package,
       signal,
@@ -179,7 +187,7 @@ export class Cli {
   /** `test <dir> --runtime <cached runtime> --offline --format json`. */
   async test(
     directory: string,
-    options: { scenario?: string | undefined; update?: boolean },
+    options: { scenario?: string | undefined; update?: boolean; typecheck?: boolean },
     signal?: AbortSignal,
   ) {
     const args = [
@@ -190,6 +198,7 @@ export class Cli {
       "--format",
       "json",
     ];
+    if (options.typecheck === false) args.push("--no-typecheck");
     if (options.scenario) args.push(`--scenario=${options.scenario}`);
     if (options.update) args.push("--update");
     const result = await this.run(args, directory, TIMEOUTS.test, signal);

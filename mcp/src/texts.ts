@@ -27,7 +27,7 @@ export const DESCRIPTIONS = {
   create_widget:
     "Create a widget project from a template, in a new folder inside the project. Never overwrites a file. The ID is final: ask the user for <handle>.<name> (their publisher handle in the OverCrow creator space) or a reverse domain they can verify.",
   install_sdk:
-    "Install @overcrow/sdk and TypeScript (pinned versions) in a widget project with npm, so that check can type-check the logic. Runs npm with install scripts disabled. Requires confirm: true.",
+    "Install @overcrow/sdk and TypeScript (pinned versions) in a widget project with npm, so that check, test and package can type-check the logic: they only run a TypeScript this tool installed. Runs npm with install scripts disabled. Requires confirm: true.",
   check:
     "Check a widget project (manifest, view, style, logic, types). Returns each problem with its file, line, code, message and suggested fix.",
   test: "Play the widget's test scenarios (tests/*.scenario.json) in the headless runtime. When an image differs, returns the reference image, the new image and their difference.",

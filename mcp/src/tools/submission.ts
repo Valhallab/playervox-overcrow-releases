@@ -8,6 +8,7 @@ import { join } from "node:path";
 import { z } from "zod";
 import { auditWidget } from "../audit/index.js";
 import { readWidget } from "../audit/project.js";
+import { mayTypeCheck, TYPECHECK_SKIPPED } from "../typescript.js";
 import { Cli } from "../cli.js";
 import { limit } from "../content.js";
 import { sourcesFingerprint } from "../fingerprint.js";
@@ -125,16 +126,18 @@ export function registerSubmissionTool(env: ToolEnv): void {
         let review: Record<string, unknown>[] = [];
         if (tools) {
           const cli = new Cli(tools);
-          const check = await cli.check(target, ctx.mcpReq.signal);
+          const typecheck = await mayTypeCheck(session.cacheRoot, target);
+          const check = await cli.check(target, ctx.mcpReq.signal, typecheck);
           const errors = check.diagnostics.filter((d) => d.severity === "error").length;
           const warnings = check.diagnostics.length - errors;
+          const result =
+            errors + warnings === 0
+              ? "Clean."
+              : `${errors} error(s), ${warnings} warning(s): the creator space refuses warnings too.`;
           checklist.push({
             item: "check: no error, no warning",
             status: errors + warnings === 0 ? "pass" : "fail",
-            detail:
-              errors + warnings === 0
-                ? "Clean."
-                : `${errors} error(s), ${warnings} warning(s): the creator space refuses warnings too.`,
+            detail: typecheck ? result : `${result} ${TYPECHECK_SKIPPED}`,
           });
           const report = await cli.admit(target, ctx.mcpReq.signal);
           const diagnostics = Array.isArray(report.diagnostics)

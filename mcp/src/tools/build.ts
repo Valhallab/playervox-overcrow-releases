@@ -12,6 +12,7 @@ import { sourcesFingerprint } from "../fingerprint.js";
 import { explainError } from "../knowledge.js";
 import { boundList, clean, cleanLine } from "../text.js";
 import { DESCRIPTIONS } from "../texts.js";
+import { mayTypeCheck, TYPECHECK_SKIPPED } from "../typescript.js";
 import { registerPreviewTool } from "./preview.js";
 import {
   fail,
@@ -218,7 +219,8 @@ async function runTests(
     target,
     update ? ["tests/output", "tests/reference"] : ["tests/output"],
   );
-  const result = await cli.test(target, { scenario, update }, signal);
+  const typecheck = await mayTypeCheck(env.session.cacheRoot, target);
+  const result = await cli.test(target, { scenario, update, typecheck }, signal);
   const { diagnostics } = shapeDiagnostics(result.diagnostics);
   if (!result.ran) {
     return {
@@ -232,10 +234,11 @@ async function runTests(
         diagnostics,
         problem: clean(result.problem, 2000) || "No scenario ran.",
         imagesShown: [],
-        next:
+        next: `${
           diagnostics.length > 0
             ? "Fix the diagnostics (run check), then test again."
-            : "Read the problem, fix it, and test again.",
+            : "Read the problem, fix it, and test again."
+        }${typecheck ? "" : ` ${TYPECHECK_SKIPPED}`}`,
       },
       images: [] as ContentBlock[],
     };
@@ -291,12 +294,13 @@ async function runTests(
       diagnostics,
       problem: result.problem ? clean(result.problem, 2000) : null,
       imagesShown: shown,
-      next:
+      next: `${
         failed === 0
           ? update
             ? "Reference images updated. Look at them, then run test again."
             : "All scenarios pass. Run audit next."
-          : "Fix the widget, or, if the new images are right, ask the user before update_reference_images.",
+          : "Fix the widget, or, if the new images are right, ask the user before update_reference_images."
+      }${typecheck ? "" : ` ${TYPECHECK_SKIPPED}`}`,
     },
     images,
   };
@@ -327,15 +331,17 @@ export function registerBuildTools(env: ToolEnv): void {
         const cli = await cliOf(env);
         if (!cli) return fail(TOOLS_MISSING);
         const target = await widgetDirectory(confinement, directory);
-        const result = await cli.check(target, ctx.mcpReq.signal);
+        const typecheck = await mayTypeCheck(env.session.cacheRoot, target);
+        const result = await cli.check(target, ctx.mcpReq.signal, typecheck);
         const { errors, warnings } = counts(result.diagnostics);
         const shaped = shapeDiagnostics(result.diagnostics);
-        const next =
+        const advice =
           errors > 0
             ? "Fix the errors (explain_error explains a code), then check again."
             : warnings > 0
               ? "Fix the warnings: a submission must have none."
               : "No problem. Run test next.";
+        const next = typecheck ? advice : `${advice} ${TYPECHECK_SKIPPED}`;
         return ok(
           {
             directory: confinement.display(target),
@@ -463,8 +469,10 @@ export function registerBuildTools(env: ToolEnv): void {
         }
         await checkOutputs(confinement, target, ["dist"]);
         const out = join(target, "dist", `${id}-${version}.ocpkg`);
-        const result = await cli.package(target, out, ctx.mcpReq.signal);
+        const typecheck = await mayTypeCheck(env.session.cacheRoot, target);
+        const result = await cli.package(target, out, ctx.mcpReq.signal, typecheck);
         const shaped = shapeDiagnostics(result.diagnostics);
+        const skipped = typecheck ? "" : ` ${TYPECHECK_SKIPPED}`;
         return ok(
           {
             directory: confinement.display(target),
@@ -474,9 +482,11 @@ export function registerBuildTools(env: ToolEnv): void {
             logicBytes: result.logicBytes,
             sha256: result.sha256,
             diagnostics: shaped.diagnostics,
-            next: result.ok
-              ? "Run inspect on the package to see what it may do, then prepare_submission."
-              : "Fix the diagnostics, then package again.",
+            next: `${
+              result.ok
+                ? "Run inspect on the package to see what it may do, then prepare_submission."
+                : "Fix the diagnostics, then package again."
+            }${skipped}`,
           },
           result.ok
             ? `Packaged ${confinement.display(out)} (${result.bytes} bytes, logic.js ${result.logicBytes} bytes).`
