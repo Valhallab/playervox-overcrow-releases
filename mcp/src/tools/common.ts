@@ -15,7 +15,7 @@ import { type Confinement, ConfinementError } from "../confine.js";
 import { NpmError } from "../npm.js";
 import { RunError } from "../run.js";
 import { type Session, SetupError } from "../session.js";
-import { bound, DATA_NOTICE, type Redactor } from "../text.js";
+import { bound, clean, DATA_NOTICE, dataText, type Redactor, stripInvisible } from "../text.js";
 
 export interface ToolEnv {
   session: Session;
@@ -35,10 +35,9 @@ export function ok(
   summary: string,
   options: { data?: boolean; redactor?: Redactor; extra?: ContentBlock[] } = {},
 ): CallToolResult {
-  const redact = (text: string) => (options.redactor ? options.redactor.text(text) : text);
-  const structuredContent = options.redactor
-    ? redactDeep(structured, options.redactor)
-    : structured;
+  const redact = (text: string) =>
+    stripInvisible(options.redactor ? options.redactor.text(text) : text);
+  const structuredContent = redactDeep(structured, redact);
   const json = JSON.stringify(structuredContent);
   const body = options.data
     ? `${DATA_NOTICE}\n<data>\n${json.replaceAll("</data>", "<\\/data>")}\n</data>`
@@ -52,13 +51,16 @@ export function ok(
   };
 }
 
-/** Replaces the user's paths in every string of a JSON value. */
-function redactDeep<T>(value: T, redactor: Redactor): T {
-  if (typeof value === "string") return redactor.text(value) as T;
-  if (Array.isArray(value)) return value.map((item) => redactDeep(item, redactor)) as T;
+/**
+ * Applies `redact` to every string of a JSON value: the user's paths
+ * replaced, invisible characters removed.
+ */
+function redactDeep<T>(value: T, redact: (text: string) => string): T {
+  if (typeof value === "string") return redact(value) as T;
+  if (Array.isArray(value)) return value.map((item) => redactDeep(item, redact)) as T;
   if (typeof value === "object" && value !== null) {
     return Object.fromEntries(
-      Object.entries(value).map(([key, item]) => [key, redactDeep(item, redactor)]),
+      Object.entries(value).map(([key, item]) => [key, redactDeep(item, redact)]),
     ) as T;
   }
   return value;
@@ -67,7 +69,12 @@ function redactDeep<T>(value: T, redactor: Redactor): T {
 /** A failure the model can correct: what went wrong and what to do. */
 export function fail(message: string, redactor?: Redactor): CallToolResult {
   return {
-    content: [{ type: "text", text: bound(redactor ? redactor.text(message) : message, 4000) }],
+    content: [
+      {
+        type: "text",
+        text: bound(stripInvisible(redactor ? redactor.text(message) : message), 4000),
+      },
+    ],
     isError: true,
   };
 }
@@ -88,7 +95,8 @@ export function failure(error: unknown, redactor?: Redactor): CallToolResult {
       .filter((line) => line.trim() !== "")
       .slice(0, 8)
       .join("\n");
-    return fail(`${error.message}${detail ? `\n${DATA_NOTICE}\n${detail}` : ""}`, redactor);
+    // The CLI's output may quote the project: fenced as data, like tool results.
+    return fail(`${error.message}${detail ? `\n${dataText(clean(detail))}` : ""}`, redactor);
   }
   throw error;
 }

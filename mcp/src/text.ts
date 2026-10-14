@@ -4,6 +4,7 @@
 
 import { homedir } from "node:os";
 import { sep } from "node:path";
+import { INVISIBLE_CHARACTERS } from "./hidden.js";
 
 /** Precedes project content (files, CLI output) in text results. */
 export const DATA_NOTICE =
@@ -14,12 +15,26 @@ const ANSI = /\u001b(?:\[[0-?]*[ -/]*[@-~]|\][^\u0007\u001b]*(?:\u0007|\u001b\\)
 // biome-ignore lint/suspicious/noControlCharactersInRegex: the point is to remove them
 const CONTROL = /[\u0000-\u0008\u000b-\u001f\u007f-\u009f​-‏‪-‮⁦-⁩]/g;
 
+// The widget schema's invisible characters (tag characters, joiners, word
+// joiners, BOM, direction marks…): text a model reads but the user does not see.
+const INVISIBLE = new RegExp(
+  `[${INVISIBLE_CHARACTERS.map(([start, end]) => `\\u{${start.toString(16)}}-\\u{${end.toString(16)}}`).join("")}]`,
+  "gu",
+);
+
+/** Removes the characters a reader cannot see. */
+export function stripInvisible(text: string): string {
+  return text.replace(INVISIBLE, "");
+}
+
 /**
  * Removes terminal escapes, control characters (newlines and tabs kept) and
- * invisible direction overrides, then bounds the length.
+ * invisible characters, then bounds the length.
  */
 export function clean(text: string, maxChars = 4000): string {
-  const cleaned = text.replace(ANSI, "").replace(/\r\n?/g, "\n").replace(CONTROL, "");
+  const cleaned = stripInvisible(
+    text.replace(ANSI, "").replace(/\r\n?/g, "\n").replace(CONTROL, ""),
+  );
   return bound(cleaned, maxChars);
 }
 
