@@ -21,7 +21,7 @@ libc = "=0.2.186"
 ring = "=0.17.14"
 serde = { version = "=1.0.229", default-features = false, features = ["alloc", "derive"] }
 serde_json = { version = "=1.0.151", default-features = false, features = ["alloc"] }
-sha2 = { version = "=0.10.9", default-features = false }
+sha2 = { version = "=0.11.0", default-features = false }
 tempfile = "=3.23.0"
 
 # Distribution builds of the creator CLI (`cargo build --profile dist`):
