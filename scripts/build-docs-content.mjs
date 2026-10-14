@@ -53,6 +53,15 @@ const WORDS = {
     nothing: "none",
     meaning: "Meaning",
     account: "Account",
+    signIn: "Connection",
+    keyMode: "personal key",
+    oauthMode: "OAuth sign-in",
+    sentTo: "Key or token sent to",
+    images: "Images",
+    allowedPaths: "Allowed paths",
+    refusedPaths: "Refused paths",
+    scope: "Scope",
+    reads: "What it reads",
     withSensitive: "With a sensitive capability",
     field: "Field",
     type: "Type",
@@ -158,6 +167,15 @@ const WORDS = {
     nothing: "aucune",
     meaning: "Signification",
     account: "Compte",
+    signIn: "Connexion",
+    keyMode: "clé personnelle",
+    oauthMode: "connexion OAuth",
+    sentTo: "Clé ou jeton envoyé à",
+    images: "Images",
+    allowedPaths: "Chemins permis",
+    refusedPaths: "Chemins refusés",
+    scope: "Scope",
+    reads: "Ce qu’il lit",
     withSensitive: "Avec une capability sensible",
     field: "Champ",
     type: "Type",
@@ -428,7 +446,8 @@ const LIMIT_GROUPS = {
 };
 
 // Defined by the schema, not shipped by any released application yet:
-// third-party accounts (`account-key`, `account-oauth`). Only hidden pages
+// third-party accounts (`account-key`, `account-oauth`) and integrated
+// services (`service-steam`, `service-twitch`). Only hidden pages
 // show them; the release removes the entries. Each entry must still exist,
 // or the build fails.
 export const UNRELEASED = {
@@ -683,6 +702,33 @@ function capabilities(t) {
     }
   }
   return blocks([table([t.w.capability, t.w.sensitive, t.w.service, t.w.when], rows), t.w.whenNote]);
+}
+
+/** The integrated services PlayerVox defines (ADR 0009 §10). */
+function integratedServices(t) {
+  return table(
+    [t.w.service, t.w.signIn, t.w.sentTo, t.w.images, t.w.allowedPaths, t.w.refusedPaths],
+    records(sections, "Permissions > Integrated services").map((entry) => [
+      entry.Service,
+      entry.Mode === "key" ? t.w.keyMode : t.w.oauthMode,
+      entry["Secret origins"],
+      entry["Image origins"],
+      entry["Allowed paths"],
+      entry["Refused paths"],
+    ]),
+  );
+}
+
+/** The scopes a widget may ask an integrated service for, as the user reads them. */
+function integratedScopes(t) {
+  return table(
+    [t.w.service, t.w.scope, t.w.reads],
+    records(sections, "Permissions > Integrated service scopes").map((entry) => [
+      entry.Service,
+      entry.Scope,
+      t.locale === "fr" ? entry.French : entry.English,
+    ]),
+  );
 }
 
 function capabilityList(t) {
@@ -1105,6 +1151,9 @@ const GENERATORS = {
   "account-scope": (t) => fields(t, "Permissions > AccountScope"),
   "account-services": (t) => services(t, UNRELEASED.services),
   "account-shapes": (t) => resultShapes(t, UNRELEASED.shapes),
+  "integrated-service-fields": (t) => fields(t, "Permissions > IntegratedServiceAccount"),
+  "integrated-services": integratedServices,
+  "integrated-scopes": integratedScopes,
   "parameter-constraints": parameterConstraints,
   services: (t) => services(t),
   "result-shapes": (t) => resultShapes(t),

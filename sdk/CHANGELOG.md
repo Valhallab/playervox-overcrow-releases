@@ -13,7 +13,8 @@ Third-party accounts (the version number is chosen at release):
 
 - `account.subscribe` and `account.connect` (`account`, `AccountServices`):
   the state of an account the manifest declares in `permissions.accounts`,
-  and the host's panel to connect it. The widget never sees the secret.
+  or of an integrated service it names (`steam`, `twitch`), and the host's
+  panel to connect it. The widget never sees the secret.
 - The service error `account_refused`, and the `AccountStatus` and
   `AccountGrant` types; `hasGrant` takes `account:<id>`.
 - `@overcrow/sdk/testing`: account states (`accounts` at install,
