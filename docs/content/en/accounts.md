@@ -204,10 +204,10 @@ The reviewer checks, for a widget with an account:
 <!-- generated:account-fields -->
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `id` | identifier ≤ 32 bytes | yes | `[a-z][a-z0-9-]` of 2 bytes to 32 bytes, without a final or double `-`; `playervox` and `twitch` are reserved. The permission key is `account:<id>`; a network rule names it in `account`. |
-| `name` | text ≤ 32 characters | yes | The service's name as the host shows it, plain text of at most 32 characters; a name that reads as PlayerVox, OverCrow or Valhallab is refused. |
+| `id` | identifier ≤ 32 bytes | yes | `[a-z][a-z0-9-]` of 2 bytes to 32 bytes, without a final or double `-`; `playervox` is reserved, and an integrated service's ID (`steam`, `twitch`) is refused: name the service instead. The permission key is `account:<id>`; a network rule names it in `account`. |
+| `name` | text ≤ 32 characters | yes | The service's name as the host shows it, plain text of at most 32 characters; a name that reads as PlayerVox, OverCrow or Valhallab is refused, and so is one that reads as an integrated service (Steam, Valve, Twitch). |
 | `mode` | `key` \| `oauth` | yes | `key`: a personal key or token the user pastes in the host's panel. `oauth`: a sign-in with the publisher's public OAuth client. Exactly the object of the mode is present. |
-| `origins` | list of `origin` ≤ 4 | yes | Distinct canonical HTTPS origins of the service, as in network rules. Every network rule of the widget targets one of them. |
+| `origins` | list of `origin` ≤ 4 | yes | Distinct canonical HTTPS origins of the service, as in network rules, none of an integrated service. Every network rule of the widget targets one of them. |
 | `required` | boolean | no | Default `true`: the host covers the content until the account is connected. `false`: the widget works without it and opens the host's panel with `account.connect`. |
 | `refusedStatus` | `list of 401 and 403` | no | Distinct statuses, among 401 and 403, by which the service refuses the secret on a route of the account; default `[401]`. Such a response marks the account refused (key) or expired (OAuth) and the call fails with `account_refused`. |
 | `send` | `AccountSend` | no | Key mode only, required there: how the host sends the key. |

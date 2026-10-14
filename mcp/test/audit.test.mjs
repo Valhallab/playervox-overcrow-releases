@@ -438,6 +438,34 @@ test("a widget's own account on Steam or Twitch is reported, a named service is 
       0,
     ],
     ["the service itself", { service: "steam" }, 0],
+    [
+      "the Steam key page",
+      declared({
+        id: "stats",
+        name: "Stats",
+        origins: ["https://api.stats.example"],
+        key: {
+          format: { charset: "hex", minLength: 32, maxLength: 32 },
+          page: "https://steamcommunity.com/dev/apikey",
+        },
+      }),
+      1,
+    ],
+    [
+      "a Steam domain",
+      declared({ id: "stats", name: "Stats", origins: ["https://store.steampowered.com"] }),
+      1,
+    ],
+    [
+      "named with an accent",
+      declared({ id: "stats", name: "Šteam", origins: ["https://api.stats.example"] }),
+      1,
+    ],
+    [
+      "named with rn",
+      declared({ id: "stats", name: "Stearn", origins: ["https://api.stats.example"] }),
+      1,
+    ],
   ];
   for (const [label, account, expected] of cases) {
     const directory = widget(`integrated-${label.replaceAll(" ", "-")}`, {

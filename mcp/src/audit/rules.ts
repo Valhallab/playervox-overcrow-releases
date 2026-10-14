@@ -280,29 +280,82 @@ function networkRules(context: Context): void {
   }
 }
 
-/** Origins and names of the services PlayerVox OverCrow integrates itself. */
-const INTEGRATED_SERVICE_ORIGINS = new Set([
-  "https://api.steampowered.com",
-  "https://api.twitch.tv",
-  "https://id.twitch.tv",
-  "https://www.twitch.tv",
-]);
+/** What the schema keeps for the services PlayerVox OverCrow integrates
+ * itself: their domains, an origin outside them, their names and clients. */
+const INTEGRATED_SERVICE_DOMAINS = [
+  "steampowered.com",
+  "steamcommunity.com",
+  "steamstatic.com",
+  "steam-api.com",
+  "steamgames.com",
+  "steamcontent.com",
+  "steamusercontent.com",
+  "valvesoftware.com",
+  "twitch.tv",
+  "jtvnw.net",
+  "twitchcdn.net",
+  "twitchsvc.net",
+];
+const INTEGRATED_SERVICE_HOSTS = new Set(["steamcdn-a.akamaihd.net"]);
 const INTEGRATED_SERVICE_IDS = new Set(["steam", "twitch"]);
-const INTEGRATED_SERVICE_NAMES = /\b(?:steam|twitch)\b/i;
+const INTEGRATED_SERVICE_NAMES = ["steam", "valve", "twitch"];
+const INTEGRATED_SERVICE_CLIENTS = new Set(["4mnhecoh0nif054yubgwkkj2k7bma2"]);
+
+/** Whether a URL or origin is under an integrated service's domains. */
+function servicesAddress(url: string): boolean {
+  const host = (url.replace(/^https?:\/\//i, "").split(/[/:?#]/)[0] ?? "").toLowerCase();
+  return (
+    INTEGRATED_SERVICE_HOSTS.has(host) ||
+    INTEGRATED_SERVICE_DOMAINS.some((domain) => host === domain || host.endsWith(`.${domain}`))
+  );
+}
+
+/** A name folded as the schema reads it: ASCII letters, digits as letters, `rn` as `m`. */
+function readsAsService(name: string): boolean {
+  const folded = name
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "")
+    .replace(/0/g, "o")
+    .replace(/[1i]/g, "l")
+    .replace(/3/g, "e")
+    .replace(/4/g, "a")
+    .replace(/5/g, "s")
+    .replace(/7/g, "t")
+    .replace(/rn/g, "m");
+  return INTEGRATED_SERVICE_NAMES.some((word) => folded.includes(word.replace(/i/g, "l")));
+}
 
 /** A declared account on Steam or Twitch: OverCrow integrates them itself,
- * and refuses a widget's own account on them. */
+ * and refuses a widget's own account on their names, addresses or clients. */
 function integratedServiceAccount(context: Context): void {
   const accounts = permissionsOf(context.project).accounts;
   if (!Array.isArray(accounts)) return;
   accounts.forEach((entry, index) => {
     if (typeof entry !== "object" || entry === null || "service" in entry) return;
     const declared = entry as Record<string, unknown>;
-    const origins = Array.isArray(declared.origins) ? declared.origins.map(String) : [];
+    const key = (declared.key ?? {}) as Record<string, unknown>;
+    const oauth = (declared.oauth ?? {}) as Record<string, unknown>;
+    const urls = [
+      ...(Array.isArray(declared.origins) ? declared.origins.map(String) : []),
+      ...[
+        key.page,
+        oauth.authorize,
+        oauth.token,
+        oauth.device,
+        oauth.verify,
+        oauth.revoke,
+        oauth.validate,
+      ]
+        .filter((url) => typeof url === "string")
+        .map(String),
+    ];
     const imitates =
       INTEGRATED_SERVICE_IDS.has(String(declared.id ?? "")) ||
-      INTEGRATED_SERVICE_NAMES.test(String(declared.name ?? "")) ||
-      origins.some((origin) => INTEGRATED_SERVICE_ORIGINS.has(origin));
+      readsAsService(String(declared.name ?? "")) ||
+      INTEGRATED_SERVICE_CLIENTS.has(String(oauth.clientId ?? "")) ||
+      urls.some(servicesAddress);
     if (!imitates) return;
     add(context, {
       rule: "integrated-service",
@@ -310,8 +363,8 @@ function integratedServiceAccount(context: Context): void {
       severity: "high",
       file: "manifest.json",
       line: null,
-      message: `permissions.accounts[${index}] declares the widget's own account on Steam or Twitch.`,
-      fix: "Steam and Twitch are services PlayerVox OverCrow integrates itself: the player connects them once, and a widget cannot declare its own account on them (OverCrow refuses the manifest).",
+      message: `permissions.accounts[${index}] declares the widget's own account on Steam or Twitch (its ID, name, addresses or client).`,
+      fix: "Steam and Twitch are services PlayerVox OverCrow integrates itself: the player connects them once, and a widget cannot declare its own account on them or use their addresses, names or clients (OverCrow refuses the manifest).",
     });
   });
 }

@@ -136,10 +136,11 @@ fn a_service_takes_its_definition_from_the_table() {
         account.key.as_ref().map(|key| key.page.as_str()),
         Some("https://steamcommunity.com/dev/apikey")
     );
-    assert_eq!(account.secret_origins(), ["https://api.steampowered.com"]);
+    // `origins` stays where the secret goes; images are apart.
+    assert_eq!(account.origins, ["https://api.steampowered.com"]);
     assert!(
         account
-            .origins
+            .image_origins
             .iter()
             .any(|origin| origin == "https://steamcdn-a.akamaihd.net")
     );
@@ -622,7 +623,20 @@ fn a_declared_account_never_uses_a_services_addresses() {
 
 #[test]
 fn look_alike_letters_never_hide_a_services_name() {
-    for name in ["ЅТЕАМ", "Ѕteam", "Τwitch", "ТWITCH", "Stеаm"] {
+    for name in [
+        "ЅТЕАМ",
+        "Ѕteam",
+        "Τwitch",
+        "ТWITCH",
+        "Stеаm",
+        "Šteam",
+        "Ştеam",
+        "Ťwitch",
+        "Twiťch",
+        "Stearn",
+        "Valve keys",
+        "VALVE",
+    ] {
         let value = declared("runlog", name, "https://api.runlog.example");
         assert_eq!(validate(&value).err(), Some("account_service"), "{name}");
     }
@@ -677,4 +691,73 @@ fn a_twitch_route_needs_the_scope_the_widget_asked_for() {
         ]);
         route(value, 0)["path"] = json!("/helix/hypetrain/status");
     });
+}
+
+/// PlayerVox's own client at Twitch is the Twitch service's: a declared
+/// account using it would show PlayerVox's app on Twitch's consent page
+/// and send the token to the publisher's endpoints.
+#[test]
+fn a_declared_account_never_uses_a_services_client() {
+    let client = TWITCH.oauth.unwrap().client_id;
+    let mut value = declared("runlog", "Run Log", "https://api.runlog.example");
+    let account = entry(&mut value).as_object_mut().unwrap();
+    account.remove("send");
+    account.remove("key");
+    account.insert("mode".into(), json!("oauth"));
+    account.insert("origins".into(), json!(["https://api.runlog.example"]));
+    account.insert(
+        "oauth".into(),
+        json!({
+            "clientId": client,
+            "flow": "device",
+            "device": "https://api.runlog.example/device",
+            "verify": "https://runlog.example/activate",
+            "token": "https://api.runlog.example/token",
+            "scopes": [{"name": "runs:read", "access": "read"}]
+        }),
+    );
+    assert_eq!(validate(&value).err(), Some("account_service"));
+    entry(&mut value)["oauth"]["clientId"] = json!("nova-run-log");
+    validate(&value).expect("its own client");
+}
+
+/// What a reader refuses of a declared account is frozen: a service or a
+/// domain added later must never make a newer reader refuse a manifest an
+/// older one accepted (and with it the whole catalog).
+#[test]
+fn the_readers_guard_is_frozen_and_covers_the_table() {
+    use overcrow_widget_schema::integrated::{INTEGRATED_SERVICES, READER_GUARDS};
+    let ids: Vec<&str> = READER_GUARDS.iter().map(|guard| guard.id).collect();
+    assert_eq!(
+        ids,
+        ["steam", "twitch"],
+        "frozen: add a service to the producers' guard"
+    );
+    for service in INTEGRATED_SERVICES {
+        let Some(guard) = READER_GUARDS.iter().find(|guard| guard.id == service.id) else {
+            continue;
+        };
+        for domain in service.domains {
+            assert!(guard.domains.contains(domain), "{domain}");
+        }
+        for origin in service.all_origins() {
+            let host = origin.trim_start_matches("https://");
+            assert!(
+                guard.origins.contains(&origin)
+                    || guard
+                        .domains
+                        .iter()
+                        .any(|domain| host == *domain || host.ends_with(&format!(".{domain}"))),
+                "{origin}"
+            );
+        }
+        if let Some(oauth) = service.oauth {
+            assert!(guard.client_ids.contains(&oauth.client_id));
+        }
+        assert!(
+            guard
+                .names
+                .contains(&service.name.to_ascii_lowercase().as_str())
+        );
+    }
 }

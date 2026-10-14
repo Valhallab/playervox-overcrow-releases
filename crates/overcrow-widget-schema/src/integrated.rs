@@ -48,6 +48,11 @@ pub struct ServiceKey {
     pub guide: &'static [Text],
     /// A short note under the field, when the service needs one.
     pub note: Option<Text>,
+    /// A request of the host alone, on a secret origin, that only a refused
+    /// key fails: a 401 or 403 a widget's route gets (a private profile, a
+    /// bad parameter) never marks the shared key refused unless this probe
+    /// fails too.
+    pub probe: Option<&'static str>,
 }
 
 /// The public OAuth client of PlayerVox at the service.
@@ -252,6 +257,9 @@ pub const STEAM: IntegratedService = IntegratedService {
             en: "Steam gives no key to limited accounts (under $5 of purchases).",
             fr: "Steam ne donne pas de clé aux comptes limités (moins de 5 $ d’achats).",
         }),
+        // The interfaces this key reaches; a refused key gets 403. To
+        // confirm in ACC.6's real test.
+        probe: Some("https://api.steampowered.com/ISteamWebAPIUtil/GetSupportedAPIList/v1/"),
     }),
     oauth: None,
     scopes: &[],
@@ -363,6 +371,67 @@ pub const TWITCH: IntegratedService = IntegratedService {
         ),
     ],
 };
+
+/// What a manifest reader refuses of a declared account that imitates an
+/// integrated service (`account_service`): its ID, a name that reads as one
+/// of `names`, an address under `domains` or among `origins`, an OAuth
+/// client of `client_ids`. Frozen with the first release that announces a
+/// service's feature: a service or a domain added later joins only the
+/// producers' checks (CLI, catalog-tool), never this list, so that a newer
+/// reader never refuses a manifest an older one accepted.
+#[derive(Debug, Eq, PartialEq)]
+pub struct ServiceGuard {
+    pub id: &'static str,
+    /// Lowercase ASCII words; look-alike letters are folded before.
+    pub names: &'static [&'static str],
+    pub domains: &'static [&'static str],
+    /// Origins outside `domains`.
+    pub origins: &'static [&'static str],
+    pub client_ids: &'static [&'static str],
+}
+
+/// The readers' guard of version 1 (`service-steam`, `service-twitch`).
+pub const READER_GUARDS: &[ServiceGuard] = &[
+    ServiceGuard {
+        id: "steam",
+        names: &["steam", "valve"],
+        domains: &[
+            "steampowered.com",
+            "steamcommunity.com",
+            "steamstatic.com",
+            "steam-api.com",
+            "steamgames.com",
+            "steamcontent.com",
+            "steamusercontent.com",
+            "valvesoftware.com",
+        ],
+        origins: &["https://steamcdn-a.akamaihd.net"],
+        client_ids: &[],
+    },
+    ServiceGuard {
+        id: "twitch",
+        names: &["twitch"],
+        domains: &["twitch.tv", "jtvnw.net", "twitchcdn.net", "twitchsvc.net"],
+        origins: &[],
+        client_ids: &["4mnhecoh0nif054yubgwkkj2k7bma2"],
+    },
+];
+
+impl ServiceGuard {
+    /// Whether the lowercase `host` is under one of the domains or is one
+    /// of the origins' hosts.
+    pub fn owns_host(&self, host: &str) -> bool {
+        self.domains.iter().any(|domain| {
+            host == *domain
+                || host
+                    .strip_suffix(domain)
+                    .is_some_and(|rest| rest.ends_with('.'))
+        }) || self
+            .origins
+            .iter()
+            .any(|origin| origin.strip_prefix("https://") == Some(host))
+    }
+}
 
 /// Every integrated service, in the order the Control Center lists them.
 pub const INTEGRATED_SERVICES: &[IntegratedService] = &[STEAM, TWITCH];
@@ -610,6 +679,10 @@ mod tests {
                     assert!(key.format.min_length <= key.format.max_length);
                     assert!(https_url(key.page, true).is_some(), "{}", key.page);
                     assert_eq!(key.guide.len(), 3, "three short steps");
+                    // The probe goes where the key goes, nowhere else.
+                    let probe = key.probe.expect("a key service confirms a refusal");
+                    let (origin, _) = https_url(probe, false).expect("a static HTTPS URL");
+                    assert!(service.secret_origins.contains(&origin), "{probe}");
                     for step in key.guide.iter().chain(key.note.iter()) {
                         assert!(!step.en.is_empty() && !step.fr.is_empty());
                         assert!(!step.en.contains("http") && !step.fr.contains("http"));

@@ -186,7 +186,8 @@ impl NameError {
     }
 }
 
-/// Letters outside ASCII that read as the letters of the reserved words:
+/// Letters outside ASCII that read as the letters of the reserved words and
+/// of the integrated services' names:
 /// Latin letters with diacritics and Cyrillic and Greek look-alikes, with
 /// the ASCII letter they fold to. Fullwidth ASCII folds too.
 pub const CONFUSABLE_LETTERS: &[(&str, char)] = &[
@@ -200,6 +201,9 @@ pub const CONFUSABLE_LETTERS: &[(&str, char)] = &[
     ("òóôõöøōŏőÒÓÔÕÖØŌŎŐоОοΟσ", 'o'),
     ("рРρΡ", 'p'),
     ("ŕŗřŔŖŘ", 'r'),
+    ("śŝşšșŚŜŞŠȘ", 's'),
+    ("ţťŧțŢŤŦȚ", 't'),
+    ("ṁṃḿṀṂḾ", 'm'),
     ("ѵѴν", 'v'),
     ("ŵŴԝԜѡ", 'w'),
     ("хХχΧ", 'x'),
@@ -299,7 +303,8 @@ pub fn reads_as_reserved_name(name: &str) -> bool {
 /// account named like an integrated service (`Steam`, `Tw1tch`).
 pub fn reads_as_any(name: &str, words: &[&str]) -> bool {
     let letters: String = name.chars().filter_map(ascii_letter).collect();
-    let folded = confusable_skeleton(&letters);
+    // `rn` reads as `m` in most fonts (`Stearn`).
+    let folded = confusable_skeleton(&letters).replace("rn", "m");
     words
         .iter()
         .any(|word| folded.contains(&confusable_skeleton(word)))
