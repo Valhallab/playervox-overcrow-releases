@@ -15,6 +15,10 @@
     "en": "The service needs the user's PlayerVox or Twitch account, which is not connected at the moment.",
     "fr": "Le service a besoin du compte PlayerVox ou Twitch de l’utilisateur, qui n’est pas connecté pour le moment."
   },
+  "account_refused": {
+    "en": "The service refused the account's key or sign-in on this route (a status of the account's `refusedStatus`). The account is now `refused` or `expired`, and PlayerVox OverCrow asks the user for a new key or to sign in again.",
+    "fr": "Le service a refusé la clé ou la connexion du compte sur cette route (un statut de `refusedStatus` du compte). Le compte est maintenant `refused` ou `expired`, et PlayerVox OverCrow demande à l’utilisateur une nouvelle clé ou une nouvelle connexion."
+  },
   "stale_context": {
     "en": "What the call was about changed before the answer: another game, another account, another media player, an object deleted meanwhile. Read the current state again.",
     "fr": "Ce sur quoi portait l’appel a changé avant la réponse : un autre jeu, un autre compte, un autre lecteur multimédia, un objet supprimé entre-temps. Relisez l’état courant."

@@ -94,6 +94,21 @@ export async function checks(): Promise<void> {
   // @ts-expect-error removed capability
   const removed: overcrow.Capability = "playervox.followed.read";
   void [cap, removed, overcrow.hasGrant(cap)];
+  const grant: overcrow.AccountGrant = "account:steam";
+  // @ts-expect-error not an account grant
+  const notGrant: overcrow.AccountGrant = "steam";
+  const status: overcrow.AccountStatus = { state: "refused" };
+  // @ts-expect-error the widget never sees the account's name
+  const named: overcrow.AccountStatus = { state: "connected", name: "me" };
+  const refused: overcrow.ServiceErrorCode = "account_refused";
+  void [grant, notGrant, status, named, refused, overcrow.hasGrant(grant)];
+  overcrow.account.subscribe({ id: "steam" }, (update) => {
+    if (update.ok) {
+      const state: "signed_out" | "pending" | "connected" | "refused" | "expired" = update.value.state;
+      void state;
+    }
+  });
+  void overcrow.account.connect({ id: "steam" });
 
   const seconds: boolean = overcrow.option("seconds", true);
   overcrow.timers.atEach("minute", () => {}).cancel();

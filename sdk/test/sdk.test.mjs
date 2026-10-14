@@ -86,6 +86,37 @@ test("namespaces reach nested services", async () => {
   assert.deepEqual(lastCall().params, {});
 });
 
+test("account services name the declared account; the secret never shows", async () => {
+  vm.host = { ...HOST, grants: ["account:steam"] };
+  assert.ok(overcrow.hasGrant("account:steam"));
+  assert.ok(!overcrow.hasGrant("account:other"));
+  vm.host = HOST;
+  const updates = [];
+  overcrow.account.subscribe({ id: "steam" }, (update) => updates.push(update));
+  const [, entry] = [...vm.subscriptions].at(-1);
+  assert.equal(entry.service, "account.subscribe");
+  assert.deepEqual(entry.params, { id: "steam" });
+  entry.update({ value: { state: "refused" }, final: false });
+  assert.deepEqual(updates, [{ ok: true, value: { state: "refused" }, final: false }]);
+
+  const connecting = overcrow.account.connect({ id: "steam" });
+  assert.deepEqual(
+    { service: lastCall().service, params: lastCall().params },
+    { service: "account.connect", params: { id: "steam" } },
+  );
+  lastCall().resolve(null);
+  assert.equal(await connecting, null);
+
+  const fetching = overcrow.http.fetch(
+    "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?steamids=1",
+    { as: "json" },
+  );
+  lastCall().reject({ code: "account_refused" });
+  const error = await fetching.catch((caught) => caught);
+  assert.ok(error instanceof overcrow.ServiceError);
+  assert.equal(error.code, "account_refused");
+});
+
 test("subscriptions report values and their final failure", () => {
   const updates = [];
   const subscription = overcrow.fps.subscribe((update) => updates.push(update));

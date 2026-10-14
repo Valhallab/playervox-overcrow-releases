@@ -10,8 +10,9 @@ const realNow = Date.now;
 const start = Date.UTC(2026, 2, 29, 0, 59, 0);
 const vm = installRuntime({
   now: start,
+  accounts: { steam: "signed_out" },
   host: {
-    grants: ["stopwatch.control"],
+    grants: ["stopwatch.control", "account:steam"],
     region: { numberFormat: "us", dateOrder: "mdy", offsetMinutes: 60, nextChangeAt: Date.UTC(2026, 2, 29, 1) },
   },
 });
@@ -76,6 +77,22 @@ test("calls wait for the test, and subscriptions take pushed values", async () =
   assert.equal(vm.push("stopwatch.subscribe", value), 0);
   assert.equal(updates[0].ok, true);
   assert.equal(updates[1].error.code, "permission_denied");
+});
+
+test("accounts: a subscription gets the state, then each change", () => {
+  const updates = [];
+  globalThis.overcrow.subscribe("account.subscribe", { id: "steam" }, (update) => updates.push(update));
+  assert.deepEqual(updates, [{ value: { state: "signed_out" }, final: false }], "from the install options");
+  assert.equal(vm.setAccount("steam", "connected"), 1);
+  assert.equal(vm.accounts.steam, "connected");
+  assert.deepEqual(updates.at(-1), { value: { state: "connected" }, final: false });
+  // Another account's subscription is left alone.
+  const other = [];
+  globalThis.overcrow.subscribe("account.subscribe", { id: "quests" }, (update) => other.push(update));
+  assert.deepEqual(other, [], "an account without a state waits for the test");
+  assert.equal(vm.setAccount("steam", "refused"), 1);
+  assert.deepEqual(other, []);
+  assert.throws(() => vm.setAccount("steam", "offline"), RangeError);
 });
 
 test("uninstall restores Date.now and the global", () => {
