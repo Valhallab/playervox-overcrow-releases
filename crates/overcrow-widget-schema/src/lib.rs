@@ -15,6 +15,7 @@ pub mod compiled_view;
 pub mod confusable_letters;
 pub mod icons;
 pub mod identifiers;
+pub mod integrated;
 pub mod ipc;
 pub mod json;
 pub mod limits;

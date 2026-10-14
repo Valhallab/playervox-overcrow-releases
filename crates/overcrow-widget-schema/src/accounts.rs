@@ -543,6 +543,12 @@ fn validate_account(value: &Value) -> Result<Account, ManifestError> {
 
 /// `[a-z][a-z0-9-]{1,31}`, no final or double hyphen, not reserved.
 pub fn valid_account_id(id: &str) -> bool {
+    account_id_grammar(id) && !RESERVED_ACCOUNT_IDS.contains(&id)
+}
+
+/// `[a-z][a-z0-9-]{1,31}`, no final or double hyphen: the grammar of every
+/// account ID, the host's and the integrated services' included.
+pub fn account_id_grammar(id: &str) -> bool {
     let bytes = id.as_bytes();
     (2..=MAX_ACCOUNT_ID_BYTES.value as usize).contains(&bytes.len())
         && bytes[0].is_ascii_lowercase()
@@ -551,7 +557,14 @@ pub fn valid_account_id(id: &str) -> bool {
             .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || *byte == b'-')
         && !id.ends_with('-')
         && !id.contains("--")
-        && !RESERVED_ACCOUNT_IDS.contains(&id)
+}
+
+/// A scope name: 1 to `MAX_OAUTH_SCOPE_BYTES` of the bytes services name
+/// scopes with ([`scope_byte`]).
+pub fn valid_scope_name(name: &str) -> bool {
+    !name.is_empty()
+        && name.len() as u64 <= MAX_OAUTH_SCOPE_BYTES.value
+        && name.bytes().all(scope_byte)
 }
 
 fn validate_send(value: &Value) -> Result<Delivery, ManifestError> {
@@ -736,11 +749,7 @@ fn validate_oauth(value: &Value) -> Result<(OAuth, bool), ManifestError> {
             return Err(ManifestError::Shape);
         }
         let name = scope["name"].as_str().ok_or(invalid)?;
-        if name.is_empty()
-            || name.len() as u64 > MAX_OAUTH_SCOPE_BYTES.value
-            || !name.bytes().all(scope_byte)
-            || !names.insert(name)
-        {
+        if !valid_scope_name(name) || !names.insert(name) {
             return Err(invalid);
         }
         let access = match scope["access"].as_str() {

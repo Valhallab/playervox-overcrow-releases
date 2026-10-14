@@ -82,11 +82,17 @@ pub const INITIAL_CATEGORIES: &[(&str, &str, &str)] = &[
 ];
 
 pub use crate::accounts::{FEATURE_ACCOUNT_KEY, FEATURE_ACCOUNT_OAUTH};
+pub use crate::integrated::{FEATURE_SERVICE_STEAM, FEATURE_SERVICE_TWITCH};
 
 /// Every feature name of `requires` this schema defines. A reader passes
 /// the ones it implements to [`validate_catalog`]; a tool that only shows
 /// entries (the website) may pass them all.
-pub const KNOWN_FEATURES: &[&str] = &[FEATURE_ACCOUNT_KEY, FEATURE_ACCOUNT_OAUTH];
+pub const KNOWN_FEATURES: &[&str] = &[
+    FEATURE_ACCOUNT_KEY,
+    FEATURE_ACCOUNT_OAUTH,
+    FEATURE_SERVICE_STEAM,
+    FEATURE_SERVICE_TWITCH,
+];
 
 pub const ENVELOPE_FIELDS: &[Field] = &[
     Field::required(
@@ -1786,7 +1792,15 @@ mod tests {
 
     #[test]
     fn the_reader_passes_the_features_it_supports() {
-        assert_eq!(KNOWN_FEATURES, ["account-key", "account-oauth"]);
+        assert_eq!(
+            KNOWN_FEATURES,
+            [
+                "account-key",
+                "account-oauth",
+                "service-steam",
+                "service-twitch"
+            ]
+        );
         let mut payload = valid();
         with_account(&mut payload, Some(json!(["account-key"])));
         // A reader that does not announce the feature skips the target and
