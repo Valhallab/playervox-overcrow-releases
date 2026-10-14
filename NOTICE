@@ -8,5 +8,8 @@ separate proprietary works; see the notices shipped with those packages.
 
 Icon names come from Lucide (ISC License), as listed by the egui-lucide
 crate; no icon artwork is distributed here.
+The look-alike letters of crates/overcrow-widget-schema/src/confusable_letters.rs
+are derived from Unicode's confusables.txt (UTS #39), Copyright (c) 1991-2026
+Unicode, Inc., under the Unicode License v3 (https://www.unicode.org/license.txt).
 Dependencies retain their own licenses. PlayerVox branding is governed by
 TRADEMARKS.md and is not licensed by the MIT software license.

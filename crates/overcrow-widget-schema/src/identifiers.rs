@@ -18,6 +18,7 @@
 use std::ops::RangeInclusive;
 
 use crate::catalog_v2::display_text;
+pub use crate::confusable_letters::UNICODE_CONFUSABLE_LETTERS;
 use crate::limits::{
     MAX_DNS_LABEL_BYTES, MAX_DNS_NAME_BYTES, MAX_HANDLE_BYTES, MAX_PUBLISHER_NAME_CHARS,
     MAX_WIDGET_ID_BYTES, MIN_HANDLE_BYTES,
@@ -232,15 +233,23 @@ fn ascii_letter(character: char) -> Option<char> {
         _ => CONFUSABLE_LETTERS
             .iter()
             .find(|(letters, _)| letters.contains(character))
-            .map(|(_, ascii)| *ascii),
+            .map(|(_, ascii)| *ascii)
+            .or_else(|| {
+                UNICODE_CONFUSABLE_LETTERS
+                    .binary_search_by_key(&character, |(look_alike, _)| *look_alike)
+                    .ok()
+                    .map(|index| UNICODE_CONFUSABLE_LETTERS[index].1)
+            }),
     }
 }
 
 /// A displayed publisher name the creator portal accepts: display text on
 /// one line, and, for any publisher but `playervox`, no reserved word in the
 /// confusable skeleton of the letters and digits it reads as, once fullwidth
-/// forms and [`CONFUSABLE_LETTERS`] are folded to ASCII (`Player Vox`,
-/// `0verCrow`, `PlayerVох` in Cyrillic). Other characters are dropped.
+/// forms, [`CONFUSABLE_LETTERS`] and Unicode's look-alikes of the reserved
+/// words' letters ([`UNICODE_CONFUSABLE_LETTERS`]: Lisu, Armenian, Coptic…)
+/// are folded to ASCII (`Player Vox`, `0verCrow`, `PlayerVох` in Cyrillic,
+/// `ꓑlayerVox` in Lisu). Other characters are dropped.
 /// [`STYLIZED_LETTERS`] are refused first. Catalog readers check display text
 /// only; human review covers the look-alikes no table lists.
 pub fn validate_publisher_name(name: &str, handle: &str) -> Result<(), NameError> {
@@ -566,6 +575,33 @@ mod tests {
         assert_eq!(ascii_letter('\u{ff19}'), Some('9'));
         assert_eq!(ascii_letter('\u{6f22}'), None);
         assert_eq!(ascii_letter(' '), None);
+    }
+
+    /// The generated table is sorted (it is searched by halves), lists each
+    /// character once, never ASCII nor a stylized block, and folds to the
+    /// reserved words' letters only.
+    #[test]
+    fn unicode_confusables_are_sorted_and_fold_to_reserved_letters() {
+        for pair in UNICODE_CONFUSABLE_LETTERS.windows(2) {
+            assert!(pair[0].0 < pair[1].0, "{:?} before {:?}", pair[0], pair[1]);
+        }
+        for (look_alike, ascii) in UNICODE_CONFUSABLE_LETTERS {
+            assert!(!look_alike.is_ascii(), "{look_alike}");
+            assert!(
+                "abcehiloprvwxy01348".contains(*ascii),
+                "{look_alike} → {ascii}"
+            );
+            assert!(
+                !STYLIZED_LETTERS
+                    .iter()
+                    .any(|block| block.contains(look_alike)),
+                "{look_alike} is stylized"
+            );
+        }
+        // Lisu P, Armenian o, Coptic o.
+        assert_eq!(ascii_letter('\u{A4D1}'), Some('p'));
+        assert_eq!(ascii_letter('\u{0585}'), Some('o'));
+        assert_eq!(ascii_letter('\u{2C9F}'), Some('o'));
     }
 
     #[test]

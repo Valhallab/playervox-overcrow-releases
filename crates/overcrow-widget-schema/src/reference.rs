@@ -502,8 +502,10 @@ publisher may not register a domain extension ({}) or a handle whose skeleton eq
 a reserved handle ({}), of an example handle ({}), or contains {}. The skeleton removes hyphens, reads `vv` as `w`, then \
 `0` as `o`, `1` and `i` as `l`, `3` as `e`, `4` as `a`, `5` as `s`, `7` as `t` and `8` as \
 `b`. The same words may not appear in the skeleton of another publisher's displayed name, \
-read as ASCII letters and digits: fullwidth forms fold to ASCII, the look-alikes below to their \
-letter, other characters are dropped. Such a name may not use stylized letters either ({}), \
+read as ASCII letters and digits: fullwidth forms fold to ASCII, the look-alikes below and \
+Unicode's look-alikes of the reserved words' letters (`UNICODE_CONFUSABLE_LETTERS`, from \
+confusables.txt: Lisu, Armenian, Coptic and other scripts) to their letter, other characters \
+are dropped. Such a name may not use stylized letters either ({}), \
 except `™`. Human review covers the look-alikes no table lists.\n\n| Look-alikes | Letter |\n\
 | --- | --- |\n",
         code_list(DOMAIN_EXTENSIONS),

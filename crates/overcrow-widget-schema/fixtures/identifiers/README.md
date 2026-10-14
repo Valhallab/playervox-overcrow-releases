@@ -49,8 +49,11 @@ contains `playervox`, `overcrow` or `valhallab`). Each character folds to a
 lowercase ASCII letter or digit: ASCII as is, fullwidth forms
 (U+FF10–U+FF19, U+FF21–U+FF3A, U+FF41–U+FF5A) to their ASCII letter, and the
 Latin, Cyrillic and Greek look-alikes of `CONFUSABLE_LETTERS`
-(`src/identifiers.rs`, also in the schema reference) to theirs; any other
-character is dropped. The skeleton rule of handles then applies. Catalog
+(`src/identifiers.rs`, also in the schema reference) and Unicode's
+look-alikes of the reserved words' letters, `UNICODE_CONFUSABLE_LETTERS`
+(`src/confusable_letters.rs`, generated from confusables.txt by
+`scripts/generate-confusable-letters.mjs`: Lisu, Armenian, Coptic and other
+scripts), to theirs; any other character is dropped. The skeleton rule of handles then applies. Catalog
 readers check display text only.
 
 ## `widget-ids.json`
