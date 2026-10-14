@@ -20,6 +20,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 
+use overcrow_widget_schema::accounts::{RESERVED_ACCOUNT_IDS, valid_account_id};
 use overcrow_widget_schema::ipc::FAULT_CATEGORY_NAMES;
 use overcrow_widget_schema::limits::{
     MAX_CLIPBOARD_BYTES, MAX_CONTENT_SCALE, MAX_HTTP_DECLARED_RESPONSE_BYTES,
@@ -336,11 +337,12 @@ impl Default for Grants {
     }
 }
 
-/// One account of the host. Only `connected` passes the services' account
-/// check. The wrapper draws its account panel over the content of a widget
-/// whose grants need a `disconnected`, `pending` or `expired` account (no
-/// input reaches the widget then), and a compact notice for an `offline`
-/// one, whose widget keeps its input.
+/// One account: the host's PlayerVox and Twitch accounts, or a third-party
+/// account the manifest declares. Only `connected` passes the services'
+/// account check. The wrapper draws its account panel over the content of a
+/// widget whose grants need a `disconnected`, `pending`, `refused` or
+/// `expired` account (no input reaches the widget then), and a compact
+/// notice for an `offline` one, whose widget keeps its input.
 #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum AccountState {
@@ -352,8 +354,10 @@ pub enum AccountState {
     Pending,
     /// The session expired: the user must sign in again.
     Expired,
-    /// Signed in, but the service is unreachable.
+    /// Signed in, but the service is unreachable. The host's accounts only.
     Offline,
+    /// The service refused the key. Declared accounts only.
+    Refused,
 }
 
 impl AccountState {
@@ -364,13 +368,47 @@ impl AccountState {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-#[serde(deny_unknown_fields)]
-pub struct Accounts {
-    #[serde(default)]
-    pub playervox: AccountState,
-    #[serde(default)]
-    pub twitch: AccountState,
+/// The state of each account by ID: `playervox`, `twitch`, or the `id` of
+/// an account the manifest declares. An account left out is `connected`.
+/// A `host` step replaces the whole set.
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(transparent)]
+pub struct Accounts(pub BTreeMap<String, AccountState>);
+
+impl Accounts {
+    /// The state of the account `id`; `connected` when the scenario does
+    /// not name it.
+    pub fn state(&self, id: &str) -> AccountState {
+        self.0.get(id).copied().unwrap_or_default()
+    }
+}
+
+/// The grammar of `host.accounts`: an account ID, `offline` only for the
+/// host's accounts and `refused` only for a declared one.
+fn check_accounts(path: &str, accounts: &Accounts) -> Checked {
+    for (id, state) in &accounts.0 {
+        let host = RESERVED_ACCOUNT_IDS.contains(&id.as_str());
+        let valid = if host {
+            *state != AccountState::Refused
+        } else {
+            valid_account_id(id) && *state != AccountState::Offline
+        };
+        if !valid {
+            return Err(ScenarioError::new(
+                format!("{path}.{}", report::neutral(id)),
+                "`playervox` or `twitch` (connected, disconnected, pending, expired or offline), or a declared account (connected, disconnected, pending, refused or expired)",
+            ));
+        }
+    }
+    Ok(())
+}
+
+/// The accounts of `accounts` that are neither the host's nor declared.
+fn undeclared_account<'a>(accounts: &'a Accounts, manifest: &Manifest) -> Option<&'a str> {
+    accounts.0.keys().map(String::as_str).find(|id| {
+        !RESERVED_ACCOUNT_IDS.contains(id)
+            && !manifest.accounts.iter().any(|account| account.id == *id)
+    })
 }
 
 /// The host at the start of the scenario.
@@ -519,7 +557,40 @@ pub struct HttpFixture {
 #[serde(deny_unknown_fields)]
 pub struct HttpRequest {
     pub method: String,
+    /// The widget's URL, without the secret the host adds.
     pub url: String,
+    /// The declared account the request is sent with; absent for a request
+    /// sent without one. The fixture answers only a request sent so.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub account: Option<String>,
+}
+
+/// How a fixture relates to a request the widget sent.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum FixtureMatch {
+    /// Same method and URL, sent with the account the fixture names (or
+    /// none): the fixture answers.
+    Answers,
+    /// Same method and URL, but sent with another account, or with one
+    /// where the fixture says none, or without where it names one: an error
+    /// of the scenario, the assertion "sent with the account".
+    AccountMismatch,
+    /// Another request.
+    Other,
+}
+
+impl HttpFixture {
+    /// Whether this fixture answers `method url`, sent with `account` (the
+    /// account of the network rule that allowed it).
+    pub fn answer(&self, method: &str, url: &str, account: Option<&str>) -> FixtureMatch {
+        if self.request.method != method || self.request.url != url {
+            FixtureMatch::Other
+        } else if self.request.account.as_deref() == account {
+            FixtureMatch::Answers
+        } else {
+            FixtureMatch::AccountMismatch
+        }
+    }
 }
 
 /// What the broker returns: a status, the one content type and the body,
@@ -965,6 +1036,7 @@ fn is_item(name: &str) -> bool {
         name,
         "network" | "storage" | "clipboardWrite" | "gameEvents"
     ) || capability_named(name).is_some()
+        || name.strip_prefix("account:").is_some_and(valid_account_id)
 }
 
 fn check_error_code(path: &str, code: &str) -> Checked {
@@ -1145,6 +1217,7 @@ impl Scenario {
             check_background("host.background", background)?;
         }
         check_zone("host.zone", &host.zone)?;
+        check_accounts("host.accounts", &host.accounts)?;
         if host.start_at > MAX_UNIX_MS - MAX_ADVANCE_MS {
             return Err(ScenarioError::new(
                 "host.startAt",
@@ -1412,6 +1485,38 @@ impl Scenario {
                 ),
             ));
         }
+        if let Some(id) = undeclared_account(&self.host.accounts, manifest) {
+            return Err(ScenarioError::new(
+                format!("host.accounts.{}", report::neutral(id)),
+                "neither `playervox`, `twitch` nor an account the manifest declares",
+            ));
+        }
+        for (index, step) in self.steps.iter().enumerate() {
+            if let Step::Host(HostChange {
+                accounts: Some(accounts),
+                ..
+            }) = step
+                && let Some(id) = undeclared_account(accounts, manifest)
+            {
+                return Err(ScenarioError::new(
+                    format!("steps[{index}].host.accounts.{}", report::neutral(id)),
+                    "neither `playervox`, `twitch` nor an account the manifest declares",
+                ));
+            }
+        }
+        for (index, fixture) in self.fixtures.http.iter().enumerate() {
+            if let Some(account) = &fixture.request.account
+                && !manifest
+                    .accounts
+                    .iter()
+                    .any(|declared| declared.id == *account)
+            {
+                return Err(ScenarioError::new(
+                    format!("fixtures.http[{index}].request.account"),
+                    "the manifest declares no such account",
+                ));
+            }
+        }
         let rows = menu_rows(manifest);
         for (id, value) in &self.host.options {
             let path = format!("host.options.{}", report::neutral(id));
@@ -1534,6 +1639,9 @@ fn check_change(path: &str, change: &HostChange) -> Checked {
     if let Some(zone) = &change.zone {
         check_zone(&format!("{path}.zone"), zone)?;
     }
+    if let Some(accounts) = &change.accounts {
+        check_accounts(&format!("{path}.accounts"), accounts)?;
+    }
     Ok(())
 }
 
@@ -1555,6 +1663,14 @@ fn check_http(path: &str, fixture: &HttpFixture) -> Checked {
         return Err(ScenarioError::new(
             format!("{path}.request.url"),
             "an HTTPS URL within the request bounds",
+        ));
+    }
+    if let Some(account) = &request.account
+        && !valid_account_id(account)
+    {
+        return Err(ScenarioError::new(
+            format!("{path}.request.account"),
+            "the `id` of an account the manifest declares",
         ));
     }
     match (&fixture.response, &fixture.error) {
@@ -1751,6 +1867,12 @@ pub fn declared_items(manifest: &Manifest) -> BTreeSet<String> {
             .capabilities
             .iter()
             .map(|name| (*name).to_owned()),
+    );
+    items.extend(
+        manifest
+            .accounts
+            .iter()
+            .map(|account| format!("account:{}", account.id)),
     );
     items
 }
