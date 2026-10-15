@@ -11,8 +11,9 @@ Elle ne permet rien d’autre.
   Chaque version passe toujours par la revue avant d’arriver aux joueurs.
 - Elle ne permet ni de publier, ni de modifier la fiche, ni d’accéder à
   votre compte ou à vos autres widgets.
-- Elle dure de 1 à 365 jours (90 par défaut). Nous vous prévenons par e-mail
-  et dans l’espace créateurs 14 jours avant son expiration.
+- Elle dure 30, 90 ou 180 jours, ou un an (90 jours par défaut). Nous
+  vous prévenons par e-mail et dans l’espace créateurs 14 jours avant son
+  expiration.
 - PlayerVox n’en garde qu’une empreinte : la clé est affichée **une seule
   fois**, à sa création.
 
@@ -88,7 +89,8 @@ jobs:
 La tâche échoue quand les contrôles échouent, avec chaque problème sur la
 ligne de votre fichier. Une version que l’espace créateurs a déjà n’est pas
 renvoyée : `submit` donne son état, et la même tâche peut aussi tourner à
-chaque push sur votre branche principale.
+chaque push sur votre branche principale. Augmentez la version dès que les
+sources changent : la même version avec d’autres sources est refusée.
 
 ## Révoquer une clé
 

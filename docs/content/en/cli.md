@@ -337,7 +337,7 @@ refuses sources without a valid `listing.json`. `optional` is the creator
 space's way: the listing is edited there, so `listing.json` may be absent,
 and one with a problem is left out (no listing in the report or in
 `--out`) with warnings instead of refusing the sources. Exit status: 0 admitted, 1 refused, 2 on a
-usage or file error. See [publishing and review](publishing.md).
+usage or file error. See [checks and the catalog](publishing.md).
 
 ### Permission keys
 
@@ -385,16 +385,15 @@ overcrow-widget submit --submission submission.json
 ```
 
 Sends a version of your widget to the PlayerVox OverCrow creator space, from
-a terminal, a CI job or the OverCrow MCP server, then follows its checks. It
-never asks a question: what is missing is said, with a stable
-[exit status](#exit-status). It takes the widget folder (the current one
-without argument) or a ZIP of it.
+a terminal or a CI job, then follows its checks. It never asks a question:
+what is missing is said, with a stable [exit status](#exit-status). It takes
+the widget folder (the current one without argument) or a ZIP of it.
 
 ### The publish key
 
 - Create it in the creator space (Publisher, Publish keys). A key can only
-  submit versions of one widget, for 1 to 365 days (90 by default), and is
-  shown once.
+  submit versions of one widget, for up to a year (90 days by default),
+  and is shown once.
 - `submit` and `status` read it from the environment variable
   `OVERCROW_PUBLISH_KEY`, and only there: never from an argument or a file
   of the project. In a CI, keep it as a secret.

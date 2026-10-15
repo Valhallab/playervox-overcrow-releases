@@ -40,8 +40,9 @@ most, no two names that differ only by case.
   is sent: Windows cannot use it. Rename it.
 - A browser reads the file a link points to, where the command-line tool
   leaves the link out. Keep links out of the widget's folder.
-- Your sources stay private: only PlayerVox reviewers read them, and every
-  access shows in the creator space.
+- Your sources stay private: only PlayerVox reviewers read them, sometimes
+  with an AI's help unless you refuse, and every access shows in the
+  creator space.
 
 A publisher sends at most 20 submissions in 24 hours; the page says when
 the next one is possible. If the page is closed or the connection drops
@@ -80,6 +81,11 @@ When the checks pass, the version page says what changes for players:
 The page also says which review the version gets (quick or full) and what
 changed since the last approved version. **Submit for review** sends it.
 
+Until one of your widgets is approved, you have one widget in review at a
+time: another widget waits until the first is approved, refused or
+withdrawn. Sending and checking it are not blocked, and a new version of
+the widget in review takes its place.
+
 ## From a terminal or a CI job
 
 `overcrow-widget submit` sends a version with a publish key, and stops at
@@ -88,7 +94,8 @@ the same screen when something is missing: see [`submit`](cli.md#submit) and
 
 ## After the review
 
-An approved version is published within 24 business hours. In the creator
-space you can then withdraw it, or the whole widget (**Settings**): it
-leaves the catalog at the next publication, and installed copies keep
-working.
+PlayerVox aims to publish an approved version within 24 business hours.
+You can withdraw it with **Withdraw this version**, or the whole widget with
+**Remove from the catalog**, in **Settings**: it leaves the catalog at the
+next publication, and installed copies keep working. Until then you can
+cancel the withdrawal. See [withdrawal](widget-review.md#withdrawal).

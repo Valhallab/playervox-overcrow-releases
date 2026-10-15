@@ -1,17 +1,17 @@
 # Getting started in the creator space
 
-The creator space of PlayerVox OverCrow, at `creators.playervox.com`,
-is where you publish widgets: you create your publisher once, reserve your widgets' IDs,
-send their versions and follow their review. It is open by invitation for
-now.
+The creator space of PlayerVox OverCrow, at `creators.playervox.com`, is
+where you publish widgets: you create your publisher once, reserve your
+widgets' IDs, send their versions and follow their review. Any PlayerVox
+account can join, with two-factor authentication.
 
 ## Sign in
 
 Sign in with your PlayerVox account: the creator space sends you to
 playervox.com, which asks you to confirm, then brings you back. You never
-type your password in the creator space. The session lasts while you use
-it, up to 14 days; you can close it on playervox.com, in
-**Connected devices**.
+type your password in the creator space. The session ends after 3 days
+without use, and after 14 days at most; you can close it on playervox.com,
+in **Connected devices**.
 
 The interface is in English or French: choose in the account menu. The
 addresses stay the same in both languages.
@@ -28,8 +28,8 @@ visit turns it on:
 3. Enter the 6-digit code the app shows.
 
 You then get ten recovery codes, shown once: each signs you in once if you
-lose your phone. Keep them somewhere safe. Creating a publish key or
-deleting your publisher asks for a fresh code again.
+lose your phone. Keep them somewhere safe. Creating a publish key,
+deleting a widget or deleting your publisher asks for a fresh code again.
 
 ## Create your publisher
 
@@ -38,8 +38,9 @@ The publisher is the name your widgets appear under.
 - **Display name**: shown to players. A name that reads as PlayerVox,
   OverCrow or Valhallab is refused.
 - **Handle**: 3 to 32 lowercase letters, digits and hyphens, without a
-  hyphen at either end. It is **permanent**: it can never be changed, and a
-  handle is never given to anyone else, even after a deletion. Your
+  hyphen at either end or two in a row; reserved words and domain endings
+  (`com`, `net`…) are refused. It is **permanent**: it can never be changed,
+  and a handle is never given to anyone else, even after a deletion. Your
   widgets' IDs start with it.
 - **Contact e-mail**: for PlayerVox to reach you. It is never shown.
 - **Website** and **logo** (square, PNG or WebP): optional, shown on your
@@ -72,7 +73,7 @@ is published.
 
 ## Next
 
-- Send a version: [publishing and review](publishing.md).
+- Send a version: [publish a widget](publish-a-widget.md).
 - Send from a terminal or a CI job: [publish keys and CI](publish-keys.md).
 - Get the verified badge and IDs under your domain:
   [verified domain](verified-domain.md).

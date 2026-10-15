@@ -31,11 +31,11 @@ npm install
 project's `package.json`.
 
 The templates are `blank`, `counter`, `list` and `chart`. The ID defaults to
-`com.example.<dir>`: pass `--id` with a reverse-DNS name you control
-(`com.playervox.*` is reserved). [Files of a project](cli.md#files-of-a-project)
-lists every file and says which ones are packaged;
-[the SDK types](cli.md#the-sdk-types) says how to add the SDK to another
-project.
+`yourhandle.<dir>`: pass `--id` with your widget's ID, your publisher handle
+and a name (`nova.my-counter`), reserved in the [creator
+space](creator-space.md). [Files of a project](cli.md#files-of-a-project)
+lists every file and says which ones are packaged; [the SDK
+types](cli.md#the-sdk-types) says how to add the SDK to another project.
 
 ## 3. The view
 
@@ -228,7 +228,7 @@ example is in
 
 ```sh
 overcrow-widget package
-overcrow-widget inspect dist/com.example.my-counter-0.1.0.ocpkg
+overcrow-widget inspect dist/yourhandle.my-counter-0.1.0.ocpkg
 ```
 
 `package` writes a deterministic `.ocpkg` to `dist/`: the same sources and
@@ -239,14 +239,14 @@ locally stays unverified; users get widgets from the signed catalog. See
 
 ## 12. Submit
 
-Add a `listing.json` with the marketplace text and run the admission
-yourself. Widgets are no longer proposed by pull request: you will send
-yours from the PlayerVox OverCrow creator space when it opens.
+Run the checks of the creator space on your computer:
 
 ```sh
-overcrow-widget admit
+overcrow-widget admit --listing optional
 ```
 
-`admit` runs exactly the checks of the marketplace CI. What happens next,
-from review to the signed catalog, is in
-[publishing and review](publishing.md).
+Then create your publisher and reserve the widget's ID
+([getting started](creator-space.md)), and send the version from the
+creator space ([publish a widget](publish-a-widget.md)), or from a terminal
+or a CI job with [`submit`](cli.md#submit). A person at PlayerVox reviews
+every version before players get it: see [review](widget-review.md).

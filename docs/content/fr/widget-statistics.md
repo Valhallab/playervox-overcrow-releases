@@ -19,8 +19,8 @@ et ses erreurs (type, endroit du code, nombre arrondi).
 - **Aucun message d’erreur** : seulement le type d’une erreur et son endroit
   dans votre code. Un message peut contenir des données personnelles.
 - **Activé par défaut** : les joueurs peuvent couper **Partager des
-  statistiques anonymes** dans PlayerVox OverCrow ; plus rien n’est envoyé
-  ensuite, et ils ne sont plus comptés.
+  statistiques anonymes** dans PlayerVox OverCrow ; aucun signal de widget
+  n’est plus envoyé ensuite, et ils ne sont plus comptés.
 
 Les chiffres s’additionnent à l’arrivée des signaux. **Mis à jour** donne
 l’heure du dernier signal compté.
@@ -30,14 +30,14 @@ l’heure du dernier signal compté.
 | Chiffre | Ce qu’il compte |
 | --- | --- |
 | Joueurs actifs par jour | Les joueurs qui ont affiché le widget au moins une fois dans la journée. La tuile donne la moyenne par jour sur la période. |
-| Installations actives | Les installations moins les désinstallations, additionnées depuis le premier signal, jamais sous zéro. |
+| Installations actives | Les installations moins les désinstallations, additionnées depuis le premier signal, jamais sous zéro. Dès que PlayerVox OverCrow compte assez d’installations au total, corrigées pour inclure les joueurs qui ne partagent pas leurs statistiques. |
 | Installations · désinstallations | Les installations et les désinstallations de la période, et leur solde. Une mise à jour n’est ni l’une ni l’autre. |
 | Erreurs | La somme des erreurs signalées sur la période. |
 
 Chaque tuile compare son chiffre à la période juste avant, de même durée :
 vert quand il évolue dans le bon sens (moins d’erreurs, plus de joueurs),
 ambre dans l’autre sens, gris quand il bouge de moins de 1 %. **Première
-période** signifie qu’il n’y a rien avant pour comparer.
+période** signifie que la période d’avant ne compte rien à comparer.
 
 ## Périodes et filtres
 
@@ -52,8 +52,8 @@ période** signifie qu’il n’y a rien avant pour comparer.
   systèmes et ne suit pas ce filtre.
 - La note ne suit aucun filtre.
 
-Chaque graphique a **Voir en tableau**, avec les mêmes chiffres jour par
-jour.
+Les graphiques des joueurs par jour, des installations et de l’adoption ont
+**Voir en tableau**, avec les chiffres du graphique.
 
 ## Adoption des versions et où tourne votre widget
 
@@ -66,11 +66,12 @@ jour.
 
 ## Erreurs
 
-Les erreurs sont regroupées par type et par endroit du code : le même type à
-la même ligne de la même fonction forme un groupe, quelle que soit la
-version. Le tableau montre les 50 groupes les plus fréquents de la période,
-avec leurs versions, leur nombre et leur tendance ; **Exporter CSV** les
-enregistre.
+Les erreurs sont regroupées par type et par endroit du code : une fois
+retrouvé, le même type à la même ligne de la même fonction forme un groupe,
+quelle que soit la version ; une erreur pas encore retrouvée est regroupée
+par version et par position. Le tableau montre les 50 groupes les plus
+fréquents de la période, avec leurs versions, leur nombre et leur tendance ;
+**Exporter CSV** les enregistre.
 
 PlayerVox OverCrow signale où une erreur s’est produite dans le `logic.js`
 du paquet. L’espace créateurs retrouve cette position dans vos sources
@@ -79,8 +80,9 @@ le paquet et jamais publiée.
 
 - **Retraduction en cours** : la position s’affiche en
   `logic.js:ligne:colonne` jusqu’à ce qu’elle soit retrouvée.
-- **Non retrouvée** : la version n’a pas de carte, ou la position n’y figure
-  pas ; la position brute reste.
+- Quand la position ne peut pas être retrouvée, elle reste brute, avec la
+  raison : pas de carte pour cette version, carte indisponible pour le
+  moment, carte illisible, ou position absente de la carte.
 - **Sans position dans le code** : le widget s’est arrêté tout entier
   (budget dépassé, plus de réponse) ; voyez son type.
 - **SDK** : l’erreur s’est produite dans `@overcrow/sdk`, appelé depuis votre
@@ -130,10 +132,12 @@ et sur le site.
 
 ## Des tendances, pas des comptes exacts
 
-- Seuls les joueurs qui partagent leurs statistiques anonymes sont comptés.
+- Seuls les joueurs qui partagent leurs statistiques anonymes sont comptés,
+  sauf dans les installations actives une fois corrigées.
 - PlayerVox OverCrow arrondit chaque nombre d’erreurs à un palier avant de
-  l’envoyer, et envoie au plus 10 endroits du code par widget et par jour :
-  les chiffres des erreurs donnent des ordres de grandeur.
+  l’envoyer, et envoie l’endroit du code des 10 erreurs les plus fréquentes
+  par widget et par jour ; les autres comptent sous leur type, sans
+  endroit. Les chiffres des erreurs donnent des ordres de grandeur.
 - Un jour est la date du joueur lui-même.
 - Un joueur qui efface les données de PlayerVox OverCrow, puis réinstalle le
   widget, compte pour deux installations.

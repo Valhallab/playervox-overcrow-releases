@@ -45,7 +45,8 @@ la casse.
   ligne de commande laisse le lien de côté. Gardez les liens hors du dossier
   du widget.
 - Vos sources restent privées : seuls les relecteurs PlayerVox les lisent,
-  et chaque consultation apparaît dans l’espace créateurs.
+  parfois avec l’aide d’une IA sauf refus, et chaque consultation apparaît
+  dans l’espace créateurs.
 
 Un éditeur fait au plus 20 envois en 24 heures ; la page dit quand le
 suivant est possible. Si la page se ferme ou si la connexion se coupe
@@ -87,6 +88,11 @@ La page dit aussi quelle revue la version reçoit (rapide ou complète) et ce
 qui a changé depuis la dernière version approuvée. **Soumettre pour revue**
 l’envoie.
 
+Tant qu’aucun de vos widgets n’est approuvé, vous avez un seul widget en
+revue à la fois : un autre widget attend que le premier soit approuvé,
+refusé ou retiré. Son envoi et ses contrôles ne sont pas bloqués, et une
+nouvelle version du widget en revue prend sa place.
+
 ## Depuis un terminal ou une CI
 
 `overcrow-widget submit` envoie une version avec une clé de publication, et
@@ -95,7 +101,9 @@ s’arrête au même écran quand il manque quelque chose : voir
 
 ## Après la revue
 
-Une version approuvée est publiée sous 24 heures ouvrées. Dans l’espace
-créateurs, vous pouvez ensuite la retirer, ou retirer le widget entier
-(**Réglages**) : il sort du catalogue à la prochaine publication, et les
-copies installées continuent de fonctionner.
+PlayerVox vise à publier une version approuvée sous 24 heures ouvrées. Vous
+pouvez la retirer avec **Retirer cette version**, ou retirer le widget
+entier avec **Retirer du catalogue**, dans **Réglages** : il sort du
+catalogue à la prochaine publication, et les copies installées continuent
+de fonctionner. D’ici là, vous pouvez annuler le retrait. Voir
+[le retrait](widget-review.md#retrait).

@@ -18,8 +18,8 @@ place in the code, a rounded count).
 - **No error message**: only the kind of an error and its place in your
   code. A message may hold personal data.
 - **On by default**: players can turn **Share anonymous statistics** off in
-  PlayerVox OverCrow; nothing is sent after that, and they are no longer
-  counted.
+  PlayerVox OverCrow; no widget signal is sent after that, and they are
+  no longer counted.
 
 The figures are added up as the signals arrive. **Updated** gives the time
 of the last one counted.
@@ -29,14 +29,14 @@ of the last one counted.
 | Figure | What it counts |
 | --- | --- |
 | Daily active players | The players who showed the widget at least once that day. The tile gives the mean per day over the period. |
-| Active installs | Installs minus uninstalls, added up since the first signal, never below zero. |
+| Active installs | Installs minus uninstalls, added up since the first signal, never below zero. Once PlayerVox OverCrow counts enough installs overall, adjusted to include the players who do not share their statistics. |
 | Installs · uninstalls | The installs and the uninstalls of the period, and their balance. An update is neither. |
 | Errors | The sum of the errors reported over the period. |
 
 Each tile compares its figure with the period just before, of the same
 length: green when it moves the good way (fewer errors, more players), amber
 the other way, grey when it moves by less than 1 %. **First period** means
-there is nothing before to compare with.
+the period before counts nothing to compare with.
 
 ## Periods and filters
 
@@ -50,7 +50,8 @@ there is nothing before to compare with.
   systems and does not follow this filter.
 - The rating follows no filter.
 
-Every chart has **View as table**, with the same figures day by day.
+The daily players, installs and adoption charts have **View as table**,
+with the figures of the chart.
 
 ## Version adoption and where your widget runs
 
@@ -63,8 +64,9 @@ Every chart has **View as table**, with the same figures day by day.
 
 ## Errors
 
-The errors are grouped by kind and by place in your code: the same kind at
-the same line of the same function is one group, whatever the version. The
+The errors are grouped by kind and by place in your code: once traced, the
+same kind at the same line of the same function is one group, whatever the
+version; an error not traced yet is grouped by version and position. The
 table shows the 50 most frequent groups of the period, with their versions,
 their count and their trend; **Export CSV** saves them.
 
@@ -75,8 +77,9 @@ never published.
 
 - **Being traced**: the position is shown as `logic.js:line:column` until it
   is traced.
-- **Not traced**: the version has no map, or the position is not in it; the
-  raw position stays.
+- When the position cannot be traced, it stays raw, with the reason: no
+  map for that version, map unavailable for now, unreadable map, or
+  position missing from the map.
 - **No position in the code**: the widget stopped as a whole (budget
   exceeded, no answer); see its kind.
 - **SDK**: the error happened inside `@overcrow/sdk`, called from your code.
@@ -124,9 +127,11 @@ and on the website.
 
 ## Trends, not exact counts
 
-- Only the players who share their anonymous statistics are counted.
+- Only the players who share their anonymous statistics are counted, except
+  in active installs once they are adjusted.
 - PlayerVox OverCrow rounds each error count to a step before sending it,
-  and sends at most 10 places in the code per widget and day: the error
+  and sends the place in the code of the 10 most frequent errors per widget
+  and day; the others count under their kind, without a place. The error
   figures give orders of magnitude.
 - A day is the player's own date.
 - A player who clears PlayerVox OverCrow's data, then installs the widget

@@ -117,7 +117,7 @@ avant qu’un utilisateur ne le rencontre.
 
 - Un paquet **issu du catalogue signé** est vérifié : c’est ainsi que les
   utilisateurs obtiennent les widgets. Voir
-  [publication et revue](publishing.md).
+  [vérifications et catalogue](publishing.md).
 - Un paquet envoyé par `overcrow-widget dev` est un **paquet de
   développement** : marqué « Unverified », pour la durée de la session
   seulement. Voir [le canal de développement](dev-channel.md).

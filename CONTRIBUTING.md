@@ -5,9 +5,9 @@ are MIT-licensed, except `@overcrow/sdk`, which is MIT-0. Submit only material
 you have authority to license and preserve third-party notices. Third-party
 widgets keep their declared licenses; see [licensing scope](LICENSING.md).
 
-Tooling and documentation pull requests target `main`. Widgets are no
-longer proposed by pull request: creators will submit theirs in the
-PlayerVox OverCrow creator space when it opens, and a pull request that adds a
+Tooling and documentation pull requests target `main`. Widgets are not
+proposed by pull request: creators submit theirs in the PlayerVox OverCrow
+creator space, at creators.playervox.com, and a pull request that adds a
 widget is closed. PlayerVox's own widgets live in `widgets/<dir>/`; after each
 merge on `main`, the `overcrow-submit` workflow sends their new versions to the
 creator space, where a person reviews them like any widget (a permission

@@ -74,7 +74,7 @@ MCP server `@overcrow/mcp`
 | `cli/` | `overcrow-widget`: `init`, `check`, `package`, `inspect`, `dev`, `doctor`, `test`, `admit` ([guide](https://overcrow.playervox.com/docs/en/cli/), [internals](docs/cli.md)) |
 | `mcp/` | `@overcrow/mcp`, the MCP server that lets an AI assistant create, check, test, audit and package widgets ([guide](https://overcrow.playervox.com/docs/en/mcp/), [README](mcp/README.md)) |
 | `templates/` | The templates of `overcrow-widget init`: blank, counter, list, chart |
-| `docs/content/` | The creator documentation that the website renders, in English and French: guide, manifest, view, style, logic, services, forms, CLI, tests, reference, package, security, publishing |
+| `docs/content/` | The creator documentation that the website renders, in English and French: guide, manifest, view, style, logic, services, forms, CLI, tests, reference, package, security, the creator space, checks and the catalog |
 | `docs/` | Specifications and notes for implementers and maintainers, in English: [schema reference](docs/widget-schema-v1.md) (generated), [package and catalog format](docs/widget-package-v1.md), [catalog v2 format](docs/widget-catalog-v2.md), [development channel protocol](docs/dev-channel.md), [compiled output of the source formats](docs/widget-source-formats.md), [CLI internals](docs/cli.md), [headless runtime interface](docs/widget-testing.md), [review policy](docs/review-policy.md), [testing](docs/testing.md) |
 | `widgets/` | The built-in widgets on the public SDK, each with its tests and reference page ([list](https://overcrow.playervox.com/docs/en/widgets/)), and Warframe Market, a PlayerVox catalog widget |
 | `widgets-shared/` | Sources several built-ins share, copied into each of them by `scripts/sync-shared-widgets.mjs` ([how](widgets-shared/README.md)) |
@@ -138,7 +138,7 @@ space). After each merge, the `overcrow-submit` workflow sends new versions
 of PlayerVox's own widgets to the creator space for review. Neither a pull
 request nor a merge signs or publishes a widget. See
 [contributing](CONTRIBUTING.md), [security](SECURITY.md) and
-[publishing and review](docs/content/en/publishing.md).
+[publish a widget](docs/content/en/publish-a-widget.md).
 
 The public sources are MIT-licensed, except `@overcrow/sdk` (MIT-0, no
 attribution required), with the scopes in [LICENSING.md](LICENSING.md).

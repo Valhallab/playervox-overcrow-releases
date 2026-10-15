@@ -78,8 +78,10 @@ the user's data.
    PlayerVox OverCrow while you write it.
 5. Look up an element, a style property, a service or an SDK function in the
    [reference](reference.md).
-6. Before you publish, read [the package](package.md),
-   [security](security.md) and [publishing and review](publishing.md).
+6. Before you publish, read [the package](package.md) and
+   [security](security.md).
+7. Publish in the creator space: [getting started](creator-space.md), then
+   [publish a widget](publish-a-widget.md).
 
 Widgets run on Windows and Linux alike: the same package, the same SDK and
 the same rendering.

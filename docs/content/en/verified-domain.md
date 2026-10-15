@@ -17,7 +17,7 @@ TXT record named `_overcrow.` followed by your domain, whose value is
 `overcrow-verify=` followed by a token.
 
 ```text
-_overcrow.nova.gg.  TXT  "overcrow-verify=3f9c1e7a52d04b8e"
+_overcrow.nova.gg.  TXT  "overcrow-verify=3f9c1e7a52d04b8e90a6c2d17f3b5e84"
 ```
 
 ## Verification
@@ -26,12 +26,12 @@ _overcrow.nova.gg.  TXT  "overcrow-verify=3f9c1e7a52d04b8e"
 also check on our own every hour for seven days. DNS can take a few minutes
 to spread.
 
-| State | Meaning |
+| The creator space says | Meaning |
 | --- | --- |
 | Pending | The record is not found yet; checked every hour for seven days. |
-| Verified | The record is found. It is checked again every 30 days. |
-| Lost | The record disappeared. Put it back, then check now. |
-| Expired | Not verified within seven days. Check now to start again. |
+| Verified on a date | The record is found. It is checked again every 30 days. |
+| No longer verified | The record disappeared. Put it back, then check now: we also check every hour for seven days. |
+| Not verified within 7 days | Add the record, then check now to start again. |
 
 Keep the record in place: if it disappears, the badge goes away. The IDs
 of widgets you already created under the domain stay yours.
@@ -42,5 +42,5 @@ of widgets you already created under the domain stay yours.
   domains under and above it: nobody else can claim them.
 - A domain reading as PlayerVox, OverCrow or Valhallab is refused; write to
   support if it is yours. IDs under `com.playervox` belong to PlayerVox.
-- Removing a domain never verified forgets it. A domain verified once stays
-  reserved to you, and cannot be removed while widget IDs use it.
+- **Remove** takes a verified domain off your profile, except while widget
+  IDs use it. It stays reserved to you.

@@ -83,8 +83,10 @@ conserve les données de l’utilisateur.
    PlayerVox OverCrow pendant que vous l’écrivez.
 5. Cherchez un élément, une propriété de style, un service ou une fonction
    du SDK dans la [référence](reference.md).
-6. Avant de publier, lisez [le paquet](package.md),
-   [sécurité](security.md) et [publication et revue](publishing.md).
+6. Avant de publier, lisez [le paquet](package.md) et
+   [sécurité](security.md).
+7. Publiez dans l’espace créateurs : [démarrer](creator-space.md), puis
+   [publier un widget](publish-a-widget.md).
 
 Les widgets fonctionnent de la même façon sous Windows et sous Linux : le
 même paquet, le même SDK et le même rendu.

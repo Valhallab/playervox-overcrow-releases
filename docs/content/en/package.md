@@ -108,7 +108,7 @@ see a problem before a user does.
 ## Installed from the catalog, or locally
 
 - A package **from the signed catalog** is verified: this is how users get
-  widgets. See [publishing and review](publishing.md).
+  widgets. See [checks and the catalog](publishing.md).
 - A package sent by `overcrow-widget dev` is a **development package**:
   marked "Unverified", for the session only. See
   [the development channel](dev-channel.md).

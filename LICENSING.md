@@ -26,12 +26,11 @@ widget's `LICENSE` in its package so the widget's own notice travels with
 it. The templates of `overcrow-widget init` start a new project with an MIT
 `LICENSE` naming its authors; replace it with the license you choose.
 
-Third-party creators' widgets are separate works. Their licensing policy
-remains undecided. The marketplace's MIT license does not automatically apply
-to them, and this project does not currently establish a requirement to use
-MIT or any other specific license. Listing metadata records the declared
-license. Existing validation of that metadata is a technical format check,
-not legal approval or a promise of publication under any particular license.
+Third-party creators' widgets are separate works under the license their
+creators choose: any license is accepted, closed source included. This
+repository's MIT license does not apply to them. Their listing records the
+declared license; checking its format is not legal approval. Their sources
+are sent privately to the creator space, never to this repository.
 
 ## Third-party material and publication
 
@@ -43,7 +42,7 @@ Signed catalogs and previously admitted artifacts are immutable release inputs.
 Changing a source license or listing does not rewrite an existing signature or
 artifact. Updated packages must go through the normal admission and authorized
 publication process with a new version when replacing a released package; see
-[publishing and review](docs/content/en/publishing.md).
+[checks and the catalog](docs/content/en/publishing.md).
 
 Desktop application binaries attached to GitHub Releases are separate proprietary
 works governed by their included license, not this repository's MIT license.
