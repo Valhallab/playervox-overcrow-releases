@@ -185,7 +185,7 @@ pub const STEAM: IntegratedService = IntegratedService {
     feature: FEATURE_SERVICE_STEAM,
     mode: AccountMode::Key,
     secret_origins: &["https://api.steampowered.com"],
-    // Not documented by Valve: measured during the real test of ACC.6
+    // Not documented by Valve: to be measured in a real test before release
     // before the release that announces `service-steam`.
     origins: &[
         "https://avatars.steamstatic.com",
@@ -237,7 +237,7 @@ pub const STEAM: IntegratedService = IntegratedService {
             max_length: 32,
         },
         page: "https://steamcommunity.com/dev/apikey",
-        // The "domain" field is undocumented for a person: ACC.6 confirms
+        // The "domain" field is undocumented for a person: a real test confirms
         // `localhost` during the owner's real test.
         guide: &[
             Text {
@@ -258,7 +258,7 @@ pub const STEAM: IntegratedService = IntegratedService {
             fr: "Steam ne donne pas de clé aux comptes limités (moins de 5 $ d’achats).",
         }),
         // The interfaces this key reaches; a refused key gets 403. To
-        // confirm in ACC.6's real test.
+        // confirm in a real test before release.
         probe: Some("https://api.steampowered.com/ISteamWebAPIUtil/GetSupportedAPIList/v1/"),
     }),
     oauth: None,
