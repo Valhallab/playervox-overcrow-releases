@@ -100,10 +100,12 @@ function assetNames(directory) {
   return out;
 }
 
-// The documentation, as the website renders it.
+// The documentation, as the website renders it: a hidden page describes
+// what is not released yet, so it is never shipped.
 const pages = JSON.parse(readText(join(repository, "docs", "content", "pages.json")));
+const visiblePages = pages.pages.filter((page) => page.hidden !== true);
 const docs = [];
-for (const page of pages.pages) {
+for (const page of visiblePages) {
   const entry = {
     slug: page.slug,
     file: page.file,
@@ -212,7 +214,7 @@ for (const [name, service, when] of tableRows(region("en", "services.md", "permi
 // values, plus the service error codes and the CLI's domains.
 const errors = { diagnostics: {}, services: {}, domains: {} };
 for (const locale of pages.locales) {
-  for (const page of pages.pages) {
+  for (const page of visiblePages) {
     const markdown = readText(join(repository, "docs", "content", locale, page.file));
     let heading = "";
     for (const line of markdown.split("\n")) {
