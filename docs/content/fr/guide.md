@@ -32,8 +32,9 @@ npm install
 `package.json` du projet.
 
 Les templates sont `blank`, `counter`, `list` et `chart`. L’ID vaut par
-défaut `com.example.<dir>` : passez `--id` avec un nom DNS inversé que vous
-contrôlez (`com.playervox.*` est réservé).
+défaut `yourhandle.<dir>` : passez `--id` avec l’ID de votre widget,
+l’identifiant de votre éditeur suivi d’un nom (`nova.my-counter`), réservé
+dans l’[espace créateurs](creator-space.md).
 [Fichiers d’un projet](cli.md#fichiers-dun-projet) liste chaque fichier et
 indique lesquels sont empaquetés ;
 [les types du SDK](cli.md#les-types-du-sdk) explique comment ajouter le SDK
@@ -238,7 +239,7 @@ jamais faire. L’exemple complet se trouve dans
 
 ```sh
 overcrow-widget package
-overcrow-widget inspect dist/com.example.my-counter-0.1.0.ocpkg
+overcrow-widget inspect dist/yourhandle.my-counter-0.1.0.ocpkg
 ```
 
 `package` écrit un `.ocpkg` déterministe dans `dist/` : les mêmes sources
@@ -250,15 +251,15 @@ utilisateurs obtiennent les widgets par le catalogue signé. Voir
 
 ## 12. Soumettre
 
-Ajoutez un `listing.json` avec le texte de la marketplace et lancez
-vous-même l’admission. Les widgets ne sont plus proposés par pull request :
-vous enverrez le vôtre depuis l’espace créateurs PlayerVox OverCrow, à son
-ouverture.
+Lancez les vérifications de l’espace créateurs sur votre ordinateur :
 
 ```sh
-overcrow-widget admit
+overcrow-widget admit --listing optional
 ```
 
-`admit` exécute exactement les contrôles de la CI de la marketplace. La
-suite, de la revue au catalogue signé, est décrite dans
-[publication et revue](publishing.md).
+Créez ensuite votre éditeur et réservez l’ID du widget
+([démarrer](creator-space.md)), puis envoyez la version depuis l’espace
+créateurs ([publier un widget](publish-a-widget.md)), ou depuis un terminal
+ou une CI avec [`submit`](cli.md#submit). Une personne de PlayerVox relit
+chaque version avant que les joueurs ne la reçoivent : voir
+[la revue](widget-review.md).

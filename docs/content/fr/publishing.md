@@ -1,40 +1,49 @@
-# Publication et revue
-
-> **Les pull requests sont fermées.** Les widgets ne sont plus proposés par
-> pull request : ceux de PlayerVox passent déjà par l’espace créateurs
-> PlayerVox OverCrow, et le vôtre y passera à son ouverture. D’ici là, cette
-> page décrit l’admission, la revue et le catalogue que suit un widget.
+# Vérifications et catalogue
 
 Les widgets atteignent les utilisateurs de PlayerVox OverCrow par le
 catalogue signé des widgets : OverCrow n’installe que ce que liste ce
-catalogue. Cette page va du dossier de sources d’un widget à une version
-listée. Ni une pull request ni une fusion ne publient quoi que ce soit : la
-publication est une étape distincte des mainteneurs, hors de la CI.
+catalogue. Vous envoyez une version depuis l’espace créateurs
+([publier un widget](publish-a-widget.md)), elle est vérifiée, une personne
+de PlayerVox la relit ([la revue](widget-review.md)), puis elle est publiée
+dans le catalogue. Cette page couvre les vérifications que vous pouvez
+lancer sur votre ordinateur, `listing.json` et le catalogue lui-même.
 
-## La soumission
+## Lancer les vérifications vous-même
 
-Une soumission est le dossier de sources d’un widget, placé sous
-`widgets/<dir>/` du
-[dépôt public](https://github.com/Valhallab/playervox-overcrow-releases),
-dans une pull request vers sa branche `candidate` :
-
-```text
-widgets/<dir>/
-  manifest.json   view.ocml   style.ocss?   logic.ts | logic.js
-  locales/en.json + locales/fr.json?   assets/**?   LICENSE
-  listing.json    (marketplace text, never packaged)
+```sh
+overcrow-widget admit --listing optional
+overcrow-widget admit --package dist/<id>-<version>.ocpkg
+overcrow-widget admit --format json
 ```
 
-Vous soumettez des sources, pas un paquet : le catalogue livre toujours le
-paquet reconstruit à partir des sources relues.
+`admit` lance sur votre ordinateur les vérifications statiques de l’espace
+créateurs. Elle n’exécute jamais votre code ni `tsc` :
 
-Les IDs de paquet sous `com.playervox` sont réservés aux widgets publiés
-par PlayerVox. Utilisez un ID en DNS inversé sous un domaine que vous
-contrôlez, et gardez-le : l’ID est l’identité du widget dans le catalogue.
+1. elle construit le dossier comme le fait `package` : toutes les
+   vérifications des sources, du style, de la logique et du paquet, puis le
+   lecteur de paquets de PlayerVox OverCrow lui-même ;
+2. avec `--package`, la vue compilée de votre archive doit être, octet pour
+   octet, le résultat de la compilation de `view.ocml` ;
+3. elle vérifie les limites du schéma, les IDs réservés, `listing.json`,
+   l’aperçu et, pour les widgets PlayerVox, la licence MIT ;
+4. elle liste l’autorité que demande le widget, comme la voit le
+   relecteur : capabilities sensibles, chaque route réseau, écritures dans
+   le presse-papiers, stockage et événements de jeu.
+
+`--listing optional` vérifie le dossier comme le fait l’espace créateurs,
+où `listing.json` peut manquer. La commande se termine avec le code de
+sortie 1 quand la version serait refusée ; ses codes sont listés avec la
+[commande `admit`](cli.md#admit). Pour vérifier aussi ce que seul l’espace
+créateurs connaît (le numéro de version, les justifications, la politique
+de confidentialité), utilisez `overcrow-widget submit --dry-run`
+([`submit`](cli.md#submit)).
 
 ## La fiche
 
-`listing.json` contient ce qu’affiche la marketplace :
+Les joueurs lisent la fiche dans le catalogue. Vous l’écrivez dans l’espace
+créateurs ([la fiche](widget-listing.md)). `listing.json`, dans le dossier
+du widget, en est la forme fichier : `admit` le lit, l’espace créateurs peut
+l’importer, et il n’est jamais empaqueté.
 
 <!-- source: docs/content/examples/weather/listing.json -->
 ```json
@@ -63,80 +72,27 @@ contrôlez, et gardez-le : l’ID est l’identité du widget dans le catalogue.
 - `author`, les noms et les descriptions sont du texte brut, sans espace au
   début ni à la fin, sans `<` ni `>` ; les langues sont de la forme `xx` ou
   `xx-YY`, l’une d’elles étant `defaultLocale`.
-- `spdxLicense` est une expression SPDX ; le `LICENSE` du paquet en
-  contient le texte. Les widgets PlayerVox sont sous MIT. La politique pour
-  les licences des tiers n’est pas encore arrêtée : une expression valide
-  est relue, pas approuvée par les métadonnées
-  ([licences](../../../LICENSING.md)).
-- `sourceUrl` est une URL HTTPS canonique des sources relues, sans port,
-  requête ni fragment.
+- `spdxLicense` est une expression SPDX, ou `LicenseRef-Proprietary` pour
+  un code qui n’est pas open source ; le `LICENSE` du paquet en contient le
+  texte. Toute licence est acceptée, code fermé compris. Les widgets de
+  PlayerVox sont sous MIT.
+- `sourceUrl` est une URL HTTPS canonique de vos sources publiques, sans
+  port, requête ni fragment. Le fichier l’exige, pas l’espace créateurs :
+  si votre code n’est pas public, laissez `listing.json` de côté et écrivez
+  la fiche à l’écran.
 - `preview` (facultatif) désigne un PNG empaqueté sous `assets/`, de
   256 Kio au plus, par exemple `"preview": "assets/preview.png"`. Le
-  Centre de contrôle et la marketplace le montrent entier dans un cadre
-  4:3, centré sur la couleur `#1e242e`, à 1,5 pixel par point d’écran au
-  plus : rendez le widget à 150 % (`"scale": 1500` dans un scénario) et
+  Centre de contrôle et la marketplace montrent un aperçu entier dans un
+  cadre 4:3, centré sur la couleur `#1e242e`, à 1,5 pixel par point d’écran
+  au plus : rendez le widget à 150 % (`"scale": 1500` dans un scénario) et
   donnez à l’image un format 4:3, il apparaît à sa taille réelle, jamais
   recadré ni agrandi.
 
-## L’admission : lancez-la vous-même
-
-```sh
-overcrow-widget admit widgets/<dir>
-overcrow-widget admit widgets/<dir> --package dist/<id>-<version>.ocpkg
-overcrow-widget admit widgets/<dir> --format json
-```
-
-`admit` est exactement l’admission statique de la marketplace. Elle
-n’exécute jamais votre code ni `tsc` :
-
-1. elle construit le dossier comme le fait `package` : toutes les
-   vérifications des sources, du style, de la logique et du paquet, puis le
-   lecteur de paquets de PlayerVox OverCrow lui-même ;
-2. avec `--package`, la vue compilée de votre archive doit être, octet pour
-   octet, le résultat de la compilation de `view.ocml` ;
-3. elle vérifie les limites du schéma, les IDs réservés, `listing.json`,
-   l’aperçu et, pour les widgets PlayerVox, la licence MIT ;
-4. elle liste pour le relecteur l’autorité que demande le widget :
-   capabilities sensibles, chaque route réseau, écritures dans le
-   presse-papiers, stockage et événements de jeu.
-
-La commande se termine avec le code de sortie 1 quand la soumission serait
-refusée. Ses codes sont listés avec la [commande `admit`](cli.md#admit).
-
-Sur une pull request, l’outil d’admission est construit depuis la branche
-de base relue, jamais depuis votre révision, et il lit vos fichiers comme
-des données : votre JavaScript, votre TypeScript, vos commandes de build,
-vos tests et vos scripts n’y sont jamais exécutés. Une pull request ne peut
-pas modifier les outils de l’admission eux-mêmes.
-
-## La revue
-
-Un mainteneur lit le rapport d’admission et les sources, puis fusionne dans
-`candidate`. Les relecteurs vérifient :
-
-- **L’identité.** Un nouvel ID sous un domaine que l’auteur contrôle. Une
-  nouvelle version pour tout changement : les versions publiées sont
-  immuables, et une version inférieure à une version listée est refusée.
-- **La reproductibilité.** Le paquet est reconstruit à partir des sources
-  relues.
-- **L’autorité.** Chaque capability, surtout les sensibles ; chaque route
-  réseau, qui doit servir l’objet annoncé du widget ; les écritures dans le
-  presse-papiers, le stockage et les événements de jeu. Voir
-  [services et permissions](services.md).
-- **La fiche.** Un texte exact et brut dans chaque langue, une URL de
-  sources canonique, un aperçu qui montre le widget.
-- **La licence.** `LICENSE` correspond à `spdxLicense`, et chaque
-  ressource, police ou code tiers embarqué garde sa mention.
-
-À la fusion, la révision exacte est admise de nouveau, et un reçu lie le
-paquet admis au commit relu. Accepter une soumission ne signe et ne publie
-rien.
-
 ## Le catalogue
 
-Les mainteneurs préparent le catalogue suivant à partir des révisions
-admises et le signent hors de la CI avec la clé du catalogue, dont la moitié
-publique est dans [`keys/`](../../../keys/). Le catalogue :
+PlayerVox vise à publier une version approuvée sous 24 heures ouvrées. Il
+signe chaque catalogue hors de ses serveurs avec la clé du catalogue, dont la
+moitié publique est dans [`keys/`](../../../keys/). Le catalogue :
 
 - liste chaque version avec le SHA-256 et la taille de son paquet ; une
   version publiée ne change jamais, et un changement est une nouvelle
@@ -149,9 +105,11 @@ publique est dans [`keys/`](../../../keys/). Le catalogue :
   avec leurs permissions déclarées accordées, sauf pour une mise à jour qui
   en demande davantage.
 
-PlayerVox OverCrow vérifie la signature, l’empreinte du paquet, son registre
-et sa vue compilée avant l’installation, puis à chaque démarrage du widget.
-Voir [le paquet](package.md#comment-overcrow-vérifie-un-paquet).
+Le paquet du catalogue est toujours celui que PlayerVox a reconstruit à
+partir des sources relues. PlayerVox OverCrow vérifie la signature,
+l’empreinte du paquet, son registre et sa vue compilée avant
+l’installation, puis à chaque démarrage du widget. Voir
+[le paquet](package.md#comment-overcrow-vérifie-un-paquet).
 
 ## Mises à jour
 
@@ -174,4 +132,5 @@ Chaque version listée a un statut :
 
 Omettre une version dans un catalogue ne change jamais son statut. La
 signature d’un catalogue ne contourne jamais la validation du paquet, le
-consentement de l’utilisateur ni le sandbox.
+consentement de l’utilisateur ni le sandbox. Une suspension dans l’espace
+créateurs est expliquée dans [la revue](widget-review.md#suspension).

@@ -2,8 +2,8 @@
 
 What a package holds and how PlayerVox OverCrow checks it is documented for
 creators on the website: [the
-package](https://overcrow.playervox.com/docs/en/package/) and [publishing and
-review](https://overcrow.playervox.com/docs/en/publishing/)
+package](https://overcrow.playervox.com/docs/en/package/) and [checks and the
+catalog](https://overcrow.playervox.com/docs/en/publishing/)
 ([français](https://overcrow.playervox.com/docs/package/)), from
 [`docs/content/en/package.md`](content/en/package.md) and
 [`docs/content/en/publishing.md`](content/en/publishing.md). The manifest is on

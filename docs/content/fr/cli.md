@@ -347,7 +347,7 @@ DIR` (écrit le paquet admis, sa fiche et un rapport dans un dossier vide),
 `--format json`, `--deny-warnings`. `admit <file.ocpkg> --listing FILE`
 vérifie une archive sans ses sources. Codes de sortie : 0 admis, 1 refusé,
 2 pour une erreur d’utilisation ou de fichier. Voir
-[publication et revue](publishing.md).
+[vérifications et catalogue](publishing.md).
 
 `--listing required|optional` concerne les sources. `required`, par
 défaut, refuse des sources sans `listing.json` valide. `optional` est le
@@ -405,17 +405,17 @@ overcrow-widget submit --submission submission.json
 ```
 
 Envoie une version de votre widget à l’espace créateurs de
-PlayerVox OverCrow, depuis un terminal, une CI ou le serveur MCP d’OverCrow,
-puis suit ses contrôles. La commande ne pose jamais de question : ce qui
-manque est signalé, avec un [code de sortie](#codes-de-sortie) stable. Elle
+PlayerVox OverCrow, depuis un terminal ou une CI, puis suit ses contrôles.
+La commande ne pose jamais de question : ce qui manque est signalé, avec un
+[code de sortie](#codes-de-sortie) stable. Elle
 prend le dossier du widget (le dossier courant sans argument) ou un ZIP de
 ce dossier.
 
 ### La clé de publication
 
 - Créez-la dans l’espace créateurs (Éditeur, Clés de publication). Une clé
-  ne permet que de soumettre des versions d’un seul widget, pour 1 à
-  365 jours (90 par défaut), et n’est affichée qu’une fois.
+  ne permet que de soumettre des versions d’un seul widget, pour un an au
+  plus (90 jours par défaut), et n’est affichée qu’une fois.
 - `submit` et `status` la lisent dans la variable d’environnement
   `OVERCROW_PUBLISH_KEY`, et seulement là : jamais dans un argument ni dans
   un fichier du projet. Dans une CI, gardez-la comme secret.

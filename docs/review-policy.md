@@ -22,7 +22,7 @@ stays the static admission of `main`; it runs on pull requests to `main`
   `fuzz/`, the Cargo workspace and toolchain files, `.gitattributes`,
   `.gitignore`, `docs/widget-schema-v1.md`, `keys/` and `fixtures/keys/`;
 - each `widgets/<dir>` goes through `overcrow-widget admit` (see
-  [publishing and review](content/en/publishing.md#admission-run-it-yourself)),
+  [checks and the catalog](content/en/publishing.md#run-the-checks-yourself)),
   with warnings denied. Proposed JavaScript,
   TypeScript, build commands, tests and scripts are never executed;
 - reserved `com.playervox.*` IDs are admitted only on a trusted push, on a
@@ -37,9 +37,9 @@ admission bundles for the maintainers. Nothing in CI signs or publishes.
 
 ## Human review and security decisions
 
-What reviewers check (identity, reproducibility, authority, listing,
-license) and the version statuses of the catalog (`verified`,
-`security-suspended`, `revoked`) are described in
-[publishing and review](content/en/publishing.md#review), the page creators
+The review creators go through is described in
+[review](content/en/widget-review.md), and the version statuses of the
+catalog (`verified`, `security-suspended`, `revoked`) in [checks and the
+catalog](content/en/publishing.md#version-statuses), the pages creators
 read. A catalog signature never bypasses package validation, the user's
 consent or the widget sandbox.

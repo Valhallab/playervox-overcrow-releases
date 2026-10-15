@@ -1,17 +1,18 @@
 # Démarrer dans l’espace créateurs
 
 L’espace créateurs de PlayerVox OverCrow, à l’adresse
-`creators.playervox.com`, sert à publier des widgets : vous y créez votre éditeur une fois, réservez les
-identifiants de vos widgets, envoyez leurs versions et suivez leur revue. Il
-est ouvert sur invitation pour l’instant.
+`creators.playervox.com`, sert à publier des widgets : vous y créez votre
+éditeur une fois, réservez les identifiants de vos widgets, envoyez leurs
+versions et suivez leur revue. Tout compte PlayerVox peut y entrer, avec la
+double authentification.
 
 ## Se connecter
 
 Connectez-vous avec votre compte PlayerVox : l’espace créateurs vous envoie
 sur playervox.com, qui vous demande de confirmer, puis vous ramène. Vous ne
-tapez jamais votre mot de passe dans l’espace créateurs. La session dure tant
-que vous l’utilisez, 14 jours au plus ; vous pouvez la fermer sur
-playervox.com, dans **Appareils connectés**.
+tapez jamais votre mot de passe dans l’espace créateurs. La session prend
+fin après 3 jours sans utilisation, et après 14 jours au plus ; vous pouvez
+la fermer sur playervox.com, dans **Appareils connectés**.
 
 L’interface est en français ou en anglais : choisissez dans le menu du
 compte. Les adresses restent les mêmes dans les deux langues.
@@ -30,8 +31,8 @@ visite l’active :
 
 Vous recevez ensuite dix codes de secours, affichés une seule fois : chacun
 vous connecte une fois si vous perdez votre téléphone. Rangez-les en lieu
-sûr. Créer une clé de publication ou supprimer votre éditeur redemande un
-code récent.
+sûr. Créer une clé de publication, supprimer un widget ou supprimer votre
+éditeur redemande un code récent.
 
 ## Créer votre éditeur
 
@@ -40,9 +41,11 @@ L’éditeur est le nom sous lequel vos widgets apparaissent.
 - **Nom affiché** : montré aux joueurs. Un nom qui se lit comme PlayerVox,
   OverCrow ou Valhallab est refusé.
 - **Identifiant** : de 3 à 32 lettres minuscules, chiffres et tirets, sans
-  tiret au début ni à la fin. Il est **définitif** : il ne peut plus être
-  changé, et un identifiant n’est jamais donné à quelqu’un d’autre, même
-  après une suppression. Les identifiants de vos widgets commencent par lui.
+  tiret au début, à la fin ni deux à la suite ; les mots réservés et les
+  extensions de domaine (`com`, `net`…) sont refusés. Il est **définitif** :
+  il ne peut plus être changé, et un identifiant n’est jamais donné à
+  quelqu’un d’autre, même après une suppression. Les identifiants de vos
+  widgets commencent par lui.
 - **E-mail de contact** : pour que PlayerVox vous joigne. Il n’est jamais
   affiché.
 - **Site web** et **logo** (carré, PNG ou WebP) : facultatifs, affichés sur
@@ -76,7 +79,7 @@ rien n’est publié.
 
 ## Ensuite
 
-- Envoyer une version : [publication et revue](publishing.md).
+- Envoyer une version : [publier un widget](publish-a-widget.md).
 - Envoyer depuis un terminal ou une CI :
   [clés de publication et CI](publish-keys.md).
 - Obtenir le badge vérifié et des identifiants à votre domaine :

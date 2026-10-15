@@ -138,6 +138,48 @@
       "label": { "en": "Limits", "fr": "Limites" }
     },
     {
+      "slug": "creator-space",
+      "file": "creator-space.md",
+      "group": "publish",
+      "label": { "en": "Getting started", "fr": "Démarrer" }
+    },
+    {
+      "slug": "publish-a-widget",
+      "file": "publish-a-widget.md",
+      "group": "publish",
+      "label": { "en": "Publish a widget", "fr": "Publier un widget" }
+    },
+    {
+      "slug": "widget-review",
+      "file": "widget-review.md",
+      "group": "publish",
+      "label": { "en": "Review: types, delays, appeals", "fr": "Revue : types, délais, recours" }
+    },
+    {
+      "slug": "widget-listing",
+      "file": "widget-listing.md",
+      "group": "publish",
+      "label": { "en": "The listing: best practices", "fr": "Fiche : bonnes pratiques" }
+    },
+    {
+      "slug": "widget-statistics",
+      "file": "widget-statistics.md",
+      "group": "publish",
+      "label": { "en": "Statistics: definitions", "fr": "Statistiques : définitions" }
+    },
+    {
+      "slug": "publish-keys",
+      "file": "publish-keys.md",
+      "group": "publish",
+      "label": { "en": "Publish keys and CI", "fr": "Clés de publication et CI" }
+    },
+    {
+      "slug": "verified-domain",
+      "file": "verified-domain.md",
+      "group": "publish",
+      "label": { "en": "Verified domain", "fr": "Domaine vérifié" }
+    },
+    {
       "slug": "package",
       "file": "package.md",
       "group": "publish",
@@ -153,56 +195,7 @@
       "slug": "publishing",
       "file": "publishing.md",
       "group": "publish",
-      "label": { "en": "Publishing and review", "fr": "Publication et revue" }
-    },
-    {
-      "slug": "creator-space",
-      "file": "creator-space.md",
-      "group": "publish",
-      "label": { "en": "Getting started", "fr": "Démarrer" },
-      "hidden": true
-    },
-    {
-      "slug": "publish-keys",
-      "file": "publish-keys.md",
-      "group": "publish",
-      "label": { "en": "Publish keys and CI", "fr": "Clés de publication et CI" },
-      "hidden": true
-    },
-    {
-      "slug": "verified-domain",
-      "file": "verified-domain.md",
-      "group": "publish",
-      "label": { "en": "Verified domain", "fr": "Domaine vérifié" },
-      "hidden": true
-    },
-    {
-      "slug": "publish-a-widget",
-      "file": "publish-a-widget.md",
-      "group": "publish",
-      "label": { "en": "Publish a widget", "fr": "Publier un widget" },
-      "hidden": true
-    },
-    {
-      "slug": "widget-review",
-      "file": "widget-review.md",
-      "group": "publish",
-      "label": { "en": "Review: types, delays, appeals", "fr": "Revue : types, délais, recours" },
-      "hidden": true
-    },
-    {
-      "slug": "widget-listing",
-      "file": "widget-listing.md",
-      "group": "publish",
-      "label": { "en": "The listing: best practices", "fr": "Fiche : bonnes pratiques" },
-      "hidden": true
-    },
-    {
-      "slug": "widget-statistics",
-      "file": "widget-statistics.md",
-      "group": "publish",
-      "label": { "en": "Statistics: definitions", "fr": "Statistiques : définitions" },
-      "hidden": true
+      "label": { "en": "Checks and the catalog", "fr": "Vérifications et catalogue" }
     },
     {
       "slug": "compatible-services",

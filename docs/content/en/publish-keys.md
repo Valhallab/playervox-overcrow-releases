@@ -10,8 +10,8 @@ password. It can do nothing else.
   still goes through the review before players get it.
 - It can neither publish, nor change the listing, nor reach your account or
   your other widgets.
-- It lasts 1 to 365 days (90 by default). We remind you by e-mail and in
-  the creator space 14 days before it expires.
+- It lasts 30, 90 or 180 days, or a year (90 days by default). We remind
+  you by e-mail and in the creator space 14 days before it expires.
 - PlayerVox keeps only a digest of it: the key is shown **once**, when you
   create it.
 
@@ -86,7 +86,8 @@ jobs:
 The job fails when the checks fail, with each problem on the line of your
 file. A version the creator space already has is not sent again: `submit`
 reports its state, so the same job may also run on every push to your main
-branch.
+branch. Raise the version whenever the sources change: the same version
+with other sources is refused.
 
 ## Revoke a key
 

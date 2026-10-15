@@ -119,7 +119,7 @@ Chaque paquet est vérifié lors de son admission au catalogue, puis chaque
 fois que PlayerVox OverCrow le démarre : le catalogue signé, le registre de
 ses fichiers et la vue compilée doivent concorder, sinon le widget ne
 démarre pas. Voir [le paquet](package.md#comment-overcrow-vérifie-un-paquet)
-et [publication et revue](publishing.md).
+et [vérifications et catalogue](publishing.md).
 
 Une version du catalogue peut être suspendue ou révoquée après sa
 publication : PlayerVox OverCrow arrête alors la copie installée. Voir

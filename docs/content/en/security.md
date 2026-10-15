@@ -103,7 +103,7 @@ Every package is checked when it is admitted to the catalog and again each
 time PlayerVox OverCrow starts it: the signed catalog, the ledger of its
 files and the compiled view must match, or the widget does not start. See
 [the package](package.md#how-overcrow-checks-a-package) and
-[publishing and review](publishing.md).
+[checks and the catalog](publishing.md).
 
 A version of the catalog can be suspended or revoked after its
 publication: PlayerVox OverCrow then stops the installed copy. See

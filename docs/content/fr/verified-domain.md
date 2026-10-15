@@ -17,7 +17,7 @@ hébergeur : un enregistrement TXT nommé `_overcrow.` suivi de votre domaine,
 dont la valeur est `overcrow-verify=` suivi d’un jeton.
 
 ```text
-_overcrow.nova.gg.  TXT  "overcrow-verify=3f9c1e7a52d04b8e"
+_overcrow.nova.gg.  TXT  "overcrow-verify=3f9c1e7a52d04b8e90a6c2d17f3b5e84"
 ```
 
 ## La vérification
@@ -26,12 +26,12 @@ _overcrow.nova.gg.  TXT  "overcrow-verify=3f9c1e7a52d04b8e"
 minute au plus). Nous vérifions aussi tout seuls, toutes les heures pendant
 sept jours. Le DNS peut mettre quelques minutes à se propager.
 
-| État | Signification |
+| L’espace créateurs indique | Signification |
 | --- | --- |
 | En attente | L’enregistrement n’est pas encore trouvé ; vérifié toutes les heures pendant sept jours. |
-| Vérifié | L’enregistrement est trouvé. Il est revérifié tous les 30 jours. |
-| Perdu | L’enregistrement a disparu. Remettez-le, puis vérifiez maintenant. |
-| Expiré | Pas vérifié en sept jours. Vérifiez maintenant pour recommencer. |
+| Vérifié le (date) | L’enregistrement est trouvé. Il est revérifié tous les 30 jours. |
+| Plus vérifié | L’enregistrement a disparu. Remettez-le, puis vérifiez maintenant : nous vérifions aussi toutes les heures pendant sept jours. |
+| Pas vérifié en 7 jours | Ajoutez l’enregistrement, puis vérifiez maintenant pour recommencer. |
 
 Laissez l’enregistrement en place : s’il disparaît, le badge s’en va. Les
 identifiants des widgets déjà créés sous ce domaine restent à vous.
@@ -44,6 +44,5 @@ identifiants des widgets déjà créés sous ce domaine restent à vous.
 - Un domaine qui se lit comme PlayerVox, OverCrow ou Valhallab est refusé ;
   écrivez à l’assistance s’il vous appartient. Les identifiants sous
   `com.playervox` appartiennent à PlayerVox.
-- Retirer un domaine jamais vérifié l’oublie. Un domaine vérifié une fois
-  vous reste réservé, et ne peut pas être retiré tant que des identifiants
-  de widgets l’utilisent.
+- **Retirer** enlève un domaine vérifié de votre profil, sauf tant que des
+  identifiants de widgets l’utilisent. Il vous reste réservé.
