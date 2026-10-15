@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
@@ -42,7 +42,14 @@ test("the shipped content: every visible page in both languages, projects, refer
 test("a hidden page is never shipped, nor found by a search", () => {
   const pages = JSON.parse(readFileSync(join(repository, "docs", "content", "pages.json"), "utf8"));
   const hidden = pages.pages.filter((page) => page.hidden === true);
-  assert.ok(hidden.length > 0, "pages.json has no hidden page left to test with");
+  // Every shipped page is a visible one (this release branch has no hidden
+  // page left; main keeps the stricter check with its hidden pages).
+  const visible = pages.pages.filter((page) => page.hidden !== true);
+  for (const locale of pages.locales) {
+    const dir = join(repository, "mcp", "dist", "content", "docs", locale);
+    const shipped = readdirSync(dir).filter((name) => name.endsWith(".md"));
+    assert.deepEqual(shipped.sort(), visible.map((page) => page.file).sort(), locale);
+  }
   for (const page of hidden) {
     assert.equal(readDoc(page.slug, "en"), undefined, page.slug);
     for (const locale of pages.locales) {
