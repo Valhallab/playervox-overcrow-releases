@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "nova.steam-progress",
+  "version": "1.0.0",
+  "name": {
+    "en": "Steam progress",
+    "fr": "Progression Steam"
+  },
+  "sizing": {
+    "fit": "height",
+    "preferred": {
+      "width": 300,
+      "height": 170
+    },
+    "min": {
+      "width": 200,
+      "height": 96
+    },
+    "max": {
+      "width": 480,
+      "height": 480
+    }
+  },
+  "permissions": {
+    "accounts": [
+      {
+        "id": "runlog",
+        "name": "Steam",
+        "mode": "key",
+        "origins": [
+          "https://api.runlog.example"
+        ],
+        "send": {
+          "header": "X-Api-Key"
+        },
+        "key": {
+          "format": {
+            "charset": "alnum",
+            "minLength": 16,
+            "maxLength": 64
+          },
+          "page": "https://runlog.example/settings/api"
+        }
+      }
+    ],
+    "network": [
+      {
+        "origin": "https://api.runlog.example",
+        "method": "GET",
+        "path": "/v1/runs",
+        "account": "runlog"
+      }
+    ]
+  }
+}

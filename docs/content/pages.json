@@ -59,6 +59,13 @@
       "hidden": true
     },
     {
+      "slug": "integrated-services",
+      "file": "integrated-services.md",
+      "group": "build",
+      "label": { "en": "Integrated services", "fr": "Services intégrés" },
+      "hidden": true
+    },
+    {
       "slug": "forms",
       "file": "forms.md",
       "group": "build",

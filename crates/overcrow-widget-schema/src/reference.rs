@@ -5,8 +5,9 @@ use std::fmt::Write;
 
 use crate::API_VERSION;
 use crate::accounts::{
-    ACCOUNT_FIELDS, ACCOUNT_KEY_FIELDS, ACCOUNT_SEND_FIELDS, FEATURE_ACCOUNT_KEY,
+    ACCOUNT_FIELDS, ACCOUNT_KEY_FIELDS, ACCOUNT_SEND_FIELDS, AccountMode, FEATURE_ACCOUNT_KEY,
     FEATURE_ACCOUNT_OAUTH, KEY_FORMAT_FIELDS, OAUTH_FIELDS, OAUTH_SCOPE_FIELDS,
+    SERVICE_ACCOUNT_FIELDS, ScopeAccess,
 };
 use crate::catalog::{
     CATALOG_DOMAIN, CATALOG_FIELDS, CATALOG_FILE, ENVELOPE_FIELDS, LISTING_FIELDS,
@@ -20,6 +21,7 @@ use crate::identifiers::{
     CONFUSABLE_LETTERS, DOMAIN_EXTENSIONS, EXAMPLE_HANDLES, PLAYERVOX_DOMAIN, PLAYERVOX_HANDLE,
     RESERVED_HANDLE_WORDS, RESERVED_HANDLES, STYLIZED_LETTERS,
 };
+use crate::integrated::INTEGRATED_SERVICES;
 use crate::ipc::{
     self, DRAW_COMMANDS, FAILURES, FRAME_KINDS, HEADER, HOST_MESSAGES, Message, PATCH_OPS,
     VM_MESSAGES,
@@ -617,7 +619,9 @@ other, and never gives it to the widget. A manifest with a `key` account needs t
 feature `{FEATURE_ACCOUNT_KEY}`, with an `oauth` account `{FEATURE_ACCOUNT_OAUTH}`. With an \
 account, every network rule targets one of its `origins`, no sensitive capability or \
 `clipboardWrite` is allowed, two rules of the same origin and method that may match one URL \
-name the same account or none, and no rule targets a declared OAuth endpoint.\n\n"
+name the same account or none, and no rule targets a declared OAuth endpoint. The entry is \
+either a declared account (the fields below) or an integrated service the widget names \
+(`IntegratedServiceAccount`).\n\n"
     );
     fields_table(out, ACCOUNT_FIELDS);
     for (title, fields) in [
@@ -630,6 +634,87 @@ name the same account or none, and no rule targets a declared OAuth endpoint.\n\
         let _ = write!(out, "### `{title}`\n\n");
         fields_table(out, fields);
     }
+    integrated_services_section(out);
+}
+
+/// The integrated services (ADR 0009 §10): the entry that names one, and
+/// the table PlayerVox defines.
+fn integrated_services_section(out: &mut String) {
+    out.push_str(
+        "### `IntegratedServiceAccount`\n\nAn entry of `permissions.accounts` that names an \
+integrated service. The account's `id` is the service's; the user connects the service once \
+and every widget granted `account:<service>` shares the connection.\n\n",
+    );
+    fields_table(out, SERVICE_ACCOUNT_FIELDS);
+    out.push_str(
+        "### Integrated services\n\nDefined by PlayerVox, read-only for widgets in version 1: \
+with a service, every network rule uses one of its methods and targets one of its origins; \
+only rules on an origin that receives the secret name the service, stay within an allowed \
+path and cannot reach a refused one (segments compared without case and without final dots, \
+a path parameter matching any segment). A path ending with `/` is a prefix; another is one \
+endpoint, opened only by the scope it names when the widget asks for that scope itself: the \
+token is shared by the widgets of the service. A declared account never uses an address of a \
+service (its origins, or a host under its domains). A manifest that names a service needs its \
+feature. Once a released application announces it, an addition takes a new feature name.\n\n\
+| Service | Name | Feature | Mode | Domains | Secret origins | Image origins | Methods | Allowed paths | Refused paths |\n\
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n",
+    );
+    let list = |items: &[&str]| {
+        items
+            .iter()
+            .map(|item| format!("`{item}`"))
+            .collect::<Vec<_>>()
+            .join(", ")
+    };
+    for service in INTEGRATED_SERVICES {
+        let allowed = service
+            .allowed_paths
+            .iter()
+            .map(|allowed| match allowed.scope {
+                Some(scope) => format!("`{}` (`{scope}`)", allowed.path),
+                None => format!("`{}`", allowed.path),
+            })
+            .collect::<Vec<_>>()
+            .join(", ");
+        let _ = writeln!(
+            out,
+            "| `{}` | {} | `{}` | {} | {} | {} | {} | {} | {} | {} |",
+            service.id,
+            service.name,
+            service.feature,
+            match service.mode {
+                AccountMode::Key => "key",
+                AccountMode::OAuth => "oauth",
+            },
+            list(service.domains),
+            list(service.secret_origins),
+            list(service.origins),
+            list(service.methods),
+            allowed,
+            list(service.refused_paths),
+        );
+    }
+    out.push_str(
+        "\n### Integrated service scopes\n\nThe scopes a widget may ask for, with what the user is \
+told they read.\n\n| Service | Scope | Access | English | French |\n| --- | --- | --- | --- | --- |\n",
+    );
+    for service in INTEGRATED_SERVICES {
+        for scope in service.scopes {
+            let _ = writeln!(
+                out,
+                "| `{}` | `{}` | {} | {} | {} |",
+                service.id,
+                scope.name,
+                match scope.access {
+                    ScopeAccess::Read => "read",
+                    ScopeAccess::Write => "write",
+                },
+                scope.label.en,
+                scope.label.fr,
+            );
+        }
+    }
+    out.push('\n');
 }
 
 /// Member tables of a record shape, nested records and alternatives

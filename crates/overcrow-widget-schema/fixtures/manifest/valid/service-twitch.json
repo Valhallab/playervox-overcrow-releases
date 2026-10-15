@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "nova.live-goals",
+  "version": "1.0.0",
+  "name": {
+    "en": "Live goals",
+    "fr": "Objectifs du live"
+  },
+  "sizing": {
+    "fit": "height",
+    "preferred": {
+      "width": 300,
+      "height": 170
+    },
+    "min": {
+      "width": 200,
+      "height": 96
+    },
+    "max": {
+      "width": 480,
+      "height": 480
+    }
+  },
+  "permissions": {
+    "accounts": [
+      {
+        "service": "twitch",
+        "scopes": [
+          "channel:read:goals",
+          "moderator:read:followers"
+        ],
+        "required": false
+      }
+    ],
+    "network": [
+      {
+        "origin": "https://api.twitch.tv",
+        "method": "GET",
+        "path": "/helix/goals",
+        "queryParams": {
+          "broadcaster_id": {
+            "type": "slug",
+            "maxLength": 32,
+            "required": true
+          }
+        },
+        "account": "twitch"
+      },
+      {
+        "origin": "https://static-cdn.jtvnw.net",
+        "method": "GET",
+        "path": "/jtv_user_pictures/{file}",
+        "pathParams": {
+          "file": {
+            "type": "slug",
+            "maxLength": 128
+          }
+        }
+      }
+    ]
+  }
+}

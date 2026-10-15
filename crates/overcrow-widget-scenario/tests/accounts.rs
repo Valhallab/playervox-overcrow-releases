@@ -5,6 +5,7 @@ use overcrow_widget_scenario::{AccountState, FixtureMatch, Scenario, ScenarioErr
 use overcrow_widget_schema::manifest::{Manifest, validate_manifest_value};
 use serde_json::{Value, json};
 
+/// The integrated Steam service: its account is `steam`.
 fn steam() -> Manifest {
     validate_manifest_value(json!({
         "schemaVersion": 1,
@@ -19,17 +20,7 @@ fn steam() -> Manifest {
             "max": {"width": 300, "height": 170}
         },
         "permissions": {
-            "accounts": [{
-                "id": "steam",
-                "name": "Steam",
-                "mode": "key",
-                "origins": ["https://api.steampowered.com", "https://avatars.steamstatic.com"],
-                "send": {"header": "X-WebAPI-Key"},
-                "key": {
-                    "format": {"charset": "hex", "minLength": 32, "maxLength": 32},
-                    "page": "https://steamcommunity.com/dev/apikey"
-                }
-            }],
+            "accounts": [{"service": "steam"}],
             "network": [
                 {
                     "origin": "https://api.steampowered.com",
@@ -247,4 +238,130 @@ fn a_scenario_without_accounts_reads_as_before() {
     assert_eq!(again, read);
     assert_eq!(read.host.accounts.state("playervox"), AccountState::Expired);
     assert_eq!(read.host.accounts.state("twitch"), AccountState::Connected);
+}
+
+/// A declared account of a fictitious service reads the same way.
+#[test]
+fn a_declared_account_reads_as_a_service() {
+    let manifest = validate_manifest_value(json!({
+        "schemaVersion": 1,
+        "apiVersion": 1,
+        "id": "nova.run-log",
+        "version": "1.0.0",
+        "name": {"en": "Run log", "fr": "Journal de course"},
+        "sizing": {
+            "fit": "none",
+            "preferred": {"width": 300, "height": 170},
+            "min": {"width": 300, "height": 170},
+            "max": {"width": 300, "height": 170}
+        },
+        "permissions": {
+            "accounts": [{
+                "id": "runlog",
+                "name": "Run Log",
+                "mode": "key",
+                "origins": ["https://api.runlog.example"],
+                "send": {"header": "X-Api-Key"},
+                "key": {
+                    "format": {"charset": "alnum", "minLength": 16, "maxLength": 64},
+                    "page": "https://runlog.example/settings/api"
+                }
+            }],
+            "network": [{
+                "origin": "https://api.runlog.example",
+                "method": "GET",
+                "path": "/v1/runs",
+                "account": "runlog"
+            }]
+        }
+    }))
+    .expect("manifest");
+    let read = scenario(
+        json!({"accounts": {"runlog": "refused"}}),
+        json!([{"request": {"method": "GET", "url": "https://api.runlog.example/v1/runs", "account": "runlog"},
+                "response": {"status": 200, "body": "{}"}}]),
+        json!([]),
+    )
+    .expect("read");
+    assert_eq!(
+        read.check_against(&manifest).map_err(|error| error.path),
+        Ok(())
+    );
+    assert_eq!(read.host.accounts.state("runlog"), AccountState::Refused);
+    // The Steam account is not this widget's.
+    let other = scenario(
+        json!({"accounts": {"steam": "connected"}}),
+        json!([]),
+        json!([]),
+    )
+    .expect("read");
+    assert!(other.check_against(&manifest).is_err());
+}
+
+/// The Twitch service is the host's Twitch account: its states are the
+/// host's (`offline`, never `refused`), and a fixture names it.
+#[test]
+fn the_twitch_service_is_the_hosts_twitch_account() {
+    let manifest = validate_manifest_value(json!({
+        "schemaVersion": 1,
+        "apiVersion": 1,
+        "id": "nova.live-goals",
+        "version": "1.0.0",
+        "name": {"en": "Live goals", "fr": "Objectifs du live"},
+        "sizing": {
+            "fit": "none",
+            "preferred": {"width": 300, "height": 170},
+            "min": {"width": 300, "height": 170},
+            "max": {"width": 300, "height": 170}
+        },
+        "permissions": {
+            "accounts": [{"service": "twitch", "scopes": ["channel:read:goals"]}],
+            "network": [{
+                "origin": "https://api.twitch.tv",
+                "method": "GET",
+                "path": "/helix/goals",
+                "queryParams": {"broadcaster_id": {"type": "slug", "maxLength": 32}},
+                "account": "twitch"
+            }]
+        }
+    }))
+    .expect("manifest");
+    for state in ["connected", "disconnected", "pending", "expired", "offline"] {
+        let read = scenario(json!({"accounts": {"twitch": state}}), json!([]), json!([]))
+            .unwrap_or_else(|error| panic!("{state}: {error}"));
+        assert_eq!(
+            read.check_against(&manifest).map_err(|error| error.path),
+            Ok(()),
+            "{state}"
+        );
+    }
+    assert!(
+        scenario(
+            json!({"accounts": {"twitch": "refused"}}),
+            json!([]),
+            json!([])
+        )
+        .is_err()
+    );
+    let granted = scenario(
+        json!({"grants": ["network", "account:twitch"]}),
+        json!([]),
+        json!([]),
+    )
+    .expect("the service's grant");
+    assert_eq!(
+        granted.check_against(&manifest).map_err(|error| error.path),
+        Ok(())
+    );
+    let read = scenario(
+        json!({}),
+        json!([{"request": {"method": "GET", "url": "https://api.twitch.tv/helix/goals?broadcaster_id=1", "account": "twitch"},
+                "response": {"status": 200, "body": "{}"}}]),
+        json!([]),
+    )
+    .expect("read");
+    assert_eq!(
+        read.check_against(&manifest).map_err(|error| error.path),
+        Ok(())
+    );
 }

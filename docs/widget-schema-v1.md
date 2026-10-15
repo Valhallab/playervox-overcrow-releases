@@ -725,7 +725,7 @@ Keys are the permissions of [Permissions](#permissions); a sensitive capability 
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `accounts` | list of `Account` ≤ `MAX_ACCOUNTS` | no | The user's account on a third-party service, which the host keeps and adds to the network rules that name it; the widget never sees the secret. Present only with one account. With an account, every network rule targets one of its `origins`, and no sensitive capability or `clipboardWrite` is allowed. |
+| `accounts` | list of `Account` ≤ `MAX_ACCOUNTS` | no | The user's account on a third-party service, which the host keeps and adds to the network rules that name it; the widget never sees the secret. Present only with one entry: a declared account, or an integrated service the widget names. With an account, every network rule targets one of its origins, and no sensitive capability or `clipboardWrite` is allowed. |
 | `network` | list of `NetworkRule` ≤ `MAX_NETWORK_RULES` | no | Distinct network rules. |
 | `storage` | boolean | no | Host key-value storage; default `false`. |
 | `clipboardWrite` | boolean | no | Clipboard text writes; default `false`. |
@@ -869,14 +869,14 @@ Declaring a permission or capability grants nothing: activation requires consent
 
 ### Accounts
 
-`permissions.accounts` declares the user's account on one third-party service (ADR 0009). The host keeps the secret, asks for it in its own panel in Interactive mode, adds it to the requests of the network rules that name the account and to no other, and never gives it to the widget. A manifest with a `key` account needs the catalog feature `account-key`, with an `oauth` account `account-oauth`. With an account, every network rule targets one of its `origins`, no sensitive capability or `clipboardWrite` is allowed, two rules of the same origin and method that may match one URL name the same account or none, and no rule targets a declared OAuth endpoint.
+`permissions.accounts` declares the user's account on one third-party service (ADR 0009). The host keeps the secret, asks for it in its own panel in Interactive mode, adds it to the requests of the network rules that name the account and to no other, and never gives it to the widget. A manifest with a `key` account needs the catalog feature `account-key`, with an `oauth` account `account-oauth`. With an account, every network rule targets one of its `origins`, no sensitive capability or `clipboardWrite` is allowed, two rules of the same origin and method that may match one URL name the same account or none, and no rule targets a declared OAuth endpoint. The entry is either a declared account (the fields below) or an integrated service the widget names (`IntegratedServiceAccount`).
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `id` | identifier ≤ `MAX_ACCOUNT_ID_BYTES` | yes | `[a-z][a-z0-9-]` of 2 bytes to `MAX_ACCOUNT_ID_BYTES`, without a final or double `-`; `playervox` and `twitch` are reserved. The permission key is `account:<id>`; a network rule names it in `account`. |
-| `name` | text ≤ `MAX_ACCOUNT_NAME_CHARS` | yes | The service's name as the host shows it, plain text of at most `MAX_ACCOUNT_NAME_CHARS`; a name that reads as PlayerVox, OverCrow or Valhallab is refused. |
+| `id` | identifier ≤ `MAX_ACCOUNT_ID_BYTES` | yes | `[a-z][a-z0-9-]` of 2 bytes to `MAX_ACCOUNT_ID_BYTES`, without a final or double `-`; `playervox` is reserved, and an integrated service's ID (`steam`, `twitch`) is refused: name the service instead. The permission key is `account:<id>`; a network rule names it in `account`. |
+| `name` | text ≤ `MAX_ACCOUNT_NAME_CHARS` | yes | The service's name as the host shows it, plain text of at most `MAX_ACCOUNT_NAME_CHARS`; a name that reads as PlayerVox, OverCrow or Valhallab is refused, and so is one that reads as an integrated service (Steam, Valve, Twitch). |
 | `mode` | `key` \| `oauth` | yes | `key`: a personal key or token the user pastes in the host's panel. `oauth`: a sign-in with the publisher's public OAuth client. Exactly the object of the mode is present. |
-| `origins` | list of `origin` ≤ `MAX_ACCOUNT_ORIGINS` | yes | Distinct canonical HTTPS origins of the service, as in network rules. Every network rule of the widget targets one of them. |
+| `origins` | list of `origin` ≤ `MAX_ACCOUNT_ORIGINS` | yes | Distinct canonical HTTPS origins of the service, as in network rules, none of an integrated service. Every network rule of the widget targets one of them. |
 | `required` | boolean | no | Default `true`: the host covers the content until the account is connected. `false`: the widget works without it and opens the host's panel with `account.connect`. |
 | `refusedStatus` | `list of 401 and 403` | no | Distinct statuses, among 401 and 403, by which the service refuses the secret on a route of the account; default `[401]`. Such a response marks the account refused (key) or expired (OAuth) and the call fails with `account_refused`. |
 | `send` | `AccountSend` | no | Key mode only, required there: how the host sends the key. |
@@ -928,6 +928,43 @@ Declaring a permission or capability grants nothing: activation requires consent
 | --- | --- | --- | --- |
 | `name` | text ≤ `MAX_OAUTH_SCOPE_BYTES` | yes | ASCII letters, digits, `-`, `.`, `_`, `:` and `/`, nothing a service decodes or splits on; a name whose letters and digits contain `streamkey` in any case (`stream_key`, `stream-key`…) is refused. |
 | `access` | `read` \| `write` | yes | Whether the scope can change the user's account; `write` is shown to the user and reviewed. |
+
+### `IntegratedServiceAccount`
+
+An entry of `permissions.accounts` that names an integrated service. The account's `id` is the service's; the user connects the service once and every widget granted `account:<service>` shares the connection.
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `service` | `steam` \| `twitch` | yes | An integrated service of the table: PlayerVox defines its origins, how the secret is sent, its key page or OAuth client and the paths no widget reaches; the user connects it once and every widget that names it shares the connection. The account's `id` is the service's: the permission key is `account:<service>` and the routes name it in `account`. Only `scopes` and `required` stand beside it. |
+| `scopes` | list of `scope name` ≤ `MAX_OAUTH_SCOPES` | no | OAuth services only: distinct scopes among those the service offers, all read-only in version 1; default none. |
+| `required` | boolean | no | As for a declared account; default `true`. |
+
+### Integrated services
+
+Defined by PlayerVox, read-only for widgets in version 1: with a service, every network rule uses one of its methods and targets one of its origins; only rules on an origin that receives the secret name the service, stay within an allowed path and cannot reach a refused one (segments compared without case and without final dots, a path parameter matching any segment). A path ending with `/` is a prefix; another is one endpoint, opened only by the scope it names when the widget asks for that scope itself: the token is shared by the widgets of the service. A declared account never uses an address of a service (its origins, or a host under its domains). A manifest that names a service needs its feature. Once a released application announces it, an addition takes a new feature name.
+
+| Service | Name | Feature | Mode | Domains | Secret origins | Image origins | Methods | Allowed paths | Refused paths |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `steam` | Steam | `service-steam` | key | `steampowered.com`, `steamcommunity.com`, `steamstatic.com`, `steam-api.com`, `steamgames.com`, `steamcontent.com`, `steamusercontent.com` | `https://api.steampowered.com` | `https://avatars.steamstatic.com`, `https://avatars.fastly.steamstatic.com`, `https://avatars.akamai.steamstatic.com`, `https://steamcdn-a.akamaihd.net`, `https://cdn.akamai.steamstatic.com`, `https://shared.akamai.steamstatic.com`, `https://shared.fastly.steamstatic.com` | `GET` | `/ISteamUser/`, `/IPlayerService/`, `/ISteamUserStats/`, `/ISteamApps/`, `/ISteamNews/` | `/IEconService/`, `/IGameServersService/`, `/IBroadcastService/`, `/ISteamUserAuth/`, `/IAuthenticationService/`, `/ITwoFactorService/`, `/IEconMarketService/`, `/ISteamMicroTxn/`, `/ISteamMicroTxnSandbox/` |
+| `twitch` | Twitch | `service-twitch` | oauth | `twitch.tv`, `jtvnw.net`, `twitchcdn.net`, `twitchsvc.net` | `https://api.twitch.tv` | `https://static-cdn.jtvnw.net` | `GET` | `/helix/streams`, `/helix/users`, `/helix/channels`, `/helix/games`, `/helix/games/top`, `/helix/clips`, `/helix/videos`, `/helix/schedule`, `/helix/search/categories`, `/helix/search/channels`, `/helix/chat/emotes`, `/helix/chat/emotes/global`, `/helix/chat/badges`, `/helix/chat/badges/global`, `/helix/goals` (`channel:read:goals`), `/helix/channels/followers` (`moderator:read:followers`), `/helix/hypetrain/status` (`channel:read:hype_train`), `/helix/polls` (`channel:read:polls`), `/helix/predictions` (`channel:read:predictions`), `/helix/subscriptions` (`channel:read:subscriptions`), `/helix/bits/leaderboard` (`bits:read`), `/helix/charity/campaigns` (`channel:read:charity`), `/helix/charity/donations` (`channel:read:charity`), `/helix/channels/ads` (`channel:read:ads`), `/helix/channels/vips` (`channel:read:vips`), `/helix/chat/chatters` (`moderator:read:chatters`) | `/helix/streams/key`, `/helix/extensions/`, `/helix/eventsub/` |
+
+### Integrated service scopes
+
+The scopes a widget may ask for, with what the user is told they read.
+
+| Service | Scope | Access | English | French |
+| --- | --- | --- | --- | --- |
+| `twitch` | `channel:read:goals` | read | your goals | vos objectifs |
+| `twitch` | `moderator:read:followers` | read | your followers | vos followers |
+| `twitch` | `channel:read:hype_train` | read | your Hype Trains | vos Hype Trains |
+| `twitch` | `channel:read:polls` | read | your polls | vos sondages |
+| `twitch` | `channel:read:predictions` | read | your predictions | vos prédictions |
+| `twitch` | `channel:read:subscriptions` | read | your subscribers | vos abonnés |
+| `twitch` | `bits:read` | read | your Bits | vos Bits |
+| `twitch` | `channel:read:charity` | read | your charity campaigns | vos collectes caritatives |
+| `twitch` | `channel:read:ads` | read | your ads | vos publicités |
+| `twitch` | `channel:read:vips` | read | your VIPs | vos VIP |
+| `twitch` | `moderator:read:chatters` | read | your chatters | les spectateurs de votre chat |
 
 ## Services
 
@@ -1969,6 +2006,9 @@ Catalog readers check the grammar only. A new publisher may not register a domai
 | òóôõöøōŏőÒÓÔÕÖØŌŎŐоОοΟσ | `o` |
 | рРρΡ | `p` |
 | ŕŗřŔŖŘ | `r` |
+| śŝşšșŚŜŞŠȘ | `s` |
+| ţťŧțŢŤŦȚ | `t` |
+| ṁṃḿṀṂḾ | `m` |
 | ѵѴν | `v` |
 | ŵŴԝԜѡ | `w` |
 | хХχΧ | `x` |

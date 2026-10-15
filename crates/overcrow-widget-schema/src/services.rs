@@ -69,7 +69,7 @@ const MEDIA_PLAYER: &[Field] = &[Field::optional(
 const ACCOUNT: &[Field] = &[Field::required(
     "id",
     ValueType::Identifier(&MAX_ACCOUNT_ID_BYTES),
-    "`id` of an account the manifest declares and the user granted.",
+    "`id` of an account the manifest declares, or of the integrated service it names, that the user granted.",
 )];
 const CURSOR: &[Field] = &[Field::optional(
     "cursor",

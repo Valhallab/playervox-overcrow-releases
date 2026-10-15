@@ -1,5 +1,5 @@
 <!-- The player's Steam ID (public, not a secret), their name and the game
-     they are playing. The key is entered in OverCrow's own panel. -->
+     they are playing. Steam is connected in the Control Center. -->
 <box class="stats">
   <field class="steam-id" label={t("steam-id")} placeholder={t("steam-id-hint")} value={state.steamId} max-length="17" on:input={steamIdTyped(event.value)}/>
   <text class="name">{state.name}</text>

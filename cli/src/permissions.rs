@@ -322,4 +322,45 @@ mod tests {
             assert_eq!(comparison.review, ReviewType::Full);
         }
     }
+
+    fn goals(entry: Value) -> Manifest {
+        manifest(json!({
+            "accounts": [entry],
+            // A public endpoint: every variant below opens it.
+            "network": [{"method": "GET", "origin": "https://api.twitch.tv", "path": "/helix/streams",
+                         "account": "twitch"}],
+        }))
+    }
+
+    #[test]
+    fn an_integrated_service_is_an_account_key_detailed_by_its_declaration() {
+        let manifest = goals(json!({"service": "twitch", "scopes": ["channel:read:goals"]}));
+        let keys = keys(&manifest);
+        let detail = keys.get("account:twitch").expect("account key");
+        assert_eq!(
+            detail.iter().collect::<Vec<_>>(),
+            [r#"{"scopes":["channel:read:goals"],"service":"twitch"}"#]
+        );
+        // Adding the service needs a full review.
+        let before = manifest_without_account();
+        let comparison = compare(&before, &manifest);
+        assert!(comparison.added.contains(&"account:twitch".to_owned()));
+        assert_eq!(comparison.review, ReviewType::Full);
+        // Any change of the declaration is changed: scopes, `required`.
+        for after in [
+            goals(json!({"service": "twitch", "scopes": ["channel:read:goals", "bits:read"]})),
+            goals(json!({"service": "twitch"})),
+            goals(json!({"service": "twitch", "scopes": ["channel:read:goals"], "required": true})),
+        ] {
+            let comparison = compare(&manifest, &after);
+            assert_eq!(comparison.changed, ["account:twitch"]);
+            assert_eq!(comparison.review, ReviewType::Full);
+        }
+    }
+
+    fn manifest_without_account() -> Manifest {
+        manifest(json!({
+            "network": [{"method": "GET", "origin": "https://api.twitch.tv", "path": "/helix/streams"}],
+        }))
+    }
 }

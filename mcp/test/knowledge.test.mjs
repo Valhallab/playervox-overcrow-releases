@@ -57,6 +57,13 @@ test("explanations of permissions and codes", () => {
   assert.match(account.meaning, /never sees/);
   assert.match(account.advice, /origins/);
   assert.equal(explainPermission("account:Steam", "en"), undefined);
+  // Steam and Twitch are integrated services; another account is declared.
+  assert.match(account.meaning, /integrated service/);
+  assert.match(account.advice, /read-only/);
+  assert.match(explainPermission("account:twitch", "fr").meaning, /service intégré/);
+  const declared = explainPermission("account:runlog", "en");
+  assert.doesNotMatch(declared.meaning, /integrated service/);
+  assert.match(declared.advice, /origins/);
   assert.equal(explainError("permission_denied", "en").kind, "service");
   assert.equal(explainError("logic.eval", "en").kind, "diagnostic");
   assert.equal(explainError("manifest.network_rule", "en").kind, "domain");

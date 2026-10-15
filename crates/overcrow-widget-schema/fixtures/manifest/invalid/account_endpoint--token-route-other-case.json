@@ -26,20 +26,20 @@
     "accounts": [
       {
         "id": "twitch-api",
-        "name": "Twitch",
+        "name": "Stream Stats",
         "mode": "oauth",
         "origins": [
-          "https://api.twitch.tv",
-          "https://id.twitch.tv"
+          "https://api.streamstats.example",
+          "https://id.streamstats.example"
         ],
         "oauth": {
           "clientId": "abcdefghijklmnopqrstuvwxyz0123",
           "flow": "device",
-          "device": "https://id.twitch.tv/oauth2/device",
-          "verify": "https://www.twitch.tv/activate",
-          "token": "https://id.twitch.tv/oauth2/token",
-          "revoke": "https://id.twitch.tv/oauth2/revoke",
-          "validate": "https://id.twitch.tv/oauth2/validate",
+          "device": "https://id.streamstats.example/oauth2/device",
+          "verify": "https://streamstats.example/activate",
+          "token": "https://id.streamstats.example/oauth2/token",
+          "revoke": "https://id.streamstats.example/oauth2/revoke",
+          "validate": "https://id.streamstats.example/oauth2/validate",
           "scopes": [
             {
               "name": "moderator:read:followers",
@@ -53,7 +53,7 @@
     ],
     "network": [
       {
-        "origin": "https://api.twitch.tv",
+        "origin": "https://api.streamstats.example",
         "method": "GET",
         "path": "/helix/channels/followers",
         "queryParams": {
@@ -66,7 +66,7 @@
         "account": "twitch-api"
       },
       {
-        "origin": "https://id.twitch.tv",
+        "origin": "https://id.streamstats.example",
         "method": "POST",
         "path": "/OAuth2/Token/",
         "account": "twitch-api"

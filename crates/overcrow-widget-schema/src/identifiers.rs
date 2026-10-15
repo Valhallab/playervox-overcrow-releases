@@ -186,7 +186,8 @@ impl NameError {
     }
 }
 
-/// Letters outside ASCII that read as the letters of the reserved words:
+/// Letters outside ASCII that read as the letters of the reserved words and
+/// of the integrated services' names:
 /// Latin letters with diacritics and Cyrillic and Greek look-alikes, with
 /// the ASCII letter they fold to. Fullwidth ASCII folds too.
 pub const CONFUSABLE_LETTERS: &[(&str, char)] = &[
@@ -200,6 +201,9 @@ pub const CONFUSABLE_LETTERS: &[(&str, char)] = &[
     ("òóôõöøōŏőÒÓÔÕÖØŌŎŐоОοΟσ", 'o'),
     ("рРρΡ", 'p'),
     ("ŕŗřŔŖŘ", 'r'),
+    ("śŝşšșŚŜŞŠȘ", 's'),
+    ("ţťŧțŢŤŦȚ", 't'),
+    ("ṁṃḿṀṂḾ", 'm'),
     ("ѵѴν", 'v'),
     ("ŵŴԝԜѡ", 'w'),
     ("хХχΧ", 'x'),
@@ -292,6 +296,18 @@ pub fn reads_as_reserved_name(name: &str) -> bool {
         || RESERVED_HANDLE_WORDS
             .iter()
             .any(|word| folded.contains(&confusable_skeleton(word)))
+}
+
+/// Whether a displayed name reads as one of `words` (lowercase ASCII
+/// letters), by the same folding as [`reads_as_reserved_name`]: a declared
+/// account named like an integrated service (`Steam`, `Tw1tch`).
+pub fn reads_as_any(name: &str, words: &[&str]) -> bool {
+    let letters: String = name.chars().filter_map(ascii_letter).collect();
+    // `rn` reads as `m` in most fonts (`Stearn`).
+    let folded = confusable_skeleton(&letters).replace("rn", "m");
+    words
+        .iter()
+        .any(|word| folded.contains(&confusable_skeleton(word)))
 }
 
 /// The handle grammar: `MIN_HANDLE_BYTES`..=`MAX_HANDLE_BYTES` of
@@ -597,7 +613,7 @@ mod tests {
 
     /// The generated table is sorted (it is searched by halves), lists each
     /// character once, never ASCII nor a stylized block, and folds to the
-    /// reserved words' letters only.
+    /// reserved words' and the integrated services' letters only.
     #[test]
     fn unicode_confusables_are_sorted_and_fold_to_reserved_letters() {
         for pair in UNICODE_CONFUSABLE_LETTERS.windows(2) {
@@ -606,7 +622,7 @@ mod tests {
         for (look_alike, ascii) in UNICODE_CONFUSABLE_LETTERS {
             assert!(!look_alike.is_ascii(), "{look_alike}");
             assert!(
-                "abcehiloprvwxy01348".contains(*ascii),
+                "abcehilmoprstvwxy0134578".contains(*ascii),
                 "{look_alike} → {ascii}"
             );
             assert!(

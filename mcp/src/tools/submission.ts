@@ -423,6 +423,20 @@ function textsToWrite(
 export function describeReview(item: Record<string, unknown>): string {
   switch (item.kind) {
     case "account": {
+      if (typeof item.service === "string") {
+        const origins = Array.isArray(item.origins)
+          ? item.origins.slice(0, 8).map((origin) => cleanLine(String(origin), 200))
+          : [];
+        const scopes = Array.isArray(item.scopes)
+          ? (item.scopes as Record<string, unknown>[])
+              .slice(0, 16)
+              .map(
+                (scope) =>
+                  `${cleanLine(String(scope.name), 128)} (${cleanLine(String(scope.access), 8)})`,
+              )
+          : [];
+        return `${cleanLine(String(item.name), 32)} integrated service (${cleanLine(item.service, 32)}), sent only to ${origins.join(", ")}; ${scopes.length === 0 ? "no scope" : `scopes ${scopes.join(", ")}`}.`;
+      }
       const origins = Array.isArray(item.origins)
         ? item.origins.slice(0, 8).map((origin) => cleanLine(String(origin), 200))
         : [];

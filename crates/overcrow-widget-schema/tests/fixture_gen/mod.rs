@@ -520,16 +520,32 @@ fn with_account(target: &Value) -> Value {
     edit(target, |target| {
         target["manifest"]["permissions"] = json!({
             "accounts": [{
-                "id": "steam",
-                "name": "Steam",
+                "id": "runlog",
+                "name": "Run Log",
                 "mode": "key",
-                "origins": ["https://api.steampowered.com"],
-                "send": {"header": "X-WebAPI-Key"},
+                "origins": ["https://api.runlog.example"],
+                "send": {"header": "X-Api-Key"},
                 "key": {
                     "format": {"charset": "hex", "minLength": 32, "maxLength": 32},
-                    "page": "https://steamcommunity.com/dev/apikey"
+                    "page": "https://runlog.example/settings/api"
                 }
             }],
+            "network": [{
+                "origin": "https://api.runlog.example",
+                "method": "GET",
+                "path": "/v1/runs",
+                "account": "runlog"
+            }]
+        });
+    })
+}
+
+/// A target whose manifest names the integrated Steam service: it needs
+/// `service-steam`, which the catalog v1 and the seed never carry either.
+fn with_service(target: &Value) -> Value {
+    edit(target, |target| {
+        target["manifest"]["permissions"] = json!({
+            "accounts": [{"service": "steam"}],
             "network": [{
                 "origin": "https://api.steampowered.com",
                 "method": "GET",
@@ -681,6 +697,10 @@ fn catalogs(out: &mut BTreeMap<String, Vec<u8>>, packages: &BTreeMap<&str, Built
     signed_invalid(
         "features--account-target",
         catalog_payload(vec![clock.clone(), with_account(&weather)]),
+    );
+    signed_invalid(
+        "features--service-target",
+        catalog_payload(vec![clock.clone(), with_service(&weather)]),
     );
     signed_invalid(
         "time--fractional-seconds",
@@ -909,6 +929,10 @@ fn seeds(out: &mut BTreeMap<String, Vec<u8>>, packages: &BTreeMap<&str, Built>) 
         invalid(
             "features--account-target",
             &seed_payload(vec![with_account(&clock)]),
+        ),
+        invalid(
+            "features--service-target",
+            &seed_payload(vec![with_service(&clock)]),
         ),
         invalid(
             "seed_target--revoked",

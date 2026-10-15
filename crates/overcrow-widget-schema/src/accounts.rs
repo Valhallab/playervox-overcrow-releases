@@ -17,7 +17,8 @@ use std::collections::BTreeSet;
 
 use serde_json::{Map, Value};
 
-use crate::identifiers::reads_as_reserved_name;
+use crate::identifiers::{reads_as_any, reads_as_reserved_name};
+use crate::integrated::{IntegratedService, READER_GUARDS, service_named};
 use crate::json::{has_exact_fields, integer_in};
 use crate::limits::{
     MAX_ACCOUNT_ID_BYTES, MAX_ACCOUNT_KEY_BYTES, MAX_ACCOUNT_NAME_CHARS, MAX_ACCOUNT_ORIGINS,
@@ -86,12 +87,12 @@ pub const ACCOUNT_FIELDS: &[Field] = &[
     Field::required(
         "id",
         ValueType::Identifier(&MAX_ACCOUNT_ID_BYTES),
-        "`[a-z][a-z0-9-]` of 2 bytes to `MAX_ACCOUNT_ID_BYTES`, without a final or double `-`; `playervox` and `twitch` are reserved. The permission key is `account:<id>`; a network rule names it in `account`.",
+        "`[a-z][a-z0-9-]` of 2 bytes to `MAX_ACCOUNT_ID_BYTES`, without a final or double `-`; `playervox` is reserved, and an integrated service's ID (`steam`, `twitch`) is refused: name the service instead. The permission key is `account:<id>`; a network rule names it in `account`.",
     ),
     Field::required(
         "name",
         ValueType::Chars(&MAX_ACCOUNT_NAME_CHARS),
-        "The service's name as the host shows it, plain text of at most `MAX_ACCOUNT_NAME_CHARS`; a name that reads as PlayerVox, OverCrow or Valhallab is refused.",
+        "The service's name as the host shows it, plain text of at most `MAX_ACCOUNT_NAME_CHARS`; a name that reads as PlayerVox, OverCrow or Valhallab is refused, and so is one that reads as an integrated service (Steam, Valve, Twitch).",
     ),
     Field::required(
         "mode",
@@ -101,7 +102,7 @@ pub const ACCOUNT_FIELDS: &[Field] = &[
     Field::required(
         "origins",
         ValueType::ListOf("origin", &MAX_ACCOUNT_ORIGINS),
-        "Distinct canonical HTTPS origins of the service, as in network rules. Every network rule of the widget targets one of them.",
+        "Distinct canonical HTTPS origins of the service, as in network rules, none of an integrated service. Every network rule of the widget targets one of them.",
     ),
     Field::optional(
         "required",
@@ -127,6 +128,26 @@ pub const ACCOUNT_FIELDS: &[Field] = &[
         "oauth",
         ValueType::Record("AccountOAuth"),
         "OAuth mode only, required there. The host always sends `Authorization: Bearer <token>`.",
+    ),
+];
+
+/// An entry of `permissions.accounts` that names an integrated service
+/// instead of declaring an account (ADR 0009 §10).
+pub const SERVICE_ACCOUNT_FIELDS: &[Field] = &[
+    Field::required(
+        "service",
+        ValueType::Keyword(&["steam", "twitch"]),
+        "An integrated service of the table: PlayerVox defines its origins, how the secret is sent, its key page or OAuth client and the paths no widget reaches; the user connects it once and every widget that names it shares the connection. The account's `id` is the service's: the permission key is `account:<service>` and the routes name it in `account`. Only `scopes` and `required` stand beside it.",
+    ),
+    Field::optional(
+        "scopes",
+        ValueType::ListOf("scope name", &MAX_OAUTH_SCOPES),
+        "OAuth services only: distinct scopes among those the service offers, all read-only in version 1; default none.",
+    ),
+    Field::optional(
+        "required",
+        ValueType::Bool,
+        "As for a declared account; default `true`.",
     ),
 ];
 
@@ -398,7 +419,12 @@ pub struct Account {
     pub id: String,
     pub name: String,
     pub mode: AccountMode,
+    /// The origins that receive the secret: every origin of a declared
+    /// account, the secret origins of an integrated service.
     pub origins: Vec<String>,
+    /// An integrated service's other origins (images): the widget may reach
+    /// them, never with the secret. Empty for a declared account.
+    pub image_origins: Vec<String>,
     pub required: bool,
     pub refused_status: Vec<u16>,
     /// Key mode only.
@@ -410,9 +436,20 @@ pub struct Account {
     /// The declaration in compact JSON with sorted keys: the detail of the
     /// permission key `account:<id>`.
     pub canonical: String,
+    /// The integrated service the entry names; `None` for a declared
+    /// account. Its definition fills the fields above.
+    pub service: Option<&'static IntegratedService>,
 }
 
 impl Account {
+    /// Every origin a widget with this account may reach.
+    pub fn all_origins(&self) -> impl Iterator<Item = &str> {
+        self.origins
+            .iter()
+            .chain(&self.image_origins)
+            .map(String::as_str)
+    }
+
     /// Whether a scope can change the user's account.
     pub fn has_write_scope(&self) -> bool {
         self.oauth.as_ref().is_some_and(|oauth| {
@@ -438,16 +475,31 @@ pub(crate) fn validate_accounts(value: &Value) -> Result<Vec<Account>, ManifestE
 fn validate_account(value: &Value) -> Result<Account, ManifestError> {
     let invalid = ManifestError::Account;
     let object = value.as_object().ok_or(ManifestError::Shape)?;
+    if object.contains_key("service") {
+        return validate_service_account(object, value);
+    }
     if !has_exact_fields(object, &[ACCOUNT_FIELDS]) {
         return Err(ManifestError::Shape);
     }
     let id = object["id"].as_str().ok_or(invalid)?;
+    // A declared account never stands for an integrated service: its ID,
+    // its name and its addresses would escape the service's guards. The
+    // readers' guard is frozen (`READER_GUARDS`).
+    if READER_GUARDS.iter().any(|guard| guard.id == id) {
+        return Err(ManifestError::AccountService);
+    }
     if !valid_account_id(id) {
         return Err(invalid);
     }
     let name = object["name"].as_str().ok_or(invalid)?;
     if !valid_label_text(name, MAX_ACCOUNT_NAME_CHARS.value) || reads_as_reserved_name(name) {
         return Err(invalid);
+    }
+    if READER_GUARDS
+        .iter()
+        .any(|guard| reads_as_any(name, guard.names))
+    {
+        return Err(ManifestError::AccountService);
     }
     let mode = match object["mode"].as_str() {
         Some("key") => AccountMode::Key,
@@ -463,6 +515,9 @@ fn validate_account(value: &Value) -> Result<Account, ManifestError> {
         let origin = origin.as_str().ok_or(invalid)?;
         if !canonical_https_origin(origin) || !unique.insert(origin) {
             return Err(invalid);
+        }
+        if belongs_to_a_service(origin) {
+            return Err(ManifestError::AccountService);
         }
     }
     let required = match object.get("required") {
@@ -523,6 +578,26 @@ fn validate_account(value: &Value) -> Result<Account, ManifestError> {
             }
         }
     }
+    // Nor does it send the player to a service's pages: the player would get
+    // their real Steam key, or sign in at Twitch, for another server.
+    let pages = key
+        .iter()
+        .map(|key| key.page.as_str())
+        .chain(oauth.iter().flat_map(OAuth::endpoints));
+    for url in pages {
+        if belongs_to_a_service(url) {
+            return Err(ManifestError::AccountService);
+        }
+    }
+    // Nor does it borrow a service's OAuth client: the service's consent
+    // page would show PlayerVox's application.
+    if oauth.as_ref().is_some_and(|oauth| {
+        READER_GUARDS
+            .iter()
+            .any(|guard| guard.client_ids.contains(&oauth.client_id.as_str()))
+    }) {
+        return Err(ManifestError::AccountService);
+    }
     // Last, so that the dedicated code names the only fault.
     if stream_key {
         return Err(ManifestError::AccountScope);
@@ -538,11 +613,119 @@ fn validate_account(value: &Value) -> Result<Account, ManifestError> {
         key,
         oauth,
         canonical: value.to_string(),
+        image_origins: Vec::new(),
+        service: None,
     })
+}
+
+/// `{ "service": …, "scopes"?: […], "required"?: bool }`: the account is
+/// the service's, as the table defines it.
+fn validate_service_account(
+    object: &Map<String, Value>,
+    value: &Value,
+) -> Result<Account, ManifestError> {
+    let invalid = ManifestError::Account;
+    if !has_exact_fields(object, &[SERVICE_ACCOUNT_FIELDS]) {
+        return Err(ManifestError::Shape);
+    }
+    let service = object["service"]
+        .as_str()
+        .and_then(service_named)
+        .ok_or(invalid)?;
+    let required = match object.get("required") {
+        None => true,
+        Some(required) => required.as_bool().ok_or(invalid)?,
+    };
+    let mut scopes = Vec::new();
+    if let Some(requested) = object.get("scopes") {
+        let requested = requested.as_array().ok_or(invalid)?;
+        // A key service has no scope: even an empty list is a mistake.
+        if service.mode != AccountMode::OAuth || requested.len() as u64 > MAX_OAUTH_SCOPES.value {
+            return Err(invalid);
+        }
+        for name in requested {
+            let offered = name
+                .as_str()
+                .and_then(|name| service.scope(name))
+                .ok_or(invalid)?;
+            if scopes
+                .iter()
+                .any(|scope: &Scope| scope.name == offered.name)
+            {
+                return Err(invalid);
+            }
+            scopes.push(Scope {
+                name: offered.name.to_owned(),
+                access: offered.access,
+            });
+        }
+    }
+    let origins: Vec<String> = service
+        .secret_origins
+        .iter()
+        .map(|origin| (*origin).to_owned())
+        .collect();
+    let image_origins: Vec<String> = service
+        .origins
+        .iter()
+        .map(|origin| (*origin).to_owned())
+        .collect();
+    let oauth = service.oauth.map(|oauth| OAuth {
+        client_id: oauth.client_id.to_owned(),
+        flow: oauth.flow,
+        authorize: oauth.authorize.map(str::to_owned),
+        token: oauth.token.to_owned(),
+        device: oauth.device.map(str::to_owned),
+        verify: oauth.verify.map(str::to_owned),
+        revoke: oauth.revoke.map(str::to_owned),
+        validate: oauth.validate.map(str::to_owned),
+        scopes,
+        scope_param: oauth.scope_param,
+        client_id_header: oauth.client_id_header.map(str::to_owned),
+    });
+    Ok(Account {
+        id: service.id.to_owned(),
+        name: service.name.to_owned(),
+        mode: service.mode,
+        origins,
+        image_origins,
+        required,
+        refused_status: service.refused_status.to_vec(),
+        send: service.send.map(|send| Delivery::Header {
+            name: send.name.to_owned(),
+            scheme: send.scheme.map(str::to_owned),
+        }),
+        key: service.key.map(|key| KeySettings {
+            format: key.format,
+            page: key.page.to_owned(),
+        }),
+        oauth,
+        canonical: value.to_string(),
+        service: Some(service),
+    })
+}
+
+/// Whether an `https://` origin or URL is an integrated service's: one of
+/// its origins, or a host under one of its domains.
+fn belongs_to_a_service(url: &str) -> bool {
+    let host = url
+        .strip_prefix("https://")
+        .unwrap_or(url)
+        .split(['/', ':', '?', '#'])
+        .next()
+        .unwrap_or_default()
+        .to_ascii_lowercase();
+    READER_GUARDS.iter().any(|guard| guard.owns_host(&host))
 }
 
 /// `[a-z][a-z0-9-]{1,31}`, no final or double hyphen, not reserved.
 pub fn valid_account_id(id: &str) -> bool {
+    account_id_grammar(id) && !RESERVED_ACCOUNT_IDS.contains(&id)
+}
+
+/// `[a-z][a-z0-9-]{1,31}`, no final or double hyphen: the grammar of every
+/// account ID, the host's and the integrated services' included.
+pub fn account_id_grammar(id: &str) -> bool {
     let bytes = id.as_bytes();
     (2..=MAX_ACCOUNT_ID_BYTES.value as usize).contains(&bytes.len())
         && bytes[0].is_ascii_lowercase()
@@ -551,7 +734,14 @@ pub fn valid_account_id(id: &str) -> bool {
             .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || *byte == b'-')
         && !id.ends_with('-')
         && !id.contains("--")
-        && !RESERVED_ACCOUNT_IDS.contains(&id)
+}
+
+/// A scope name: 1 to `MAX_OAUTH_SCOPE_BYTES` of the bytes services name
+/// scopes with ([`scope_byte`]).
+pub fn valid_scope_name(name: &str) -> bool {
+    !name.is_empty()
+        && name.len() as u64 <= MAX_OAUTH_SCOPE_BYTES.value
+        && name.bytes().all(scope_byte)
 }
 
 fn validate_send(value: &Value) -> Result<Delivery, ManifestError> {
@@ -736,11 +926,7 @@ fn validate_oauth(value: &Value) -> Result<(OAuth, bool), ManifestError> {
             return Err(ManifestError::Shape);
         }
         let name = scope["name"].as_str().ok_or(invalid)?;
-        if name.is_empty()
-            || name.len() as u64 > MAX_OAUTH_SCOPE_BYTES.value
-            || !name.bytes().all(scope_byte)
-            || !names.insert(name)
-        {
+        if !valid_scope_name(name) || !names.insert(name) {
             return Err(invalid);
         }
         let access = match scope["access"].as_str() {
@@ -940,9 +1126,36 @@ pub(crate) fn validate_account_routes(
     let path = |rule: &Map<String, Value>| rule["path"].as_str().unwrap_or_default().to_owned();
     if rules
         .iter()
-        .any(|rule| !account.origins.contains(&origin(rule)))
+        .any(|rule| !account.all_origins().any(|own| own == origin(rule)))
     {
         return Err(ManifestError::AccountOrigin);
+    }
+    // An integrated service's own guards: the secret goes to its secret
+    // origins only, and every route is read-only and stays on the paths the
+    // table allows.
+    if let Some(service) = account.service {
+        for rule in &rules {
+            let on_secret_origin = service.secret_origins.contains(&origin(rule).as_str());
+            if account_of(rule).is_some() && !on_secret_origin {
+                return Err(ManifestError::AccountOrigin);
+            }
+        }
+        // The token is shared: a widget reaches only what its own scopes open.
+        let scopes: Vec<&str> = account
+            .oauth
+            .iter()
+            .flat_map(|oauth| &oauth.scopes)
+            .map(|scope| scope.name.as_str())
+            .collect();
+        for rule in &rules {
+            let method = rule["method"].as_str().unwrap_or_default();
+            if !service.methods.contains(&method)
+                || (service.secret_origins.contains(&origin(rule).as_str())
+                    && !service.route_path_allowed(&path(rule), &scopes))
+            {
+                return Err(ManifestError::ServiceRoute);
+            }
+        }
     }
     if let Some(oauth) = &account.oauth {
         for endpoint in oauth.endpoints() {

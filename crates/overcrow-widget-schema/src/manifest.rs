@@ -140,7 +140,7 @@ pub const PERMISSION_FIELDS: &[Field] = &[
     Field::optional(
         "accounts",
         ValueType::ListOf("Account", &MAX_ACCOUNTS),
-        "The user's account on a third-party service, which the host keeps and adds to the network rules that name it; the widget never sees the secret. Present only with one account. With an account, every network rule targets one of its `origins`, and no sensitive capability or `clipboardWrite` is allowed.",
+        "The user's account on a third-party service, which the host keeps and adds to the network rules that name it; the widget never sees the secret. Present only with one entry: a declared account, or an integrated service the widget names. With an account, every network rule targets one of its origins, and no sensitive capability or `clipboardWrite` is allowed.",
     ),
     Field::optional(
         "network",
@@ -207,6 +207,13 @@ pub enum ManifestError {
     AccountEndpoint,
     /// An OAuth scope that would hand the broadcast key to the widget.
     AccountScope,
+    /// A declared account that takes the ID, the name or an origin of an
+    /// integrated service: the widget names the service instead.
+    AccountService,
+    /// With an integrated service, a network rule its guards refuse: a
+    /// method other than the service's, or a path outside its allowed
+    /// prefixes or that may reach a refused one.
+    ServiceRoute,
 }
 
 impl ManifestError {
@@ -233,6 +240,8 @@ impl ManifestError {
             Self::AccountOverlap => "account_overlap",
             Self::AccountEndpoint => "account_endpoint",
             Self::AccountScope => "account_scope",
+            Self::AccountService => "account_service",
+            Self::ServiceRoute => "service_route",
         }
     }
 }
@@ -259,12 +268,15 @@ impl Manifest {
     }
 
     /// The catalog v2 features a reader must support to run this manifest
-    /// (`account-key`, `account-oauth`); empty for a manifest without an
-    /// account.
+    /// (`account-key`, `account-oauth`, or the integrated service's
+    /// `service-steam`…); empty for a manifest without an account.
     pub fn features(&self) -> BTreeSet<&'static str> {
         self.accounts
             .iter()
-            .map(|account| account.mode.feature())
+            .map(|account| match account.service {
+                Some(service) => service.feature,
+                None => account.mode.feature(),
+            })
             .collect()
     }
 

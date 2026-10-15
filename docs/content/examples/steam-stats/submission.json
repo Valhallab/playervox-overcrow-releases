@@ -6,7 +6,7 @@
   "justifications": [
     {
       "permission": "account:steam",
-      "text": "Reads the player's own Steam profile with their Steam Web API key, in a header, on one GET route; it writes nothing."
+      "text": "Reads the player's own Steam profile with the integrated Steam service, on one GET route; it writes nothing."
     },
     {
       "permission": "network:GET https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/",
@@ -17,5 +17,5 @@
       "text": "Keeps the player's public Steam ID between two games."
     }
   ],
-  "reviewMessage": "Test with any Steam account and its key from steamcommunity.com/dev/apikey; the widget sends only the Steam ID the player typed."
+  "reviewMessage": "Test with any Steam account connected in Connected services; the widget sends only the Steam ID the player typed."
 }

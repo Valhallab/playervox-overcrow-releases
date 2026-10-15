@@ -82,11 +82,17 @@ pub const INITIAL_CATEGORIES: &[(&str, &str, &str)] = &[
 ];
 
 pub use crate::accounts::{FEATURE_ACCOUNT_KEY, FEATURE_ACCOUNT_OAUTH};
+pub use crate::integrated::{FEATURE_SERVICE_STEAM, FEATURE_SERVICE_TWITCH};
 
 /// Every feature name of `requires` this schema defines. A reader passes
 /// the ones it implements to [`validate_catalog`]; a tool that only shows
 /// entries (the website) may pass them all.
-pub const KNOWN_FEATURES: &[&str] = &[FEATURE_ACCOUNT_KEY, FEATURE_ACCOUNT_OAUTH];
+pub const KNOWN_FEATURES: &[&str] = &[
+    FEATURE_ACCOUNT_KEY,
+    FEATURE_ACCOUNT_OAUTH,
+    FEATURE_SERVICE_STEAM,
+    FEATURE_SERVICE_TWITCH,
+];
 
 pub const ENVELOPE_FIELDS: &[Field] = &[
     Field::required(
@@ -1755,16 +1761,35 @@ mod tests {
         let target = &mut payload["targets"][3];
         target["manifest"]["permissions"] = json!({
             "accounts": [{
-                "id": "steam",
-                "name": "Steam",
+                "id": "runlog",
+                "name": "Run Log",
                 "mode": "key",
-                "origins": ["https://api.steampowered.com"],
-                "send": {"header": "X-WebAPI-Key"},
+                "origins": ["https://api.runlog.example"],
+                "send": {"header": "X-Api-Key"},
                 "key": {
                     "format": {"charset": "hex", "minLength": 32, "maxLength": 32},
-                    "page": "https://steamcommunity.com/dev/apikey"
+                    "page": "https://runlog.example/settings/api"
                 }
             }],
+            "network": [{
+                "origin": "https://api.runlog.example",
+                "method": "GET",
+                "path": "/v1/runs",
+                "account": "runlog"
+            }]
+        });
+        if let Some(requires) = requires {
+            target["requires"] = requires;
+        }
+    }
+
+    /// `nightowl.focus` 0.3.0 naming the Steam service (`service-steam`).
+    fn with_service(payload: &mut Value, requires: Option<Value>) {
+        payload["widgets"][2]["listing"]["privacyPolicyUrl"] =
+            json!("https://nightowl.example/privacy");
+        let target = &mut payload["targets"][3];
+        target["manifest"]["permissions"] = json!({
+            "accounts": [{"service": "steam"}],
             "network": [{
                 "origin": "https://api.steampowered.com",
                 "method": "GET",
@@ -1786,7 +1811,15 @@ mod tests {
 
     #[test]
     fn the_reader_passes_the_features_it_supports() {
-        assert_eq!(KNOWN_FEATURES, ["account-key", "account-oauth"]);
+        assert_eq!(
+            KNOWN_FEATURES,
+            [
+                "account-key",
+                "account-oauth",
+                "service-steam",
+                "service-twitch"
+            ]
+        );
         let mut payload = valid();
         with_account(&mut payload, Some(json!(["account-key"])));
         // A reader that does not announce the feature skips the target and
@@ -1802,6 +1835,25 @@ mod tests {
         assert_eq!(catalog.widgets.len(), 3);
         let catalog = check_with(&payload, KNOWN_FEATURES).expect("kept");
         assert!(has_focus(&catalog));
+    }
+
+    #[test]
+    fn a_service_target_needs_the_services_feature() {
+        let mut payload = valid();
+        with_service(&mut payload, Some(json!(["service-steam"])));
+        for supported in [&[][..], &["account-key"], &["service-twitch"]] {
+            let catalog = check_with(&payload, supported).expect("skipped, not refused");
+            assert!(!has_focus(&catalog), "{supported:?}");
+        }
+        let catalog = check_with(&payload, &["service-steam"]).expect("kept");
+        assert!(has_focus(&catalog));
+        // A target that names the service without its feature is skipped.
+        for requires in [None, Some(json!(["account-key"]))] {
+            let mut payload = valid();
+            with_service(&mut payload, requires.clone());
+            let catalog = check_with(&payload, KNOWN_FEATURES).expect("skipped");
+            assert!(!has_focus(&catalog), "{requires:?}");
+        }
     }
 
     #[test]

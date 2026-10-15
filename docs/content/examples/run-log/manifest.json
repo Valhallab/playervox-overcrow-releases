@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "nova.run-log",
+  "version": "1.0.0",
+  "name": { "en": "Run log", "fr": "Journal de course" },
+  "sizing": {
+    "fit": "none",
+    "preferred": { "width": 260, "height": 120 },
+    "min": { "width": 200, "height": 96 },
+    "max": { "width": 480, "height": 320 }
+  },
+  "permissions": {
+    "accounts": [
+      {
+        "id": "runlog",
+        "name": "Run Log",
+        "mode": "key",
+        "origins": ["https://api.runlog.example"],
+        "send": { "header": "X-Api-Key" },
+        "key": {
+          "format": { "charset": "alnum", "minLength": 32, "maxLength": 32 },
+          "page": "https://runlog.example/settings/api"
+        },
+        "refusedStatus": [401, 403]
+      }
+    ],
+    "network": [
+      {
+        "origin": "https://api.runlog.example",
+        "method": "GET",
+        "path": "/v1/me/runs/latest",
+        "maxResponseBytes": 16384,
+        "account": "runlog"
+      }
+    ]
+  }
+}

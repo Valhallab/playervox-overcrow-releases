@@ -4,7 +4,7 @@
   "loading": "Loading…",
   "updated": "Up to date",
   "no-id": "Enter your Steam ID",
-  "not_connected": "Waiting for your Steam key",
+  "not_connected": "Waiting for Steam",
   "account_refused": "Steam refused the key",
   "unavailable": "Steam is unavailable",
   "refresh": "Refresh"

@@ -1,6 +1,7 @@
-// The player's Steam name and the game they are playing, read with their
-// own Steam Web API key. PlayerVox OverCrow keeps the key and adds it to the
-// requests of the route that names the account: the widget never sees it.
+// The player's Steam name and the game they are playing, read with the
+// integrated Steam service: the player connects Steam once in PlayerVox
+// OverCrow, which adds the key to the requests of the route that names the
+// service. The widget never sees the key.
 import { account, http, initState, ServiceError, storage, timers } from "@overcrow/sdk";
 
 declare module "@overcrow/sdk" {
@@ -35,8 +36,8 @@ async function load(): Promise<void> {
     state.game = typeof player.gameextrainfo === "string" ? player.gameextrainfo : "";
     state.status = "updated";
   } catch (error) {
-    // not_connected until the user saves a key, account_refused when Steam
-    // refuses it: OverCrow shows its own panel, the widget only waits.
+    // not_connected until the player connects Steam, account_refused when
+    // Steam refuses the key: OverCrow shows its own panel, the widget waits.
     const code = error instanceof ServiceError ? error.code : "";
     state.status = code === "not_connected" || code === "account_refused" ? code : "unavailable";
   }
@@ -52,7 +53,7 @@ export function refresh(): void {
   void load();
 }
 
-// Read again as soon as the key is saved or replaced.
+// Read again as soon as Steam is connected, or its key replaced.
 account.subscribe({ id: "steam" }, (update) => {
   if (update.ok && update.value.state === "connected") {
     void load();

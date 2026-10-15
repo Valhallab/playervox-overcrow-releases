@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "nova.steam-progress",
+  "version": "1.0.0",
+  "name": {
+    "en": "Steam progress",
+    "fr": "Progression Steam"
+  },
+  "sizing": {
+    "fit": "height",
+    "preferred": {
+      "width": 300,
+      "height": 170
+    },
+    "min": {
+      "width": 200,
+      "height": 96
+    },
+    "max": {
+      "width": 480,
+      "height": 480
+    }
+  },
+  "permissions": {
+    "storage": true,
+    "accounts": [
+      {
+        "service": "steam"
+      }
+    ],
+    "network": [
+      {
+        "origin": "https://api.steampowered.com",
+        "method": "POST",
+        "path": "/ISteamUserStats/GetPlayerAchievements/v1/",
+        "queryParams": {
+          "steamid": {
+            "type": "slug",
+            "maxLength": 17,
+            "required": true
+          },
+          "appid": {
+            "type": "integer",
+            "min": 1,
+            "max": 99999999,
+            "required": true
+          }
+        },
+        "account": "steam"
+      },
+      {
+        "origin": "https://steamcdn-a.akamaihd.net",
+        "method": "GET",
+        "path": "/steamcommunity/public/images/apps/{app}/{file}",
+        "pathParams": {
+          "app": {
+            "type": "integer",
+            "min": 1,
+            "max": 99999999
+          },
+          "file": {
+            "type": "slug",
+            "maxLength": 64
+          }
+        }
+      }
+    ]
+  }
+}

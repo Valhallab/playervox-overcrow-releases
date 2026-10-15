@@ -409,3 +409,76 @@ test("the secret fix names no unreleased manifest field", async () => {
   assert.ok(finding);
   assert.doesNotMatch(finding.fix, /permissions\.accounts/);
 });
+
+test("a widget's own account on Steam or Twitch is reported, a named service is not", async () => {
+  const declared = (fields) => ({
+    mode: "key",
+    send: { header: "X-Api-Key" },
+    key: {
+      format: { charset: "alnum", minLength: 16, maxLength: 64 },
+      page: "https://runlog.example/key",
+    },
+    ...fields,
+  });
+  const cases = [
+    [
+      "by origin",
+      declared({ id: "stats", name: "Stats", origins: ["https://api.steampowered.com"] }),
+      1,
+    ],
+    ["by ID", declared({ id: "twitch", name: "Live", origins: ["https://api.live.example"] }), 1],
+    [
+      "by name",
+      declared({ id: "stats", name: "Steam", origins: ["https://api.stats.example"] }),
+      1,
+    ],
+    [
+      "another service",
+      declared({ id: "runlog", name: "Run Log", origins: ["https://api.runlog.example"] }),
+      0,
+    ],
+    ["the service itself", { service: "steam" }, 0],
+    [
+      "the Steam key page",
+      declared({
+        id: "stats",
+        name: "Stats",
+        origins: ["https://api.stats.example"],
+        key: {
+          format: { charset: "hex", minLength: 32, maxLength: 32 },
+          page: "https://steamcommunity.com/dev/apikey",
+        },
+      }),
+      1,
+    ],
+    [
+      "a Steam domain",
+      declared({ id: "stats", name: "Stats", origins: ["https://store.steampowered.com"] }),
+      1,
+    ],
+    [
+      "named with an accent",
+      declared({ id: "stats", name: "Šteam", origins: ["https://api.stats.example"] }),
+      1,
+    ],
+    [
+      "named with rn",
+      declared({ id: "stats", name: "Stearn", origins: ["https://api.stats.example"] }),
+      1,
+    ],
+  ];
+  for (const [label, account, expected] of cases) {
+    const directory = widget(`integrated-${label.replaceAll(" ", "-")}`, {
+      "manifest.json": manifest({ accounts: [account] }),
+    });
+    const found = (await auditWidget(directory)).findings.filter(
+      (finding) => finding.rule === "integrated-service",
+    );
+    assert.equal(found.length, expected, label);
+    for (const finding of found) {
+      assert.equal(finding.severity, "high");
+      // The fix names no manifest field the published applications refuse.
+      assert.doesNotMatch(finding.fix, /permissions\.accounts|"service"/);
+    }
+  }
+});

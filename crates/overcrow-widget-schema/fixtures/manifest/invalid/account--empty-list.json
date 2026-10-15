@@ -27,7 +27,7 @@
     "accounts": [],
     "network": [
       {
-        "origin": "https://api.steampowered.com",
+        "origin": "https://api.runlog.example",
         "method": "GET",
         "path": "/ISteamUser/GetPlayerSummaries/v2/",
         "queryParams": {
@@ -40,7 +40,7 @@
         "maxResponseBytes": 65536
       },
       {
-        "origin": "https://avatars.steamstatic.com",
+        "origin": "https://img.runlog.example",
         "method": "GET",
         "path": "/{file}",
         "pathParams": {

@@ -11,20 +11,7 @@
     "max": { "width": 480, "height": 320 }
   },
   "permissions": {
-    "accounts": [
-      {
-        "id": "steam",
-        "name": "Steam",
-        "mode": "key",
-        "origins": ["https://api.steampowered.com"],
-        "send": { "header": "X-WebAPI-Key" },
-        "key": {
-          "format": { "charset": "hex", "minLength": 32, "maxLength": 32 },
-          "page": "https://steamcommunity.com/dev/apikey"
-        },
-        "refusedStatus": [401, 403]
-      }
-    ],
+    "accounts": [{ "service": "steam" }],
     "network": [
       {
         "origin": "https://api.steampowered.com",

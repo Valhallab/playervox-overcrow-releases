@@ -20,7 +20,9 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 
-use overcrow_widget_schema::accounts::{RESERVED_ACCOUNT_IDS, valid_account_id};
+use overcrow_widget_schema::accounts::{
+    RESERVED_ACCOUNT_IDS, account_id_grammar, valid_account_id,
+};
 use overcrow_widget_schema::ipc::FAULT_CATEGORY_NAMES;
 use overcrow_widget_schema::limits::{
     MAX_CLIPBOARD_BYTES, MAX_CONTENT_SCALE, MAX_HTTP_DECLARED_RESPONSE_BYTES,
@@ -337,8 +339,9 @@ impl Default for Grants {
     }
 }
 
-/// One account: the host's PlayerVox and Twitch accounts, or a third-party
-/// account the manifest declares. Only `connected` passes the services'
+/// One account: the host's PlayerVox and Twitch accounts (the Twitch
+/// account is also the integrated Twitch service), or a third-party account
+/// the manifest declares or the integrated service it names (`steam`). Only `connected` passes the services'
 /// account check. The wrapper draws its account panel over the content of a
 /// widget whose grants need a `disconnected`, `pending`, `refused` or
 /// `expired` account (no input reaches the widget then), and a compact
@@ -369,7 +372,8 @@ impl AccountState {
 }
 
 /// The state of each account by ID: `playervox`, `twitch`, or the `id` of
-/// an account the manifest declares. An account left out is `connected`.
+/// an account the manifest declares (an integrated service's ID for a
+/// service it names). An account left out is `connected`.
 /// A `host` step replaces the whole set.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(transparent)]
@@ -1036,7 +1040,9 @@ fn is_item(name: &str) -> bool {
         name,
         "network" | "storage" | "clipboardWrite" | "gameEvents"
     ) || capability_named(name).is_some()
-        || name.strip_prefix("account:").is_some_and(valid_account_id)
+        // `account:twitch` names the integrated Twitch service; whether the
+        // manifest declares the account is checked against it.
+        || name.strip_prefix("account:").is_some_and(account_id_grammar)
 }
 
 fn check_error_code(path: &str, code: &str) -> Checked {
@@ -1665,8 +1671,10 @@ fn check_http(path: &str, fixture: &HttpFixture) -> Checked {
             "an HTTPS URL within the request bounds",
         ));
     }
+    // `twitch` passes: the integrated Twitch service is the host's account.
+    // Whether the manifest declares it is checked against the manifest.
     if let Some(account) = &request.account
-        && !valid_account_id(account)
+        && !account_id_grammar(account)
     {
         return Err(ScenarioError::new(
             format!("{path}.request.account"),
