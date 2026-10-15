@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
@@ -11,11 +11,15 @@ import { clean, cleanLine, Redactor } from "../dist/text.js";
 
 const repository = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
-test("the shipped content: every page in both languages, projects, references", () => {
+test("the shipped content: every visible page in both languages, projects, references", () => {
   const pages = JSON.parse(
     readFileSync(join(repository, "docs", "content", "pages.json"), "utf8"),
   ).pages;
-  assert.equal(docPages().length, pages.length);
+  const visible = pages.filter((page) => page.hidden !== true);
+  assert.deepEqual(
+    docPages().map((page) => page.slug),
+    visible.map((page) => page.slug),
+  );
   for (const page of docPages()) {
     assert.ok(readDoc(page.slug, "en")?.markdown?.startsWith("# "), page.slug);
     assert.ok(readDoc(page.slug, "fr")?.markdown?.startsWith("# "), page.slug);
@@ -33,6 +37,22 @@ test("the shipped content: every page in both languages, projects, references", 
   assert.equal(limit("MAX_HTTP_DECLARED_RESPONSE_BYTES"), 3 * 1024 * 1024);
   assert.match(manifestReference(), /maxResponseBytes/);
   assert.match(manifestReference(), /export type Capability/);
+});
+
+test("a hidden page is never shipped, nor found by a search", () => {
+  const pages = JSON.parse(readFileSync(join(repository, "docs", "content", "pages.json"), "utf8"));
+  const hidden = pages.pages.filter((page) => page.hidden === true);
+  assert.ok(hidden.length > 0, "pages.json has no hidden page left to test with");
+  for (const page of hidden) {
+    assert.equal(readDoc(page.slug, "en"), undefined, page.slug);
+    for (const locale of pages.locales) {
+      const file = join(repository, "mcp", "dist", "content", "docs", locale, page.file);
+      assert.equal(existsSync(file), false, `${locale}/${page.file} is shipped`);
+    }
+  }
+  for (const hit of searchDocs("account.subscribe account_refused", "en", 20)) {
+    assert.ok(!hidden.some((page) => page.slug === hit.slug), hit.slug);
+  }
 });
 
 test("search finds the right page, in English and French", () => {
