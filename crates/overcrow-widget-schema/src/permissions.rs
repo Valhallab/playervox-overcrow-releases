@@ -110,6 +110,11 @@ pub const PARAMETER_CONSTRAINTS: &[Field] = &[
         "ASCII letters of either case, digits, `_` and `-`, at least one character, as the broker matches it; `maxLength` 1..=`MAX_SLUG_PARAMETER_BYTES`.",
     ),
     Field::required(
+        "file",
+        ValueType::Record("{ maxLength, extensions }"),
+        "A file name `<name>.<extension>`: a name of ASCII letters of either case, digits, `_` and `-`, one dot, and one of the listed extensions, exactly (`[a-z0-9]`, ≤ `MAX_FILE_EXTENSION_BYTES` each, `MAX_FILE_EXTENSIONS` at most), as the broker matches it; `maxLength` 3..=`MAX_FILE_PARAMETER_BYTES` for the whole value. Needs the catalog feature `network-file-param`.",
+    ),
+    Field::required(
         "enum",
         ValueType::ListOf("literal segment", &MAX_ENUM_VALUES),
         "One of the listed values, each ≤ `MAX_ENUM_VALUE_BYTES`.",

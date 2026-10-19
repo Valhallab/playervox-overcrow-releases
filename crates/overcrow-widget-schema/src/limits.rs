@@ -1005,6 +1005,24 @@ pub const MAX_SLUG_PARAMETER_BYTES: Limit = fixed(
     Unit::Bytes,
     "Largest `maxLength` of a `slug` parameter constraint, as today.",
 );
+pub const MAX_FILE_PARAMETER_BYTES: Limit = fixed(
+    "MAX_FILE_PARAMETER_BYTES",
+    128,
+    Unit::Bytes,
+    "Largest `maxLength` of a `file` parameter constraint (feature `network-file-param`).",
+);
+pub const MAX_FILE_EXTENSIONS: Limit = fixed(
+    "MAX_FILE_EXTENSIONS",
+    8,
+    Unit::Count,
+    "Extensions one `file` parameter constraint allows.",
+);
+pub const MAX_FILE_EXTENSION_BYTES: Limit = fixed(
+    "MAX_FILE_EXTENSION_BYTES",
+    8,
+    Unit::Bytes,
+    "One extension of a `file` parameter constraint, without its dot.",
+);
 pub const MAX_STRING_PARAMETER_BYTES: Limit = fixed(
     "MAX_STRING_PARAMETER_BYTES",
     256,
@@ -1391,6 +1409,9 @@ pub const ALL: &[&Limit] = &[
     &MAX_ENUM_VALUE_BYTES,
     &MAX_PARAMETER_NAME_BYTES,
     &MAX_SLUG_PARAMETER_BYTES,
+    &MAX_FILE_PARAMETER_BYTES,
+    &MAX_FILE_EXTENSIONS,
+    &MAX_FILE_EXTENSION_BYTES,
     &MAX_STRING_PARAMETER_BYTES,
     &MAX_ACCOUNTS,
     &MAX_ACCOUNT_ORIGINS,

@@ -84,6 +84,10 @@ pub const INITIAL_CATEGORIES: &[(&str, &str, &str)] = &[
 pub use crate::accounts::{FEATURE_ACCOUNT_KEY, FEATURE_ACCOUNT_OAUTH};
 pub use crate::integrated::{FEATURE_SERVICE_STEAM, FEATURE_SERVICE_TWITCH};
 
+/// A network rule with a `file` parameter (`<name>.<extension>`):
+/// a reader whose broker does not match it would refuse the manifest.
+pub const FEATURE_NETWORK_FILE_PARAM: &str = "network-file-param";
+
 /// Every feature name of `requires` this schema defines. A reader passes
 /// the ones it implements to [`validate_catalog`]; a tool that only shows
 /// entries (the website) may pass them all.
@@ -92,6 +96,7 @@ pub const KNOWN_FEATURES: &[&str] = &[
     FEATURE_ACCOUNT_OAUTH,
     FEATURE_SERVICE_STEAM,
     FEATURE_SERVICE_TWITCH,
+    FEATURE_NETWORK_FILE_PARAM,
 ];
 
 pub const ENVELOPE_FIELDS: &[Field] = &[
@@ -1817,7 +1822,8 @@ mod tests {
                 "account-key",
                 "account-oauth",
                 "service-steam",
-                "service-twitch"
+                "service-twitch",
+                "network-file-param"
             ]
         );
         let mut payload = valid();

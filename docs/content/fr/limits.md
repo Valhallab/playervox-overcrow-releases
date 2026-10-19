@@ -95,6 +95,9 @@ que la logique peut lire sont aussi des constantes du SDK : voir
 | `MAX_ENUM_VALUE_BYTES` | 128 octets | Une valeur d’un paramètre `enum`. |
 | `MAX_PARAMETER_NAME_BYTES` | 32 octets | Nom d’un paramètre de chemin ou de requête. |
 | `MAX_SLUG_PARAMETER_BYTES` | 128 octets | Plus grand `maxLength` d’une contrainte de paramètre `slug`. |
+| `MAX_FILE_PARAMETER_BYTES` | 128 octets | Plus grand `maxLength` d’une contrainte de paramètre `file` (fonction `network-file-param`). |
+| `MAX_FILE_EXTENSIONS` | 8 | Extensions qu’une contrainte de paramètre `file` autorise. |
+| `MAX_FILE_EXTENSION_BYTES` | 8 octets | Une extension d’une contrainte de paramètre `file`, sans son point. |
 | `MAX_STRING_PARAMETER_BYTES` | 256 octets | Plus grand `maxLength` d’une contrainte de paramètre de requête `string`. |
 | `MAX_DNS_LABEL_BYTES` | 63 octets | Un label, entre deux points, du nom d’hôte d’une origine réseau ou d’un ID de widget. |
 | `MAX_DNS_NAME_BYTES` | 253 octets | Nom d’hôte d’une origine réseau. |

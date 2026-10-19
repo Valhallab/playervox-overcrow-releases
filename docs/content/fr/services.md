@@ -335,6 +335,7 @@ Chaque paramètre de chemin ou de requête porte une contrainte :
 | --- | --- | --- |
 | `integer` | `{ min, max }` | Entier décimal sans zéro initial, de 0 à 2^53 - 1. |
 | `slug` | `{ maxLength }` | Lettres ASCII majuscules ou minuscules, chiffres, `_` et `-`, au moins un caractère ; `maxLength` de 1 à 128 octets. |
+| `file` | `{ maxLength, extensions }` | Un nom de fichier `<nom>.<extension>` : un nom en lettres ASCII majuscules ou minuscules, chiffres, `_` et `-`, un point, puis l’une des extensions listées, à l’identique (`[a-z0-9]`, ≤ 8 octets chacune, 8 au plus), comme le broker la compare ; `maxLength` de 3 à 128 octets pour la valeur entière. Demande la fonction de catalogue `network-file-param`. |
 | `enum` | liste de `literal segment` ≤ 32 | L’une des valeurs listées, chacune ≤ 128 octets. |
 | `string` | `{ maxLength }` | Paramètres de requête seulement ; tout texte sans caractère de contrôle ; `maxLength` de 1 à 256 octets. |
 <!-- /generated:parameter-constraints -->

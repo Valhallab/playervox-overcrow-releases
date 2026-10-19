@@ -11,10 +11,12 @@ use std::collections::BTreeSet;
 use serde_json::{Map, Value};
 
 use crate::accounts::{Account, validate_account_routes, validate_accounts};
+use crate::catalog_v2::FEATURE_NETWORK_FILE_PARAM;
 use crate::json::{has_exact_fields, integer_in, parse_strict};
 use crate::limits::{
     MAX_ACCOUNTS, MAX_DNS_LABEL_BYTES, MAX_DNS_NAME_BYTES, MAX_ENUM_VALUE_BYTES, MAX_ENUM_VALUES,
-    MAX_GAME_EVENTS, MAX_HTTP_DECLARED_RESPONSE_BYTES, MAX_MANIFEST_BYTES, MAX_NETWORK_PATH_BYTES,
+    MAX_FILE_EXTENSION_BYTES, MAX_FILE_EXTENSIONS, MAX_FILE_PARAMETER_BYTES, MAX_GAME_EVENTS,
+    MAX_HTTP_DECLARED_RESPONSE_BYTES, MAX_MANIFEST_BYTES, MAX_NETWORK_PATH_BYTES,
     MAX_NETWORK_RULES, MAX_PARAMETER_NAME_BYTES, MAX_PATH_PARAMS, MAX_QUERY_PARAMS,
     MAX_SLUG_PARAMETER_BYTES, MAX_STRING_PARAMETER_BYTES, MAX_WIDGET_EDGE_PX, MAX_WIDGET_ID_BYTES,
     MAX_WIDGET_NAME_CHARS, MIN_WIDGET_ID_BYTES, VM_HEAP_BYTES, VM_MAX_HEAP_BYTES,
@@ -269,15 +271,22 @@ impl Manifest {
 
     /// The catalog v2 features a reader must support to run this manifest
     /// (`account-key`, `account-oauth`, or the integrated service's
-    /// `service-steam`…); empty for a manifest without an account.
+    /// `service-steam`…, and `network-file-param` for a network rule with a
+    /// `file` parameter); empty for a manifest without either.
     pub fn features(&self) -> BTreeSet<&'static str> {
-        self.accounts
+        let mut features: BTreeSet<&'static str> = self
+            .accounts
             .iter()
             .map(|account| match account.service {
                 Some(service) => service.feature,
                 None => account.mode.feature(),
             })
-            .collect()
+            .collect();
+        let rules = self.value["permissions"]["network"].as_array();
+        if rules.is_some_and(|rules| rules.iter().any(uses_file_parameter)) {
+            features.insert(FEATURE_NETWORK_FILE_PARAM);
+        }
+        features
     }
 
     /// The declared account, if any.
@@ -659,6 +668,7 @@ fn validate_constraint(constraint: &Value, query: bool) -> Result<(), ManifestEr
     let expected: &[&str] = match kind {
         "integer" => &["min", "max"],
         "slug" | "string" => &["maxLength"],
+        "file" => &["maxLength", "extensions"],
         "enum" => &["values"],
         _ => return Err(invalid),
     };
@@ -690,6 +700,26 @@ fn validate_constraint(constraint: &Value, query: bool) -> Result<(), ManifestEr
             )
             .ok_or(invalid)?;
         }
+        "file" => {
+            // The shortest file name: one letter, the dot, one letter.
+            integer_in(
+                &object["maxLength"],
+                3,
+                MAX_FILE_PARAMETER_BYTES.value as i64,
+            )
+            .ok_or(invalid)?;
+            let extensions = object["extensions"].as_array().ok_or(invalid)?;
+            let mut unique = BTreeSet::new();
+            if extensions.is_empty() || extensions.len() as u64 > MAX_FILE_EXTENSIONS.value {
+                return Err(invalid);
+            }
+            for extension in extensions {
+                let extension = extension.as_str().ok_or(invalid)?;
+                if !valid_file_extension(extension) || !unique.insert(extension) {
+                    return Err(invalid);
+                }
+            }
+        }
         "string" => {
             if !query {
                 return Err(invalid);
@@ -719,6 +749,27 @@ fn validate_constraint(constraint: &Value, query: bool) -> Result<(), ManifestEr
         }
     }
     Ok(())
+}
+
+/// One extension of a `file` constraint, without its dot: lowercase ASCII
+/// letters and digits, as the broker compares it (no case folding).
+pub(crate) fn valid_file_extension(extension: &str) -> bool {
+    !extension.is_empty()
+        && extension.len() as u64 <= MAX_FILE_EXTENSION_BYTES.value
+        && extension
+            .bytes()
+            .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit())
+}
+
+/// Whether a network rule of a manifest value has a `file` parameter.
+fn uses_file_parameter(rule: &Value) -> bool {
+    ["pathParams", "queryParams"].iter().any(|params| {
+        rule[*params].as_object().is_some_and(|params| {
+            params
+                .values()
+                .any(|constraint| constraint["type"] == "file")
+        })
+    })
 }
 
 /// `https://host[:port]` exactly as a URL parser would serialize it: a

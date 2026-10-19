@@ -170,6 +170,9 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MAX_ENUM_VALUE_BYTES` | 128 bytes | fixed | One `enum` parameter value, as today. |
 | `MAX_PARAMETER_NAME_BYTES` | 32 bytes | fixed | Name of one path or query parameter, as today. |
 | `MAX_SLUG_PARAMETER_BYTES` | 128 bytes | fixed | Largest `maxLength` of a `slug` parameter constraint, as today. |
+| `MAX_FILE_PARAMETER_BYTES` | 128 bytes | fixed | Largest `maxLength` of a `file` parameter constraint (feature `network-file-param`). |
+| `MAX_FILE_EXTENSIONS` | 8 | fixed | Extensions one `file` parameter constraint allows. |
+| `MAX_FILE_EXTENSION_BYTES` | 8 bytes | fixed | One extension of a `file` parameter constraint, without its dot. |
 | `MAX_STRING_PARAMETER_BYTES` | 256 bytes | fixed | Largest `maxLength` of a `string` query parameter constraint, as today. |
 | `MAX_ACCOUNTS` | 1 | fixed | Third-party accounts declared by one package: one service per widget, so no relay between two. |
 | `MAX_ACCOUNT_ORIGINS` | 4 | fixed | `origins` of one account. |
@@ -842,6 +845,7 @@ Declaring a permission or capability grants nothing: activation requires consent
 | --- | --- | --- |
 | `integer` | `{ min, max }` | Decimal without leading zero, 0..=2^53 - 1. |
 | `slug` | `{ maxLength }` | ASCII letters of either case, digits, `_` and `-`, at least one character, as the broker matches it; `maxLength` 1..=`MAX_SLUG_PARAMETER_BYTES`. |
+| `file` | `{ maxLength, extensions }` | A file name `<name>.<extension>`: a name of ASCII letters of either case, digits, `_` and `-`, one dot, and one of the listed extensions, exactly (`[a-z0-9]`, ≤ `MAX_FILE_EXTENSION_BYTES` each, `MAX_FILE_EXTENSIONS` at most), as the broker matches it; `maxLength` 3..=`MAX_FILE_PARAMETER_BYTES` for the whole value. Needs the catalog feature `network-file-param`. |
 | `enum` | list of `literal segment` ≤ `MAX_ENUM_VALUES` | One of the listed values, each ≤ `MAX_ENUM_VALUE_BYTES`. |
 | `string` | `{ maxLength }` | Query parameters only; any text without control characters; `maxLength` 1..=`MAX_STRING_PARAMETER_BYTES`. |
 

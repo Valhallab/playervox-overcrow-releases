@@ -93,6 +93,9 @@ see [limit constants](sdk.md#limit-constants).
 | `MAX_ENUM_VALUE_BYTES` | 128 bytes | One `enum` parameter value. |
 | `MAX_PARAMETER_NAME_BYTES` | 32 bytes | Name of one path or query parameter. |
 | `MAX_SLUG_PARAMETER_BYTES` | 128 bytes | Largest `maxLength` of a `slug` parameter constraint. |
+| `MAX_FILE_PARAMETER_BYTES` | 128 bytes | Largest `maxLength` of a `file` parameter constraint (feature `network-file-param`). |
+| `MAX_FILE_EXTENSIONS` | 8 | Extensions one `file` parameter constraint allows. |
+| `MAX_FILE_EXTENSION_BYTES` | 8 bytes | One extension of a `file` parameter constraint, without its dot. |
 | `MAX_STRING_PARAMETER_BYTES` | 256 bytes | Largest `maxLength` of a `string` query parameter constraint. |
 | `MAX_DNS_LABEL_BYTES` | 63 bytes | One dot-separated label of a network origin host or of a widget ID. |
 | `MAX_DNS_NAME_BYTES` | 253 bytes | Host name of one network origin. |
