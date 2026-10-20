@@ -2,8 +2,8 @@
 # scripts/ci-verify.sh end to end on a throwaway clone: the exact candidate
 # revision is admitted, never the base; reserved IDs are refused to a fork;
 # a directory that is not a v1 source project, a trusted-path change and a
-# Git archive attack fail; a trusted push runs its checks and writes the
-# admission bundles its receipt names.
+# Git archive attack fail; widget tests stay out of the snapshot; a trusted
+# push runs its checks and writes the admission bundles its receipt names.
 #
 # The trusted admission tool is built once into a private cache of this run
 # (CI_VERIFY_TOOL_TARGET); set TMPDIR to put the run on a large disk.
@@ -186,6 +186,36 @@ hide_file() {
 }
 expect_refusal "$fork" "$(candidate archive hide_file)" \
     'candidate snapshot admission failed' 'Git archive bytes that differ from the tree'
+
+# Reference images and fixtures under widgets/<dir>/tests/ are read by no
+# admission step: beyond the snapshot's 32 MiB they are still admitted, and
+# neither mode materializes them.
+large_tests() {
+    widget new-tested contributor.tested-counter
+    /usr/bin/install -d "$repository/widgets/new-tested/tests/reference"
+    for index in 1 2 3 4 5; do
+        /usr/bin/head -c 7340032 /dev/urandom \
+            >"$repository/widgets/new-tested/tests/reference/$index.png"
+    done
+}
+tested_sha=$(candidate tested large_tests)
+pull_request "$fork" "$tested_sha" \
+    || report_failure 'widget tests beyond the snapshot bounds were refused'
+bootstrap="$scratch/bootstrap"
+sh "$repo_root/scripts/materialize-git-snapshot.sh" --bootstrap \
+    "$repository" "$tested_sha" "$bootstrap" >"$stdout" 2>"$stderr" \
+    || report_failure 'the bootstrap snapshot refused widget tests'
+test -f "$bootstrap/widgets/new-tested/manifest.json" \
+    && test ! -e "$bootstrap/widgets/new-tested/tests" \
+    && test -f "$bootstrap/cli/src/snapshot.rs" \
+    || report_failure 'the bootstrap snapshot does not leave widget tests out'
+/usr/bin/rm -rf -- "$bootstrap"
+tests_only() {
+    /usr/bin/install -d "$repository/widgets/only-tests/tests"
+    printf '%s\n' '{}' >"$repository/widgets/only-tests/tests/a.scenario.json"
+}
+expect_refusal "$fork" "$(candidate only-tests tests_only)" \
+    'candidate snapshot admission failed' 'a widget directory of tests only'
 
 touch_docs() {
     printf '\n' >>"$repository/docs/content/en/guide.md"

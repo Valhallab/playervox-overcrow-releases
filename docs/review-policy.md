@@ -16,7 +16,12 @@ stays the static admission of `main`; it runs on pull requests to `main`
   base revision, never from the proposed one;
 - the proposed tree is fetched as a Git object and materialized as data; a
   base-built plan compares every file with the tree (mode, size, object ID,
-  portable path), so archive attributes cannot hide or rewrite bytes;
+  portable path), so archive attributes cannot hide or rewrite bytes. Every
+  file of the tree must be a regular file with a portable path of at most
+  8 MiB, 20,000 files at most; the snapshot holds at most 4,000 files and
+  32 MiB. It leaves out `widgets/<dir>/tests/` (reference images, fixtures,
+  tests), which no admission step reads, in the base's snapshot too; a
+  widget directory holding only tests is refused;
 - a pull request may not change the admission's own implementation:
   `.github/`, `scripts/`, `tests/`, `cli/`, `sdk/`, `mcp/`, `crates/`,
   `fuzz/`, the Cargo workspace and toolchain files, `.gitattributes`,

@@ -130,8 +130,10 @@ undeclared file present only in the proposed revision is rejected, that a
 proposal changing a trusted path (the widget schema crate, the CLI, the CI
 drivers) is rejected by the trusted-path policy, that a valid proposal emits
 a version 3 receipt bound to its revision, tree, identity, version, and the
-SHA-256 and byte length of its package, listing and admission report, and
-that tests from an exact trusted push cannot be silently skipped.
+SHA-256 and byte length of its package, listing and admission report, that
+widget tests beyond the snapshot's 32 MiB are admitted and materialized by
+neither snapshot mode, and that tests from an exact trusted push cannot be
+silently skipped.
 Pull-request admission never executes proposed JavaScript or build scripts;
 it validates and packages those bytes with the tool compiled from the
 target-base commit. Push admission runs the now-trusted revision's checks
