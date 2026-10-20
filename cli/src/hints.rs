@@ -114,18 +114,57 @@ const SECRET_SEGMENTS: &[&str] = &["key", "keys"];
 /// table for admit and the MCP audit (its build ships this file).
 const SECRET_ROUTES: &str = include_str!("secret_routes.json");
 
-/// Whether `path` on `origin` is in [`SECRET_ROUTES`].
-fn known_secret_route(origin: &str, path: &str) -> bool {
+/// Whether `rule` may reach a route of [`SECRET_ROUTES`]: its origin, and
+/// the last segments of its path, each one the known segment or a
+/// parameter that may be it (an `enum` that holds it, any type but an
+/// integer), whatever the case and a final slash.
+fn known_secret_route(rule: &Value) -> bool {
     let Ok(Value::Array(routes)) = serde_json::from_str::<Value>(SECRET_ROUTES) else {
         return false;
     };
-    let path = path.to_ascii_lowercase();
+    let origin = rule["origin"]
+        .as_str()
+        .unwrap_or_default()
+        .to_ascii_lowercase();
+    let path = rule["path"].as_str().unwrap_or_default();
+    let segments: Vec<&str> = path.split('/').filter(|part| !part.is_empty()).collect();
     routes.iter().any(|route| {
-        route["origin"].as_str() == Some(origin)
-            && route["path"]
-                .as_str()
-                .is_some_and(|known| path.ends_with(known))
+        let known: Vec<&str> = route["path"]
+            .as_str()
+            .unwrap_or_default()
+            .split('/')
+            .filter(|part| !part.is_empty())
+            .collect();
+        route["origin"].as_str() == Some(origin.as_str())
+            && !known.is_empty()
+            && segments.len() >= known.len()
+            && segments[segments.len() - known.len()..]
+                .iter()
+                .zip(&known)
+                .all(|(segment, known)| segment_may_be(rule, segment, known))
     })
+}
+
+/// Whether a path segment of `rule` may be `known` (lowercase).
+fn segment_may_be(rule: &Value, segment: &str, known: &str) -> bool {
+    let Some(name) = segment
+        .strip_prefix('{')
+        .and_then(|rest| rest.strip_suffix('}'))
+    else {
+        return segment.eq_ignore_ascii_case(known);
+    };
+    let constraint = &rule["pathParams"][name];
+    match constraint["type"].as_str() {
+        Some("enum") => constraint["values"].as_array().is_some_and(|values| {
+            values.iter().any(|value| {
+                value
+                    .as_str()
+                    .is_some_and(|value| value.eq_ignore_ascii_case(known))
+            })
+        }),
+        Some("integer") => known.bytes().all(|byte| byte.is_ascii_digit()),
+        _ => true,
+    }
 }
 
 /// Words of the host's own labels an account name must not imitate, as
@@ -591,7 +630,7 @@ fn speaks_of_a_secret(text: &str) -> bool {
 /// names and its `enum` values.
 pub fn secret_hint(rule: &Value) -> bool {
     let path = rule["path"].as_str().unwrap_or_default();
-    if known_secret_route(rule["origin"].as_str().unwrap_or_default(), path) {
+    if known_secret_route(rule) {
         return true;
     }
     let params = ["pathParams", "queryParams"]
@@ -737,18 +776,26 @@ mod tests {
             );
             assert!(route["returns"].is_string(), "{route}");
         }
-        assert!(known_secret_route(
+        let rule = |origin: &str, path: &str| json!({"origin": origin, "path": path});
+        assert!(known_secret_route(&rule(
             "https://www.googleapis.com",
             "/youtube/v3/liveStreams"
-        ));
-        assert!(!known_secret_route(
-            "https://www.googleapis.com",
-            "/youtube/v3/videos"
-        ));
-        assert!(!known_secret_route(
-            "https://api.example.com",
-            "/youtube/v3/livestreams"
-        ));
+        )));
+        assert!(known_secret_route(&rule(
+            "HTTPS://WWW.GOOGLEAPIS.COM",
+            "/youtube/v3/liveStreams/"
+        )));
+        assert!(known_secret_route(&rule(
+            "https://streamlabs.com",
+            "/api/v2.0/socket/token"
+        )));
+        for (origin, path) in [
+            ("https://www.googleapis.com", "/youtube/v3/videos"),
+            ("https://api.example.com", "/youtube/v3/livestreams"),
+            ("https://streamlabs.com", "/token"),
+        ] {
+            assert!(!known_secret_route(&rule(origin, path)), "{origin}{path}");
+        }
     }
 
     #[test]

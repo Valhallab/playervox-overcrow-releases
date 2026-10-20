@@ -403,10 +403,40 @@ fn a_route_that_may_return_secrets_is_pointed_at() {
             "{origin}{path}"
         );
     }
-    let report = admit(json!({"network": [{
-        "origin": "https://www.googleapis.com", "method": "GET", "path": "/youtube/v3/videos"
-    }]}));
-    assert_eq!(hints(&report), []);
+    // Whatever the rule lets the widget write there: an `enum` that holds
+    // the known segment, a free parameter, a final slash.
+    for rule in [
+        json!({"origin": "https://www.googleapis.com", "method": "GET",
+            "path": "/youtube/v3/{resource}",
+            "pathParams": {"resource": {"type": "enum", "values": ["videos", "liveStreams"]}}}),
+        json!({"origin": "https://www.googleapis.com", "method": "GET",
+            "path": "/youtube/v3/{resource}",
+            "pathParams": {"resource": {"type": "slug", "maxLength": 32}}}),
+        json!({"origin": "https://www.googleapis.com", "method": "GET",
+            "path": "/youtube/{version}/liveStreams",
+            "pathParams": {"version": {"type": "slug", "maxLength": 8}}}),
+        json!({"origin": "https://www.googleapis.com", "method": "GET",
+            "path": "/youtube/v3/liveStreams/"}),
+    ] {
+        let report = admit(json!({"network": [rule.clone()]}));
+        assert_eq!(
+            hints(&report),
+            [hint("review.secret_route", "/permissions/network/0")],
+            "{rule}"
+        );
+    }
+    for rule in [
+        json!({"origin": "https://www.googleapis.com", "method": "GET", "path": "/youtube/v3/videos"}),
+        json!({"origin": "https://www.googleapis.com", "method": "GET",
+            "path": "/youtube/v3/{resource}",
+            "pathParams": {"resource": {"type": "enum", "values": ["videos", "channels"]}}}),
+        json!({"origin": "https://www.googleapis.com", "method": "GET",
+            "path": "/youtube/v3/{n}",
+            "pathParams": {"n": {"type": "integer", "min": 1, "max": 9}}}),
+    ] {
+        let report = admit(json!({"network": [rule.clone()]}));
+        assert_eq!(hints(&report), [], "{rule}");
+    }
 }
 
 /// An integrated service is PlayerVox's definition: no account hint.

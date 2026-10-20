@@ -685,13 +685,44 @@ function speaksOfSecret(text: string): boolean {
 /** Whether a route seems to create, list or return keys or tokens: by its
  * path, its segments, its parameter names and its `enum` values (each one
  * in its place in the path too). */
+/** Whether a path segment of `rule` may be `known` (lowercase): the
+ * segment itself, or a parameter that may be it (an `enum` that holds it,
+ * any type but an integer), as admit reads it. */
+function segmentMayBe(rule: NetworkRule, segment: string, known: string): boolean {
+  const name = /^\{(.+)\}$/.exec(segment)?.[1];
+  if (name === undefined) return segment.toLowerCase() === known;
+  const constraint = rule.pathParams?.[name];
+  if (constraint?.type === "enum")
+    return (Array.isArray(constraint.values) ? constraint.values : []).some(
+      (value) => String(value).toLowerCase() === known,
+    );
+  if (constraint?.type === "integer") return /^[0-9]+$/.test(known);
+  return true;
+}
+
+/** Whether `rule` may reach a route a service is known to answer secrets
+ * on: admit's table (cli/src/secret_routes.json), shipped in the content,
+ * compared segment by segment, whatever the case and a final slash. */
+function knownSecretRoute(origin: string, rule: NetworkRule): boolean {
+  const segments = String(rule.path ?? "")
+    .split("/")
+    .filter(Boolean);
+  return secretRoutes().some((route) => {
+    const known = route.path.split("/").filter(Boolean);
+    return (
+      route.origin === origin.toLowerCase() &&
+      known.length > 0 &&
+      segments.length >= known.length &&
+      segments
+        .slice(segments.length - known.length)
+        .every((segment, index) => segmentMayBe(rule, segment, known[index] ?? ""))
+    );
+  });
+}
+
 function returnsSecrets(origin: string, rule: NetworkRule): boolean {
   const path = String(rule.path ?? "");
-  const lower = path.toLowerCase();
-  // Routes of a service known to return a secret, whatever their words:
-  // admit's table (cli/src/secret_routes.json), shipped in the content.
-  if (secretRoutes().some((known) => known.origin === origin && lower.endsWith(known.path)))
-    return true;
+  if (knownSecretRoute(origin, rule)) return true;
   const texts = [path, ...path.split("/")];
   for (const params of [rule.pathParams, rule.queryParams]) {
     for (const [name, constraint] of Object.entries(params ?? {})) {

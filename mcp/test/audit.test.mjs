@@ -395,6 +395,41 @@ test("routes that return or trade secrets are reported", async () => {
   assert.match(trades[0].fix, /never touches Steam item trades/);
 });
 
+test("a known secret route is found behind a parameter, a final slash or capitals", async () => {
+  const youtube = (path, pathParams) => ({
+    origin: "https://www.googleapis.com",
+    method: "GET",
+    path,
+    ...(pathParams ? { pathParams } : {}),
+  });
+  const cases = [
+    [
+      youtube("/youtube/v3/{resource}", {
+        resource: { type: "enum", values: ["videos", "liveStreams"] },
+      }),
+      1,
+    ],
+    [youtube("/youtube/v3/{resource}", { resource: { type: "slug", maxLength: 32 } }), 1],
+    [youtube("/youtube/v3/liveStreams/"), 1],
+    [
+      youtube("/youtube/v3/{resource}", {
+        resource: { type: "enum", values: ["videos", "channels"] },
+      }),
+      0,
+    ],
+    [youtube("/youtube/v3/{n}", { n: { type: "integer", min: 1, max: 9 } }), 0],
+  ];
+  for (const [index, [rule, expected]] of cases.entries()) {
+    const directory = widget(`known-secret-${index}`, {
+      "manifest.json": manifest({ network: [rule] }),
+    });
+    const found = (await auditWidget(directory)).findings.filter(
+      (finding) => finding.rule === "token-route",
+    );
+    assert.equal(found.length, expected, JSON.stringify(rule));
+  }
+});
+
 test("folded spellings, parameter names and enum values reveal a secret route", async () => {
   const route = (path, extra = {}) => ({
     origin: "https://api.runlog.example",
