@@ -343,12 +343,15 @@ jamais votre code ni `tsc` :
 | `admission.package_rebuilt` | avertissement | L’archive soumise diffère de la reconstruction dans d’autres fichiers. |
 | `admission.not_rebuilt` | avertissement | Une archive a été admise sans ses sources. |
 | `review.service_key_format` | avertissement | Le format de clé du compte accepte aussi les clés d’un service intégré (Steam : 32 caractères hexadécimaux). |
-| `review.service_name_in_host` | avertissement | Une adresse du compte se lit comme un service intégré (`steam-keys.example`). |
+| `review.service_name_in_host` | avertissement | Une adresse du compte se lit comme un service intégré ou comme PlayerVox (`steam-keys.example`, `ttvnw-auth.example`, une adresse `xn--` une fois décodée). |
 | `review.address_in_key_page` | avertissement | La requête de la page de clé porte une adresse : une redirection, un moteur de recherche, un raccourcisseur de liens. |
 | `review.same_route` | avertissement | Une règle est sur la route d’une règle précédente : OverCrow permet ce que l’une ou l’autre permet. |
 | `review.path_and_query_name` | avertissement | Une règle nomme un même paramètre dans `pathParams` et dans `queryParams`. |
-| `review.secret_route` | avertissement | Le chemin, les noms de paramètres ou les valeurs `enum` d’une route parlent de clés, de jetons ou de mots de passe. |
+| `review.secret_route` | avertissement | Le chemin, les noms de paramètres ou les valeurs `enum` d’une route parlent de clés, de jetons ou de mots de passe, ou la route est de celles où un service rend un secret (les directs de YouTube). |
 | `review.service_label_name` | avertissement | Le nom du compte imite un libellé d’OverCrow (intégré, officiel, vérifié). |
+| `review.oauth_pages` | avertissement | Tout compte OAuth : l’hôte de sa page de connexion (ou de code) et celui de son point `token`. Le relecteur se connecte avec un compte de test et vérifie où finit chaque page. |
+| `review.read_scope_writes` | avertissement | Un scope OAuth déclaré `read` dont le nom dit écrire, modifier, gérer ou supprimer. |
+| `review.service_name_in_id` | avertissement | L’identifiant du compte se lit comme un service intégré ou comme PlayerVox (`twitch-api`). |
 
 Options : `--publisher HANDLE`, `--domain DOMAIN` (répétable), `--previous
 FILE`, `--package FILE`, `--source-map FILE` ([la carte du
