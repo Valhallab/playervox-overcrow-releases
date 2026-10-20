@@ -12,7 +12,8 @@
 //!    the manifest, the license and the preview;
 //! 4. a permission review for the maintainer: sensitive capabilities, the
 //!    declared network routes, clipboard writes and storage; with a
-//!    previous manifest, the permission keys it adds and the review type.
+//!    previous manifest, the permission keys it adds and the review type;
+//!    review hints ([`crate::hints`]) point at what to look at closely.
 //!
 //! A source ZIP is read by [`crate::sourcetree`] and admitted from the
 //! private folder it is written to, exactly as a source folder.
@@ -40,6 +41,7 @@ use serde_json::{Value, json};
 
 use crate::build;
 use crate::diag::{Diagnostic, Report};
+use crate::hints;
 use crate::permissions;
 use crate::project::read_bounded;
 use crate::sanitize;
@@ -188,6 +190,9 @@ pub fn admit(input: &Input<'_>, options: &Options<'_>, report: &mut Report) -> O
         };
     };
     check_identity(&findings.package.manifest, &options.publisher, report);
+    for hint in hints::hints(&findings.package.manifest) {
+        report.push(hint);
+    }
     if let Some(path) = options.previous {
         findings.previous = compare_previous(path, &findings.package.manifest, report);
     }
@@ -756,7 +761,7 @@ fn review(manifest: &Manifest) -> Vec<Value> {
     }
     if let Some(rules) = manifest.value["permissions"]["network"].as_array() {
         for rule in rules {
-            items.push(json!({
+            let mut item = json!({
                 "kind": "network",
                 "method": rule["method"],
                 "origin": rule["origin"],
@@ -768,7 +773,12 @@ fn review(manifest: &Manifest) -> Vec<Value> {
                     .cloned()
                     .unwrap_or(json!(MAX_HTTP_RESPONSE_BYTES.value)),
                 "account": rule.get("account"),
-            }));
+            });
+            // Absent when false, as older reports had it.
+            if hints::secret_hint(rule) {
+                item["secretHint"] = json!(true);
+            }
+            items.push(item);
         }
     }
     if permissions.clipboard_write {
@@ -958,7 +968,7 @@ pub fn render_human(report: &Value) -> String {
                     .map(|scope| format!("{} ({})", text(&scope["name"]), text(&scope["access"])))
                     .collect();
                 format!(
-                    "account         {} ({}), integrated service, sent only to {}\n                    {}",
+                    "account         {} ({}), integrated service, sent only to {}{CONTINUED}{}{}",
                     text(&item["name"]),
                     text(&item["service"]),
                     origins.join(", "),
@@ -966,7 +976,8 @@ pub fn render_human(report: &Value) -> String {
                         "no scope".to_owned()
                     } else {
                         format!("scopes {}", scopes.join(", "))
-                    }
+                    },
+                    required_text(&item["required"])
                 )
             }
             Some("account") => {
@@ -1009,10 +1020,14 @@ pub fn render_human(report: &Value) -> String {
                         Some(_) => format!("header {}", text(&send["header"])),
                         None => format!("query parameter {}", text(&send["query"])),
                     };
-                    format!("key in {carrier}, from {}", text(&item["key"]["page"]))
+                    format!(
+                        "key of {}, in {carrier}, from {}",
+                        key_format_text(&item["key"]["format"]),
+                        text(&item["key"]["page"])
+                    )
                 };
                 format!(
-                    "account         {} ({}), {mode}, sent only to {}{}\n                    {detail}",
+                    "account         {} ({}), {mode}, sent only to {}{}{CONTINUED}{detail}{}",
                     text(&item["name"]),
                     text(&item["id"]),
                     origins.join(", "),
@@ -1020,11 +1035,12 @@ pub fn render_human(report: &Value) -> String {
                         " [CAN CHANGE THE ACCOUNT]"
                     } else {
                         ""
-                    }
+                    },
+                    required_text(&item["required"])
                 )
             }
             Some("network") => format!(
-                "network         {} {}{}, responses up to {} bytes{}",
+                "network         {} {}{}, responses up to {} bytes{}{}{}",
                 text(&item["method"]),
                 text(&item["origin"]),
                 text(&item["path"]),
@@ -1032,7 +1048,13 @@ pub fn render_human(report: &Value) -> String {
                 item["account"]
                     .as_str()
                     .map(|account| format!(", with account {}", sanitize::line(account)))
-                    .unwrap_or_default()
+                    .unwrap_or_default(),
+                if item["secretHint"] == true {
+                    " [MAY RETURN SECRETS]"
+                } else {
+                    ""
+                },
+                parameters_text(&item)
             ),
             Some("clipboardWrite") => "clipboardWrite  text on a user gesture".to_owned(),
             Some("storage") => {
@@ -1082,6 +1104,93 @@ pub fn render_human(report: &Value) -> String {
         }
     ));
     out
+}
+
+/// The indentation of a review item's further lines.
+const CONTINUED: &str = "\n                    ";
+
+/// `required` of an account, as its own line.
+fn required_text(required: &Value) -> String {
+    let text = if *required == false {
+        "optional: the widget works without it"
+    } else {
+        "required: the content stays covered until it is connected"
+    };
+    format!("{CONTINUED}{text}")
+}
+
+/// A key format of the report: `32 hex characters`, `16 to 64 printable
+/// characters`.
+fn key_format_text(format: &Value) -> String {
+    let (min, max) = (
+        sanitize::line(&format["minLength"].to_string()),
+        sanitize::line(&format["maxLength"].to_string()),
+    );
+    let charset = match format["charset"].as_str() {
+        Some("alnum") => "letter and digit".to_owned(),
+        Some(charset) => sanitize::line(charset),
+        None => "-".to_owned(),
+    };
+    if min == max {
+        format!("{min} {charset} characters")
+    } else {
+        format!("{min} to {max} {charset} characters")
+    }
+}
+
+/// One line per parameter of a network item: where it is (`path`, `query`),
+/// its name, its constraint and, in the query, whether it is required.
+fn parameters_text(item: &Value) -> String {
+    let mut out = String::new();
+    for (field, place) in [("pathParams", "path "), ("queryParams", "query")] {
+        for (name, constraint) in item[field].as_object().into_iter().flatten() {
+            let required = if place == "query" {
+                if constraint["required"] == true {
+                    ", required"
+                } else {
+                    ", optional"
+                }
+            } else {
+                ""
+            };
+            out.push_str(&format!(
+                "{CONTINUED}{place}  {}: {}{required}",
+                sanitize::line(name),
+                constraint_text(constraint)
+            ));
+        }
+    }
+    out
+}
+
+fn constraint_text(constraint: &Value) -> String {
+    let number = |name: &str| sanitize::line(&constraint[name].to_string());
+    let list = |name: &str, prefix: &str| -> Vec<String> {
+        constraint[name]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .map(|value| {
+                format!(
+                    "{prefix}{}",
+                    sanitize::line(value.as_str().unwrap_or_default())
+                )
+            })
+            .collect()
+    };
+    match constraint["type"].as_str() {
+        Some("enum") => format!("one of {}", list("values", "").join(", ")),
+        Some("slug") => format!("a slug of at most {} bytes", number("maxLength")),
+        Some("string") => format!("text of at most {} bytes", number("maxLength")),
+        Some("integer") => format!("an integer from {} to {}", number("min"), number("max")),
+        Some("file") => format!(
+            "a file name of at most {} bytes ending in {}",
+            number("maxLength"),
+            list("extensions", ".").join(" or ")
+        ),
+        // A type this CLI does not know stays visible.
+        _ => format!("type {}", sanitize::line(&constraint["type"].to_string())),
+    }
 }
 
 /// Writes an admission bundle into `out`, which must not exist or be empty:
@@ -1321,7 +1430,7 @@ mod tests {
         report["review"] = json!([key]);
         let text = render_human(&report);
         assert!(
-            text.contains("key in header X-Api-Key, from https://runlog.example/settings/api"),
+            text.contains("key of 32 hex characters, in header X-Api-Key, from https://runlog.example/settings/api"),
             "{text}"
         );
         report["review"] = json!([review(&live_goals())[0].clone()]);

@@ -315,10 +315,13 @@ jamais votre code ni `tsc` :
    sous un pseudo que personne ne peut prendre (`admin.*`, `com.*`).
    `listing.json` est valide, son aperçu est un PNG empaqueté d’au plus
    256 Kio ;
-4. les pouvoirs que le widget demande sont listés pour le relecteur :
-   capabilities (les sensibles sont signalées), routes réseau avec leur
-   limite de réponse, écritures dans le presse-papiers, stockage et
-   événements de jeu ;
+4. les pouvoirs que le widget demande sont listés pour le relecteur : son
+   compte (obligatoire ou non, format et page de la clé), capabilities (les
+   sensibles sont signalées), routes réseau avec leur limite de réponse et
+   chaque paramètre de chemin et de requête, écritures dans le
+   presse-papiers, stockage et événements de jeu ; des indices de revue,
+   avertissements qui ne refusent rien, montrent ce qu’il faut regarder de
+   près ;
 5. avec `--previous`, la dernière version approuvée (son `manifest.json`,
    son paquet, son dossier ou son ZIP) : l’ID doit être le même et la
    version supérieure, et le rapport liste les
@@ -339,6 +342,13 @@ jamais votre code ni `tsc` :
 | `admission.version_not_newer` | erreur | La version n’est pas supérieure à la précédente. |
 | `admission.package_rebuilt` | avertissement | L’archive soumise diffère de la reconstruction dans d’autres fichiers. |
 | `admission.not_rebuilt` | avertissement | Une archive a été admise sans ses sources. |
+| `review.service_key_format` | avertissement | Le format de clé du compte accepte aussi les clés d’un service intégré (Steam : 32 caractères hexadécimaux). |
+| `review.service_name_in_host` | avertissement | Une adresse du compte se lit comme un service intégré (`steam-keys.example`). |
+| `review.address_in_key_page` | avertissement | La requête de la page de clé porte une adresse : une redirection, un moteur de recherche, un raccourcisseur de liens. |
+| `review.same_route` | avertissement | Une règle est sur la route d’une règle précédente : OverCrow permet ce que l’une ou l’autre permet. |
+| `review.path_and_query_name` | avertissement | Une règle nomme un même paramètre dans `pathParams` et dans `queryParams`. |
+| `review.secret_route` | avertissement | Le chemin, les noms de paramètres ou les valeurs `enum` d’une route parlent de clés, de jetons ou de mots de passe. |
+| `review.service_label_name` | avertissement | Le nom du compte imite un libellé d’OverCrow (intégré, officiel, vérifié). |
 
 Options : `--publisher HANDLE`, `--domain DOMAIN` (répétable), `--previous
 FILE`, `--package FILE`, `--source-map FILE` ([la carte du
@@ -701,7 +711,7 @@ Le code a la forme `<domain>.<category>` :
 | `package` | Le paquet relu | `archive_size`, `file_size` et les catégories du lecteur de paquets d’OverCrow |
 | `test` | Les scénarios | `scenario`, `scenario_name`, `too_many_scenarios` |
 | `sources` | Une archive de sources | voir [archives de sources](#archives-de-sources) |
-| `init`, `doctor`, `admission` | Ces commandes | listés ci-dessus |
+| `init`, `doctor`, `admission`, `review` | Ces commandes | listés ci-dessus |
 | `submit` | Ce que `submit` vérifie avant l’envoi | `widget_not_submittable`, `agreement_required`, `limit_reached`, `version_too_low`, `justification_missing`, `archive_too_large`, `archive_mismatch`, `release_notes`, `justification`, `review_message` |
 
 - Les lignes et les colonnes commencent à 1 ; une colonne compte des
@@ -710,7 +720,9 @@ Le code a la forme `<domain>.<category>` :
 - Avec `--format json`, chaque diagnostic est un objet JSON sur une ligne de
   la sortie standard :
   `{"severity","code","file","line","column","message","help"}`, avec
-  `null` pour ce qui est inconnu. `package --format json` se termine par un
+  `null` pour ce qui est inconnu ; un indice `review.*` ajoute `pointer`, le
+  pointeur JSON de sa permission dans `manifest.json`
+  (`/permissions/network/3`). `package --format json` se termine par un
   objet `{"package","bytes","sha256","logicBytes","sourceMap"}` ; `admit` et
   `diff` affichent un seul rapport ([sortie lisible par un
   programme](#sortie-lisible-par-un-programme)).
@@ -738,7 +750,7 @@ est annoncé par un nouveau `formatVersion`.
 | `reproducible` | `viewJson` et `archive`, comparés avec `--package`, sinon `null`. |
 | `listing` | `bytes`, `sha256`, `spdxLicense` et `preview` de `listing.json`. |
 | `sources` | `kind` (`folder` ou `archive`), `files`, `bytes`, `ignored` (`path`, `reason`) et, pour un ZIP, `sha256` et `prefix` (le dossier englobant). |
-| `review` | Les pouvoirs à relire, un objet par élément (`kind`, puis ses champs). |
+| `review` | Les pouvoirs à relire, un objet par élément (`kind`, puis ses champs) ; un élément `network` qui peut renvoyer des clés ou des jetons a `"secretHint": true`. |
 | `permissions` | `keys` ; avec `--previous`, aussi `previous` (`id`, `version`), `added`, `changed`, `removed` et `reviewType` (`full` ou `quick`), sinon `null`. |
 | `listingPolicy` | `required` ou `optional` (`--listing`). |
 | `diagnostics` | Les diagnostics, comme ci-dessus. |

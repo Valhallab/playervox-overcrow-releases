@@ -40,7 +40,7 @@ on each route that needs the key:
         "origins": ["https://api.runlog.example"],
         "send": { "header": "X-Api-Key" },
         "key": {
-          "format": { "charset": "alnum", "minLength": 32, "maxLength": 32 },
+          "format": { "charset": "alnum", "minLength": 40, "maxLength": 40 },
           "page": "https://runlog.example/settings/api"
         },
         "refusedStatus": [401, 403]

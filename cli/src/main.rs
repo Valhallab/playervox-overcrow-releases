@@ -10,6 +10,7 @@ mod diag;
 mod diff;
 mod doctor;
 mod download;
+mod hints;
 mod init;
 mod inspect;
 mod interrupt;
