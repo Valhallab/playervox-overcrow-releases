@@ -1,0 +1,87 @@
+{
+  "scenarioVersion": 1,
+  "name": "profile-invalid",
+  "description": "A store link is not a profile: refused before any request, with an example.",
+  "host": {
+    "startAt": 1767225600000,
+    "storage": {},
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "http": []
+  },
+  "steps": [
+    {
+      "pointer": {
+        "click": {
+          "label": "Link to your Steam profile"
+        }
+      }
+    },
+    {
+      "text": "store.steampowered.com/app/1874000"
+    },
+    {
+      "key": {
+        "key": "Enter"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          " This is not a Steam profile link. Example: steamcommunity.com/id/yourname"
+        ],
+        "calls": [
+          {
+            "service": "account.subscribe",
+            "outcome": "ok"
+          },
+          {
+            "service": "storage.get",
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "compact"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 280,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "profile-invalid-compact",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "profile-invalid-standard",
+        "fault": "none"
+      }
+    }
+  ]
+}

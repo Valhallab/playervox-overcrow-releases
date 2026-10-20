@@ -291,3 +291,16 @@ test("the workflow submits from main only, with the key in one step", () => {
     assert.match(use, /@[0-9a-f]{40}$/, `${use} is pinned to a commit`);
   }
 });
+
+test("a held widget is never submitted, and the run says why", () => {
+  const setup = scratch({ clock: PUBLISHED, "steam-achievements": IN_REVIEW });
+  try {
+    const { status, stdout, calls, summary } = run(setup);
+    assert.equal(status, 0, stdout);
+    assert.deepEqual(calls.map((call) => call.args[1].split("/").pop()), ["clock"]);
+    assert.match(stdout, /^steam-achievements +1\.0\.0 +held: enters the catalog with the release that ships its host features$/m);
+    assert.match(summary, /\| steam-achievements \| 1\.0\.0 \| held: enters the catalog with the release that ships its host features \|/);
+  } finally {
+    rmSync(setup.folder, { recursive: true, force: true });
+  }
+});

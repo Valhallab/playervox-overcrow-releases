@@ -1,0 +1,107 @@
+{
+  "scenarioVersion": 1,
+  "name": "passive",
+  "description": "No profile yet, in Passive mode: no field, a line to switch mode.",
+  "host": {
+    "startAt": 1767225600000,
+    "storage": {}
+  },
+  "fixtures": {
+    "http": []
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "Switch to Interactive mode to enter your Steam profile."
+        ]
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 240,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "passive-line",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "passive-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 240,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "passive-fr-line",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "passive-fr-standard",
+        "fault": "none"
+      }
+    }
+  ]
+}

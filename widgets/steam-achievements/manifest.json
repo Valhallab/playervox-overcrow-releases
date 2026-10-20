@@ -1,0 +1,335 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.playervox.overcrow.steam.achievements",
+  "version": "1.0.0",
+  "name": {
+    "en": "Steam achievements",
+    "fr": "Succès Steam"
+  },
+  "sizing": {
+    "fit": "height",
+    "preferred": {
+      "width": 300,
+      "height": 184
+    },
+    "min": {
+      "width": 150,
+      "height": 32
+    },
+    "max": {
+      "width": 560,
+      "height": 720
+    }
+  },
+  "permissions": {
+    "accounts": [
+      {
+        "service": "steam"
+      }
+    ],
+    "network": [
+      {
+        "origin": "https://api.steampowered.com",
+        "method": "GET",
+        "path": "/ISteamUser/ResolveVanityURL/v1/",
+        "queryParams": {
+          "vanityurl": {
+            "type": "slug",
+            "maxLength": 64,
+            "required": true
+          }
+        },
+        "account": "steam",
+        "maxResponseBytes": 4096
+      },
+      {
+        "origin": "https://api.steampowered.com",
+        "method": "GET",
+        "path": "/ISteamUser/GetPlayerSummaries/v2/",
+        "queryParams": {
+          "steamids": {
+            "type": "slug",
+            "maxLength": 17,
+            "required": true
+          }
+        },
+        "account": "steam",
+        "maxResponseBytes": 16384
+      },
+      {
+        "origin": "https://api.steampowered.com",
+        "method": "GET",
+        "path": "/IPlayerService/GetRecentlyPlayedGames/v1/",
+        "queryParams": {
+          "steamid": {
+            "type": "slug",
+            "maxLength": 17,
+            "required": true
+          },
+          "count": {
+            "type": "integer",
+            "min": 1,
+            "max": 5,
+            "required": true
+          }
+        },
+        "account": "steam",
+        "maxResponseBytes": 16384
+      },
+      {
+        "origin": "https://api.steampowered.com",
+        "method": "GET",
+        "path": "/ISteamUserStats/GetPlayerAchievements/v1/",
+        "queryParams": {
+          "steamid": {
+            "type": "slug",
+            "maxLength": 17,
+            "required": true
+          },
+          "appid": {
+            "type": "integer",
+            "min": 1,
+            "max": 99999999,
+            "required": true
+          }
+        },
+        "account": "steam",
+        "maxResponseBytes": 1048576
+      },
+      {
+        "origin": "https://api.steampowered.com",
+        "method": "GET",
+        "path": "/ISteamUserStats/GetSchemaForGame/v2/",
+        "queryParams": {
+          "appid": {
+            "type": "integer",
+            "min": 1,
+            "max": 99999999,
+            "required": true
+          },
+          "l": {
+            "type": "enum",
+            "values": [
+              "english",
+              "french"
+            ],
+            "required": true
+          }
+        },
+        "account": "steam",
+        "maxResponseBytes": 2097152
+      },
+      {
+        "origin": "https://api.steampowered.com",
+        "method": "GET",
+        "path": "/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/",
+        "queryParams": {
+          "gameid": {
+            "type": "integer",
+            "min": 1,
+            "max": 99999999,
+            "required": true
+          }
+        },
+        "maxResponseBytes": 1048576
+      },
+      {
+        "origin": "https://cdn.akamai.steamstatic.com",
+        "method": "GET",
+        "path": "/steamcommunity/public/images/apps/{app}/{file}",
+        "pathParams": {
+          "app": {
+            "type": "integer",
+            "min": 1,
+            "max": 99999999
+          },
+          "file": {
+            "type": "file",
+            "maxLength": 64,
+            "extensions": [
+              "jpg"
+            ]
+          }
+        },
+        "maxResponseBytes": 65536
+      },
+      {
+        "origin": "https://shared.akamai.steamstatic.com",
+        "method": "GET",
+        "path": "/store_item_assets/steam/apps/{app}/header.jpg",
+        "pathParams": {
+          "app": {
+            "type": "integer",
+            "min": 1,
+            "max": 99999999
+          }
+        },
+        "maxResponseBytes": 262144
+      },
+      {
+        "origin": "https://cdn.akamai.steamstatic.com",
+        "method": "GET",
+        "path": "/steam/apps/{app}/header.jpg",
+        "pathParams": {
+          "app": {
+            "type": "integer",
+            "min": 1,
+            "max": 99999999
+          }
+        },
+        "maxResponseBytes": 262144
+      }
+    ],
+    "storage": true
+  },
+  "wrapper": {
+    "menu": [
+      {
+        "type": "choice",
+        "id": "layout",
+        "label": {
+          "en": "Layout",
+          "fr": "Affichage"
+        },
+        "choices": [
+          {
+            "value": "line",
+            "label": {
+              "en": "One line",
+              "fr": "Une ligne"
+            }
+          },
+          {
+            "value": "compact",
+            "label": {
+              "en": "Compact",
+              "fr": "Compact"
+            }
+          },
+          {
+            "value": "standard",
+            "label": {
+              "en": "Standard",
+              "fr": "Standard"
+            }
+          },
+          {
+            "value": "full",
+            "label": {
+              "en": "Full",
+              "fr": "Complet"
+            }
+          }
+        ],
+        "default": "standard"
+      },
+      {
+        "type": "slider",
+        "id": "rows",
+        "label": {
+          "en": "Rows per list",
+          "fr": "Lignes par liste"
+        },
+        "min": 1,
+        "max": 6,
+        "step": 1,
+        "default": 3
+      },
+      {
+        "type": "group",
+        "id": "achievements",
+        "label": {
+          "en": "Achievements",
+          "fr": "Succès"
+        },
+        "rows": [
+          {
+            "type": "toggle",
+            "id": "missing-only",
+            "label": {
+              "en": "Only missing achievements",
+              "fr": "Seulement les succès manquants"
+            },
+            "default": false
+          },
+          {
+            "type": "choice",
+            "id": "order",
+            "label": {
+              "en": "Sort missing",
+              "fr": "Trier les manquants"
+            },
+            "choices": [
+              {
+                "value": "easiest",
+                "label": {
+                  "en": "Easiest first",
+                  "fr": "Plus faciles d'abord"
+                }
+              },
+              {
+                "value": "rarest",
+                "label": {
+                  "en": "Rarest first",
+                  "fr": "Plus rares d'abord"
+                }
+              },
+              {
+                "value": "name",
+                "label": {
+                  "en": "By name",
+                  "fr": "Par nom"
+                }
+              }
+            ],
+            "default": "easiest"
+          },
+          {
+            "type": "toggle",
+            "id": "show-rarity",
+            "label": {
+              "en": "Show rarity",
+              "fr": "Montrer la rareté"
+            },
+            "default": true
+          },
+          {
+            "type": "toggle",
+            "id": "reveal-hidden",
+            "label": {
+              "en": "Reveal hidden achievements",
+              "fr": "Révéler les succès cachés"
+            },
+            "default": false
+          }
+        ]
+      },
+      {
+        "type": "toggle",
+        "id": "show-logo",
+        "label": {
+          "en": "Steam logo",
+          "fr": "Logo Steam"
+        },
+        "default": true
+      },
+      {
+        "type": "action",
+        "id": "track",
+        "label": {
+          "en": "Track an achievement…",
+          "fr": "Suivre un succès…"
+        }
+      },
+      {
+        "type": "action",
+        "id": "change-profile",
+        "label": {
+          "en": "Change Steam profile…",
+          "fr": "Changer de profil Steam…"
+        }
+      }
+    ]
+  }
+}

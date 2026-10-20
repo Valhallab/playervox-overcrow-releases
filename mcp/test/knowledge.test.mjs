@@ -28,7 +28,7 @@ test("the shipped content: every visible page in both languages, projects, refer
     projects("examples")
       .filter((p) => p.source === "widgets")
       .map((p) => p.name).length,
-    13,
+    14,
   );
   assert.ok(projectFile("examples", "warframe-market", "logic.ts")?.includes("CatalogScanner"));
   assert.equal(projectFile("examples", "warframe-market", "../../../package.json"), undefined);

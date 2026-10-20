@@ -1,0 +1,48 @@
+{
+  "justifications": [
+    {
+      "permission": "account:steam",
+      "text": "Uses the Steam connection of PlayerVox OverCrow to read your game and your achievements, read only. Your Steam key is sensitive: it can also manage your item trades. This widget never calls a trade route (no IEconService), never sees the key, and PlayerVox OverCrow sends the key only to api.steampowered.com. To revoke it: steamcommunity.com/dev/apikey, then \"Revoke My Steam Web API Key\". Never show that page on stream."
+    },
+    {
+      "permission": "network:GET https://api.steampowered.com/ISteamUser/ResolveVanityURL/v1/",
+      "text": "Finds the SteamID of the profile link you enter when it uses a custom name (steamcommunity.com/id/<name>). Only when you enter or change your profile."
+    },
+    {
+      "permission": "network:GET https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/",
+      "text": "Reads which game your profile is playing now and whether its details are public. Once a minute while the widget is shown."
+    },
+    {
+      "permission": "network:GET https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/",
+      "text": "Finds your last game played and its icon when you are not in a game. When the game changes, then every 10 minutes out of game."
+    },
+    {
+      "permission": "network:GET https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/",
+      "text": "Reads which achievements of the shown game you unlocked, and when. Once a minute in game, every 10 minutes out of game."
+    },
+    {
+      "permission": "network:GET https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/",
+      "text": "Reads the names, descriptions and icons of the shown game's achievements, in your language. Once per game and language, then kept in storage."
+    },
+    {
+      "permission": "network:GET https://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/",
+      "text": "Reads the share of players who unlocked each achievement (rarity). Once per game and day, without your key."
+    },
+    {
+      "permission": "network:GET https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/{app}/{file}",
+      "text": "Shows the icons of the achievements on screen and of the game, the file name taken from Steam's answer and checked (<hash>.jpg). Each icon once; a failure is not asked again for an hour."
+    },
+    {
+      "permission": "network:GET https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{app}/header.jpg",
+      "text": "Shows the store image of the shown game. Once per game; a failure is not asked again for an hour."
+    },
+    {
+      "permission": "network:GET https://cdn.akamai.steamstatic.com/steam/apps/{app}/header.jpg",
+      "text": "The same store image on Steam's other image host, when the first one has none."
+    },
+    {
+      "permission": "storage",
+      "text": "Keeps your profile link, the achievement you track, the last values shown and the achievement lists of your last three games, on this computer."
+    }
+  ]
+}

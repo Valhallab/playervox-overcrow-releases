@@ -19,6 +19,7 @@ license: read them, copy them, and use them as a starting point.
 | **Player reviews** | What PlayerVox players think of the game you play: three reviews per page with each player's grade and score, in your language when a translation exists. Limit them to the players you follow from the widget's menu. Needs your PlayerVox account. | `com.playervox.overcrow.playervox.reviews` | `playervox.reviews.read` | [widgets/playervox-reviews/](../../../widgets/playervox-reviews/) |
 | **PlayerVox score** | The PlayerVox community grade of your Steam game, with its score, rating count and three criteria. No account needed; the badge is always shown. | `com.playervox.overcrow.playervox.score` | `playervox.score.read` | [widgets/playervox-score/](../../../widgets/playervox-score/) |
 | **Session** | Shows how long the current game session has lasted. | `com.playervox.overcrow.session` | `session.read` | [widgets/session/](../../../widgets/session/) |
+| **Steam achievements** | Your Steam achievements for the game you play: progress, latest unlocked and the next ones to get, with their rarity. Choose what to show, track one achievement. Updated every minute. Needs Steam connected in PlayerVox OverCrow and your profile link. Your Steam key can also manage item trades: this widget only reads, and the key goes only to api.steampowered.com. Revoke it at steamcommunity.com/dev/apikey. PlayerVox is not affiliated with Valve Corporation. | `com.playervox.overcrow.steam.achievements` | `accounts`, `network`, `storage` | [widgets/steam-achievements/](../../../widgets/steam-achievements/) |
 | **Manual stopwatch** | A stopwatch to the hundredth of a second, started, paused and reset with its buttons or the host’s shortcuts. | `com.playervox.overcrow.stopwatch` | `stopwatch.read`, `stopwatch.control` | [widgets/stopwatch/](../../../widgets/stopwatch/) |
 | **Twitch chat** | Read and send messages in a public Twitch chat you choose: your favorite channels, the scrolling history with emotes and replies in Interactive mode, the last messages fading out in Passive mode. Needs your Twitch account. | `com.playervox.overcrow.twitch.chat` | `twitch.chat.read`, `twitch.chat.compose` | [widgets/twitch-chat/](../../../widgets/twitch-chat/) |
 | **Warframe Market** | Searches public PC items from a cached catalog, shows an item’s online sellers and buyers in two tabs, and copies a trade whisper when you click. | `com.playervox.overcrow.warframe.market` | `network`, `storage`, `clipboardWrite` | [widgets/warframe-market/](../../../widgets/warframe-market/) |
@@ -51,6 +52,7 @@ license: read them, copy them, and use them as a starting point.
 | page through a service and react to a revision | Player reviews, Session journal |
 | keep a long scrolling list at its end, send a message | Twitch chat |
 | call an HTTP API, cache it in storage, copy to the clipboard | Warframe Market |
+| use a connected service (Steam): no key in the widget, a large answer read in slices, images on a CDN with fallbacks | Steam achievements |
 
 Warframe Market is not a built-in: a PlayerVox widget of the catalog,
 installed on request, it shows network routes with a declared response

@@ -1,0 +1,225 @@
+<component name="achicon" props="a cls">
+  <if test={achSrc(a, state.images) != ""}><image class={cls} src={achSrc(a, state.images)} label={achName(a)}/></if>
+  <else><box class={fallbackClass(cls)}><icon name={concealed(a) ? "lock" : a.achieved ? "trophy" : "award"}/></box></else>
+</component>
+
+<component name="feature" props="a title metaText cls">
+  <box class={cls}>
+    <achicon a={a} cls="ach-icon"/>
+    <box class="feature-text">
+      <box class="feature-top">
+        <if test={cls == "feature tracked" || cls == "feature tracked done"}><icon class="pin" name="pin"/></if>
+        <text class="feature-eyebrow">{title}</text>
+        <if test={cls == "feature new"}><badge class="new-badge">{t("new")}</badge></if>
+      </box>
+      <text class="feature-name">{achName(a)}</text>
+      <text class="feature-meta">{metaText}</text>
+    </box>
+    <if test={cls == "feature tracked done"}><icon class="done-icon" name="circle-check"/></if>
+  </box>
+</component>
+
+<component name="gameicon" props="cls">
+  <if test={iconSrc(state) != ""}><image class={cls} src={iconSrc(state)} label={state.game.name}/></if>
+  <else><box class={fallbackClass(cls)}><icon name="gamepad-2"/></box></else>
+</component>
+
+<box class={rootClass(state)}>
+  <if test={phase(state) == "loading"}>
+    <box class="skeleton">
+      <box class="sk-head"><box class="sk-icon"/><box class="sk-lines"><box class="sk sk-short"/><box class="sk sk-long"/></box></box>
+      <if test={layout(state.optionsVersion) != "line"}><box class="sk sk-bar"/><text class="sk-note">{t("loading")}</text></if>
+    </box>
+  </if>
+
+  <else-if test={phase(state) == "profile"}>
+    <if test={layout(state.optionsVersion) == "line"}>
+      <if test={state.interactive}>
+        <form class="pform line-form" on:submit={submitProfile}>
+          <field class={profileError(state) ? "pfield invalid" : "pfield"} placeholder={t("profile-placeholder-short")} label={t("profile-placeholder")} value={state.profile.value} max-length="256" on:input={profileTyped(event.value)}/>
+          <button class="pgo" submit label={t("profile-save")} tooltip={profileMessage(state, true)}><icon name="arrow-right"/></button>
+        </form>
+      </if>
+      <else>
+        <box class="line-msg"><icon class="msg-icon" name="user-round"/><text class="line-text">{t("profile-passive-short")}</text></box>
+      </else>
+    </if>
+    <else>
+      <box class="profile">
+        <if test={layout(state.optionsVersion) == "compact"}><text class="eyebrow accent">{t("step-short")}</text></if>
+        <else>
+          <text class="eyebrow accent">{t("step")}</text>
+          <text class="title">{t("profile-title")}</text>
+        </else>
+        <if test={state.interactive}>
+          <form class="pform" on:submit={submitProfile}>
+            <field class={profileError(state) ? "pfield invalid" : "pfield"} placeholder={t("profile-placeholder")} label={t("profile-placeholder")} value={state.profile.value} max-length="256" on:input={profileTyped(event.value)}/>
+            <button class="pbutton" submit label={t("profile-save")}><text class="pbutton-text">{t("profile-save")}</text></button>
+          </form>
+          <box class="pfoot">
+            <text class={profileError(state) ? "pmsg error" : "pmsg"}><if test={profileError(state)}><icon class="inline-icon" name="circle-alert"/></if><span>&#32;{profileMessage(state, layout(state.optionsVersion) == "compact")}</span></text>
+            <if test={state.profile.canCancel}>
+              <button class="ghost" on:activate={cancelProfile}><text class="ghost-text">{t("profile-cancel")}</text></button>
+            </if>
+          </box>
+        </if>
+        <else><text class="pmsg">{t("profile-passive")}</text></else>
+      </box>
+    </else>
+  </else-if>
+
+  <else-if test={phase(state) == "nothing" || phase(state) == "empty-unreachable" || phase(state) == "private-empty"}>
+    <box class="empty" tooltip={phase(state) == "private-empty" ? t("private-fix") : ""}>
+      <icon class={phase(state) == "nothing" ? "empty-icon" : "empty-icon warn"} name={phase(state) == "nothing" ? "trophy" : phase(state) == "private-empty" ? "eye-off" : "cloud-off"}/>
+      <if test={layout(state.optionsVersion) == "line"}>
+        <text class="line-text">{phase(state) == "nothing" ? t("nothing-short") : phase(state) == "private-empty" ? t("private-short") : t("empty-unreachable")}</text>
+      </if>
+      <else>
+        <box class="empty-text">
+          <if test={phase(state) == "nothing" && layout(state.optionsVersion) != "compact"}><text class="empty-title">{t("nothing-title")}</text></if>
+          <if test={phase(state) == "private-empty" && layout(state.optionsVersion) != "compact"}><text class="empty-title">{t("private-short")}</text></if>
+          <text class="empty-body">{phase(state) == "nothing" ? t("nothing") : phase(state) == "private-empty" ? t("private") : t("empty-unreachable")}</text>
+          <if test={phase(state) == "private-empty" && layout(state.optionsVersion) == "full"}><text class="notice-fix">{t("private-fix")}</text></if>
+        </box>
+      </else>
+    </box>
+  </else-if>
+
+  <else-if test={state.picking && state.interactive}>
+    <box class="picker">
+      <text class="eyebrow accent">{t("pick-title")}</text>
+      <text class="pmsg">{t("pick-hint")}</text>
+      <scroll class="pick-list">
+        <for each={pickList(state)} as="a" key={a.id}>
+          <button class="pick-row" label={achName(a)} on:activate={pick(a.id)}>
+            <achicon a={a} cls="row-icon"/>
+            <box class="row-text">
+              <text class="row-name">{achName(a)}</text>
+              <text class="row-desc">{achDesc(a)}</text>
+            </box>
+            <if test={showRarity(state.optionsVersion) && rarityShort(a) != ""}><text class="row-side">{rarityShort(a)}</text></if>
+          </button>
+        </for>
+      </scroll>
+      <box class="pick-actions">
+        <if test={state.tracked != ""}>
+          <button class="ghost" on:activate={pick("")}><text class="ghost-text">{t("pick-none")}</text></button>
+        </if>
+        <button class="ghost" on:activate={cancelPick}><text class="ghost-text">{t("cancel")}</text></button>
+      </box>
+    </box>
+  </else-if>
+
+  <else-if test={state.game}>
+    <if test={layout(state.optionsVersion) == "line"}>
+      <box class="line">
+        <box class="line-top">
+          <gameicon cls="line-icon"/>
+          <text class="line-name">{state.game.name}</text>
+          <if test={isStale(state)}><icon class="warn-icon" name={staleIcon(state)} tooltip={eyebrow(state)}/></if>
+          <else-if test={state.game.privateGame}><icon class="warn-icon" name="eye-off" tooltip={t("private")}/></else-if>
+          <if test={hasAch(state.game)}>
+            <if test={missingOnly(state.optionsVersion)}><text class="line-count">{countText(state.game, state.optionsVersion)}</text></if>
+            <else><text class={anyNew(state) ? "line-count new" : "line-count"}><span class="num">{num(state.game.unlocked)}</span><span class="of">&#32;/&#32;{num(state.game.total)}</span></text></else>
+          </if>
+        </box>
+        <if test={hasAch(state.game)}>
+          <progress class={done(state.game) ? "line-bar done" : "line-bar"} value={state.game.unlocked} max={state.game.total} label={pct(state.game)}/>
+        </if>
+      </box>
+    </if>
+    <else>
+      <box class="gamecard">
+        <if test={layout(state.optionsVersion) == "full" && hasHeader(state)}>
+          <box class="banner-clip"><image class="banner" src={gameSrc(state)} label={state.game.name}/></box>
+        </if>
+        <box class="head">
+          <if test={layout(state.optionsVersion) != "full"}>
+            <if test={hasHeader(state)}><image class="capsule" src={gameSrc(state)} label={state.game.name}/></if>
+            <else><gameicon cls="capsule-icon"/></else>
+          </if>
+          <box class="head-text">
+            <box class="eyebrow-row" tooltip={staleTip(state)}>
+              <if test={isStale(state)}><icon class="eyebrow-icon" name={staleIcon(state)}/></if>
+              <else-if test={state.game.privateGame}><icon class="eyebrow-icon" name="eye-off"/></else-if>
+              <else-if test={state.game.playing}><box class="live-dot"/></else-if>
+              <text class={eyebrowClass(state)}>{eyebrow(state)}</text>
+            </box>
+            <if test={layout(state.optionsVersion) != "full" || !hasHeader(state)}><text class="game-name">{state.game.name}</text></if>
+          </box>
+          <if test={steamLogo(state.theme, state.optionsVersion) != ""}>
+            <image class="steam-mark" src={steamLogo(state.theme, state.optionsVersion)} label="Steam" tooltip={t("source")}/>
+          </if>
+          <else><text class="source-word" tooltip={t("source")}>Steam</text></else>
+        </box>
+        <if test={hasAch(state.game)}>
+          <box class="prog">
+            <progress class={done(state.game) ? "bar done" : "bar"} value={state.game.unlocked} max={state.game.total} label={pct(state.game)}/>
+            <if test={missingOnly(state.optionsVersion) && !done(state.game)}>
+              <text class="count">{countText(state.game, state.optionsVersion)}</text>
+            </if>
+            <else>
+              <text class="count"><span class="num">{num(state.game.unlocked)}</span><span class="of">&#32;/&#32;{num(state.game.total)}</span></text>
+            </else>
+            <if test={done(state.game)}><icon class="done-icon" name="circle-check" label={t("all-done")}/></if>
+            <else><text class="pct">{pct(state.game)}</text></else>
+          </box>
+        </if>
+        <else><text class="muted-line">{muted(state.game)}</text></else>
+      </box>
+
+      <if test={state.game.privateGame && !isStale(state) && layout(state.optionsVersion) == "full"}>
+        <box class="notice">
+          <icon class="notice-icon" name="eye-off"/>
+          <box class="notice-text">
+            <text class="notice-body">{t("private")}</text>
+            <text class="notice-fix">{t("private-fix")}</text>
+          </box>
+        </box>
+      </if>
+
+      <if test={layout(state.optionsVersion) == "standard" && hasAch(state.game) && featured(state, state.optionsVersion)}>
+        <feature a={featured(state, state.optionsVersion)} title={featuredTitle(state, state.optionsVersion)} metaText={featureMeta(featured(state, state.optionsVersion), state)} cls={cardClass(featured(state, state.optionsVersion), state)}/>
+      </if>
+
+      <if test={layout(state.optionsVersion) == "full" && hasAch(state.game)}>
+        <if test={tracked(state)}>
+          <feature a={tracked(state)} title={t("tracked")} metaText={featureMeta(tracked(state), state)} cls={cardClass(tracked(state), state)}/>
+        </if>
+        <if test={!missingOnly(state.optionsVersion) && !tracked(state) && latest(state)}>
+          <feature a={latest(state)} title={t("latest")} metaText={meta(latest(state), state)} cls={cardClass(latest(state), state)}/>
+        </if>
+        <box class="lists">
+          <if test={!missingOnly(state.optionsVersion) && recent(state, rows(state.optionsVersion)).length > 0}>
+            <box class="section">
+              <text class="section-title">{t("recent")}</text>
+              <for each={recent(state, rows(state.optionsVersion))} as="a" key={a.id}>
+                <box class="row">
+                  <achicon a={a} cls="row-icon"/>
+                  <text class="row-name">{achName(a)}</text>
+                  <text class="row-side">{a.at > 0 ? ago(state.now - a.at) : ""}</text>
+                </box>
+              </for>
+            </box>
+          </if>
+          <box class="section">
+            <text class="section-title">{missingOnly(state.optionsVersion) ? t("missing") : t("next")}</text>
+            <if test={done(state.game)}>
+              <text class="all-done"><icon class="inline-icon" name="circle-check"/><span>&#32;{t("all-done")}</span></text>
+            </if>
+            <for each={missing(state, missingOnly(state.optionsVersion) ? rows(state.optionsVersion) * 2 : rows(state.optionsVersion), state.optionsVersion)} as="a" key={a.id}>
+              <box class="row" tooltip={achDesc(a)}>
+                <achicon a={a} cls="row-icon"/>
+                <box class="row-text">
+                  <text class={concealed(a) ? "row-name hidden" : "row-name"}>{achName(a)}</text>
+                  <text class="row-desc">{achDesc(a)}</text>
+                </box>
+                <if test={showRarity(state.optionsVersion) && rarityShort(a) != ""}><text class="row-side" tooltip={rarity(a)}>{rarityShort(a)}</text></if>
+              </box>
+            </for>
+          </box>
+        </box>
+      </if>
+    </else>
+  </else-if>
+</box>

@@ -1,0 +1,68 @@
+{
+  "scenarioVersion": 1,
+  "name": "refused",
+  "description": "Steam refuses the key (403, and the host's probe too): PlayerVox OverCrow's panel covers the widget, nothing else is read.",
+  "host": {
+    "startAt": 1767225600000,
+    "storage": {
+      "profile": {
+        "steamid": "76561198000000000",
+        "input": "https://steamcommunity.com/profiles/76561198000000000"
+      }
+    },
+    "frame": true
+  },
+  "fixtures": {
+    "http": [
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?steamids=76561198000000000",
+          "account": "steam"
+        },
+        "response": {
+          "status": 403,
+          "contentType": "application/json",
+          "body": "{}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.steampowered.com/ISteamWebAPIUtil/GetSupportedAPIList/v1/",
+          "account": "steam"
+        },
+        "response": {
+          "status": 403,
+          "contentType": "application/json",
+          "body": "{}"
+        }
+      }
+    ]
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "image": "refused",
+        "fault": "none"
+      }
+    },
+    {
+      "advance": {
+        "ms": 180000
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "expect": {
+        "image": "refused-fr",
+        "fault": "none"
+      }
+    }
+  ]
+}

@@ -22,6 +22,15 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const KEY_PATTERN = /ocw_pub_[A-Za-z0-9_-]+/g;
+/**
+ * Widgets kept out of the creator space for now, with the reason the run
+ * prints: they need host features no published PlayerVox OverCrow has yet,
+ * and enter the catalog with the release that ships them. Empty the entry
+ * in that release.
+ */
+export const HELD = {
+  "steam-achievements": "enters the catalog with the release that ships its host features",
+};
 /** Long enough for checks followed for 15 minutes, and the upload. */
 const CLI_TIMEOUT_SECONDS = 20 * 60;
 
@@ -193,6 +202,13 @@ export function main(argv, env = process.env) {
   const folders = widgetFolders(root);
   for (const name of folders) {
     const folder = join(root, name);
+    if (Object.hasOwn(HELD, name)) {
+      const text = `held: ${HELD[name]}`;
+      const version = manifestVersion(folder);
+      say(`${name.padEnd(18)} ${String(version).padEnd(7)} ${text}`);
+      rows.push([name, String(version), text]);
+      continue;
+    }
     const args = ["submit", folder, "--format", "json", "--review-message", reviewMessage(env)];
     const submission = join(folder, "submission.json");
     if (existsSync(submission)) args.push("--submission", submission);

@@ -1,0 +1,161 @@
+{
+  "scenarioVersion": 1,
+  "name": "nothing",
+  "description": "No game now and none recently: how to start.",
+  "host": {
+    "startAt": 1767225600000,
+    "storage": {
+      "profile": {
+        "steamid": "76561198000000000",
+        "input": "https://steamcommunity.com/profiles/76561198000000000"
+      }
+    }
+  },
+  "fixtures": {
+    "http": [
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?steamids=76561198000000000",
+          "account": "steam"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 3,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\"\n\t\t\t}\n\t\t]\n\t}\n}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?steamids=76561198000000000",
+          "account": "steam"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 3,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\"\n\t\t\t}\n\t\t]\n\t}\n}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/?steamid=76561198000000000&count=5",
+          "account": "steam"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\n\t\"response\": {\n\t\t\"total_count\": 0,\n\t\t\"games\": []\n\t}\n}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/?steamid=76561198000000000&count=5",
+          "account": "steam"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\n\t\"response\": {\n\t\t\"total_count\": 0,\n\t\t\"games\": []\n\t}\n}"
+        }
+      }
+    ]
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "Play a Steam game: its achievements show up here."
+        ]
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 240,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "nothing-line",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "nothing-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 240,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "nothing-fr-line",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "nothing-fr-standard",
+        "fault": "none"
+      }
+    }
+  ]
+}

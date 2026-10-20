@@ -1,0 +1,642 @@
+/* Steam achievements. The frame fits its height to the content
+   (fit: height): no empty band under the content. */
+.root {
+  width: 100%;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  font-variant-numeric: tabular-nums;
+}
+.root > box,
+.root > image {
+  flex-shrink: 0;
+}
+.root.line {
+  padding: var(--space-1);
+}
+.root.compact {
+  padding: var(--space-4);
+}
+
+/* One line */
+.line {
+  flex-direction: column;
+  gap: 3px;
+  padding: var(--space-2) var(--space-4) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+}
+.line-top {
+  align-items: center;
+  gap: var(--space-3);
+}
+.line-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+}
+.line-name {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+  font-size: var(--font-size-button);
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.line-bar {
+  height: 3px;
+  color: var(--color-accent);
+}
+.line-count {
+  flex-shrink: 0;
+  font-size: var(--font-size-button);
+  white-space: nowrap;
+}
+.line-count.new .num {
+  color: var(--color-accent);
+}
+.line-msg {
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+.line-text {
+  font-size: var(--font-size-button);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.msg-icon {
+  font-size: 16px;
+  color: var(--color-text-muted);
+}
+.warn-icon {
+  font-size: 14px;
+  color: var(--color-warning);
+}
+
+/* Game card */
+.gamecard {
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+  overflow: hidden;
+}
+.compact .gamecard {
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+.full .gamecard {
+  padding: 0 0 var(--space-4);
+}
+.full .gamecard > .head,
+.full .gamecard > .prog,
+.full .gamecard > .muted-line {
+  padding: 0 var(--space-5);
+}
+/* The store header keeps its top, where games put their title: the image
+   at its own ratio (460 x 215), its bottom cut beyond 112 px. */
+.banner-clip {
+  flex-direction: column;
+  width: 100%;
+  max-height: 112px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.banner {
+  width: 100%;
+  aspect-ratio: 2.14;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+.head {
+  align-items: center;
+  gap: var(--space-4);
+}
+/* The whole header, nothing cut (owner's correction of 2026-10-15). */
+.capsule {
+  width: 68px;
+  aspect-ratio: 2.14;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+.compact .capsule {
+  width: 60px;
+}
+/* No header: the game's icon on a square, or a neutral gamepad. */
+.capsule-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+.capsule-icon.fallback {
+  font-size: 16px;
+}
+.compact .capsule-icon {
+  width: 28px;
+  height: 28px;
+}
+.line-icon.fallback {
+  font-size: 12px;
+}
+.head-text {
+  flex-direction: column;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+}
+.eyebrow-row {
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-success);
+}
+.eyebrow-icon {
+  font-size: 11px;
+  color: var(--color-warning);
+}
+.eyebrow {
+  flex-shrink: 1;
+  min-width: 0;
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.eyebrow.accent {
+  color: var(--color-accent);
+}
+.eyebrow.live {
+  color: var(--color-success);
+}
+.eyebrow.warn {
+  color: var(--color-warning);
+}
+/* "Unreachable · 5 min ago": sentence case, so the age always fits, from
+   Compact to Full, in English and French (owner's correction). */
+.eyebrow.stale {
+  text-transform: none;
+  letter-spacing: 0;
+}
+.inline-icon {
+  font-size: 11px;
+  vertical-align: middle;
+}
+.game-name {
+  font-size: var(--font-size-body);
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.prog {
+  align-items: center;
+  gap: var(--space-4);
+}
+.bar {
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 0;
+  width: 0;
+  height: 6px;
+  color: var(--color-accent);
+}
+.bar.done,
+.line-bar.done {
+  color: var(--color-success);
+}
+.count {
+  font-size: var(--font-size-body);
+  white-space: nowrap;
+}
+.num {
+  font-weight: 700;
+}
+.of {
+  color: var(--color-text-muted);
+}
+.pct {
+  min-width: 34px;
+  text-align: end;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+.done-icon {
+  font-size: 16px;
+  color: var(--color-success);
+}
+.muted-line {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+/* Feature card: latest, next or tracked achievement */
+.feature {
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+}
+.feature.new {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  animation: unlock 900ms ease-out 2 alternate;
+}
+.feature.tracked {
+  border-color: var(--color-border-strong);
+}
+@keyframes unlock {
+  from { border-color: var(--color-accent); }
+  to { border-color: transparent; }
+}
+.ach-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+}
+.fallback {
+  justify-content: center;
+  align-items: center;
+  color: var(--color-text-muted);
+  background: var(--color-surface-hover);
+}
+.ach-icon.fallback {
+  font-size: 18px;
+}
+.row-icon.fallback {
+  font-size: 13px;
+}
+.feature-text {
+  flex-direction: column;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+}
+.feature-top {
+  align-items: center;
+  gap: var(--space-2);
+}
+.pin {
+  font-size: 11px;
+  color: var(--color-accent);
+}
+.feature-eyebrow {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+.feature-name {
+  font-size: var(--font-size-button);
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.feature-meta {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.new-badge {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  color: var(--color-on-accent);
+  background: var(--color-accent);
+}
+
+/* Lists */
+.lists {
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.wide .lists {
+  flex-direction: row;
+}
+.section {
+  flex-direction: column;
+  flex-grow: 1;
+  flex-basis: 0;
+  min-width: 0;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+}
+.section-title {
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+.row {
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 28px;
+}
+.row-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 3px;
+}
+.row-text {
+  flex-direction: column;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+}
+.row-name {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+  font-size: var(--font-size-button);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.row-name.hidden {
+  font-style: italic;
+  color: var(--color-text-secondary);
+}
+.row-desc {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.row-side {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+.all-done {
+  font-size: var(--font-size-button);
+  color: var(--color-success);
+}
+
+/* Private notice */
+.notice {
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+}
+.notice-icon {
+  font-size: 14px;
+  color: var(--color-warning);
+}
+.notice-text {
+  flex-direction: column;
+  flex-shrink: 1;
+  min-width: 0;
+  gap: var(--space-1);
+}
+.notice-body {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+}
+.notice-fix {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+/* Picker (Interactive) */
+.picker {
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+}
+.pick-list {
+  flex-direction: column;
+  gap: var(--space-1);
+  /* Six rows, then the list scrolls. */
+  max-height: 240px;
+}
+.pick-row {
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+}
+.pick-row:hover,
+.pick-row:focus {
+  background: var(--color-surface-hover);
+}
+.pick-actions {
+  justify-content: end;
+  gap: var(--space-3);
+}
+.ghost {
+  height: var(--control-height);
+  padding: 0 var(--space-5);
+  align-items: center;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+}
+.ghost:hover {
+  background: var(--color-surface-hover);
+}
+.ghost-text {
+  font-size: var(--font-size-button);
+}
+
+/* Profile step */
+.pfoot {
+  align-items: center;
+  gap: var(--space-3);
+}
+.pfoot > .pmsg {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+}
+.pfoot > .ghost {
+  flex-shrink: 0;
+}
+.profile {
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+}
+.title {
+  font-size: var(--font-size-title);
+  font-weight: 600;
+}
+.pform {
+  align-items: center;
+  gap: var(--space-3);
+}
+.pfield {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 60px;
+  height: var(--control-height);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-field);
+  font-size: var(--font-size-button);
+}
+.pfield:focus {
+  border-color: var(--color-accent);
+}
+.pfield.invalid {
+  border-color: var(--color-danger);
+}
+.pbutton {
+  height: var(--control-height);
+  padding: 0 var(--space-5);
+  align-items: center;
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+}
+.pbutton-text {
+  font-size: var(--font-size-button);
+  font-weight: 600;
+  color: var(--color-on-accent);
+}
+.pgo {
+  width: var(--control-height);
+  height: var(--control-height);
+  justify-content: center;
+  align-items: center;
+  border-radius: var(--radius-md);
+  color: var(--color-on-accent);
+  background: var(--color-accent);
+  font-size: 15px;
+}
+.line-form {
+  padding: var(--space-1);
+}
+.pmsg {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+.pmsg.error {
+  color: var(--color-danger);
+}
+
+/* Empty and first load */
+.empty {
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+}
+.empty-icon {
+  font-size: 22px;
+  color: var(--color-text-muted);
+}
+.root.line .empty-icon {
+  font-size: 16px;
+}
+.root.line .empty {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+}
+.empty-icon.warn {
+  color: var(--color-warning);
+}
+.empty-text {
+  flex-direction: column;
+  flex-shrink: 1;
+  gap: var(--space-1);
+}
+.empty-title {
+  font-size: var(--font-size-button);
+  font-weight: 600;
+}
+.empty-body {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+}
+.skeleton {
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.root.line .skeleton {
+  padding: var(--space-2) var(--space-4);
+}
+.sk-head {
+  align-items: center;
+  gap: var(--space-4);
+}
+.sk-icon {
+  width: 60px;
+  height: 28px;
+  border-radius: 4px;
+  background: var(--color-surface-raised);
+}
+.root.line .sk-icon {
+  width: 18px;
+  height: 18px;
+}
+.sk-lines {
+  flex-direction: column;
+  flex-grow: 1;
+  gap: var(--space-3);
+}
+.sk {
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-hover);
+  animation: breathe 1200ms ease-in-out infinite alternate;
+}
+.sk-short {
+  width: 30%;
+}
+.sk-long {
+  width: 65%;
+}
+.sk-bar {
+  height: 28px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+}
+.sk-note {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+@keyframes breathe {
+  from { opacity: 1; }
+  to { opacity: 0.55; }
+}
+
+/* Steam symbol, cut from Valve's guide unchanged: 16 px, clear space of the
+   small circle's diameter (about 3 px) on every side. */
+.steam-mark {
+  width: 16px;
+  height: 16px;
+  margin: 3px;
+  flex-shrink: 0;
+  align-self: start;
+}
+.source-word {
+  flex-shrink: 0;
+  align-self: start;
+  margin-left: 6px;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}

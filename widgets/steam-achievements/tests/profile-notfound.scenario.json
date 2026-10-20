@@ -1,0 +1,98 @@
+{
+  "scenarioVersion": 1,
+  "name": "profile-notfound",
+  "description": "A custom name Steam does not know: said under the field.",
+  "host": {
+    "startAt": 1767225600000,
+    "storage": {},
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "http": [
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.steampowered.com/ISteamUser/ResolveVanityURL/v1/?vanityurl=ashen_kn1ght",
+          "account": "steam"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\n\t\"response\": {\n\t\t\"success\": 42,\n\t\t\"message\": \"No match\"\n\t}\n}"
+        }
+      }
+    ]
+  },
+  "steps": [
+    {
+      "pointer": {
+        "click": {
+          "label": "Link to your Steam profile"
+        }
+      }
+    },
+    {
+      "text": "steamcommunity.com/id/ashen_kn1ght"
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Continue"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          " No Steam profile at this link. Check it and try again."
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "profile-notfound-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "profile-notfound-fr-standard",
+        "fault": "none"
+      }
+    }
+  ]
+}
