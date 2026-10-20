@@ -21,11 +21,26 @@
 //!   values speak of keys, tokens or passwords (`secretHint` of the review).
 //! - `review.service_label_name`: an account name that imitates a label of
 //!   the host (integrated service, official, verified).
+//! - `review.oauth_pages`: every declared OAuth account. Its sign-in page
+//!   (`authorize`, or `verify` for a device code) may redirect elsewhere,
+//!   to an integrated service or a large provider, while its `token`
+//!   endpoint relays: the reviewer signs in and notes where each page ends.
+//! - `review.read_scope_writes`: an OAuth scope declared `read` whose name
+//!   says it writes, edits, manages or deletes.
+//! - `review.service_name_in_id`: an account ID that, folded to letters,
+//!   reads as an integrated service or as PlayerVox's own names.
+//!
+//! An address reads as a service through its letters and digits folded
+//! with look-alikes, Twitch's CDN names (`ttvnw`, `jtvnw`) and, for an
+//! internationalized host (`xn--`), its decoded form; PlayerVox's own names
+//! (`playervox`, `overcrow`, `valhallab`) count as one.
 
 use std::collections::BTreeMap;
 
-use overcrow_widget_schema::accounts::{Account, AccountMode, Charset, KeyFormat};
-use overcrow_widget_schema::identifiers::reads_as_any;
+use overcrow_widget_schema::accounts::{
+    Account, AccountMode, Charset, KeyFormat, OAuthFlow, ScopeAccess,
+};
+use overcrow_widget_schema::identifiers::{RESERVED_HANDLE_WORDS, reads_as_any};
 use overcrow_widget_schema::integrated::{INTEGRATED_SERVICES, READER_GUARDS};
 use overcrow_widget_schema::manifest::Manifest;
 use serde_json::Value;
@@ -35,6 +50,18 @@ use crate::sanitize;
 
 /// The help every account hint ends with.
 const ACCOUNT_HELP: &str = "open each page of the account and note its final address; refuse a widget that sends the player to an integrated service (reviewer manual, accounts)";
+
+/// The help of a declared OAuth account's sign-in pages.
+const OAUTH_HELP: &str = "sign in with a test account and note the final address of each page and the application its consent page names; refuse a step that ends at an integrated service or at a provider other than the account's origins, or scopes other than the declared ones (reviewer manual, OAuth accounts)";
+
+/// Words of a scope's name that say it changes the account.
+const WRITE_WORDS: &[&str] = &[
+    "admin", "ban", "create", "delete", "edit", "manage", "modify", "post", "publish", "remove",
+    "send", "update", "upload", "write",
+];
+
+/// Other names an integrated service's addresses go by: Twitch's CDNs.
+const SERVICE_ALIASES: &[(&str, &[&str])] = &[("twitch", &["ttvnw", "jtvnw"])];
 
 /// Words of a path, a parameter name or a value that speak of a secret,
 /// split on separators and case changes (`oauth2/token`, `getSecret`).
@@ -187,6 +214,41 @@ fn hint(code: &str, pointer: &str, message: String, help: &str) -> Diagnostic {
 fn account_hints(account: &Account, index: usize, out: &mut Vec<Diagnostic>) {
     let pointer = format!("/permissions/accounts/{index}");
     let name = sanitize::line(&account.name);
+    if let Some(oauth) = account
+        .oauth
+        .as_ref()
+        .filter(|_| account.mode == AccountMode::OAuth)
+    {
+        let token = sanitize::line(host_of(&oauth.token));
+        let message = match oauth.flow {
+            OAuthFlow::Loopback => format!(
+                "the OAuth account {name} signs the player in at {} and gets its tokens from {token}",
+                sanitize::line(host_of(oauth.authorize.as_deref().unwrap_or_default()))
+            ),
+            OAuthFlow::Device => format!(
+                "the OAuth account {name} has the player enter a code at {} and gets its tokens from {token}",
+                sanitize::line(host_of(oauth.verify.as_deref().unwrap_or_default()))
+            ),
+        };
+        out.push(hint("review.oauth_pages", &pointer, message, OAUTH_HELP));
+        for scope in &oauth.scopes {
+            if scope.access == ScopeAccess::Read
+                && words(&scope.name)
+                    .iter()
+                    .any(|word| WRITE_WORDS.contains(&word.as_str()))
+            {
+                out.push(hint(
+                    "review.read_scope_writes",
+                    &pointer,
+                    format!(
+                        "the scope {} of {name} is declared read, but its name says it changes the account",
+                        sanitize::line(&scope.name)
+                    ),
+                    "check what the scope allows at the service: one that changes the account is declared write, and the player is told so",
+                ));
+            }
+        }
+    }
     if let Some(key) = account
         .key
         .as_ref()
@@ -233,17 +295,33 @@ fn account_hints(account: &Account, index: usize, out: &mut Vec<Diagnostic>) {
             continue;
         }
         seen.push(host);
-        if let Some(service) = service_read_in(host) {
+        // An internationalized host as the browser shows it.
+        let decoded = idna_decoded(host);
+        if let Some(service) =
+            service_read_in(host).or_else(|| decoded.as_deref().and_then(service_read_in))
+        {
+            let shown = match &decoded {
+                Some(decoded) => format!("{} ({})", sanitize::line(decoded), sanitize::line(host)),
+                None => sanitize::line(host),
+            };
             out.push(hint(
                 "review.service_name_in_host",
                 &pointer,
-                format!(
-                    "the address {} of {name} reads as {service}",
-                    sanitize::line(host)
-                ),
+                format!("the address {shown} of {name} reads as {service}"),
                 ACCOUNT_HELP,
             ));
         }
+    }
+    if let Some(service) = service_read_in(&account.id) {
+        out.push(hint(
+            "review.service_name_in_id",
+            &pointer,
+            format!(
+                "the ID {} of {name} reads as {service}",
+                sanitize::line(&account.id)
+            ),
+            ACCOUNT_HELP,
+        ));
     }
     let imitates = reads_as_any(&account.name, HOST_LABEL_WORDS)
         || account
@@ -296,16 +374,106 @@ fn host_of(url: &str) -> &str {
         .unwrap_or_default()
 }
 
-/// The integrated service a host reads as, folded to letters and digits
-/// with look-alikes (`steam-keys.example`, `api.tw1tch.example`).
-fn service_read_in(host: &str) -> Option<&'static str> {
-    INTEGRATED_SERVICES.iter().find_map(|service| {
-        let mut words = vec![service.id];
-        if let Some(guard) = READER_GUARDS.iter().find(|guard| guard.id == service.id) {
-            words.extend(guard.names);
+/// The integrated service, or PlayerVox's own name, a host or an ID reads
+/// as, folded to letters and digits with look-alikes
+/// (`steam-keys.example`, `api.tw1tch.example`, `ttvnw-auth.example`,
+/// `playervox-link.example`).
+fn service_read_in(text: &str) -> Option<&'static str> {
+    INTEGRATED_SERVICES
+        .iter()
+        .find_map(|service| {
+            let mut words = vec![service.id];
+            if let Some(guard) = READER_GUARDS.iter().find(|guard| guard.id == service.id) {
+                words.extend(guard.names);
+            }
+            if let Some((_, aliases)) = SERVICE_ALIASES.iter().find(|(id, _)| *id == service.id) {
+                words.extend(*aliases);
+            }
+            reads_as_any(text, &words).then_some(service.name)
+        })
+        .or_else(|| {
+            RESERVED_HANDLE_WORDS
+                .iter()
+                .find(|word| reads_as_any(text, &[word]))
+                .map(|word| match *word {
+                    "playervox" => "PlayerVox",
+                    "overcrow" => "OverCrow",
+                    "valhallab" => "Valhallab",
+                    other => other,
+                })
+        })
+}
+
+/// `host` with each `xn--` label decoded (RFC 3492), as a browser shows it;
+/// `None` without one, or for a label that does not decode.
+fn idna_decoded(host: &str) -> Option<String> {
+    if !host.split('.').any(|label| label.starts_with("xn--")) {
+        return None;
+    }
+    host.split('.')
+        .map(|label| match label.strip_prefix("xn--") {
+            Some(encoded) => punycode(encoded),
+            None => Some(label.to_owned()),
+        })
+        .collect::<Option<Vec<_>>>()
+        .map(|labels| labels.join("."))
+}
+
+/// The Unicode of a Punycode label (RFC 3492 §6.2), `None` when it does not
+/// decode.
+fn punycode(input: &str) -> Option<String> {
+    const BASE: u32 = 36;
+    const T_MIN: u32 = 1;
+    const T_MAX: u32 = 26;
+    let (basic, extended) = match input.rfind('-') {
+        Some(at) => (&input[..at], &input[at + 1..]),
+        None => ("", input),
+    };
+    if !basic.is_ascii() {
+        return None;
+    }
+    let mut output: Vec<char> = basic.chars().collect();
+    let (mut code, mut position, mut bias) = (128_u32, 0_u32, 72_u32);
+    let mut digits = extended.bytes().peekable();
+    while digits.peek().is_some() {
+        let start = position;
+        let (mut weight, mut k) = (1_u32, BASE);
+        loop {
+            let digit = match digits.next()? {
+                byte @ b'a'..=b'z' => byte - b'a',
+                byte @ b'A'..=b'Z' => byte - b'A',
+                byte @ b'0'..=b'9' => byte - b'0' + 26,
+                _ => return None,
+            };
+            let digit = u32::from(digit);
+            position = position.checked_add(digit.checked_mul(weight)?)?;
+            let threshold = k.saturating_sub(bias).clamp(T_MIN, T_MAX);
+            if digit < threshold {
+                break;
+            }
+            weight = weight.checked_mul(BASE - threshold)?;
+            k = k.checked_add(BASE)?;
         }
-        reads_as_any(host, &words).then_some(service.name)
-    })
+        let length = u32::try_from(output.len()).ok()? + 1;
+        bias = adapt(position - start, length, start == 0);
+        code = code.checked_add(position / length)?;
+        position %= length;
+        output.insert(usize::try_from(position).ok()?, char::from_u32(code)?);
+        position += 1;
+    }
+    Some(output.into_iter().collect())
+}
+
+/// The bias adaptation of RFC 3492 §6.1.
+fn adapt(delta: u32, points: u32, first: bool) -> u32 {
+    let mut delta = if first { delta / 700 } else { delta / 2 };
+    delta += delta / points;
+    let mut k = 0;
+    while delta > ((36 - 1) * 26) / 2 {
+        delta /= 36 - 1;
+        k += 36;
+    }
+    k + (36 * delta) / (delta + 38)
 }
 
 /// Whether a static query, once percent-decoded, carries an address: a `/`
@@ -496,6 +664,34 @@ mod tests {
             "mainstream.example",
         ] {
             assert_eq!(service_read_in(host), None, "{host}");
+        }
+    }
+
+    #[test]
+    fn an_internationalized_host_is_decoded() {
+        // RFC 3492 §7.1 (B) and (A), and look-alikes of service names.
+        assert_eq!(
+            punycode("ihqwcrb4cv8a8dqg056pqjye").as_deref(),
+            Some("他们为什么不说中文")
+        );
+        assert_eq!(
+            punycode("egbpdaj6bu4bxfgehfvwxn").as_deref(),
+            Some(
+                "\u{0644}\u{064A}\u{0647}\u{0645}\u{0627}\u{0628}\u{062A}\u{0643}\u{0644}\u{0645}\u{0648}\u{0634}\u{0639}\u{0631}\u{0628}\u{064A}\u{061F}"
+            )
+        );
+        assert_eq!(punycode("bcher-kva").as_deref(), Some("bücher"));
+        assert_eq!(
+            idna_decoded("auth.xn--twith-4ye.example").as_deref(),
+            Some("auth.twit\u{0441}h.example")
+        );
+        assert_eq!(
+            service_read_in("auth.twit\u{0441}h.example"),
+            Some("Twitch")
+        );
+        assert_eq!(idna_decoded("auth.twitch-tools.example"), None);
+        for broken in ["xn--a!b", "xn--99999999999", "xn--\u{e9}-x"] {
+            assert_eq!(idna_decoded(broken), None, "{broken}");
         }
     }
 
