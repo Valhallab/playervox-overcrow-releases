@@ -409,6 +409,31 @@ fn steam_routes_stay_on_the_read_interfaces() {
     });
 }
 
+/// A route without the key on the secret origin keeps the service's
+/// refused paths: the guard is the path, not the account.
+#[test]
+fn a_route_without_the_key_never_reaches_a_refused_path() {
+    for path in [
+        "/IEconService/GetTradeOffers/v1/",
+        "/IEconService./GetTradeOffers/v1/",
+        "/ITwoFactorService/QueryStatus/v1/",
+    ] {
+        refused(&steam(), "service_route", path, |value| {
+            route(value, 1).as_object_mut().unwrap().remove("account");
+            route(value, 1)["path"] = json!(path);
+        });
+    }
+    refused(
+        &twitch(),
+        "service_route",
+        "the broadcast key without the token",
+        |value| {
+            route(value, 0).as_object_mut().unwrap().remove("account");
+            route(value, 0)["path"] = json!("/helix/streams/key");
+        },
+    );
+}
+
 #[test]
 fn twitch_routes_never_reach_a_secret() {
     for path in [
@@ -726,12 +751,38 @@ fn a_declared_account_never_uses_a_services_client() {
 /// older one accepted (and with it the whole catalog).
 #[test]
 fn the_readers_guard_is_frozen_and_covers_the_table() {
-    use overcrow_widget_schema::integrated::{INTEGRATED_SERVICES, READER_GUARDS};
-    let ids: Vec<&str> = READER_GUARDS.iter().map(|guard| guard.id).collect();
+    use overcrow_widget_schema::integrated::{INTEGRATED_SERVICES, READER_GUARDS, ServiceGuard};
+    // The exact image: a name, a domain, an origin or a client added makes
+    // newer readers refuse what older ones accepted; one removed relaxes
+    // the guard of every reader.
+    const FROZEN: &[ServiceGuard] = &[
+        ServiceGuard {
+            id: "steam",
+            names: &["steam", "valve"],
+            domains: &[
+                "steampowered.com",
+                "steamcommunity.com",
+                "steamstatic.com",
+                "steam-api.com",
+                "steamgames.com",
+                "steamcontent.com",
+                "steamusercontent.com",
+                "valvesoftware.com",
+            ],
+            origins: &["https://steamcdn-a.akamaihd.net"],
+            client_ids: &[],
+        },
+        ServiceGuard {
+            id: "twitch",
+            names: &["twitch"],
+            domains: &["twitch.tv", "jtvnw.net", "twitchcdn.net", "twitchsvc.net"],
+            origins: &[],
+            client_ids: &["4mnhecoh0nif054yubgwkkj2k7bma2"],
+        },
+    ];
     assert_eq!(
-        ids,
-        ["steam", "twitch"],
-        "frozen: add a service to the producers' guard"
+        READER_GUARDS, FROZEN,
+        "frozen: add a service or an address to the producers' checks"
     );
     for service in INTEGRATED_SERVICES {
         let Some(guard) = READER_GUARDS.iter().find(|guard| guard.id == service.id) else {
@@ -760,4 +811,45 @@ fn the_readers_guard_is_frozen_and_covers_the_table() {
                 .contains(&service.name.to_ascii_lowercase().as_str())
         );
     }
+}
+
+/// The look-alike tables the readers fold an account's name with
+/// (`reads_as_any`, `reads_as_reserved_name`) are part of the frozen guard:
+/// a letter added makes newer readers refuse a name older ones accepted.
+#[test]
+fn the_look_alikes_readers_fold_are_frozen() {
+    use overcrow_widget_schema::identifiers::{
+        CONFUSABLE_LETTERS, STYLIZED_LETTERS, UNICODE_CONFUSABLE_LETTERS,
+    };
+    use overcrow_widget_schema::package::{hex, sha256};
+    let mut image = String::new();
+    for (letters, ascii) in CONFUSABLE_LETTERS {
+        image.push_str(&format!("{letters}>{ascii}\n"));
+    }
+    image.push_str("--\n");
+    for (look_alike, ascii) in UNICODE_CONFUSABLE_LETTERS {
+        image.push_str(&format!("{:x}>{ascii}\n", u32::from(*look_alike)));
+    }
+    image.push_str("--\n");
+    for block in STYLIZED_LETTERS {
+        image.push_str(&format!(
+            "{:x}-{:x}\n",
+            u32::from(*block.start()),
+            u32::from(*block.end())
+        ));
+    }
+    assert_eq!(
+        (
+            CONFUSABLE_LETTERS.len(),
+            UNICODE_CONFUSABLE_LETTERS.len(),
+            STYLIZED_LETTERS.len()
+        ),
+        (17, 519, 9),
+        "sizes"
+    );
+    assert_eq!(
+        hex(&sha256(image.as_bytes())),
+        "ff87b03128baeccb66655ad662bbcd297761f4d59afe8add7e4092ddafff8a00",
+        "frozen: a look-alike added or removed changes what readers refuse"
+    );
 }

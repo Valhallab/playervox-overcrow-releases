@@ -142,13 +142,20 @@ function unusedAuthority(context: Context): void {
   }
 }
 
+interface ParameterConstraint {
+  type?: unknown;
+  maxLength?: unknown;
+  values?: unknown;
+}
+
 interface NetworkRule {
   origin?: unknown;
   method?: unknown;
   path?: unknown;
-  pathParams?: Record<string, { type?: unknown; maxLength?: unknown }>;
-  queryParams?: Record<string, { type?: unknown; maxLength?: unknown }>;
+  pathParams?: Record<string, ParameterConstraint>;
+  queryParams?: Record<string, ParameterConstraint>;
   maxResponseBytes?: unknown;
+  account?: unknown;
 }
 
 /** The static start of a route path, before its first `{parameter}`. */
@@ -172,6 +179,7 @@ function networkRules(context: Context): void {
   if (!Array.isArray(rules) || rules.length === 0) return;
   const origins = new Set(rules.map((rule) => String(rule.origin ?? "")));
   const defaultBound = limit("MAX_HTTP_RESPONSE_BYTES");
+  const firstOfRoute = new Map<string, number>();
   rules.forEach((rule, index) => {
     const where = `permissions.network[${index}]`;
     const origin = String(rule.origin ?? "");
@@ -210,15 +218,42 @@ function networkRules(context: Context): void {
         },
       });
     }
-    if (returnsSecrets(origin, path)) {
+    if (returnsSecrets(origin, rule)) {
+      const withAccount = typeof rule.account === "string";
       add(context, {
         rule: "token-route",
+        area: "security",
+        severity: withAccount ? "high" : "medium",
+        file: "manifest.json",
+        line: null,
+        message: withAccount
+          ? `${where} (${route}) looks like a route that creates, lists or returns keys or tokens, and it carries the account's secret.`
+          : `${where} (${route}) looks like a route that creates, lists or returns keys or tokens.`,
+        fix: "A widget never requests such a route: its answer would hand a secret to the widget's code, and the review refuses it. Remove the route.",
+      });
+    }
+    const first = firstOfRoute.get(route);
+    if (first === undefined) firstOfRoute.set(route, index);
+    else
+      add(context, {
+        rule: "same-route",
         area: "security",
         severity: "medium",
         file: "manifest.json",
         line: null,
-        message: `${where} (${route}) looks like a route that creates, lists or returns keys or tokens.`,
-        fix: "A widget never requests such a route: its answer would hand a secret to the widget's code, and the review refuses it. Remove the route.",
+        message: `${where} is on the route of permissions.network[${first}] (${route}): OverCrow allows what either rule allows.`,
+        fix: "Keep one rule per route, with the parameters and the response bound the widget needs: the reviewer reads them as one route.",
+      });
+    for (const name of Object.keys(rule.pathParams ?? {})) {
+      if (!Object.hasOwn(rule.queryParams ?? {}, name)) continue;
+      add(context, {
+        rule: "path-and-query-name",
+        area: "security",
+        severity: "medium",
+        file: "manifest.json",
+        line: null,
+        message: `${where} names ${name} in both pathParams and queryParams.`,
+        fix: "Give the path parameter and the query parameter different names: they are two separate constraints, easy to read as one.",
       });
     }
     if (
@@ -310,22 +345,26 @@ function servicesAddress(url: string): boolean {
   );
 }
 
-/** A name folded as the schema reads it: ASCII letters, digits as letters, `rn` as `m`. */
-function readsAsService(name: string): boolean {
+/** A name folded as the schema reads it: ASCII letters, digits as letters, `vv` as `w`, `rn` as `m`. */
+function readsAsAny(name: string, words: readonly string[]): boolean {
   const folded = name
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/[^a-z0-9]/g, "")
+    .replace(/vv/g, "w")
     .replace(/0/g, "o")
     .replace(/[1i]/g, "l")
     .replace(/3/g, "e")
     .replace(/4/g, "a")
     .replace(/5/g, "s")
     .replace(/7/g, "t")
+    .replace(/8/g, "b")
     .replace(/rn/g, "m");
-  return INTEGRATED_SERVICE_NAMES.some((word) => folded.includes(word.replace(/i/g, "l")));
+  return words.some((word) => folded.includes(word.replace(/i/g, "l")));
 }
+
+const readsAsService = (name: string): boolean => readsAsAny(name, INTEGRATED_SERVICE_NAMES);
 
 /** A declared account on Steam or Twitch: OverCrow integrates them itself,
  * and refuses a widget's own account on their names, addresses or clients. */
@@ -369,22 +408,203 @@ function integratedServiceAccount(context: Context): void {
   });
 }
 
-/** Words of a path that name keys, tokens or sign-in steps. */
+/** The key formats of the services OverCrow integrates (the schema's table). */
+const INTEGRATED_SERVICE_KEYS = [{ service: "Steam", charset: "hex", min: 32, max: 32 }];
+
+/** Whether a key charset allows the ASCII character `code`. */
+function charsetAllows(charset: string, code: number): boolean {
+  const character = String.fromCharCode(code);
+  const alnum = /^[A-Za-z0-9]$/.test(character);
+  switch (charset) {
+    case "hex":
+      return /^[0-9A-Fa-f]$/.test(character);
+    case "alnum":
+      return alnum;
+    case "base64url":
+      return alnum || "-_=".includes(character);
+    case "base64":
+      return alnum || "+/=".includes(character);
+    case "printable":
+      return code >= 0x21 && code <= 0x7e;
+    default:
+      return false;
+  }
+}
+
+/** Words of OverCrow's own labels an account name must not imitate. */
+const HOST_LABEL_WORDS = [
+  "builtin",
+  "certifie",
+  "integrated",
+  "integre",
+  "official",
+  "officiel",
+  "verifie",
+];
+const CHECK_MARKS = /[\u2611\u2705\u2713\u2714]/u;
+
+/** `%XX` decoded twice: a redirect may be escaped twice. */
+function percentDecode(text: string): string {
+  const once = (value: string) =>
+    value.replace(/%([0-9A-Fa-f]{2})/g, (_, hex: string) =>
+      String.fromCharCode(Number.parseInt(hex, 16)),
+    );
+  return once(once(text));
+}
+
+/** Whether the static query of a key page carries an address. */
+function carriesAnAddress(query: string): boolean {
+  const decoded = percentDecode(query).toLowerCase();
+  return (
+    /[/:]/.test(decoded) ||
+    decoded.includes("http") ||
+    decoded.includes("www.") ||
+    decoded.split(/[&=]/).some((value) => value !== "" && servicesAddress(value))
+  );
+}
+
+/** What a reviewer looks at closely in a declared account: a key shaped
+ * like a Steam key, a key page that leads elsewhere, an address or a name
+ * that reads as a service or as OverCrow's own labels. */
+function declaredAccountHints(context: Context): void {
+  const accounts = permissionsOf(context.project).accounts;
+  if (!Array.isArray(accounts)) return;
+  accounts.forEach((entry, index) => {
+    if (typeof entry !== "object" || entry === null || "service" in entry) return;
+    const where = `permissions.accounts[${index}]`;
+    const declared = entry as Record<string, unknown>;
+    const key = (declared.key ?? {}) as Record<string, unknown>;
+    const format = (key.format ?? {}) as Record<string, unknown>;
+    const oauth = (declared.oauth ?? {}) as Record<string, unknown>;
+    const finding = (rule: string, severity: Severity, message: string, fix: string) =>
+      add(context, {
+        rule,
+        area: "security",
+        severity,
+        file: "manifest.json",
+        line: null,
+        message,
+        fix,
+      });
+    const [charset, min, max] = [
+      String(format.charset ?? ""),
+      Number(format.minLength),
+      Number(format.maxLength),
+    ];
+    for (const theirs of INTEGRATED_SERVICE_KEYS) {
+      // A wider charset holds theirs (hex is within letters and digits).
+      const holds = Array.from({ length: 128 }, (_, code) => code).every(
+        (code) => !charsetAllows(theirs.charset, code) || charsetAllows(charset, code),
+      );
+      if (holds && min <= theirs.min && max >= theirs.max)
+        finding(
+          "service-key-format",
+          "medium",
+          `${where}: its key has the format of ${theirs.service} keys (${theirs.min} ${theirs.charset} characters).`,
+          `The reviewer opens the key page and refuses a widget that sends the player to fetch a ${theirs.service} key. Give the format your service's keys really have.`,
+        );
+    }
+    const page = typeof key.page === "string" ? key.page : "";
+    const query = page.includes("?") ? page.slice(page.indexOf("?") + 1) : "";
+    if (query && carriesAnAddress(query))
+      finding(
+        "address-in-key-page",
+        "high",
+        `${where}: the key page carries an address in its query (${page}).`,
+        "Link the page of your service where a player gets a key, directly: never a redirect, a search engine or a link shortener.",
+      );
+    const urls = [
+      ...(Array.isArray(declared.origins) ? declared.origins.map(String) : []),
+      page,
+      ...[oauth.authorize, oauth.token, oauth.device, oauth.verify, oauth.revoke, oauth.validate]
+        .filter((url) => typeof url === "string")
+        .map(String),
+    ].filter((url) => url !== "" && !servicesAddress(url));
+    const hosts = new Set(
+      urls.map((url) => (url.replace(/^https?:\/\//i, "").split(/[/:?#]/)[0] ?? "").toLowerCase()),
+    );
+    for (const host of hosts) {
+      if (!readsAsService(host)) continue;
+      finding(
+        "service-name-in-host",
+        "medium",
+        `${where}: the address ${host} reads as Steam or Twitch.`,
+        "Use your service's own addresses: the reviewer checks that an address that reads as Steam or Twitch belongs to you.",
+      );
+    }
+    const name = String(declared.name ?? "");
+    if (readsAsAny(name, HOST_LABEL_WORDS) || CHECK_MARKS.test(name))
+      finding(
+        "service-label-name",
+        "high",
+        `${where}: the name ${name} imitates a label of OverCrow (integrated, official, verified).`,
+        "Name the account with your service's plain name: OverCrow marks integrated services itself, and the review refuses a name that imitates it.",
+      );
+  });
+}
+
+/** Words of a path, a parameter name or a value that name keys, tokens or
+ * sign-in steps, split on separators and case changes (as `admit` does). */
 const SECRET_ROUTE_WORDS = new Set([
-  "token",
-  "tokens",
-  "oauth",
-  "oauth2",
   "authorize",
-  "revoke",
-  "introspect",
-  "apikey",
-  "apikeys",
   "credential",
   "credentials",
+  "introspect",
+  "oauth",
+  "oauth2",
+  "passwd",
+  "password",
+  "passwords",
+  "revoke",
   "secret",
   "secrets",
+  "token",
+  "tokens",
 ]);
+
+/** Compounds found in the letters and digits alone (`stream_key`, `Access-Tokens`). */
+const SECRET_ROUTE_COMPOUNDS = [
+  "accesskey",
+  "accesstoken",
+  "apikey",
+  "authtoken",
+  "bearertoken",
+  "clientsecret",
+  "credential",
+  "idtoken",
+  "passwd",
+  "password",
+  "privatekey",
+  "refreshtoken",
+  "secretkey",
+  "sessionkey",
+  "sessiontoken",
+  "signingkey",
+  "streamkey",
+];
+
+/** Lowercase words: runs of letters and digits, split before an uppercase letter that follows a lowercase one or a digit. */
+function routeWords(text: string): string[] {
+  return text
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+function speaksOfSecret(text: string): boolean {
+  const folded = text.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const words = routeWords(text);
+  return (
+    SECRET_ROUTE_COMPOUNDS.some((compound) => folded.includes(compound)) ||
+    words.some(
+      (word, index) =>
+        SECRET_ROUTE_WORDS.has(word) ||
+        (word === "api" && (words[index + 1] === "key" || words[index + 1] === "keys")),
+    ) ||
+    ["key", "keys"].includes(text.toLowerCase())
+  );
+}
 
 /** Routes of a service known to return a secret, whatever their words. */
 const SECRET_ROUTES: { origin: string; path: string }[] = [
@@ -397,17 +617,25 @@ const SECRET_ROUTES: { origin: string; path: string }[] = [
   { origin: "https://youtube.googleapis.com", path: "/youtube/v3/livestreams" },
 ];
 
-/** Whether a route seems to create, list or return keys or tokens. */
-function returnsSecrets(origin: string, path: string): boolean {
+/** Whether a route seems to create, list or return keys or tokens: by its
+ * path, its segments, its parameter names and its `enum` values (each one
+ * in its place in the path too). */
+function returnsSecrets(origin: string, rule: NetworkRule): boolean {
+  const path = String(rule.path ?? "");
   const lower = path.toLowerCase();
   if (SECRET_ROUTES.some((known) => known.origin === origin && lower.endsWith(known.path)))
     return true;
-  const words = lower.split(/[^a-z0-9]+/).filter(Boolean);
-  return words.some(
-    (word, index) =>
-      SECRET_ROUTE_WORDS.has(word) ||
-      (word === "api" && (words[index + 1] === "key" || words[index + 1] === "keys")),
-  );
+  const texts = [path, ...path.split("/")];
+  for (const params of [rule.pathParams, rule.queryParams]) {
+    for (const [name, constraint] of Object.entries(params ?? {})) {
+      texts.push(name);
+      const values = Array.isArray(constraint?.values) ? constraint.values : [];
+      for (const value of values) {
+        texts.push(String(value), path.replace(`{${name}}`, String(value)));
+      }
+    }
+  }
+  return texts.some(speaksOfSecret);
 }
 
 /** Labels of a text field that ask for a key, a token or a password. */
@@ -943,6 +1171,7 @@ export function runRules(project: WidgetProject): Finding[] {
   asksForSecret(context);
   if (project.manifest) {
     integratedServiceAccount(context);
+    declaredAccountHints(context);
     unusedAuthority(context);
     networkRules(context);
     largeResponses(context);

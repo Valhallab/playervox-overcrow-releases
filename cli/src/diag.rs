@@ -37,6 +37,12 @@ pub struct Diagnostic {
     pub position: Position,
     pub message: String,
     pub help: Option<String>,
+    /// A JSON pointer (RFC 6901) into `file` naming what the diagnostic is
+    /// about, such as `/permissions/network/3`.
+    /// Behind one thin pointer: a diagnostic is the error of many results,
+    /// which must stay small (`clippy::result_large_err`).
+    #[allow(clippy::box_collection)]
+    pub pointer: Option<Box<String>>,
 }
 
 impl Diagnostic {
@@ -48,6 +54,7 @@ impl Diagnostic {
             position: Position::default(),
             message: message.into(),
             help: None,
+            pointer: None,
         }
     }
 
@@ -68,6 +75,11 @@ impl Diagnostic {
         self
     }
 
+    pub fn at_pointer(mut self, pointer: impl Into<String>) -> Self {
+        self.pointer = Some(Box::new(pointer.into()));
+        self
+    }
+
     pub fn help(mut self, help: impl Into<String>) -> Self {
         self.help = Some(help.into());
         self
@@ -85,7 +97,14 @@ impl Diagnostic {
         if let Some(file) = &self.file {
             let file = crate::sanitize::line(file);
             if self.position.line == 0 {
-                let _ = writeln!(out, "  --> {file}");
+                match &self.pointer {
+                    Some(pointer) => {
+                        let _ = writeln!(out, "  --> {file} {}", crate::sanitize::line(pointer));
+                    }
+                    None => {
+                        let _ = writeln!(out, "  --> {file}");
+                    }
+                }
             } else {
                 let _ = writeln!(
                     out,
@@ -120,7 +139,7 @@ impl Diagnostic {
         } else {
             (Some(self.position.line), Some(self.position.column))
         };
-        let line = json!({
+        let mut line = json!({
             "severity": self.severity.as_str(),
             "code": self.code,
             "file": self.file,
@@ -128,8 +147,12 @@ impl Diagnostic {
             "column": column,
             "message": self.message,
             "help": self.help,
-        })
-        .to_string();
+        });
+        // Absent rather than null: older readers see the same objects.
+        if let Some(pointer) = &self.pointer {
+            line["pointer"] = json!(pointer);
+        }
+        let line = line.to_string();
         crate::sanitize::json(&line)
     }
 }

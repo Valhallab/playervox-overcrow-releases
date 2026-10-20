@@ -940,4 +940,42 @@ mod tests {
             );
         }
     }
+
+    /// A service whose allowed prefix covers its refused paths: only the
+    /// refusals keep a route or a request from them (every real service's
+    /// allow-list refuses first, which would hide a broken refusal).
+    const WIDE: IntegratedService = IntegratedService {
+        id: "wide",
+        name: "Wide",
+        feature: "service-wide",
+        allowed_paths: &[prefix("/helix/")],
+        refused_paths: &["/helix/streams/key", "/helix/extensions/"],
+        ..TWITCH
+    };
+
+    #[test]
+    fn refused_paths_hold_under_a_wide_allowed_prefix() {
+        for path in ["/helix/streams", "/helix/goals", "/helix/streams/keys"] {
+            assert!(WIDE.route_path_allowed(path, &[]), "route {path}");
+            assert!(WIDE.request_path_allowed(path, &[]), "request {path}");
+        }
+        for path in [
+            "/helix/streams/key",
+            "/HELIX/Streams/Key",
+            "/helix/streams/key.",
+            "/helix/streams/key/x",
+            "/helix/extensions/jwt/secrets",
+        ] {
+            assert!(!WIDE.route_path_allowed(path, &[]), "route {path}");
+            assert!(!WIDE.request_path_allowed(path, &[]), "request {path}");
+        }
+        // A parameter may take the refused segment.
+        for path in [
+            "/helix/streams/{x}",
+            "/helix/{kind}/key",
+            "/helix/{kind}/jwt",
+        ] {
+            assert!(!WIDE.route_path_allowed(path, &[]), "route {path}");
+        }
+    }
 }

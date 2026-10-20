@@ -301,9 +301,12 @@ never runs your code or `tsc`:
    ID (`nova.*`, `yourhandle.*`, `gg.nova.*`, `com.example.*`…), nor under a
    handle nobody can register (`admin.*`, `com.*`). `listing.json` is
    valid, its preview is a packaged PNG of at most 256 KiB;
-4. the authority the widget asks for is listed for the reviewer:
-   capabilities (the sensitive ones marked), network routes with their
-   response bound, clipboard writes, storage and game events;
+4. the authority the widget asks for is listed for the reviewer: its
+   account (whether it is required, the key format and page), capabilities
+   (the sensitive ones marked), network routes with their response bound
+   and each path and query parameter, clipboard writes, storage and game
+   events; review hints, warnings that refuse nothing, point at what to
+   look at closely;
 5. with `--previous`, the last approved version (its `manifest.json`, its
    package, its folder or its ZIP): the ID must be the same and the version
    higher, and the report lists the
@@ -324,6 +327,13 @@ never runs your code or `tsc`:
 | `admission.version_not_newer` | error | The version is not above the previous one. |
 | `admission.package_rebuilt` | warning | The submitted archive differs from the rebuild in other files. |
 | `admission.not_rebuilt` | warning | An archive was admitted without its sources. |
+| `review.service_key_format` | warning | The account's key format also accepts the keys of an integrated service (Steam: 32 hex characters). |
+| `review.service_name_in_host` | warning | An address of the account reads as an integrated service (`steam-keys.example`). |
+| `review.address_in_key_page` | warning | The query of the key page carries an address: a redirect, a search engine, a link shortener. |
+| `review.same_route` | warning | A rule is on the route of an earlier one: OverCrow allows what either allows. |
+| `review.path_and_query_name` | warning | A rule names one parameter in both `pathParams` and `queryParams`. |
+| `review.secret_route` | warning | A route's path, parameter names or `enum` values speak of keys, tokens or passwords. |
+| `review.service_label_name` | warning | The account's name imitates a label of OverCrow (integrated, official, verified). |
 
 Options: `--publisher HANDLE`, `--domain DOMAIN` (repeatable), `--previous
 FILE`, `--package FILE`, `--source-map FILE` ([the code map](#the-code-map),
@@ -667,7 +677,7 @@ The code is `<domain>.<category>`:
 | `package` | The package read back | `archive_size`, `file_size` and the categories of OverCrow's package reader |
 | `test` | Scenarios | `scenario`, `scenario_name`, `too_many_scenarios` |
 | `sources` | A source archive | see [source archives](#source-archives) |
-| `init`, `doctor`, `admission` | Those commands | listed above |
+| `init`, `doctor`, `admission`, `review` | Those commands | listed above |
 | `submit` | What `submit` checks before sending | `widget_not_submittable`, `agreement_required`, `limit_reached`, `version_too_low`, `justification_missing`, `archive_too_large`, `archive_mismatch`, `release_notes`, `justification`, `review_message` |
 
 - Lines and columns start at 1; a column counts characters, not bytes.
@@ -675,7 +685,8 @@ The code is `<domain>.<category>`:
 - With `--format json`, each diagnostic is one JSON object on a line of the
   standard output:
   `{"severity","code","file","line","column","message","help"}`, with
-  `null` for what is unknown. `package --format json` ends with one
+  `null` for what is unknown; a `review.*` hint adds `pointer`, the JSON
+  pointer of its permission in `manifest.json` (`/permissions/network/3`). `package --format json` ends with one
   `{"package","bytes","sha256","logicBytes","sourceMap"}` object; `admit`
   and `diff` print one report ([machine-readable output](#machine-readable-output)).
 - Texts that come from a widget (its logs, its names) are shown with
@@ -701,7 +712,7 @@ change announces any other change.
 | `reproducible` | `viewJson` and `archive`, compared with `--package`, else `null`. |
 | `listing` | `bytes`, `sha256`, `spdxLicense` and `preview` of `listing.json`. |
 | `sources` | `kind` (`folder` or `archive`), `files`, `bytes`, `ignored` (`path`, `reason`) and, for a ZIP, `sha256` and `prefix` (the wrapping folder). |
-| `review` | The authority to review, one object per item (`kind`, then its fields). |
+| `review` | The authority to review, one object per item (`kind`, then its fields); a `network` item that may return keys or tokens has `"secretHint": true`. |
 | `permissions` | `keys`; with `--previous`, also `previous` (`id`, `version`), `added`, `changed`, `removed` and `reviewType` (`full` or `quick`), else `null`. |
 | `listingPolicy` | `required` or `optional` (`--listing`). |
 | `diagnostics` | The diagnostics, as above. |
