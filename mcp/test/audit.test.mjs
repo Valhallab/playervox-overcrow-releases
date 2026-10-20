@@ -395,6 +395,214 @@ test("routes that return or trade secrets are reported", async () => {
   assert.match(trades[0].fix, /never touches Steam item trades/);
 });
 
+test("folded spellings, parameter names and enum values reveal a secret route", async () => {
+  const route = (path, extra = {}) => ({
+    origin: "https://api.runlog.example",
+    method: "GET",
+    path,
+    ...extra,
+  });
+  const secret = [
+    route("/v1/streamkey"),
+    route("/v1/stream_key"),
+    route("/v1/accesstoken"),
+    route("/v1/Access-Tokens/list"),
+    route("/v1/getApiKey"),
+    route("/v1/me/keys"),
+    route("/v1/me/{section}", {
+      pathParams: { section: { type: "enum", values: ["runs", "tokens"] } },
+    }),
+    route("/v1/{kind}/list", { pathParams: { kind: { type: "enum", values: ["apikeys"] } } }),
+    route("/v1/me", { queryParams: { include_secret: { type: "enum", values: ["no"] } } }),
+    // Only the value in its place makes the compound (`accesstoken`).
+    route("/v1/access/{part}", { pathParams: { part: { type: "enum", values: ["tokenset"] } } }),
+  ];
+  const harmless = [
+    route("/v1/runs"),
+    route("/v1/tokenizer"),
+    route("/v1/hotkeys"),
+    route("/v1/secretary/key-bindings"),
+    route("/v1/{kind}", { pathParams: { kind: { type: "slug", maxLength: 16 } } }),
+  ];
+  const directory = widget("folded-secret-routes", {
+    "manifest.json": manifest({ network: [...secret, ...harmless] }),
+  });
+  const found = (await auditWidget(directory)).findings.filter(
+    (finding) => finding.rule === "token-route",
+  );
+  assert.deepEqual(
+    found.map((finding) => Number(/network\[(\d+)\]/.exec(finding.message)[1])),
+    secret.map((_, index) => index),
+  );
+  assert.ok(found.every((finding) => finding.severity === "medium"));
+
+  // On a route of the account, the secret goes with the request: high.
+  const account = {
+    id: "runlog",
+    name: "Run Log",
+    mode: "key",
+    origins: ["https://api.runlog.example"],
+    send: { header: "X-Api-Key" },
+    key: {
+      format: { charset: "alnum", minLength: 40, maxLength: 64 },
+      page: "https://runlog.example/key",
+    },
+  };
+  const withAccount = widget("account-secret-route", {
+    "manifest.json": manifest({
+      accounts: [account],
+      network: [route("/v1/me/access_token", { account: "runlog" })],
+    }),
+  });
+  const high = (await auditWidget(withAccount)).findings.filter(
+    (finding) => finding.rule === "token-route",
+  );
+  assert.equal(high.length, 1);
+  assert.equal(high[0].severity, "high");
+  assert.match(high[0].message, /carries the account's secret/);
+});
+
+test("rules on one route and a name in both tables are reported", async () => {
+  const wide = {
+    origin: "https://api.runlog.example",
+    method: "GET",
+    path: "/v1/me/{section}",
+    pathParams: { section: { type: "slug", maxLength: 32 } },
+    queryParams: { section: { type: "enum", values: ["runs", "stats"] } },
+  };
+  const narrow = { ...wide, pathParams: { section: { type: "enum", values: ["runs"] } } };
+  delete narrow.queryParams;
+  const directory = widget("same-route", {
+    "manifest.json": manifest({
+      network: [narrow, { ...narrow, path: "/v1/runs", pathParams: undefined }, wide],
+    }),
+  });
+  const found = (await auditWidget(directory)).findings.filter((finding) =>
+    ["same-route", "path-and-query-name"].includes(finding.rule),
+  );
+  assert.deepEqual(
+    found.map((finding) => `${finding.rule}:${/network\[(\d+)\]/.exec(finding.message)[1]}`).sort(),
+    ["path-and-query-name:2", "same-route:2"],
+  );
+  const same = found.find((finding) => finding.rule === "same-route");
+  assert.match(same.message, /permissions\.network\[0\]/);
+});
+
+test("a declared account that could fish a service's key is reported", async () => {
+  const account = (change) => {
+    const value = {
+      id: "tracker",
+      name: "Achievement Tracker",
+      mode: "key",
+      origins: ["https://api.tracker.example"],
+      send: { header: "X-Key" },
+      key: {
+        format: { charset: "alnum", minLength: 40, maxLength: 64 },
+        page: "https://get.tracker.example/key",
+      },
+    };
+    change(value);
+    return value;
+  };
+  const cases = [
+    ["a plain account", account(() => {}), []],
+    [
+      "a Steam key format",
+      account((value) => {
+        value.key.format = { charset: "hex", minLength: 32, maxLength: 32 };
+      }),
+      ["medium:service-key-format"],
+    ],
+    [
+      "a wider charset that holds a Steam key",
+      account((value) => {
+        value.key.format = { charset: "alnum", minLength: 32, maxLength: 32 };
+      }),
+      ["medium:service-key-format"],
+    ],
+    [
+      "a generic printable key",
+      account((value) => {
+        value.key.format = { charset: "printable", minLength: 16, maxLength: 128 };
+      }),
+      ["medium:service-key-format"],
+    ],
+    [
+      "a key too long for Steam",
+      account((value) => {
+        value.key.format = { charset: "hex", minLength: 40, maxLength: 40 };
+      }),
+      [],
+    ],
+    [
+      "a redirect in the key page",
+      account((value) => {
+        value.key.page =
+          "https://www.google.com/url?q=https%3A%2F%2Fsteamcommunity.com%2Fdev%2Fapikey";
+      }),
+      ["high:address-in-key-page"],
+    ],
+    [
+      "a service host in the key page",
+      account((value) => {
+        value.key.page = "https://get.tracker.example/go?to=steamcommunity.com";
+      }),
+      ["high:address-in-key-page"],
+    ],
+    [
+      "a plain static query",
+      account((value) => {
+        value.key.page = "https://get.tracker.example/key?tab=api-keys";
+      }),
+      [],
+    ],
+    [
+      "a host that reads as Steam",
+      account((value) => {
+        value.key.page = "https://st3am-keys.example/key";
+      }),
+      ["medium:service-name-in-host"],
+    ],
+    [
+      "a host that reads as Twitch",
+      account((value) => {
+        value.origins = ["https://api.tw1tch-tools.example"];
+      }),
+      ["medium:service-name-in-host"],
+    ],
+    [
+      "a name that imitates a label",
+      account((value) => {
+        value.name = "Arena (service intégré)";
+      }),
+      ["high:service-label-name"],
+    ],
+    [
+      "a check mark",
+      account((value) => {
+        value.name = "Arena ✓";
+      }),
+      ["high:service-label-name"],
+    ],
+    ["the service itself", { service: "steam" }, []],
+  ];
+  const hintRules = new Set([
+    "service-key-format",
+    "address-in-key-page",
+    "service-name-in-host",
+    "service-label-name",
+  ]);
+  for (const [label, entry, expected] of cases) {
+    const directory = widget(`hints-${label.replaceAll(" ", "-")}`, {
+      "manifest.json": manifest({ accounts: [entry] }),
+    });
+    const found = (await auditWidget(directory)).findings
+      .filter((finding) => hintRules.has(finding.rule))
+      .map((finding) => `${finding.severity}:${finding.rule}`);
+    assert.deepEqual(found, expected, label);
+  }
+});
+
 // Until an application release announces account-key, the fixes name no
 // manifest field that the published apps would refuse (the release lot
 // points them to permissions.accounts again).
