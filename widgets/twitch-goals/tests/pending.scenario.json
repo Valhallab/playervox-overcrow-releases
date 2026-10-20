@@ -1,0 +1,50 @@
+{
+  "scenarioVersion": 1,
+  "name": "pending",
+  "description": "Twitch connection pending: the host's panel, the widget reads nothing.",
+  "host": {
+    "startAt": 1767225600000,
+    "frame": true,
+    "accounts": {
+      "twitch": "pending"
+    }
+  },
+  "fixtures": {
+    "http": []
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "image": "pending",
+        "fault": "none",
+        "calls": [
+          {
+            "service": "account.subscribe",
+            "params": {
+              "id": "twitch"
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 120000
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "expect": {
+        "image": "pending-fr",
+        "fault": "none",
+        "calls": []
+      }
+    }
+  ]
+}

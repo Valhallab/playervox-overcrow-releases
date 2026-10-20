@@ -1,0 +1,168 @@
+{
+  "scenarioVersion": 1,
+  "name": "long-texts",
+  "description": "A long description and a long follower name: one line each, cut with an ellipsis.",
+  "host": {
+    "startAt": 1767225600000
+  },
+  "fixtures": {
+    "http": [
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/users",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"141981764\",\"login\":\"novalive\",\"display_name\":\"NovaLive\",\"type\":\"\",\"broadcaster_type\":\"affiliate\",\"description\":\"\",\"profile_image_url\":\"\",\"offline_image_url\":\"\",\"view_count\":0,\"created_at\":\"2019-05-01T10:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Road to the big charity marathon stream\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1284,\"data\":[{\"user_id\":\"70000003\",\"user_login\":\"theverylongestnameontwitch\",\"user_name\":\"TheVeryLongestNameOnTwitch\",\"followed_at\":\"2025-12-31T23:58:00Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":null,\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      }
+    ]
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 260,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "long-line",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "compact"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "long-compact",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 320,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "long-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 340,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "long-full",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 230,
+          "height": 120
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "long-standard-230",
+        "fault": "none"
+      }
+    }
+  ]
+}

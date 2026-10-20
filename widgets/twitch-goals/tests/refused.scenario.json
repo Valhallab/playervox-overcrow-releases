@@ -1,0 +1,309 @@
+{
+  "scenarioVersion": 1,
+  "name": "refused",
+  "description": "Twitch refuses the goals while the token is valid: the channel is read again, then Refused by Twitch, values kept.",
+  "host": {
+    "startAt": 1767225600000
+  },
+  "fixtures": {
+    "http": [
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/users",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"141981764\",\"login\":\"novalive\",\"display_name\":\"NovaLive\",\"type\":\"\",\"broadcaster_type\":\"affiliate\",\"description\":\"\",\"profile_image_url\":\"\",\"offline_image_url\":\"\",\"view_count\":0,\"created_at\":\"2019-05-01T10:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1284,\"data\":[{\"user_id\":\"70000001\",\"user_login\":\"nyxarcade\",\"user_name\":\"NyxArcade\",\"followed_at\":\"2025-12-31T23:56:00Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":null,\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/users",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"141981764\",\"login\":\"novalive\",\"display_name\":\"NovaLive\",\"type\":\"\",\"broadcaster_type\":\"affiliate\",\"description\":\"\",\"profile_image_url\":\"\",\"offline_image_url\":\"\",\"view_count\":0,\"created_at\":\"2019-05-01T10:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 403,
+          "contentType": "application/json",
+          "body": "{}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 403,
+          "contentType": "application/json",
+          "body": "{}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 403,
+          "contentType": "application/json",
+          "body": "{}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://id.twitch.tv/oauth2/validate",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"client_id\":\"x\",\"scopes\":[],\"expires_in\":3600}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://id.twitch.tv/oauth2/validate",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"client_id\":\"x\",\"scopes\":[],\"expires_in\":3600}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://id.twitch.tv/oauth2/validate",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"client_id\":\"x\",\"scopes\":[],\"expires_in\":3600}"
+        }
+      }
+    ]
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "Karaoke night"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 60000
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "Refused by Twitch"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 60000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Refused by Twitch · 2 min ago",
+          "Karaoke night"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 260,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "refused-line",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "compact"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "refused-compact",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 320,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "refused-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "compact"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "refused-fr-compact",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 320,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "refused-fr-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 320,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "refused-150-standard",
+        "fault": "none"
+      }
+    }
+  ]
+}

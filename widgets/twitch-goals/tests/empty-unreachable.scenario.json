@@ -1,0 +1,149 @@
+{
+  "scenarioVersion": 1,
+  "name": "empty-unreachable",
+  "description": "Twitch unreachable at the first read: no value yet, said once.",
+  "host": {
+    "startAt": 1767225600000
+  },
+  "fixtures": {
+    "http": [
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/users",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"141981764\",\"login\":\"novalive\",\"display_name\":\"NovaLive\",\"type\":\"\",\"broadcaster_type\":\"affiliate\",\"description\":\"\",\"profile_image_url\":\"\",\"offline_image_url\":\"\",\"view_count\":0,\"created_at\":\"2019-05-01T10:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "error": "timeout"
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "error": "timeout"
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "error": "timeout"
+      }
+    ]
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "Twitch unreachable. Retrying every minute."
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 260,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "empty-unreachable-line",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 320,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "empty-unreachable-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 260,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "empty-unreachable-fr-line",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 320,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "empty-unreachable-fr-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en"
+      }
+    }
+  ]
+}

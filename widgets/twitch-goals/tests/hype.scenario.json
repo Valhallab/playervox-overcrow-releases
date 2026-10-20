@@ -1,0 +1,607 @@
+{
+  "scenarioVersion": 1,
+  "name": "hype",
+  "description": "A Hype Train at level 2, 03:42 left: in front of the goal, alone in Compact; it leaves at zero without waiting for Twitch.",
+  "host": {
+    "startAt": 1767225600000
+  },
+  "fixtures": {
+    "http": [
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/users",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"141981764\",\"login\":\"novalive\",\"display_name\":\"NovaLive\",\"type\":\"\",\"broadcaster_type\":\"affiliate\",\"description\":\"\",\"profile_image_url\":\"\",\"offline_image_url\":\"\",\"view_count\":0,\"created_at\":\"2019-05-01T10:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1284,\"data\":[{\"user_id\":\"70000001\",\"user_login\":\"nyxarcade\",\"user_name\":\"NyxArcade\",\"followed_at\":\"2025-12-31T23:56:00Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":{\"id\":\"hype-1\",\"broadcaster_user_id\":\"141981764\",\"broadcaster_user_login\":\"novalive\",\"broadcaster_user_name\":\"NovaLive\",\"level\":2,\"total\":4240,\"progress\":1240,\"goal\":1800,\"top_contributions\":[],\"shared_train_participants\":null,\"started_at\":\"2025-12-31T23:58:00Z\",\"expires_at\":\"2026-01-01T00:03:42Z\",\"type\":\"regular\",\"is_shared_train\":false},\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1284,\"data\":[{\"user_id\":\"70000001\",\"user_login\":\"nyxarcade\",\"user_name\":\"NyxArcade\",\"followed_at\":\"2025-12-31T23:57:00Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":{\"id\":\"hype-1\",\"broadcaster_user_id\":\"141981764\",\"broadcaster_user_login\":\"novalive\",\"broadcaster_user_name\":\"NovaLive\",\"level\":2,\"total\":4240,\"progress\":1240,\"goal\":1800,\"top_contributions\":[],\"shared_train_participants\":null,\"started_at\":\"2025-12-31T23:59:00Z\",\"expires_at\":\"2026-01-01T00:03:42Z\",\"type\":\"regular\",\"is_shared_train\":false},\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1284,\"data\":[{\"user_id\":\"70000001\",\"user_login\":\"nyxarcade\",\"user_name\":\"NyxArcade\",\"followed_at\":\"2025-12-31T23:58:00Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":{\"id\":\"hype-1\",\"broadcaster_user_id\":\"141981764\",\"broadcaster_user_login\":\"novalive\",\"broadcaster_user_name\":\"NovaLive\",\"level\":2,\"total\":4240,\"progress\":1240,\"goal\":1800,\"top_contributions\":[],\"shared_train_participants\":null,\"started_at\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T00:03:42Z\",\"type\":\"regular\",\"is_shared_train\":false},\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1284,\"data\":[{\"user_id\":\"70000001\",\"user_login\":\"nyxarcade\",\"user_name\":\"NyxArcade\",\"followed_at\":\"2025-12-31T23:59:00Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":{\"id\":\"hype-1\",\"broadcaster_user_id\":\"141981764\",\"broadcaster_user_login\":\"novalive\",\"broadcaster_user_name\":\"NovaLive\",\"level\":2,\"total\":4240,\"progress\":1240,\"goal\":1800,\"top_contributions\":[],\"shared_train_participants\":null,\"started_at\":\"2026-01-01T00:01:00Z\",\"expires_at\":\"2026-01-01T00:03:42Z\",\"type\":\"regular\",\"is_shared_train\":false},\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1284,\"data\":[{\"user_id\":\"70000001\",\"user_login\":\"nyxarcade\",\"user_name\":\"NyxArcade\",\"followed_at\":\"2026-01-01T00:00:00Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":{\"id\":\"hype-1\",\"broadcaster_user_id\":\"141981764\",\"broadcaster_user_login\":\"novalive\",\"broadcaster_user_name\":\"NovaLive\",\"level\":2,\"total\":4240,\"progress\":1240,\"goal\":1800,\"top_contributions\":[],\"shared_train_participants\":null,\"started_at\":\"2026-01-01T00:02:00Z\",\"expires_at\":\"2026-01-01T00:03:42Z\",\"type\":\"regular\",\"is_shared_train\":false},\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      }
+    ]
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "Hype Train",
+          "03:42 left"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 260,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "hype-line",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "compact"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "hype-compact",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 320,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "hype-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 340,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "hype-full",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 260,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "hype-150-line",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "compact"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "hype-150-compact",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 320,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "hype-150-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 340,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "hype-150-full",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 260,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "hype-fr-line",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "compact"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "hype-fr-compact",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 320,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "hype-fr-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 340,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "hype-fr-full",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1500
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 260,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "hype-fr-150-line",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "compact"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "hype-fr-150-compact",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 320,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "hype-fr-150-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 340,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "hype-fr-150-full",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 320,
+          "height": 200
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 180000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "00:42 left"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 43000
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "Hype Train"
+        ],
+        "text": [
+          "Karaoke night"
+        ],
+        "image": "hype-ended-standard",
+        "fault": "none"
+      }
+    }
+  ]
+}

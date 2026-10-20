@@ -1,0 +1,74 @@
+{
+  "scenarioVersion": 1,
+  "name": "expired",
+  "description": "Twitch refuses the token itself (validate refused): the connection expires and the host covers the widget.",
+  "host": {
+    "startAt": 1767225600000,
+    "frame": true
+  },
+  "fixtures": {
+    "http": [
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/users",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"141981764\",\"login\":\"novalive\",\"display_name\":\"NovaLive\",\"type\":\"\",\"broadcaster_type\":\"affiliate\",\"description\":\"\",\"profile_image_url\":\"\",\"offline_image_url\":\"\",\"view_count\":0,\"created_at\":\"2019-05-01T10:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 401,
+          "contentType": "application/json",
+          "body": "{}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://id.twitch.tv/oauth2/validate",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 401,
+          "contentType": "application/json",
+          "body": "{\"status\":401,\"message\":\"invalid access token\"}"
+        }
+      }
+    ]
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "image": "expired",
+        "fault": "none"
+      }
+    },
+    {
+      "advance": {
+        "ms": 180000
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "expect": {
+        "image": "expired-fr",
+        "fault": "none"
+      }
+    }
+  ]
+}

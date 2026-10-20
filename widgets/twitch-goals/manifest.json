@@ -1,0 +1,219 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.playervox.overcrow.twitch.goals",
+  "version": "1.0.0",
+  "name": {
+    "en": "Live goals",
+    "fr": "Objectifs du live"
+  },
+  "sizing": {
+    "fit": "height",
+    "preferred": {
+      "width": 320,
+      "height": 164
+    },
+    "min": {
+      "width": 150,
+      "height": 32
+    },
+    "max": {
+      "width": 560,
+      "height": 640
+    }
+  },
+  "permissions": {
+    "accounts": [
+      {
+        "service": "twitch",
+        "scopes": [
+          "channel:read:goals",
+          "moderator:read:followers",
+          "channel:read:hype_train"
+        ]
+      }
+    ],
+    "network": [
+      {
+        "origin": "https://api.twitch.tv",
+        "method": "GET",
+        "path": "/helix/users",
+        "account": "twitch",
+        "maxResponseBytes": 8192
+      },
+      {
+        "origin": "https://api.twitch.tv",
+        "method": "GET",
+        "path": "/helix/goals",
+        "queryParams": {
+          "broadcaster_id": {
+            "type": "slug",
+            "maxLength": 32,
+            "required": true
+          }
+        },
+        "account": "twitch",
+        "maxResponseBytes": 16384
+      },
+      {
+        "origin": "https://api.twitch.tv",
+        "method": "GET",
+        "path": "/helix/channels/followers",
+        "queryParams": {
+          "broadcaster_id": {
+            "type": "slug",
+            "maxLength": 32,
+            "required": true
+          },
+          "first": {
+            "type": "integer",
+            "min": 1,
+            "max": 1,
+            "required": true
+          }
+        },
+        "account": "twitch",
+        "maxResponseBytes": 4096
+      },
+      {
+        "origin": "https://api.twitch.tv",
+        "method": "GET",
+        "path": "/helix/hypetrain/status",
+        "queryParams": {
+          "broadcaster_id": {
+            "type": "slug",
+            "maxLength": 32,
+            "required": true
+          }
+        },
+        "account": "twitch",
+        "maxResponseBytes": 16384
+      }
+    ]
+  },
+  "wrapper": {
+    "menu": [
+      {
+        "type": "choice",
+        "id": "layout",
+        "label": {
+          "en": "Layout",
+          "fr": "Affichage"
+        },
+        "choices": [
+          {
+            "value": "line",
+            "label": {
+              "en": "One line",
+              "fr": "Une ligne"
+            }
+          },
+          {
+            "value": "compact",
+            "label": {
+              "en": "Compact",
+              "fr": "Compact"
+            }
+          },
+          {
+            "value": "standard",
+            "label": {
+              "en": "Standard",
+              "fr": "Standard"
+            }
+          },
+          {
+            "value": "full",
+            "label": {
+              "en": "Full",
+              "fr": "Complet"
+            }
+          }
+        ],
+        "default": "standard"
+      },
+      {
+        "type": "group",
+        "id": "goals",
+        "label": {
+          "en": "Goals shown",
+          "fr": "Objectifs affichés"
+        },
+        "rows": [
+          {
+            "type": "toggle",
+            "id": "goal-subs",
+            "label": {
+              "en": "Subscribers",
+              "fr": "Abonnés"
+            },
+            "default": true
+          },
+          {
+            "type": "toggle",
+            "id": "goal-followers",
+            "label": {
+              "en": "Followers",
+              "fr": "Followers"
+            },
+            "default": true
+          },
+          {
+            "type": "toggle",
+            "id": "goal-bits",
+            "label": {
+              "en": "Bits",
+              "fr": "Bits"
+            },
+            "default": true
+          },
+          {
+            "type": "toggle",
+            "id": "goal-cheerers",
+            "label": {
+              "en": "Cheerers",
+              "fr": "Donateurs de Bits"
+            },
+            "default": true
+          }
+        ]
+      },
+      {
+        "type": "toggle",
+        "id": "show-followers",
+        "label": {
+          "en": "Follower count",
+          "fr": "Total de followers"
+        },
+        "default": true
+      },
+      {
+        "type": "toggle",
+        "id": "show-last-follower",
+        "label": {
+          "en": "Latest follower",
+          "fr": "Dernier follower"
+        },
+        "default": true
+      },
+      {
+        "type": "toggle",
+        "id": "show-hype",
+        "label": {
+          "en": "Hype Train while it runs",
+          "fr": "Hype Train pendant un train"
+        },
+        "default": true
+      },
+      {
+        "type": "toggle",
+        "id": "show-logo",
+        "label": {
+          "en": "Twitch logo",
+          "fr": "Logo Twitch"
+        },
+        "default": true
+      }
+    ]
+  }
+}

@@ -15,3 +15,11 @@ of the project.
 
 Warframe and related names remain trademarks of their respective owners. Their
 descriptive use does not imply sponsorship or endorsement.
+
+Steam and the Steam logo are trademarks of Valve Corporation; Twitch and the
+Glitch logo are trademarks of Twitch Interactive, Inc. The widgets that read
+these services show their logos only to attribute the data's source, under
+the services' own rules; the logo files
+(`widgets/steam-achievements/assets/steam-symbol-*.png`,
+`widgets/twitch-goals/assets/glitch-*.png`) are not covered by the MIT
+license. PlayerVox is not affiliated with Valve Corporation or Twitch.

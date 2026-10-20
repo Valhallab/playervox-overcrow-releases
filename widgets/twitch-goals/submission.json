@@ -1,0 +1,24 @@
+{
+  "justifications": [
+    {
+      "permission": "account:twitch",
+      "text": "Uses the Twitch connection of PlayerVox OverCrow, read only, with three read permissions: your goals (channel:read:goals), your followers (moderator:read:followers) and your Hype Trains (channel:read:hype_train). The widget never sees the token: PlayerVox OverCrow adds it to the four routes below, on api.twitch.tv only. Nothing is written to Twitch, and nothing read is stored."
+    },
+    {
+      "permission": "network:GET https://api.twitch.tv/helix/users",
+      "text": "Reads the ID of your channel (no permission needed), once per connection; the other routes ask for that channel."
+    },
+    {
+      "permission": "network:GET https://api.twitch.tv/helix/goals",
+      "text": "Reads your channel's active goals and their progress (channel:read:goals). Once a minute while the widget is shown, when the options show goals."
+    },
+    {
+      "permission": "network:GET https://api.twitch.tv/helix/channels/followers",
+      "text": "Reads your follower count and the latest follower, one at a time (first=1; moderator:read:followers). Once a minute while the widget is shown, when the options show followers."
+    },
+    {
+      "permission": "network:GET https://api.twitch.tv/helix/hypetrain/status",
+      "text": "Reads whether a Hype Train runs on your channel, its level, progress and end (channel:read:hype_train). Once a minute while the widget is shown, when the options show the Hype Train."
+    }
+  ]
+}

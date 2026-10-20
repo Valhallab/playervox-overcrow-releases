@@ -1,0 +1,141 @@
+{
+  "scenarioVersion": 1,
+  "name": "loading",
+  "description": "The first load: the skeleton while nothing is answered yet.",
+  "host": {
+    "startAt": 1767225600000
+  },
+  "fixtures": {
+    "http": [
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/users",
+          "account": "twitch"
+        },
+        "error": "busy"
+      }
+    ]
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "Reading your goals…"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 260,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "loading-line",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "compact"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "loading-compact",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 320,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "loading-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 260,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "loading-fr-line",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 320,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "loading-fr-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en"
+      }
+    }
+  ]
+}

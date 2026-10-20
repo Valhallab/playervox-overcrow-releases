@@ -1,0 +1,328 @@
+/* Live goals. */
+.root {
+  width: 100%;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  font-variant-numeric: tabular-nums;
+}
+.root.line {
+  justify-content: center;
+  padding: var(--space-1);
+}
+.root.compact {
+  padding: var(--space-4);
+}
+.root > box {
+  flex-shrink: 0;
+}
+
+.line {
+  flex-direction: column;
+  gap: 3px;
+  padding: var(--space-2) var(--space-4) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+}
+.line-top {
+  align-items: center;
+  gap: var(--space-3);
+}
+.line-icon {
+  font-size: 15px;
+  color: var(--color-accent);
+}
+.line-icon.ok {
+  color: var(--color-success);
+}
+.line-icon.muted,
+.line-name.muted {
+  color: var(--color-text-muted);
+}
+.line-name {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+  font-size: var(--font-size-button);
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.line-level {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+.line-count {
+  flex-shrink: 0;
+  font-size: var(--font-size-button);
+  white-space: nowrap;
+}
+.line-bar {
+  height: 3px;
+  color: var(--color-accent);
+}
+
+.card {
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+}
+.compact .card {
+  padding: var(--space-3) var(--space-4);
+}
+.card-top {
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.type-icon {
+  font-size: 15px;
+  color: var(--color-accent);
+}
+.type-icon.ok {
+  color: var(--color-success);
+}
+.type-icon.muted {
+  color: var(--color-text-muted);
+}
+.card-title {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+  font-size: var(--font-size-body);
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.card-title.muted {
+  color: var(--color-text-secondary);
+  font-weight: 400;
+}
+.goal {
+  gap: var(--space-3);
+}
+.reached {
+  min-width: 34px;
+  text-align: end;
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  color: var(--color-success);
+}
+.hype-title {
+  flex-grow: 1;
+  font-size: var(--font-size-small);
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.status {
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+}
+.status-text {
+  flex-shrink: 1;
+  min-width: 0;
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  color: var(--color-warning);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.fol-last.alone {
+  text-align: start;
+}
+.prog {
+  align-items: center;
+  gap: var(--space-4);
+}
+.bar {
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 0;
+  width: 0;
+  height: 6px;
+  color: var(--color-accent);
+}
+.bar.done,
+.line-bar.done {
+  color: var(--color-success);
+}
+.count {
+  font-size: var(--font-size-body);
+  white-space: nowrap;
+}
+.num {
+  font-weight: 700;
+}
+.of {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+.pct {
+  min-width: 34px;
+  text-align: end;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.hype {
+  border: 1px solid var(--color-accent);
+  background: var(--color-accent-soft);
+}
+.hype-icon {
+  color: var(--color-accent);
+}
+.hype-time {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+.hype-level {
+  font-size: var(--font-size-body);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.hype-bar {
+  color: var(--color-accent);
+}
+
+.help {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.followers {
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+}
+.followers.new {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  animation: arrive 900ms ease-out 2 alternate;
+}
+@keyframes arrive {
+  from { border-color: var(--color-accent); }
+  to { border-color: transparent; }
+}
+.fol-icon {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+.fol-total {
+  flex-shrink: 0;
+  font-size: var(--font-size-button);
+  white-space: nowrap;
+}
+.fol-last {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+  text-align: end;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.stale-icon {
+  font-size: 12px;
+  color: var(--color-warning);
+}
+
+.empty {
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+}
+.empty-text {
+  flex-direction: column;
+  flex-shrink: 1;
+  gap: var(--space-1);
+}
+.empty-title {
+  font-size: var(--font-size-button);
+  font-weight: 600;
+}
+.empty-icon {
+  font-size: 20px;
+  color: var(--color-text-muted);
+}
+.line .empty-icon,
+.root.line .empty-icon {
+  font-size: 15px;
+}
+.empty-icon.warn {
+  color: var(--color-warning);
+}
+.empty-body {
+  flex-shrink: 1;
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+}
+.skeleton {
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.sk {
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-hover);
+  animation: breathe 1200ms ease-in-out infinite alternate;
+}
+.sk-short {
+  width: 30%;
+}
+.sk-bar {
+  height: 24px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+}
+.root.line .sk-bar {
+  display: none;
+}
+.sk-note {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+@keyframes breathe {
+  from { opacity: 1; }
+  to { opacity: 0.55; }
+}
+.slimbar {
+  width: 100%;
+  height: 4px;
+  color: var(--color-accent);
+}
+.slimbar.done {
+  color: var(--color-success);
+}
+
+/* Twitch's Glitch: official file, 16 px high (55:64), clear space of one
+   module (2 px) around and 1.5 module (3 px) under the bubble. */
+.glitch {
+  width: 16px;
+  height: 16px;
+  margin: 2px 1px 3px 5px;
+  flex-shrink: 0;
+}
+.source-word {
+  flex-shrink: 0;
+  margin-left: 6px;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
