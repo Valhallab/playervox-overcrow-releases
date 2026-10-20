@@ -39,10 +39,9 @@ export type Route = keyof typeof ROUTES;
 
 /** One minute, the least time between two requests of one route. */
 export const MINUTE = 60_000;
-const SECOND = 1000;
 const TICK_SLACK = 1000;
 /** How long a new follower lights the followers card. */
-export const NEW_FOLLOWER_FOR = 10 * SECOND;
+export const NEW_FOLLOWER_FOR = 10_000;
 /** Backoff of a 5xx or a 429, minutes: then 10 min. */
 const BACKOFF_MINUTES = [1, 2, 4, 8, 10] as const;
 /** A goal's description is 40 characters on Twitch; more is cut. */
@@ -537,7 +536,8 @@ function setHype(hype: Hype | null): void {
     countdown = null;
     return;
   }
-  countdown ??= timers.every(SECOND, tick);
+  // The countdown follows the clock's second, as a clock does; no request.
+  countdown ??= timers.atEach("second", tick);
 }
 
 /** A second of the Hype Train: at zero the card leaves without waiting for Twitch. */

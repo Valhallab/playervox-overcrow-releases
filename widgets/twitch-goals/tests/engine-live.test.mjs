@@ -18,6 +18,8 @@ const logic = await loadLogic();
 const { state } = await import("@overcrow/sdk");
 await settle(vm, twitch);
 const v = () => state.optionsVersion;
+/** The countdown's timers: it follows the second of the clock. */
+const countdowns = () => vm.timers.filter((timer) => timer.intervalMs <= 1000).length;
 
 test("the first follower read is not new", () => {
   assert.equal(logic.isNewFollower(state), false);
@@ -52,9 +54,9 @@ test("a Hype Train comes first and counts down each second", async () => {
   vm.setHost({ options: { "show-hype": false } });
   assert.equal(logic.hype(state, v()), null);
   assert.equal(logic.firstCard(state, v()), "goal:g1");
-  assert.equal(vm.timers.filter((timer) => timer.intervalMs === 1000).length, 0, "no countdown for a hidden train");
+  assert.equal(countdowns(), 0, "no countdown for a hidden train");
   vm.setHost({ options: {} });
-  assert.equal(vm.timers.filter((timer) => timer.intervalMs === 1000).length, 1);
+  assert.equal(countdowns(), 1);
 });
 
 test("the train leaves at zero even when Twitch is down", async () => {
@@ -67,7 +69,7 @@ test("the train leaves at zero even when Twitch is down", async () => {
   await settle(vm, twitch);
   assert.equal(logic.hype(state, v()), null);
   assert.equal(state.hype, null);
-  assert.equal(vm.timers.filter((timer) => timer.intervalMs === 1000).length, 0, "no countdown left");
+  assert.equal(countdowns(), 0, "no countdown left");
   twitch.fail = null;
 });
 
