@@ -103,6 +103,19 @@ export function errorsTable(): ErrorInfo {
   return load("reference/errors.json", JSON.parse);
 }
 
+/** A route a service is known to answer secrets on (`cli/src/secret_routes.json`). */
+export interface SecretRoute {
+  origin: string;
+  /** The end of the path, in lowercase. */
+  path: string;
+  returns: string;
+}
+
+/** The routes `admit` and the audit both know to return secrets. */
+export function secretRoutes(): SecretRoute[] {
+  return load("reference/secret-routes.json", JSON.parse);
+}
+
 export function limits(): Limit[] {
   return load("reference/limits.json", JSON.parse);
 }

@@ -18,7 +18,9 @@
 //! - `review.path_and_query_name`: one name in `pathParams` and in
 //!   `queryParams` of a rule; they are two separate constraints.
 //! - `review.secret_route`: a route whose path, parameter names or `enum`
-//!   values speak of keys, tokens or passwords (`secretHint` of the review).
+//!   values speak of keys, tokens or passwords, or that a service is known
+//!   to answer secrets on (`secret_routes.json`, the MCP audit's table too;
+//!   `secretHint` of the review).
 //! - `review.service_label_name`: an account name that imitates a label of
 //!   the host (integrated service, official, verified).
 //! - `review.oauth_pages`: every declared OAuth account. Its sign-in page
@@ -106,6 +108,25 @@ const SECRET_COMPOUNDS: &[&str] = &[
 
 /// Whole segments, parameter names or values that name keys.
 const SECRET_SEGMENTS: &[&str] = &["key", "keys"];
+
+/// Routes a service is known to answer secrets on, whatever their words:
+/// `origin`, the end of the path in lowercase, and what it returns. One
+/// table for admit and the MCP audit (its build ships this file).
+const SECRET_ROUTES: &str = include_str!("secret_routes.json");
+
+/// Whether `path` on `origin` is in [`SECRET_ROUTES`].
+fn known_secret_route(origin: &str, path: &str) -> bool {
+    let Ok(Value::Array(routes)) = serde_json::from_str::<Value>(SECRET_ROUTES) else {
+        return false;
+    };
+    let path = path.to_ascii_lowercase();
+    routes.iter().any(|route| {
+        route["origin"].as_str() == Some(origin)
+            && route["path"]
+                .as_str()
+                .is_some_and(|known| path.ends_with(known))
+    })
+}
 
 /// Words of the host's own labels an account name must not imitate, as
 /// [`reads_as_any`] folds them (`Intégré`, `0fficial`, `built-in`).
@@ -570,6 +591,9 @@ fn speaks_of_a_secret(text: &str) -> bool {
 /// names and its `enum` values.
 pub fn secret_hint(rule: &Value) -> bool {
     let path = rule["path"].as_str().unwrap_or_default();
+    if known_secret_route(rule["origin"].as_str().unwrap_or_default(), path) {
+        return true;
+    }
     let params = ["pathParams", "queryParams"]
         .iter()
         .flat_map(|params| rule[*params].as_object().into_iter().flatten());
@@ -693,6 +717,38 @@ mod tests {
         for broken in ["xn--a!b", "xn--99999999999", "xn--\u{e9}-x"] {
             assert_eq!(idna_decoded(broken), None, "{broken}");
         }
+    }
+
+    #[test]
+    fn the_table_of_secret_routes_reads() {
+        let Ok(Value::Array(routes)) = serde_json::from_str::<Value>(SECRET_ROUTES) else {
+            panic!("secret_routes.json is an array");
+        };
+        assert!(routes.len() >= 6);
+        for route in &routes {
+            let (origin, path) = (route["origin"].as_str(), route["path"].as_str());
+            assert!(
+                origin.is_some_and(|origin| origin.starts_with("https://")),
+                "{route}"
+            );
+            assert!(
+                path.is_some_and(|path| path.starts_with('/') && path == path.to_lowercase()),
+                "{route}"
+            );
+            assert!(route["returns"].is_string(), "{route}");
+        }
+        assert!(known_secret_route(
+            "https://www.googleapis.com",
+            "/youtube/v3/liveStreams"
+        ));
+        assert!(!known_secret_route(
+            "https://www.googleapis.com",
+            "/youtube/v3/videos"
+        ));
+        assert!(!known_secret_route(
+            "https://api.example.com",
+            "/youtube/v3/livestreams"
+        ));
     }
 
     #[test]

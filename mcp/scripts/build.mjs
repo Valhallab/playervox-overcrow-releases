@@ -339,6 +339,11 @@ write(
 write(join(content, "reference", "permissions.json"), `${JSON.stringify(permissions, null, 1)}\n`);
 write(join(content, "reference", "errors.json"), `${JSON.stringify(errors, null, 1)}\n`);
 write(join(content, "reference", "limits.json"), `${JSON.stringify(limits, null, 1)}\n`);
+// One table of the routes known to answer secrets, for admit and the audit.
+write(
+  join(content, "reference", "secret-routes.json"),
+  readText(join(repository, "cli", "src", "secret_routes.json")),
+);
 write(join(content, "reference", "manifest.md"), manifestReference);
 
 // npm packs each file with its mode.

@@ -386,6 +386,27 @@ fn a_route_that_may_return_secrets_is_pointed_at() {
     );
     let message = message(&report, "review.secret_route");
     assert!(!message.contains("carries"), "{message}");
+    // Routes a service is known to answer secrets on, whatever their words
+    // (the table the MCP audit reads too): YouTube's live streams give
+    // their ingestion key.
+    for (origin, path) in [
+        ("https://www.googleapis.com", "/youtube/v3/liveStreams"),
+        ("https://youtube.googleapis.com", "/youtube/v3/livestreams"),
+        ("https://api.twitch.tv", "/helix/streams/key"),
+    ] {
+        let report = admit(json!({"network": [{
+            "origin": origin, "method": "GET", "path": path
+        }]}));
+        assert_eq!(
+            hints(&report),
+            [hint("review.secret_route", "/permissions/network/0")],
+            "{origin}{path}"
+        );
+    }
+    let report = admit(json!({"network": [{
+        "origin": "https://www.googleapis.com", "method": "GET", "path": "/youtube/v3/videos"
+    }]}));
+    assert_eq!(hints(&report), []);
 }
 
 /// An integrated service is PlayerVox's definition: no account hint.
