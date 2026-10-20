@@ -323,6 +323,26 @@ fn account_name_is_plain_and_not_reserved() {
             account(value)["name"] = json!(name);
         });
     }
+    // Bidirectional and invisible formatting without any reserved word: the
+    // text check alone refuses them.
+    for name in [
+        "Run\u{202e}Log",
+        "Run\u{202d}Log",
+        "\u{2066}Run Log\u{2069}",
+        "\u{2067}Run Log",
+        "Run\u{200f}Log",
+        "Run\u{200e}Log",
+        "Run\u{061c}Log",
+        "Run\u{feff}Log",
+        "Run\u{2060}Log",
+    ] {
+        refused(&key(), "account", name, |value| {
+            account(value)["name"] = json!(name);
+        });
+    }
+    accepted(&key(), "the same name without them", |value| {
+        account(value)["name"] = json!("Run Log");
+    });
     refused(&key(), "account", "33 characters", |value| {
         account(value)["name"] = json!("é".repeat(33));
     });
