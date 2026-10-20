@@ -165,8 +165,9 @@ prend aucun :
 
 `http.fetch` envoie un corps de type chaîne en `text/plain` et tout autre
 corps en JSON, sauf si `contentType` en dit autrement, et décode la réponse
-comme le demande `as`. Une réponse sans corps donne `null`, `""` ou un
-`ArrayBuffer` vide.
+comme le demande `as`. Un `GET` ne porte pas de corps : un `body` ou un
+`contentType` avec lui échoue avec `invalid_request`. Une réponse sans corps
+donne `null`, `""` ou un `ArrayBuffer` vide.
 
 Les types des autres espaces de noms sont générés à partir du schéma :
 `ClipboardServices`, `FpsServices`, `GameEventsServices`,
