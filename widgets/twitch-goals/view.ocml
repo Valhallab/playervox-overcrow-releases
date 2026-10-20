@@ -40,21 +40,21 @@
 </component>
 
 <box class={rootClass(state)}>
-  <if test={phase(state) == "loading"}>
+  <if test={screen(state, state.optionsVersion) == "loading"}>
     <box class="skeleton">
       <box class="sk sk-short"/>
       <if test={layout(state.optionsVersion) != "line"}><box class="sk sk-bar"/><text class="sk-note">{t("loading")}</text></if>
     </box>
   </if>
 
-  <else-if test={phase(state) == "empty"}>
+  <else-if test={screen(state, state.optionsVersion) == "empty"}>
     <box class="empty">
       <icon class="empty-icon warn" name={emptyIcon(state)}/>
       <text class="empty-body">{emptyText(state)}</text>
     </box>
   </else-if>
 
-  <else-if test={nothingShown(state, state.optionsVersion)}>
+  <else-if test={screen(state, state.optionsVersion) == "nothing"}>
     <box class="empty">
       <icon class="empty-icon" name="eye-off"/>
       <if test={layout(state.optionsVersion) == "line"}><text class="empty-body">{t("nothing-shown")}</text></if>
@@ -71,25 +71,25 @@
     <box class="line">
       <box class="line-top">
         <if test={hype(state, state.optionsVersion)}>
-          <icon class="line-icon hype-icon" name="train-front"/>
+          <icon class="line-icon hype-icon" name="train-front" tooltip={lineTip(t("hype"))}/>
           <text class="line-name">{t("hype")}</text>
           <text class="line-level">{hypeLevel(hype(state, state.optionsVersion), true)}</text>
           <if test={isStale(state)}><icon class="stale-icon" name={staleIcon(state)} tooltip={staleText(state)}/></if>
           <text class="line-count">{hypeTime(hype(state, state.optionsVersion), state)}</text>
         </if>
         <else-if test={firstGoal(state, state.optionsVersion)}>
-          <icon class={reached(firstGoal(state, state.optionsVersion)) ? "line-icon ok" : "line-icon"} name={typeIcon(firstGoal(state, state.optionsVersion))} tooltip={goalType(firstGoal(state, state.optionsVersion))}/>
+          <icon class={reached(firstGoal(state, state.optionsVersion)) ? "line-icon ok" : "line-icon"} name={typeIcon(firstGoal(state, state.optionsVersion))} tooltip={lineTip(goalType(firstGoal(state, state.optionsVersion)))}/>
           <text class="line-name">{goalTitle(firstGoal(state, state.optionsVersion))}</text>
           <if test={isStale(state)}><icon class="stale-icon" name={staleIcon(state)} tooltip={staleText(state)}/></if>
           <text class="line-count"><span class="num">{num(firstGoal(state, state.optionsVersion).current)}</span><span class="of">&#32;/&#32;{num(firstGoal(state, state.optionsVersion).target)}</span></text>
         </else-if>
         <else-if test={lineFollowers(state, state.optionsVersion)}>
-          <icon class="line-icon" name="users"/>
+          <icon class="line-icon" name="users" tooltip={lineTip(t("followers-title"))}/>
           <text class="line-name"><span class="num">{lineFollowersText(state, state.optionsVersion)}</span><span class="of">{lineFollowersUnit(state, state.optionsVersion)}</span></text>
           <if test={isStale(state)}><icon class="stale-icon" name={staleIcon(state)} tooltip={staleText(state)}/></if>
         </else-if>
         <else>
-          <icon class="line-icon muted" name="target"/>
+          <icon class="line-icon muted" name="target" tooltip={t("source")}/>
           <text class="line-name muted">{t("no-goal")}</text>
           <if test={isStale(state)}><icon class="stale-icon" name={staleIcon(state)} tooltip={staleText(state)}/></if>
         </else>

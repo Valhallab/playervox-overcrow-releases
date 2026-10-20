@@ -30,7 +30,7 @@ affiliated with Twitch ([trademarks](../../TRADEMARKS.md)).
 | Hype Train | A card in the accent colour in front: "Hype Train", the time left counted down each second, the level and its progress. Alone in Compact; with the goal on one line in Standard. It leaves when its time is up, without waiting for Twitch |
 | New follower | The followers card in the accent colour, pulsing twice, for 10 seconds |
 | No goal | "No active goal" and where to create one (Creator Dashboard, Goals); the followers stay |
-| Nothing to show | Every option off: "Nothing to show", choose in the widget options |
+| Nothing to show | Every option off, or only goal types Twitch has none of with the followers off: "Nothing to show", choose in the widget options; at once, even before the first read |
 | Unreachable, rate limited, refused | An amber line on top: "Unreachable · 5 min ago", "Rate limited · 2 min ago" or "Refused by Twitch · 5 min ago"; the values stay; the tooltip says why and what to do. Without any value yet: "Twitch unreachable. Retrying every minute." |
 
 Values never disappear during a read, a failure or a limit. Texts are in
@@ -72,11 +72,12 @@ again.
 ## How it works
 
 - **Rhythm.** One timer a minute. Hidden, the widget calls nothing; shown
-  again, it reads once if the last read is older than a minute. A route is
-  asked at most once per tick of that timer (one second of slack absorbs
-  the delivery of the tick). Polling, not EventSub: everything is at most a
-  minute late, except the Hype Train's countdown, local each second while a
-  train runs (and only then).
+  again, it reads once if the last read is older than a minute. At each
+  tick the goals, the followers and the Hype Train leave together (they do
+  not depend on each other), each at most once per tick (one second of
+  slack absorbs the delivery of the tick). Polling, not EventSub:
+  everything is at most a minute late, except the Hype Train's countdown,
+  local each second while a train runs and is shown (and only then).
 - **Channel.** Each connection reads `/helix/users` again: if another
   account is now connected, the values of the old one are dropped. A 401 or
   403 on a route while PlayerVox OverCrow's own check of the token
@@ -84,11 +85,15 @@ again.
   refusing, the amber "Refused by Twitch" line says to reconnect Twitch.
   When the token itself is refused, PlayerVox OverCrow marks the connection
   expired and covers the widget with its panel.
-- **Failures.** A network failure or a timeout retries every minute; a 5xx
-  or a 429 waits 1, 2, 4, 8 then 10 minutes (`http.fetch` gives no
-  `Ratelimit-Reset`). PlayerVox OverCrow's own network budget being full
-  (`busy`) is not a failure of Twitch: the view stays, the next minute
-  reads again.
+- **Failures.** Each route on its own: one failing never holds the others
+  back. A network failure or a timeout retries every minute; a 5xx, an
+  unreadable answer or a 429 waits 1, 2, 4, 8 then 10 minutes
+  (`http.fetch` gives no `Ratelimit-Reset`), and the tooltip says "in a
+  few minutes". The warning names the most serious cause among the failing
+  routes (refused, limited, unreachable) and the age of the oldest data it
+  concerns. PlayerVox OverCrow's own network budget being full (`busy`) is
+  not a failure of Twitch: the view stays, the next minute reads again.
+  An answer that comes after the account changed is dropped.
 - **Twitch's answers.** Goals come newest first (Twitch documents no
   order); an unknown goal type shows with a neutral icon. Without the
   followers scope Twitch may give the count alone: the latest follower is

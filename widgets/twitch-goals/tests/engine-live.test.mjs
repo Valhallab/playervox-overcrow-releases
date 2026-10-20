@@ -52,7 +52,9 @@ test("a Hype Train comes first and counts down each second", async () => {
   vm.setHost({ options: { "show-hype": false } });
   assert.equal(logic.hype(state, v()), null);
   assert.equal(logic.firstCard(state, v()), "goal:g1");
+  assert.equal(vm.timers.filter((timer) => timer.intervalMs === 1000).length, 0, "no countdown for a hidden train");
   vm.setHost({ options: {} });
+  assert.equal(vm.timers.filter((timer) => timer.intervalMs === 1000).length, 1);
 });
 
 test("the train leaves at zero even when Twitch is down", async () => {

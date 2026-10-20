@@ -70,6 +70,30 @@
       {
         "request": {
           "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1284,\"data\":[{\"user_id\":\"70000001\",\"user_login\":\"nyxarcade\",\"user_name\":\"NyxArcade\",\"followed_at\":\"2025-12-31T23:57:00Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":null,\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
           "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
           "account": "twitch"
         },
@@ -77,6 +101,30 @@
           "status": 429,
           "contentType": "application/json",
           "body": "{\"error\":\"Too Many Requests\",\"status\":429,\"message\":\"\"}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1284,\"data\":[{\"user_id\":\"70000001\",\"user_login\":\"nyxarcade\",\"user_name\":\"NyxArcade\",\"followed_at\":\"2025-12-31T23:58:00Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":null,\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
         }
       }
     ]
@@ -198,7 +246,11 @@
     },
     {
       "host": {
-        "locale": "fr"
+        "locale": "fr",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
       }
     },
     {
@@ -263,7 +315,11 @@
     },
     {
       "host": {
-        "locale": "en"
+        "locale": "en",
+        "region": {
+          "numberFormat": "us",
+          "dateOrder": "mdy"
+        }
       }
     }
   ]

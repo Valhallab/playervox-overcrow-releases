@@ -4,7 +4,11 @@
   "description": "The goals of the channel, in French: four layouts, dark and light, at 100 and 150 %.",
   "host": {
     "startAt": 1767225600000,
-    "locale": "fr"
+    "locale": "fr",
+    "region": {
+      "numberFormat": "fr",
+      "dateOrder": "dmy"
+    }
   },
   "fixtures": {
     "http": [

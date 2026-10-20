@@ -4,7 +4,11 @@
   "description": "The goals of the channel, in English: four layouts, dark and light, at 100 and 150 %.",
   "host": {
     "startAt": 1767225600000,
-    "locale": "en"
+    "locale": "en",
+    "region": {
+      "numberFormat": "us",
+      "dateOrder": "mdy"
+    }
   },
   "fixtures": {
     "http": [

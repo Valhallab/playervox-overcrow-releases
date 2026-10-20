@@ -229,7 +229,8 @@ export function reached(g: { current: number; target: number }): boolean {
 
 export type Layout = "line" | "compact" | "standard" | "full";
 export type Phase = "loading" | "ready" | "empty";
-export type Stale = "" | "unreachable" | "quota" | "refused";
+/** Why values are old: no answer (every minute), Twitch failing (5xx, unreadable: backoff), its limit, its refusal. */
+export type Stale = "" | "unreachable" | "server" | "quota" | "refused";
 
 declare module "@overcrow/sdk" {
   interface WidgetState {
@@ -254,8 +255,9 @@ export const state = initState({
   goals: null as Goal[] | null,
   followers: null as Followers | null,
   hype: null as Hype | null,
+  /** The most serious cause among the routes that failed, `""` when none. */
   stale: "" as Stale,
-  /** Last successful read of a route, Unix ms. */
+  /** The oldest data shown by a failing route, Unix ms: the warning's age. */
   readAt: 0,
   now: Date.now(),
   /** The followers card is lit until then (a new follower). */
@@ -269,20 +271,37 @@ export const state = initState({
 // ---------------------------------------------------------------------------
 // Engine
 
+/** Each route on its own: one failing never holds the others back. */
+interface RouteState {
+  /** Last request, Unix ms; 0 never. */
+  lastCall: number;
+  /** Last answer used. */
+  okAt: number;
+  /** First failure since then. */
+  failAt: number;
+  /** 5xx or 429 in a row, for the backoff. */
+  failures: number;
+  /** Refusals in a row while the token is valid. */
+  refusals: number;
+  retryAt: number;
+  stale: Stale;
+}
+const fresh = (): RouteState => ({ lastCall: 0, okAt: 0, failAt: 0, failures: 0, refusals: 0, retryAt: 0, stale: "" });
+const routes: Record<Route, RouteState> = { user: fresh(), goals: fresh(), followers: fresh(), hype: fresh() };
+type DataRoute = Exclude<Route, "user">;
+const DATA_ROUTES: readonly DataRoute[] = ["goals", "followers", "hype"];
+
 const model = {
   connected: false,
+  /** Bumped at each connection: an answer of an older one is dropped. */
+  generation: 0,
   /** The channel read by T1 for this connection; `""` reads it again. */
   userId: "",
   /** The channel the values shown belong to. */
   owner: "",
   /** The latest follower of the last read, to see a new one. */
   lastFollower: "",
-  /** Last request of each route. */
-  lastCall: new Map<Route, number>(),
-  failures: 0,
-  /** Refusals in a row of a route while the token is valid. */
-  refusals: 0,
-  retryAt: 0,
+  lastFollowerAt: 0,
   busy: false,
   pending: false,
 };
@@ -295,12 +314,11 @@ function measure(): void {
 }
 measure();
 
-/** Whether `route` may be called now: at most once per tick of the timer. */
-function canCall(route: Route, now: number): boolean {
-  const last = model.lastCall.get(route);
+/** Whether `r` may be asked now: once per tick of the timer, after its backoff. */
+function due(r: RouteState, now: number): boolean {
   // The host fires the timer every minute at a fixed rate; a second of
   // slack absorbs its delivery jitter.
-  return last === undefined || now - last >= MINUTE - TICK_SLACK;
+  return (r.lastCall === 0 || now - r.lastCall >= MINUTE - TICK_SLACK) && now >= r.retryAt - TICK_SLACK;
 }
 
 const SUB_GOALS: readonly GoalType[] = ["subscription", "subscription_count", "new_subscription", "new_subscription_count"];
@@ -313,7 +331,7 @@ export function goalTypeShown(type: GoalType): boolean {
   return true;
 }
 /** The routes whose data the options show: the others are not called. */
-export function wanted(): Record<"goals" | "followers" | "hype", boolean> {
+export function wanted(): Record<DataRoute, boolean> {
   return {
     goals: option("goal-subs", true) || option("goal-followers", true) || option("goal-bits", true) || option("goal-cheerers", true),
     followers: option("show-followers", true) || option("show-last-follower", true),
@@ -330,11 +348,15 @@ type Outcome =
   | { kind: "server" }
   /** The host's own network budget is full: nothing was asked. */
   | { kind: "busy" }
+  /** The account changed during the call. */
+  | { kind: "changed" }
   /** The account is not connected (the host covers the content). */
   | { kind: "stop" };
 
-async function call(route: Route, query: string, at: number): Promise<Outcome> {
-  model.lastCall.set(route, at);
+const SERVER_ERRORS: readonly string[] = ["encoding_denied", "content_type_denied", "response_body_limit", "response_metadata_limit", "redirect_denied"];
+
+async function call(route: Route, query: string, now: number): Promise<Outcome> {
+  routes[route].lastCall = now;
   try {
     const response = await http.fetch(query === "" ? ROUTES[route] : `${ROUTES[route]}?${query}`, { as: "text" });
     if (response.status === 429) return { kind: "quota" };
@@ -349,37 +371,57 @@ async function call(route: Route, query: string, at: number): Promise<Outcome> {
     const code = (error as { code?: string }).code ?? "unavailable";
     if (code === "account_refused" || code === "not_connected" || code === "permission_denied") return { kind: "stop" };
     if (code === "busy") return { kind: "busy" };
-    if (code === "encoding_denied" || code === "content_type_denied" || code === "too_large") return { kind: "server" };
+    if (code === "stale_context") return { kind: "changed" };
+    if (SERVER_ERRORS.includes(code)) return { kind: "server" };
     return { kind: "unreachable" };
   }
 }
 
-/** A failed read: values stay, the warning names the cause. */
-function failed(outcome: Outcome, now: number): void {
-  if (outcome.kind === "stop" || outcome.kind === "ok") return;
+function succeeded(r: RouteState, now: number): void {
+  Object.assign(r, { okAt: now, failAt: 0, failures: 0, refusals: 0, retryAt: 0, stale: "" });
+}
+
+/** A failed read of `r`: values stay, the warning names the cause. */
+function failed(r: RouteState, outcome: Outcome, now: number): void {
+  if (outcome.kind === "ok" || outcome.kind === "stop") return;
   if (outcome.kind === "busy") {
-    model.retryAt = now + MINUTE;
+    // Nothing was asked of Twitch: no warning, next minute again.
+    r.retryAt = now + MINUTE;
     return;
   }
+  if (outcome.kind === "changed") {
+    model.userId = "";
+    return;
+  }
+  if (r.failAt === 0) r.failAt = now;
   if (outcome.kind === "refused") {
-    model.refusals += 1;
-    if (model.refusals === 1) {
+    r.refusals += 1;
+    if (r.refusals === 1) {
       // Most likely another account is connected: read the channel again
       // at the next tick before saying anything.
       model.userId = "";
       return;
     }
-    model.retryAt = now + MINUTE;
-    state.stale = "refused";
+    r.retryAt = now + MINUTE;
+    r.stale = "refused";
   } else if (outcome.kind === "unreachable") {
-    model.retryAt = now + MINUTE;
-    state.stale = "unreachable";
+    r.retryAt = now + MINUTE;
+    r.stale = "unreachable";
   } else {
-    model.failures += 1;
-    model.retryAt = now + backoff(model.failures);
-    state.stale = outcome.kind === "quota" ? "quota" : "unreachable";
+    r.failures += 1;
+    r.retryAt = now + backoff(r.failures);
+    r.stale = outcome.kind;
   }
-  if (state.phase === "loading") state.phase = "empty";
+}
+
+const SEVERITY: readonly Stale[] = ["refused", "quota", "server", "unreachable"];
+/** The warning: the most serious cause, the age of the oldest data it concerns. */
+function summarize(): void {
+  const want = wanted();
+  const failing = [routes.user, ...DATA_ROUTES.filter((route) => want[route]).map((route) => routes[route])].filter((r) => r.stale !== "");
+  state.stale = SEVERITY.find((kind) => failing.some((r) => r.stale === kind)) ?? "";
+  state.readAt = failing.length === 0 ? 0 : Math.min(...failing.map((r) => r.okAt || r.failAt));
+  if (state.phase === "loading" && failing.length > 0) state.phase = "empty";
 }
 
 /** Forgets the values of another channel. */
@@ -388,9 +430,11 @@ function forget(): void {
   state.followers = null;
   setHype(null);
   state.newUntil = 0;
-  state.readAt = 0;
   state.phase = "loading";
   model.lastFollower = "";
+  model.lastFollowerAt = 0;
+  // Another channel: its routes are read at once.
+  for (const route of DATA_ROUTES) routes[route] = fresh();
 }
 
 /** One read of Twitch, under the rhythm rules; never two at once. */
@@ -415,44 +459,40 @@ async function read(): Promise<void> {
   const now = Date.now();
   state.now = now;
   // Hidden, the widget calls nothing (the host does not tick it either).
-  if (!host.visible || !model.connected || now < model.retryAt - TICK_SLACK) return;
+  if (!host.visible || !model.connected) return;
   const want = wanted();
   if (!want.goals && !want.followers && !want.hype) return;
+  const generation = model.generation;
   if (model.userId === "") {
-    if (!canCall("user", now)) return;
+    if (!due(routes.user, now)) return;
     const outcome = await call("user", "", now);
-    if (!model.connected) return;
+    if (generation !== model.generation) return;
     const id = outcome.kind === "ok" ? parseUser(outcome.body) : null;
     if (id === null) {
-      failed(outcome.kind === "ok" ? { kind: "server" } : outcome, now);
+      failed(routes.user, outcome.kind === "ok" ? { kind: "server" } : outcome, now);
+      summarize();
       return;
     }
+    succeeded(routes.user, now);
     if (model.owner !== "" && model.owner !== id) forget();
     model.userId = id;
     model.owner = id;
   }
   const channel = `broadcaster_id=${encodeURIComponent(model.userId)}`;
-  let read = false;
-  for (const route of ["goals", "followers", "hype"] as const) {
-    if (!want[route] || !canCall(route, now)) continue;
-    const outcome = await call(route, route === "followers" ? `${channel}&first=1` : channel, now);
-    if (!model.connected) return;
-    if (outcome.kind !== "ok" || !apply(route, outcome.body, now)) {
-      failed(outcome.kind === "ok" ? { kind: "server" } : outcome, now);
-      return;
-    }
-    read = true;
-  }
-  if (read) {
-    model.failures = 0;
-    model.refusals = 0;
-    model.retryAt = 0;
-    state.stale = "";
-  }
+  // The three routes do not depend on each other: they leave together.
+  const reads = DATA_ROUTES.filter((route) => want[route] && due(routes[route], now));
+  const outcomes = await Promise.all(reads.map((route) => call(route, route === "followers" ? `${channel}&first=1` : channel, now)));
+  if (generation !== model.generation) return;
+  reads.forEach((route, index) => {
+    const outcome = outcomes[index] as Outcome;
+    if (outcome.kind === "ok" && apply(route, outcome.body, now)) succeeded(routes[route], now);
+    else failed(routes[route], outcome.kind === "ok" ? { kind: "server" } : outcome, now);
+  });
+  summarize();
 }
 
 /** Puts a route's answer in the state; `false` when unreadable. */
-function apply(route: "goals" | "followers" | "hype", body: JsonValue, now: number): boolean {
+function apply(route: DataRoute, body: JsonValue, now: number): boolean {
   if (route === "goals") {
     const goals = parseGoals(body);
     if (goals === null) return false;
@@ -460,16 +500,20 @@ function apply(route: "goals" | "followers" | "hype", body: JsonValue, now: numb
   } else if (route === "followers") {
     const followers = parseFollowers(body);
     if (followers === null) return false;
-    // A new latest follower lights the card, never at the first read.
-    if (model.lastFollower !== "" && followers.lastId !== "" && followers.lastId !== model.lastFollower) light(now);
-    if (followers.lastId !== "") model.lastFollower = followers.lastId;
+    // A newer latest follower lights the card; never at the first read, and
+    // never an older one coming back first after an unfollow.
+    const newer = followers.lastId !== "" && followers.lastId !== model.lastFollower && followers.lastAt > model.lastFollowerAt;
+    if (newer && model.lastFollower !== "") light(now);
+    if (followers.lastId !== "") {
+      model.lastFollower = followers.lastId;
+      model.lastFollowerAt = Math.max(model.lastFollowerAt, followers.lastAt);
+    }
     state.followers = followers;
   } else {
     const hype = parseHype(body);
     if (hype === undefined) return false;
     setHype(hype !== null && hype.expiresAt > now ? hype : null);
   }
-  state.readAt = now;
   state.phase = "ready";
   return true;
 }
@@ -483,15 +527,16 @@ function light(now: number): void {
   });
 }
 
-/** Shows a Hype Train and counts it down each second, only while it runs. */
+/** Shows a Hype Train and counts it down each second, only while it runs and is shown. */
 function setHype(hype: Hype | null): void {
   state.hype = hype;
-  if (hype === null) {
+  state.now = Date.now();
+  const counting = hype !== null && option("show-hype", true);
+  if (!counting) {
     countdown?.cancel();
     countdown = null;
     return;
   }
-  state.now = Date.now();
   countdown ??= timers.every(SECOND, tick);
 }
 
@@ -508,8 +553,11 @@ onHost((changed) => {
   if (changed.includes("viewport")) measure();
   if (changed.includes("locale")) state.locale = host.locale;
   if (changed.includes("theme")) state.theme = host.theme;
+  // The user's number format: the view writes numbers again.
+  if (changed.includes("options") || changed.includes("region")) state.optionsVersion += 1;
   if (changed.includes("options")) {
-    state.optionsVersion += 1;
+    setHype(state.hype);
+    summarize();
     // A route the options show again is read at once (within its rhythm).
     void refresh();
   }
@@ -523,12 +571,14 @@ account.subscribe({ id: "twitch" }, (update) => {
   const connected = update.ok && update.value.state === "connected";
   const was = model.connected;
   model.connected = connected;
+  if (connected !== was) model.generation += 1;
   if (connected && !was) {
     // Each connection reads the channel again: it may be another account.
     // The values shown stay until then.
     model.userId = "";
-    model.refusals = 0;
-    model.retryAt = 0;
+    for (const route of DATA_ROUTES) Object.assign(routes[route], { refusals: 0, retryAt: 0 });
+    // A new connection reads its channel at once.
+    routes.user = fresh();
     void refresh();
   }
 });
@@ -554,9 +604,6 @@ export function showLast(_v: number): boolean {
 /** Option "Twitch logo": off, the attribution is the word "Twitch". */
 export function showLogo(_v: number): boolean {
   return option("show-logo", true);
-}
-export function phase(s: typeof state): Phase {
-  return s.phase;
 }
 export function goalType(g: Goal): string {
   return g.type === "other" ? t("type-other") : t(`type-${g.type}`);
@@ -621,6 +668,13 @@ export function followersCard(s: typeof state, v: number): boolean {
   if (lay === "standard") return hype(s, v) === null || firstGoal(s, v) === null;
   return lay === "compact" && firstGoal(s, v) === null && hype(s, v) === null && !noGoalCard(s, v);
 }
+/** What the widget shows: the options before anything else, then the data. */
+export function screen(s: typeof state, v: number): "nothing" | "loading" | "empty" | "content" {
+  const want = wanted();
+  if (!want.goals && !want.followers && !want.hype) return "nothing";
+  if (s.phase !== "ready") return s.phase;
+  return nothingShown(s, v) ? "nothing" : "content";
+}
 export function nothingShown(s: typeof state, v: number): boolean {
   if (layout(v) === "line") return hype(s, v) === null && firstGoal(s, v) === null && !lineFollowers(s, v) && !lineNoGoal(s, v);
   return hype(s, v) === null && firstGoal(s, v) === null && !noGoalCard(s, v) && !followersCard(s, v);
@@ -653,7 +707,7 @@ export function lastFollower(s: typeof state, full: boolean): string {
   return t("last-follower-short", { name: f.lastName });
 }
 export function hasLast(s: typeof state, v: number): boolean {
-  return showLast(v) && s.followers !== null && s.followers.lastId !== "";
+  return showLast(v) && s.followers !== null && s.followers.lastName !== "";
 }
 export function isStale(s: typeof state): boolean {
   return s.stale !== "";
@@ -662,18 +716,24 @@ export function staleIcon(s: typeof state): IconName {
   if (s.stale === "quota") return "hourglass";
   return s.stale === "refused" ? "circle-alert" : "cloud-off";
 }
+/** "Unreachable · 5 min ago": Twitch failing reads as unreachable too. */
 export function staleText(s: typeof state): string {
-  return s.stale === "" ? "" : t(`stale-${s.stale}`, { age: age(s.now - s.readAt) });
+  if (s.stale === "") return "";
+  return t(`stale-${s.stale === "server" ? "unreachable" : s.stale}`, { age: age(s.now - s.readAt) });
 }
 export function staleTip(s: typeof state): string {
   return s.stale === "" ? "" : t(`stale-${s.stale}-tip`);
 }
-/** The first load failed: why, and that the widget tries again. */
+/** The first load failed: why, and when the widget tries again. */
 export function emptyText(s: typeof state): string {
-  return s.stale === "refused" ? t("empty-refused") : t("empty-unreachable");
+  return t(`empty-${s.stale === "" ? "unreachable" : s.stale}`);
 }
 export function emptyIcon(s: typeof state): IconName {
-  return s.stale === "refused" ? "circle-alert" : "cloud-off";
+  return staleIcon(s);
+}
+/** One line has no room for the Glitch: its icon's tooltip names the source. */
+export function lineTip(what: string): string {
+  return `${what} · ${t("source")}`;
 }
 export function rootClass(s: typeof state): string {
   return `root ${layout(s.optionsVersion)}${s.narrow ? " narrow" : ""}`;

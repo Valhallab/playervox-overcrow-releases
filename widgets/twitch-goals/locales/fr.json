@@ -35,5 +35,9 @@
   "type-other": "Objectif",
   "stale-refused": "Refusé par Twitch · {age}",
   "stale-refused-tip": "Twitch refuse de donner ces données. Reconnectez Twitch dans Services connectés.",
-  "empty-refused": "Refusé par Twitch. Reconnectez Twitch dans Services connectés."
+  "empty-refused": "Refusé par Twitch. Reconnectez Twitch dans Services connectés.",
+  "stale-server-tip": "Twitch a un problème pour l'instant. Nouvel essai dans quelques minutes.",
+  "empty-server": "Twitch injoignable. Nouvel essai dans quelques minutes.",
+  "empty-quota": "Twitch limite les demandes. Nouvel essai dans quelques minutes.",
+  "followers-title": "Followers"
 }

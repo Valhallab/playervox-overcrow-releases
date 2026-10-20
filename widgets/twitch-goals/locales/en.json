@@ -35,5 +35,9 @@
   "type-other": "Goal",
   "stale-refused": "Refused by Twitch · {age}",
   "stale-refused-tip": "Twitch refuses to give this data. Reconnect Twitch in Connected services.",
-  "empty-refused": "Refused by Twitch. Reconnect Twitch in Connected services."
+  "empty-refused": "Refused by Twitch. Reconnect Twitch in Connected services.",
+  "stale-server-tip": "Twitch has a problem for now. Retrying in a few minutes.",
+  "empty-server": "Twitch unreachable. Retrying in a few minutes.",
+  "empty-quota": "Twitch is limiting requests. Retrying in a few minutes.",
+  "followers-title": "Followers"
 }

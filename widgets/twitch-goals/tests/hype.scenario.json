@@ -384,7 +384,11 @@
     },
     {
       "host": {
-        "locale": "fr"
+        "locale": "fr",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
       }
     },
     {
@@ -469,12 +473,20 @@
     },
     {
       "host": {
-        "locale": "en"
+        "locale": "en",
+        "region": {
+          "numberFormat": "us",
+          "dateOrder": "mdy"
+        }
       }
     },
     {
       "host": {
         "locale": "fr",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        },
         "scale": 1500
       }
     },
@@ -567,6 +579,10 @@
     {
       "host": {
         "locale": "en",
+        "region": {
+          "numberFormat": "us",
+          "dateOrder": "mdy"
+        },
         "scale": 1000,
         "size": {
           "width": 320,

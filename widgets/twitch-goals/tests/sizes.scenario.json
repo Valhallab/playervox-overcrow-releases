@@ -149,6 +149,10 @@
     {
       "host": {
         "locale": "fr",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        },
         "size": {
           "width": 520,
           "height": 200

@@ -92,7 +92,11 @@
     },
     {
       "host": {
-        "locale": "fr"
+        "locale": "fr",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
       }
     },
     {
@@ -137,7 +141,11 @@
     },
     {
       "host": {
-        "locale": "en"
+        "locale": "en",
+        "region": {
+          "numberFormat": "us",
+          "dateOrder": "mdy"
+        }
       }
     }
   ]

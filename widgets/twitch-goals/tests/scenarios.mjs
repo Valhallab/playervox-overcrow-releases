@@ -37,7 +37,7 @@ const READ = [fetched(urls.goals), fetched(urls.followers), fetched(urls.hype)];
 const SUBSCRIBED = { service: "account.subscribe", params: { id: "twitch" }, outcome: "ok" };
 const START_CALLS = [SUBSCRIBED, fetched(urls.user), ...READ];
 
-// The channel of the mockups (tmp/acc-p-mockups, series 2), all invented.
+// The channel of the approved mockups, all invented.
 const GOALS = {
   en: [
     { id: "g1", type: "subscription_count", desc: "Karaoke night", current: 37, target: 50, ago: 60 },
@@ -81,22 +81,29 @@ function hype(train, at) {
 }
 const TRAIN = { level: 2, progress: 1240, goal: 1800, leftS: 222 };
 
+/** A fixture of `url` for `answer`: a response, `{ error }`, or none (`null`). */
+const answer = (url, value) => (value === null ? [] : value.error ? [failure(url, value.error)] : [fixture(url, value)]);
+
 /**
  * The answers of `minutes` minutes of reads (one read at start and one a
- * minute). `goalsAt(n)`… give the answer of the read `n` (0 at start).
+ * minute). `goalsAt(n, at)`… give the answer of the read `n` (0 at start):
+ * a response, `{ error }`, or `null` when the widget asks nothing then.
  */
 function reads({ minutes = 0, list = GOALS.en, total = 1284, last = NYX, train = null, goalsAt, followersAt, hypeAt, skip = [] } = {}) {
   const out = [fixture(urls.user, user())];
   for (let n = 0; n <= minutes; n += 1) {
     const at = START + n * MIN;
-    if (!skip.includes("goals")) out.push(fixture(urls.goals, goalsAt ? goalsAt(n) : goals(list)));
-    if (!skip.includes("followers")) out.push(fixture(urls.followers, followersAt ? followersAt(n, at) : followers(total, last, at)));
-    if (!skip.includes("hype")) out.push(fixture(urls.hype, hypeAt ? hypeAt(n, at) : hype(train, at)));
+    if (!skip.includes("goals")) out.push(...answer(urls.goals, goalsAt ? goalsAt(n, at) : goals(list)));
+    if (!skip.includes("followers")) out.push(...answer(urls.followers, followersAt ? followersAt(n, at) : followers(total, last, at)));
+    if (!skip.includes("hype")) out.push(...answer(urls.hype, hypeAt ? hypeAt(n, at) : hype(train, at)));
   }
   return out;
 }
 
 const WIDTH = { line: 260, compact: 300, standard: 320, full: 340 };
+/** A French user's settings: the language and the number format with it. */
+const FR = { locale: "fr", region: { numberFormat: "fr", dateOrder: "dmy" } };
+const EN = { locale: "en", region: { numberFormat: "us", dateOrder: "mdy" } };
 const L4 = ["line", "compact", "standard", "full"];
 
 /** The options menu's rows and their defaults (manifest). */
@@ -139,13 +146,13 @@ function layouts(tag, list = L4, options = {}) {
 }
 /** The same in French, then back to English. */
 function inFrench(tag, list, options = {}) {
-  return [{ host: { locale: "fr" } }, ...layouts(`${tag}-fr`, list, options), { host: { locale: "en" } }];
+  return [{ host: FR }, ...layouts(`${tag}-fr`, list, options), { host: EN }];
 }
 
 // --- render: the four layouts, both languages, both themes, two scales.
 for (const locale of ["en", "fr"]) {
   scenario(`render-${locale}`, `The goals of the channel, ${locale === "en" ? "in English" : "in French"}: four layouts, dark and light, at 100 and 150 %.`, {
-    host: { locale },
+    host: locale === "fr" ? FR : EN,
     http: reads({ list: GOALS[locale] }),
     steps: [
       { expect: { state: "running", text: [GOALS[locale][0].desc], fault: "none" } },
@@ -170,7 +177,7 @@ scenario("sizes", "One line at 150 and 170 px (ellipsis), Standard at 230 px, Fu
     { expect: { image: "full-520", fault: "none" } },
     { host: { size: { width: 560, height: 200 } } },
     { expect: { image: "full-560", fault: "none" } },
-    { host: { locale: "fr", size: { width: 520, height: 200 } } },
+    { host: { ...FR, size: { width: 520, height: 200 } } },
     { expect: { image: "full-520-fr", fault: "none" } },
   ],
 });
@@ -185,9 +192,9 @@ scenario("hype", "A Hype Train at level 2, 03:42 left: in front of the goal, alo
     ...layouts("hype-150"),
     { host: { scale: 1000 } },
     ...inFrench("hype", L4),
-    { host: { locale: "fr", scale: 1500 } },
+    { host: { ...FR, scale: 1500 } },
     ...layouts("hype-fr-150"),
-    { host: { locale: "en", scale: 1000, options: { layout: "standard" }, size: { width: 320, height: 200 } } },
+    { host: { ...EN, scale: 1000, options: { layout: "standard" }, size: { width: 320, height: 200 } } },
     { advance: { ms: 3 * MIN } },
     { expect: { text: ["00:42 left"] } },
     { advance: { ms: 43_000 } },
@@ -274,12 +281,11 @@ scenario("loading", "The first load: the skeleton while nothing is answered yet.
 });
 
 // --- failures.
-scenario("unreachable", "Twitch unreachable (network error, then 503): the values stay, the warning says since when.", {
-  http: [
-    ...reads({ minutes: 0 }),
-    ...repeat(2, () => failure(urls.goals, "transport_failed")),
-    ...repeat(3, () => fixture(urls.goals, json(503, {}))),
-  ],
+scenario("unreachable", "Twitch unreachable for the goals (network error, then 503): the values stay, the warning says since when; the followers keep reading.", {
+  http: reads({
+    minutes: 5,
+    goalsAt: (n) => (n === 0 ? goals(GOALS.en) : n <= 2 ? { error: "transport_failed" } : n <= 4 ? json(503, {}) : null),
+  }),
   steps: [
     { expect: { state: "running", text: ["Karaoke night"] } },
     { advance: { ms: 2 * MIN } },
@@ -291,13 +297,13 @@ scenario("unreachable", "Twitch unreachable (network error, then 503): the value
     ...layouts("unreachable-150", ["compact", "standard", "full"]),
     { host: { scale: 1000 } },
     ...inFrench("unreachable", L4),
-    { host: { locale: "fr", scale: 1500 } },
+    { host: { ...FR, scale: 1500 } },
     ...layouts("unreachable-fr-150", ["compact", "standard", "full"]),
   ],
 });
 
 scenario("quota", "Twitch limits requests (429): the values stay, Rate limited and since when.", {
-  http: [...reads({ minutes: 0 }), ...repeat(2, () => fixture(urls.goals, json(429, { error: "Too Many Requests", status: 429, message: "" })))],
+  http: reads({ minutes: 2, goalsAt: (n) => (n === 0 ? goals(GOALS.en) : json(429, { error: "Too Many Requests", status: 429, message: "" })) }),
   steps: [
     { expect: { state: "running", text: ["Karaoke night"] } },
     { advance: { ms: MIN } },
@@ -310,7 +316,7 @@ scenario("quota", "Twitch limits requests (429): the values stay, Rate limited a
 });
 
 scenario("empty-unreachable", "Twitch unreachable at the first read: no value yet, said once.", {
-  http: [fixture(urls.user, user()), ...repeat(3, () => failure(urls.goals, "timeout"))],
+  http: [failure(urls.user, "timeout")],
   steps: [
     { expect: { state: "running", text: ["Twitch unreachable. Retrying every minute."], fault: "none" } },
     ...layouts("empty-unreachable", ["line", "standard"]),
@@ -320,9 +326,8 @@ scenario("empty-unreachable", "Twitch unreachable at the first read: no value ye
 
 scenario("refused", "Twitch refuses the goals while the token is valid: the channel is read again, then Refused by Twitch, values kept.", {
   http: [
-    ...reads({ minutes: 0 }),
+    ...reads({ minutes: 2, goalsAt: (n) => (n === 0 ? goals(GOALS.en) : { status: 403, contentType: "application/json", body: "{}" }) }),
     fixture(urls.user, user()),
-    ...repeat(3, () => fixture(urls.goals, { status: 403, contentType: "application/json", body: "{}" })),
     ...repeat(3, () => fixture(VALIDATE, json(200, { client_id: "x", scopes: [], expires_in: 3600 }))),
   ],
   steps: [
@@ -341,14 +346,13 @@ scenario("refused", "Twitch refuses the goals while the token is valid: the chan
 scenario("expired", "Twitch refuses the token itself (validate refused): the connection expires and the host covers the widget.", {
   host: { frame: true },
   http: [
-    fixture(urls.user, user()),
-    fixture(urls.goals, { status: 401, contentType: "application/json", body: "{}" }),
+    ...reads({ goalsAt: () => ({ status: 401, contentType: "application/json", body: "{}" }) }),
     fixture(VALIDATE, json(401, { status: 401, message: "invalid access token" })),
   ],
   steps: [
     { expect: { state: "running", image: "expired", fault: "none" } },
     { advance: { ms: 3 * MIN } },
-    { host: { locale: "fr" } },
+    { host: FR },
     { expect: { image: "expired-fr", fault: "none" } },
   ],
 });
@@ -362,7 +366,7 @@ for (const [name, account, description] of [
     steps: [
       { expect: { state: "running", image: name, fault: "none", calls: [SUBSCRIBED] } },
       { advance: { ms: 2 * MIN } },
-      { host: { locale: "fr" } },
+      { host: FR },
       { expect: { image: `${name}-fr`, fault: "none", calls: [] } },
     ],
   });
@@ -390,6 +394,15 @@ for (const [name, description, options, list] of OPTIONS) {
     ],
   });
 }
+
+scenario("opt-all-off", "Every option off from the start, Hype Train included: Nothing to show at once, no route called.", {
+  host: { options: { "goal-subs": false, "goal-followers": false, "goal-bits": false, "goal-cheerers": false, "show-followers": false, "show-last-follower": false, "show-hype": false } },
+  steps: [
+    { expect: { state: "running", text: ["Nothing to show"], noText: ["Reading your goals…"], fault: "none", calls: [SUBSCRIBED] } },
+    { advance: { ms: 2 * MIN } },
+    { expect: { calls: [], image: "opt-all-off", fault: "none" } },
+  ],
+});
 
 scenario("opt-no-hype", "Hype Train off: never shown, even while a train runs; the route is not called.", {
   host: { options: { "show-hype": false } },

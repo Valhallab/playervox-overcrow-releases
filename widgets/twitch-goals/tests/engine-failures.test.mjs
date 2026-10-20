@@ -49,7 +49,10 @@ test("a 5xx waits 1, 2, 4, 8 then 10 minutes", async () => {
     }
   }
   assert.deepEqual(gaps.slice(0, 6), [1, 1, 2, 4, 8, 10]);
-  assert.equal(state.stale, "unreachable");
+  // Twitch failing reads as unreachable; its tooltip says the longer wait.
+  assert.equal(state.stale, "server");
+  assert.match(logic.staleText(state), /^Unreachable · /);
+  assert.match(logic.staleTip(state), /few minutes/);
   twitch.fail = null;
   await minutes(vm, twitch, 10);
   assert.equal(state.stale, "");
@@ -69,7 +72,7 @@ test("a 429: Rate limited, with the same backoff", async () => {
 test("an unreadable answer is unreachable, not an empty list", async () => {
   twitch.routeStatus["/helix/goals"] = 200;
   await minutes(vm, twitch, 1);
-  assert.equal(state.stale, "unreachable");
+  assert.equal(state.stale, "server");
   assert.deepEqual(state.goals.map((g) => g.id), ["g1"]);
   delete twitch.routeStatus["/helix/goals"];
   await minutes(vm, twitch, 2);
