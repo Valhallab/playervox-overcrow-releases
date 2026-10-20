@@ -39,5 +39,7 @@
   "stale-server-tip": "Twitch a un problème pour l'instant. Nouvel essai dans quelques minutes.",
   "empty-server": "Twitch injoignable. Nouvel essai dans quelques minutes.",
   "empty-quota": "Twitch limite les demandes. Nouvel essai dans quelques minutes.",
-  "followers-title": "Followers"
+  "followers-title": "Followers",
+  "latest-follower": "Dernier follower : {name} · {ago}",
+  "latest-follower-short": "Dernier follower : {name}"
 }

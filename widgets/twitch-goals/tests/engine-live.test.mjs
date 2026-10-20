@@ -23,8 +23,9 @@ const countdowns = () => vm.timers.filter((timer) => timer.intervalMs <= 1000).l
 
 test("the first follower read is not new", () => {
   assert.equal(logic.isNewFollower(state), false);
-  assert.equal(logic.lastFollower(state, false), "Latest: Mira");
-  assert.equal(logic.lastFollower(state, true), "Latest: Mira · 3 min ago");
+  // A followers goal is on screen: the card names the latest follower.
+  assert.equal(logic.lastFollower(state, false), "Latest follower: Mira");
+  assert.equal(logic.lastFollower(state, true), "Latest follower: Mira · 3 min ago");
 });
 
 test("a new follower lights the card for 10 s", async () => {
@@ -111,5 +112,29 @@ test("goals filtered out and followers off: nothing to show, never No active goa
   vm.setHost({ options: { "goal-subs": false, "show-followers": false, "show-last-follower": false } });
   assert.equal(logic.noGoalCard(state, v()), false);
   assert.equal(logic.nothingShown(state, v()), true);
+  vm.setHost({ options: {} });
+});
+
+test("a followers goal on screen already writes the count: the followers card says the latest follower only", async () => {
+  twitch.goals = [goal("fol", { description: "" })];
+  twitch.followers = [follower("7", "Mira", Date.now() - 180_000)];
+  await minutes(vm, twitch, 1);
+  assert.equal(logic.countShown(state, v()), false);
+  assert.equal(logic.lastFollower(state, false), "Latest follower: Mira");
+  vm.setHost({ options: { layout: "full" } });
+  assert.equal(logic.lastFollower(state, true), "Latest follower: Mira · 4 min ago");
+  // Without a followers goal, the count again, and "Latest:" next to it.
+  twitch.goals = [goal("subs", { type: "subscription_count" })];
+  await minutes(vm, twitch, 1);
+  assert.equal(logic.countShown(state, v()), true);
+  assert.equal(logic.lastFollower(state, true), "Latest: Mira · 5 min ago");
+  // The count turned off by the user: "Latest:" as the approved mockup shows.
+  vm.setHost({ options: { layout: "full", "show-followers": false } });
+  assert.equal(logic.lastFollower(state, true), "Latest: Mira · 5 min ago");
+  // A followers goal filtered out by the options writes nothing: the count stays.
+  twitch.goals = [goal("fol")];
+  vm.setHost({ options: { "goal-followers": false } });
+  await minutes(vm, twitch, 1);
+  assert.equal(logic.countShown(state, v()), true);
   vm.setHost({ options: {} });
 });

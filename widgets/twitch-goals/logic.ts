@@ -661,8 +661,8 @@ export function noGoalCard(s: typeof state, v: number): boolean {
 }
 /** Followers card: in Standard only without a Hype Train, always in Full. */
 export function followersCard(s: typeof state, v: number): boolean {
-  if (s.followers === null || (!showFollowers(v) && !showLast(v))) return false;
-  if (!showFollowers(v) && s.followers.lastId === "") return false;
+  if (s.followers === null || (!countShown(s, v) && !showLast(v))) return false;
+  if (!countShown(s, v) && s.followers.lastName === "") return false;
   const lay = layout(v);
   if (lay === "full") return true;
   if (lay === "standard") return hype(s, v) === null || firstGoal(s, v) === null;
@@ -694,6 +694,13 @@ export function lineFollowersText(s: typeof state, v: number): string {
 export function lineFollowersUnit(_s: typeof state, v: number): string {
   return showFollowers(v) ? ` ${t("followers")}` : "";
 }
+/**
+ * The follower count, unless a followers goal on screen already writes it
+ * ("1,284 / 1,500"): one number written once.
+ */
+export function countShown(s: typeof state, v: number): boolean {
+  return showFollowers(v) && !(hype(s, v) === null || layout(v) === "full" ? shown(s, v) : []).some((g) => g.type === "follower");
+}
 export function isNewFollower(s: typeof state): boolean {
   return s.newUntil > s.now;
 }
@@ -703,8 +710,11 @@ export function followersClass(s: typeof state): string {
 export function lastFollower(s: typeof state, full: boolean): string {
   const f = s.followers;
   if (f === null || f.lastId === "") return "";
-  if (full && f.lastAt > 0) return t("last-follower", { name: f.lastName, ago: ago(s.now - f.lastAt) });
-  return t("last-follower-short", { name: f.lastName });
+  // Alone because a followers goal writes the count: say what it is.
+  const named = showFollowers(s.optionsVersion) && !countShown(s, s.optionsVersion);
+  const key = named ? "latest-follower" : "last-follower";
+  if (full && f.lastAt > 0) return t(key, { name: f.lastName, ago: ago(s.now - f.lastAt) });
+  return t(`${key}-short`, { name: f.lastName });
 }
 export function hasLast(s: typeof state, v: number): boolean {
   return showLast(v) && s.followers !== null && s.followers.lastName !== "";

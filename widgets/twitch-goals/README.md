@@ -43,7 +43,7 @@ French); numbers use the user's format.
 | --- | --- |
 | Layout | One line, Compact, Standard (default), Full. The frame fits its height to the content; the width is yours |
 | Goals shown › Subscribers, Followers, Bits, Cheerers | Which goal types show (all by default); the four subscription goal types follow "Subscribers" |
-| Follower count | On (default): "1,284 followers" |
+| Follower count | On (default): "1,284 followers"; left out while a followers goal on screen already writes it ("1,284 / 1,500"), the card then saying "Latest follower: NyxArcade" |
 | Latest follower | On (default): "Latest: NyxArcade", with how long ago in Full |
 | Hype Train while it runs | On (default); off, never shown and never read |
 | Twitch logo | On (default): Twitch's Glitch on the first card; off, the word "Twitch" |

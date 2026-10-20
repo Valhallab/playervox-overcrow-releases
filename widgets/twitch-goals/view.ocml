@@ -129,11 +129,11 @@
     <if test={followersCard(state, state.optionsVersion)}>
       <box class={followersClass(state)}>
         <icon class="fol-icon" name="users"/>
-        <if test={showFollowers(state.optionsVersion)}>
+        <if test={countShown(state, state.optionsVersion)}>
           <text class="fol-total"><span class="num">{num(state.followers.total)}</span><span class="of">&#32;{t("followers")}</span></text>
         </if>
         <if test={hasLast(state, state.optionsVersion)}>
-          <text class={showFollowers(state.optionsVersion) ? "fol-last" : "fol-last alone"}>{lastFollower(state, layout(state.optionsVersion) == "full")}</text>
+          <text class={countShown(state, state.optionsVersion) ? "fol-last" : "fol-last alone"}>{lastFollower(state, layout(state.optionsVersion) == "full")}</text>
         </if>
         <if test={markFor(state, state.optionsVersion, "followers") != ""}><mark src={glitch(state.theme)} logo={showLogo(state.optionsVersion)}/></if>
       </box>

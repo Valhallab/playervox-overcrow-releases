@@ -76,7 +76,7 @@ test("an unfollow is not a new follower", async () => {
   const lit = state.newUntil;
   twitch.followers = twitch.followers.slice(1);
   await minutes(vm, twitch, 1);
-  assert.equal(logic.lastFollower(state, false), "Latest: Mira");
+  assert.equal(logic.lastFollower(state, false), "Latest follower: Mira");
   assert.equal(state.newUntil, lit, "Mira is not lit again");
   assert.equal(logic.isNewFollower(state), false);
 });
