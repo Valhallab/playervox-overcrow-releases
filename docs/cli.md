@@ -170,7 +170,8 @@ SDK's tests.
 
 `snapshot-plan --repository PATH --revision SHA` is a maintenance command of
 the marketplace CI: the validated file list of a Git revision
-(`scripts/materialize-git-snapshot.sh`). Creators do not need it.
+(`scripts/materialize-git-snapshot.sh`), without `widgets/<dir>/tests/`,
+which admission does not read. Creators do not need it.
 `admit --publisher playervox` is passed by the marketplace CI only for this
 repository's own revisions ([review policy](review-policy.md)). It is the
 only publisher that may use `com.playervox.*`, and it admits every widget

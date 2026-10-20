@@ -105,7 +105,12 @@ if test "$mode" = --validated; then
     fi
 fi
 
+# No admission step reads widgets/<dir>/tests/ (reference images, fixtures):
+# it stays out of the snapshot and its bounds, as in `snapshot-plan`, whose
+# plan the validated mode compares file by file. A `glob` pathspec: `*` does
+# not cross `/`, and portable paths hold no glob character.
 if ! trusted_git archive --format=tar --output="$archive" "$revision" \
+        -- ':(exclude,glob)widgets/*/tests/**' \
         || test ! -f "$archive" || test -L "$archive" \
         || test "$(/usr/bin/stat -c '%u:%a:%h' "$archive")" \
             != "$invoking_uid:600:1" \

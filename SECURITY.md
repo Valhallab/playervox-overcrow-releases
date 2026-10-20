@@ -39,8 +39,11 @@ the fixed public repository URL as a Git object, verifies its expected digest,
 and prepares its validator and drivers from the exact target-base commit. A
 base-built planner compares every materialized regular file with the proposed
 Git tree's mode, size, object ID, and portable path, so archive attributes
-cannot omit or rewrite proposed bytes. The proposed tree is treated only as
-data and is never selected as the Actions checkout or a shell-script source.
+cannot omit or rewrite proposed bytes. Widget tests and their reference
+images (`widgets/<dir>/tests/`) are read by no admission step and are not
+materialized, but every entry of the tree must still be a bounded regular
+file with a portable path. The proposed tree is treated only as data and is
+never selected as the Actions checkout or a shell-script source.
 
 Admission builds `overcrow-widget` offline from the reviewed base and runs
 `overcrow-widget admit` on every widget directory of the proposed tree: the

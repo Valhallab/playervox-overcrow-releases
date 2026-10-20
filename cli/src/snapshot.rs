@@ -1,6 +1,9 @@
 //! `snapshot-plan`: the validated `git ls-tree` of a revision that the
 //! marketplace CI materializes (`scripts/materialize-git-snapshot.sh`): only
-//! bounded regular files with portable paths. Maintenance command, not for
+//! bounded regular files with portable paths. Widget tests
+//! (`widgets/<dir>/tests/`, reference images and fixtures) are read by no
+//! admission step: they are validated like every file of the tree but stay
+//! out of the plan and of the snapshot's bounds. Maintenance command, not for
 //! creators; Git runs with a fixed, isolated environment.
 
 use std::{
@@ -12,8 +15,11 @@ use std::{
     time::{Duration, Instant},
 };
 
-// 4,000 records of at most 300 bytes (a 240-byte path and its header).
-const MAX_PLAN_BYTES: usize = 2 * 1024 * 1024;
+// `git ls-tree` of the whole tree: 20,000 records of at most 300 bytes (a
+// 240-byte path and its header).
+const MAX_PLAN_BYTES: usize = 6 * 1024 * 1024;
+const MAX_TREE_ENTRIES: usize = 20_000;
+// The materialized snapshot.
 const MAX_ENTRIES: usize = 4_000;
 const MAX_FILE_BYTES: u64 = 8 * 1024 * 1024;
 const MAX_AGGREGATE_BYTES: u64 = 32 * 1024 * 1024;
@@ -127,6 +133,9 @@ fn safe_repository(repository: &Path) -> bool {
 
 fn validate_plan(bytes: &[u8]) -> Result<Vec<Entry<'_>>, SnapshotError> {
     let mut paths = BTreeSet::new();
+    // Widget directories with tests, and with materialized files.
+    let mut tested = BTreeSet::new();
+    let mut materialized = BTreeSet::new();
     let mut aggregate = 0_u64;
     let mut entries = Vec::new();
     for record in bytes
@@ -155,10 +164,17 @@ fn validate_plan(bytes: &[u8]) -> Result<Vec<Entry<'_>>, SnapshotError> {
             return Err(SnapshotError);
         }
         let path = std::str::from_utf8(&record[tab + 1..]).map_err(|_| SnapshotError)?;
-        if !valid_path(path) || !paths.insert(path) {
+        if !valid_path(path) || !paths.insert(path) || paths.len() > MAX_TREE_ENTRIES {
             return Err(SnapshotError);
         }
-        if paths.len() > MAX_ENTRIES {
+        if let Some(directory) = widget_test(path) {
+            tested.insert(directory);
+            continue;
+        }
+        if let Some(directory) = widget_directory(path) {
+            materialized.insert(directory);
+        }
+        if entries.len() == MAX_ENTRIES {
             return Err(SnapshotError);
         }
         aggregate = aggregate.checked_add(size).ok_or(SnapshotError)?;
@@ -172,10 +188,22 @@ fn validate_plan(bytes: &[u8]) -> Result<Vec<Entry<'_>>, SnapshotError> {
             path,
         });
     }
-    if entries.is_empty() {
+    if entries.is_empty() || !tested.is_subset(&materialized) {
         return Err(SnapshotError);
     }
     Ok(entries)
+}
+
+/// `<dir>` of `widgets/<dir>/...` (a valid path has no empty component).
+fn widget_directory(path: &str) -> Option<&str> {
+    Some(path.strip_prefix("widgets/")?.split_once('/')?.0)
+}
+
+/// `<dir>` of `widgets/<dir>/tests/...`, as the script's Git pathspec
+/// `:(exclude,glob)widgets/*/tests/**`.
+fn widget_test(path: &str) -> Option<&str> {
+    let (directory, rest) = path.strip_prefix("widgets/")?.split_once('/')?;
+    rest.starts_with("tests/").then_some(directory)
 }
 
 fn valid_object_id(value: &str) -> bool {
@@ -200,7 +228,10 @@ fn valid_path(value: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{MAX_AGGREGATE_BYTES, MAX_ENTRIES, MAX_PLAN_BYTES, SnapshotError, validate_plan};
+    use super::{
+        MAX_AGGREGATE_BYTES, MAX_ENTRIES, MAX_PLAN_BYTES, MAX_TREE_ENTRIES, SnapshotError,
+        validate_plan,
+    };
 
     const OBJECT: &str = "0123456789abcdef0123456789abcdef01234567";
 
@@ -231,9 +262,7 @@ mod tests {
         let plan = |count: usize, size: u64| -> String {
             (0..count)
                 .map(|index| {
-                    format!(
-                        "100644 blob {OBJECT} {size}\twidgets/w/tests/reference/{index:05}.png\0"
-                    )
+                    format!("100644 blob {OBJECT} {size}\twidgets/w/assets/{index:05}.png\0")
                 })
                 .collect()
         };
@@ -248,5 +277,94 @@ mod tests {
         let count = (MAX_AGGREGATE_BYTES / per_file) as usize;
         assert!(validate_plan(plan(count, per_file).as_bytes()).is_ok());
         assert!(validate_plan(plan(count + 1, per_file).as_bytes()).is_err());
+    }
+
+    /// Reference images and fixtures (`widgets/<dir>/tests/`) are read by
+    /// no admission step: they stay out of the snapshot and its bounds, but
+    /// every one of them is still a bounded regular file with a portable path.
+    #[test]
+    fn plan_leaves_widget_tests_out_of_the_snapshot() {
+        let mut tree = format!("100644 blob {OBJECT} 12\twidgets/w/manifest.json\0");
+        for index in 0..10 {
+            tree.push_str(&format!(
+                "100644 blob {OBJECT} 8388608\twidgets/w/tests/reference/{index}.png\0"
+            ));
+        }
+        let entries = validate_plan(tree.as_bytes()).expect("tests beyond the aggregate bound");
+        let paths: Vec<&str> = entries.iter().map(|entry| entry.path).collect();
+        assert_eq!(paths, ["widgets/w/manifest.json"]);
+
+        for invalid in [
+            format!("120000 blob {OBJECT} 12\twidgets/w/tests/link\0"),
+            format!("160000 commit {OBJECT} 0\twidgets/w/tests/module\0"),
+            format!("100644 blob {OBJECT} 12\twidgets/w/tests/bad name\0"),
+            format!("100644 blob {OBJECT} 8388609\twidgets/w/tests/large.png\0"),
+            format!(
+                "100644 blob {OBJECT} 12\twidgets/w/tests/a\0100644 blob {OBJECT} 12\twidgets/w/tests/a\0"
+            ),
+        ] {
+            let plan = format!("100644 blob {OBJECT} 12\twidgets/w/manifest.json\0{invalid}");
+            assert!(validate_plan(plan.as_bytes()).is_err(), "{invalid}");
+        }
+    }
+
+    /// Only the third component `tests` of `widgets/<dir>/...` is left out.
+    #[test]
+    fn plan_keeps_every_other_tests_directory() {
+        for path in [
+            "widgets/w/tests",
+            "widgets/tests/x",
+            "widgets/w/sub/tests/x",
+            "widgets/w/tests-old/x",
+            "cli/tests/x",
+            "templates/blank/tests/x",
+            "sdk/test/e2e/clock/tests/x",
+        ] {
+            let plan = format!("100644 blob {OBJECT} 12\t{path}\0");
+            let entries = validate_plan(plan.as_bytes()).expect("valid snapshot plan");
+            assert_eq!(entries.len(), 1, "{path}");
+        }
+        let only_tests = format!("100644 blob {OBJECT} 12\twidgets/w/tests/a.png\0");
+        assert!(validate_plan(only_tests.as_bytes()).is_err());
+    }
+
+    /// A widget directory holding only tests would vanish from the snapshot
+    /// and skip admission: it is refused, as a directory that is no widget.
+    #[test]
+    fn plan_refuses_a_widget_directory_of_tests_only() {
+        let widget = format!("100644 blob {OBJECT} 12\twidgets/w/manifest.json\0");
+        let hidden = format!("{widget}100644 blob {OBJECT} 12\twidgets/x/tests/a.png\0");
+        assert!(validate_plan(hidden.as_bytes()).is_err());
+        let before = format!("100644 blob {OBJECT} 12\twidgets/w/tests/a.png\0{widget}");
+        assert_eq!(
+            validate_plan(before.as_bytes())
+                .expect("tested widget")
+                .len(),
+            1
+        );
+    }
+
+    /// The tree may hold up to `MAX_TREE_ENTRIES` files, the snapshot
+    /// `MAX_ENTRIES` of them.
+    #[test]
+    fn plan_bounds_the_whole_tree() {
+        let tree = |count: usize| -> String {
+            let mut tree = format!("100644 blob {OBJECT} 12\twidgets/w/manifest.json\0");
+            for index in 1..count {
+                tree.push_str(&format!(
+                    "100644 blob {OBJECT} 1\twidgets/w/tests/reference/{index:05}.png\0"
+                ));
+            }
+            tree
+        };
+        let full = tree(MAX_TREE_ENTRIES);
+        assert!(full.len() <= MAX_PLAN_BYTES);
+        assert_eq!(
+            validate_plan(full.as_bytes()).expect("at the bound").len(),
+            1
+        );
+        assert!(validate_plan(tree(MAX_TREE_ENTRIES + 1).as_bytes()).is_err());
+        let longest = format!("100644 blob {OBJECT} 8388608\t{}\0", "a".repeat(240));
+        assert!(longest.len() * MAX_TREE_ENTRIES <= MAX_PLAN_BYTES);
     }
 }
