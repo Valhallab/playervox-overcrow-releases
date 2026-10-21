@@ -644,6 +644,27 @@ fn a_declared_account_never_uses_a_services_addresses() {
         Some("account_service"),
         "Twitch's sign-in page"
     );
+    // Twitch's own page for a device code.
+    let account = entry(&mut oauth).as_object_mut().unwrap();
+    account.insert(
+        "oauth".into(),
+        json!({
+            "clientId": "nova-run-log",
+            "flow": "device",
+            "device": "https://id.runlog.example/device",
+            "verify": "https://www.twitch.tv/activate",
+            "token": "https://id.runlog.example/token",
+            "scopes": [{"name": "runs:read", "access": "read"}]
+        }),
+    );
+    assert_eq!(
+        validate(&oauth).err(),
+        Some("account_service"),
+        "Twitch's device page"
+    );
+    // The same account on its own pages passes.
+    entry(&mut oauth)["oauth"]["verify"] = json!("https://runlog.example/activate");
+    assert_eq!(validate(&oauth).err(), None, "its own device page");
 }
 
 #[test]

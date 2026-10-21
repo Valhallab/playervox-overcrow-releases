@@ -395,6 +395,41 @@ test("routes that return or trade secrets are reported", async () => {
   assert.match(trades[0].fix, /never touches Steam item trades/);
 });
 
+test("a known secret route is found behind a parameter, a final slash or capitals", async () => {
+  const youtube = (path, pathParams) => ({
+    origin: "https://www.googleapis.com",
+    method: "GET",
+    path,
+    ...(pathParams ? { pathParams } : {}),
+  });
+  const cases = [
+    [
+      youtube("/youtube/v3/{resource}", {
+        resource: { type: "enum", values: ["videos", "liveStreams"] },
+      }),
+      1,
+    ],
+    [youtube("/youtube/v3/{resource}", { resource: { type: "slug", maxLength: 32 } }), 1],
+    [youtube("/youtube/v3/liveStreams/"), 1],
+    [
+      youtube("/youtube/v3/{resource}", {
+        resource: { type: "enum", values: ["videos", "channels"] },
+      }),
+      0,
+    ],
+    [youtube("/youtube/v3/{n}", { n: { type: "integer", min: 1, max: 9 } }), 0],
+  ];
+  for (const [index, [rule, expected]] of cases.entries()) {
+    const directory = widget(`known-secret-${index}`, {
+      "manifest.json": manifest({ network: [rule] }),
+    });
+    const found = (await auditWidget(directory)).findings.filter(
+      (finding) => finding.rule === "token-route",
+    );
+    assert.equal(found.length, expected, JSON.stringify(rule));
+  }
+});
+
 test("folded spellings, parameter names and enum values reveal a secret route", async () => {
   const route = (path, extra = {}) => ({
     origin: "https://api.runlog.example",
@@ -606,6 +641,138 @@ test("a declared account that could fish a service's key is reported", async () 
 // Until an application release announces account-key, the fixes name no
 // manifest field that the published apps would refuse (the release lot
 // points them to permissions.accounts again).
+test("a declared OAuth account: its sign-in pages, a read scope that writes, its ID", async () => {
+  const quests = (change) => {
+    const value = {
+      id: "quests",
+      name: "Quest Log",
+      mode: "oauth",
+      origins: ["https://api.quests.example"],
+      oauth: {
+        clientId: "nova-quest-log",
+        flow: "loopback",
+        authorize: "https://auth.quests.example/oauth/authorize",
+        token: "https://api.quests.example/oauth/token",
+        scopes: [{ name: "quests:read", access: "read" }],
+      },
+    };
+    change(value);
+    return value;
+  };
+  const pages = "low:oauth-pages";
+  const cases = [
+    ["a plain OAuth account", quests(() => {}), [pages]],
+    [
+      "a read scope that writes",
+      quests((value) => {
+        value.oauth.scopes = [{ name: "user:write:chat", access: "read" }];
+      }),
+      [pages, "medium:read-scope-writes"],
+    ],
+    [
+      "a write scope declared write",
+      quests((value) => {
+        value.oauth.scopes = [{ name: "user:write:chat", access: "write" }];
+      }),
+      [pages],
+    ],
+    [
+      "a page that reads as PlayerVox",
+      quests((value) => {
+        value.oauth.authorize = "https://playervox-link.quests.example/oauth/authorize";
+      }),
+      [pages, "medium:service-name-in-host"],
+    ],
+    [
+      "a page on a name of Twitch's CDN",
+      quests((value) => {
+        value.oauth.authorize = "https://ttvnw-auth.example/oauth/authorize";
+      }),
+      [pages, "medium:service-name-in-host"],
+    ],
+    [
+      "an internationalized page",
+      quests((value) => {
+        value.oauth.authorize = "https://xn--twtch-0sa.example/oauth/authorize";
+      }),
+      [pages, "medium:service-name-in-host"],
+    ],
+    [
+      "an ID that reads as Twitch",
+      quests((value) => {
+        value.id = "twitch-api";
+      }),
+      [pages, "medium:service-name-in-id"],
+    ],
+    [
+      "a key account",
+      {
+        id: "tracker",
+        name: "Tracker",
+        mode: "key",
+        origins: ["https://api.tracker.example"],
+        send: { header: "X-Key" },
+        key: {
+          format: { charset: "alnum", minLength: 40, maxLength: 64 },
+          page: "https://get.tracker.example/key",
+        },
+      },
+      [],
+    ],
+  ];
+  const hintRules = new Set([
+    "oauth-pages",
+    "read-scope-writes",
+    "service-name-in-host",
+    "service-name-in-id",
+  ]);
+  for (const [label, entry, expected] of cases) {
+    const directory = widget(`oauth-${label.replaceAll(" ", "-").replaceAll("'", "")}`, {
+      "manifest.json": manifest({ accounts: [entry] }),
+    });
+    const findings = (await auditWidget(directory)).findings.filter((finding) =>
+      hintRules.has(finding.rule),
+    );
+    // The audit sorts its findings by severity.
+    assert.deepEqual(
+      findings.map((finding) => `${finding.severity}:${finding.rule}`).sort(),
+      [...expected].sort(),
+      label,
+    );
+    const page = findings.find((finding) => finding.rule === "oauth-pages");
+    if (label === "a plain OAuth account") {
+      assert.match(
+        page.message,
+        /signs the player in at auth\.quests\.example and gets its tokens from api\.quests\.example/,
+      );
+      assert.match(page.fix, /test account/);
+    }
+    if (label === "an internationalized page") {
+      const host = findings.find((finding) => finding.rule === "service-name-in-host");
+      assert.match(host.message, /twítch\.example \(xn--twtch-0sa\.example\) reads as Twitch/);
+    }
+  }
+  const device = widget("oauth-device", {
+    "manifest.json": manifest({
+      accounts: [
+        quests((value) => {
+          value.oauth.flow = "device";
+          delete value.oauth.authorize;
+          value.oauth.device = "https://api.quests.example/oauth/device";
+          value.oauth.verify = "https://quests.example/device";
+        }),
+      ],
+    }),
+  });
+  const page = (await auditWidget(device)).findings.find(
+    (finding) => finding.rule === "oauth-pages",
+  );
+  assert.match(
+    page.message,
+    /enter a code at quests\.example and gets its tokens from api\.quests\.example/,
+  );
+});
+
 test("the secret fix names no unreleased manifest field", async () => {
   const key = ["api", "_key"].join("");
   const directory = widget("secret-fix", {

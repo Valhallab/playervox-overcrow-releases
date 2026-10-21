@@ -328,12 +328,15 @@ never runs your code or `tsc`:
 | `admission.package_rebuilt` | warning | The submitted archive differs from the rebuild in other files. |
 | `admission.not_rebuilt` | warning | An archive was admitted without its sources. |
 | `review.service_key_format` | warning | The account's key format also accepts the keys of an integrated service (Steam: 32 hex characters). |
-| `review.service_name_in_host` | warning | An address of the account reads as an integrated service (`steam-keys.example`). |
+| `review.service_name_in_host` | warning | An address of the account reads as an integrated service or as PlayerVox (`steam-keys.example`, `ttvnw-auth.example`, an `xn--` address once decoded). |
 | `review.address_in_key_page` | warning | The query of the key page carries an address: a redirect, a search engine, a link shortener. |
 | `review.same_route` | warning | A rule is on the route of an earlier one: OverCrow allows what either allows. |
 | `review.path_and_query_name` | warning | A rule names one parameter in both `pathParams` and `queryParams`. |
-| `review.secret_route` | warning | A route's path, parameter names or `enum` values speak of keys, tokens or passwords. |
+| `review.secret_route` | warning | A route's path, parameter names or `enum` values speak of keys, tokens or passwords, or the route is one a service is known to answer secrets on (YouTube's live streams). |
 | `review.service_label_name` | warning | The account's name imitates a label of OverCrow (integrated, official, verified). |
+| `review.oauth_pages` | warning | Every OAuth account: the host of its sign-in page (or code page) and of its token endpoint. The reviewer signs in with a test account and checks where each page ends. |
+| `review.read_scope_writes` | warning | An OAuth scope declared `read` whose name writes, edits, manages or deletes. |
+| `review.service_name_in_id` | warning | The account's ID reads as an integrated service or as PlayerVox (`twitch-api`). |
 
 Options: `--publisher HANDLE`, `--domain DOMAIN` (repeatable), `--previous
 FILE`, `--package FILE`, `--source-map FILE` ([the code map](#the-code-map),

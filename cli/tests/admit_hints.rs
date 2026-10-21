@@ -386,6 +386,57 @@ fn a_route_that_may_return_secrets_is_pointed_at() {
     );
     let message = message(&report, "review.secret_route");
     assert!(!message.contains("carries"), "{message}");
+    // Routes a service is known to answer secrets on, whatever their words
+    // (the table the MCP audit reads too): YouTube's live streams give
+    // their ingestion key.
+    for (origin, path) in [
+        ("https://www.googleapis.com", "/youtube/v3/liveStreams"),
+        ("https://youtube.googleapis.com", "/youtube/v3/livestreams"),
+        ("https://api.twitch.tv", "/helix/streams/key"),
+    ] {
+        let report = admit(json!({"network": [{
+            "origin": origin, "method": "GET", "path": path
+        }]}));
+        assert_eq!(
+            hints(&report),
+            [hint("review.secret_route", "/permissions/network/0")],
+            "{origin}{path}"
+        );
+    }
+    // Whatever the rule lets the widget write there: an `enum` that holds
+    // the known segment, a free parameter, a final slash.
+    for rule in [
+        json!({"origin": "https://www.googleapis.com", "method": "GET",
+            "path": "/youtube/v3/{resource}",
+            "pathParams": {"resource": {"type": "enum", "values": ["videos", "liveStreams"]}}}),
+        json!({"origin": "https://www.googleapis.com", "method": "GET",
+            "path": "/youtube/v3/{resource}",
+            "pathParams": {"resource": {"type": "slug", "maxLength": 32}}}),
+        json!({"origin": "https://www.googleapis.com", "method": "GET",
+            "path": "/youtube/{version}/liveStreams",
+            "pathParams": {"version": {"type": "slug", "maxLength": 8}}}),
+        json!({"origin": "https://www.googleapis.com", "method": "GET",
+            "path": "/youtube/v3/liveStreams/"}),
+    ] {
+        let report = admit(json!({"network": [rule.clone()]}));
+        assert_eq!(
+            hints(&report),
+            [hint("review.secret_route", "/permissions/network/0")],
+            "{rule}"
+        );
+    }
+    for rule in [
+        json!({"origin": "https://www.googleapis.com", "method": "GET", "path": "/youtube/v3/videos"}),
+        json!({"origin": "https://www.googleapis.com", "method": "GET",
+            "path": "/youtube/v3/{resource}",
+            "pathParams": {"resource": {"type": "enum", "values": ["videos", "channels"]}}}),
+        json!({"origin": "https://www.googleapis.com", "method": "GET",
+            "path": "/youtube/v3/{n}",
+            "pathParams": {"n": {"type": "integer", "min": 1, "max": 9}}}),
+    ] {
+        let report = admit(json!({"network": [rule.clone()]}));
+        assert_eq!(hints(&report), [], "{rule}");
+    }
 }
 
 /// An integrated service is PlayerVox's definition: no account hint.
@@ -447,5 +498,261 @@ fn the_human_review_shows_parameters_required_and_the_key_format() {
         warnings.contains("warning[review.service_key_format]")
             && warnings.contains("--> manifest.json /permissions/accounts/0"),
         "{warnings}"
+    );
+}
+
+/// A declared OAuth account `quests`: the browser (`loopback`) or a device
+/// code, its token endpoint on the account's origin.
+fn quests(flow: &str, change: impl FnOnce(&mut Value)) -> Value {
+    let mut oauth = json!({
+        "clientId": "nova-quest-log",
+        "flow": flow,
+        "token": "https://api.quests.example/oauth/token",
+        "scopes": [
+            {"name": "quests:read", "access": "read"},
+            {"name": "quests:track", "access": "write"}
+        ]
+    });
+    if flow == "loopback" {
+        oauth["authorize"] = json!("https://auth.quests.example/oauth/authorize");
+    } else {
+        oauth["device"] = json!("https://api.quests.example/oauth/device");
+        oauth["verify"] = json!("https://quests.example/device");
+    }
+    let mut declared = json!({
+        "id": "quests",
+        "name": "Quest Log",
+        "mode": "oauth",
+        "origins": ["https://api.quests.example"],
+        "oauth": oauth
+    });
+    change(&mut declared);
+    json!({
+        "accounts": [declared],
+        "network": [{
+            "origin": "https://api.quests.example",
+            "method": "GET",
+            "path": "/v1/me/quests",
+            "account": "quests"
+        }]
+    })
+}
+
+/// The help of a review hint `code`.
+fn help(report: &Value, code: &str) -> String {
+    report["diagnostics"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .find(|diagnostic| diagnostic["code"] == code)
+        .and_then(|diagnostic| diagnostic["help"].as_str())
+        .unwrap_or_default()
+        .to_owned()
+}
+
+/// A page of a declared OAuth account (`authorize` or `verify`) may
+/// redirect elsewhere, to an integrated service or a large provider, while
+/// its `token` relays: the reviewer signs in and notes where each page
+/// ends. Every declared OAuth account says so, whatever its hosts.
+#[test]
+fn an_oauth_account_points_at_its_sign_in_pages() {
+    let account = "/permissions/accounts/0";
+    let report = admit(quests("loopback", |_| {}));
+    assert_eq!(hints(&report), [hint("review.oauth_pages", account)]);
+    assert_eq!(
+        message(&report, "review.oauth_pages"),
+        "the OAuth account Quest Log signs the player in at auth.quests.example and gets its tokens from api.quests.example"
+    );
+    let help = help(&report, "review.oauth_pages");
+    for words in [
+        "test account",
+        "final address of each page",
+        "consent page",
+        "integrated service",
+        "origins",
+        "scopes",
+        "reviewer manual, OAuth accounts",
+    ] {
+        assert!(help.contains(words), "{words}: {help}");
+    }
+    let report = admit(quests("device", |_| {}));
+    assert_eq!(hints(&report), [hint("review.oauth_pages", account)]);
+    assert_eq!(
+        message(&report, "review.oauth_pages"),
+        "the OAuth account Quest Log has the player enter a code at quests.example and gets its tokens from api.quests.example"
+    );
+    // A key account has no sign-in page.
+    assert_eq!(hints(&admit(tracker(|_| {}))), []);
+}
+
+/// The human review of a declared OAuth account: its client and flow, the
+/// page the player signs in on, its scopes and whether it can change the
+/// account.
+#[test]
+fn the_human_review_shows_an_oauth_accounts_client_page_and_scopes() {
+    for (flow, page) in [
+        ("loopback", "https://auth.quests.example/oauth/authorize"),
+        ("device", "https://quests.example/device"),
+    ] {
+        let (_temporary, root) = project(quests(flow, |_| {}));
+        let output = cli(&["admit", path(&root), "--publisher", "nova"]);
+        assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
+        let shown = text(&output.stdout);
+        for line in [
+            "account         Quest Log (quests), OAuth sign-in, sent only to https://api.quests.example [CAN CHANGE THE ACCOUNT]",
+            &format!(
+                "OAuth client nova-quest-log ({flow}), sign-in page {page}, scopes quests:read (read), quests:track (write)"
+            ),
+        ] {
+            assert!(shown.contains(line), "{line}\n{shown}");
+        }
+    }
+    // Read scopes and GET routes only: it cannot change the account.
+    let (_temporary, root) = project(quests("loopback", |declared| {
+        declared["oauth"]["scopes"] = json!([{"name": "quests:read", "access": "read"}]);
+    }));
+    let output = cli(&["admit", path(&root), "--publisher", "nova"]);
+    let shown = text(&output.stdout);
+    let line = shown
+        .lines()
+        .find(|line| line.trim_start().starts_with("account "))
+        .unwrap_or_default();
+    assert!(
+        line.contains("Quest Log") && !line.contains("[CAN CHANGE THE ACCOUNT]"),
+        "{shown}"
+    );
+    let report = admit(quests("loopback", |declared| {
+        declared["oauth"]["scopes"] = json!([{"name": "quests:read", "access": "read"}]);
+    }));
+    let item = report["review"]
+        .as_array()
+        .expect("review")
+        .iter()
+        .find(|item| item["kind"] == "account")
+        .expect("account item")
+        .clone();
+    assert_eq!(item["writes"], false, "{item}");
+    assert_eq!(item["oauth"]["flow"], "loopback", "{item}");
+}
+
+/// A scope declared `read` whose name says it writes, edits, manages or
+/// deletes: the player is shown "read" only.
+#[test]
+fn a_read_scope_whose_name_writes_is_pointed_at() {
+    let account = "/permissions/accounts/0";
+    for name in [
+        "user:write:chat",
+        "channel:manage:broadcast",
+        "chat:edit",
+        "quests.delete",
+        "WriteQuests",
+    ] {
+        let report = admit(quests("loopback", |declared| {
+            declared["oauth"]["scopes"] = json!([{"name": name, "access": "read"}]);
+        }));
+        assert_eq!(
+            hints(&report),
+            [
+                hint("review.oauth_pages", account),
+                hint("review.read_scope_writes", account)
+            ],
+            "{name}"
+        );
+        let message = message(&report, "review.read_scope_writes");
+        assert!(
+            message.contains(name) && message.contains("read"),
+            "{message}"
+        );
+    }
+    for name in ["quests:read", "user:read:chat", "overwrite_free", "rewrite"] {
+        let report = admit(quests("loopback", |declared| {
+            declared["oauth"]["scopes"] = json!([{"name": name, "access": "read"}]);
+        }));
+        assert_eq!(
+            hints(&report),
+            [hint("review.oauth_pages", account)],
+            "{name}"
+        );
+    }
+    // A scope declared `write` says so already.
+    let report = admit(quests("loopback", |declared| {
+        declared["oauth"]["scopes"] = json!([{"name": "user:write:chat", "access": "write"}]);
+    }));
+    assert_eq!(hints(&report), [hint("review.oauth_pages", account)]);
+}
+
+/// An address or an ID of a declared account that reads as PlayerVox,
+/// OverCrow or an integrated service, through Twitch's CDN names and an
+/// internationalized host decoded first.
+#[test]
+fn an_oauth_page_or_id_that_reads_as_a_service_is_pointed_at() {
+    let account = "/permissions/accounts/0";
+    for (authorize, service) in [
+        (
+            "https://playervox-link.quests.example/oauth/authorize",
+            "PlayerVox",
+        ),
+        ("https://auth.0vercrow.example/oauth/authorize", "OverCrow"),
+        ("https://ttvnw-auth.example/oauth/authorize", "Twitch"),
+        ("https://auth.jtvnw-login.example/oauth/authorize", "Twitch"),
+        // `twitсh`, its `с` Cyrillic.
+        ("https://xn--twith-4ye.example/oauth/authorize", "Twitch"),
+        ("https://st3am-login.example/oauth/authorize", "Steam"),
+    ] {
+        let report = admit(quests("loopback", |declared| {
+            declared["oauth"]["authorize"] = json!(authorize);
+        }));
+        assert_eq!(
+            hints(&report),
+            [
+                hint("review.oauth_pages", account),
+                hint("review.service_name_in_host", account)
+            ],
+            "{authorize}"
+        );
+        let message = message(&report, "review.service_name_in_host");
+        assert!(
+            message.ends_with(&format!("reads as {service}")),
+            "{message}"
+        );
+    }
+    let report = admit(quests("device", |declared| {
+        declared["oauth"]["verify"] = json!("https://xn--layervox-4bh.example/device");
+    }));
+    let shown = message(&report, "review.service_name_in_host");
+    // The address as the browser shows it, and as written.
+    assert!(
+        shown.contains("рlayervox.example") && shown.contains("xn--layervox-4bh.example"),
+        "{shown}"
+    );
+    let with_id = |id: &str| {
+        let mut permissions = quests("loopback", |declared| declared["id"] = json!(id));
+        permissions["network"][0]["account"] = json!(id);
+        admit(permissions)
+    };
+    for (id, service) in [
+        ("twitch-api", "Twitch"),
+        ("tw1tch", "Twitch"),
+        ("steamstats", "Steam"),
+        ("overcrow-sync", "OverCrow"),
+    ] {
+        let report = with_id(id);
+        assert_eq!(
+            hints(&report),
+            [
+                hint("review.oauth_pages", account),
+                hint("review.service_name_in_id", account)
+            ],
+            "{id}"
+        );
+        let message = message(&report, "review.service_name_in_id");
+        assert!(
+            message.contains(id) && message.ends_with(&format!("reads as {service}")),
+            "{message}"
+        );
+    }
+    assert_eq!(
+        hints(&with_id("quest-log")),
+        [hint("review.oauth_pages", account)]
     );
 }

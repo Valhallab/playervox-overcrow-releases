@@ -9,7 +9,8 @@
 // running while the widget is hidden (the host does not tick them),
 // one-shot retries and watchdogs, slice-by-slice parsing.
 
-import { limit, permissionsTable } from "../content.js";
+import { domainToUnicode } from "node:url";
+import { limit, permissionsTable, secretRoutes } from "../content.js";
 import { ID_FORMS, isPlaceholderId, isReservedId } from "../ids.js";
 import {
   callArguments,
@@ -366,6 +367,47 @@ function readsAsAny(name: string, words: readonly string[]): boolean {
 
 const readsAsService = (name: string): boolean => readsAsAny(name, INTEGRATED_SERVICE_NAMES);
 
+/** What a host or an ID may read as, as admit's hints read it: an
+ * integrated service (its names and Twitch's CDNs) or PlayerVox's own
+ * names (the reserved handle words). */
+const READ_AS: { name: string; words: string[] }[] = [
+  { name: "Steam", words: ["steam", "valve"] },
+  { name: "Twitch", words: ["twitch", "ttvnw", "jtvnw"] },
+  { name: "PlayerVox", words: ["playervox"] },
+  { name: "OverCrow", words: ["overcrow"] },
+  { name: "Valhallab", words: ["valhallab"] },
+];
+
+function serviceReadIn(text: string): string | undefined {
+  return READ_AS.find((entry) => readsAsAny(text, entry.words))?.name;
+}
+
+/** A host with each `xn--` label decoded, as a browser shows it; "" without one. */
+function idnaDecoded(host: string): string {
+  return host.split(".").some((label) => label.startsWith("xn--")) ? domainToUnicode(host) : "";
+}
+
+const hostOf = (url: string): string =>
+  (url.replace(/^https?:\/\//i, "").split(/[/:?#]/)[0] ?? "").toLowerCase();
+
+/** Words of a scope's name that say it changes the account (as admit reads them). */
+const WRITE_WORDS = new Set([
+  "admin",
+  "ban",
+  "create",
+  "delete",
+  "edit",
+  "manage",
+  "modify",
+  "post",
+  "publish",
+  "remove",
+  "send",
+  "update",
+  "upload",
+  "write",
+]);
+
 /** A declared account on Steam or Twitch: OverCrow integrates them itself,
  * and refuses a widget's own account on their names, addresses or clients. */
 function integratedServiceAccount(context: Context): void {
@@ -520,19 +562,53 @@ function declaredAccountHints(context: Context): void {
         .filter((url) => typeof url === "string")
         .map(String),
     ].filter((url) => url !== "" && !servicesAddress(url));
-    const hosts = new Set(
-      urls.map((url) => (url.replace(/^https?:\/\//i, "").split(/[/:?#]/)[0] ?? "").toLowerCase()),
-    );
+    const name = String(declared.name ?? "");
+    if (declared.mode === "oauth" && typeof oauth.token === "string") {
+      const device = oauth.flow === "device";
+      const page = hostOf(String((device ? oauth.verify : oauth.authorize) ?? ""));
+      const token = hostOf(oauth.token);
+      finding(
+        "oauth-pages",
+        "low",
+        device
+          ? `${where}: the OAuth account ${name} has the player enter a code at ${page} and gets its tokens from ${token}.`
+          : `${where}: the OAuth account ${name} signs the player in at ${page} and gets its tokens from ${token}.`,
+        "The reviewer signs in with a test account and notes where each page ends and which application the consent page names: keep the sign-in page and the token endpoint at the service the account is for, never a page that redirects to an integrated service or to another provider, and ask for the declared scopes only.",
+      );
+      const scopes = Array.isArray(oauth.scopes) ? (oauth.scopes as Record<string, unknown>[]) : [];
+      for (const scope of scopes) {
+        const scopeName = String(scope?.name ?? "");
+        if (scope?.access === "read" && routeWords(scopeName).some((word) => WRITE_WORDS.has(word)))
+          finding(
+            "read-scope-writes",
+            "medium",
+            `${where}: the scope ${scopeName} is declared read, but its name says it changes the account.`,
+            "Declare write a scope that changes the account: the player is told so before granting it, and the reviewer checks what the scope allows.",
+          );
+      }
+    }
+    const hosts = new Set(urls.map(hostOf));
     for (const host of hosts) {
-      if (!readsAsService(host)) continue;
+      const decoded = idnaDecoded(host);
+      const service = serviceReadIn(host) ?? (decoded ? serviceReadIn(decoded) : undefined);
+      if (!service) continue;
+      const shown = decoded ? `${decoded} (${host})` : host;
       finding(
         "service-name-in-host",
         "medium",
-        `${where}: the address ${host} reads as Steam or Twitch.`,
-        "Use your service's own addresses: the reviewer checks that an address that reads as Steam or Twitch belongs to you.",
+        `${where}: the address ${shown} reads as ${service}.`,
+        `Use your service's own addresses: the reviewer checks that an address that reads as ${service} belongs to you.`,
       );
     }
-    const name = String(declared.name ?? "");
+    const id = String(declared.id ?? "");
+    const idService = serviceReadIn(id);
+    if (idService)
+      finding(
+        "service-name-in-id",
+        "medium",
+        `${where}: the ID ${id} reads as ${idService}.`,
+        `Name the account after your own service: an ID that reads as ${idService} misleads the review.`,
+      );
     if (readsAsAny(name, HOST_LABEL_WORDS) || CHECK_MARKS.test(name))
       finding(
         "service-label-name",
@@ -606,25 +682,47 @@ function speaksOfSecret(text: string): boolean {
   );
 }
 
-/** Routes of a service known to return a secret, whatever their words. */
-const SECRET_ROUTES: { origin: string; path: string }[] = [
-  { origin: "https://api.twitch.tv", path: "/helix/streams/key" },
-  { origin: "https://api.twitch.tv", path: "/helix/extensions/jwt/secrets" },
-  { origin: "https://streamlabs.com", path: "/socket/token" },
-  { origin: "https://streamlabs.com", path: "/legacy/token" },
-  // The ingestion key of a YouTube live stream (`cdn.ingestionInfo.streamName`).
-  { origin: "https://www.googleapis.com", path: "/youtube/v3/livestreams" },
-  { origin: "https://youtube.googleapis.com", path: "/youtube/v3/livestreams" },
-];
-
 /** Whether a route seems to create, list or return keys or tokens: by its
  * path, its segments, its parameter names and its `enum` values (each one
  * in its place in the path too). */
+/** Whether a path segment of `rule` may be `known` (lowercase): the
+ * segment itself, or a parameter that may be it (an `enum` that holds it,
+ * any type but an integer), as admit reads it. */
+function segmentMayBe(rule: NetworkRule, segment: string, known: string): boolean {
+  const name = /^\{(.+)\}$/.exec(segment)?.[1];
+  if (name === undefined) return segment.toLowerCase() === known;
+  const constraint = rule.pathParams?.[name];
+  if (constraint?.type === "enum")
+    return (Array.isArray(constraint.values) ? constraint.values : []).some(
+      (value) => String(value).toLowerCase() === known,
+    );
+  if (constraint?.type === "integer") return /^[0-9]+$/.test(known);
+  return true;
+}
+
+/** Whether `rule` may reach a route a service is known to answer secrets
+ * on: admit's table (cli/src/secret_routes.json), shipped in the content,
+ * compared segment by segment, whatever the case and a final slash. */
+function knownSecretRoute(origin: string, rule: NetworkRule): boolean {
+  const segments = String(rule.path ?? "")
+    .split("/")
+    .filter(Boolean);
+  return secretRoutes().some((route) => {
+    const known = route.path.split("/").filter(Boolean);
+    return (
+      route.origin === origin.toLowerCase() &&
+      known.length > 0 &&
+      segments.length >= known.length &&
+      segments
+        .slice(segments.length - known.length)
+        .every((segment, index) => segmentMayBe(rule, segment, known[index] ?? ""))
+    );
+  });
+}
+
 function returnsSecrets(origin: string, rule: NetworkRule): boolean {
   const path = String(rule.path ?? "");
-  const lower = path.toLowerCase();
-  if (SECRET_ROUTES.some((known) => known.origin === origin && lower.endsWith(known.path)))
-    return true;
+  if (knownSecretRoute(origin, rule)) return true;
   const texts = [path, ...path.split("/")];
   for (const params of [rule.pathParams, rule.queryParams]) {
     for (const [name, constraint] of Object.entries(params ?? {})) {

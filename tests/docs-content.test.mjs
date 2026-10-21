@@ -175,8 +175,15 @@ for (const name of readdirSync(examples).sort()) {
       assert.equal(packaged.status, 0, packaged.stdout + packaged.stderr);
       // The examples' IDs are under `nova`, the documentation's example
       // publisher: admitted for it, refused to anyone else.
-      const admitted = run(["admit", project, "--publisher", "nova", "--deny-warnings"]);
+      // `review.oauth_pages` points every OAuth account at the reviewer's
+      // checks: a step of the review, never a defect of the example. Any
+      // other warning is one.
+      const admitted = run(["admit", project, "--publisher", "nova", "--format", "json"]);
       assert.equal(admitted.status, 0, admitted.stdout + admitted.stderr);
+      const warnings = JSON.parse(admitted.stdout).diagnostics.filter(
+        (diagnostic) => diagnostic.code !== "review.oauth_pages",
+      );
+      assert.deepEqual(warnings, [], admitted.stdout);
     } finally {
       rmSync(work, { recursive: true, force: true });
     }
