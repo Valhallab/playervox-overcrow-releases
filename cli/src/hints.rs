@@ -1,9 +1,10 @@
 //! Review hints of `admit`: warnings that point a maintainer at an account
-//! or a route to look at closely. They refuse nothing, and they never
-//! tighten what the host's reader accepts: a widget admitted yesterday stays
-//! readable. Each one names what to look at, and its JSON pointer into
-//! `manifest.json` (`/permissions/network/3`) says which permission it is
-//! about.
+//! or a route to look at closely. They refuse nothing, unless
+//! `--deny-warnings` asks it (`review.oauth_pages`, a step of the review
+//! rather than a defect, never refuses), and they never tighten what the
+//! host's reader accepts: a widget admitted yesterday stays readable. Each
+//! one names what to look at, and its JSON pointer into `manifest.json`
+//! (`/permissions/network/3`) says which permission it is about.
 //!
 //! The codes are stable (the creator space shows them):
 //!
@@ -52,6 +53,10 @@ use crate::sanitize;
 
 /// The help every account hint ends with.
 const ACCOUNT_HELP: &str = "open each page of the account and note its final address; refuse a widget that sends the player to an integrated service (reviewer manual, accounts)";
+
+/// The hint of every declared OAuth account's sign-in pages: a step of
+/// the review, never a defect, so `--deny-warnings` does not refuse it.
+pub const OAUTH_PAGES: &str = "review.oauth_pages";
 
 /// The help of a declared OAuth account's sign-in pages.
 const OAUTH_HELP: &str = "sign in with a test account and note the final address of each page and the application its consent page names; refuse a step that ends at an integrated service or at a provider other than the account's origins, or scopes other than the declared ones (reviewer manual, OAuth accounts)";
@@ -290,7 +295,7 @@ fn account_hints(account: &Account, index: usize, out: &mut Vec<Diagnostic>) {
                 sanitize::line(host_of(oauth.verify.as_deref().unwrap_or_default()))
             ),
         };
-        out.push(hint("review.oauth_pages", &pointer, message, OAUTH_HELP));
+        out.push(hint(OAUTH_PAGES, &pointer, message, OAUTH_HELP));
         for scope in &oauth.scopes {
             if scope.access == ScopeAccess::Read
                 && words(&scope.name)

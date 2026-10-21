@@ -342,8 +342,9 @@ Options: `--publisher HANDLE`, `--domain DOMAIN` (repeatable), `--previous
 FILE`, `--package FILE`, `--source-map FILE` ([the code map](#the-code-map),
 written when the sources are admitted), `--out DIR` (writes the admitted
 package, its listing and a report into an empty directory), `--format
-json`, `--deny-warnings`. `admit <file.ocpkg> --listing FILE` checks an
-archive without its sources.
+json`, `--deny-warnings` (a warning refuses the widget, except
+`review.oauth_pages`: a step of the review, still reported).
+`admit <file.ocpkg> --listing FILE` checks an archive without its sources.
 
 `--listing required|optional` is for sources. `required`, the default,
 refuses sources without a valid `listing.json`. `optional` is the creator

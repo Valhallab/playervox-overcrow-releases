@@ -357,8 +357,9 @@ Options : `--publisher HANDLE`, `--domain DOMAIN` (répétable), `--previous
 FILE`, `--package FILE`, `--source-map FILE` ([la carte du
 code](#la-carte-du-code), écrite quand les sources sont admises), `--out
 DIR` (écrit le paquet admis, sa fiche et un rapport dans un dossier vide),
-`--format json`, `--deny-warnings`. `admit <file.ocpkg> --listing FILE`
-vérifie une archive sans ses sources. Codes de sortie : 0 admis, 1 refusé,
+`--format json`, `--deny-warnings` (un avertissement refuse le widget, sauf
+`review.oauth_pages` : une étape de la revue, toujours signalée).
+`admit <file.ocpkg> --listing FILE` vérifie une archive sans ses sources. Codes de sortie : 0 admis, 1 refusé,
 2 pour une erreur d’utilisation ou de fichier. Voir
 [vérifications et catalogue](publishing.md).
 

@@ -42,7 +42,7 @@ use std::process::ExitCode;
 use overcrow_widget_schema::limits::MAX_PACKAGE_BYTES;
 use overcrow_widget_schema::package::{hex, read_package, sha256};
 
-use crate::diag::{Diagnostic, Report};
+use crate::diag::{Diagnostic, Report, Severity};
 
 const USAGE: &str = "\
 overcrow-widget: create, check and package PlayerVox OverCrow widgets (widget API v1)
@@ -393,7 +393,7 @@ fn run_admit(arguments: &Arguments) -> Result<ExitCode, String> {
     };
     let outcome = admit::admit(&input, &options, &mut report);
     let deny_warnings = arguments.flag("--deny-warnings");
-    let refused = outcome.admitted.is_none() || (deny_warnings && report.warnings() > 0);
+    let refused = outcome.admitted.is_none() || (deny_warnings && refusing_warnings(&report) > 0);
     match format {
         Format::Json => println!("{}", sanitize::json(&outcome.report.to_string())),
         Format::Human => {
@@ -559,6 +559,20 @@ fn usage(message: &str) -> ExitCode {
     let message = publish::secret::redact(message);
     eprintln!("overcrow-widget: {message}\n\n{USAGE}");
     ExitCode::from(2)
+}
+
+/// The warnings `admit --deny-warnings` refuses: every one but
+/// `review.oauth_pages`, which points the reviewer at the sign-in pages of
+/// each OAuth account, a step of the review and never a defect. That hint
+/// is still reported, printed and counted.
+fn refusing_warnings(report: &Report) -> usize {
+    report
+        .diagnostics
+        .iter()
+        .filter(|diagnostic| {
+            diagnostic.severity == Severity::Warning && diagnostic.code != hints::OAUTH_PAGES
+        })
+        .count()
 }
 
 /// Prints the diagnostics and a summary; returns whether the command failed.

@@ -1,6 +1,7 @@
 //! `admit`'s review hints through the binary: warnings that point the
 //! maintainer at an account or a route, each with its JSON pointer, that
-//! refuse nothing.
+//! refuse nothing unless `--deny-warnings` asks it, and never the OAuth
+//! sign-in pages' step.
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -755,4 +756,75 @@ fn an_oauth_page_or_id_that_reads_as_a_service_is_pointed_at() {
         hints(&with_id("quest-log")),
         [hint("review.oauth_pages", account)]
     );
+}
+
+/// `admit --deny-warnings`: its exit status and its JSON report.
+fn admit_denying_warnings(permissions: Value) -> (Option<i32>, Value) {
+    let (_temporary, root) = project(permissions);
+    let output = cli(&[
+        "admit",
+        path(&root),
+        "--publisher",
+        "nova",
+        "--deny-warnings",
+        "--format",
+        "json",
+    ]);
+    let report: Value = serde_json::from_slice(&output.stdout)
+        .unwrap_or_else(|_| panic!("one JSON report: {}", text(&output.stdout)));
+    (output.status.code(), report)
+}
+
+/// `review.oauth_pages` is a step of the review, never a defect: with
+/// `--deny-warnings`, a widget with an OAuth account is still admitted, and
+/// the hint is still reported, printed and counted.
+#[test]
+fn deny_warnings_never_refuses_the_oauth_sign_in_pages_step() {
+    let account = "/permissions/accounts/0";
+    for flow in ["loopback", "device"] {
+        let (status, report) = admit_denying_warnings(quests(flow, |_| {}));
+        assert_eq!(status, Some(0), "{report}");
+        assert_eq!(hints(&report), [hint("review.oauth_pages", account)]);
+        let (_temporary, root) = project(quests(flow, |_| {}));
+        let output = cli(&[
+            "admit",
+            path(&root),
+            "--publisher",
+            "nova",
+            "--deny-warnings",
+        ]);
+        let printed = text(&output.stderr);
+        assert_eq!(output.status.code(), Some(0), "{printed}");
+        assert!(
+            printed.contains("warning[review.oauth_pages]")
+                && printed.contains("admit: 0 error(s), 1 warning(s)"),
+            "{printed}"
+        );
+    }
+}
+
+/// Every other review hint still refuses with `--deny-warnings`, beside the
+/// sign-in pages' step or alone.
+#[test]
+fn deny_warnings_refuses_every_other_review_hint() {
+    let account = "/permissions/accounts/0";
+    let (status, report) = admit_denying_warnings(quests("loopback", |declared| {
+        declared["oauth"]["scopes"] = json!([{"name": "user:write:chat", "access": "read"}]);
+    }));
+    assert_eq!(status, Some(1), "{report}");
+    assert_eq!(
+        hints(&report),
+        [
+            hint("review.oauth_pages", account),
+            hint("review.read_scope_writes", account)
+        ]
+    );
+    let (status, report) = admit_denying_warnings(tracker(|declared| {
+        declared["name"] = json!("Arena Official")
+    }));
+    assert_eq!(status, Some(1), "{report}");
+    assert_eq!(hints(&report), [hint("review.service_label_name", account)]);
+    // Without a warning, nothing changes.
+    let (status, report) = admit_denying_warnings(tracker(|_| {}));
+    assert_eq!(status, Some(0), "{report}");
 }
