@@ -347,6 +347,7 @@ test("a field that asks for a key, a token or a password is reported, not its lo
   );
   assert.ok(found.every((finding) => finding.severity === "high" && finding.file === "view.ocml"));
   assert.match(found[0].fix, /publication rule 3\.5/);
+  assert.match(found[0].fix, /permissions\.accounts/);
 });
 
 test("routes that return or trade secrets are reported", async () => {
@@ -389,6 +390,8 @@ test("routes that return or trade secrets are reported", async () => {
       path,
     );
   assert.ok(!tokens.some((message) => message.includes("/v1/weather")));
+  const tokenFixes = result.findings.filter((finding) => finding.rule === "token-route");
+  assert.ok(tokenFixes.every((finding) => /permissions\.accounts/.test(finding.fix)));
   const trades = result.findings.filter((finding) => finding.rule === "trade-route");
   assert.equal(trades.length, 2);
   assert.ok(trades.every((finding) => finding.severity === "high"));
@@ -638,9 +641,6 @@ test("a declared account that could fish a service's key is reported", async () 
   }
 });
 
-// Until an application release announces account-key, the fixes name no
-// manifest field that the published apps would refuse (the release lot
-// points them to permissions.accounts again).
 test("a declared OAuth account: its sign-in pages, a read scope that writes, its ID", async () => {
   const quests = (change) => {
     const value = {
@@ -773,7 +773,7 @@ test("a declared OAuth account: its sign-in pages, a read scope that writes, its
   );
 });
 
-test("the secret fix names no unreleased manifest field", async () => {
+test("the secret rule points to OverCrow's accounts", async () => {
   const key = ["api", "_key"].join("");
   const directory = widget("secret-fix", {
     "manifest.json": manifest({}),
@@ -782,7 +782,7 @@ test("the secret fix names no unreleased manifest field", async () => {
   const result = await auditWidget(directory);
   const finding = result.findings.find((f) => f.rule === "secret");
   assert.ok(finding);
-  assert.doesNotMatch(finding.fix, /permissions\.accounts/);
+  assert.match(finding.fix, /permissions\.accounts/);
 });
 
 test("a widget's own account on Steam or Twitch is reported, a named service is not", async () => {

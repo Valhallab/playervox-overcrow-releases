@@ -230,7 +230,7 @@ function networkRules(context: Context): void {
         message: withAccount
           ? `${where} (${route}) looks like a route that creates, lists or returns keys or tokens, and it carries the account's secret.`
           : `${where} (${route}) looks like a route that creates, lists or returns keys or tokens.`,
-        fix: "A widget never requests such a route: its answer would hand a secret to the widget's code, and the review refuses it. Remove the route.",
+        fix: "A widget never requests such a route: its answer would hand a secret to the widget's code, and the review refuses it. Remove the route; PlayerVox OverCrow handles keys and sign-in itself (permissions.accounts).",
       });
     }
     const first = firstOfRoute.get(route);
@@ -795,7 +795,7 @@ function asksForSecret(context: Context): void {
         file: "view.ocml",
         line: index + 1,
         message: "A field of the widget asks for a key, a token or a password.",
-        fix: "Never ask for a key, a token or a password in a widget field: every keystroke reaches the widget's code, and the field shows on a stream (publication rule 3.5).",
+        fix: "Never ask for a key, a token or a password in a widget field: every keystroke reaches the widget's code, and the field shows on a stream (publication rule 3.5). Declare the account in permissions.accounts: PlayerVox OverCrow asks for the key or the sign-in in its own panel and keeps it.",
       });
       break;
     }
@@ -902,7 +902,7 @@ function secrets(context: Context): void {
         file: file.path,
         line: index + 1,
         message: `${file.path} seems to hold ${what}.`,
-        fix: "Remove it, and revoke it at its provider: anyone can read a widget's package, and reviewers read its sources. A widget cannot keep a secret; use an API that needs none, or one the user's own account authorizes through OverCrow.",
+        fix: "Remove it, and revoke it at its provider: anyone can read a widget's package, and reviewers read its sources. A widget cannot keep a secret. To use the user's own key or sign-in at a service, declare the account in permissions.accounts: PlayerVox OverCrow keeps it and adds it to the routes that name the account.",
       });
     }
   }
