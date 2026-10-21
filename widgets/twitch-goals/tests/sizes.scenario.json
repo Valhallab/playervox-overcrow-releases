@@ -1,0 +1,169 @@
+{
+  "scenarioVersion": 1,
+  "name": "sizes",
+  "description": "One line at 150 and 170 px (ellipsis), Standard at 230 px, Full at 520 and 560 px.",
+  "host": {
+    "startAt": 1767225600000
+  },
+  "fixtures": {
+    "http": [
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/users",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"141981764\",\"login\":\"novalive\",\"display_name\":\"NovaLive\",\"type\":\"\",\"broadcaster_type\":\"affiliate\",\"description\":\"\",\"profile_image_url\":\"\",\"offline_image_url\":\"\",\"view_count\":0,\"created_at\":\"2019-05-01T10:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1284,\"data\":[{\"user_id\":\"70000001\",\"user_login\":\"nyxarcade\",\"user_name\":\"NyxArcade\",\"followed_at\":\"2025-12-31T23:56:00Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":null,\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      }
+    ]
+  },
+  "steps": [
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 150,
+          "height": 40
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "line-150",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 170,
+          "height": 40
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "line-170",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 230,
+          "height": 120
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "standard-230",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 520,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "full-520",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 560,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "full-560",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        },
+        "size": {
+          "width": 520,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "full-520-fr",
+        "fault": "none"
+      }
+    }
+  ]
+}

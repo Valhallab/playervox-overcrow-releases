@@ -1,0 +1,19 @@
+{
+  "author": "PlayerVox",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/twitch-goals",
+  "preview": "assets/preview.png",
+  "defaultLocale": "en",
+  "localizations": [
+    {
+      "locale": "en",
+      "name": "Live goals",
+      "description": "Your Twitch goal, your followers and the Hype Train, over your game. For streamers: your channel's current goal and its progress, your follower count and the latest one, and the Hype Train while it runs. Choose what to show. Updated every minute. Needs Twitch connected in PlayerVox OverCrow. Works with Twitch, read only. PlayerVox is not affiliated with Twitch."
+    },
+    {
+      "locale": "fr",
+      "name": "Objectifs du live",
+      "description": "Votre objectif Twitch, vos followers et le Hype Train, par-dessus votre jeu. Pour les streamers : l'objectif en cours de votre chaîne et sa progression, le total de followers et le dernier arrivé, et le Hype Train pendant qu'il roule. Choisissez quoi afficher. Mis à jour chaque minute. Il faut connecter Twitch dans PlayerVox OverCrow. Fonctionne avec Twitch, en lecture seule. PlayerVox n'est pas affilié à Twitch."
+    }
+  ]
+}

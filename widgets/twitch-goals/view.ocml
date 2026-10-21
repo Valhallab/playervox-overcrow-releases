@@ -1,0 +1,142 @@
+<component name="mark" props="src logo">
+  <if test={logo}><image class="glitch" src={src} label="Twitch" tooltip={t("source")}/></if>
+  <else><text class="source-word" tooltip={t("source")}>Twitch</text></else>
+</component>
+
+<component name="goalcard" props="g slim">
+  <box class={reached(g) ? "card goal done" : "card goal"}>
+    <box class="card-top">
+      <icon class={reached(g) ? "type-icon ok" : "type-icon"} name={typeIcon(g)} tooltip={goalType(g)}/>
+      <text class="card-title">{goalTitle(g)}</text>
+      <if test={slim}><text class="count"><span class="num">{num(g.current)}</span><span class="of">&#32;/&#32;{num(g.target)}</span></text></if>
+      <if test={carries(g.mark)}><mark src={g.mark} logo={showLogo(state.optionsVersion)}/></if>
+    </box>
+    <if test={slim}><progress class={reached(g) ? "slimbar done" : "slimbar"} value={g.current} max={g.target}/></if>
+    <else>
+      <box class="prog">
+        <progress class={reached(g) ? "bar done" : "bar"} value={g.current} max={g.target}/>
+        <text class="count"><span class="num">{num(g.current)}</span><span class="of">&#32;/&#32;{num(g.target)}</span></text>
+        <if test={reached(g)}><text class="reached">{t("reached-short")}</text></if>
+        <else><text class="pct">{percentOf(g.current, g.target)}</text></else>
+      </box>
+    </else>
+  </box>
+</component>
+
+<component name="hypecard" props="h">
+  <box class="card hype">
+    <box class="card-top">
+      <icon class="type-icon hype-icon" name="train-front"/>
+      <text class="hype-title">{t("hype")}</text>
+      <text class="hype-time">{hypeLeft(h, state)}</text>
+      <if test={markFor(state, state.optionsVersion, "hype") != ""}><mark src={glitch(state.theme)} logo={showLogo(state.optionsVersion)}/></if>
+    </box>
+    <box class="prog">
+      <text class="hype-level">{hypeLevel(h, false)}</text>
+      <progress class="bar hype-bar" value={h.progress} max={h.goal}/>
+      <text class="pct">{percentOf(h.progress, h.goal)}</text>
+    </box>
+  </box>
+</component>
+
+<box class={rootClass(state)}>
+  <if test={screen(state, state.optionsVersion) == "loading"}>
+    <box class="skeleton">
+      <box class="sk sk-short"/>
+      <if test={layout(state.optionsVersion) != "line"}><box class="sk sk-bar"/><text class="sk-note">{t("loading")}</text></if>
+    </box>
+  </if>
+
+  <else-if test={screen(state, state.optionsVersion) == "empty"}>
+    <box class="empty">
+      <icon class="empty-icon warn" name={emptyIcon(state)}/>
+      <text class="empty-body">{emptyText(state)}</text>
+    </box>
+  </else-if>
+
+  <else-if test={screen(state, state.optionsVersion) == "nothing"}>
+    <box class="empty">
+      <icon class="empty-icon" name="eye-off"/>
+      <if test={layout(state.optionsVersion) == "line"}><text class="empty-body">{t("nothing-shown")}</text></if>
+      <else>
+        <box class="empty-text">
+          <text class="empty-title">{t("nothing-shown")}</text>
+          <text class="empty-body">{t("nothing-shown-help")}</text>
+        </box>
+      </else>
+    </box>
+  </else-if>
+
+  <else-if test={layout(state.optionsVersion) == "line"}>
+    <box class="line">
+      <box class="line-top">
+        <if test={hype(state, state.optionsVersion)}>
+          <icon class="line-icon hype-icon" name="train-front" tooltip={lineTip(t("hype"))}/>
+          <text class="line-name">{t("hype")}</text>
+          <text class="line-level">{hypeLevel(hype(state, state.optionsVersion), true)}</text>
+          <if test={isStale(state)}><icon class="stale-icon" name={staleIcon(state)} tooltip={staleText(state)}/></if>
+          <text class="line-count">{hypeTime(hype(state, state.optionsVersion), state)}</text>
+        </if>
+        <else-if test={firstGoal(state, state.optionsVersion)}>
+          <icon class={reached(firstGoal(state, state.optionsVersion)) ? "line-icon ok" : "line-icon"} name={typeIcon(firstGoal(state, state.optionsVersion))} tooltip={lineTip(goalType(firstGoal(state, state.optionsVersion)))}/>
+          <text class="line-name">{goalTitle(firstGoal(state, state.optionsVersion))}</text>
+          <if test={isStale(state)}><icon class="stale-icon" name={staleIcon(state)} tooltip={staleText(state)}/></if>
+          <text class="line-count"><span class="num">{num(firstGoal(state, state.optionsVersion).current)}</span><span class="of">&#32;/&#32;{num(firstGoal(state, state.optionsVersion).target)}</span></text>
+        </else-if>
+        <else-if test={lineFollowers(state, state.optionsVersion)}>
+          <icon class="line-icon" name="users" tooltip={lineTip(t("followers-title"))}/>
+          <text class="line-name"><span class="num">{lineFollowersText(state, state.optionsVersion)}</span><span class="of">{lineFollowersUnit(state, state.optionsVersion)}</span></text>
+          <if test={isStale(state)}><icon class="stale-icon" name={staleIcon(state)} tooltip={staleText(state)}/></if>
+        </else-if>
+        <else>
+          <icon class="line-icon muted" name="target" tooltip={t("source")}/>
+          <text class="line-name muted">{t("no-goal")}</text>
+          <if test={isStale(state)}><icon class="stale-icon" name={staleIcon(state)} tooltip={staleText(state)}/></if>
+        </else>
+      </box>
+      <if test={hype(state, state.optionsVersion)}>
+        <progress class="line-bar hype-bar" value={hype(state, state.optionsVersion).progress} max={hype(state, state.optionsVersion).goal}/>
+      </if>
+      <else-if test={firstGoal(state, state.optionsVersion)}>
+        <progress class={reached(firstGoal(state, state.optionsVersion)) ? "line-bar done" : "line-bar"} value={firstGoal(state, state.optionsVersion).current} max={firstGoal(state, state.optionsVersion).target}/>
+      </else-if>
+    </box>
+  </else-if>
+
+  <else>
+    <if test={isStale(state)}>
+      <box class="status" tooltip={staleTip(state)}>
+        <icon class="stale-icon" name={staleIcon(state)}/>
+        <text class="status-text">{staleText(state)}</text>
+      </box>
+    </if>
+    <if test={hype(state, state.optionsVersion)}><hypecard h={hype(state, state.optionsVersion)}/></if>
+    <if test={!(layout(state.optionsVersion) == "compact" && hype(state, state.optionsVersion))}>
+      <for each={goals(state, state.optionsVersion)} as="g" key={g.id}>
+        <goalcard g={g} slim={layout(state.optionsVersion) == "standard" && hype(state, state.optionsVersion) != null}/>
+      </for>
+      <if test={noGoalCard(state, state.optionsVersion)}>
+        <box class="card nogoal">
+          <box class="card-top">
+            <icon class="type-icon muted" name="target"/>
+            <text class="card-title muted">{t("no-goal")}</text>
+            <if test={markFor(state, state.optionsVersion, "nogoal") != ""}><mark src={glitch(state.theme)} logo={showLogo(state.optionsVersion)}/></if>
+          </box>
+          <if test={layout(state.optionsVersion) != "compact"}><text class="help">{t("no-goal-help")}</text></if>
+        </box>
+      </if>
+    </if>
+    <if test={followersCard(state, state.optionsVersion)}>
+      <box class={followersClass(state)}>
+        <icon class="fol-icon" name="users"/>
+        <if test={countShown(state, state.optionsVersion)}>
+          <text class="fol-total"><span class="num">{num(state.followers.total)}</span><span class="of">&#32;{t("followers")}</span></text>
+        </if>
+        <if test={hasLast(state, state.optionsVersion)}>
+          <text class={countShown(state, state.optionsVersion) ? "fol-last" : "fol-last alone"}>{lastFollower(state, layout(state.optionsVersion) == "full")}</text>
+        </if>
+        <if test={markFor(state, state.optionsVersion, "followers") != ""}><mark src={glitch(state.theme)} logo={showLogo(state.optionsVersion)}/></if>
+      </box>
+    </if>
+  </else>
+</box>

@@ -30,6 +30,7 @@ const KEY_PATTERN = /ocw_pub_[A-Za-z0-9_-]+/g;
  */
 export const HELD = {
   "steam-achievements": "enters the catalog with the release that ships its host features",
+  "twitch-goals": "enters the catalog with the release that ships its host features",
 };
 /** Long enough for checks followed for 15 minutes, and the upload. */
 const CLI_TIMEOUT_SECONDS = 20 * 60;

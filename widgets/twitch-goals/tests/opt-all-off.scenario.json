@@ -1,0 +1,55 @@
+{
+  "scenarioVersion": 1,
+  "name": "opt-all-off",
+  "description": "Every option off from the start, Hype Train included: Nothing to show at once, no route called.",
+  "host": {
+    "startAt": 1767225600000,
+    "options": {
+      "goal-subs": false,
+      "goal-followers": false,
+      "goal-bits": false,
+      "goal-cheerers": false,
+      "show-followers": false,
+      "show-last-follower": false,
+      "show-hype": false
+    }
+  },
+  "fixtures": {
+    "http": []
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "Nothing to show"
+        ],
+        "noText": [
+          "Reading your goals…"
+        ],
+        "fault": "none",
+        "calls": [
+          {
+            "service": "account.subscribe",
+            "params": {
+              "id": "twitch"
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 120000
+      }
+    },
+    {
+      "expect": {
+        "calls": [],
+        "image": "opt-all-off",
+        "fault": "none"
+      }
+    }
+  ]
+}

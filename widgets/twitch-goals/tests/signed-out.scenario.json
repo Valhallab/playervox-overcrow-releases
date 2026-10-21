@@ -1,0 +1,54 @@
+{
+  "scenarioVersion": 1,
+  "name": "signed-out",
+  "description": "Twitch not connected (or connected without this widget's permissions): the host's panel, the widget reads nothing.",
+  "host": {
+    "startAt": 1767225600000,
+    "frame": true,
+    "accounts": {
+      "twitch": "disconnected"
+    }
+  },
+  "fixtures": {
+    "http": []
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "image": "signed-out",
+        "fault": "none",
+        "calls": [
+          {
+            "service": "account.subscribe",
+            "params": {
+              "id": "twitch"
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 120000
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "region": {
+          "numberFormat": "fr",
+          "dateOrder": "dmy"
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "signed-out-fr",
+        "fault": "none",
+        "calls": []
+      }
+    }
+  ]
+}

@@ -22,6 +22,7 @@ lisez-les, copiez-les et servez-vous-en comme point de départ.
 | **Succès Steam** | Vos succès Steam du jeu en cours : progression, derniers débloqués et prochains à obtenir, avec leur rareté. Choisissez quoi afficher, suivez un succès. Mis à jour chaque minute. Il faut connecter Steam dans PlayerVox OverCrow et donner le lien de votre profil. Votre clé Steam gère aussi vos échanges : ce widget ne fait que lire et la clé ne va qu'à api.steampowered.com. Révocation : steamcommunity.com/dev/apikey. PlayerVox n'est pas affilié à Valve Corporation. | `com.playervox.overcrow.steam.achievements` | `accounts`, `network`, `storage` | [widgets/steam-achievements/](../../../widgets/steam-achievements/) |
 | **Chronomètre** | Un chronomètre au centième de seconde, démarré, mis en pause et réinitialisé par ses boutons ou les raccourcis de l’hôte. | `com.playervox.overcrow.stopwatch` | `stopwatch.read`, `stopwatch.control` | [widgets/stopwatch/](../../../widgets/stopwatch/) |
 | **Chat Twitch** | Lisez et envoyez des messages dans le chat Twitch public de votre choix : vos chaînes favorites, l’historique défilant avec emotes et réponses en mode interactif, les derniers messages qui s’effacent en mode passif. Nécessite votre compte Twitch. | `com.playervox.overcrow.twitch.chat` | `twitch.chat.read`, `twitch.chat.compose` | [widgets/twitch-chat/](../../../widgets/twitch-chat/) |
+| **Objectifs du live** | Votre objectif Twitch, vos followers et le Hype Train, par-dessus votre jeu. Pour les streamers : l'objectif en cours de votre chaîne et sa progression, le total de followers et le dernier arrivé, et le Hype Train pendant qu'il roule. Choisissez quoi afficher. Mis à jour chaque minute. Il faut connecter Twitch dans PlayerVox OverCrow. Fonctionne avec Twitch, en lecture seule. PlayerVox n'est pas affilié à Twitch. | `com.playervox.overcrow.twitch.goals` | `accounts`, `network` | [widgets/twitch-goals/](../../../widgets/twitch-goals/) |
 | **Marché Warframe** | Recherche les objets PC publics dans un catalogue en cache, affiche les vendeurs et acheteurs en ligne d’un objet dans deux onglets et copie un message d’échange sur un clic. | `com.playervox.overcrow.warframe.market` | `network`, `storage`, `clipboardWrite` | [widgets/warframe-market/](../../../widgets/warframe-market/) |
 <!-- /generated:widgets -->
 
@@ -55,6 +56,7 @@ lisez-les, copiez-les et servez-vous-en comme point de départ.
 | maintenir une longue liste défilante sur sa fin, envoyer un message | Chat Twitch |
 | appeler une API HTTP, la mettre en cache dans le stockage, copier dans le presse-papiers | Marché Warframe |
 | utiliser un service connecté (Steam) : aucune clé dans le widget, une grande réponse lue par tranches, des images d’un CDN avec replis | Succès Steam |
+| utiliser un service connecté OAuth (Twitch) : scopes dans le manifeste, routes lues seulement quand elles s’affichent, un décompte local | Objectifs du live |
 
 Marché Warframe n’est pas un widget intégré : widget PlayerVox du catalogue,
 installé à la demande, il montre des routes réseau avec une limite de
