@@ -9,6 +9,8 @@ import { dirname, join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 
+import { HELD } from "../scripts/submit-widgets.mjs";
+
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const script = join(root, "scripts", "submit-widgets.mjs");
 const KEY = "ocw_pub_q9XeT4mVb2LzR8nKc1HwY6sJ0pAfD3gUa7Bc-_dWxyz";
@@ -292,15 +294,19 @@ test("the workflow submits from main only, with the key in one step", () => {
   }
 });
 
-test("a held widget is never submitted, and the run says why", () => {
+test("the widgets of this release are no longer held: they are submitted", () => {
+  // The release that ships the accounts' host features lets Steam achievements
+  // and Live goals into the creator space; a future release may hold others.
+  assert.deepEqual(HELD, {});
   const setup = scratch({ clock: PUBLISHED, "steam-achievements": IN_REVIEW, "twitch-goals": IN_REVIEW });
   try {
-    const { status, stdout, calls, summary } = run(setup);
+    const { status, stdout, calls } = run(setup);
     assert.equal(status, 0, stdout);
-    assert.deepEqual(calls.map((call) => call.args[1].split("/").pop()), ["clock"]);
-    assert.match(stdout, /^steam-achievements +1\.0\.0 +held: enters the catalog with the release that ships its host features$/m);
-    assert.match(summary, /\| steam-achievements \| 1\.0\.0 \| held: enters the catalog with the release that ships its host features \|/);
-    assert.match(stdout, /^twitch-goals +1\.0\.0 +held: enters the catalog with the release that ships its host features$/m);
+    assert.deepEqual(
+      calls.map((call) => call.args[1].split("/").pop()).sort(),
+      ["clock", "steam-achievements", "twitch-goals"],
+    );
+    assert.doesNotMatch(stdout, /held:/);
   } finally {
     rmSync(setup.folder, { recursive: true, force: true });
   }
