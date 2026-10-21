@@ -84,7 +84,7 @@ du SDK que l’outil embarque : lancez `npm install` dans le projet. Dans un
 autre projet, installez le SDK avec :
 
 ```sh
-npm install --save-dev --save-exact @overcrow/sdk@1.0.0
+npm install --save-dev --save-exact @overcrow/sdk@1.1.0
 ```
 
 Gardez la version que l’outil embarque (`overcrow-widget --version`).

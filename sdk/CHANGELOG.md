@@ -7,9 +7,10 @@ version it was built with, so a new SDK never changes a published widget.
 An incompatible change would be 2.0.0. Every 1.x release needs the VM's
 runtime surface 0.1, which OverCrow keeps for widget API v1.
 
-## Unreleased
+## 1.1.0
 
-Third-party accounts (the version number is chosen at release):
+Ships with PlayerVox OverCrow 0.8.0-beta.1, the first release that runs
+widgets with third-party accounts:
 
 - `account.subscribe` and `account.connect` (`account`, `AccountServices`):
   the state of an account the manifest declares in `permissions.accounts`,

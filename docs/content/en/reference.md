@@ -42,7 +42,7 @@ together; the pages below are the ones to keep open while you write.
 ## Versions
 
 These pages describe widget API v1 (`"apiVersion": 1` in the manifest) and
-`@overcrow/sdk` 1.0.
+`@overcrow/sdk` 1.1.
 
 ## Specifications for implementers
 

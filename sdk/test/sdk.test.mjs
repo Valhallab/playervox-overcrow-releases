@@ -10,7 +10,7 @@ const settle = () => new Promise((resolve) => setImmediate(resolve));
 const lastCall = () => vm.calls[vm.calls.length - 1];
 
 test("the version and the runtime surface are exported", () => {
-  assert.equal(overcrow.SDK_VERSION, "1.0.0");
+  assert.equal(overcrow.SDK_VERSION, "1.1.0");
   assert.equal(overcrow.RUNTIME_SURFACE, "0.1");
 });
 

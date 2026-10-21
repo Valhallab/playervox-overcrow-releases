@@ -9,7 +9,7 @@
     "package": "overcrow-widget package"
   },
   "devDependencies": {
-    "@overcrow/sdk": "1.0.0",
+    "@overcrow/sdk": "1.1.0",
     "typescript": "6.0.3"
   }
 }

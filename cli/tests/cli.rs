@@ -125,7 +125,7 @@ fn every_template_checks_packages_and_reads_back() {
         validate_package_style(&package).expect("style accepted");
         assert_eq!(package.manifest.id, format!("yourhandle.{template}"));
         let logic = package.file("logic.js").expect("logic.js");
-        assert!(logic.starts_with(b"/*! @overcrow/sdk 1.0.0 | MIT-0 |"));
+        assert!(logic.starts_with(b"/*! @overcrow/sdk 1.1.0 | MIT-0 |"));
         assert!(
             package.file("view.ocml").is_none(),
             "the view source is not shipped"
@@ -138,7 +138,7 @@ fn every_template_checks_packages_and_reads_back() {
             report.contains(&format!("yourhandle.{template} 0.1.0")),
             "{report}"
         );
-        assert!(report.contains("@overcrow/sdk 1.0.0"));
+        assert!(report.contains("@overcrow/sdk 1.1.0"));
         assert!(report.contains("ledger.json"));
     }
 }

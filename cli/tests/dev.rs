@@ -297,7 +297,7 @@ fn doctor_reports_the_overlay_and_the_project() {
     assert_eq!(facts["type"], "doctor");
     assert_eq!(facts["development"]["active"], false);
     assert_eq!(facts["project"], true);
-    assert_eq!(facts["sdk"], "1.0.0");
+    assert_eq!(facts["sdk"], "1.1.0");
     assert_eq!(doctor(&["--deny-warnings"]).status.code(), Some(1));
 
     // With an overlay listening: its version.

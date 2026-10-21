@@ -1,6 +1,6 @@
 # Référence du SDK
 
-`@overcrow/sdk` 1.0 est l’API de la logique d’un widget PlayerVox OverCrow :
+`@overcrow/sdk` 1.1 est l’API de la logique d’un widget PlayerVox OverCrow :
 l’état, les données de l’hôte, les services, les minuteurs, le dessin, le
 menu d’options, les messages, les journaux et le formatage. Cette page liste
 tous les exports du paquet. [La logique](logic.md) et
@@ -11,7 +11,7 @@ projet créé par `overcrow-widget init` le liste déjà : lancez-y
 `npm install`.
 
 ```sh
-npm install --save-dev --save-exact @overcrow/sdk@1.0.0
+npm install --save-dev --save-exact @overcrow/sdk@1.1.0
 ```
 
 <!-- source: widgets/clock/logic.ts -->
@@ -37,7 +37,7 @@ chaque paramètre et chaque valeur qui sort de la VM.
 
 | Export | Nature | Résumé |
 | --- | --- | --- |
-| `SDK_VERSION` | constante | `"1.0.0"`. |
+| `SDK_VERSION` | constante | `"1.1.0"`. |
 | `RUNTIME_SURFACE` | constante | `"0.1"`, la version de l’interface intégrée de la VM dont ce SDK a besoin. |
 
 ## État et vue
