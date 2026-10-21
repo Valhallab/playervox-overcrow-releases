@@ -22,14 +22,20 @@ That is the whole use of a service in the Session widget: it declares the
 
 ## Declare, then ask the user
 
-Two kinds of authority exist, both declared in `permissions` of
+Three kinds of authority exist, all declared in `permissions` of
 [the manifest](manifest.md#permissions):
 
 - four **permissions** for general services: `network`, `storage`,
   `clipboardWrite` and `gameEvents`;
 - **capabilities**, listed under `permissions.capabilities`, for the data
-  and actions of PlayerVox OverCrow itself and of the user's accounts: the
-  frame rate, the media player, notes, PlayerVox ratings, Twitch chat…
+  and actions of PlayerVox OverCrow itself and of the user's PlayerVox and
+  Twitch accounts: the frame rate, the media player, notes, PlayerVox
+  ratings, Twitch chat…
+- one **account**, under `permissions.accounts`: the user's account on
+  another service, or an integrated service such as Steam or Twitch, whose
+  key or token PlayerVox OverCrow adds to the network rules that name it.
+  See [third-party accounts](accounts.md) and
+  [integrated services](integrated-services.md).
 
 <!-- source: docs/content/examples/weather/manifest.json -->
 ```json
@@ -158,7 +164,8 @@ subscription that fails delivers the same error in its last update.
 | `invalid_request` | The parameters are not what the service takes: a member is missing or unknown, has the wrong type or is out of bounds. |
 | `permission_denied` | The permission or capability is not declared in the manifest, or the user has not granted it. For `http.fetch`, no network rule allows this URL and method. A write through a form can also get it from the account's provider, for a write it does not allow. |
 | `gesture_required` | The service can be called only during a user action, and this call was not made while one was handled, or that action already allowed another call. |
-| `not_connected` | The service needs the user's PlayerVox or Twitch account, which is not connected at the moment. |
+| `not_connected` | The service needs an account of the user that is not connected at the moment: PlayerVox, an integrated service (Steam, Twitch) or the account the widget declares. |
+| `account_refused` | The service refused the account's key or sign-in on this route (a status of the account's `refusedStatus`). The account is now `refused` or `expired`, and PlayerVox OverCrow asks the user for a new key or to sign in again. |
 | `stale_context` | What the call was about changed before the answer: another game, another account, another media player, an object deleted meanwhile. Read the current state again. |
 | `unavailable` | PlayerVox OverCrow's source for this data failed, or cannot act right now. A subscription that ends with it can be started again later. |
 | `busy` | Too much is in progress: a confirmation is already open, a queue or the budget of network responses is full, or the provider asks to wait. Try again later. |
@@ -245,6 +252,7 @@ The tables below say, for each service, when it can be called.
 | Permission | Meaning | With a sensitive capability |
 | --- | --- | --- |
 | `network` | Exact HTTPS routes reachable through the host broker, at most 32 rules. | manifest rejected |
+| `accounts` | The user's account on one third-party service, kept by the host and added to the network rules that name it; at most 1. | manifest rejected |
 | `storage` | Host-managed key-value storage partitioned by widget ID, within 256 KiB. | process-lifetime data only |
 | `clipboardWrite` | Text clipboard writes, during a user action in Interactive mode. | manifest rejected |
 | `gameEvents` | Named semantic game events `overcrow.game.<name>.v1`, at most 32. | allowed |
@@ -314,7 +322,12 @@ parameter, and only the declared query parameters are accepted.
 | `pathParams` | `name → ParameterConstraint` | no | Constraint of every `{name}` segment, at most 8. |
 | `queryParams` | `name → ParameterConstraint` | no | Allowed query parameters, at most 16, each optionally `required`; others are refused. |
 | `maxResponseBytes` | integer 1 to 3145728 | no | Largest response body of this route, from 1 to 3 MiB; 1 MiB when absent. Not for `as: "image"`, which keeps 1 MiB. When several rules allow a request, the largest bound applies. |
+| `account` | identifier ≤ 32 bytes | no | `id` of the declared account: the host adds the user's secret to the requests this rule allows, and to no other. Two rules of the same origin and method that may match one URL name the same account, or none; no rule targets a declared OAuth endpoint. |
 <!-- /generated:network-rule-fields -->
+
+`account` names the [third-party account](accounts.md) or the
+[integrated service](integrated-services.md) whose key or token
+PlayerVox OverCrow adds to the requests of that rule, and of no other.
 
 Each path and query parameter has a constraint:
 
@@ -334,7 +347,7 @@ widget's process. The broker:
 - refuses any URL that no rule allows (`permission_denied`), before any
   DNS query;
 - follows no redirection, and sends no cookie, credential or proxy
-  header;
+  header, except the key or token of the account a rule names;
 - refuses local and private addresses, so a widget cannot reach the user's
   router or another program of the machine;
 - bounds each exchange: 256 KiB for a request body, 30 seconds in all, and
@@ -347,7 +360,9 @@ bind to an `image` element instead of the bytes. A string `body` is sent as
 `text/plain` and any other value as JSON, unless `contentType` says
 otherwise. A `GET` carries no body: a `body` or a `contentType` with it
 fails with `invalid_request`. An HTTP error status is not a failure of the call: check
-`status`.
+`status`. On a rule that names an account, the call fails with
+`not_connected` while the account is not connected, and with
+`account_refused` when the service refuses its key or token.
 
 <!-- source: docs/content/examples/weather/logic.ts -->
 ```ts
@@ -418,7 +433,9 @@ attribute is copied by PlayerVox OverCrow itself, and needs no permission.
 
 A capability gives access to data or actions that PlayerVox OverCrow holds:
 what the game's use of the machine, the media player, the user's notes,
-their PlayerVox and Twitch accounts.
+their PlayerVox and Twitch accounts. The user's account on another service
+is not a capability: a widget declares it in `permissions.accounts`
+([third-party accounts](accounts.md)).
 
 <!-- generated:capability-list -->
 | Capability | Sensitive | Account | Meaning |
@@ -494,6 +511,10 @@ A widget that declares one:
 So what such a widget reads cannot leave the machine through it. If your
 widget needs both an HTTP API and a sensitive capability, make two widgets.
 
+A widget with an account is confined too: it declares no sensitive
+capability and no `clipboardWrite`, and every network rule targets one of
+the account's origins. See [confinement](accounts.md#confinement).
+
 ### Accounts
 
 Some capabilities need the user's PlayerVox or Twitch account. The
@@ -502,6 +523,12 @@ tokens and shows its own panel over the widget while the account is signed
 out. A widget never sees a token; it receives only the data its capability
 describes, and its calls fail with `not_connected` while the account is
 not connected.
+
+A widget can also use the user's own account on another service, or an
+integrated service such as Steam, through its network rules: PlayerVox
+OverCrow keeps the key or the sign-in and adds it only to the routes that name the account.
+See [third-party accounts](accounts.md) and
+[integrated services](integrated-services.md).
 
 ### Data that changes
 

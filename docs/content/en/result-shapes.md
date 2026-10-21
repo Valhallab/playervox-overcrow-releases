@@ -312,6 +312,14 @@ One chat message. `{ id, author, color, badges, fragments, reply, deleted, recei
 | `deleted` | boolean | Deleted by a moderator. |
 | `receivedAt` | integer | When the host received the message, in Unix milliseconds of the host's clock: compare it with `Date.now()` to age a message (the fade of Passive mode), also after a `reset`. |
 
+### `AccountStatus`
+
+State of a third-party account the widget declares. `{ state }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `state` | `signed_out` \| `pending` \| `connected` \| `refused` \| `expired` | State of the account; connection is drawn by the host. |
+
 ### `TwitchChat`
 
 Twitch chat state. `{ account, channel, joinState, failure, favorites, canSend, generation, reset, messages, removed, skipped }`

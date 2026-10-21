@@ -448,20 +448,24 @@ const LIMIT_GROUPS = {
   ],
 };
 
-// Defined by the schema, not shipped by any released application yet:
-// third-party accounts (`account-key`, `account-oauth`) and integrated
-// services (`service-steam`, `service-twitch`). Only hidden pages
-// show them; the release removes the entries. Each entry must still exist,
-// or the build fails.
+// Defined by the schema, not shipped by any released application yet. Only
+// hidden pages show them; the release that ships them removes the entries.
+// Each entry must still exist, or the build fails. Empty: everything the
+// schema defines is released.
 export const UNRELEASED = {
   // `<section>:<field>` of a fields table.
-  fields: new Set(["Manifest > Permissions:accounts", "Permissions > Network rules:account"]),
-  permissions: new Set(["accounts"]),
-  services: new Set(["account.subscribe", "account.connect"]),
-  errors: new Set(["account_refused"]),
-  shapes: new Set(["AccountStatus"]),
-  limitGroups: new Set(["accounts"]),
+  fields: new Set(),
+  permissions: new Set(),
+  services: new Set(),
+  errors: new Set(),
+  shapes: new Set(),
+  limitGroups: new Set(),
 };
+
+// The services and the result shape of third-party accounts, which their
+// own page (accounts.md) lists again.
+const ACCOUNT_SERVICES = new Set(["account.subscribe", "account.connect"]);
+const ACCOUNT_SHAPES = new Set(["AccountStatus"]);
 
 /** Files of the pages written ahead of their release. */
 const HIDDEN_FILES = new Set(
@@ -1145,15 +1149,15 @@ const GENERATORS = {
   capabilities,
   "capability-list": capabilityList,
   "network-rule-fields": (t) => fields(t, "Permissions > Network rules"),
-  // Third-party accounts (hidden pages until their release).
+  // Third-party accounts and integrated services.
   "account-fields": (t) => fields(t, "Permissions > Accounts"),
   "account-send": (t) => fields(t, "Permissions > AccountSend"),
   "account-key": (t) => fields(t, "Permissions > AccountKey"),
   "key-format": (t) => fields(t, "Permissions > KeyFormat"),
   "account-oauth": (t) => fields(t, "Permissions > AccountOAuth"),
   "account-scope": (t) => fields(t, "Permissions > AccountScope"),
-  "account-services": (t) => services(t, UNRELEASED.services),
-  "account-shapes": (t) => resultShapes(t, UNRELEASED.shapes),
+  "account-services": (t) => services(t, ACCOUNT_SERVICES),
+  "account-shapes": (t) => resultShapes(t, ACCOUNT_SHAPES),
   "integrated-service-fields": (t) => fields(t, "Permissions > IntegratedServiceAccount"),
   "integrated-services": integratedServices,
   "integrated-scopes": integratedScopes,

@@ -191,14 +191,9 @@ for (const name of readdirSync(examples).sort()) {
 }
 
 test("public pages show nothing of what is not released yet", async () => {
-  const { UNRELEASED } = await import("../scripts/build-docs-content.mjs");
-  const words = [
-    ...UNRELEASED.services,
-    ...UNRELEASED.errors,
-    ...UNRELEASED.shapes,
-    "permissions.accounts",
-    "account:<id>",
-  ];
+  const { UNRELEASED, render, staleUnreleased } = await import("../scripts/build-docs-content.mjs");
+  assert.deepEqual(staleUnreleased(), [], "UNRELEASED names only what the schema defines");
+  const words = [...UNRELEASED.services, ...UNRELEASED.errors, ...UNRELEASED.shapes];
   for (const page of pages.pages.filter((entry) => entry.hidden !== true)) {
     for (const locale of pages.locales) {
       const text = readFileSync(join(content, locale, page.file), "utf8");
@@ -207,4 +202,21 @@ test("public pages show nothing of what is not released yet", async () => {
       }
     }
   }
+  // The sets may be empty between releases: the mechanism still works. A
+  // service listed there leaves the regions of a public page, and a name the
+  // schema does not define is caught.
+  const file = join(content, "en", "service-reference.md");
+  const text = readFileSync(file, "utf8");
+  const heading = "### `account.connect`";
+  assert.ok(text.includes(heading), `${file} lists account.connect`);
+  UNRELEASED.services.add("account.connect");
+  UNRELEASED.errors.add("no_such_code");
+  try {
+    assert.ok(!render(file, "en", text).includes(heading), "an unreleased service shows on a public page");
+    assert.deepEqual(staleUnreleased(), ["errors: no_such_code"]);
+  } finally {
+    UNRELEASED.services.delete("account.connect");
+    UNRELEASED.errors.delete("no_such_code");
+  }
+  assert.ok(render(file, "en", text).includes(heading));
 });

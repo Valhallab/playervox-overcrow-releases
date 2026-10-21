@@ -16,6 +16,7 @@ ensemble ; celles qui suivent sont à garder ouvertes pendant que vous
 | Quelles fonctions `@overcrow/sdk` exporte-t-il ? | [Référence du SDK](sdk.md) |
 | Comment formater les heures, les dates et les nombres ? | [Heure, dates et nombres](sdk.md#heure-dates-et-nombres) |
 | Qu’autorise chaque permission et chaque capability ? | [Services et permissions](services.md) |
+| Comment un widget utilise-t-il le compte du joueur sur un autre service ? | [Comptes tiers](accounts.md), [services intégrés](integrated-services.md) |
 | Quels sont les paramètres et le résultat d’un service ? | [Référence des services](service-reference.md), [formes de résultat](result-shapes.md) |
 | Que signifie un code d’erreur ? | [Erreurs](services.md#erreurs) |
 | Quels champs un intent d’écriture prend-il ? | [Les intents](forms.md#les-intents) |
@@ -39,7 +40,7 @@ ensemble ; celles qui suivent sont à garder ouvertes pendant que vous
   de `@overcrow/sdk` y figure.
 - Chaque **exemple de code** de ces pages est un extrait d’un projet que
   l’outil en ligne de commande vérifie, empaquette et admet à chaque
-  changement : un template, un widget de référence ou l’un des deux
+  changement : un template, un widget de référence ou l’un des
   exemples.
 
 ## Versions

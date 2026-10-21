@@ -314,6 +314,14 @@ Un message de chat. `{ id, author, color, badges, fragments, reply, deleted, rec
 | `deleted` | booléen | Supprimé par un modérateur. |
 | `receivedAt` | entier | Moment où l’hôte a reçu le message, en millisecondes Unix de l’horloge de l’hôte : comparez-le à `Date.now()` pour connaître l’âge d’un message (l’estompage du mode passif), y compris après un `reset`. |
 
+### `AccountStatus`
+
+État d’un compte tiers que le widget déclare. `{ state }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `state` | `signed_out` \| `pending` \| `connected` \| `refused` \| `expired` | État du compte ; la connexion est dessinée par l’hôte. |
+
 ### `TwitchChat`
 
 État du chat Twitch. `{ account, channel, joinState, failure, favorites, canSend, generation, reset, messages, removed, skipped }`

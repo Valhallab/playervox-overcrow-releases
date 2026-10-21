@@ -333,5 +333,5 @@ State of a third-party account the widget declares. `{ state }`
 
 | Code | Meaning |
 | --- | --- |
-| `not_connected` | The service needs an account of the user (PlayerVox, Twitch or the one the widget declares) that is not connected. |
+| `not_connected` | The service needs an account of the user that is not connected at the moment: PlayerVox, an integrated service (Steam, Twitch) or the account the widget declares. |
 | `account_refused` | The service refused the account's key or sign-in on this route. The account is now `refused` or `expired`, and PlayerVox OverCrow asks the user for a new key or to sign in again. |

@@ -75,7 +75,7 @@ const state = initState({ values: [50] as number[] });
 | `HostKey` | type | Le nom d’un membre de `HostData`. |
 | `HostListener` | type | Un écouteur de `onHost`. |
 | `Viewport` | interface | `{ width, height }`, en pixels logiques. |
-| `hasGrant(capability)` | fonction | Indique si l’utilisateur a accordé une capability. |
+| `hasGrant(grant)` | fonction | Indique si l’utilisateur a accordé une capability, ou un compte tiers (`account:<id>`). |
 | `option(id, fallback)` | fonction | La valeur enregistrée d’une ligne du menu d’options, ou `fallback` quand il n’y en a pas ou qu’elle est d’un autre type. |
 | `MenuValue` | type | `boolean \| number \| string`. |
 | `Widened<T>` | type | Le type du résultat de `option` : une valeur de repli `false` donne `boolean`. |
@@ -119,6 +119,7 @@ l’utilisateur.
 | `playervox` | espace de noms | `score.subscribe`, `rating.subscribe`, `reviews.subscribe`, `reviews.page({ page?, followedOnly? })`. |
 | `journal` | espace de noms | `subscribe(listener)` ; `page({ cursor? })` ; `delete({ session })` pendant une action de l’utilisateur, après confirmation de celui-ci. |
 | `twitch` | espace de noms | `chat.subscribe(listener)` ; `chat.join({ channel })`, `chat.leave()`, `chat.favorite({ channel, favorite })` pendant une action de l’utilisateur. |
+| `account` | espace de noms | `subscribe({ id }, listener)` ; `connect({ id })` pendant une action de l’utilisateur. Un [compte tiers](accounts.md) que le manifeste déclare, ou un [service intégré](integrated-services.md) qu’il nomme. |
 | `call(service, params?)` | fonction | Appelle par son nom n’importe quel service qui répond une seule fois. |
 | `subscribe(service, params, listener)` | fonction | S’abonne par son nom à n’importe quel service d’abonnement. |
 | `ServiceError` | classe | Le rejet d’un appel en échec : `code` est un `ServiceErrorCode`. |
@@ -170,7 +171,7 @@ comme le demande `as`. Un `GET` ne porte pas de corps : un `body` ou un
 donne `null`, `""` ou un `ArrayBuffer` vide.
 
 Les types des autres espaces de noms sont générés à partir du schéma :
-`ClipboardServices`, `FpsServices`, `GameEventsServices`,
+`AccountServices`, `ClipboardServices`, `FpsServices`, `GameEventsServices`,
 `JournalServices`, `MediaServices`, `NotesServices`, `PlayervoxServices`,
 `SessionServices`, `StopwatchServices`, `StorageServices`,
 `TelemetryServices` et `TwitchServices`. Chaque service est décrit dans la
@@ -264,8 +265,9 @@ donc toujours à ce que PlayerVox OverCrow accepte.
 | `ServiceName`, `CallServiceName`, `SubscribeServiceName`, `GestureServiceName` | Les noms de service : tous, ceux qui répondent une seule fois, les abonnements, et ceux qui demandent une action de l’utilisateur. |
 | `ServiceParamsMap`, `ServiceResultMap` | Les paramètres et le résultat de chaque service. |
 | `ServiceErrorCode`, `ServiceErrorPayload` | Les [codes d’erreur](services.md#erreurs), et la valeur `{ code }` qui en porte un. |
-| `Session`, `Telemetry`, `Fps`, `Stopwatch`, `Media`, `Notes`, `Note`, `NoteItem`, `CreatedNote`, `Score`, `Rating`, `RatingState`, `Review`, `ReviewsState`, `ReviewsPage`, `JournalState`, `JournalPage`, `JournalSession`, `TwitchChat`, `ChatMessage`, `ChatFragment`, `GameEvent`, `HttpResponse` | Les [formes de résultat](result-shapes.md). |
+| `Session`, `Telemetry`, `Fps`, `Stopwatch`, `Media`, `Notes`, `Note`, `NoteItem`, `CreatedNote`, `Score`, `Rating`, `RatingState`, `Review`, `ReviewsState`, `ReviewsPage`, `JournalState`, `JournalPage`, `JournalSession`, `TwitchChat`, `ChatMessage`, `ChatFragment`, `AccountStatus`, `GameEvent`, `HttpResponse` | Les [formes de résultat](result-shapes.md). |
 | `Permission`, `Capability`, `SensitiveCapability`, `CapabilityServices`, `PermissionServices` | Les permissions et les capabilities du manifeste, et les services que chacune autorise. |
+| `AccountGrant` | L’accord d’un compte tiers, `account:<id>` : `hasGrant` le prend, `host.grants` le liste. |
 | `Locale`, `Theme`, `Mode`, `Region`, `NumberFormat`, `DateOrder` | Les valeurs de `host`. |
 | `EventName`, `GestureEventName`, `EventDetailMap`, `NamedKey` | Les événements de la vue, ceux qui sont des actions de l’utilisateur, leurs détails, et les touches nommées de `keydown`. |
 | `DrawCommand`, `DrawCommandName`, `Color` | Les commandes et les couleurs du canvas. |
@@ -299,5 +301,7 @@ nombre : `MAX_TIMERS`, `MIN_TIMER_INTERVAL_MS`, `MAX_SERVICE_CALLS_IN_FLIGHT`,
 Un second point d’entrée, jamais assemblé dans un widget, remplace
 PlayerVox OverCrow dans un test unitaire de la logique : `installRuntime()`
 fournit un temps virtuel, fait aboutir les appels de service et pousse les
-valeurs des abonnements. Voir les [tests
+valeurs des abonnements. Il prend l’état de chaque compte dans `accounts`, et
+`setAccount(id, state)` envoie un nouvel état aux abonnements
+`account.subscribe` du widget. Voir les [tests
 unitaires](testing.md#tests-unitaires).

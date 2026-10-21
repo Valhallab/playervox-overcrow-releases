@@ -334,6 +334,24 @@ update.
 - **Parameters**: `channel`: text ≤ 25 bytes; `favorite`: boolean
 - **Result**: `null`; `quota_exceeded` beyond 20
 - **Shape**: `null`
+
+### `account.subscribe`
+
+- **Kind**: subscription
+- **Requires**: a declared, granted account (`id`)
+- **When it can be called**: At any time
+- **Parameters**: `id`: identifier ≤ 32 bytes
+- **Each update**: `{ state }` at once, then at each change: `signed_out`, `pending` (a sign-in step is open), `connected`, `refused` (the service refused the key) or `expired` (the service asks to sign in again). The widget never sees the secret, the account's name or its scopes; with `required`, the host covers the content until the account is connected
+- **Shape**: [`AccountStatus`](result-shapes.md#accountstatus)
+
+### `account.connect`
+
+- **Kind**: call, answered once
+- **Requires**: a declared, granted account (`id`)
+- **When it can be called**: Only during a user action
+- **Parameters**: `id`: identifier ≤ 32 bytes
+- **Result**: `null`; the host shows its account panel for this account, in its current state: the widget's own button for an account that is not `required`
+- **Shape**: `null`
 <!-- /generated:services -->
 
 ## Writes that go through a form

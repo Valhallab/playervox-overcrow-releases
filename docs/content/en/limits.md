@@ -242,4 +242,21 @@ see [limit constants](sdk.md#limit-constants).
 | --- | --- | --- |
 | `PARITY_CHANNEL_TOLERANCE` | 2 levels of 255 | Largest per-channel difference for a pixel to count as equal to the reference image's. |
 | `PARITY_MAX_DIFFERENT_PIXELS` | 100 ppm | Share of pixels allowed beyond the channel tolerance. One wrong 10 px letter in a 360 × 260 widget is 385 ppm. |
+
+### Third-party accounts
+
+| Limit | Value | Meaning |
+| --- | --- | --- |
+| `MAX_ACCOUNTS` | 1 | Third-party accounts declared by one package: one service per widget, so no relay between two. |
+| `MAX_ACCOUNT_ORIGINS` | 4 | `origins` of one account. |
+| `MAX_ACCOUNT_ID_BYTES` | 32 bytes | `id` of one account. |
+| `MAX_ACCOUNT_NAME_CHARS` | 32 characters | `name` of one account: the service's display name. |
+| `MIN_ACCOUNT_KEY_BYTES` | 8 bytes | Smallest `minLength` of a key format. |
+| `MAX_ACCOUNT_KEY_BYTES` | 512 bytes | Largest `maxLength` of a key format. |
+| `MAX_ACCOUNT_URL_BYTES` | 512 bytes | One URL of an account declaration: the key page or an OAuth endpoint. |
+| `MAX_HEADER_NAME_BYTES` | 64 bytes | Name of the header that carries an account's secret or OAuth client ID. |
+| `MAX_AUTH_SCHEME_BYTES` | 16 bytes | `scheme` sent before a key in `Authorization`. |
+| `MAX_OAUTH_CLIENT_ID_BYTES` | 128 bytes | `clientId` of an OAuth account. |
+| `MAX_OAUTH_SCOPES` | 16 | `scopes` of an OAuth account. |
+| `MAX_OAUTH_SCOPE_BYTES` | 128 bytes | Name of one OAuth scope. |
 <!-- /generated:limits -->

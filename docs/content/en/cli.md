@@ -141,7 +141,9 @@ Runs every check, in this order, and writes nothing:
 
 1. **Project files**: the required files are there and within their size
    bounds, one logic module, both locale files or neither.
-2. **Manifest**: PlayerVox OverCrow's own manifest validator.
+2. **Manifest**: PlayerVox OverCrow's own manifest validator. An origin of
+   the account that no network rule or OAuth endpoint uses is a warning
+   (`manifest.unused_origin`).
 3. **View**: `view.ocml` is compiled and the result validated; static
    images must exist in `assets/`.
 4. **Style**: `style.ocss` is parsed with PlayerVox OverCrow's parser.
@@ -302,7 +304,8 @@ never runs your code or `tsc`:
    handle nobody can register (`admin.*`, `com.*`). `listing.json` is
    valid, its preview is a packaged PNG of at most 256 KiB;
 4. the authority the widget asks for is listed for the reviewer: its
-   account (whether it is required, the key format and page), capabilities
+   account (whether it is required; the key format and page, or the OAuth
+   client, sign-in pages and scopes; the routes that name it), capabilities
    (the sensitive ones marked), network routes with their response bound
    and each path and query parameter, clipboard writes, storage and game
    events; review hints, warnings that refuse nothing, point at what to
@@ -364,10 +367,12 @@ Each permission has a stable key, the same in the creator space:
 | `clipboardWrite` | Clipboard writes. |
 | `capability:<name>` | A capability. |
 | `gameEvent:<name>` | A game event. |
+| `account:<id>` | The [third-party account](accounts.md) `<id>`, or the [integrated service](integrated-services.md) the widget names (`account:steam`), with its whole declaration. |
 
 A key is *added* when the previous version did not have it, *widened* when
 its route stays but its rule changes (path or query constraints, response
-bound), and *removed* when it goes. An added or widened key calls for a
+bound, the account it names) or when the declaration of its account
+changes, and *removed* when it goes. An added or widened key calls for a
 **full** review; otherwise the review is **quick**.
 
 ## diff
@@ -672,7 +677,7 @@ The code is `<domain>.<category>`:
 | Domain | From | Codes |
 | --- | --- | --- |
 | `project` | The files of the project | `missing_file`, `file_size`, `encoding`, `ambiguous_logic`, `asset_path`, `entry_limit`, `read` |
-| `manifest` | `manifest.json` | see [the manifest](manifest.md#how-the-manifest-is-checked) |
+| `manifest` | `manifest.json` | see [the manifest](manifest.md#how-the-manifest-is-checked); `unused_origin`, a warning |
 | `view` | `view.ocml` | see [the view](view.md#when-the-view-is-wrong) |
 | `style` | `style.ocss` | see [the style](style.md#when-the-style-is-wrong) |
 | `locales` | `locales/*.json` | `missing_file`, `json`, `shape`, `key`, `value`, `keys`, `entry_limit`, `unknown_key` |
@@ -716,7 +721,7 @@ change announces any other change.
 | `reproducible` | `viewJson` and `archive`, compared with `--package`, else `null`. |
 | `listing` | `bytes`, `sha256`, `spdxLicense` and `preview` of `listing.json`. |
 | `sources` | `kind` (`folder` or `archive`), `files`, `bytes`, `ignored` (`path`, `reason`) and, for a ZIP, `sha256` and `prefix` (the wrapping folder). |
-| `review` | The authority to review, one object per item (`kind`, then its fields); a `network` item that may return keys or tokens has `"secretHint": true`. |
+| `review` | The authority to review, one object per item (`kind`, then its fields). The account comes first (`"kind": "account"`: its declaration, or the integrated service it names, `writes` and the `routes` that name it); a `network` item names its `account`, and has `"secretHint": true` when it may return keys or tokens. |
 | `permissions` | `keys`; with `--previous`, also `previous` (`id`, `version`), `added`, `changed`, `removed` and `reviewType` (`full` or `quick`), else `null`. |
 | `listingPolicy` | `required` or `optional` (`--listing`). |
 | `diagnostics` | The diagnostics, as above. |

@@ -11,15 +11,8 @@ import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-// Exports written ahead of their release are documented on the hidden page
-// that describes them (docs/content/README.md): third-party accounts.
-const AHEAD = ["accounts.md"];
 const page = (locale, file) => readFileSync(join(root, "..", "docs", "content", locale, file), "utf8");
-const references = ["en", "fr"].map((locale) => ({
-  locale,
-  text: page(locale, "sdk.md"),
-  ahead: AHEAD.map((file) => page(locale, file)).join("\n"),
-}));
+const references = ["en", "fr"].map((locale) => ({ locale, text: page(locale, "sdk.md") }));
 
 const program = ts.createProgram([join(root, "src", "index.ts")], {
   target: ts.ScriptTarget.ES2023,
@@ -37,10 +30,10 @@ const exports = checker
     target: symbol.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(symbol) : symbol,
   }));
 
-for (const { locale, text, ahead } of references) {
+for (const { locale, text } of references) {
   /** Names the reference writes in code spans, before any `(` or `<`. */
   const documented = new Set(
-    [...`${text}\n${ahead}`.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)[(<`]/g)].map((match) => match[1]),
+    [...text.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)[(<`]/g)].map((match) => match[1]),
   );
 
   test(`every export is in the ${locale} reference`, () => {

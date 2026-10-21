@@ -145,7 +145,8 @@ Exécute toutes les vérifications, dans cet ordre, et n’écrit rien :
    leurs limites de taille, il y a un seul module de logique, et les deux
    fichiers de langue ou aucun.
 2. **Manifeste** : le validateur de manifeste de PlayerVox OverCrow
-   lui-même.
+   lui-même. Une origine du compte qu’aucune règle réseau ni aucun point
+   OAuth n’utilise est un avertissement (`manifest.unused_origin`).
 3. **Vue** : `view.ocml` est compilé et le résultat validé ; les images
    statiques doivent exister dans `assets/`.
 4. **Style** : `style.ocss` est analysé avec l’analyseur syntaxique
@@ -316,9 +317,10 @@ jamais votre code ni `tsc` :
    `listing.json` est valide, son aperçu est un PNG empaqueté d’au plus
    256 Kio ;
 4. les pouvoirs que le widget demande sont listés pour le relecteur : son
-   compte (obligatoire ou non, format et page de la clé), capabilities (les
-   sensibles sont signalées), routes réseau avec leur limite de réponse et
-   chaque paramètre de chemin et de requête, écritures dans le
+   compte (obligatoire ou non ; format et page de la clé, ou client OAuth,
+   pages de connexion et scopes ; les routes qui le nomment), capabilities
+   (les sensibles sont signalées), routes réseau avec leur limite de réponse
+   et chaque paramètre de chemin et de requête, écritures dans le
    presse-papiers, stockage et événements de jeu ; des indices de revue,
    avertissements qui ne refusent rien, montrent ce qu’il faut regarder de
    près ;
@@ -381,11 +383,13 @@ Chaque permission a une clé stable, la même dans l’espace créateurs :
 | `clipboardWrite` | Les écritures dans le presse-papiers. |
 | `capability:<name>` | Une capability. |
 | `gameEvent:<name>` | Un événement de jeu. |
+| `account:<id>` | Le [compte tiers](accounts.md) `<id>`, ou le [service intégré](integrated-services.md) que le widget nomme (`account:steam`), avec toute sa déclaration. |
 
 Une clé est *ajoutée* quand la version précédente ne l’avait pas,
 *élargie* quand sa route reste mais que sa règle change (contraintes du
-chemin ou de la requête, limite de réponse), et *retirée* quand elle
-disparaît. Une clé ajoutée ou élargie demande une revue **complète** ;
+chemin ou de la requête, limite de réponse, compte qu’elle nomme) ou quand
+la déclaration de son compte change, et *retirée* quand elle disparaît. Une
+clé ajoutée ou élargie demande une revue **complète** ;
 sinon la revue est **rapide**.
 
 ## diff
@@ -706,7 +710,7 @@ Le code a la forme `<domain>.<category>` :
 | Domaine | Origine | Codes |
 | --- | --- | --- |
 | `project` | Les fichiers du projet | `missing_file`, `file_size`, `encoding`, `ambiguous_logic`, `asset_path`, `entry_limit`, `read` |
-| `manifest` | `manifest.json` | voir [le manifeste](manifest.md#comment-le-manifeste-est-vérifié) |
+| `manifest` | `manifest.json` | voir [le manifeste](manifest.md#comment-le-manifeste-est-vérifié) ; `unused_origin`, un avertissement |
 | `view` | `view.ocml` | voir [la vue](view.md#quand-la-vue-est-incorrecte) |
 | `style` | `style.ocss` | voir [le style](style.md#quand-le-style-est-incorrect) |
 | `locales` | `locales/*.json` | `missing_file`, `json`, `shape`, `key`, `value`, `keys`, `entry_limit`, `unknown_key` |
@@ -754,7 +758,7 @@ est annoncé par un nouveau `formatVersion`.
 | `reproducible` | `viewJson` et `archive`, comparés avec `--package`, sinon `null`. |
 | `listing` | `bytes`, `sha256`, `spdxLicense` et `preview` de `listing.json`. |
 | `sources` | `kind` (`folder` ou `archive`), `files`, `bytes`, `ignored` (`path`, `reason`) et, pour un ZIP, `sha256` et `prefix` (le dossier englobant). |
-| `review` | Les pouvoirs à relire, un objet par élément (`kind`, puis ses champs) ; un élément `network` qui peut renvoyer des clés ou des jetons a `"secretHint": true`. |
+| `review` | Les pouvoirs à relire, un objet par élément (`kind`, puis ses champs). Le compte vient en premier (`"kind": "account"` : sa déclaration, ou le service intégré qu’il nomme, `writes` et les `routes` qui le nomment) ; un élément `network` nomme son `account`, et a `"secretHint": true` quand il peut renvoyer des clés ou des jetons. |
 | `permissions` | `keys` ; avec `--previous`, aussi `previous` (`id`, `version`), `added`, `changed`, `removed` et `reviewType` (`full` ou `quick`), sinon `null`. |
 | `listingPolicy` | `required` ou `optional` (`--listing`). |
 | `diagnostics` | Les diagnostics, comme ci-dessus. |

@@ -72,9 +72,10 @@ test("one timer at the next local minute, then each minute", () => {
 
 | Member | Does |
 | --- | --- |
-| `installRuntime({ now, host })` | Installs the stand-in; `Date.now()` returns the virtual time. One at a time. |
+| `installRuntime({ now, host, accounts })` | Installs the stand-in; `Date.now()` returns the virtual time. `accounts` gives the state of each [account](accounts.md) by ID. One at a time. |
 | `now`, `advance(ms)` | The virtual time; `advance` fires the timers that fall due, in order (a repeating one re-arms), and returns their count. |
 | `setHost(changes)` | Changes `host` as PlayerVox OverCrow does: `region`, `locale`, `options`… |
+| `accounts`, `setAccount(id, state)` | The state of each account. `setAccount` changes one (`signed_out`, `pending`, `connected`, `refused` or `expired`), sends it to the running `account.subscribe` subscriptions of that account and returns their number. |
 | `calls`, `lastCall(service)` | Every service call, with `resolve(value)` and `reject(code)`. |
 | `push(service, value)`, `fail(service, code)` | The next update, or the final failure, of the subscriptions to a service. |
 | `menu(row)` | Chooses an `action` row of the options menu. |
@@ -150,7 +151,7 @@ Everything is optional.
 | `startAt` | 2026-01-01T00:00:00Z | The virtual time at which the widget starts, in Unix milliseconds. |
 | `options` | the rows' defaults | Values of the rows of the options menu. |
 | `grants` | `"declared"` | Or the exact list of what the user granted (`storage`, `network`, `fps.read`…): PlayerVox OverCrow refuses the rest. |
-| `accounts` | connected | `{ playervox, twitch }`, each `connected`, `disconnected`, `pending`, `expired` or `offline`. |
+| `accounts` | connected | The state of each account by ID: `playervox` and `twitch`, each `connected`, `disconnected`, `pending`, `expired` or `offline`; the account the manifest declares, or the integrated service it names (`steam`), `connected`, `disconnected`, `pending`, `refused` or `expired`. |
 | `features` | all | The data sources of the machine, for `requires`. |
 | `storage` | empty | The widget's storage before it starts. |
 
@@ -191,7 +192,7 @@ not of the widget.
 | --- | --- |
 | `subscriptions` | The value of a subscription when it starts; `publish` steps send the next ones. |
 | `calls` | The calls of a service, in order: `{ "value": … }` or `{ "error": code }`. A call beyond them is an error of the scenario. |
-| `http` | The `http.fetch` requests, each used once: `{ "request": { method, url }, "response": { status, contentType, body } }` (or `bodyBase64`), or `{ "request": …, "error": code }`. The manifest's network rules apply first, and the response bounds apply as in the overlay. |
+| `http` | The `http.fetch` requests, each used once: `{ "request": { method, url }, "response": { status, contentType, body } }` (or `bodyBase64`), or `{ "request": …, "error": code }`. The manifest's network rules apply first, and the response bounds apply as in the overlay. `request.account` names the account a request is sent with: the fixture answers only a request sent so, and a status of the account's `refusedStatus` plays a refusal ([third-party accounts](accounts.md#testing)). |
 | `confirmations` | `accept` or `cancel`, in order, for PlayerVox OverCrow's confirmation of `notes.delete` and `journal.delete`. |
 | `intents` | The answer to each submitted [write intent](forms.md#forms-that-write-user-data), in order: `"accepted"`, `{ "error": code }` or `"pending"`. |
 

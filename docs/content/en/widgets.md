@@ -74,7 +74,9 @@ node --test widgets/clock/tests/logic.test.mjs
 
 `prepare-widgets.mjs` needs the SDK built first (`npm ci` then
 `npm run build` in `sdk/`). The four templates of `overcrow-widget init`
-are in [`templates/`](../../../templates/), and two complete examples
+are in [`templates/`](../../../templates/), and complete examples
 written for these pages in
-[`docs/content/examples/`](../examples/): `weather` calls an HTTP API and
-`countdown` uses a timer, a canvas, a context menu and storage.
+[`docs/content/examples/`](../examples/): `weather` calls an HTTP API,
+`countdown` uses a timer, a canvas, a context menu and storage, `run-log`
+reads a service with the player's key, `quest-log` with an OAuth sign-in,
+and `steam-stats` reads Steam, an integrated service.

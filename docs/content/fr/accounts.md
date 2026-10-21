@@ -1,26 +1,26 @@
 # Comptes tiers
 
-Un widget peut utiliser le compte du joueur sur un autre service (l'API
-d'un jeu, une plateforme de streaming, un site qui accepte de travailler
+Un widget peut utiliser le compte du joueur sur un autre service (l’API
+d’un jeu, une plateforme de streaming, un site qui accepte de travailler
 avec les widgets) sans jamais voir le secret. PlayerVox OverCrow garde la
 clé ou la connexion dans le trousseau du système, la demande dans son
-propre panneau et ne l'ajoute qu'aux requêtes des règles réseau qui nomment
+propre panneau et ne l’ajoute qu’aux requêtes des règles réseau qui nomment
 le compte. Le widget reçoit les réponses, jamais le secret.
 
-Deux façons d'entrer :
+Deux façons d’entrer :
 
 - **Une clé personnelle.** Le joueur crée une clé ou un jeton personnel chez
-  le service et la colle dans le panneau d'OverCrow, en mode Interactif
+  le service et la colle dans le panneau d’OverCrow, en mode Interactif
   seulement.
 - **Une connexion OAuth.** Le joueur clique sur « Connecter », approuve chez
-  le service dans le navigateur (ou saisit un code), et c'est tout. Vous
+  le service dans le navigateur (ou saisit un code), et c’est tout. Vous
   enregistrez chez le service un client **public** : PKCE, une redirection
-  `http://127.0.0.1` sur un port quelconque ou le code d'appareil, et aucun
+  `http://127.0.0.1` sur un port quelconque ou le code d’appareil, et aucun
   secret client.
 
 Un widget ne demande jamais de mot de passe, ni de clé dans un de ses
 propres champs : chaque frappe dans un champ du widget arrive dans son code,
-et le champ s'affiche sur un stream.
+et le champ s’affiche sur un stream.
 
 Steam et Twitch sont des **services intégrés** : le joueur les connecte une
 fois dans PlayerVox OverCrow et vos widgets les nomment avec
@@ -57,19 +57,19 @@ Déclarez le compte dans `permissions.accounts`, puis nommez-le avec
 ```
 
 - `id` nomme le compte : la permission est `account:runlog`, et les appels
-  du SDK l'utilisent.
-- `name` est le nom du service tel qu'OverCrow l'affiche (« Compte Run Log »).
+  du SDK l’utilisent.
+- `name` est le nom du service tel qu’OverCrow l’affiche (« Compte Run Log »).
 - `origins` liste les adresses du service. Avec un compte, toute règle
-  réseau du widget vise l'une d'elles.
+  réseau du widget vise l’une d’elles.
 - `send` dit où va la clé : un en-tête (`{ "header": "X-Api-Key" }`, ou
   `Authorization` avec un `scheme`), ou un paramètre de requête
-  (`{ "query": "key" }`) quand le service n'accepte rien d'autre.
+  (`{ "query": "key" }`) quand le service n’accepte rien d’autre.
 - `key.format` permet à OverCrow de refuser une clé mal saisie avant de
-  l'envoyer ; `key.page` est l'adresse où le joueur en obtient une. OverCrow
-  affiche son domaine et l'ouvre sur un clic.
+  l’envoyer ; `key.page` est l’adresse où le joueur en obtient une. OverCrow
+  affiche son domaine et l’ouvre sur un clic.
 - `refusedStatus` est le statut par lequel le service refuse la clé (401 par
   défaut). OverCrow marque alors le compte refusé et demande une autre clé ;
-  l'appel échoue avec `account_refused`.
+  l’appel échoue avec `account_refused`.
 
 ## Une connexion OAuth
 
@@ -91,67 +91,67 @@ Déclarez le compte dans `permissions.accounts`, puis nommez-le avec
           "scopes": [{ "name": "quests:read", "access": "read" }]
 ```
 
-- `clientId` est votre client public chez le service. Ce n'est pas un
-  secret ; un secret client n'a pas de champ et serait refusé.
+- `clientId` est votre client public chez le service. Ce n’est pas un
+  secret ; un secret client n’a pas de champ et serait refusé.
 - `flow` vaut `loopback` (le navigateur du système, puis une redirection
   vers OverCrow sur `127.0.0.1`) ou `device` (un code que le joueur saisit
   sur la page `verify` du service).
-- `token`, et `device`, `revoke` et `validate` s'ils sont déclarés, sont sur
+- `token`, et `device`, `revoke` et `validate` s’ils sont déclarés, sont sur
   une des `origins` du compte : OverCrow leur envoie le code, le
   vérificateur ou les jetons. Aucune route du widget ne peut viser un de ces
   points.
 - Les `scopes` lisent par défaut. Un scope `write`, comme une route qui ne
   fait pas `GET`, peut modifier le compte du joueur : il est justifié, relu
   et montré au joueur.
-- `scopeParam` nomme le paramètre des scopes dans les requêtes d'OverCrow
+- `scopeParam` nomme le paramètre des scopes dans les requêtes d’OverCrow
   vers `device` et `token`, pour un service qui veut `scopes` ;
-  `clientIdHeader` envoie aussi l'identifiant client dans un en-tête
+  `clientIdHeader` envoie aussi l’identifiant client dans un en-tête
   (Twitch : `Client-Id`).
 - `required: false` laisse le widget fonctionner sans le compte et montrer
   son propre bouton. Avec `required` (par défaut), OverCrow couvre le
-  contenu du widget tant que le compte n'est pas connecté.
+  contenu du widget tant que le compte n’est pas connecté.
 
-### Ce qu'OverCrow ouvre, lit et envoie
+### Ce qu’OverCrow ouvre, lit et envoie
 
 - **Vos pages de connexion restent chez votre service.** `authorize` et
   `verify` sont les pages où le joueur se connecte et autorise votre
-  widget : les pages de votre service, qui n'envoient jamais le joueur chez
-  un autre fournisseur (Twitch, Google…) ni chez un service qu'OverCrow
+  widget : les pages de votre service, qui n’envoient jamais le joueur chez
+  un autre fournisseur (Twitch, Google…) ni chez un service qu’OverCrow
   intègre. Un widget dont la connexion aboutit chez un autre fournisseur,
-  ou qui lui demande d'autres scopes que sa déclaration, est refusé.
-- **La page d'autorisation** est `authorize` avec `response_type`,
+  ou qui lui demande d’autres scopes que sa déclaration, est refusé.
+- **La page d’autorisation** est `authorize` avec `response_type`,
   `client_id`, `redirect_uri`, `scope`, `state`, `code_challenge` et
   `code_challenge_method=S256` : 2 Kio au plus en tout. Un `authorize` long
   ou beaucoup de scopes peuvent les dépasser, et la connexion ne démarre
   pas.
 - **La redirection.** OverCrow lit `code`, `state`, `iss` et les champs
-  d'erreur, 32 champs au plus ; les autres sont ignorés. Un `iss`
-  (RFC 9207), si votre service en envoie un, est en HTTPS sur l'origine
-  d'`authorize`, sans chemin ou avec un chemin sous lequel se trouve
+  d’erreur, 32 champs au plus ; les autres sont ignorés. Un `iss`
+  (RFC 9207), si votre service en envoie un, est en HTTPS sur l’origine
+  d’`authorize`, sans chemin ou avec un chemin sous lequel se trouve
   `authorize` ; tout autre `iss` met fin à la connexion.
 - **Les réponses.** De `token`, OverCrow lit `access_token` (avec un
   `token_type` `Bearer`), `refresh_token`, `expires_in` et `scope` ; de
   `device`, `device_code`, `user_code`, `verification_uri`, `expires_in` et
   `interval`. Tout autre champ est ignoré.
-- **La déconnexion.** OverCrow efface d'abord les jetons, puis envoie le
-  jeton d'accès et `client_id` à `revoke` (RFC 7009). Toute réponse HTTP
-  vaut fait. Un service injoignable est réessayé plus tard tant qu'OverCrow
-  tourne, au mieux : la déconnexion ne l'attend jamais.
+- **La déconnexion.** OverCrow efface d’abord les jetons, puis envoie le
+  jeton d’accès et `client_id` à `revoke` (RFC 7009). Toute réponse HTTP
+  vaut fait. Un service injoignable est réessayé plus tard tant qu’OverCrow
+  tourne, au mieux : la déconnexion ne l’attend jamais.
 
-Un service qui refuse un client public (secret client à l'échange, port de
+Un service qui refuse un client public (secret client à l’échange, port de
 redirection exact, plafond pour les applications non validées) ne peut pas
 être utilisé. [Rendre votre service compatible avec les
 widgets](compatible-services.md) dit ce dont un service a besoin.
 
 ## Confinement
 
-Un widget qui a un compte ne parle qu'à ce service :
+Un widget qui a un compte ne parle qu’à ce service :
 
 - un compte par widget, toutes les règles réseau sur une de ses `origins` ;
 - aucune capacité sensible et pas de presse-papiers ;
 - deux règles de même origine et même méthode qui peuvent viser la même URL
-  nomment le même compte, ou aucun, pour que la clé n'aille jamais où le
-  widget n'a pas dit qu'elle irait ;
+  nomment le même compte, ou aucun, pour que la clé n’aille jamais où le
+  widget n’a pas dit qu’elle irait ;
 - aucune route sur un point OAuth, ni sur une route qui crée, liste ou
   renvoie des clés ou des jetons : sa réponse arriverait dans le code du
   widget ;
@@ -159,7 +159,7 @@ Un widget qui a un compte ne parle qu'à ce service :
 
 ## Dans la logique
 
-Le widget suit l'état du compte avec `account.subscribe` : `signed_out`,
+Le widget suit l’état du compte avec `account.subscribe` : `signed_out`,
 `pending`, `connected`, `refused` ou `expired`. Il ne voit jamais le nom du
 compte, ses scopes ni son secret.
 Le SDK les exporte sous `account` (de type `AccountServices`), avec la forme
@@ -177,7 +177,7 @@ account.subscribe({ id: "runlog" }, (update) => {
 ```
 
 Un appel sur une route du compte échoue avec `not_connected` tant que le
-compte n'est pas connecté, et avec `account_refused` quand le service vient
+compte n’est pas connecté, et avec `account_refused` quand le service vient
 de refuser le secret. OverCrow affiche son propre panneau ; le widget
 attend :
 
@@ -192,8 +192,8 @@ attend :
 }
 ```
 
-Un compte qui n'est pas `required` se connecte depuis le bouton du widget,
-sur une action de l'utilisateur :
+Un compte qui n’est pas `required` se connecte depuis le bouton du widget,
+sur une action de l’utilisateur :
 
 <!-- source: docs/content/examples/quest-log/logic.ts -->
 ```ts
@@ -205,17 +205,17 @@ export function connect(): void {
 
 ## Tests
 
-Dans un [scénario de test](testing.md), `host.accounts` donne l'état de
+Dans un [scénario de test](testing.md), `host.accounts` donne l’état de
 chaque compte par identifiant : `playervox` et `twitch`, et les comptes que
-le manifeste déclare ou les services intégrés qu'il nomme (`connected` par défaut ; `connected`, `disconnected`,
+le manifeste déclare ou les services intégrés qu’il nomme (`connected` par défaut ; `connected`, `disconnected`,
 `pending`, `refused` ou `expired`). Une fixture HTTP ajoute
 `"account": "runlog"` à sa `request` quand la requête part avec le compte :
-une fixture ne répond qu'à une requête envoyée comme elle le dit, donc le
+une fixture ne répond qu’à une requête envoyée comme elle le dit, donc le
 scénario vérifie que la clé va où elle doit. Une fixture dont le statut est
 dans `refusedStatus` joue un refus.
 
 Dans les tests unitaires, `@overcrow/sdk/testing` prend `accounts` à
-l'installation, et `setAccount(id, state)` envoie un nouvel état aux
+l’installation, et `setAccount(id, state)` envoie un nouvel état aux
 abonnements du widget.
 
 ## Revue
@@ -226,10 +226,10 @@ Pour un widget qui a un compte, le relecteur vérifie :
   service, avec un lien vers sa documentation ;
 - que chaque route qui peut modifier le compte, et chaque scope `write`, est
   justifié ;
-- qu'aucune route ne crée, ne liste ni ne renvoie des clés, des jetons ou
-  des connexions (clé de stream Twitch, secrets d'extension, jetons de
+- qu’aucune route ne crée, ne liste ni ne renvoie des clés, des jetons ou
+  des connexions (clé de stream Twitch, secrets d’extension, jetons de
   socket Streamlabs) ;
-- qu'aucun champ du widget ne demande une clé, un jeton ou un mot de passe ;
+- qu’aucun champ du widget ne demande une clé, un jeton ou un mot de passe ;
 - le widget avec un compte de test chez le service. Ne mettez jamais de clé
   ni de mot de passe dans le message pour la revue.
 
@@ -343,5 +343,5 @@ Pour un widget qui a un compte, le relecteur vérifie :
 
 | Code | Sens |
 | --- | --- |
-| `not_connected` | Le service a besoin d'un compte de l'utilisateur (PlayerVox, Twitch ou celui que le widget déclare), qui n'est pas connecté. |
-| `account_refused` | Le service a refusé la clé ou la connexion du compte sur cette route. Le compte est maintenant `refused` ou `expired`, et PlayerVox OverCrow demande à l'utilisateur une nouvelle clé ou une nouvelle connexion. |
+| `not_connected` | Le service a besoin d’un compte de l’utilisateur qui n’est pas connecté pour le moment : PlayerVox, un service intégré (Steam, Twitch) ou le compte que le widget déclare. |
+| `account_refused` | Le service a refusé la clé ou la connexion du compte sur cette route. Le compte est maintenant `refused` ou `expired`, et PlayerVox OverCrow demande à l’utilisateur une nouvelle clé ou une nouvelle connexion. |

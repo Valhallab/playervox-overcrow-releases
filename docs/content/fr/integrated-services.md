@@ -1,8 +1,8 @@
 # Services intégrés
 
 Certains services sont **intégrés** à PlayerVox OverCrow. PlayerVox définit
-chacun d'eux une fois : ses adresses, la façon d'envoyer la clé ou la
-connexion, et les chemins qu'un widget peut atteindre. Le joueur connecte
+chacun d’eux une fois : ses adresses, la façon d’envoyer la clé ou la
+connexion, et les chemins qu’un widget peut atteindre. Le joueur connecte
 chacun une fois, dans la page **Services connectés** du Centre de contrôle,
 et chaque widget qui le nomme et que le joueur autorise utilise cette
 connexion. Le widget ne voit jamais la clé ni le jeton.
@@ -28,12 +28,12 @@ leurs adresses ou de leurs pages pour un autre compte : il nomme le service.
         "account": "steam"
 ```
 
-- L'identifiant du compte est celui du service : la permission est
+- L’identifiant du compte est celui du service : la permission est
   `account:steam`, une route le nomme dans `account`, et
   `account.subscribe({ id: "steam" })` suit son état.
-- Seuls `scopes` et `required` accompagnent `service`. Les origines, l'envoi
+- Seuls `scopes` et `required` accompagnent `service`. Les origines, l’envoi
   et la page de clé viennent de la table de PlayerVox ci-dessous.
-- Twitch prend des `scopes` parmi ceux qu'il propose, par exemple
+- Twitch prend des `scopes` parmi ceux qu’il propose, par exemple
   `{ "service": "twitch", "scopes": ["channel:read:goals"] }`. Le joueur
   voit ce que lit chaque scope.
 
@@ -45,14 +45,14 @@ widgets :
 - toute règle réseau du widget utilise `GET` et vise une origine du service
   (son API, ses images) ;
 - seules les règles sur les origines qui reçoivent la clé ou le jeton
-  nomment le service ; les origines d'images ne le reçoivent jamais ;
-- ces règles restent sur les chemins que le service permet et n'atteignent
+  nomment le service ; les origines d’images ne le reçoivent jamais ;
+- ces règles restent sur les chemins que le service permet et n’atteignent
   jamais un chemin refusé (échanges et jetons de serveur de Steam, clé de
-  stream et secrets d'extension de Twitch). Un paramètre de chemin y compte
-  pour n'importe quelle valeur ;
-- chez Twitch, chaque point d'accès exige le scope qu'il lit, demandé par
-  le widget lui-même : la connexion est partagée, et un widget n'atteint
-  jamais ce que seul le scope d'un autre widget ouvre.
+  stream et secrets d’extension de Twitch). Un paramètre de chemin y compte
+  pour n’importe quelle valeur ;
+- chez Twitch, chaque point d’accès exige le scope qu’il lit, demandé par
+  le widget lui-même : la connexion est partagée, et un widget n’atteint
+  jamais ce que seul le scope d’un autre widget ouvre.
 
 Le chat Twitch de PlayerVox OverCrow utilise la même connexion Twitch, par
 ses propres capacités : un widget ne demande jamais les scopes du chat.
@@ -63,15 +63,15 @@ ses propres capacités : un widget ne demande jamais les scopes du chat.
   clé avec un court guide pour Steam, un code pour Twitch. Chaque widget
   demande toujours la permission `account:<service>` ; la retirer à un
   widget ne déconnecte pas le service.
-- Quand un widget demande à Twitch un scope que la connexion n'a pas,
+- Quand un widget demande à Twitch un scope que la connexion n’a pas,
   OverCrow demande au joueur de reconnecter Twitch.
-- Déconnecter un service déconnecte tous les widgets qui l'utilisent
-  (`signed_out`). Désinstaller un widget n'efface rien de la connexion.
+- Déconnecter un service déconnecte tous les widgets qui l’utilisent
+  (`signed_out`). Désinstaller un widget n’efface rien de la connexion.
 
 Le SDK, les erreurs et les tests fonctionnent comme pour tout compte : voyez
 [Comptes tiers](accounts.md). Dans un scénario de test, `host.accounts` donne
-l'état du service par son identifiant : `steam`, ou `twitch`, qui est le
-compte Twitch d'OverCrow.
+l’état du service par son identifiant : `steam`, ou `twitch`, qui est le
+compte Twitch d’OverCrow.
 
 ## Référence
 

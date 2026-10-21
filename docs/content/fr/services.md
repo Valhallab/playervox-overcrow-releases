@@ -24,16 +24,21 @@ s’abonne.
 
 ## Déclarer, puis demander à l’utilisateur
 
-Il existe deux sortes d’autorité, toutes deux déclarées dans `permissions`
+Il existe trois sortes d’autorité, toutes déclarées dans `permissions`
 du [manifeste](manifest.md#permissions) :
 
 - quatre **permissions** pour les services généraux : `network`, `storage`,
   `clipboardWrite` et `gameEvents` ;
 - des **capabilities**, listées sous `permissions.capabilities`, pour les
-  données et les actions de PlayerVox OverCrow lui-même et des comptes de
-  l’utilisateur : la fréquence d’images, le lecteur multimédia, les notes de
-  l’utilisateur, la note qu’il donne à un jeu sur PlayerVox, le chat
-  Twitch…
+  données et les actions de PlayerVox OverCrow lui-même et des comptes
+  PlayerVox et Twitch de l’utilisateur : la fréquence d’images, le lecteur
+  multimédia, les notes de l’utilisateur, la note qu’il donne à un jeu sur
+  PlayerVox, le chat Twitch…
+- un **compte**, sous `permissions.accounts` : le compte de l’utilisateur
+  sur un autre service, ou un service intégré comme Steam ou Twitch, dont
+  PlayerVox OverCrow ajoute la clé ou le jeton aux règles réseau qui le
+  nomment. Voir [les comptes tiers](accounts.md) et
+  [les services intégrés](integrated-services.md).
 
 <!-- source: docs/content/examples/weather/manifest.json -->
 ```json
@@ -164,7 +169,8 @@ dernière mise à jour.
 | `invalid_request` | Les paramètres ne sont pas ceux que le service attend : un membre manque ou est inconnu, n’a pas le bon type ou sort de ses limites. |
 | `permission_denied` | La permission ou la capability n’est pas déclarée dans le manifeste, ou l’utilisateur ne l’a pas accordée. Pour `http.fetch`, aucune règle réseau n’autorise cette URL et cette méthode. Une écriture par formulaire peut aussi le recevoir du fournisseur du compte, pour une écriture qu’il n’autorise pas. |
 | `gesture_required` | Le service ne peut être appelé que pendant une action de l’utilisateur, et cet appel n’a pas eu lieu pendant le traitement d’une telle action, ou cette action a déjà autorisé un autre appel. |
-| `not_connected` | Le service a besoin du compte PlayerVox ou Twitch de l’utilisateur, qui n’est pas connecté pour le moment. |
+| `not_connected` | Le service a besoin d’un compte de l’utilisateur qui n’est pas connecté pour le moment : PlayerVox, un service intégré (Steam, Twitch) ou le compte que le widget déclare. |
+| `account_refused` | Le service a refusé la clé ou la connexion du compte sur cette route (un statut de `refusedStatus` du compte). Le compte est maintenant `refused` ou `expired`, et PlayerVox OverCrow demande à l’utilisateur une nouvelle clé ou une nouvelle connexion. |
 | `stale_context` | Ce sur quoi portait l’appel a changé avant la réponse : un autre jeu, un autre compte, un autre lecteur multimédia, un objet supprimé entre-temps. Relisez l’état courant. |
 | `unavailable` | La source de PlayerVox OverCrow pour ces données a échoué, ou ne peut pas agir pour l’instant. Un abonnement qui se termine ainsi peut être relancé plus tard. |
 | `busy` | Trop d’opérations sont en cours : une confirmation est déjà ouverte, une file ou le budget des réponses réseau est plein, ou le fournisseur demande d’attendre. Réessayez plus tard. |
@@ -256,6 +262,7 @@ Les tableaux ci-dessous indiquent, pour chaque service, quand l’appeler.
 | Permission | Signification | Avec une capability sensible |
 | --- | --- | --- |
 | `network` | Routes HTTPS exactes, joignables par le broker de l’hôte ; au plus 32 règles. | manifeste refusé |
+| `accounts` | Le compte de l’utilisateur sur un service tiers, gardé par l’hôte et ajouté aux règles réseau qui le nomment ; au plus 1. | manifeste refusé |
 | `storage` | Stockage clé-valeur tenu par l’hôte, cloisonné par ID de widget, dans la limite de 256 Kio. | données conservées le temps du processus seulement |
 | `clipboardWrite` | Écriture de texte dans le presse-papiers, pendant une action de l’utilisateur en mode interactif. | manifeste refusé |
 | `gameEvents` | Événements de jeu sémantiques nommés `overcrow.game.<name>.v1`, au plus 32. | admis |
@@ -326,7 +333,12 @@ requête déclarés sont acceptés.
 | `pathParams` | `name → ParameterConstraint` | non | Contrainte de chaque segment `{name}`, au plus 8. |
 | `queryParams` | `name → ParameterConstraint` | non | Paramètres de requête admis, au plus 16, chacun éventuellement `required` ; les autres sont refusés. |
 | `maxResponseBytes` | entier de 1 à 3145728 | non | Plus grand corps de réponse de cette route, de 1 à 3 Mio ; 1 Mio quand il est absent. Sans effet pour `as: "image"`, qui garde 1 Mio. Quand plusieurs règles autorisent une requête, la plus grande limite s’applique. |
+| `account` | identifiant ≤ 32 octets | non | `id` du compte déclaré : l’hôte ajoute le secret de l’utilisateur aux requêtes que cette règle autorise, et à aucune autre. Deux règles de même origine et méthode qui peuvent correspondre à une même URL nomment le même compte, ou aucun ; aucune règle ne vise un point OAuth déclaré. |
 <!-- /generated:network-rule-fields -->
+
+`account` nomme le [compte tiers](accounts.md) ou le
+[service intégré](integrated-services.md) dont PlayerVox OverCrow ajoute la
+clé ou le jeton aux requêtes de cette règle, et d’aucune autre.
 
 Chaque paramètre de chemin ou de requête porte une contrainte :
 
@@ -346,7 +358,7 @@ widget. Le broker :
 - refuse toute URL qu’aucune règle n’autorise (`permission_denied`), avant
   toute requête DNS ;
 - ne suit aucune redirection, et n’envoie ni cookie, ni identifiant, ni
-  en-tête de proxy ;
+  en-tête de proxy, sauf la clé ou le jeton du compte qu’une règle nomme ;
 - refuse les adresses locales et privées : un widget ne peut donc pas
   joindre le routeur de l’utilisateur ni un autre programme de la machine ;
 - limite chaque échange : 256 Kio pour le corps d’une requête, 30 secondes
@@ -361,7 +373,9 @@ la place des octets, un identifiant d’image à lier à un élément `image`. U
 JSON, sauf si `contentType` en décide autrement. Un `GET` ne porte pas de
 corps : un `body` ou un `contentType` avec lui échoue avec
 `invalid_request`. Un statut HTTP d’erreur n’est pas un échec de l’appel :
-vérifiez `status`.
+vérifiez `status`. Sur une règle qui nomme un compte, l’appel échoue avec
+`not_connected` tant que le compte n’est pas connecté, et avec
+`account_refused` quand le service refuse sa clé ou son jeton.
 
 <!-- source: docs/content/examples/weather/logic.ts -->
 ```ts
@@ -436,7 +450,9 @@ que l’un d’eux se produit.
 
 Une capability donne accès à des données ou à des actions que détient
 PlayerVox OverCrow : les ressources qu’utilise le jeu, le lecteur
-multimédia, les notes de l’utilisateur, ses comptes PlayerVox et Twitch.
+multimédia, les notes de l’utilisateur, ses comptes PlayerVox et Twitch. Le
+compte de l’utilisateur sur un autre service n’est pas une capability : un
+widget le déclare dans `permissions.accounts` ([comptes tiers](accounts.md)).
 
 <!-- generated:capability-list -->
 | Capability | Sensible | Compte | Signification |
@@ -514,6 +530,10 @@ Ce qu’un tel widget lit ne peut donc pas quitter la machine par son
 intermédiaire. Si votre widget a besoin à la fois d’une API HTTP et d’une
 capability sensible, faites deux widgets.
 
+Un widget doté d’un compte est confiné lui aussi : il ne déclare aucune
+capability sensible ni `clipboardWrite`, et chaque règle réseau vise l’une
+des origines du compte. Voir le [confinement](accounts.md#confinement).
+
 ### Comptes
 
 Certaines capabilities ont besoin du compte PlayerVox ou Twitch de
@@ -523,6 +543,12 @@ panneau par-dessus le widget tant que le compte est déconnecté. Un widget ne
 voit jamais un jeton ; il ne reçoit que les données que décrit sa
 capability, et ses appels échouent avec `not_connected` tant que le compte
 n’est pas connecté.
+
+Un widget peut aussi utiliser le compte de l’utilisateur sur un autre
+service, ou un service intégré comme Steam, par ses règles réseau :
+PlayerVox OverCrow conserve la clé ou la connexion et ne l’ajoute qu’aux
+routes qui nomment le compte. Voir [les comptes tiers](accounts.md) et
+[les services intégrés](integrated-services.md).
 
 ### Des données qui changent
 

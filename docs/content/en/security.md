@@ -53,9 +53,15 @@ game being played: a widget that declares one cannot also declare `network`
 or `clipboardWrite`, and its storage lasts only as long as its process, so
 the data cannot leave the machine through the widget.
 
-Account connections (PlayerVox, Twitch) belong to PlayerVox OverCrow:
-sign-in, codes and tokens are drawn and kept by OverCrow, and a widget
-receives only the data its capability describes.
+Account connections belong to PlayerVox OverCrow: the PlayerVox account,
+the integrated services (Steam, Twitch) and the third-party account a widget
+declares. Sign-in, codes, keys and tokens are asked for in OverCrow's own
+panels and kept by OverCrow, and a widget receives only the data its
+capability describes or the answers of its own routes. A widget with an
+account talks only to that service: one account, every network rule on its
+origins, no sensitive capability and no clipboard. See
+[third-party accounts](accounts.md#confinement) and
+[integrated services](integrated-services.md).
 
 Each permission, each capability and the services it opens are described
 in [services and permissions](services.md). Declare the least you need:
@@ -91,7 +97,8 @@ logic can read them, not set them. See
   memory, window or input. PlayerVox OverCrow never injects into the game.
 - Draw outside its frame, cover or imitate PlayerVox OverCrow's frame, menus
   or confirmations.
-- Read account tokens, cookies or credentials.
+- Read account tokens, cookies or credentials: a widget with an account
+  never sees its key or token, only the answers of its routes.
 - Read the clipboard.
 - Write to logs in production: `log.*` output appears only in a local
   development session.

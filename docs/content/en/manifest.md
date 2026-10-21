@@ -172,6 +172,7 @@ it allows.
 <!-- generated:manifest-permissions -->
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
+| `accounts` | list of `Account` ≤ 1 | no | The user's account on a third-party service, which the host keeps and adds to the network rules that name it; the widget never sees the secret. Present only with one entry: a declared account, or an integrated service the widget names. With an account, every network rule targets one of its origins, and no sensitive capability or `clipboardWrite` is allowed. |
 | `network` | list of `NetworkRule` ≤ 32 | no | Distinct network rules. |
 | `storage` | boolean | no | Host key-value storage; default `false`. |
 | `clipboardWrite` | boolean | no | Clipboard text writes; default `false`. |
@@ -188,6 +189,8 @@ it allows.
 
 A network rule is an object of its own; its fields are described with
 [network rules](services.md#network-rules).
+An account is described in [third-party accounts](accounts.md#reference)
+and [integrated services](integrated-services.md#reference).
 
 ## The options menu
 
@@ -386,5 +389,6 @@ check: 1 error(s), 0 warning(s)
 PlayerVox OverCrow validates it again when the package is admitted to the
 catalog, when it is installed and each time the widget starts. A new version
 whose manifest asks for more than the previous one (a network rule, a game
-event, a capability, storage or the clipboard) waits until the user approves
+event, a capability, storage, the clipboard, or an account or a change of
+its declaration) waits until the user approves
 it in the Control Center before it replaces the installed version.

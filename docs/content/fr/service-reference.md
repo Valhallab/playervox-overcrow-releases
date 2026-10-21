@@ -336,6 +336,24 @@ mise à jour.
 - **Paramètres** : `channel` : texte ≤ 25 octets ; `favorite` : booléen
 - **Résultat** : `null` ; `quota_exceeded` au-delà de 20
 - **Forme** : `null`
+
+### `account.subscribe`
+
+- **Nature** : abonnement
+- **Exige** : un compte déclaré et accordé (`id`)
+- **Quand l’appeler** : À tout moment
+- **Paramètres** : `id` : identifiant ≤ 32 octets
+- **Chaque mise à jour** : `{ state }` aussitôt, puis à chaque changement : `signed_out`, `pending` (une étape de connexion est ouverte), `connected`, `refused` (le service a refusé la clé) ou `expired` (le service demande de se reconnecter). Le widget ne voit jamais le secret, le nom du compte ni ses scopes ; avec `required`, l’hôte couvre le contenu tant que le compte n’est pas connecté
+- **Forme** : [`AccountStatus`](result-shapes.md#accountstatus)
+
+### `account.connect`
+
+- **Nature** : appel, à réponse unique
+- **Exige** : un compte déclaré et accordé (`id`)
+- **Quand l’appeler** : Seulement pendant une action de l’utilisateur
+- **Paramètres** : `id` : identifiant ≤ 32 octets
+- **Résultat** : `null` ; l’hôte affiche son panneau pour ce compte, dans son état du moment : le bouton du widget pour un compte qui n’est pas `required`
+- **Forme** : `null`
 <!-- /generated:services -->
 
 ## Les écritures qui passent par un formulaire

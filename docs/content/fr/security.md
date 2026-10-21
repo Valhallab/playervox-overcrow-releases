@@ -60,10 +60,16 @@ qui en déclare une ne peut pas déclarer aussi `network` ni `clipboardWrite`,
 et son stockage ne dure que le temps de son processus, pour que ces données
 ne puissent pas quitter la machine par le widget.
 
-Les connexions aux comptes (PlayerVox, Twitch) appartiennent à
-PlayerVox OverCrow : la connexion, les codes et les jetons sont affichés et
-conservés par OverCrow, et un widget ne reçoit que les données que décrit sa
-capability.
+Les connexions aux comptes appartiennent à PlayerVox OverCrow : le compte
+PlayerVox, les services intégrés (Steam, Twitch) et le compte tiers qu’un
+widget déclare. La connexion, les codes, les clés et les jetons sont
+demandés dans les panneaux d’OverCrow et conservés par OverCrow, et un widget
+ne reçoit que les données que décrit sa capability ou les réponses de ses
+propres routes. Un widget doté d’un compte ne parle qu’à ce service : un
+seul compte, chaque règle réseau sur ses origines, aucune capability
+sensible et pas de presse-papiers. Voir
+[les comptes tiers](accounts.md#confinement) et
+[les services intégrés](integrated-services.md).
 
 Chaque permission, chaque capability et les services qu’elle ouvre sont
 décrits dans [services et permissions](services.md). Déclarez le strict
@@ -106,7 +112,9 @@ remplit, modifie et valide lui-même. Votre logique peut les lire, pas les
   s’injecte jamais dans le jeu.
 - Dessiner hors de son cadre, couvrir ou imiter le cadre, les menus ou les
   confirmations de PlayerVox OverCrow.
-- Lire des jetons de compte, des cookies ou des identifiants.
+- Lire des jetons de compte, des cookies ou des identifiants : un widget
+  doté d’un compte ne voit jamais sa clé ni son jeton, seulement les réponses
+  de ses routes.
 - Lire le presse-papiers.
 - Écrire des journaux en production : la sortie de `log.*` n’apparaît que
   dans une session de développement locale.

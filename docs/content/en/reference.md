@@ -14,6 +14,7 @@ together; the pages below are the ones to keep open while you write.
 | Which functions does `@overcrow/sdk` export? | [SDK reference](sdk.md) |
 | How do I format times, dates and numbers? | [Time, dates and numbers](sdk.md#time-dates-and-numbers) |
 | What does each permission and capability allow? | [Services and permissions](services.md) |
+| How does a widget use the player's account on another service? | [Third-party accounts](accounts.md), [integrated services](integrated-services.md) |
 | What are the parameters and the result of a service? | [Service reference](service-reference.md), [result shapes](result-shapes.md) |
 | What does an error code mean? | [Errors](services.md#errors) |
 | Which fields does a write intent take? | [The intents](forms.md#the-intents) |
@@ -36,7 +37,7 @@ together; the pages below are the ones to keep open while you write.
   `@overcrow/sdk` is listed there.
 - Every **code example** of these pages is an excerpt of a project that the
   command-line tool checks, packages and admits on each change: a template,
-  a reference widget or one of the two examples.
+  a reference widget or one of the examples.
 
 ## Versions
 

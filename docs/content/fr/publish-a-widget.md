@@ -73,7 +73,9 @@ les joueurs :
 
 - **Permissions.** Expliquez pourquoi le widget a besoin de chaque
   permission nouvelle ou élargie, avec des mots que les joueurs comprennent.
-  Une première version les explique toutes.
+  Une première version les explique toutes. Un [compte tiers](accounts.md)
+  (`account:<id>`) s’explique aussi, avec chaque route et chaque scope
+  `write` qui peut modifier le compte du joueur.
 - **Politique de confidentialité.** Obligatoire dès que le widget utilise
   le réseau. L’adresse tapée ici est aussi enregistrée dans la fiche.
 - **Fiche.** Une première version part en revue avec sa fiche, qui demande
@@ -81,8 +83,12 @@ les joueurs :
 - **Notes de version**, visibles par les joueurs : facultatives. L’anglais
   vient d’abord ; **Ajouter une langue** en ajoute d’autres, 16 au plus. Dès
   que vous en écrivez, écrivez-les aussi en anglais.
-- **Message pour la revue**, lu seulement par PlayerVox : un compte de test,
-  un contexte utile.
+- **Message pour la revue**, lu seulement par PlayerVox : un contexte utile.
+  N’y mettez jamais de clé, de jeton ni de mot de passe : les relecteurs
+  essaient un widget doté d’un compte avec leur propre compte de test chez
+  le service. Si votre application chez le service ne laisse se connecter
+  que des utilisateurs inscrits, ajoutez-y ce compte de test ; le relecteur
+  le donne dans le fil de revue.
 
 La page dit aussi quelle revue la version reçoit (rapide ou complète) et ce
 qui a changé depuis la dernière version approuvée. **Soumettre pour revue**

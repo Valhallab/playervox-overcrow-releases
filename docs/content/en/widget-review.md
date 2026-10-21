@@ -9,7 +9,7 @@ appeal. To send a version, see [publish a widget](publish-a-widget.md).
 
 | Review | When | Longest delay |
 | --- | --- | --- |
-| Full | The first publication, or an update that adds a permission, a network route or a capability | 5 business days |
+| Full | The first publication, or an update that adds a permission, a network route, a capability or an account (`account:<id>`), or changes the declaration of its account | 5 business days |
 | Quick | Any other update, or a change of the listing alone | 2 business days |
 | Appeal | Once per decision, within six months | 7 days |
 | Publication | After the approval | 24 business hours |

@@ -74,7 +74,7 @@ const state = initState({ values: [50] as number[] });
 | `HostKey` | type | The name of a member of `HostData`. |
 | `HostListener` | type | A listener of `onHost`. |
 | `Viewport` | interface | `{ width, height }`, in logical pixels. |
-| `hasGrant(capability)` | function | Whether the user granted a capability. |
+| `hasGrant(grant)` | function | Whether the user granted a capability, or a third-party account (`account:<id>`). |
 | `option(id, fallback)` | function | The stored value of a row of the options menu, or `fallback` when there is none or it has another type. |
 | `MenuValue` | type | `boolean \| number \| string`. |
 | `Widened<T>` | type | The result type of `option`: a `false` fallback gives `boolean`. |
@@ -117,6 +117,7 @@ permission or capability, its parameters and the user action at each call.
 | `playervox` | namespace | `score.subscribe`, `rating.subscribe`, `reviews.subscribe`, `reviews.page({ page?, followedOnly? })`. |
 | `journal` | namespace | `subscribe(listener)`; `page({ cursor? })`; `delete({ session })` during a user action, after the user's confirmation. |
 | `twitch` | namespace | `chat.subscribe(listener)`; `chat.join({ channel })`, `chat.leave()`, `chat.favorite({ channel, favorite })` during a user action. |
+| `account` | namespace | `subscribe({ id }, listener)`; `connect({ id })` during a user action. A [third-party account](accounts.md) the manifest declares, or an [integrated service](integrated-services.md) it names. |
 | `call(service, params?)` | function | Calls any service that answers once, by its name. |
 | `subscribe(service, params, listener)` | function | Subscribes to any subscription service, by its name. |
 | `ServiceError` | class | The rejection of a failed call: `code` is a `ServiceErrorCode`. |
@@ -168,7 +169,7 @@ with `invalid_request`. A response without a body gives `null`, `""` or an empty
 `ArrayBuffer`.
 
 The types of the other namespaces are generated from the schema:
-`ClipboardServices`, `FpsServices`, `GameEventsServices`,
+`AccountServices`, `ClipboardServices`, `FpsServices`, `GameEventsServices`,
 `JournalServices`, `MediaServices`, `NotesServices`, `PlayervoxServices`,
 `SessionServices`, `StopwatchServices`, `StorageServices`,
 `TelemetryServices` and `TwitchServices`. Each service is described in the
@@ -258,8 +259,9 @@ what PlayerVox OverCrow accepts.
 | `ServiceName`, `CallServiceName`, `SubscribeServiceName`, `GestureServiceName` | The service names: all of them, those that answer once, the subscriptions, and those that need a user action. |
 | `ServiceParamsMap`, `ServiceResultMap` | The parameters and the result of each service. |
 | `ServiceErrorCode`, `ServiceErrorPayload` | The [error codes](services.md#errors), and the `{ code }` value that carries one. |
-| `Session`, `Telemetry`, `Fps`, `Stopwatch`, `Media`, `Notes`, `Note`, `NoteItem`, `CreatedNote`, `Score`, `Rating`, `RatingState`, `Review`, `ReviewsState`, `ReviewsPage`, `JournalState`, `JournalPage`, `JournalSession`, `TwitchChat`, `ChatMessage`, `ChatFragment`, `GameEvent`, `HttpResponse` | The [result shapes](result-shapes.md). |
+| `Session`, `Telemetry`, `Fps`, `Stopwatch`, `Media`, `Notes`, `Note`, `NoteItem`, `CreatedNote`, `Score`, `Rating`, `RatingState`, `Review`, `ReviewsState`, `ReviewsPage`, `JournalState`, `JournalPage`, `JournalSession`, `TwitchChat`, `ChatMessage`, `ChatFragment`, `AccountStatus`, `GameEvent`, `HttpResponse` | The [result shapes](result-shapes.md). |
 | `Permission`, `Capability`, `SensitiveCapability`, `CapabilityServices`, `PermissionServices` | The permissions and capabilities of the manifest, and the services each one allows. |
+| `AccountGrant` | The grant of a third-party account, `account:<id>`: `hasGrant` takes it, `host.grants` lists it. |
 | `Locale`, `Theme`, `Mode`, `Region`, `NumberFormat`, `DateOrder` | The values of `host`. |
 | `EventName`, `GestureEventName`, `EventDetailMap`, `NamedKey` | The events of the view, those that are user actions, their details, and the named keys of `keydown`. |
 | `DrawCommand`, `DrawCommandName`, `Color` | The canvas commands and colours. |
@@ -293,4 +295,6 @@ constants, so the code never repeats a number: `MAX_TIMERS`,
 A second entry point, never bundled into a widget, replaces
 PlayerVox OverCrow in a unit test of the logic: `installRuntime()` gives
 virtual time, settles the service calls and pushes the subscription values.
+It takes the state of each account in `accounts`, and `setAccount(id, state)`
+sends a new one to the widget's `account.subscribe` subscriptions.
 See [unit tests](testing.md#unit-tests).

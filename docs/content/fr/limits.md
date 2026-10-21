@@ -244,4 +244,21 @@ que la logique peut lire sont aussi des constantes du SDK : voir
 | --- | --- | --- |
 | `PARITY_CHANNEL_TOLERANCE` | 2 niveaux sur 255 | Plus grand écart par canal pour qu’un pixel compte comme identique à celui de l’image de référence. |
 | `PARITY_MAX_DIFFERENT_PIXELS` | 100 ppm | Part des pixels admise au-delà de la tolérance par canal. Une seule lettre fausse de 10 px dans un widget de 360 × 260 représente 385 ppm. |
+
+### Comptes tiers
+
+| Limite | Valeur | Signification |
+| --- | --- | --- |
+| `MAX_ACCOUNTS` | 1 | Comptes tiers déclarés par un paquet : un service par widget, donc aucun relais entre deux. |
+| `MAX_ACCOUNT_ORIGINS` | 4 | `origins` d’un compte. |
+| `MAX_ACCOUNT_ID_BYTES` | 32 octets | `id` d’un compte. |
+| `MAX_ACCOUNT_NAME_CHARS` | 32 caractères | `name` d’un compte : le nom du service tel qu’il est affiché. |
+| `MIN_ACCOUNT_KEY_BYTES` | 8 octets | Plus petit `minLength` d’un format de clé. |
+| `MAX_ACCOUNT_KEY_BYTES` | 512 octets | Plus grand `maxLength` d’un format de clé. |
+| `MAX_ACCOUNT_URL_BYTES` | 512 octets | Une URL de la déclaration d’un compte : la page de clé ou un point OAuth. |
+| `MAX_HEADER_NAME_BYTES` | 64 octets | Nom de l’en-tête qui porte le secret d’un compte ou l’ID de son client OAuth. |
+| `MAX_AUTH_SCHEME_BYTES` | 16 octets | `scheme` envoyé avant une clé dans `Authorization`. |
+| `MAX_OAUTH_CLIENT_ID_BYTES` | 128 octets | `clientId` d’un compte OAuth. |
+| `MAX_OAUTH_SCOPES` | 16 | `scopes` d’un compte OAuth. |
+| `MAX_OAUTH_SCOPE_BYTES` | 128 octets | Nom d’un scope OAuth. |
 <!-- /generated:limits -->

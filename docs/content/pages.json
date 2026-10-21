@@ -55,15 +55,13 @@
       "slug": "accounts",
       "file": "accounts.md",
       "group": "build",
-      "label": { "en": "Third-party accounts", "fr": "Comptes tiers" },
-      "hidden": true
+      "label": { "en": "Third-party accounts", "fr": "Comptes tiers" }
     },
     {
       "slug": "integrated-services",
       "file": "integrated-services.md",
       "group": "build",
-      "label": { "en": "Integrated services", "fr": "Services intégrés" },
-      "hidden": true
+      "label": { "en": "Integrated services", "fr": "Services intégrés" }
     },
     {
       "slug": "forms",
@@ -201,8 +199,7 @@
       "slug": "compatible-services",
       "file": "compatible-services.md",
       "group": "publish",
-      "label": { "en": "Make your service work with widgets", "fr": "Rendre votre service compatible" },
-      "hidden": true
+      "label": { "en": "Make your service work with widgets", "fr": "Rendre votre service compatible" }
     }
   ]
 }

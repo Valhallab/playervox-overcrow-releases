@@ -12,8 +12,8 @@
     "fr": "Le service ne peut être appelé que pendant une action de l’utilisateur, et cet appel n’a pas eu lieu pendant le traitement d’une telle action, ou cette action a déjà autorisé un autre appel."
   },
   "not_connected": {
-    "en": "The service needs the user's PlayerVox or Twitch account, which is not connected at the moment.",
-    "fr": "Le service a besoin du compte PlayerVox ou Twitch de l’utilisateur, qui n’est pas connecté pour le moment."
+    "en": "The service needs an account of the user that is not connected at the moment: PlayerVox, an integrated service (Steam, Twitch) or the account the widget declares.",
+    "fr": "Le service a besoin d’un compte de l’utilisateur qui n’est pas connecté pour le moment : PlayerVox, un service intégré (Steam, Twitch) ou le compte que le widget déclare."
   },
   "account_refused": {
     "en": "The service refused the account's key or sign-in on this route (a status of the account's `refusedStatus`). The account is now `refused` or `expired`, and PlayerVox OverCrow asks the user for a new key or to sign in again.",

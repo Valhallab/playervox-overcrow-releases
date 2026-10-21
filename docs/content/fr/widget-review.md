@@ -10,7 +10,7 @@ de revue et le recours. Pour envoyer une version, voir
 
 | Revue | Quand | Délai maximal |
 | --- | --- | --- |
-| Complète | La première publication, ou une mise à jour qui ajoute une permission, une route réseau ou une capability | 5 jours ouvrés |
+| Complète | La première publication, ou une mise à jour qui ajoute une permission, une route réseau, une capability ou un compte (`account:<id>`), ou qui modifie la déclaration de son compte | 5 jours ouvrés |
 | Rapide | Toute autre mise à jour, ou une modification de la fiche seule | 2 jours ouvrés |
 | Recours | Une fois par décision, sous six mois | 7 jours |
 | Publication | Après l’approbation | 24 heures ouvrées |

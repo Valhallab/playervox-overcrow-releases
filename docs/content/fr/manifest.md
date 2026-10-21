@@ -177,6 +177,7 @@ qu’elle autorise.
 <!-- generated:manifest-permissions -->
 | Champ | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
+| `accounts` | liste de `Account` ≤ 1 | non | Le compte de l’utilisateur sur un service tiers, que l’hôte garde et ajoute aux règles réseau qui le nomment ; le widget ne voit jamais le secret. Présent seulement avec une entrée : un compte déclaré, ou un service intégré que le widget nomme. Avec un compte, chaque règle réseau vise l’une de ses origines, et aucune capability sensible ni `clipboardWrite` n’est permise. |
 | `network` | liste de `NetworkRule` ≤ 32 | non | Règles réseau, distinctes. |
 | `storage` | booléen | non | Stockage clé-valeur tenu par l’hôte ; `false` par défaut. |
 | `clipboardWrite` | booléen | non | Écriture de texte dans le presse-papiers ; `false` par défaut. |
@@ -193,6 +194,8 @@ qu’elle autorise.
 
 Une règle réseau est un objet à part entière ; ses champs sont décrits avec
 les [règles réseau](services.md#règles-réseau).
+Un compte est décrit dans [les comptes tiers](accounts.md#référence) et
+[les services intégrés](integrated-services.md#référence).
 
 ## Le menu d’options
 
@@ -397,6 +400,6 @@ check: 1 error(s), 0 warning(s)
 PlayerVox OverCrow le valide de nouveau quand le paquet est admis dans le
 catalogue, quand il est installé et à chaque démarrage du widget. Une
 nouvelle version dont le manifeste demande plus que la précédente (une règle
-réseau, un événement de jeu, une capability, le stockage ou le
-presse-papiers) attend que l’utilisateur l’approuve dans le Centre de
+réseau, un événement de jeu, une capability, le stockage, le presse-papiers,
+ou un compte ou un changement de sa déclaration) attend que l’utilisateur l’approuve dans le Centre de
 contrôle avant de remplacer la version installée.

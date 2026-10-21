@@ -67,7 +67,9 @@ When the checks pass, the version page says what changes for players:
 
 - **Permissions.** Explain why the widget needs each new or widened
   permission, in words players understand. A first version explains all of
-  them.
+  them. A [third-party account](accounts.md) (`account:<id>`) is explained
+  too, with each route and `write` scope that can change the player's
+  account.
 - **Privacy policy.** Required as soon as the widget uses the network. The
   address typed here is saved into the listing too.
 - **Listing.** A first version goes to review with its listing, which needs
@@ -75,8 +77,11 @@ When the checks pass, the version page says what changes for players:
 - **Release notes**, shown to players: optional. English comes first;
   **Add a language** adds others, 16 at most. When you write any, write
   them in English too.
-- **Message for the review**, read only by PlayerVox: a test account,
-  useful context.
+- **Message for the review**, read only by PlayerVox: useful context. Never
+  put a key, a token or a password there: reviewers try a widget with an
+  account using their own test account at the service. If your application
+  at the service lets only listed users sign in, add that test account to
+  it; the reviewer gives it in the review thread.
 
 The page also says which review the version gets (quick or full) and what
 changed since the last approved version. **Submit for review** sends it.
