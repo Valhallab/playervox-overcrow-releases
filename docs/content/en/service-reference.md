@@ -82,7 +82,7 @@ update.
 - **Requires**: permission `network`
 - **When it can be called**: At any time
 - **Parameters**: `url`: text ≤ 2 KiB; `method`: `GET` \| `POST` \| `PUT` \| `PATCH` \| `DELETE`; `contentType?`: `application/json` \| `text/plain`; `as`: `json` \| `text` \| `bytes` \| `image`
-- **Result**: `{ status, contentType }` with the body, ≤ the rule's `maxResponseBytes` (1 MiB when absent), or `{ status, asset }` from a body ≤ 1 MiB
+- **Result**: `{ status, contentType }` with the body, ≤ the rule's `maxResponseBytes` (1 MiB when absent), or `{ status, asset }` from a body ≤ 1 MiB; on a rule that names an account, `not_connected` while it is not connected and `account_refused` when the service refused its secret
 - **Shape**: [`HttpResponse`](result-shapes.md#httpresponse)
 
 ### `clipboard.writeText`

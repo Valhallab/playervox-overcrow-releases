@@ -927,7 +927,7 @@ export interface ServiceResultMap {
   readonly "storage.remove": null;
   /** `storage.keys`: list of keys. */
   readonly "storage.keys": ReadonlyArray<string>;
-  /** `http.fetch`: `{ status, contentType }` with the body as raw payload ≤ the rule's `maxResponseBytes` (`MAX_HTTP_RESPONSE_BYTES` when absent), or `{ status, asset }` from a body ≤ `MAX_HTTP_RESPONSE_BYTES`. */
+  /** `http.fetch`: `{ status, contentType }` with the body as raw payload ≤ the rule's `maxResponseBytes` (`MAX_HTTP_RESPONSE_BYTES` when absent), or `{ status, asset }` from a body ≤ `MAX_HTTP_RESPONSE_BYTES`; on a rule that names an account, `not_connected` while it is not connected and `account_refused` when the service refused its secret. */
   readonly "http.fetch": HttpResponse;
   /** `clipboard.writeText`: `null`. */
   readonly "clipboard.writeText": null;

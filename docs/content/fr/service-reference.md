@@ -84,7 +84,7 @@ mise à jour.
 - **Exige** : permission `network`
 - **Quand l’appeler** : À tout moment
 - **Paramètres** : `url` : texte ≤ 2 Kio ; `method` : `GET` \| `POST` \| `PUT` \| `PATCH` \| `DELETE` ; `contentType?` : `application/json` \| `text/plain` ; `as` : `json` \| `text` \| `bytes` \| `image`
-- **Résultat** : `{ status, contentType }` avec le corps, d’une taille ≤ au `maxResponseBytes` de la règle (1 Mio quand il est absent), ou `{ status, asset }` à partir d’un corps ≤ 1 Mio
+- **Résultat** : `{ status, contentType }` avec le corps, d’une taille ≤ au `maxResponseBytes` de la règle (1 Mio quand il est absent), ou `{ status, asset }` à partir d’un corps ≤ 1 Mio ; sur une règle qui nomme un compte, `not_connected` tant qu’il n’est pas connecté et `account_refused` quand le service a refusé son secret
 - **Forme** : [`HttpResponse`](result-shapes.md#httpresponse)
 
 ### `clipboard.writeText`
