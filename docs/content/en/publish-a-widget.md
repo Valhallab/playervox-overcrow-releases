@@ -78,10 +78,12 @@ When the checks pass, the version page says what changes for players:
   **Add a language** adds others, 16 at most. When you write any, write
   them in English too.
 - **Message for the review**, read only by PlayerVox: useful context. Never
-  put a key, a token or a password there: reviewers try a widget with an
-  account using their own test account at the service. If your application
-  at the service lets only listed users sign in, add that test account to
-  it; the reviewer gives it in the review thread.
+  put a key, a token or a password there. Reviewers try a widget with an
+  account using PlayerVox's own test account at the service, and its
+  scenarios with fixtures, which a widget with an account needs. If your
+  application at the service lets only listed users sign in, add that test
+  account to it: the reviewer gives only its name in the review thread, and
+  nobody ever sends a password or a key there.
 
 The page also says which review the version gets (quick or full) and what
 changed since the last approved version. **Submit for review** sends it.

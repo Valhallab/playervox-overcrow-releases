@@ -84,11 +84,13 @@ les joueurs :
   vient d’abord ; **Ajouter une langue** en ajoute d’autres, 16 au plus. Dès
   que vous en écrivez, écrivez-les aussi en anglais.
 - **Message pour la revue**, lu seulement par PlayerVox : un contexte utile.
-  N’y mettez jamais de clé, de jeton ni de mot de passe : les relecteurs
-  essaient un widget doté d’un compte avec leur propre compte de test chez
-  le service. Si votre application chez le service ne laisse se connecter
-  que des utilisateurs inscrits, ajoutez-y ce compte de test ; le relecteur
-  le donne dans le fil de revue.
+  N’y mettez jamais de clé, de jeton ni de mot de passe. Les relecteurs
+  essaient un widget doté d’un compte avec le compte de test de PlayerVox
+  chez le service, et avec ses scénarios à fixtures, qu’un widget doté d’un
+  compte doit avoir. Si votre application chez le service ne laisse se
+  connecter que des utilisateurs inscrits, ajoutez-y ce compte de test : le
+  relecteur en donne seulement le nom dans le fil de revue, et personne n’y
+  envoie jamais de mot de passe ni de clé.
 
 La page dit aussi quelle revue la version reçoit (rapide ou complète) et ce
 qui a changé depuis la dernière version approuvée. **Soumettre pour revue**
