@@ -111,6 +111,33 @@ Déclarez le compte dans `permissions.accounts`, puis nommez-le avec
   son propre bouton. Avec `required` (par défaut), OverCrow couvre le
   contenu du widget tant que le compte n'est pas connecté.
 
+### Ce qu'OverCrow ouvre, lit et envoie
+
+- **Vos pages de connexion restent chez votre service.** `authorize` et
+  `verify` sont les pages où le joueur se connecte et autorise votre
+  widget : les pages de votre service, qui n'envoient jamais le joueur chez
+  un autre fournisseur (Twitch, Google…) ni chez un service qu'OverCrow
+  intègre. Un widget dont la connexion aboutit chez un autre fournisseur,
+  ou qui lui demande d'autres scopes que sa déclaration, est refusé.
+- **La page d'autorisation** est `authorize` avec `response_type`,
+  `client_id`, `redirect_uri`, `scope`, `state`, `code_challenge` et
+  `code_challenge_method=S256` : 2 Kio au plus en tout. Un `authorize` long
+  ou beaucoup de scopes peuvent les dépasser, et la connexion ne démarre
+  pas.
+- **La redirection.** OverCrow lit `code`, `state`, `iss` et les champs
+  d'erreur, 32 champs au plus ; les autres sont ignorés. Un `iss`
+  (RFC 9207), si votre service en envoie un, est en HTTPS sur l'origine
+  d'`authorize`, sans chemin ou avec un chemin sous lequel se trouve
+  `authorize` ; tout autre `iss` met fin à la connexion.
+- **Les réponses.** De `token`, OverCrow lit `access_token` (avec un
+  `token_type` `Bearer`), `refresh_token`, `expires_in` et `scope` ; de
+  `device`, `device_code`, `user_code`, `verification_uri`, `expires_in` et
+  `interval`. Tout autre champ est ignoré.
+- **La déconnexion.** OverCrow efface d'abord les jetons, puis envoie le
+  jeton d'accès et `client_id` à `revoke` (RFC 7009). Toute réponse HTTP
+  vaut fait. Un service injoignable est réessayé plus tard tant qu'OverCrow
+  tourne, au mieux : la déconnexion ne l'attend jamais.
+
 Un service qui refuse un client public (secret client à l'échange, port de
 redirection exact, plafond pour les applications non validées) ne peut pas
 être utilisé. [Rendre votre service compatible avec les

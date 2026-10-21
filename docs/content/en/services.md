@@ -345,7 +345,8 @@ widget's process. The broker:
 `"bytes"` (an `ArrayBuffer`) or `"image"`, which gives an image handle to
 bind to an `image` element instead of the bytes. A string `body` is sent as
 `text/plain` and any other value as JSON, unless `contentType` says
-otherwise. An HTTP error status is not a failure of the call: check
+otherwise. A `GET` carries no body: a `body` or a `contentType` with it
+fails with `invalid_request`. An HTTP error status is not a failure of the call: check
 `status`.
 
 <!-- source: docs/content/examples/weather/logic.ts -->

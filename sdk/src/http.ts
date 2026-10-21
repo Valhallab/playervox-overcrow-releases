@@ -16,10 +16,11 @@ export interface FetchOptions<A extends BodyType> {
   readonly as: A;
   /**
    * Request body: a string is sent as `text/plain` unless `contentType`
-   * says otherwise; any other value is sent as JSON.
+   * says otherwise; any other value is sent as JSON. A `GET` carries none:
+   * a body or a `contentType` with it fails with `invalid_request`.
    */
   readonly body?: JsonValue;
-  /** Media type of the body; `application/json` or `text/plain`. */
+  /** Media type of the body; `application/json` or `text/plain`. Not with `GET`. */
   readonly contentType?: ServiceParamsMap["http.fetch"]["contentType"];
 }
 

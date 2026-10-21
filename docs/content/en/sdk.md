@@ -163,7 +163,8 @@ none:
 
 `http.fetch` sends a string body as `text/plain` and any other body as
 JSON, unless `contentType` says otherwise, and decodes the answer as `as`
-asks. A response without a body gives `null`, `""` or an empty
+asks. A `GET` carries no body: a `body` or a `contentType` with it fails
+with `invalid_request`. A response without a body gives `null`, `""` or an empty
 `ArrayBuffer`.
 
 The types of the other namespaces are generated from the schema:

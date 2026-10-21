@@ -107,6 +107,32 @@ on each route that needs the key:
   own button. With `required` (the default), OverCrow covers the widget's
   content until the account is connected.
 
+### What OverCrow opens, reads and sends
+
+- **Your sign-in pages stay at your service.** `authorize` and `verify`
+  are where the player signs in and allows your widget: your service's own
+  pages, which never send the player on to another provider (Twitch,
+  Google…) or to a service OverCrow integrates. A widget whose sign-in ends
+  at another provider, or asks it for other scopes than its declaration, is
+  refused.
+- **The authorization page** is `authorize` with `response_type`,
+  `client_id`, `redirect_uri`, `scope`, `state`, `code_challenge` and
+  `code_challenge_method=S256`: 2 KiB at most in all. A long `authorize` or
+  many scopes can go over it, and the sign-in does not start.
+- **The redirect.** OverCrow reads `code`, `state`, `iss` and the error
+  fields, 32 fields at most; any other field is ignored. An `iss` (RFC 9207),
+  when your service sends one, is HTTPS on the origin of `authorize`, with
+  no path or a path `authorize` lies under; any other `iss` ends the
+  sign-in.
+- **The answers.** From `token`, OverCrow reads `access_token` (with a
+  `Bearer` `token_type`), `refresh_token`, `expires_in` and `scope`; from
+  `device`, `device_code`, `user_code`, `verification_uri`, `expires_in` and
+  `interval`. Any other field is ignored.
+- **Signing out.** OverCrow erases the tokens first, then sends the access
+  token and `client_id` to `revoke` (RFC 7009). Any HTTP answer counts as
+  done. A service it cannot reach is tried again later while OverCrow runs,
+  at best: signing out never waits for it.
+
 A service that refuses a public client (a client secret at the exchange,
 an exact redirect port, a cap on unreviewed applications) cannot be used.
 [Make your service work with widgets](compatible-services.md) says what a

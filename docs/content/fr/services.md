@@ -358,8 +358,10 @@ widget. Le broker :
 `"json"`, `"text"`, `"bytes"` (un `ArrayBuffer`) ou `"image"`, qui donne, à
 la place des octets, un identifiant d’image à lier à un élément `image`. Un
 `body` de type chaîne est envoyé en `text/plain`, et toute autre valeur en
-JSON, sauf si `contentType` en décide autrement. Un statut HTTP d’erreur
-n’est pas un échec de l’appel : vérifiez `status`.
+JSON, sauf si `contentType` en décide autrement. Un `GET` ne porte pas de
+corps : un `body` ou un `contentType` avec lui échoue avec
+`invalid_request`. Un statut HTTP d’erreur n’est pas un échec de l’appel :
+vérifiez `status`.
 
 <!-- source: docs/content/examples/weather/logic.ts -->
 ```ts
