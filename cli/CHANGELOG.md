@@ -7,6 +7,48 @@ change between betas; 1.0.0 will freeze them under semantic versioning.
 The CLI's version enters no package: a package depends only on the
 widget's sources and the embedded SDK.
 
+## 1.0.0-beta.7
+
+Released in the creator tools ZIPs of PlayerVox OverCrow 0.8.0-beta.1's
+GitHub release, `overcrow-creator-tools-0.8.0-beta.1-<platform>.zip`,
+beside the headless runtime it pins.
+
+- It pins the headless runtime 0.8.0-beta.1, from the same release.
+- It embeds `@overcrow/sdk` 1.1.0, which adds `account.subscribe` and
+  `account.connect`; `init` names that version in a new project's
+  `package.json`, and `check` and `doctor` expect it in `node_modules`.
+- Third-party accounts: a manifest may declare an account in
+  `permissions.accounts` (a key, or OAuth with the publisher's public
+  client) or name an integrated service (`{ "service": "steam" }`,
+  `{ "service": "twitch", "scopes": […] }`), and a network rule names the
+  account it is sent with (`account`). `check` and `admit` explain each new
+  manifest error; `check` warns about an origin of the account that no rule
+  or OAuth endpoint uses (`manifest.unused_origin`).
+- A path or query parameter may be of type `file`: one file name with one
+  of the declared extensions (`<hash>.jpg`), for image hosts.
+- `admit` lists the account first in the review (kind `account`): how it
+  connects, its origins, the key page or the OAuth client, sign-in pages
+  and scopes, whether it is required, and the routes that name it; an
+  integrated service shows with its scopes. Each path and query parameter
+  shows with its constraint, and an item of an unknown kind shows as
+  `other` instead of being skipped.
+- The permission key `account:<id>` (`account:steam` for a service) holds
+  the whole declaration: adding it, changing the declaration or giving a
+  route an account needs a full review.
+- `admit` adds review hints, warnings that refuse nothing, each with a JSON
+  pointer to its permission in `manifest.json`: `review.oauth_pages`,
+  `review.read_scope_writes`, `review.secret_route` (its review item gets
+  `secretHint`), `review.service_key_format`,
+  `review.service_name_in_host`, `review.service_name_in_id`,
+  `review.service_label_name`, `review.address_in_key_page`,
+  `review.same_route` and `review.path_and_query_name`.
+- `admit --deny-warnings` never refuses `review.oauth_pages`, a step of the
+  review for every OAuth account: it is still reported and counted, and
+  every other warning still refuses.
+- `test`: a scenario sets the state of each account in `host.accounts`,
+  grants `account:<id>`, and an HTTP fixture answers only a request sent
+  with the account it names (`request.account`).
+
 ## 1.0.0-beta.6
 
 Released in the creator tools ZIPs of PlayerVox OverCrow 0.7.3-beta.1's
