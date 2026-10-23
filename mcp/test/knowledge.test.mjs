@@ -130,12 +130,25 @@ test("text leaving the server: no escapes, no hidden characters, no home path", 
   );
 });
 
+/**
+ * The SDK version the shipped pin must name: the repository's, or, while
+ * the changelog's first section says it is not released yet, the last
+ * released one (the pin holds the integrity of a published package).
+ */
+function releasedSdk() {
+  const sdk = JSON.parse(readFileSync(join(repository, "sdk", "package.json"), "utf8"));
+  const changelog = readFileSync(join(repository, "sdk", "CHANGELOG.md"), "utf8");
+  const sections = [...changelog.matchAll(/^## (\S+)\n\n([^\n]*)/gm)];
+  const [first, previous] = sections;
+  assert.equal(first?.[1], sdk.version, "the changelog's first section is the SDK's version");
+  return first[2].startsWith("Not released yet") ? previous[1] : sdk.version;
+}
+
 test("the shipped pin names the SDK and TypeScript versions of the templates", () => {
   const pin = shippedPin();
   const template = JSON.parse(
     readFileSync(join(repository, "templates", "shared", "package.json"), "utf8"),
   );
-  const sdk = JSON.parse(readFileSync(join(repository, "sdk", "package.json"), "utf8"));
   assert.equal(pin.npm.typescript.version, template.devDependencies.typescript);
-  assert.equal(pin.npm.sdk.version, sdk.version);
+  assert.equal(pin.npm.sdk.version, releasedSdk());
 });
