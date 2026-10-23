@@ -211,22 +211,21 @@ clipboard.writeText({ text: "at start" });
   );
 });
 
-test("network polling: every 19 s is reported, every 20 s is not", async () => {
-  const polling = async (ms) =>
-    rules(
-      await auditWidget(
-        widget(`polling-${ms}`, {
-          "manifest.json": manifest({
-            network: [
-              {
-                origin: "https://api.example.org",
-                method: "GET",
-                path: "/v1/score",
-                maxResponseBytes: 1024,
-              },
-            ],
-          }),
-          "logic.ts": `import { http, initState, timers } from "@overcrow/sdk";
+test("network polling below a minute per route needs a justification (rule 4.2)", async () => {
+  const route = "network:GET https://api.example.org/v1/score";
+  const polling = async (ms, justifications) => {
+    const files = {
+      "manifest.json": manifest({
+        network: [
+          {
+            origin: "https://api.example.org",
+            method: "GET",
+            path: "/v1/score",
+            maxResponseBytes: 1024,
+          },
+        ],
+      }),
+      "logic.ts": `import { http, initState, timers } from "@overcrow/sdk";
 export const state = initState({ value: 0 });
 async function load(): Promise<void> {
   const response = await http.fetch("https://api.example.org/v1/score", { as: "json" });
@@ -234,13 +233,45 @@ async function load(): Promise<void> {
 }
 timers.every(${ms}, load);
 `,
-          "view.ocml": "<box><text>{state.value}</text></box>\n",
-          LICENSE: "MIT\n",
-        }),
-      ),
-    ).filter((rule) => rule.endsWith(":fast-polling"));
-  assert.deepEqual(await polling(19_000), ["medium:fast-polling"]);
-  assert.deepEqual(await polling(20_000), []);
+      "view.ocml": "<box><text>{state.value}</text></box>\n",
+      LICENSE: "MIT\n",
+    };
+    if (justifications) files["submission.json"] = JSON.stringify({ justifications });
+    const result = await auditWidget(
+      widget(`polling-${ms}-${justifications ? justifications.length : "none"}`, files),
+    );
+    return result.findings.filter((finding) => finding.rule === "fast-polling");
+  };
+  const unjustified = await polling(59_000);
+  assert.deepEqual(
+    unjustified.map((finding) => finding.severity),
+    ["medium"],
+  );
+  assert.match(
+    unjustified[0].message,
+    /Below 60 s per route, rule 4\.2 needs a justification that PlayerVox accepts and that the service allows\. submission\.json justifies no faster cadence for network:GET https:\/\/api\.example\.org\/v1\/score\./,
+  );
+  assert.deepEqual(await polling(60_000), []);
+  const justified = await polling(20_000, [
+    { permission: route, text: "The score changes every few seconds." },
+  ]);
+  assert.deepEqual(
+    justified.map((finding) => finding.severity),
+    ["low"],
+  );
+  assert.doesNotMatch(justified[0].message, /justifies no faster cadence/);
+  const otherRoute = await polling(20_000, [
+    { permission: "network:GET https://api.example.org/v1/other", text: "x" },
+  ]);
+  assert.deepEqual(
+    otherRoute.map((finding) => finding.severity),
+    ["medium"],
+  );
+  const empty = await polling(20_000, [{ permission: route, text: "  " }]);
+  assert.deepEqual(
+    empty.map((finding) => finding.severity),
+    ["medium"],
+  );
 });
 
 test("the reference widgets: no high or medium finding (except the reserved PlayerVox ID)", async () => {

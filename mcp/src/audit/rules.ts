@@ -952,6 +952,40 @@ function timerValue(context: Context, args: Token[][]): number | undefined {
   return first ? evaluate(first, context.constants) : undefined;
 }
 
+/** Rule 4.2 of the publication rules: at most one call per minute and per route, unless justified. */
+const RULE_4_2_MS = 60_000;
+
+/**
+ * The network routes (`network:METHOD origin+path`, the permission keys)
+ * that submission.json does not justify with a text.
+ */
+function unjustifiedRoutes(project: WidgetProject): string[] {
+  const rules = (permissionsOf(project).network as NetworkRule[] | undefined) ?? [];
+  if (!Array.isArray(rules)) return [];
+  const justified = new Set<string>();
+  const text = project.files.find((file) => file.path === "submission.json")?.text;
+  if (text) {
+    try {
+      const submission = JSON.parse(text) as { justifications?: unknown };
+      for (const item of Array.isArray(submission.justifications)
+        ? submission.justifications
+        : []) {
+        const { permission, text: why } = (item ?? {}) as { permission?: unknown; text?: unknown };
+        if (typeof permission === "string" && typeof why === "string" && why.trim() !== "")
+          justified.add(permission);
+      }
+    } catch {
+      // An unreadable submission.json justifies nothing.
+    }
+  }
+  return rules
+    .map(
+      (rule) =>
+        `network:${String(rule.method ?? "GET")} ${String(rule.origin ?? "")}${String(rule.path ?? "")}`,
+    )
+    .filter((key) => !justified.has(key));
+}
+
 function fastTimers(context: Context): void {
   const usesNetwork = calls(context.tokens, ["http", "fetch"]).length > 0;
   for (const open of calls(context.tokens, ["timers", "every"])) {
@@ -970,15 +1004,21 @@ function fastTimers(context: Context): void {
         example: { widget: "stopwatch", file: "view.ocml", find: "<elapsed" },
       });
     }
-    if (usesNetwork && value < 20_000) {
+    if (usesNetwork && value < RULE_4_2_MS) {
+      const unjustified = unjustifiedRoutes(context.project);
+      const missing =
+        unjustified.length === 0
+          ? ""
+          : ` submission.json justifies no faster cadence for ${unjustified.slice(0, 3).join(", ")}${unjustified.length > 3 ? ` and ${unjustified.length - 3} more` : ""}.`;
       add(context, {
         rule: "fast-polling",
         area: "lightness",
-        severity: "medium",
+        // Justified for every route: the reviewer weighs it (rule 4.2).
+        severity: unjustified.length === 0 ? "low" : "medium",
         file: context.logicFile,
         line,
-        message: `A timer repeats every ${value} ms in a widget that uses the network: if it requests the network, it polls a server ${Math.round(60_000 / value)} times a minute.`,
-        fix: "Refresh every 20 s or more, back off after a failure (×2 up to ×8), and only while the data is shown.",
+        message: `A timer repeats every ${value} ms in a widget that uses the network: if it requests the network, it polls a server ${Math.round(60_000 / value)} times a minute. Below 60 s per route, rule 4.2 needs a justification that PlayerVox accepts and that the service allows.${missing}`,
+        fix: "Refresh each route once a minute at most, or justify the faster cadence of each route in submission.json (the service must allow it). Back off after a failure (×2 up to ×8), and refresh only while the data is shown.",
         example: {
           widget: "warframe-market",
           file: "logic.ts",
