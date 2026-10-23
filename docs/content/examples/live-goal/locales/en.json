@@ -1,0 +1,7 @@
+{
+  "progress": "{current} / {target}",
+  "loading": "Loading…",
+  "updated": "Up to date",
+  "not_connected": "Waiting for Twitch",
+  "unavailable": "Twitch is unavailable"
+}

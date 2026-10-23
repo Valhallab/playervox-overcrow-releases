@@ -259,4 +259,7 @@ see [limit constants](sdk.md#limit-constants).
 | `MAX_OAUTH_CLIENT_ID_BYTES` | 128 bytes | `clientId` of an OAuth account. |
 | `MAX_OAUTH_SCOPES` | 16 | `scopes` of an OAuth account. |
 | `MAX_OAUTH_SCOPE_BYTES` | 128 bytes | Name of one OAuth scope. |
+| `MAX_SERVICE_EVENTS` | 32 | `events` of an integrated service's declaration. |
+| `MAX_SERVICE_EVENT_BYTES` | 16 KiB | Compact JSON of the `data` of one service event; a larger event is dropped and its `seq` skipped. |
+| `SERVICE_EVENT_WINDOW` | 16 | Latest events each update of `twitch.events.subscribe` repeats: updates are coalesced, `seq` tells a new event from one already seen. |
 <!-- /generated:limits -->

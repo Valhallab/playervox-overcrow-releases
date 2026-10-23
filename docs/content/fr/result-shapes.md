@@ -339,4 +339,25 @@ Un message de chat. `{ id, author, color, badges, fragments, reply, deleted, rec
 | `messages` | liste de [`ChatMessage`](#chatmessage) | Messages, du plus ancien au plus récent : toute la liste avec `reset` ; sinon les nouveaux messages, à ajouter, et les messages modifiés, qui remplacent sur place celui de même `id`. |
 | `removed` | liste de textes | ID des messages retirés. |
 | `skipped` | entier | Nouveaux messages que l’hôte a laissés de côté depuis la mise à jour précédente, parce que le chat va plus vite qu’il ne transmet ; 0 avec `reset`. Un retrait n’est jamais laissé de côté. |
+
+### `TwitchEvent`
+
+Un événement Twitch en direct. `{ seq, type, at, data }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `seq` | entier | Rang de l'événement dans l'abonnement, à partir de 1, sans trou sauf si des événements ont été perdus. |
+| `type` | `channel.goal.begin` \| `channel.goal.progress` \| `channel.goal.end` \| `channel.follow` \| `channel.hype_train.begin` \| `channel.hype_train.progress` \| `channel.hype_train.end` \| `channel.cheer` \| `channel.subscribe` \| `channel.subscription.gift` \| `channel.subscription.message` \| `channel.poll.begin` \| `channel.poll.progress` \| `channel.poll.end` \| `channel.prediction.begin` \| `channel.prediction.progress` \| `channel.prediction.lock` \| `channel.prediction.end` | Le type EventSub, parmi ceux de l'abonnement. |
+| `at` | entier | Quand l'hôte l'a reçu, en millisecondes Unix de l'horloge de l'hôte. |
+| `data` | JSON | La projection de l'événement par l'hôte : les champs de la table du type sous les noms de Twitch, `null` là où Twitch n'a rien envoyé. |
+
+### `TwitchEvents`
+
+Événements Twitch en direct des types que le widget déclare. `{ state, reason, events }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `state` | `live` \| `off` | `live` tant que l'hôte est abonné chez Twitch. |
+| `reason` | `connecting` \| `not_connected` \| `unavailable` ou `null` | Pourquoi l'état est `off` ; `null` en `live`. |
+| `events` | liste de [`TwitchEvent`](#twitchevent) | Les derniers événements, du plus ancien au plus récent. |
 <!-- /generated:result-shapes -->

@@ -337,4 +337,25 @@ Twitch chat state. `{ account, channel, joinState, failure, favorites, canSend, 
 | `messages` | list of [`ChatMessage`](#chatmessage) | Messages, oldest first: the whole list with `reset`; otherwise the new messages, to append, and the changed ones, which replace the message of the same `id` in place. |
 | `removed` | list of text | IDs of removed messages. |
 | `skipped` | integer | New messages the host left out since the previous update, because the chat is faster than it delivers; 0 with `reset`. A removal is never left out. |
+
+### `TwitchEvent`
+
+One live Twitch event. `{ seq, type, at, data }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `seq` | integer | Order of the event in the subscription, from 1, without gaps unless events were dropped. |
+| `type` | `channel.goal.begin` \| `channel.goal.progress` \| `channel.goal.end` \| `channel.follow` \| `channel.hype_train.begin` \| `channel.hype_train.progress` \| `channel.hype_train.end` \| `channel.cheer` \| `channel.subscribe` \| `channel.subscription.gift` \| `channel.subscription.message` \| `channel.poll.begin` \| `channel.poll.progress` \| `channel.poll.end` \| `channel.prediction.begin` \| `channel.prediction.progress` \| `channel.prediction.lock` \| `channel.prediction.end` | The EventSub type, among those subscribed. |
+| `at` | integer | When the host received it, in Unix milliseconds of the host's clock. |
+| `data` | JSON | The host's projection of the event: the fields of the type's table under Twitch's names, `null` where Twitch sent none. |
+
+### `TwitchEvents`
+
+Live Twitch events of the widget's declared types. `{ state, reason, events }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `state` | `live` \| `off` | `live` while the host is subscribed at Twitch. |
+| `reason` | `connecting` \| `not_connected` \| `unavailable` or `null` | Why the state is `off`; `null` when `live`. |
+| `events` | list of [`TwitchEvent`](#twitchevent) | The latest events, oldest first. |
 <!-- /generated:result-shapes -->

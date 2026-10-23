@@ -1,0 +1,6 @@
+<!-- The latest goal and its progress, then how fresh it is. -->
+<box class="goal">
+  <text class="description">{state.description}</text>
+  <text class="progress">{t("progress", { current: state.current, target: state.target })}</text>
+  <text class="status">{t(state.status)}</text>
+</box>

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "nova.live-goal",
+  "version": "1.0.0",
+  "name": { "en": "Live goal", "fr": "Objectif en direct" },
+  "sizing": {
+    "fit": "none",
+    "preferred": { "width": 260, "height": 96 },
+    "min": { "width": 200, "height": 80 },
+    "max": { "width": 480, "height": 200 }
+  },
+  "permissions": {
+    "accounts": [
+      {
+        "service": "twitch",
+        "scopes": ["channel:read:goals"],
+        "events": ["channel.goal.begin", "channel.goal.progress", "channel.goal.end"]
+      }
+    ],
+    "network": [
+      {
+        "origin": "https://api.twitch.tv",
+        "method": "GET",
+        "path": "/helix/users",
+        "maxResponseBytes": 16384,
+        "account": "twitch"
+      },
+      {
+        "origin": "https://api.twitch.tv",
+        "method": "GET",
+        "path": "/helix/goals",
+        "queryParams": {
+          "broadcaster_id": { "type": "slug", "maxLength": 32, "required": true }
+        },
+        "maxResponseBytes": 16384,
+        "account": "twitch"
+      }
+    ]
+  }
+}

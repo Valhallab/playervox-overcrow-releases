@@ -138,7 +138,7 @@ pub const SERVICE_ACCOUNT_FIELDS: &[Field] = &[
     Field::required(
         "service",
         ValueType::Keyword(&["steam", "twitch"]),
-        "An integrated service of the table: PlayerVox defines its origins, how the secret is sent, its key page or OAuth client and the paths no widget reaches; the user connects it once and every widget that names it shares the connection. The account's `id` is the service's: the permission key is `account:<service>` and the routes name it in `account`. Only `scopes` and `required` stand beside it.",
+        "An integrated service of the table: PlayerVox defines its origins, how the secret is sent, its key page or OAuth client and the paths no widget reaches; the user connects it once and every widget that names it shares the connection. The account's `id` is the service's: the permission key is `account:<service>` and the routes name it in `account`. Only `scopes`, `required` and `events` stand beside it.",
     ),
     Field::optional(
         "scopes",

@@ -344,6 +344,15 @@ update.
 - **Each update**: `{ state }` at once, then at each change: `signed_out`, `pending` (a sign-in step is open), `connected`, `refused` (the service refused the key) or `expired` (the service asks to sign in again). The widget never sees the secret, the account's name or its scopes; with `required`, the host covers the content until the account is connected
 - **Shape**: [`AccountStatus`](result-shapes.md#accountstatus)
 
+### `twitch.events.subscribe`
+
+- **Kind**: subscription
+- **Requires**: the named, granted service `twitch`
+- **When it can be called**: At any time
+- **Parameters**: `types?`: list of `event type` ≤ 32
+- **Each update**: `{ state, reason, events }` at once, then at each change. `state` is `live` once the host has subscribed at Twitch, `off` otherwise, with `reason` `connecting`, `not_connected` (Twitch is not connected, or its connection lacks a declared scope) or `unavailable` (Twitch refused or cannot be reached; the host retries). Twitch replays nothing: at each `live`, read once by `http.fetch` what changed meanwhile, and keep reading while `off`. `events` repeats the latest 16 events of the subscription, oldest first, each `{ seq, type, at, data }`: updates are coalesced, so take only those whose `seq` is above the last one seen; a gap in `seq` means events were missed (read again). `data` is the host's projection of Twitch's event: every field of the type's table, `null` where Twitch sent none
+- **Shape**: [`TwitchEvents`](result-shapes.md#twitchevents)
+
 ### `account.connect`
 
 - **Kind**: call, answered once

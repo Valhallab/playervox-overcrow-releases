@@ -1,0 +1,21 @@
+{
+  "releaseNotes": {
+    "en": "First version: your latest Twitch goal, live.",
+    "fr": "Première version : votre dernier objectif Twitch, en direct."
+  },
+  "justifications": [
+    {
+      "permission": "account:twitch",
+      "text": "Reads the player's own goals with the integrated Twitch service and receives their live events; it writes nothing."
+    },
+    {
+      "permission": "network:GET https://api.twitch.tv/helix/users",
+      "text": "Reads the connected account's ID once, to read its goals."
+    },
+    {
+      "permission": "network:GET https://api.twitch.tv/helix/goals",
+      "text": "Reads the goals when the live events are back after a cut, and every 20 seconds only while they are off."
+    }
+  ],
+  "reviewMessage": "Test with any Twitch account connected in Connected services; create a goal in the creator dashboard and watch it update."
+}

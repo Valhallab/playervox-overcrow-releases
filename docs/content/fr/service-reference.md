@@ -346,6 +346,15 @@ mise à jour.
 - **Chaque mise à jour** : `{ state }` aussitôt, puis à chaque changement : `signed_out`, `pending` (une étape de connexion est ouverte), `connected`, `refused` (le service a refusé la clé) ou `expired` (le service demande de se reconnecter). Le widget ne voit jamais le secret, le nom du compte ni ses scopes ; avec `required`, l’hôte couvre le contenu tant que le compte n’est pas connecté
 - **Forme** : [`AccountStatus`](result-shapes.md#accountstatus)
 
+### `twitch.events.subscribe`
+
+- **Nature** : abonnement
+- **Exige** : le service `twitch` nommé et accordé
+- **Quand l’appeler** : À tout moment
+- **Paramètres** : `types?` : liste de `event type` ≤ 32
+- **Chaque mise à jour** : `{ state, reason, events }` tout de suite, puis à chaque changement. `state` vaut `live` une fois l'hôte abonné chez Twitch, `off` sinon, avec `reason` `connecting`, `not_connected` (Twitch n'est pas connecté, ou sa connexion n'a pas un scope déclaré) ou `unavailable` (Twitch a refusé ou est injoignable ; l'hôte réessaie). Twitch ne rejoue rien : à chaque `live`, relisez une fois par `http.fetch` ce qui a changé entre-temps, et continuez à lire tant que c'est `off`. `events` répète les 16 derniers événements de l'abonnement, du plus ancien au plus récent, chacun `{ seq, type, at, data }` : les mises à jour sont fusionnées, ne prenez donc que ceux dont le `seq` dépasse le dernier vu ; un trou dans `seq` veut dire que des événements ont été perdus (relisez). `data` est la projection par l'hôte de l'événement de Twitch : chaque champ de la table du type, `null` là où Twitch n'a rien envoyé
+- **Forme** : [`TwitchEvents`](result-shapes.md#twitchevents)
+
 ### `account.connect`
 
 - **Nature** : appel, à réponse unique

@@ -1,0 +1,10 @@
+{
+  "author": "Nova",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/example/live-goal-widget",
+  "defaultLocale": "en",
+  "localizations": [
+    { "locale": "en", "name": "Live goal", "description": "Your latest Twitch goal and its progress, updated live with the Twitch account you connected in PlayerVox OverCrow. The widget never sees your token." },
+    { "locale": "fr", "name": "Objectif en direct", "description": "Votre dernier objectif Twitch et sa progression, à jour en direct avec le compte Twitch connecté dans PlayerVox OverCrow. Le widget ne voit jamais votre jeton." }
+  ]
+}

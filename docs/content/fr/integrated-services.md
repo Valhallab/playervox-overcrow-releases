@@ -31,8 +31,10 @@ leurs adresses ou de leurs pages pour un autre compte : il nomme le service.
 - L’identifiant du compte est celui du service : la permission est
   `account:steam`, une route le nomme dans `account`, et
   `account.subscribe({ id: "steam" })` suit son état.
-- Seuls `scopes` et `required` accompagnent `service`. Les origines, l’envoi
-  et la page de clé viennent de la table de PlayerVox ci-dessous.
+- Seuls `scopes`, `required` et `events`
+  ([événements en direct](#événements-en-direct-twitch)) accompagnent
+  `service`. Les origines, l’envoi et la page de clé viennent de la table de
+  PlayerVox ci-dessous.
 - Twitch prend des `scopes` parmi ceux qu’il propose, par exemple
   `{ "service": "twitch", "scopes": ["channel:read:goals"] }`. Le joueur
   voit ce que lit chaque scope.
@@ -73,6 +75,90 @@ Le SDK, les erreurs et les tests fonctionnent comme pour tout compte : voyez
 l’état du service par son identifiant : `steam`, ou `twitch`, qui est le
 compte Twitch d’OverCrow.
 
+## Événements en direct (Twitch)
+
+À partir de PlayerVox OverCrow 0.8.1-beta.1, un widget qui nomme Twitch peut
+recevoir les événements de sa chaîne dès qu’ils arrivent, au lieu de lire
+Helix en boucle. Il les liste dans `events`, à côté des scopes qui les
+lisent :
+
+<!-- source: docs/content/examples/live-goal/manifest.json -->
+```json
+    "accounts": [
+      {
+        "service": "twitch",
+        "scopes": ["channel:read:goals"],
+        "events": ["channel.goal.begin", "channel.goal.progress", "channel.goal.end"]
+      }
+    ],
+```
+
+- Chaque type demande son scope parmi les `scopes` du widget (tableau
+  ci-dessous). `events` ne demande rien de plus au joueur : un événement lit
+  ce que son scope ouvre déjà.
+- Une version avec `events` demande la fonction de catalogue
+  `twitch-events` : le catalogue la propose à OverCrow 0.8.1-beta.1 ou plus
+  récent, et une application plus ancienne garde la version précédente.
+- OverCrow ouvre une seule connexion EventSub pour tous les widgets, sur la
+  propre chaîne du joueur. Le widget ne voit jamais de jeton ni
+  d’abonnement.
+
+`twitch.events.subscribe` les transmet. Twitch ne rejoue rien de ce qu’une
+coupure fait perdre, et les mises à jour sont fusionnées en chemin vers le
+widget : un widget garde donc le dernier `seq` traité et relit Helix quand il
+a pu manquer quelque chose :
+
+<!-- source: docs/content/examples/live-goal/logic.ts -->
+```ts
+let lastSeq = 0; // the highest `seq` handled
+let live = false;
+
+twitch.events.subscribe({}, (update) => {
+  if (!update.ok) return;
+  const { state, events } = update.value;
+  if (state === "live" && !live) readHelix(); // live again: catch up once
+  live = state === "live";
+  for (const event of events) {
+    if (event.seq <= lastSeq) continue; // seen in an earlier update
+    if (event.seq > lastSeq + 1) readHelix(); // some were missed
+    lastSeq = event.seq;
+    apply(event.type, event.data);
+  }
+});
+
+// While `off`, read Helix as before.
+timers.every(20_000, () => {
+  if (!live) readHelix();
+});
+```
+
+- `state` vaut `live` une fois OverCrow abonné chez Twitch à chaque type que
+  l’abonnement demande, `off` sinon, avec `reason` : `connecting`,
+  `not_connected` (Twitch n’est pas connecté, ou sa connexion n’a pas un
+  scope que le widget déclare) ou `unavailable` (Twitch a refusé ou est
+  injoignable ; OverCrow réessaie).
+- `events` répète les derniers événements de l’abonnement, du plus ancien au
+  plus récent, chacun `{ seq, type, at, data }`. `seq` compte à partir de 1
+  pour chaque abonnement ; un trou veut dire que des événements ont été
+  perdus.
+- `data` contient les champs de l’événement sous les noms de Twitch (voir la
+  référence EventSub de Twitch), `null` là où Twitch n’a rien envoyé ; les
+  textes et les listes sont coupés à des bornes fixes.
+- `types` restreint l’abonnement à certains des types déclarés ; un type que
+  la déclaration ne liste pas échoue avec `permission_denied`.
+- Dans un scénario de test, `fixtures.subscriptions["twitch.events.subscribe"]`
+  donne la première mise à jour et une étape `publish` les suivantes.
+
+| Type | Version | Scope |
+| --- | --- | --- |
+| `channel.goal.begin`, `channel.goal.progress`, `channel.goal.end` | 1 | `channel:read:goals` |
+| `channel.follow` | 2 | `moderator:read:followers` |
+| `channel.hype_train.begin`, `channel.hype_train.progress`, `channel.hype_train.end` | 2 | `channel:read:hype_train` |
+| `channel.cheer` | 1 | `bits:read` |
+| `channel.subscribe`, `channel.subscription.gift`, `channel.subscription.message` | 1 | `channel:read:subscriptions` |
+| `channel.poll.begin`, `channel.poll.progress`, `channel.poll.end` | 1 | `channel:read:polls` |
+| `channel.prediction.begin`, `channel.prediction.progress`, `channel.prediction.lock`, `channel.prediction.end` | 1 | `channel:read:predictions` |
+
 ## Référence
 
 ### `permissions.accounts` avec un service
@@ -80,9 +166,10 @@ compte Twitch d’OverCrow.
 <!-- generated:integrated-service-fields -->
 | Champ | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
-| `service` | `steam` \| `twitch` | oui | Un service intégré de la table : PlayerVox définit ses origines, l’envoi du secret, sa page de clé ou son client OAuth et les chemins qu’aucun widget n’atteint ; l’utilisateur le connecte une fois et chaque widget qui le nomme partage la connexion. L’`id` du compte est celui du service : la clé de permission est `account:<service>` et les routes le nomment dans `account`. Seuls `scopes` et `required` l’accompagnent. |
+| `service` | `steam` \| `twitch` | oui | Un service intégré de la table : PlayerVox définit ses origines, l’envoi du secret, sa page de clé ou son client OAuth et les chemins qu’aucun widget n’atteint ; l’utilisateur le connecte une fois et chaque widget qui le nomme partage la connexion. L’`id` du compte est celui du service : la clé de permission est `account:<service>` et les routes le nomment dans `account`. Seuls `scopes`, `required` et `events` l’accompagnent. |
 | `scopes` | liste de `scope name` ≤ 16 | non | Services OAuth seulement : scopes distincts parmi ceux que le service propose, tous en lecture seule dans la version 1 ; aucun par défaut. |
 | `required` | booléen | non | Comme pour un compte déclaré ; `true` par défaut. |
+| `events` | liste de `event type` ≤ 32 | non | Seulement pour un service à événements en direct (Twitch) : types distincts de la table du service, chacun lu par un scope parmi `scopes` ; l'hôte s'abonne sur la propre chaîne de l'utilisateur et `twitch.events.subscribe` les transmet. Hors du détail de la permission : un événement lit ce que son scope ouvre déjà. Demande la fonction `twitch-events`. |
 <!-- /generated:integrated-service-fields -->
 
 ### Les services

@@ -34,6 +34,13 @@ Not released yet.
   this CLI pins must be of that version or later to run such a widget. A
   manifest that names it needs the catalog feature `menu-closes`, so the
   catalog offers that version to such hosts only.
+- A Twitch service declaration may list `events`: live events of the
+  player's own channel, each of the host's table and read by a scope the
+  widget declares (`check` and `admit` refuse any other). PlayerVox
+  OverCrow delivers them from 0.8.1-beta.1 through `twitch.events.subscribe`;
+  a manifest with `events` needs the catalog feature `twitch-events`, and a
+  test scenario gives their updates as a data subscription.
+- It embeds `@overcrow/sdk` 1.2.0, which adds `twitch.events.subscribe`.
 
 ## 1.0.0-beta.7
 

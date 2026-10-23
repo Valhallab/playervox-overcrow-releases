@@ -261,4 +261,7 @@ que la logique peut lire sont aussi des constantes du SDK : voir
 | `MAX_OAUTH_CLIENT_ID_BYTES` | 128 octets | `clientId` d’un compte OAuth. |
 | `MAX_OAUTH_SCOPES` | 16 | `scopes` d’un compte OAuth. |
 | `MAX_OAUTH_SCOPE_BYTES` | 128 octets | Nom d’un scope OAuth. |
+| `MAX_SERVICE_EVENTS` | 32 | `events` de la déclaration d'un service intégré. |
+| `MAX_SERVICE_EVENT_BYTES` | 16 Kio | JSON compact du `data` d'un événement de service ; un événement plus grand est abandonné et son `seq` sauté. |
+| `SERVICE_EVENT_WINDOW` | 16 | Derniers événements que répète chaque mise à jour de `twitch.events.subscribe` : les mises à jour sont fusionnées, `seq` distingue un nouvel événement d'un événement déjà vu. |
 <!-- /generated:limits -->

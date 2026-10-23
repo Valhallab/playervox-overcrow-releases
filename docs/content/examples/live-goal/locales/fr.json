@@ -1,0 +1,7 @@
+{
+  "progress": "{current} / {target}",
+  "loading": "Chargement…",
+  "updated": "À jour",
+  "not_connected": "En attente de Twitch",
+  "unavailable": "Twitch ne répond pas"
+}
