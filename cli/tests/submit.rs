@@ -1821,6 +1821,28 @@ fn sources_that_cannot_be_read_back_keep_the_package_refusal() {
         ),
         "{report}"
     );
+    // A version whose sources the creator space does not give back.
+    let api = FakeApi::start(Some(project.previous()));
+    api.known(vec![known_version(
+        "discarded",
+        &"00".repeat(32),
+        Some(&"ab".repeat(32)),
+    )]);
+    api.on(
+        "sources",
+        vec![Reply::Json(
+            409,
+            json!({"code": "sources_not_readable", "state": "discarded", "error": "This version was discarded, so its sources are not given back."}),
+        )],
+    );
+    let (output, report) = project.submit_json(&api, &[]);
+    assert_eq!(code(&output), Some(1), "{report}");
+    assert!(
+        report["local"]["diagnostics"].to_string().contains(
+            "its sources could not be compared: this version was discarded, so its sources are not given back\""
+        ),
+        "{report}"
+    );
     // Sources whose bytes are not the ones announced are never rebuilt.
     let known = Project::new();
     fs::write(known.root.join("README.md"), "# Sent before\n").expect("README");

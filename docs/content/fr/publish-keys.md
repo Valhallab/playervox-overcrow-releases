@@ -9,6 +9,10 @@ Elle ne permet rien d’autre.
 
 - Soumettre des versions d’**un seul** widget, et suivre leurs contrôles.
   Chaque version passe toujours par la revue avant d’arriver aux joueurs.
+- Relire les sources d’une version déjà envoyée (en attente, en revue,
+  approuvée ou publiée), pour que `submit` reconnaisse une version déjà
+  là. Chaque lecture apparaît dans l’espace créateurs avec le nom de la
+  clé.
 - Elle ne permet ni de publier, ni de modifier la fiche, ni d’accéder à
   votre compte ou à vos autres widgets.
 - Elle dure 30, 90 ou 180 jours, ou un an (90 jours par défaut). Nous

@@ -8,6 +8,9 @@ password. It can do nothing else.
 
 - Submit versions of **one** widget, and follow their checks. Every version
   still goes through the review before players get it.
+- Read back the sources of a version it already sent (waiting, in review,
+  approved or published), so that `submit` recognises a version already
+  there. Each reading shows in the creator space with the key's name.
 - It can neither publish, nor change the listing, nor reach your account or
   your other widgets.
 - It lasts 30, 90 or 180 days, or a year (90 days by default). We remind

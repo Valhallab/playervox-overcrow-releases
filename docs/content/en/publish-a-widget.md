@@ -41,8 +41,9 @@ most, no two names that differ only by case.
 - A browser reads the file a link points to, where the command-line tool
   leaves the link out. Keep links out of the widget's folder.
 - Your sources stay private: only PlayerVox reviewers read them, sometimes
-  with an AI's help unless you refuse, and every access shows in the
-  creator space.
+  with an AI's help unless you refuse, besides your own publish keys
+  (`submit` reads back a version it already sent), and every access shows
+  in the creator space.
 
 A publisher sends at most 20 submissions in 24 hours; the page says when
 the next one is possible. If the page is closed or the connection drops

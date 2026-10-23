@@ -45,8 +45,9 @@ la casse.
   ligne de commande laisse le lien de côté. Gardez les liens hors du dossier
   du widget.
 - Vos sources restent privées : seuls les relecteurs PlayerVox les lisent,
-  parfois avec l’aide d’une IA sauf refus, et chaque consultation apparaît
-  dans l’espace créateurs.
+  parfois avec l’aide d’une IA sauf refus, en plus de vos propres clés de
+  publication (`submit` relit une version déjà envoyée), et chaque
+  consultation apparaît dans l’espace créateurs.
 
 Un éditeur fait au plus 20 envois en 24 heures ; la page dit quand le
 suivant est possible. Si la page se ferme ou si la connexion se coupe

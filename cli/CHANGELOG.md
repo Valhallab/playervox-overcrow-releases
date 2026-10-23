@@ -22,9 +22,11 @@ Not released yet.
   (`submit.version_known_differs`), and the message names the files that
   differ (`view.ocml` for `view.json`, the changed scripts for
   `logic.js`). When the sources cannot be read back (an API without that
-  route, sources deleted, a link that is not https://, bytes that are not
-  the ones sent, sources that no longer build), another package is refused
-  as before, and the message says why.
+  route, a version whose sources the creator space does not give back,
+  sources deleted, a link that is not https://, bytes that are not the
+  ones sent, sources that no longer build), another package is refused as
+  before, and the message says why. Each reading shows in the creator
+  space with the key's name.
 - A `toggle`, `choice` or `action` row of `wrapper.menu` may set
   `"closesMenu": true`: the host closes its options menu after a click on
   that row (it stays open by default). `check` and `admit` accept it;
