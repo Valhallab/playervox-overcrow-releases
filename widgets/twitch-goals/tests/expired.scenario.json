@@ -68,14 +68,7 @@
           "body": "{\"status\":401,\"message\":\"invalid access token\"}"
         }
       }
-    ],
-    "subscriptions": {
-      "twitch.events.subscribe": {
-        "state": "off",
-        "reason": "connecting",
-        "events": []
-      }
-    }
+    ]
   },
   "steps": [
     {

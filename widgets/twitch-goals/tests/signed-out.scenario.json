@@ -10,14 +10,7 @@
     }
   },
   "fixtures": {
-    "http": [],
-    "subscriptions": {
-      "twitch.events.subscribe": {
-        "state": "off",
-        "reason": "connecting",
-        "events": []
-      }
-    }
+    "http": []
   },
   "steps": [
     {
@@ -31,11 +24,6 @@
             "params": {
               "id": "twitch"
             },
-            "outcome": "ok"
-          },
-          {
-            "service": "twitch.events.subscribe",
-            "params": {},
             "outcome": "ok"
           }
         ]

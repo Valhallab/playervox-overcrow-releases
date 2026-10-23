@@ -487,14 +487,7 @@
           "body": "{\"data\":[{\"current\":{\"id\":\"hype-1\",\"broadcaster_user_id\":\"141981764\",\"broadcaster_user_login\":\"novalive\",\"broadcaster_user_name\":\"NovaLive\",\"level\":2,\"total\":4240,\"progress\":1240,\"goal\":1800,\"top_contributions\":[],\"shared_train_participants\":null,\"started_at\":\"2026-01-01T00:02:00Z\",\"expires_at\":\"2026-01-01T00:03:42Z\",\"type\":\"regular\",\"is_shared_train\":false},\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
         }
       }
-    ],
-    "subscriptions": {
-      "twitch.events.subscribe": {
-        "state": "off",
-        "reason": "connecting",
-        "events": []
-      }
-    }
+    ]
   },
   "steps": [
     {

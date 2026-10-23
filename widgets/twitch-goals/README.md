@@ -54,39 +54,32 @@ A route whose data no option shows is not called.
 
 | Permission | Why |
 | --- | --- |
-| `account:twitch` | The integrated Twitch service, with three read scopes: `channel:read:goals`, `moderator:read:followers`, `channel:read:hype_train`, and the live events they read (`events`: goal begin, progress and end, follow, Hype Train begin, progress and end). PlayerVox OverCrow refuses any other Twitch path, and any method but `GET` |
+| `account:twitch` | The integrated Twitch service, with three read scopes: `channel:read:goals`, `moderator:read:followers`, `channel:read:hype_train`. PlayerVox OverCrow refuses any other Twitch path, and any method but `GET` |
 | `network` | Four `GET` routes of `https://api.twitch.tv` (below) |
 
 | Route | Scope | When |
 | --- | --- | --- |
 | `/helix/users` | none | Once per connection: the channel's ID |
-| `/helix/goals` | `channel:read:goals` | Live: once when the events start or one was missed. Otherwise every 20 seconds while shown. Only when goals show |
-| `/helix/channels/followers?first=1` | `moderator:read:followers` | Live: as the goals, and after each follow (the total also counts unfollows, which have no event). Otherwise every 20 seconds while shown. Only when the count or the latest follower shows |
-| `/helix/hypetrain/status` | `channel:read:hype_train` | Live: as the goals. Otherwise every 20 seconds while shown. Only when the Hype Train shows |
+| `/helix/goals` | `channel:read:goals` | Every 20 seconds while shown, when goals show |
+| `/helix/channels/followers?first=1` | `moderator:read:followers` | Every 20 seconds while shown, when the count or the latest follower shows |
+| `/helix/hypetrain/status` | `channel:read:hype_train` | Every 20 seconds while shown, when the Hype Train shows |
 
-At worst, with the events off, nine requests a minute, 12,960 a day, well inside Twitch's
+At worst nine requests a minute, 12,960 a day, well inside Twitch's
 per-minute bucket. No storage: nothing of Twitch is kept on disk (Twitch
 allows a cache of 24 hours at most); after a restart the widget reads
 again.
 
 ## How it works
 
-- **Live.** PlayerVox OverCrow subscribes to the channel's EventSub events
-  the manifest lists and sends them to the widget (`twitch.events`): a
-  goal's progress, a new goal, an ended goal, a follow and the Hype Train
-  show at once, without a request. Twitch replays nothing a cut loses: each
-  time the events are live again, and when one was missed (a gap in
-  `seq`), each route is read once to catch up; while they stay live, a
-  route they keep current is not read again (the followers' total after a
-  follow). When the events are off (Twitch unreachable, OverCrow 0.8.0),
-  the widget reads every 20 seconds, as below.
 - **Rhythm.** One timer every 20 seconds. Hidden, the widget calls
   nothing; shown again, it reads once if the last read is older than 20
   seconds, and the next tick comes 20 seconds after that read. At each
   tick the goals, the followers and the Hype Train leave together (they do
   not depend on each other), each at most once per tick (one second of
-  slack absorbs the delivery of the tick). The Hype Train's countdown is
-  local, each second while a train runs and is shown (and only then).
+  slack absorbs the delivery of the tick). Polling, not EventSub:
+  everything is at most 20 seconds late, except the Hype Train's
+  countdown, local each second while a train runs and is shown (and only
+  then).
 - **Channel.** Each connection reads `/helix/users` again: if another
   account is now connected, the values of the old one are dropped. A 401 or
   403 on a route while PlayerVox OverCrow's own check of the token
@@ -118,8 +111,7 @@ again.
 
 ## Limits
 
-- Live with PlayerVox OverCrow 0.8.1-beta.1 or later; while the events are
-  off, updated every 20 seconds.
+- Updated every 20 seconds, not live.
 - Twitch's goals API lists the active goals only; a goal ended on Twitch
   disappears at the next read.
 - The latest follower only: no follower list.

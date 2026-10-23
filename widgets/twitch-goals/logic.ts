@@ -4,15 +4,10 @@
 // account, and only for the three read scopes the manifest asks.
 // Only `GET` routes; nothing is written to Twitch.
 //
-// Live: the host sends the channel's goal, follow and Hype Train events as
-// they happen (`twitch.events`). Twitch replays nothing a cut loses, so the
-// routes are read once each time the events are live again or one was
-// missed (a gap in `seq`), and the followers' total after a follow.
 // Rhythm: one timer every 20 seconds, each route at most once per tick,
-// and only the routes the events do not keep current (all of them while
-// the events are off); nothing while hidden, and no route whose data is
-// not shown. Values never disappear: a failed read keeps what was shown
-// and says how old it is.
+// nothing while hidden, and no route whose data is not shown. Values
+// never disappear: a failed read keeps what was shown and says how old it
+// is.
 // Nothing of Twitch is stored: values live in memory (Twitch allows a
 // cache of 24 hours at most), the channel is read again at each connection.
 import {
@@ -26,7 +21,6 @@ import {
   option,
   t,
   timers,
-  twitch,
   type IconName,
   type JsonValue,
   type Timer,
@@ -145,25 +139,6 @@ export function parseGoals(body: JsonValue): Goal[] | null {
     .sort((a, b) => b.created - a.created || (a.id < b.id ? -1 : 1));
 }
 
-/** A goal of a `channel.goal.begin` or `progress` event: Twitch's fields, `started_at` for the creation. */
-export function goalOfEvent(data: JsonValue): Goal | null {
-  const o = object(data);
-  if (o === null) return null;
-  return goalItem({ ...o, created_at: o["started_at"] ?? null });
-}
-
-/** The ID of a goal that a `channel.goal.end` event ends. */
-export function endedGoal(data: JsonValue): string | null {
-  return text(object(data)?.["id"]);
-}
-
-/** Puts `goal` in the active goals (newest first), in place of the one of its ID. */
-export function upsertGoal(goals: readonly Goal[], goal: Goal): Goal[] {
-  return [goal, ...goals.filter((g) => g.id !== goal.id)].sort(
-    (a, b) => b.created - a.created || (a.id < b.id ? -1 : 1),
-  );
-}
-
 export interface Followers {
   total: number;
   /** The latest follower; `""` when Twitch lists nobody. */
@@ -220,26 +195,6 @@ export function parseHype(body: JsonValue): Hype | null | undefined {
   const expiresAt = time(c?.["expires_at"]);
   if (level === null || progress === null || goal === null || goal === 0 || expiresAt === null) return undefined;
   return { id: text(c?.["id"]) ?? "", level, progress, goal, expiresAt };
-}
-
-/** The follower of a `channel.follow` event; `null` when unreadable. */
-export function followerOfEvent(data: JsonValue): { id: string; name: string; at: number } | null {
-  const o = object(data);
-  const id = text(o?.["user_id"]) ?? "";
-  if (id === "") return null;
-  const display = text(o?.["user_name"]) ?? "";
-  return { id, name: display !== "" ? display : (text(o?.["user_login"]) ?? ""), at: time(o?.["followed_at"]) ?? Date.now() };
-}
-
-/** The Hype Train of a `channel.hype_train.begin` or `progress` event, as T4 reads it. */
-export function hypeOfEvent(data: JsonValue): Hype | null {
-  const o = object(data);
-  const level = whole(o?.["level"]);
-  const progress = whole(o?.["progress"]);
-  const goal = whole(o?.["goal"]);
-  const expiresAt = time(o?.["expires_at"]);
-  if (level === null || progress === null || goal === null || goal === 0 || expiresAt === null) return null;
-  return { id: text(o?.["id"]) ?? "", level, progress, goal, expiresAt };
 }
 
 /** Backoff after `failures` 5xx or 429 in a row, milliseconds. */
@@ -353,14 +308,6 @@ const model = {
   lastFollowerAt: 0,
   busy: false,
   pending: false,
-  /** The host is subscribed to the channel's events at Twitch. */
-  live: false,
-  /** The last event handled (`seq` of `twitch.events`). */
-  lastSeq: 0,
-  /** Bumped when events may have been missed: a read that started before is not enough. */
-  epoch: 0,
-  /** The routes the events keep current since their last read. */
-  current: new Set<DataRoute>(),
 };
 
 let rhythm: Timer | null = null;
@@ -494,7 +441,6 @@ function forget(): void {
   state.phase = "loading";
   model.lastFollower = "";
   model.lastFollowerAt = 0;
-  model.current.clear();
   // Another channel: its routes are read at once.
   for (const route of DATA_ROUTES) routes[route] = fresh();
 }
@@ -542,9 +488,7 @@ async function read(): Promise<void> {
   }
   const channel = `broadcaster_id=${encodeURIComponent(model.userId)}`;
   // The three routes do not depend on each other: they leave together.
-  // While the events are live, a route they keep current is not read.
-  const reads = DATA_ROUTES.filter((route) => want[route] && due(route, now) && !(model.live && model.current.has(route)));
-  const epoch = model.epoch;
+  const reads = DATA_ROUTES.filter((route) => want[route] && due(route, now));
   // A read between two ticks (shown again, a new connection): the next
   // tick comes 20 seconds after it, not sooner, and not later.
   if (reads.length > 0 && now - tickAt > TICK_SLACK) beat();
@@ -552,11 +496,8 @@ async function read(): Promise<void> {
   if (generation !== model.generation) return;
   reads.forEach((route, index) => {
     const outcome = outcomes[index] as Outcome;
-    if (outcome.kind === "ok" && apply(route, outcome.body, now)) {
-      succeeded(routes[route], now);
-      // Read after the events went live: they keep it current from now.
-      if (model.live && epoch === model.epoch) model.current.add(route);
-    } else failed(routes[route], outcome.kind === "ok" ? { kind: "server" } : outcome, now);
+    if (outcome.kind === "ok" && apply(route, outcome.body, now)) succeeded(routes[route], now);
+    else failed(routes[route], outcome.kind === "ok" ? { kind: "server" } : outcome, now);
   });
   summarize();
 }
@@ -651,66 +592,6 @@ account.subscribe({ id: "twitch" }, (update) => {
     // A new connection reads its channel at once.
     routes.user = fresh();
     void refresh();
-  }
-});
-
-/** Events may have been missed: every route is read again (at its rhythm). */
-function resync(): void {
-  model.epoch += 1;
-  model.current.clear();
-  void refresh();
-}
-
-/** One event of the channel, put on screen at once. */
-function onEvent(type: string, data: JsonValue): void {
-  const now = Date.now();
-  state.now = now;
-  if (type === "channel.goal.begin" || type === "channel.goal.progress") {
-    const goal = goalOfEvent(data);
-    if (goal === null) return resync();
-    state.goals = upsertGoal(state.goals ?? [], goal);
-  } else if (type === "channel.goal.end") {
-    const id = endedGoal(data);
-    if (id === null) return resync();
-    state.goals = (state.goals ?? []).filter((g) => g.id !== id);
-  } else if (type === "channel.follow") {
-    const follower = followerOfEvent(data);
-    if (follower === null) return resync();
-    if (follower.id !== model.lastFollower) {
-      if (model.lastFollower !== "") light(now);
-      model.lastFollower = follower.id;
-      model.lastFollowerAt = Math.max(model.lastFollowerAt, follower.at);
-      const total = state.followers === null ? 1 : state.followers.total + 1;
-      state.followers = { total, lastId: follower.id, lastName: follower.name, lastAt: follower.at };
-    }
-    // The total counts unfollows too, which have no event: read it again.
-    model.current.delete("followers");
-    void refresh();
-  } else if (type === "channel.hype_train.begin" || type === "channel.hype_train.progress") {
-    const hype = hypeOfEvent(data);
-    if (hype === null) return resync();
-    setHype(hype.expiresAt > now ? hype : null);
-  } else if (type === "channel.hype_train.end") {
-    setHype(null);
-  }
-}
-
-twitch.events.subscribe({}, (update) => {
-  if (!update.ok) return;
-  const { state: status, events } = update.value;
-  const live = status === "live";
-  if (live && !model.live) {
-    model.live = true;
-    resync();
-  } else if (!live && model.live) {
-    model.live = false;
-    model.current.clear();
-  }
-  for (const event of events) {
-    if (event.seq <= model.lastSeq) continue;
-    if (event.seq > model.lastSeq + 1) resync();
-    model.lastSeq = event.seq;
-    onEvent(event.type, event.data);
   }
 });
 
