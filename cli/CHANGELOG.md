@@ -13,7 +13,9 @@ widget's sources and the embedded SDK.
   `"closesMenu": true`: the host closes its options menu after a click on
   that row (it stays open by default). `check` and `admit` accept it;
   PlayerVox OverCrow reads it from 0.8.1-beta.1, and the headless runtime
-  this CLI pins must be of that version or later to run such a widget.
+  this CLI pins must be of that version or later to run such a widget. A
+  manifest that names it needs the catalog feature `menu-closes`, so the
+  catalog offers that version to such hosts only.
 
 ## 1.0.0-beta.7
 

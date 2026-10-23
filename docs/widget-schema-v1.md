@@ -765,7 +765,7 @@ Boolean switch.
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
 | `default` | boolean | yes | Initial value. |
-| `closesMenu` | boolean | no | `true`: the menu closes after a click on this row. By default it stays open. |
+| `closesMenu` | boolean | no | `true`: the menu closes after a click on this row. By default it stays open. Needs the catalog feature `menu-closes`. |
 
 #### `slider`
 
@@ -786,7 +786,7 @@ One value among declared choices.
 | --- | --- | --- | --- |
 | `choices` | list of `MenuChoice` ≤ `MAX_MENU_CHOICES` | yes | At least `MIN_MENU_CHOICES` choices. |
 | `default` | identifier ≤ `MAX_MENU_ID_BYTES` | yes | Value of one declared choice. |
-| `closesMenu` | boolean | no | `true`: the menu closes after a click on this row. By default it stays open. |
+| `closesMenu` | boolean | no | `true`: the menu closes after a click on this row. By default it stays open. Needs the catalog feature `menu-closes`. |
 
 #### `action`
 
@@ -794,7 +794,7 @@ Sends a `menu` event carrying the row ID to the VM. Not a user gesture.
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `closesMenu` | boolean | no | `true`: the menu closes after a click on this row. By default it stays open. |
+| `closesMenu` | boolean | no | `true`: the menu closes after a click on this row. By default it stays open. Needs the catalog feature `menu-closes`. |
 
 #### `group`
 

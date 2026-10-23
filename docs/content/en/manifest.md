@@ -252,8 +252,9 @@ The menu stays open after a click, so that the user can change several
 rows in a row. Add `"closesMenu": true` to a `toggle`, `choice` or `action`
 row that opens something in your widget, such as a list to pick from: the
 menu closes after the click and the user sees what opened. PlayerVox
-OverCrow 0.8.1-beta.1 or later reads `closesMenu`; an earlier version
-refuses a manifest that has it.
+OverCrow reads `closesMenu` from 0.8.1-beta.1: the catalog offers a version
+of your widget that has it to those versions only (catalog feature
+`menu-closes`), and an earlier one keeps the previous version.
 
 ### Fields of every row
 
@@ -299,7 +300,7 @@ Boolean switch.
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
 | `default` | boolean | yes | Initial value. |
-| `closesMenu` | boolean | no | `true`: the menu closes after a click on this row. By default it stays open. |
+| `closesMenu` | boolean | no | `true`: the menu closes after a click on this row. By default it stays open. Needs the catalog feature `menu-closes`. |
 
 ### `slider`
 
@@ -320,7 +321,7 @@ One value among declared choices.
 | --- | --- | --- | --- |
 | `choices` | list of `MenuChoice` ≤ 16 | yes | At least 2 choices. |
 | `default` | identifier ≤ 48 bytes | yes | Value of one declared choice. |
-| `closesMenu` | boolean | no | `true`: the menu closes after a click on this row. By default it stays open. |
+| `closesMenu` | boolean | no | `true`: the menu closes after a click on this row. By default it stays open. Needs the catalog feature `menu-closes`. |
 
 ### `action`
 
@@ -328,7 +329,7 @@ Calls the handler registered with `onMenu`, with the row ID. Not a user action.
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `closesMenu` | boolean | no | `true`: the menu closes after a click on this row. By default it stays open. |
+| `closesMenu` | boolean | no | `true`: the menu closes after a click on this row. By default it stays open. Needs the catalog feature `menu-closes`. |
 
 ### `group`
 

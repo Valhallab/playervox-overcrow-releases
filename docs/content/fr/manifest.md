@@ -262,7 +262,9 @@ lignes à la suite. Ajoutez `"closesMenu": true` à une ligne `toggle`,
 `choice` ou `action` qui ouvre quelque chose dans votre widget, comme une
 liste où choisir : le menu se ferme après le clic et l’utilisateur voit ce
 qui s’est ouvert. PlayerVox OverCrow lit `closesMenu` à partir de
-0.8.1-beta.1 ; une version plus ancienne refuse un manifeste qui l’a.
+0.8.1-beta.1 : le catalogue ne propose une version de votre widget qui l’a
+qu’à ces versions (fonction de catalogue `menu-closes`), et une version plus
+ancienne garde la précédente.
 
 ### Champs communs à toutes les lignes
 
@@ -309,7 +311,7 @@ Bascule booléenne.
 | Champ | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
 | `default` | booléen | oui | Valeur initiale. |
-| `closesMenu` | booléen | non | `true` : le menu se ferme après un clic sur cette ligne. Par défaut, il reste ouvert. |
+| `closesMenu` | booléen | non | `true` : le menu se ferme après un clic sur cette ligne. Par défaut, il reste ouvert. Demande la fonction de catalogue `menu-closes`. |
 
 ### `slider`
 
@@ -330,7 +332,7 @@ Une valeur parmi les choix déclarés.
 | --- | --- | --- | --- |
 | `choices` | liste de `MenuChoice` ≤ 16 | oui | Au moins 2 choix. |
 | `default` | identifiant ≤ 48 octets | oui | Valeur de l’un des choix déclarés. |
-| `closesMenu` | booléen | non | `true` : le menu se ferme après un clic sur cette ligne. Par défaut, il reste ouvert. |
+| `closesMenu` | booléen | non | `true` : le menu se ferme après un clic sur cette ligne. Par défaut, il reste ouvert. Demande la fonction de catalogue `menu-closes`. |
 
 ### `action`
 
@@ -338,7 +340,7 @@ Appelle le gestionnaire enregistré par `onMenu` avec l’ID de la ligne. Ce n�
 
 | Champ | Type | Obligatoire | Signification |
 | --- | --- | --- | --- |
-| `closesMenu` | booléen | non | `true` : le menu se ferme après un clic sur cette ligne. Par défaut, il reste ouvert. |
+| `closesMenu` | booléen | non | `true` : le menu se ferme après un clic sur cette ligne. Par défaut, il reste ouvert. Demande la fonction de catalogue `menu-closes`. |
 
 ### `group`
 

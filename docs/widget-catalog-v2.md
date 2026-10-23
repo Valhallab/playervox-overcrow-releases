@@ -254,8 +254,11 @@ safe, and refuse what an application cannot safely ignore.
    for a widget it reads only the `id` and `requires`, and skips the widget
    with its targets, which it recognizes by their manifest's top-level `id`
    without validating the manifest; for a target it reads only `requires`. A
-   skipped entry is never shown, installed or updated. Catalog v2 defines no
-   feature name, so a v2 reader skips any entry with a non-empty `requires`.
+   skipped entry is never shown, installed or updated. The schema names its
+   features in `KNOWN_FEATURES` (`account-key`, `account-oauth`,
+   `service-steam`, `service-twitch`, `network-file-param`, `menu-closes`),
+   and `Manifest::features` says which ones a manifest needs; a reader
+   announces those it implements and skips an entry that names any other.
    Producers name features `[a-z][a-z0-9-]*`. A producer puts `requires` on
    a widget only if no reader could have installed one of its versions;
    otherwise on the new targets only, so that older versions stay listed and

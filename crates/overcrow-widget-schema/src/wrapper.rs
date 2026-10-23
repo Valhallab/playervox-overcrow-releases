@@ -77,12 +77,33 @@ pub const HOST_FEATURES: &[&str] = &[
     "telemetry.gpuTemperature",
 ];
 
+/// The catalog v2 feature of a manifest whose menu names `closesMenu`: a
+/// reader that does not know the field refuses the manifest, so a catalog
+/// reader without the feature skips that version.
+pub const FEATURE_MENU_CLOSES: &str = "menu-closes";
+
+/// Whether a row of `wrapper.menu`, in a group's flyout included, names
+/// `closesMenu`, whatever its value.
+pub fn names_closes_menu(wrapper: &Value) -> bool {
+    fn rows(rows: &Value) -> bool {
+        rows.as_array().is_some_and(|rows| {
+            rows.iter()
+                .any(|row| row.get("closesMenu").is_some() || rows_of(row))
+        })
+    }
+    fn rows_of(row: &Value) -> bool {
+        row.get("rows").is_some_and(rows)
+    }
+    wrapper.get("menu").is_some_and(rows)
+}
+
 /// `closesMenu` of the `toggle`, `choice` and `action` rows: the rows a
-/// single click completes. Absent means `false`.
+/// single click completes. Absent means `false`. Needs
+/// [`FEATURE_MENU_CLOSES`].
 const CLOSES_MENU: Field = Field::optional(
     "closesMenu",
     ValueType::Bool,
-    "`true`: the menu closes after a click on this row. By default it stays open.",
+    "`true`: the menu closes after a click on this row. By default it stays open. Needs the catalog feature `menu-closes`.",
 );
 
 /// `{ "en": …, "fr": … }`: non-empty, trimmed, no control character.

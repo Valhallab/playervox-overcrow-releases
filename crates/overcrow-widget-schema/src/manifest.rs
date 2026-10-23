@@ -271,8 +271,9 @@ impl Manifest {
 
     /// The catalog v2 features a reader must support to run this manifest
     /// (`account-key`, `account-oauth`, or the integrated service's
-    /// `service-steam`…, and `network-file-param` for a network rule with a
-    /// `file` parameter); empty for a manifest without either.
+    /// `service-steam`…, `network-file-param` for a network rule with a
+    /// `file` parameter, and `menu-closes` for a menu row that names
+    /// `closesMenu`); empty for a manifest without any.
     pub fn features(&self) -> BTreeSet<&'static str> {
         let mut features: BTreeSet<&'static str> = self
             .accounts
@@ -285,6 +286,9 @@ impl Manifest {
         let rules = self.value["permissions"]["network"].as_array();
         if rules.is_some_and(|rules| rules.iter().any(uses_file_parameter)) {
             features.insert(FEATURE_NETWORK_FILE_PARAM);
+        }
+        if crate::wrapper::names_closes_menu(&self.value["wrapper"]) {
+            features.insert(crate::wrapper::FEATURE_MENU_CLOSES);
         }
         features
     }

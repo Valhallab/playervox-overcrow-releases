@@ -39,7 +39,7 @@
     "One value among declared choices.": "Une valeur parmi les choix déclarés.",
     "At least `MIN_MENU_CHOICES` choices.": "Au moins `MIN_MENU_CHOICES` choix.",
     "Value of one declared choice.": "Valeur de l’un des choix déclarés.",
-    "`true`: the menu closes after a click on this row. By default it stays open.": "`true` : le menu se ferme après un clic sur cette ligne. Par défaut, il reste ouvert.",
+    "`true`: the menu closes after a click on this row. By default it stays open. Needs the catalog feature `menu-closes`.": "`true` : le menu se ferme après un clic sur cette ligne. Par défaut, il reste ouvert. Demande la fonction de catalogue `menu-closes`.",
     "Calls the handler registered with `onMenu`, with the row ID. Not a user action.": "Appelle le gestionnaire enregistré par `onMenu` avec l’ID de la ligne. Ce n’est pas une action de l’utilisateur.",
     "Side flyout holding non-group rows.": "Sous-menu latéral qui contient des lignes autres que des groupes.",
     "At least one row; a `group` is not allowed here.": "Au moins une ligne ; un `group` n’y est pas admis.",
