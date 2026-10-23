@@ -6,9 +6,10 @@
 //   node tests/scenarios.mjs
 //
 // At each connection the widget reads its channel (T1), then at once and
-// every minute the goals (T2), the latest follower (T3) and the Hype Train
-// (T4), in that order, skipping a route the options hide. Each fixture
-// answers one request: a scenario gets enough copies for its minutes.
+// every 20 seconds the goals (T2), the latest follower (T3) and the Hype
+// Train (T4), in that order, skipping a route the options hide. Each
+// fixture answers one request: a scenario gets enough copies for its
+// minutes.
 import { readdirSync, rmSync, writeFileSync } from "node:fs";
 
 const here = new URL("./", import.meta.url);
@@ -17,6 +18,7 @@ const VALIDATE = "https://id.twitch.tv/oauth2/validate";
 const CHANNEL = "141981764";
 const START = 1_767_225_600_000; // 2026-01-01T00:00:00Z
 const MIN = 60_000;
+const TICK = 20_000;
 const iso = (ms) => new Date(ms).toISOString().replace(/\.000Z$/, "Z");
 
 const urls = {
@@ -32,7 +34,8 @@ const failure = (url, error) => ({ request: { method: "GET", url, account: "twit
 const repeat = (count, make) => Array.from({ length: count }, make);
 /** The widget's request of `url`, as a `calls` expectation. */
 const fetched = (url, outcome = "ok") => ({ service: "http.fetch", params: { url, method: "GET", as: "text" }, outcome });
-const READ = [fetched(urls.goals), fetched(urls.followers), fetched(urls.hype)];
+const GOALS_READ = fetched(urls.goals);
+const READ = [GOALS_READ, fetched(urls.followers), fetched(urls.hype)];
 /** The widget's first calls: the account's state, then its channel. */
 const SUBSCRIBED = { service: "account.subscribe", params: { id: "twitch" }, outcome: "ok" };
 const START_CALLS = [SUBSCRIBED, fetched(urls.user), ...READ];
@@ -85,14 +88,16 @@ const TRAIN = { level: 2, progress: 1240, goal: 1800, leftS: 222 };
 const answer = (url, value) => (value === null ? [] : value.error ? [failure(url, value.error)] : [fixture(url, value)]);
 
 /**
- * The answers of `minutes` minutes of reads (one read at start and one a
- * minute). `goalsAt(n, at)`… give the answer of the read `n` (0 at start):
- * a response, `{ error }`, or `null` when the widget asks nothing then.
+ * The answers of `minutes` minutes of reads (one read at start and one
+ * every 20 seconds). `goalsAt(n, at)`… give the answer of the route's read
+ * `n` (0 at start): a response, `{ error }`, or `null` when the widget asks
+ * nothing then. A failure slows a route down: its next reads come later
+ * than `at`.
  */
 function reads({ minutes = 0, list = GOALS.en, total = 1284, last = NYX, train = null, goalsAt, followersAt, hypeAt, skip = [] } = {}) {
   const out = [fixture(urls.user, user())];
-  for (let n = 0; n <= minutes; n += 1) {
-    const at = START + n * MIN;
+  for (let n = 0; n <= minutes * (MIN / TICK); n += 1) {
+    const at = START + n * TICK;
     if (!skip.includes("goals")) out.push(...answer(urls.goals, goalsAt ? goalsAt(n, at) : goals(list)));
     if (!skip.includes("followers")) out.push(...answer(urls.followers, followersAt ? followersAt(n, at) : followers(total, last, at)));
     if (!skip.includes("hype")) out.push(...answer(urls.hype, hypeAt ? hypeAt(n, at) : hype(train, at)));
@@ -184,7 +189,7 @@ scenario("sizes", "One line at 150 and 170 px (ellipsis), Standard at 230 px, Fu
 
 // --- hype: a train comes in front, then leaves when its countdown ends.
 scenario("hype", "A Hype Train at level 2, 03:42 left: in front of the goal, alone in Compact; it leaves at zero without waiting for Twitch.", {
-  http: reads({ minutes: 4, train: TRAIN, hypeAt: (n, at) => hype(n === 0 ? TRAIN : { ...TRAIN, leftS: 222 - n * 60 }, at) }),
+  http: reads({ minutes: 4, train: TRAIN, hypeAt: (n, at) => hype(n === 0 ? TRAIN : { ...TRAIN, leftS: 222 - (n * TICK) / 1000 }, at) }),
   steps: [
     { expect: { state: "running", text: ["Hype Train", "03:42 left"], fault: "none" } },
     ...layouts("hype"),
@@ -210,7 +215,7 @@ scenario("reached", "Karaoke night at 50 / 50: green check and Reached; a new fo
   ],
   steps: [
     { expect: { state: "running", text: ["Reached"], fault: "none" } },
-    { advance: { ms: MIN } },
+    { advance: { ms: TICK } },
     { expect: { text: ["Latest: KaiPlays"] } },
     ...layouts("reached"),
     ...inFrench("reached", L4),
@@ -221,7 +226,7 @@ scenario("new-follower", "KaiPlays follows: the followers card pulses twice and 
   http: reads({ minutes: 1, followersAt: (n, at) => followers(n === 0 ? 1283 : 1284, n === 0 ? NYX : KAI, at) }),
   steps: [
     { expect: { state: "running", text: ["1,283"] } },
-    { advance: { ms: MIN } },
+    { advance: { ms: TICK } },
     { expect: { text: ["1,284", "Latest: KaiPlays"], image: "new-standard", fault: "none" } },
     { host: { options: { layout: "full" }, size: { width: 340, height: 200 } } },
     { expect: { image: "new-full", fault: "none" } },
@@ -332,8 +337,10 @@ scenario("refused", "Twitch refuses the goals while the token is valid: the chan
   ],
   steps: [
     { expect: { state: "running", text: ["Karaoke night"] } },
-    { advance: { ms: MIN } },
+    { advance: { ms: TICK } },
     { expect: { noText: ["Refused by Twitch"] } },
+    { advance: { ms: MIN - TICK } },
+    { expect: { text: ["Refused by Twitch · 1 min ago", "Karaoke night"], fault: "none" } },
     { advance: { ms: MIN } },
     { expect: { text: ["Refused by Twitch · 2 min ago", "Karaoke night"], fault: "none" } },
     ...layouts("refused", ["line", "compact", "standard"]),
@@ -416,26 +423,35 @@ scenario("opt-no-hype", "Hype Train off: never shown, even while a train runs; t
 
 scenario("routes-follow-options", "Followers and Hype Train switched off: their routes are no longer called; on again, read at once.", {
   http: reads({ minutes: 1, skip: [] }).concat(
-    [fixture(urls.goals, goals(GOALS.en)), fixture(urls.goals, goals(GOALS.en)), fixture(urls.followers, followers(1284, NYX, START + 3 * MIN)), fixture(urls.hype, hype(null, START + 3 * MIN))],
+    repeat(6, () => fixture(urls.goals, goals(GOALS.en))),
+    [fixture(urls.followers, followers(1284, NYX, START + 3 * MIN)), fixture(urls.hype, hype(null, START + 3 * MIN))],
   ),
   steps: [
     { expect: { state: "running", calls: START_CALLS } },
     { advance: { ms: MIN } },
     { host: { options: { "show-followers": false, "show-last-follower": false, "show-hype": false } } },
     { advance: { ms: MIN } },
-    { expect: { calls: [...READ, fetched(urls.goals)], fault: "none" } },
+    { expect: { calls: [...READ, ...READ, ...READ, GOALS_READ, GOALS_READ, GOALS_READ], fault: "none" } },
     { advance: { ms: MIN } },
     { host: { options: {} } },
-    { expect: { calls: [fetched(urls.goals), fetched(urls.followers), fetched(urls.hype)], text: ["Latest: NyxArcade"], fault: "none" } },
+    { expect: { calls: [GOALS_READ, GOALS_READ, GOALS_READ, fetched(urls.followers), fetched(urls.hype)], text: ["Latest: NyxArcade"], fault: "none" } },
   ],
 });
 
-scenario("cadence", "Ten minutes: the channel once, then each route once a minute, never more.", {
+scenario("cadence", "Ten minutes: the channel once, then each route every 20 seconds, never more.", {
   http: reads({ minutes: 10 }),
   steps: [
     { expect: { state: "running", calls: START_CALLS } },
-    { advance: { ms: 10 * MIN } },
-    { expect: { fault: "none", text: ["Karaoke night"], calls: repeat(10, () => READ).flat() } },
+    { advance: { ms: TICK - 1000 } },
+    { expect: { calls: [] } },
+    { advance: { ms: 1000 } },
+    { expect: { calls: READ } },
+    { advance: { ms: TICK } },
+    { expect: { calls: READ } },
+    // Three minutes at a time: an expectation lists at most 64 calls.
+    ...repeat(3, () => [{ advance: { ms: 3 * MIN } }, { expect: { calls: repeat(9, () => READ).flat() } }]).flat(),
+    { advance: { ms: TICK } },
+    { expect: { fault: "none", text: ["Karaoke night"], calls: READ } },
   ],
 });
 
@@ -447,6 +463,28 @@ scenario("hidden", "Hidden for five minutes: nothing is read; shown again, one r
     { advance: { ms: 5 * MIN } },
     { expect: { calls: [] } },
     { host: { visible: true } },
+    { expect: { text: ["Karaoke night"], fault: "none", calls: READ } },
+  ],
+});
+
+scenario("shown-again", "Hidden, then shown again: read at once if the last read is more than 20 seconds old, then every 20 seconds from that read.", {
+  http: reads({ minutes: 2 }),
+  steps: [
+    { expect: { state: "running", calls: START_CALLS } },
+    { advance: { ms: 5000 } },
+    { host: { visible: false } },
+    { advance: { ms: 10_000 } },
+    { host: { visible: true } },
+    { expect: { calls: [] } },
+    { advance: { ms: 5000 } },
+    { expect: { calls: READ } },
+    { host: { visible: false } },
+    { advance: { ms: 30_000 } },
+    { host: { visible: true } },
+    { expect: { calls: READ } },
+    { advance: { ms: TICK - 1000 } },
+    { expect: { calls: [] } },
+    { advance: { ms: 1000 } },
     { expect: { text: ["Karaoke night"], fault: "none", calls: READ } },
   ],
 });

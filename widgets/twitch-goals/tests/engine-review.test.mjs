@@ -7,7 +7,7 @@ import { test } from "node:test";
 import { installRuntime } from "@overcrow/sdk/testing";
 
 import { loadLogic } from "./load-logic.mjs";
-import { NOVA, OTHER, fakeTwitch, follower, goal, minutes, settle, train } from "./twitch-fake.mjs";
+import { NOVA, OTHER, fakeTwitch, follower, goal, minutes, nextRead, seconds, settle, train } from "./twitch-fake.mjs";
 
 const NOW = Date.UTC(2026, 0, 1, 12);
 const EN = JSON.parse(readFileSync(new URL("../locales/en.json", import.meta.url), "utf8"));
@@ -31,7 +31,7 @@ test("every option off from the start: Nothing to show, never the skeleton", asy
 });
 
 test("the three reads leave together, not one after the other", async () => {
-  vm.advance(60_000);
+  vm.advance(20_000);
   await new Promise((resolve) => setImmediate(resolve));
   const open = vm.calls.filter((call) => call.service === "http.fetch" && !call.settled);
   assert.equal(open.length, 3);
@@ -42,7 +42,7 @@ test("a route failing for good never stops the others", async () => {
   twitch.routeStatus["/helix/hypetrain/status"] = 500;
   const goals = twitch.count("/helix/goals");
   await minutes(vm, twitch, 30);
-  assert.equal(twitch.count("/helix/goals") - goals, 30, "goals every minute");
+  assert.equal(twitch.count("/helix/goals") - goals, 90, "goals every 20 seconds");
   assert.equal(state.stale, "server");
   assert.equal(logic.staleText(state), "Unreachable · 30 min ago");
   assert.match(logic.staleTip(state), /few minutes/);
@@ -59,8 +59,8 @@ test("followers refused for good: goals and the Hype Train still read", async ()
   twitch.routeStatus["/helix/channels/followers"] = 401;
   const [goals, hype] = [twitch.count("/helix/goals"), twitch.count("/helix/hypetrain/status")];
   await minutes(vm, twitch, 5);
-  assert.equal(twitch.count("/helix/goals") - goals, 5);
-  assert.equal(twitch.count("/helix/hypetrain/status") - hype, 5);
+  assert.equal(twitch.count("/helix/goals") - goals, 15);
+  assert.equal(twitch.count("/helix/hypetrain/status") - hype, 15);
   assert.equal(state.stale, "refused");
   assert.equal(logic.staleText(state), "Refused by Twitch · 5 min ago", "the age of the followers, not of the goals");
   delete twitch.routeStatus["/helix/channels/followers"];
@@ -70,7 +70,7 @@ test("followers refused for good: goals and the Hype Train still read", async ()
 
 test("an unfollow is not a new follower", async () => {
   twitch.followers = [follower("8", "Kenji", Date.now()), ...twitch.followers];
-  await minutes(vm, twitch, 1);
+  await nextRead(vm, twitch, "/helix/channels/followers");
   assert.equal(logic.isNewFollower(state), true);
   vm.advance(10_000);
   const lit = state.newUntil;

@@ -4,9 +4,10 @@
 // account, and only for the three read scopes the manifest asks.
 // Only `GET` routes; nothing is written to Twitch.
 //
-// Rhythm: one timer a minute, each route at most once per tick, nothing
-// while hidden, and no route whose data is not shown. Values never
-// disappear: a failed read keeps what was shown and says how old it is.
+// Rhythm: one timer every 20 seconds, each route at most once per tick,
+// nothing while hidden, and no route whose data is not shown. Values
+// never disappear: a failed read keeps what was shown and says how old it
+// is.
 // Nothing of Twitch is stored: values live in memory (Twitch allows a
 // cache of 24 hours at most), the channel is read again at each connection.
 import {
@@ -37,8 +38,10 @@ export const ROUTES = {
 } as const;
 export type Route = keyof typeof ROUTES;
 
-/** One minute, the least time between two requests of one route. */
+/** One minute: the channel's read and every retry. */
 export const MINUTE = 60_000;
+/** The goals, the followers and the Hype Train: on screen within 20 seconds. */
+export const EVERY = 20_000;
 const TICK_SLACK = 1000;
 /** How long a new follower lights the followers card. */
 export const NEW_FOLLOWER_FOR = 10_000;
@@ -228,7 +231,7 @@ export function reached(g: { current: number; target: number }): boolean {
 
 export type Layout = "line" | "compact" | "standard" | "full";
 export type Phase = "loading" | "ready" | "empty";
-/** Why values are old: no answer (every minute), Twitch failing (5xx, unreadable: backoff), its limit, its refusal. */
+/** Why values are old: no answer (retried every minute), Twitch failing (5xx, unreadable: backoff), its limit, its refusal. */
 export type Stale = "" | "unreachable" | "server" | "quota" | "refused";
 
 declare module "@overcrow/sdk" {
@@ -289,6 +292,8 @@ const fresh = (): RouteState => ({ lastCall: 0, okAt: 0, failAt: 0, failures: 0,
 const routes: Record<Route, RouteState> = { user: fresh(), goals: fresh(), followers: fresh(), hype: fresh() };
 type DataRoute = Exclude<Route, "user">;
 const DATA_ROUTES: readonly DataRoute[] = ["goals", "followers", "hype"];
+/** The least time between two requests of a route. */
+const PERIOD: Record<Route, number> = { user: MINUTE, goals: EVERY, followers: EVERY, hype: EVERY };
 
 const model = {
   connected: false,
@@ -305,6 +310,9 @@ const model = {
   pending: false,
 };
 
+let rhythm: Timer | null = null;
+/** When the rhythm last ticked, Unix ms. */
+let tickAt = 0;
 let countdown: Timer | null = null;
 let unlight: Timer | null = null;
 
@@ -313,11 +321,12 @@ function measure(): void {
 }
 measure();
 
-/** Whether `r` may be asked now: once per tick of the timer, after its backoff. */
-function due(r: RouteState, now: number): boolean {
-  // The host fires the timer every minute at a fixed rate; a second of
-  // slack absorbs its delivery jitter.
-  return (r.lastCall === 0 || now - r.lastCall >= MINUTE - TICK_SLACK) && now >= r.retryAt - TICK_SLACK;
+/** Whether `route` may be asked now: once per period, after its backoff. */
+function due(route: Route, now: number): boolean {
+  const r = routes[route];
+  // The host fires the timer at a fixed rate; a second of slack absorbs
+  // its delivery jitter.
+  return (r.lastCall === 0 || now - r.lastCall >= PERIOD[route] - TICK_SLACK) && now >= r.retryAt - TICK_SLACK;
 }
 
 const SUB_GOALS: readonly GoalType[] = ["subscription", "subscription_count", "new_subscription", "new_subscription_count"];
@@ -463,7 +472,7 @@ async function read(): Promise<void> {
   if (!want.goals && !want.followers && !want.hype) return;
   const generation = model.generation;
   if (model.userId === "") {
-    if (!due(routes.user, now)) return;
+    if (!due("user", now)) return;
     const outcome = await call("user", "", now);
     if (generation !== model.generation) return;
     const id = outcome.kind === "ok" ? parseUser(outcome.body) : null;
@@ -479,7 +488,10 @@ async function read(): Promise<void> {
   }
   const channel = `broadcaster_id=${encodeURIComponent(model.userId)}`;
   // The three routes do not depend on each other: they leave together.
-  const reads = DATA_ROUTES.filter((route) => want[route] && due(routes[route], now));
+  const reads = DATA_ROUTES.filter((route) => want[route] && due(route, now));
+  // A read between two ticks (shown again, a new connection): the next
+  // tick comes 20 seconds after it, not sooner, and not later.
+  if (reads.length > 0 && now - tickAt > TICK_SLACK) beat();
   const outcomes = await Promise.all(reads.map((route) => call(route, route === "followers" ? `${channel}&first=1` : channel, now)));
   if (generation !== model.generation) return;
   reads.forEach((route, index) => {
@@ -583,10 +595,16 @@ account.subscribe({ id: "twitch" }, (update) => {
   }
 });
 
-timers.every(MINUTE, () => {
-  state.now = Date.now();
-  void refresh();
-});
+/** Starts the rhythm from now. */
+function beat(): void {
+  rhythm?.cancel();
+  rhythm = timers.every(EVERY, () => {
+    tickAt = Date.now();
+    state.now = tickAt;
+    void refresh();
+  });
+}
+beat();
 
 // ---------------------------------------------------------------------------
 // View helpers (the view's expressions)

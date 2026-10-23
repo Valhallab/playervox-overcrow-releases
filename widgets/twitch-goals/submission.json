@@ -10,15 +10,15 @@
     },
     {
       "permission": "network:GET https://api.twitch.tv/helix/goals",
-      "text": "Reads your channel's active goals and their progress (channel:read:goals). Once a minute while the widget is shown, when the options show goals."
+      "text": "Reads your channel's active goals and their progress (channel:read:goals). Every 20 seconds while the widget is shown, when the options show goals; once a minute at most while Twitch fails."
     },
     {
       "permission": "network:GET https://api.twitch.tv/helix/channels/followers",
-      "text": "Reads your follower count and the latest follower, one at a time (first=1; moderator:read:followers). Once a minute while the widget is shown, when the options show followers."
+      "text": "Reads your follower count and the latest follower, one at a time (first=1; moderator:read:followers). Every 20 seconds while the widget is shown, when the options show followers; once a minute at most while Twitch fails."
     },
     {
       "permission": "network:GET https://api.twitch.tv/helix/hypetrain/status",
-      "text": "Reads whether a Hype Train runs on your channel, its level, progress and end (channel:read:hype_train). Once a minute while the widget is shown, when the options show the Hype Train."
+      "text": "Reads whether a Hype Train runs on your channel, its level, progress and end (channel:read:hype_train). Every 20 seconds while the widget is shown, when the options show the Hype Train; once a minute at most while Twitch fails."
     }
   ]
 }

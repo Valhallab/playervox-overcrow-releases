@@ -60,24 +60,26 @@ A route whose data no option shows is not called.
 | Route | Scope | When |
 | --- | --- | --- |
 | `/helix/users` | none | Once per connection: the channel's ID |
-| `/helix/goals` | `channel:read:goals` | Every minute while shown, when goals show |
-| `/helix/channels/followers?first=1` | `moderator:read:followers` | Every minute while shown, when the count or the latest follower shows |
-| `/helix/hypetrain/status` | `channel:read:hype_train` | Every minute while shown, when the Hype Train shows |
+| `/helix/goals` | `channel:read:goals` | Every 20 seconds while shown, when goals show |
+| `/helix/channels/followers?first=1` | `moderator:read:followers` | Every 20 seconds while shown, when the count or the latest follower shows |
+| `/helix/hypetrain/status` | `channel:read:hype_train` | Every 20 seconds while shown, when the Hype Train shows |
 
-At worst three requests a minute, 4,320 a day, well inside Twitch's
+At worst nine requests a minute, 12,960 a day, well inside Twitch's
 per-minute bucket. No storage: nothing of Twitch is kept on disk (Twitch
 allows a cache of 24 hours at most); after a restart the widget reads
 again.
 
 ## How it works
 
-- **Rhythm.** One timer a minute. Hidden, the widget calls nothing; shown
-  again, it reads once if the last read is older than a minute. At each
+- **Rhythm.** One timer every 20 seconds. Hidden, the widget calls
+  nothing; shown again, it reads once if the last read is older than 20
+  seconds, and the next tick comes 20 seconds after that read. At each
   tick the goals, the followers and the Hype Train leave together (they do
   not depend on each other), each at most once per tick (one second of
   slack absorbs the delivery of the tick). Polling, not EventSub:
-  everything is at most a minute late, except the Hype Train's countdown,
-  local each second while a train runs and is shown (and only then).
+  everything is at most 20 seconds late, except the Hype Train's
+  countdown, local each second while a train runs and is shown (and only
+  then).
 - **Channel.** Each connection reads `/helix/users` again: if another
   account is now connected, the values of the old one are dropped. A 401 or
   403 on a route while PlayerVox OverCrow's own check of the token
@@ -109,7 +111,7 @@ again.
 
 ## Limits
 
-- Updated every minute, not live.
+- Updated every 20 seconds, not live.
 - Twitch's goals API lists the active goals only; a goal ended on Twitch
   disappears at the next read.
 - The latest follower only: no follower list.

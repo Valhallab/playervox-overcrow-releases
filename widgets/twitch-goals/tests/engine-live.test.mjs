@@ -6,7 +6,7 @@ import { test } from "node:test";
 import { installRuntime } from "@overcrow/sdk/testing";
 
 import { loadLogic } from "./load-logic.mjs";
-import { fakeTwitch, follower, goal, minutes, settle, train } from "./twitch-fake.mjs";
+import { fakeTwitch, follower, goal, minutes, seconds, settle, train } from "./twitch-fake.mjs";
 
 const NOW = Date.UTC(2026, 0, 1, 12);
 const EN = JSON.parse(readFileSync(new URL("../locales/en.json", import.meta.url), "utf8"));
@@ -31,8 +31,8 @@ test("the first follower read is not new", () => {
 test("a new follower lights the card for 10 s", async () => {
   twitch.total = 1285;
   twitch.followers = [follower("8", "Kenji", Date.now()), ...twitch.followers];
-  await minutes(vm, twitch, 1);
-  assert.equal(logic.isNewFollower(state), true);
+  await seconds(vm, twitch, 20);
+  assert.equal(logic.isNewFollower(state), true, "at the next tick");
   assert.equal(logic.followersClass(state), "followers new");
   vm.advance(10_000);
   assert.equal(logic.isNewFollower(state), false);

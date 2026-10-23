@@ -89,10 +89,22 @@ export async function settle(vm, twitch) {
   throw new Error("calls never settle");
 }
 
-/** Moves the virtual time minute by minute, settling after each tick. */
-export async function minutes(vm, twitch, count) {
-  for (let index = 0; index < count; index += 1) {
-    vm.advance(60_000);
+/** Moves the virtual time tick by tick (20 s), Twitch answering each one. */
+export async function seconds(vm, twitch, count) {
+  for (let left = count * 1000; left > 0; left -= 20_000) {
+    vm.advance(Math.min(20_000, left));
     await settle(vm, twitch);
   }
+}
+
+/** Moves tick by tick until Twitch receives a new request of `fragment`. */
+export async function nextRead(vm, twitch, fragment) {
+  const before = twitch.count(fragment);
+  for (let tick = 0; tick < 60 && twitch.count(fragment) === before; tick += 1) await seconds(vm, twitch, 20);
+  if (twitch.count(fragment) === before) throw new Error(`${fragment} never read`);
+}
+
+/** The same, minute by minute. */
+export async function minutes(vm, twitch, count) {
+  await seconds(vm, twitch, count * 60);
 }
