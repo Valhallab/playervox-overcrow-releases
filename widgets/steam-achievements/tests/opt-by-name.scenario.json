@@ -138,7 +138,7 @@
       {
         "request": {
           "method": "GET",
-          "url": "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/1874000/a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1.jpg"
+          "url": "https://shared.akamai.steamstatic.com/community_assets/images/apps/1874000/a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1.jpg"
         },
         "response": {
           "status": 200,
@@ -149,7 +149,7 @@
       {
         "request": {
           "method": "GET",
-          "url": "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/1874000/0100100100100100100100100100100000000000.jpg"
+          "url": "https://shared.akamai.steamstatic.com/community_assets/images/apps/1874000/0100100100100100100100100100100000000000.jpg"
         },
         "response": {
           "status": 200,
@@ -160,7 +160,7 @@
       {
         "request": {
           "method": "GET",
-          "url": "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/1874000/0190190190190190190190190190190000000000.jpg"
+          "url": "https://shared.akamai.steamstatic.com/community_assets/images/apps/1874000/0190190190190190190190190190190000000000.jpg"
         },
         "response": {
           "status": 200,
@@ -171,7 +171,7 @@
       {
         "request": {
           "method": "GET",
-          "url": "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/1874000/0200200200200200200200200200200000000000.jpg"
+          "url": "https://shared.akamai.steamstatic.com/community_assets/images/apps/1874000/0200200200200200200200200200200000000000.jpg"
         },
         "response": {
           "status": 200,
@@ -182,7 +182,7 @@
       {
         "request": {
           "method": "GET",
-          "url": "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/1874000/0290290290290290290290290290290000000000.jpg"
+          "url": "https://shared.akamai.steamstatic.com/community_assets/images/apps/1874000/0290290290290290290290290290290000000000.jpg"
         },
         "response": {
           "status": 200,
@@ -193,7 +193,7 @@
       {
         "request": {
           "method": "GET",
-          "url": "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/1874000/0300300300300300300300300300300000000000.jpg"
+          "url": "https://shared.akamai.steamstatic.com/community_assets/images/apps/1874000/0300300300300300300300300300300000000000.jpg"
         },
         "response": {
           "status": 200,
@@ -204,7 +204,7 @@
       {
         "request": {
           "method": "GET",
-          "url": "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/1874000/0390390390390390390390390390390000000000.jpg"
+          "url": "https://shared.akamai.steamstatic.com/community_assets/images/apps/1874000/0390390390390390390390390390390000000000.jpg"
         },
         "response": {
           "status": 200,
@@ -215,7 +215,7 @@
       {
         "request": {
           "method": "GET",
-          "url": "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/1874000/0400400400400400400400400400400000000000.jpg"
+          "url": "https://shared.akamai.steamstatic.com/community_assets/images/apps/1874000/0400400400400400400400400400400000000000.jpg"
         },
         "response": {
           "status": 200,
@@ -226,7 +226,7 @@
       {
         "request": {
           "method": "GET",
-          "url": "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/1874000/0490490490490490490490490490490000000000.jpg"
+          "url": "https://shared.akamai.steamstatic.com/community_assets/images/apps/1874000/0490490490490490490490490490490000000000.jpg"
         },
         "response": {
           "status": 200,
@@ -237,7 +237,7 @@
       {
         "request": {
           "method": "GET",
-          "url": "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/1874000/0500500500500500500500500500500000000000.jpg"
+          "url": "https://shared.akamai.steamstatic.com/community_assets/images/apps/1874000/0500500500500500500500500500500000000000.jpg"
         },
         "response": {
           "status": 200,
@@ -248,7 +248,7 @@
       {
         "request": {
           "method": "GET",
-          "url": "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/1874000/0590590590590590590590590590590000000000.jpg"
+          "url": "https://shared.akamai.steamstatic.com/community_assets/images/apps/1874000/0590590590590590590590590590590000000000.jpg"
         },
         "response": {
           "status": 200,
@@ -259,7 +259,7 @@
       {
         "request": {
           "method": "GET",
-          "url": "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/1874000/0600600600600600600600600600600000000000.jpg"
+          "url": "https://shared.akamai.steamstatic.com/community_assets/images/apps/1874000/0600600600600600600600600600600000000000.jpg"
         },
         "response": {
           "status": 200,
@@ -270,7 +270,7 @@
       {
         "request": {
           "method": "GET",
-          "url": "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/1874000/0690690690690690690690690690690000000000.jpg"
+          "url": "https://shared.akamai.steamstatic.com/community_assets/images/apps/1874000/0690690690690690690690690690690000000000.jpg"
         },
         "response": {
           "status": 200,
@@ -281,7 +281,7 @@
       {
         "request": {
           "method": "GET",
-          "url": "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/1874000/0900900900900900900900900900900000000000.jpg"
+          "url": "https://shared.akamai.steamstatic.com/community_assets/images/apps/1874000/0900900900900900900900900900900000000000.jpg"
         },
         "response": {
           "status": 200,
@@ -292,7 +292,7 @@
       {
         "request": {
           "method": "GET",
-          "url": "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/1874000/0990990990990990990990990990990000000000.jpg"
+          "url": "https://shared.akamai.steamstatic.com/community_assets/images/apps/1874000/0990990990990990990990990990990000000000.jpg"
         },
         "response": {
           "status": 200,
@@ -303,7 +303,7 @@
       {
         "request": {
           "method": "GET",
-          "url": "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/1874000/0700700700700700700700700700700000000000.jpg"
+          "url": "https://shared.akamai.steamstatic.com/community_assets/images/apps/1874000/0700700700700700700700700700700000000000.jpg"
         },
         "response": {
           "status": 200,
@@ -314,7 +314,7 @@
       {
         "request": {
           "method": "GET",
-          "url": "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/1874000/0790790790790790790790790790790000000000.jpg"
+          "url": "https://shared.akamai.steamstatic.com/community_assets/images/apps/1874000/0790790790790790790790790790790000000000.jpg"
         },
         "response": {
           "status": 200,
@@ -325,7 +325,7 @@
       {
         "request": {
           "method": "GET",
-          "url": "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/1874000/0800800800800800800800800800800000000000.jpg"
+          "url": "https://shared.akamai.steamstatic.com/community_assets/images/apps/1874000/0800800800800800800800800800800000000000.jpg"
         },
         "response": {
           "status": 200,
@@ -336,7 +336,7 @@
       {
         "request": {
           "method": "GET",
-          "url": "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/1874000/0890890890890890890890890890890000000000.jpg"
+          "url": "https://shared.akamai.steamstatic.com/community_assets/images/apps/1874000/0890890890890890890890890890890000000000.jpg"
         },
         "response": {
           "status": 200,

@@ -111,6 +111,19 @@ test("images: declared hosts, a failure not asked again for an hour", async () =
   await minutes(vm, steam, 30);
   assert.equal(steam.count(header), asked, "not asked again within the hour");
   assert.equal(typeof logic.achSrc(logic.achievements()[0], state.images), "string");
+  // A recent game: no header on either host, the game's icon instead.
+  steam.images.fail.add(fallback);
+  delete state.images[fallback];
+  state.images = { ...state.images };
+  state.game = { ...state.game, header: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/100/none.jpg" };
+  await minutes(vm, steam, 1);
+  assert.equal(state.game.header, "");
+  assert.equal(logic.hasHeader(state), false);
+  assert.equal(state.game.icon, `https://shared.akamai.steamstatic.com/community_assets/images/apps/100/${"e".repeat(40)}.jpg`);
+  assert.ok(logic.iconSrc(state) !== "", "the game's icon shows");
+  // Icons on the one path that serves every game.
+  const icons = steam.requests.filter((url) => url.endsWith(".jpg") && !url.includes("header"));
+  assert.ok(icons.length > 0 && icons.every((url) => url.startsWith("https://shared.akamai.steamstatic.com/community_assets/images/apps/")), icons.join(" "));
 });
 
 test("another language: its names are read at once, not a minute later", async () => {

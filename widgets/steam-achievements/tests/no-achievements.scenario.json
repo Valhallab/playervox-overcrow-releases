@@ -134,7 +134,7 @@
       {
         "request": {
           "method": "GET",
-          "url": "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/1874100/c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0.jpg"
+          "url": "https://shared.akamai.steamstatic.com/community_assets/images/apps/1874100/c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0.jpg"
         },
         "response": {
           "status": 200,

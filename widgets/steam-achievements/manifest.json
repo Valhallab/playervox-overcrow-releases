@@ -135,9 +135,9 @@
         "maxResponseBytes": 1048576
       },
       {
-        "origin": "https://cdn.akamai.steamstatic.com",
+        "origin": "https://shared.akamai.steamstatic.com",
         "method": "GET",
-        "path": "/steamcommunity/public/images/apps/{app}/{file}",
+        "path": "/community_assets/images/apps/{app}/{file}",
         "pathParams": {
           "app": {
             "type": "integer",

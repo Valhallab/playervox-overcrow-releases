@@ -58,7 +58,7 @@ user's language.
 | Permission | Why |
 | --- | --- |
 | `account:steam` | The integrated Steam service. Read only: the widget never calls a trade route (`IEconService`), and PlayerVox OverCrow refuses any route outside the read interfaces of the player and the games |
-| `network` | Six `GET` routes of `https://api.steampowered.com` (below); the store image of a game on two Steam image hosts; the icons of achievements and games on `https://cdn.akamai.steamstatic.com`, a `file` parameter (`<hash>.jpg`, catalog feature `network-file-param`) |
+| `network` | Six `GET` routes of `https://api.steampowered.com` (below); the store image of a game on two Steam image hosts; the icons of achievements and games on `https://shared.akamai.steamstatic.com/community_assets/images/apps/`, a `file` parameter (`<name>.jpg`, catalog feature `network-file-param`) |
 | `storage` | The profile link, the tracked achievement, the last values shown and the achievement lists of the last three games |
 
 | Route | When |
@@ -96,11 +96,14 @@ your computer and sends it only to `api.steampowered.com`. To revoke it:
 - **Key and probe.** A 401 or 403 is a refused key only when PlayerVox
   OverCrow's own probe of the key is refused too; otherwise the widget gets
   the status (a 403 on the achievements: not readable for this game).
-- **Images.** Steam's answers name images on hosts that changed over the
-  years (`steamcdn-a.akamaihd.net`, `media.steampowered.com`…, some
-  redirecting): the widget keeps only the path and asks the host its
-  manifest declares, never the URL as given, and never follows a
-  redirection. An image that fails is not asked again for an hour; a
+- **Images.** Steam's answers name an icon by its file name alone or by a
+  URL on hosts and paths that changed over the years
+  (`steamcdn-a.akamaihd.net`, `media.steampowered.com`,
+  `/steamcommunity/public/images/apps/`, `/community_assets/images/apps/`…,
+  some redirecting): the widget keeps only the file name and asks
+  `shared.akamai.steamstatic.com/community_assets/images/apps/`, the one
+  path that serves recent games too, never the URL as given, and never
+  follows a redirection. An image that fails is not asked again for an hour; a
   missing achievement icon shows a neutral Lucide icon (`trophy`, `award`,
   `lock`), a missing store image the game's icon, then `gamepad-2`.
 - **Large games.** Answers over 64 kB (a game with hundreds or thousands

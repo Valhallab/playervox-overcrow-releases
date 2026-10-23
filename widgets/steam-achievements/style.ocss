@@ -1,5 +1,7 @@
 /* Steam achievements. The frame fits its height to the content
-   (fit: height): no empty band under the content. */
+   (fit: height): no empty band under the content. Icons and side texts
+   never shrink (flex-shrink defaults to 1): a long name is cut, never
+   the icon beside it. */
 .root {
   width: 100%;
   flex-direction: column;
@@ -34,6 +36,7 @@
   width: 18px;
   height: 18px;
   border-radius: 4px;
+  flex-shrink: 0;
 }
 .line-name {
   flex-grow: 1;
@@ -70,10 +73,12 @@
 .msg-icon {
   font-size: 16px;
   color: var(--color-text-muted);
+  flex-shrink: 0;
 }
 .warn-icon {
   font-size: 14px;
   color: var(--color-warning);
+  flex-shrink: 0;
 }
 
 /* Game card */
@@ -91,6 +96,10 @@
 }
 .full .gamecard {
   padding: 0 0 var(--space-4);
+}
+/* No store image (recent games): the game's icon, as in Standard. */
+.full .gamecard.bare {
+  padding-top: var(--space-4);
 }
 .full .gamecard > .head,
 .full .gamecard > .prog,
@@ -159,10 +168,12 @@
   height: 6px;
   border-radius: var(--radius-pill);
   background: var(--color-success);
+  flex-shrink: 0;
 }
 .eyebrow-icon {
   font-size: 11px;
   color: var(--color-warning);
+  flex-shrink: 0;
 }
 .eyebrow {
   flex-shrink: 1;
@@ -219,6 +230,7 @@
 .count {
   font-size: var(--font-size-body);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 .num {
   font-weight: 700;
@@ -231,10 +243,12 @@
   text-align: end;
   font-size: var(--font-size-small);
   color: var(--color-text-muted);
+  flex-shrink: 0;
 }
 .done-icon {
   font-size: 16px;
   color: var(--color-success);
+  flex-shrink: 0;
 }
 .muted-line {
   font-size: var(--font-size-small);
@@ -266,6 +280,7 @@
   width: 40px;
   height: 40px;
   border-radius: 4px;
+  flex-shrink: 0;
 }
 .fallback {
   justify-content: center;
@@ -292,6 +307,7 @@
 .pin {
   font-size: 11px;
   color: var(--color-accent);
+  flex-shrink: 0;
 }
 .feature-eyebrow {
   font-size: var(--font-size-small);
@@ -354,6 +370,7 @@
   width: 28px;
   height: 28px;
   border-radius: 3px;
+  flex-shrink: 0;
 }
 .row-text {
   flex-direction: column;
@@ -383,6 +400,7 @@
   font-size: var(--font-size-small);
   color: var(--color-text-muted);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 .all-done {
   font-size: var(--font-size-button);
@@ -400,6 +418,7 @@
 .notice-icon {
   font-size: 14px;
   color: var(--color-warning);
+  flex-shrink: 0;
 }
 .notice-text {
   flex-direction: column;
@@ -548,6 +567,7 @@
 .empty-icon {
   font-size: 22px;
   color: var(--color-text-muted);
+  flex-shrink: 0;
 }
 .root.line .empty-icon {
   font-size: 16px;

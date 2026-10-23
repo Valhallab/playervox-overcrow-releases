@@ -111,12 +111,24 @@ test("player achievements, the schema and the rarity", () => {
 
 test("images are asked from the declared hosts only", () => {
   const file = `${"c".repeat(40)}.jpg`;
+  // Every form Steam gives: old and current paths on any host, or the file alone.
   assert.equal(logic.iconFile(7, `https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/7/${file}`), file);
+  assert.equal(logic.iconFile(7, `https://shared.fastly.steamstatic.com/community_assets/images/apps/7/${file}`), file);
+  assert.equal(logic.iconFile(7, `https://cdn.akamai.steamstatic.com/community_assets/images/apps/7/A3_DOORS_BW.jpg`), "A3_DOORS_BW.jpg");
+  assert.equal(logic.iconFile(7, file), file);
+  assert.equal(logic.iconFile(7, "A3_DOORS.jpg"), "A3_DOORS.jpg");
+  // Another game, another folder, an encoded slash, another type: nothing.
   assert.equal(logic.iconFile(7, `https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/8/${file}`), "");
+  assert.equal(logic.iconFile(7, `https://shared.akamai.steamstatic.com/community_assets/images/apps/8/${file}`), "");
+  assert.equal(logic.iconFile(7, `https://shared.akamai.steamstatic.com/community_assets/images/items/7/${file}`), "");
   assert.equal(logic.iconFile(7, "https://x.test/steamcommunity/public/images/apps/7/a%2F.jpg"), "");
+  assert.equal(logic.iconFile(7, "https://x.test/community_assets/images/apps/7/../7/a.jpg"), "");
   assert.equal(logic.iconFile(7, "https://x.test/steamcommunity/public/images/apps/7/a.png"), "");
-  assert.equal(logic.iconUrl(7, file), `https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/7/${file}`);
-  assert.equal(logic.gameIconUrl(7, "d".repeat(40)), `https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/7/${"d".repeat(40)}.jpg`);
+  assert.equal(logic.iconFile(7, "../a.jpg"), "");
+  assert.equal(logic.iconFile(7, `${"a".repeat(61)}.jpg`), "");
+  // The one path that serves recent games too.
+  assert.equal(logic.iconUrl(7, file), `https://shared.akamai.steamstatic.com/community_assets/images/apps/7/${file}`);
+  assert.equal(logic.gameIconUrl(7, "d".repeat(40)), `https://shared.akamai.steamstatic.com/community_assets/images/apps/7/${"d".repeat(40)}.jpg`);
   assert.equal(logic.gameIconUrl(7, "zz"), "");
   assert.deepEqual(logic.headerUrls(7), [
     "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/7/header.jpg",

@@ -129,12 +129,12 @@
       </box>
     </if>
     <else>
-      <box class="gamecard">
+      <box class={hasHeader(state) ? "gamecard" : "gamecard bare"}>
         <if test={layout(state.optionsVersion) == "full" && hasHeader(state)}>
           <box class="banner-clip"><image class="banner" src={gameSrc(state)} label={state.game.name}/></box>
         </if>
         <box class="head">
-          <if test={layout(state.optionsVersion) != "full"}>
+          <if test={layout(state.optionsVersion) != "full" || !hasHeader(state)}>
             <if test={hasHeader(state)}><image class="capsule" src={gameSrc(state)} label={state.game.name}/></if>
             <else><gameicon cls="capsule-icon"/></else>
           </if>

@@ -34,8 +34,12 @@ export const ROUTES = {
   rarity: `${API}/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/`,
 } as const;
 export type Route = keyof typeof ROUTES;
-/** Images: the path Steam gives, set on a host the manifest declares. */
-export const ICON_ORIGIN = "https://cdn.akamai.steamstatic.com";
+/**
+ * Icons: the file Steam names, on the one path that serves every game (the
+ * older `/steamcommunity/public/images/apps/` path misses recent games).
+ */
+export const ICON_ORIGIN = "https://shared.akamai.steamstatic.com";
+const ICON_PATH = "/community_assets/images/apps";
 
 
 /** One minute, the least time between two requests of one route. */
@@ -190,12 +194,19 @@ export interface SchemaAch {
 }
 
 // The name and `.jpg` within the route's `maxLength` (64).
-const ICON_FILE = /\/steamcommunity\/public\/images\/apps\/(\d{1,8})\/([A-Za-z0-9_-]{1,60}\.jpg)$/;
+const FILE = /^[A-Za-z0-9_-]{1,60}\.jpg$/;
+// Steam names either path, on any of its hosts.
+const ICON_FILE = /^\/(?:steamcommunity\/public|community_assets)\/images\/apps\/(\d{1,8})\/([^/]+)$/;
 
-/** The file name of an icon URL of `appid`, whatever host Steam named. */
-export function iconFile(appid: number, url: string): string {
-  const match = ICON_FILE.exec(url.replace(/^https?:\/\/[^/]+/i, ""));
-  return match !== null && Number(match[1]) === appid ? (match[2] ?? "") : "";
+/**
+ * The file name of an icon of `appid` as Steam gives it: a full URL, whatever
+ * host and path Steam named, or the file name alone.
+ */
+export function iconFile(appid: number, value: string): string {
+  if (FILE.test(value)) return value;
+  const match = ICON_FILE.exec(value.replace(/^https?:\/\/[^/]+/i, ""));
+  const file = match?.[2] ?? "";
+  return match !== null && Number(match[1]) === appid && FILE.test(file) ? file : "";
 }
 
 /** One achievement of S5. */
@@ -371,13 +382,17 @@ async function readItems(text: string, key: string, each: (item: JsonValue) => v
 
 /** The icon of an achievement on the declared host; `""` without one. */
 export function iconUrl(appid: number, file: string): string {
-  return file === "" ? "" : `${ICON_ORIGIN}/steamcommunity/public/images/apps/${appid}/${file}`;
+  return file === "" ? "" : `${ICON_ORIGIN}${ICON_PATH}/${appid}/${file}`;
 }
 /** The game's icon (S3 hash). */
 export function gameIconUrl(appid: number, hash: string): string {
   return /^[0-9a-f]{40}$/.test(hash) ? iconUrl(appid, `${hash}.jpg`) : "";
 }
-/** The store header of a game, on each declared host in turn. */
+/**
+ * The store header of a game, on each declared host in turn. A recent game
+ * keeps it only under a hashed path that only the store's API names: both
+ * fail, and the view shows the game's icon instead.
+ */
 export function headerUrls(appid: number): string[] {
   return [
     `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,

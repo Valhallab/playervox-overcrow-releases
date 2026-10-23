@@ -16,8 +16,8 @@ const ID = "76561198000000000";
 const START = 1_767_225_600_000; // 2026-01-01T00:00:00Z
 const MIN = 60_000;
 const at = (minutesAgo) => Math.floor((START - minutesAgo * MIN) / 1000);
-const ICON_HOST = "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps";
-const iconsRouted = manifest.permissions.network.some((rule) => rule.path.startsWith("/steamcommunity/"));
+const ICON_HOST = "https://shared.akamai.steamstatic.com/community_assets/images/apps";
+const iconsRouted = manifest.permissions.network.some((rule) => rule.path.startsWith("/community_assets/"));
 
 // The games and achievements of the mockups (tmp/acc-p-mockups, series 2).
 const A = (i, en, fr, ic, ago, rarity, descEn, descFr, extra = {}) => ({
@@ -84,13 +84,20 @@ function recent(games, hidden = false) {
   if (hidden) return json(200, { response: {} });
   return json(200, { response: { total_count: games.length, games: games.map((game) => ({ appid: game.appid, name: game.name, playtime_2weeks: 300, playtime_forever: 3000, img_icon_url: ICON_HASH[game.icon] })) } });
 }
-function schema(game, l) {
+/** How Steam names an icon: `old` URLs on old hosts, `current` URLs, or the file alone. */
+const ICON_FORMS = {
+  old: (game, file, gray) => (gray ? `http://media.steampowered.com` : `https://steamcdn-a.akamaihd.net`) + `/steamcommunity/public/images/apps/${game.appid}/${file}`,
+  current: (game, file) => `https://shared.fastly.steamstatic.com/community_assets/images/apps/${game.appid}/${file}`,
+  file: (_game, file) => file,
+};
+function schema(game, l, form = "old") {
+  const url = (a, gray) => ICON_FORMS[form](game, `${hash(a.ic, gray)}.jpg`, gray);
   const achievements = game.achievements.map((a) => ({
     name: a.api, defaultvalue: 0, displayName: l === "french" ? a.fr : a.en, hidden: a.hidden ? 1 : 0,
     description: a.hidden ? "" : l === "french" ? a.descFr : a.descEn,
-    // Old hosts on purpose: the widget sets each path on its declared host.
-    icon: a.icon ? `https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/${game.appid}/${hash(a.ic, false)}.jpg` : "",
-    icongray: a.icon ? `http://media.steampowered.com/steamcommunity/public/images/apps/${game.appid}/${hash(a.ic, true)}.jpg` : "",
+    // Old hosts by default: the widget sets each file on its declared path.
+    icon: a.icon ? url(a, false) : "",
+    icongray: a.icon ? url(a, true) : "",
   }));
   // Steam lists the game's stats after its achievements.
   const stats = [{ name: "STAT_RUNS", defaultvalue: 0, displayName: "Runs" }];
@@ -525,6 +532,26 @@ scenario("images", "Image failures never show a hole: an icon refused, a header 
   steps: [
     { expect: { state: "running", text: ["Ashen Crown"], fault: "none" } },
     ...layouts("images", ["compact", "standard", "full"]),
+  ],
+});
+
+// A recent game: Steam serves its icons only under /community_assets/ and
+// has no store image without the hash only the store's API names.
+const RECENT = { ...ASHEN, appid: 4_078_000, name: "Tidewater Run", icon: "game-tide" };
+scenario("recent-game", "A recent game: icons named by current URLs and by file name alone, all shown from the one path that serves them; no store image on either host, the game's icon instead.", {
+  http: [
+    ...reads(RECENT).filter((entry) => !entry.request.url.includes("/header.jpg") && !entry.request.url.includes("GetSchemaForGame")),
+    fixture(urls.schema(RECENT), schema(RECENT, "english", "current")),
+    fixture(urls.schema(RECENT, "french"), schema(RECENT, "french", "file")),
+    fixture(urls.header(RECENT), { status: 404, contentType: "text/html", body: "Not found" }, false),
+    fixture(urls.headerCdn(RECENT), { status: 404, contentType: "text/html", body: "Not found" }, false),
+  ],
+  steps: [
+    { expect: { state: "running", text: ["Tidewater Run"], fault: "none" } },
+    ...layouts("recent", ["line", "standard", "full"]),
+    { host: { locale: "fr" } },
+    { advance: { ms: MIN } },
+    ...layouts("recent-fr", ["full"]),
   ],
 });
 

@@ -29,8 +29,8 @@
       "text": "Reads the share of players who unlocked each achievement (rarity). Once per game and day, without your key."
     },
     {
-      "permission": "network:GET https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/{app}/{file}",
-      "text": "Shows the icons of the achievements on screen and of the game, the file name taken from Steam's answer and checked (<hash>.jpg). Each icon once; a failure is not asked again for an hour."
+      "permission": "network:GET https://shared.akamai.steamstatic.com/community_assets/images/apps/{app}/{file}",
+      "text": "Shows the icons of the achievements on screen and of the game, the file name taken from Steam's answer and checked (<name>.jpg). The one path Steam serves for every game, recent ones included. Each icon once; a failure is not asked again for an hour."
     },
     {
       "permission": "network:GET https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{app}/header.jpg",
