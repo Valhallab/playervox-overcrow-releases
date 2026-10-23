@@ -7,6 +7,14 @@ change between betas; 1.0.0 will freeze them under semantic versioning.
 The CLI's version enters no package: a package depends only on the
 widget's sources and the embedded SDK.
 
+## Unreleased
+
+- A `toggle`, `choice` or `action` row of `wrapper.menu` may set
+  `"closesMenu": true`: the host closes its options menu after a click on
+  that row (it stays open by default). `check` and `admit` accept it;
+  PlayerVox OverCrow reads it from 0.8.1-beta.1, and the headless runtime
+  this CLI pins must be of that version or later to run such a widget.
+
 ## 1.0.0-beta.7
 
 Released in the creator tools ZIPs of PlayerVox OverCrow 0.8.0-beta.1's
