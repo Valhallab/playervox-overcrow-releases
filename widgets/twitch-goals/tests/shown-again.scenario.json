@@ -271,7 +271,14 @@
           "body": "{\"data\":[{\"current\":null,\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
         }
       }
-    ]
+    ],
+    "subscriptions": {
+      "twitch.events.subscribe": {
+        "state": "off",
+        "reason": "connecting",
+        "events": []
+      }
+    }
   },
   "steps": [
     {
@@ -283,6 +290,11 @@
             "params": {
               "id": "twitch"
             },
+            "outcome": "ok"
+          },
+          {
+            "service": "twitch.events.subscribe",
+            "params": {},
             "outcome": "ok"
           },
           {

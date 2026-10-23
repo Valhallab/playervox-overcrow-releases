@@ -319,7 +319,14 @@
           "body": "{\"client_id\":\"x\",\"scopes\":[],\"expires_in\":3600}"
         }
       }
-    ]
+    ],
+    "subscriptions": {
+      "twitch.events.subscribe": {
+        "state": "off",
+        "reason": "connecting",
+        "events": []
+      }
+    }
   },
   "steps": [
     {
