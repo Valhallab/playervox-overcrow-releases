@@ -137,7 +137,11 @@ test("text leaving the server: no escapes, no hidden characters, no home path", 
  */
 function releasedSdk() {
   const sdk = JSON.parse(readFileSync(join(repository, "sdk", "package.json"), "utf8"));
-  const changelog = readFileSync(join(repository, "sdk", "CHANGELOG.md"), "utf8");
+  // A Windows checkout may write CRLF.
+  const changelog = readFileSync(join(repository, "sdk", "CHANGELOG.md"), "utf8").replaceAll(
+    "\r\n",
+    "\n",
+  );
   const sections = [...changelog.matchAll(/^## (\S+)\n\n([^\n]*)/gm)];
   const [first, previous] = sections;
   assert.equal(first?.[1], sdk.version, "the changelog's first section is the SDK's version");
