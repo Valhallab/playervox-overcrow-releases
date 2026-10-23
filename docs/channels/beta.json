@@ -6,139 +6,139 @@
       "linux-x86_64": {
         "files": [
           {
-            "path": "overcrow-creator-tools-0.7.3-beta.1-linux-x86_64/README.txt",
-            "sha256": "2c9963ba7542be5c26e7f22d7277533267c615a7efbb92b535e7294c97572231",
+            "path": "overcrow-creator-tools-0.8.0-beta.1-linux-x86_64/README.txt",
+            "sha256": "e257ea1b0e811086b081b60dcf552717c79270c5549e8b1fd05c576f65ad0047",
             "size": 1636
           },
           {
-            "path": "overcrow-creator-tools-0.7.3-beta.1-linux-x86_64/SHA256SUMS",
-            "sha256": "4c9ead5ff7978b452b628406e91614cd293fb874d77a70ab5efd37f34518bd1a",
+            "path": "overcrow-creator-tools-0.8.0-beta.1-linux-x86_64/SHA256SUMS",
+            "sha256": "2e1f3c86acb65cc1f1412732d18c24128c7e84136d3be163e9bb54009a4e7345",
             "size": 797
           },
           {
-            "path": "overcrow-creator-tools-0.7.3-beta.1-linux-x86_64/cli.json",
-            "sha256": "5618ae6188501390a11303c7550d3023497e549e7624bf080d60968cd57c2768",
+            "path": "overcrow-creator-tools-0.8.0-beta.1-linux-x86_64/cli.json",
+            "sha256": "397e35cf4afe6f9fcfd9ba23d383494b17852a3285959ac8496e177e638bee7d",
             "size": 1014
           },
           {
-            "path": "overcrow-creator-tools-0.7.3-beta.1-linux-x86_64/overcrow-widget-1.0.0-beta.6-LICENSE.txt",
+            "path": "overcrow-creator-tools-0.8.0-beta.1-linux-x86_64/overcrow-widget-1.0.0-beta.7-LICENSE.txt",
             "sha256": "c159eef41245fe20d4cd29fc33a0e88a85f47b53ac321f266abfb7b707aee8c3",
             "size": 1071
           },
           {
-            "path": "overcrow-creator-tools-0.7.3-beta.1-linux-x86_64/overcrow-widget-1.0.0-beta.6-THIRD-PARTY-NOTICES.md",
-            "sha256": "6e43637b0c8cde3a1875996e56ffc30d10fa0bccb92091076c174cfb9455dcea",
-            "size": 212099
+            "path": "overcrow-creator-tools-0.8.0-beta.1-linux-x86_64/overcrow-widget-1.0.0-beta.7-THIRD-PARTY-NOTICES.md",
+            "sha256": "b44390368d3494c465ece4ba108d5d0f8202b3a013e93102f75a17a152af6b8c",
+            "size": 212100
           },
           {
-            "path": "overcrow-creator-tools-0.7.3-beta.1-linux-x86_64/overcrow-widget-1.0.0-beta.6-linux-x86_64",
-            "sha256": "fe87c5ccd3f03c434e4140ba7a4e039a49173f8750b7b1300a5ee0a6b9021014",
-            "size": 9503792
+            "path": "overcrow-creator-tools-0.8.0-beta.1-linux-x86_64/overcrow-widget-1.0.0-beta.7-linux-x86_64",
+            "sha256": "d80bd543cdc7b0175e6937053f8f7d5f1eed3aac60134fc7e54f0ff5804bfe58",
+            "size": 9794776
           },
           {
-            "path": "overcrow-creator-tools-0.7.3-beta.1-linux-x86_64/overcrow-widget-headless-0.7.3-beta.1-LICENSE.md",
-            "sha256": "f178ecc8c9a729131200a805366f54f6444dff63c3b41415d51200a0a6b84adb",
-            "size": 217457
+            "path": "overcrow-creator-tools-0.8.0-beta.1-linux-x86_64/overcrow-widget-headless-0.8.0-beta.1-LICENSE.md",
+            "sha256": "18d072ccd87da37b105fa85bcb370355691d38daacf972c1143867b712a13e22",
+            "size": 236395
           },
           {
-            "path": "overcrow-creator-tools-0.7.3-beta.1-linux-x86_64/overcrow-widget-headless-0.7.3-beta.1-linux-x86_64",
-            "sha256": "1838566476949a96518c8b9d3bd94006c9f7820e4b9ab3e5898009a6a9d6f994",
-            "size": 24973656
+            "path": "overcrow-creator-tools-0.8.0-beta.1-linux-x86_64/overcrow-widget-headless-0.8.0-beta.1-linux-x86_64",
+            "sha256": "7f51460517eef23b225890033ba5ef8da0bb8b53965dea3d4ef78761ac84b7c5",
+            "size": 26448264
           },
           {
-            "path": "overcrow-creator-tools-0.7.3-beta.1-linux-x86_64/runtimes.json",
-            "sha256": "f6560aadc9f403858cebd915c4d0775602ab6d6f18096889b4830ba8f12936c5",
+            "path": "overcrow-creator-tools-0.8.0-beta.1-linux-x86_64/runtimes.json",
+            "sha256": "af3374c61ff2e847fd56c6a5f61938989a8e46e862033b2c07ba253405539bae",
             "size": 774
           }
         ],
-        "name": "overcrow-creator-tools-0.7.3-beta.1-linux-x86_64.zip",
-        "sha256": "2c99e20af88afc653091f92af260620a65d7d4d0c58664305cd9e966c43cedad",
-        "size": 15993388,
-        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.7.3-beta.1/overcrow-creator-tools-0.7.3-beta.1-linux-x86_64.zip"
+        "name": "overcrow-creator-tools-0.8.0-beta.1-linux-x86_64.zip",
+        "sha256": "a7f07cebc38cc3707f56d893e5bbfa532e1ef64583df1304df91ec5b5ed9f086",
+        "size": 16764929,
+        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.8.0-beta.1/overcrow-creator-tools-0.8.0-beta.1-linux-x86_64.zip"
       },
       "windows-x86_64": {
         "files": [
           {
-            "path": "overcrow-creator-tools-0.7.3-beta.1-windows-x86_64/README.txt",
-            "sha256": "f7f6a1ffa5b1df7cc188b6d84499e7d5597608dabda21efe5ef02ab7fc49a274",
+            "path": "overcrow-creator-tools-0.8.0-beta.1-windows-x86_64/README.txt",
+            "sha256": "d563d146393f4e69042d45522f9b3e157d95970af3866093dc8da325006b697f",
             "size": 1457
           },
           {
-            "path": "overcrow-creator-tools-0.7.3-beta.1-windows-x86_64/SHA256SUMS",
-            "sha256": "ee2a2fe931d2f0212f759577492c9aea5d5026d96f52f1e6a8920c21448835f3",
+            "path": "overcrow-creator-tools-0.8.0-beta.1-windows-x86_64/SHA256SUMS",
+            "sha256": "f1e0065d4cadde1562437863c4df2b768449776aa13be49591b265765518bfe9",
             "size": 809
           },
           {
-            "path": "overcrow-creator-tools-0.7.3-beta.1-windows-x86_64/cli.json",
-            "sha256": "5618ae6188501390a11303c7550d3023497e549e7624bf080d60968cd57c2768",
+            "path": "overcrow-creator-tools-0.8.0-beta.1-windows-x86_64/cli.json",
+            "sha256": "397e35cf4afe6f9fcfd9ba23d383494b17852a3285959ac8496e177e638bee7d",
             "size": 1014
           },
           {
-            "path": "overcrow-creator-tools-0.7.3-beta.1-windows-x86_64/overcrow-widget-1.0.0-beta.6-LICENSE.txt",
+            "path": "overcrow-creator-tools-0.8.0-beta.1-windows-x86_64/overcrow-widget-1.0.0-beta.7-LICENSE.txt",
             "sha256": "c159eef41245fe20d4cd29fc33a0e88a85f47b53ac321f266abfb7b707aee8c3",
             "size": 1071
           },
           {
-            "path": "overcrow-creator-tools-0.7.3-beta.1-windows-x86_64/overcrow-widget-1.0.0-beta.6-THIRD-PARTY-NOTICES.md",
-            "sha256": "6e43637b0c8cde3a1875996e56ffc30d10fa0bccb92091076c174cfb9455dcea",
-            "size": 212099
+            "path": "overcrow-creator-tools-0.8.0-beta.1-windows-x86_64/overcrow-widget-1.0.0-beta.7-THIRD-PARTY-NOTICES.md",
+            "sha256": "b44390368d3494c465ece4ba108d5d0f8202b3a013e93102f75a17a152af6b8c",
+            "size": 212100
           },
           {
-            "path": "overcrow-creator-tools-0.7.3-beta.1-windows-x86_64/overcrow-widget-1.0.0-beta.6-windows-x86_64.exe",
-            "sha256": "814d194edf9656fbfb24cd0e6edf4c9dff664aa04aad40afd6af77e3a3c2f16e",
-            "size": 9527296
+            "path": "overcrow-creator-tools-0.8.0-beta.1-windows-x86_64/overcrow-widget-1.0.0-beta.7-windows-x86_64.exe",
+            "sha256": "cd856c696e45266672f33eae9043de565329ff46e689abd90d1acaf419528aed",
+            "size": 9831424
           },
           {
-            "path": "overcrow-creator-tools-0.7.3-beta.1-windows-x86_64/overcrow-widget-headless-0.7.3-beta.1-LICENSE.md",
-            "sha256": "f178ecc8c9a729131200a805366f54f6444dff63c3b41415d51200a0a6b84adb",
-            "size": 217457
+            "path": "overcrow-creator-tools-0.8.0-beta.1-windows-x86_64/overcrow-widget-headless-0.8.0-beta.1-LICENSE.md",
+            "sha256": "18d072ccd87da37b105fa85bcb370355691d38daacf972c1143867b712a13e22",
+            "size": 236395
           },
           {
-            "path": "overcrow-creator-tools-0.7.3-beta.1-windows-x86_64/overcrow-widget-headless-0.7.3-beta.1-windows-x86_64.exe",
-            "sha256": "7b3162ca35729291d7b4348846d978c64084fe3de5bffa65d036caf9b092ea84",
-            "size": 25656320
+            "path": "overcrow-creator-tools-0.8.0-beta.1-windows-x86_64/overcrow-widget-headless-0.8.0-beta.1-windows-x86_64.exe",
+            "sha256": "56dc5000d83a061dd4e91c4d05fd5443b619579a632fd38fddbd780984e6db4a",
+            "size": 27450880
           },
           {
-            "path": "overcrow-creator-tools-0.7.3-beta.1-windows-x86_64/runtimes.json",
-            "sha256": "f6560aadc9f403858cebd915c4d0775602ab6d6f18096889b4830ba8f12936c5",
+            "path": "overcrow-creator-tools-0.8.0-beta.1-windows-x86_64/runtimes.json",
+            "sha256": "af3374c61ff2e847fd56c6a5f61938989a8e46e862033b2c07ba253405539bae",
             "size": 774
           }
         ],
-        "name": "overcrow-creator-tools-0.7.3-beta.1-windows-x86_64.zip",
-        "sha256": "9b2dd1df1d244bee6af1a3748312ea00dd6c883ade3441b3907e56134dd17812",
-        "size": 15919269,
-        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.7.3-beta.1/overcrow-creator-tools-0.7.3-beta.1-windows-x86_64.zip"
+        "name": "overcrow-creator-tools-0.8.0-beta.1-windows-x86_64.zip",
+        "sha256": "c6992a335e6278696786d04b6f1475a9248a0b35af27b2ec9eafd6312f22374d",
+        "size": 16714431,
+        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.8.0-beta.1/overcrow-creator-tools-0.8.0-beta.1-windows-x86_64.zip"
       }
     },
     "platforms": {
       "linux-arch-x64": {
-        "name": "overcrow-bin-0.7.3beta1-1-x86_64.pkg.tar.zst",
-        "sha256": "d63d7368452e54265b32446295e2641f2e84e74a0852a29b6b949145fd4928a7",
-        "size": 29180252,
-        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.7.3-beta.1/overcrow-bin-0.7.3beta1-1-x86_64.pkg.tar.zst"
+        "name": "overcrow-bin-0.8.0beta1-1-x86_64.pkg.tar.zst",
+        "sha256": "83c56769dee9f4784ca1a1ddd2b81853eff944e6560ea0ea486ec693358bdaa0",
+        "size": 29991245,
+        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.8.0-beta.1/overcrow-bin-0.8.0beta1-1-x86_64.pkg.tar.zst"
       },
       "linux-deb-x64": {
-        "name": "overcrow_0.7.3.beta.1-1_amd64.deb",
-        "sha256": "c058d2fbcfaaa29c7cb4086a63d67551331df662c5c1e4217da82ed9c5bd4a4f",
-        "size": 16895368,
-        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.7.3-beta.1/overcrow_0.7.3.beta.1-1_amd64.deb"
+        "name": "overcrow_0.8.0.beta.1-1_amd64.deb",
+        "sha256": "331237fbdfb10ee9ae168e28bc88c8067a5198d7de5aa29f734a1b1c548c158f",
+        "size": 17442260,
+        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.8.0-beta.1/overcrow_0.8.0.beta.1-1_amd64.deb"
       },
       "linux-rpm-x64": {
-        "name": "overcrow-0.7.3.beta.1-1.fc43.x86_64.rpm",
-        "sha256": "f95ca8627bd3974ce972708b02f418236acfb6f406d960d2e25050ecebf10b47",
-        "size": 21541179,
-        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.7.3-beta.1/overcrow-0.7.3.beta.1-1.fc43.x86_64.rpm"
+        "name": "overcrow-0.8.0.beta.1-1.fc43.x86_64.rpm",
+        "sha256": "15bb4fcd844d8d1e325bd122ba5a7ea970f0885a949891b1b19b25526f9ee92d",
+        "size": 22150687,
+        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.8.0-beta.1/overcrow-0.8.0.beta.1-1.fc43.x86_64.rpm"
       },
       "windows-x64": {
-        "name": "OverCrow-0.7.3-beta.1-windows-x64-setup.exe",
-        "sha256": "ae6d19b40f561c81ef637f47751489be37007643ffba576b40be43bbafff115f",
-        "size": 22002654,
-        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.7.3-beta.1/OverCrow-0.7.3-beta.1-windows-x64-setup.exe"
+        "name": "OverCrow-0.8.0-beta.1-windows-x64-setup.exe",
+        "sha256": "694b0ece7eee4479c040733545b734bafe5e499f1ccc322493ab098fa8b96789",
+        "size": 22820662,
+        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.8.0-beta.1/OverCrow-0.8.0-beta.1-windows-x64-setup.exe"
       }
     },
     "schemaVersion": 1,
-    "sourceCommit": "6e48136fdf35a4289a4263d6497f02ec2eda0da1",
-    "version": "0.7.3-beta.1"
+    "sourceCommit": "2cbae03afa915d6ce80928b093be247710065a8a",
+    "version": "0.8.0-beta.1"
   },
   "schemaVersion": 1
 }
