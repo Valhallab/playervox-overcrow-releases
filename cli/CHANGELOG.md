@@ -9,7 +9,9 @@ widget's sources and the embedded SDK.
 
 ## 1.0.0-beta.8
 
-Not released yet.
+Released in the creator tools ZIPs of PlayerVox OverCrow 0.8.1-beta.1's
+GitHub release, `overcrow-creator-tools-0.8.1-beta.1-<platform>.zip`,
+beside the headless runtime it pins.
 
 - `submit` no longer sends a version again, nor refuses it, when only
   what never enters the package changed (a README, tests) and the CLI that
