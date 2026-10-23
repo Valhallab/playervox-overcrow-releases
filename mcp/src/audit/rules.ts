@@ -970,7 +970,7 @@ function fastTimers(context: Context): void {
         example: { widget: "stopwatch", file: "view.ocml", find: "<elapsed" },
       });
     }
-    if (usesNetwork && value < 30_000) {
+    if (usesNetwork && value < 20_000) {
       add(context, {
         rule: "fast-polling",
         area: "lightness",
@@ -978,7 +978,7 @@ function fastTimers(context: Context): void {
         file: context.logicFile,
         line,
         message: `A timer repeats every ${value} ms in a widget that uses the network: if it requests the network, it polls a server ${Math.round(60_000 / value)} times a minute.`,
-        fix: "Refresh every 30 s or more, back off after a failure (×2 up to ×8), and only while the data is shown.",
+        fix: "Refresh every 20 s or more, back off after a failure (×2 up to ×8), and only while the data is shown.",
         example: {
           widget: "warframe-market",
           file: "logic.ts",

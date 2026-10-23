@@ -211,6 +211,38 @@ clipboard.writeText({ text: "at start" });
   );
 });
 
+test("network polling: every 19 s is reported, every 20 s is not", async () => {
+  const polling = async (ms) =>
+    rules(
+      await auditWidget(
+        widget(`polling-${ms}`, {
+          "manifest.json": manifest({
+            network: [
+              {
+                origin: "https://api.example.org",
+                method: "GET",
+                path: "/v1/score",
+                maxResponseBytes: 1024,
+              },
+            ],
+          }),
+          "logic.ts": `import { http, initState, timers } from "@overcrow/sdk";
+export const state = initState({ value: 0 });
+async function load(): Promise<void> {
+  const response = await http.fetch("https://api.example.org/v1/score", { as: "json" });
+  state.value = Number(response.status);
+}
+timers.every(${ms}, load);
+`,
+          "view.ocml": "<box><text>{state.value}</text></box>\n",
+          LICENSE: "MIT\n",
+        }),
+      ),
+    ).filter((rule) => rule.endsWith(":fast-polling"));
+  assert.deepEqual(await polling(19_000), ["medium:fast-polling"]);
+  assert.deepEqual(await polling(20_000), []);
+});
+
 test("the reference widgets: no high or medium finding (except the reserved PlayerVox ID)", async () => {
   for (const name of readdirSync(join(repository, "widgets"))) {
     const result = await auditWidget(join(repository, "widgets", name));
