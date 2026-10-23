@@ -1,6 +1,6 @@
 # SDK reference
 
-`@overcrow/sdk` 1.1 is the API of the logic of a PlayerVox OverCrow
+`@overcrow/sdk` 1.2 is the API of the logic of a PlayerVox OverCrow
 widget: the state, the data of the host, services, timers, drawing, the
 options menu, messages, logs and formatting. This page lists every export
 of the package. [The logic](logic.md) and
@@ -10,7 +10,7 @@ The SDK is on npm, and the command below adds it to a project. A project
 made by `overcrow-widget init` already lists it: run `npm install` there.
 
 ```sh
-npm install --save-dev --save-exact @overcrow/sdk@1.1.0
+npm install --save-dev --save-exact @overcrow/sdk@1.2.0
 ```
 
 <!-- source: widgets/clock/logic.ts -->
@@ -36,7 +36,7 @@ that leaves the VM.
 
 | Export | Kind | Summary |
 | --- | --- | --- |
-| `SDK_VERSION` | constant | `"1.1.0"`. |
+| `SDK_VERSION` | constant | `"1.2.0"`. |
 | `RUNTIME_SURFACE` | constant | `"0.1"`, the version of the VM's built-in interface that this SDK needs. |
 
 ## State and view
@@ -116,7 +116,7 @@ permission or capability, its parameters and the user action at each call.
 | `notes` | namespace | `subscribe(listener)`; `create()`, `select({ note })`, `setItem({ note, item, checked })`, `delete({ note })` during a user action. |
 | `playervox` | namespace | `score.subscribe`, `rating.subscribe`, `reviews.subscribe`, `reviews.page({ page?, followedOnly? })`. |
 | `journal` | namespace | `subscribe(listener)`; `page({ cursor? })`; `delete({ session })` during a user action, after the user's confirmation. |
-| `twitch` | namespace | `chat.subscribe(listener)`; `chat.join({ channel })`, `chat.leave()`, `chat.favorite({ channel, favorite })` during a user action. |
+| `twitch` | namespace | `chat.subscribe(listener)`; `chat.join({ channel })`, `chat.leave()`, `chat.favorite({ channel, favorite })` during a user action; `events.subscribe({ types }, listener)`, the [live events](integrated-services.md#live-events-twitch) the manifest lists. |
 | `account` | namespace | `subscribe({ id }, listener)`; `connect({ id })` during a user action. A [third-party account](accounts.md) the manifest declares, or an [integrated service](integrated-services.md) it names. |
 | `call(service, params?)` | function | Calls any service that answers once, by its name. |
 | `subscribe(service, params, listener)` | function | Subscribes to any subscription service, by its name. |
@@ -259,7 +259,7 @@ what PlayerVox OverCrow accepts.
 | `ServiceName`, `CallServiceName`, `SubscribeServiceName`, `GestureServiceName` | The service names: all of them, those that answer once, the subscriptions, and those that need a user action. |
 | `ServiceParamsMap`, `ServiceResultMap` | The parameters and the result of each service. |
 | `ServiceErrorCode`, `ServiceErrorPayload` | The [error codes](services.md#errors), and the `{ code }` value that carries one. |
-| `Session`, `Telemetry`, `Fps`, `Stopwatch`, `Media`, `Notes`, `Note`, `NoteItem`, `CreatedNote`, `Score`, `Rating`, `RatingState`, `Review`, `ReviewsState`, `ReviewsPage`, `JournalState`, `JournalPage`, `JournalSession`, `TwitchChat`, `ChatMessage`, `ChatFragment`, `AccountStatus`, `GameEvent`, `HttpResponse` | The [result shapes](result-shapes.md). |
+| `Session`, `Telemetry`, `Fps`, `Stopwatch`, `Media`, `Notes`, `Note`, `NoteItem`, `CreatedNote`, `Score`, `Rating`, `RatingState`, `Review`, `ReviewsState`, `ReviewsPage`, `JournalState`, `JournalPage`, `JournalSession`, `TwitchChat`, `ChatMessage`, `ChatFragment`, `TwitchEvents`, `TwitchEvent`, `AccountStatus`, `GameEvent`, `HttpResponse` | The [result shapes](result-shapes.md). |
 | `Permission`, `Capability`, `SensitiveCapability`, `CapabilityServices`, `PermissionServices` | The permissions and capabilities of the manifest, and the services each one allows. |
 | `AccountGrant` | The grant of a third-party account, `account:<id>`: `hasGrant` takes it, `host.grants` lists it. |
 | `Locale`, `Theme`, `Mode`, `Region`, `NumberFormat`, `DateOrder` | The values of `host`. |

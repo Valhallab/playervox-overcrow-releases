@@ -7,6 +7,18 @@ version it was built with, so a new SDK never changes a published widget.
 An incompatible change would be 2.0.0. Every 1.x release needs the VM's
 runtime surface 0.1, which OverCrow keeps for widget API v1.
 
+## 1.2.0
+
+Not released yet. Ships with PlayerVox OverCrow 0.8.1-beta.1, the first
+release that delivers live Twitch events to widgets:
+
+- `twitch.events.subscribe` (`twitch.events`): the live events of the
+  player's own Twitch channel (goals, follows, Hype Trains, cheers,
+  subscriptions, polls, predictions) of the types the manifest lists in
+  `events` beside the Twitch service. Each update gives `state` (`live` or
+  `off` with a `reason`) and the latest events, numbered by `seq`.
+- The `TwitchEvent` and `TwitchEvents` types.
+
 ## 1.1.0
 
 Ships with PlayerVox OverCrow 0.8.0-beta.1, the first release that runs

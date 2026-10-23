@@ -5,12 +5,12 @@
 //! `tsc`; `check` warns when its version differs from this one.
 
 /// Version of the embedded SDK (`sdk/package.json`).
-pub const VERSION: &str = "1.1.0";
+pub const VERSION: &str = "1.2.0";
 
 /// The courtesy line at the top of every bundle. The SDK is MIT-0, so its
 /// copies need no notice; the line names the linked version for reviewers
 /// and for `inspect`.
-pub const NOTICE: &str = "/*! @overcrow/sdk 1.1.0 | MIT-0 | Copyright (c) 2026 Valhallab SASU */";
+pub const NOTICE: &str = "/*! @overcrow/sdk 1.2.0 | MIT-0 | Copyright (c) 2026 Valhallab SASU */";
 
 /// The SDK entry module.
 pub const ENTRY: &str = "index.ts";

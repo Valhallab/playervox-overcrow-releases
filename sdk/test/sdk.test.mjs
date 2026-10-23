@@ -10,7 +10,7 @@ const settle = () => new Promise((resolve) => setImmediate(resolve));
 const lastCall = () => vm.calls[vm.calls.length - 1];
 
 test("the version and the runtime surface are exported", () => {
-  assert.equal(overcrow.SDK_VERSION, "1.1.0");
+  assert.equal(overcrow.SDK_VERSION, "1.2.0");
   assert.equal(overcrow.RUNTIME_SURFACE, "0.1");
 });
 
@@ -84,6 +84,24 @@ test("namespaces reach nested services", async () => {
   assert.equal(lastCall().service, "twitch.chat.leave");
   overcrow.media.previous();
   assert.deepEqual(lastCall().params, {});
+});
+
+test("live Twitch events subscribe with their types and pass each update through", () => {
+  const updates = [];
+  overcrow.twitch.events.subscribe({ types: ["channel.goal.progress"] }, (update) => updates.push(update));
+  const [, entry] = [...vm.subscriptions].at(-1);
+  assert.equal(entry.service, "twitch.events.subscribe");
+  assert.deepEqual(entry.params, { types: ["channel.goal.progress"] });
+  const value = {
+    state: "live",
+    reason: null,
+    events: [{ seq: 1, type: "channel.goal.progress", at: 1, data: { id: "g1" } }],
+  };
+  entry.update({ value, final: false });
+  entry.update({ error: { code: "permission_denied" }, final: true });
+  assert.deepEqual(updates[0], { ok: true, value, final: false });
+  assert.equal(updates[1].ok, false);
+  assert.equal(updates[1].error.code, "permission_denied");
 });
 
 test("account services name the declared account; the secret never shows", async () => {

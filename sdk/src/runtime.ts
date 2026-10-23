@@ -9,7 +9,7 @@
  */
 
 /** Version of this SDK. */
-export const SDK_VERSION = "1.1.0";
+export const SDK_VERSION = "1.2.0";
 
 /** Version of the runtime surface this SDK needs (`Ready.sdk` of the VM). */
 export const RUNTIME_SURFACE = "0.1";

@@ -83,7 +83,7 @@ version the tool embeds: run `npm install` in the project. In another
 project, install the SDK with:
 
 ```sh
-npm install --save-dev --save-exact @overcrow/sdk@1.1.0
+npm install --save-dev --save-exact @overcrow/sdk@1.2.0
 ```
 
 Keep the version the tool embeds (`overcrow-widget --version`).
