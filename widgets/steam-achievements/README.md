@@ -28,8 +28,9 @@ Valve Corporation ([trademarks](../../TRADEMARKS.md)).
 | Last game played | The same, with a neutral "Last game played" heading: not playing is not a problem |
 | All achievements | Green bar and check |
 | No achievements | "This game has no Steam achievements." |
-| Not readable | Steam answered 403 for the game's achievements (a borrowed game…): "Steam doesn't show your achievements for this game (borrowed game?)." |
-| Private game details | An amber "Game details private" heading, the last values kept; in Full, the path to make them public |
+| Not readable | Steam names the running game but refuses its achievements (a 403 with public game details: a game the player does not own; a 400 "Requested app has no stats"; `success: false`): the game, and "Steam doesn't share your achievements for this game. Check that your game details are Public in your Steam profile." instead of the bar; in Standard and Full, the path "In Steam: Profile › Edit Profile › Privacy Settings", "Game details: Public"; in One line, an amber alert icon with the text in its tooltip. Asked again every 10 minutes; never "no achievements", never a server failure |
+| Game details hidden | Game details set to Friends Only or Private: Steam names no running game and answers 403 "Profile is not public" for the last game played, even to the player's own key. An amber "Game details hidden", "Steam hides your game details. Set them to Public (Friends Only is not enough).", then where: "In Steam: Profile › Edit Profile › Privacy Settings", "Game details: Public". No game is shown, since the running one cannot be known. One line: the title, the rest in its tooltip |
+| Profile hidden | A private profile (`communityvisibilitystate` 1): "Profile hidden", "Steam hides your profile. Set it to Public, and your game details too.", and the same path to "My profile and Game details: Public". Nothing else is asked until it is public |
 | Nothing | "Play a Steam game: its achievements show up here." |
 | Unreachable, rate limited | The heading becomes "Unreachable · 5 min ago" or "Rate limited · 2 min ago" (amber), the values stay; the tooltip says why and when it retries. Without any value yet: "Steam unreachable. Retrying every minute." |
 
@@ -90,12 +91,20 @@ your computer and sends it only to `api.steampowered.com`. To revoke it:
   check is the first read.
 - **Failures.** A network failure or a timeout retries every minute; a 5xx
   or a 429 waits 1, 2, 4, 8 then 10 minutes (`http.fetch` gives no
-  `Retry-After`); a 403 on a game's achievements is asked again every 10
-  minutes. PlayerVox OverCrow's own network budget being full (`busy`) is
-  not a failure of Steam: the view stays, the next minute reads again.
+  `Retry-After`); a refusal of a game's achievements (403, 400 with an
+  error, `success: false`) is asked again every 10 minutes, never in a loop.
+  PlayerVox OverCrow's own network budget being full (`busy`) is not a
+  failure of Steam: the view stays, the next minute reads again.
+- **Hidden details.** Steam answers 403 "Profile is not public" both when
+  the game details are not Public and for a game the player does not own.
+  A game Steam names as running (`gameid`) means public game details: a
+  403 there is the game. A game taken from the last ones played, with no
+  running game named, is one the player owns: a 403 there is the hidden
+  details. When a running game stops being named, the widget asks at once
+  which. What Steam hides is kept, so a new start says it at once.
 - **Key and probe.** A 401 or 403 is a refused key only when PlayerVox
   OverCrow's own probe of the key is refused too; otherwise the widget gets
-  the status (a 403 on the achievements: not readable for this game).
+  the status (a 403 on the achievements: see Hidden details).
 - **Images.** Steam's answers name an icon by its file name alone or by a
   URL on hosts and paths that changed over the years
   (`steamcdn-a.akamaihd.net`, `media.steampowered.com`,
@@ -128,8 +137,12 @@ your computer and sends it only to `api.steampowered.com`. To revoke it:
 
 ## Limits
 
-- Private game details hide the game being played: the widget says so and
-  how to make them public.
+- Game details that are not Public (Friends Only included) hide the game
+  being played and its achievements, even from the player's own key: the
+  widget says so and where to set them Public.
+- Whether a game is borrowed through Steam Families is not shown (that
+  needs a route the widget does not use); a borrowed game Steam reads
+  shows as any game.
 - Games outside Steam are not seen.
 - Store images are sometimes missing (recent games name them with a hash
   no route gives): the game's icon replaces them.
@@ -142,4 +155,9 @@ engine on a synthetic Steam (`tests/steam-fake.mjs`). `node
 tests/scenarios.mjs` writes the scenarios from one invented account, and
 `overcrow-widget test` plays them in PlayerVox OverCrow's headless runtime.
 The games, achievements, figures and images of the scenarios and of the
-catalog preview are fictional, for demonstration only.
+catalog preview are fictional, for demonstration only. Steam's answers in the
+fixtures follow those other projects measured in 2026 (`403 Profile is not
+public` for hidden game details and for a game the player does not own,
+`400 Requested app has no stats`, `{"game":{}}` for a game without
+achievements, `{"response":{}}` for hidden recent games); no real key or
+account was used.

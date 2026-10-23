@@ -1,5 +1,5 @@
 // The engine when Steam fails: values kept, the cause and age said, the
-// backoff, "Playing now" only from a fresh read, private details.
+// backoff, "Playing now" only from a fresh read.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
@@ -81,34 +81,6 @@ test("a refused key stops the reads until it is connected again", async () => {
   vm.setAccount("steam", "connected");
   await settle(vm, steam);
   assert.equal(steam.requests.length > before, true);
-});
-
-test("private profile: amber, the last values kept", async () => {
-  steam.visible = 1;
-  await minutes(vm, steam, 1);
-  assert.equal(state.game.privateGame, true);
-  assert.equal(logic.eyebrow(state), "Game details private");
-  assert.equal(state.game.total, 5);
-  steam.visible = 3;
-  await minutes(vm, steam, 1);
-  assert.equal(state.game.privateGame, false);
-});
-
-test("a 403 on the achievements: the game stays, a neutral line instead", async () => {
-  steam.routeStatus.GetPlayerAchievements = 403;
-  steam.playing = 100;
-  await minutes(vm, steam, 1);
-  assert.equal(state.game.readable, false);
-  assert.equal(logic.hasAch(state.game), false);
-  assert.equal(logic.muted(state.game), "Steam doesn't show your achievements for this game (borrowed game?).");
-  assert.equal(state.stale, "");
-  // Asked again every 10 minutes, never in a loop.
-  const asked = steam.count("GetPlayerAchievements");
-  await minutes(vm, steam, 8);
-  assert.equal(steam.count("GetPlayerAchievements"), asked);
-  delete steam.routeStatus.GetPlayerAchievements;
-  await minutes(vm, steam, 2);
-  assert.equal(state.game.readable, true);
 });
 
 test("the host's own budget (busy) is not Steam being unreachable", async () => {

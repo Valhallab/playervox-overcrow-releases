@@ -84,18 +84,41 @@
     </else>
   </else-if>
 
-  <else-if test={phase(state) == "nothing" || phase(state) == "empty-unreachable" || phase(state) == "private-empty"}>
-    <box class="empty" tooltip={phase(state) == "private-empty" ? t("private-fix") : ""}>
-      <icon class={phase(state) == "nothing" ? "empty-icon" : "empty-icon warn"} name={phase(state) == "nothing" ? "trophy" : phase(state) == "private-empty" ? "eye-off" : "cloud-off"}/>
+  <else-if test={phase(state) == "hidden"}>
+    <if test={layout(state.optionsVersion) == "line"}>
+      <box class="empty" tooltip={hiddenTip(state)}>
+        <icon class="empty-icon warn" name="eye-off"/>
+        <text class="line-text">{hiddenTitle(state)}</text>
+      </box>
+    </if>
+    <else>
+      <box class="empty veiled">
+        <icon class="empty-icon warn" name="eye-off"/>
+        <box class="empty-text">
+          <if test={layout(state.optionsVersion) != "compact"}><text class="empty-title">{hiddenTitle(state)}</text></if>
+          <text class="empty-body">{hiddenBody(state)}</text>
+          <box class="fix-path">
+            <icon class="fix-icon" name="settings"/>
+            <box class="fix-lines">
+              <text class="fix-text">{hiddenPath(state)}</text>
+              <text class="fix-value">{hiddenSetting(state)}</text>
+            </box>
+          </box>
+        </box>
+      </box>
+    </else>
+  </else-if>
+
+  <else-if test={phase(state) == "nothing" || phase(state) == "empty-unreachable"}>
+    <box class="empty">
+      <icon class={phase(state) == "nothing" ? "empty-icon" : "empty-icon warn"} name={phase(state) == "nothing" ? "trophy" : "cloud-off"}/>
       <if test={layout(state.optionsVersion) == "line"}>
-        <text class="line-text">{phase(state) == "nothing" ? t("nothing-short") : phase(state) == "private-empty" ? t("private-short") : t("empty-unreachable")}</text>
+        <text class="line-text">{phase(state) == "nothing" ? t("nothing-short") : t("empty-unreachable")}</text>
       </if>
       <else>
         <box class="empty-text">
           <if test={phase(state) == "nothing" && layout(state.optionsVersion) != "compact"}><text class="empty-title">{t("nothing-title")}</text></if>
-          <if test={phase(state) == "private-empty" && layout(state.optionsVersion) != "compact"}><text class="empty-title">{t("private-short")}</text></if>
-          <text class="empty-body">{phase(state) == "nothing" ? t("nothing") : phase(state) == "private-empty" ? t("private") : t("empty-unreachable")}</text>
-          <if test={phase(state) == "private-empty" && layout(state.optionsVersion) == "full"}><text class="notice-fix">{t("private-fix")}</text></if>
+          <text class="empty-body">{phase(state) == "nothing" ? t("nothing") : t("empty-unreachable")}</text>
         </box>
       </else>
     </box>
@@ -137,7 +160,7 @@
           <gameicon cls="line-icon"/>
           <text class="line-name">{state.game.name}</text>
           <if test={isStale(state)}><icon class="warn-icon" name={staleIcon(state)} tooltip={eyebrow(state)}/></if>
-          <else-if test={state.game.privateGame}><icon class="warn-icon" name="eye-off" tooltip={t("private")}/></else-if>
+          <else-if test={state.game.known && !state.game.readable}><icon class="warn-icon" name="circle-alert" tooltip={muted(state.game)}/></else-if>
           <if test={hasAch(state.game)}>
             <if test={missingOnly(state.optionsVersion)}><text class="line-count">{countText(state.game, state.optionsVersion)}</text></if>
             <else><text class={anyNew(state) ? "line-count new" : "line-count"}><span class="num">{num(state.game.unlocked)}</span><span class="of">&#32;/&#32;{num(state.game.total)}</span></text></else>
@@ -161,7 +184,6 @@
           <box class="head-text">
             <box class="eyebrow-row" tooltip={staleTip(state)}>
               <if test={isStale(state)}><icon class="eyebrow-icon" name={staleIcon(state)}/></if>
-              <else-if test={state.game.privateGame}><icon class="eyebrow-icon" name="eye-off"/></else-if>
               <else-if test={state.game.playing}><box class="live-dot"/></else-if>
               <text class={eyebrowClass(state)}>{eyebrow(state)}</text>
             </box>
@@ -186,17 +208,16 @@
           </box>
         </if>
         <else><text class="muted-line">{muted(state.game)}</text></else>
-      </box>
-
-      <if test={state.game.privateGame && !isStale(state) && layout(state.optionsVersion) == "full"}>
-        <box class="notice">
-          <icon class="notice-icon" name="eye-off"/>
-          <box class="notice-text">
-            <text class="notice-body">{t("private")}</text>
-            <text class="notice-fix">{t("private-fix")}</text>
+        <if test={showFix(state.game, state.optionsVersion)}>
+          <box class="fix-path">
+            <icon class="fix-icon" name="settings"/>
+            <box class="fix-lines">
+              <text class="fix-text">{t("hidden-path")}</text>
+              <text class="fix-value">{t("hidden-details-setting")}</text>
+            </box>
           </box>
-        </box>
-      </if>
+        </if>
+      </box>
 
       <if test={layout(state.optionsVersion) == "standard" && hasAch(state.game) && trackedMany(state)}>
         <trackedcard items={trackedList(state)}/>

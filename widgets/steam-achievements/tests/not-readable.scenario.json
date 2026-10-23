@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "not-readable",
-  "description": "Steam answers 403 for the achievements while the host's probe passes: the game stays, a neutral line instead of the bar.",
+  "description": "Steam names the running game but refuses its achievements (403 with public details: a game the player does not own): the game stays, a neutral line instead of the bar, no guess.",
   "host": {
     "startAt": 1767225600000,
     "storage": {
@@ -22,7 +22,7 @@
         "response": {
           "status": 200,
           "contentType": "application/json",
-          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 3,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"gameid\": \"1874000\",\n\t\t\t\t\"gameextrainfo\": \"Ashen Crown\"\n\t\t\t}\n\t\t]\n\t}\n}"
+          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 3,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"commentpermission\": 1,\n\t\t\t\t\"profileurl\": \"https://steamcommunity.com/profiles/76561198000000000/\",\n\t\t\t\t\"personastate\": 1,\n\t\t\t\t\"lastlogoff\": 1767223800,\n\t\t\t\t\"timecreated\": 1400000000,\n\t\t\t\t\"personastateflags\": 0,\n\t\t\t\t\"gameid\": \"1874000\",\n\t\t\t\t\"gameextrainfo\": \"Ashen Crown\"\n\t\t\t}\n\t\t]\n\t}\n}"
         }
       },
       {
@@ -34,7 +34,7 @@
         "response": {
           "status": 200,
           "contentType": "application/json",
-          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 3,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"gameid\": \"1874000\",\n\t\t\t\t\"gameextrainfo\": \"Ashen Crown\"\n\t\t\t}\n\t\t]\n\t}\n}"
+          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 3,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"commentpermission\": 1,\n\t\t\t\t\"profileurl\": \"https://steamcommunity.com/profiles/76561198000000000/\",\n\t\t\t\t\"personastate\": 1,\n\t\t\t\t\"lastlogoff\": 1767223800,\n\t\t\t\t\"timecreated\": 1400000000,\n\t\t\t\t\"personastateflags\": 0,\n\t\t\t\t\"gameid\": \"1874000\",\n\t\t\t\t\"gameextrainfo\": \"Ashen Crown\"\n\t\t\t}\n\t\t]\n\t}\n}"
         }
       },
       {
@@ -46,7 +46,7 @@
         "response": {
           "status": 200,
           "contentType": "application/json",
-          "body": "{\n\t\"response\": {\n\t\t\"total_count\": 1,\n\t\t\"games\": [\n\t\t\t{\n\t\t\t\t\"appid\": 1874000,\n\t\t\t\t\"name\": \"Ashen Crown\",\n\t\t\t\t\"playtime_2weeks\": 300,\n\t\t\t\t\"playtime_forever\": 3000,\n\t\t\t\t\"img_icon_url\": \"a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1\"\n\t\t\t}\n\t\t]\n\t}\n}"
+          "body": "{\n\t\"response\": {\n\t\t\"total_count\": 1,\n\t\t\"games\": [\n\t\t\t{\n\t\t\t\t\"appid\": 1874100,\n\t\t\t\t\"name\": \"Neon Courier\",\n\t\t\t\t\"playtime_2weeks\": 300,\n\t\t\t\t\"playtime_forever\": 3000,\n\t\t\t\t\"img_icon_url\": \"c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0\",\n\t\t\t\t\"playtime_windows_forever\": 3000,\n\t\t\t\t\"playtime_mac_forever\": 0,\n\t\t\t\t\"playtime_linux_forever\": 0,\n\t\t\t\t\"playtime_deck_forever\": 0\n\t\t\t}\n\t\t]\n\t}\n}"
         }
       },
       {
@@ -58,7 +58,7 @@
         "response": {
           "status": 200,
           "contentType": "application/json",
-          "body": "{\n\t\"response\": {\n\t\t\"total_count\": 1,\n\t\t\"games\": [\n\t\t\t{\n\t\t\t\t\"appid\": 1874000,\n\t\t\t\t\"name\": \"Ashen Crown\",\n\t\t\t\t\"playtime_2weeks\": 300,\n\t\t\t\t\"playtime_forever\": 3000,\n\t\t\t\t\"img_icon_url\": \"a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1\"\n\t\t\t}\n\t\t]\n\t}\n}"
+          "body": "{\n\t\"response\": {\n\t\t\"total_count\": 1,\n\t\t\"games\": [\n\t\t\t{\n\t\t\t\t\"appid\": 1874100,\n\t\t\t\t\"name\": \"Neon Courier\",\n\t\t\t\t\"playtime_2weeks\": 300,\n\t\t\t\t\"playtime_forever\": 3000,\n\t\t\t\t\"img_icon_url\": \"c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0\",\n\t\t\t\t\"playtime_windows_forever\": 3000,\n\t\t\t\t\"playtime_mac_forever\": 0,\n\t\t\t\t\"playtime_linux_forever\": 0,\n\t\t\t\t\"playtime_deck_forever\": 0\n\t\t\t}\n\t\t]\n\t}\n}"
         }
       },
       {
@@ -94,7 +94,7 @@
         "response": {
           "status": 403,
           "contentType": "application/json",
-          "body": "{}"
+          "body": "{\n\t\"playerstats\": {\n\t\t\"error\": \"Profile is not public\",\n\t\t\"success\": false\n\t}\n}"
         }
       },
       {
@@ -106,7 +106,7 @@
         "response": {
           "status": 403,
           "contentType": "application/json",
-          "body": "{}"
+          "body": "{\n\t\"playerstats\": {\n\t\t\"error\": \"Profile is not public\",\n\t\t\"success\": false\n\t}\n}"
         }
       },
       {
@@ -118,7 +118,7 @@
         "response": {
           "status": 403,
           "contentType": "application/json",
-          "body": "{}"
+          "body": "{\n\t\"playerstats\": {\n\t\t\"error\": \"Profile is not public\",\n\t\t\"success\": false\n\t}\n}"
         }
       },
       {
@@ -431,8 +431,33 @@
       "expect": {
         "state": "running",
         "text": [
-          "Steam doesn't show your achievements for this game (borrowed game?)."
+          "Playing now",
+          "Steam doesn't share your achievements for this game. Check that your game details are Public in your Steam profile."
         ],
+        "noText": [
+          "borrowed",
+          "no Steam achievements"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 240,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "not-readable-line",
         "fault": "none"
       }
     },
@@ -473,6 +498,26 @@
     {
       "expect": {
         "image": "not-readable-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 340,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "not-readable-full",
         "fault": "none"
       }
     },
@@ -528,6 +573,36 @@
       }
     },
     {
+      "expect": {
+        "text": [
+          "Steam ne donne pas vos succès pour ce jeu. Vérifiez que vos détails de jeu sont Publics dans votre profil Steam."
+        ],
+        "noText": [
+          "prêté"
+        ]
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 240,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "not-readable-fr-line",
+        "fault": "none"
+      }
+    },
+    {
       "menu": {
         "id": "layout",
         "value": "compact"
@@ -564,6 +639,26 @@
     {
       "expect": {
         "image": "not-readable-fr-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 340,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "not-readable-fr-full",
         "fault": "none"
       }
     },

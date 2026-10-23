@@ -85,8 +85,15 @@ test("player achievements, the schema and the rarity", () => {
   ] } });
   assert.deepEqual([...unlocked], [["A", 1700000000], ["C", 0]]);
   assert.equal(logic.parsePlayerAchievements({ playerstats: { error: "Profile is not public", success: false } }), null);
-  assert.equal(logic.hasNoStats({ playerstats: { error: "Requested app has no stats", success: false } }), true);
-  assert.equal(logic.hasNoStats({ playerstats: { error: "Profile is not public", success: false } }), false);
+  // Steam's refusals of the achievements, as it sends them.
+  assert.equal(logic.refusal(403, { playerstats: { error: "Profile is not public", success: false } }), "hidden");
+  assert.equal(logic.refusal(403, null), "hidden");
+  assert.equal(logic.refusal(200, { playerstats: { error: "Profile is not public", success: false } }), "hidden");
+  assert.equal(logic.refusal(400, { playerstats: { error: "Requested app has no stats", success: false } }), "unreadable");
+  assert.equal(logic.refusal(200, { playerstats: { steamID: "76561198000000000", gameName: "Ashen Crown", success: false } }), "unreadable");
+  assert.equal(logic.refusal(200, { playerstats: { steamID: "76561198000000000", success: true, achievements: [] } }), null);
+  assert.equal(logic.refusal(500, { playerstats: { error: "Internal error", success: false } }), null);
+  assert.equal(logic.refusal(404, null), null);
 
   const file = `${"b".repeat(40)}.jpg`;
   const schema = logic.parseSchema({ game: { gameName: "Ashen Crown", availableGameStats: { achievements: [

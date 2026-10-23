@@ -35,9 +35,6 @@
   "nothing-title": "No game yet",
   "nothing": "Play a Steam game: its achievements show up here.",
   "nothing-short": "Play a Steam game",
-  "private": "Your game details are private: Steam does not say which game is running.",
-  "private-fix": "Steam › Profile › Edit Profile › Privacy Settings › Game details: Public",
-  "private-short": "Game details private",
   "step-short": "Last step: your Steam profile",
   "profile-help-short": "Steam: your profile › right-click › Copy Page URL",
   "missing": "Missing achievements",
@@ -62,6 +59,13 @@
   "done": "Done",
   "nothing-shown": "Nothing to show",
   "source": "Data from Steam",
-  "not-readable": "Steam doesn't show your achievements for this game (borrowed game?).",
-  "profile-cancel": "Cancel"
+  "not-readable": "Steam doesn't share your achievements for this game. Check that your game details are Public in your Steam profile.",
+  "profile-cancel": "Cancel",
+  "hidden-details-title": "Game details hidden",
+  "hidden-details": "Steam hides your game details. Set them to Public (Friends Only is not enough).",
+  "hidden-profile-title": "Profile hidden",
+  "hidden-profile": "Steam hides your profile. Set it to Public, and your game details too.",
+  "hidden-path": "In Steam: Profile › Edit Profile › Privacy Settings",
+  "hidden-details-setting": "Game details: Public",
+  "hidden-profile-setting": "My profile and Game details: Public"
 }

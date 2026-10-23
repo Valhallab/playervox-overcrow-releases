@@ -1,0 +1,238 @@
+{
+  "scenarioVersion": 1,
+  "name": "profile-hidden",
+  "description": "A private profile: Steam keeps only its public fields; said with where to set it Public, nothing else asked.",
+  "host": {
+    "startAt": 1767225600000,
+    "storage": {
+      "profile": {
+        "steamid": "76561198000000000",
+        "input": "https://steamcommunity.com/profiles/76561198000000000"
+      }
+    }
+  },
+  "fixtures": {
+    "http": [
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?steamids=76561198000000000",
+          "account": "steam"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 1,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"commentpermission\": 1,\n\t\t\t\t\"profileurl\": \"https://steamcommunity.com/profiles/76561198000000000/\",\n\t\t\t\t\"personastate\": 1\n\t\t\t}\n\t\t]\n\t}\n}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?steamids=76561198000000000",
+          "account": "steam"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 1,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"commentpermission\": 1,\n\t\t\t\t\"profileurl\": \"https://steamcommunity.com/profiles/76561198000000000/\",\n\t\t\t\t\"personastate\": 1\n\t\t\t}\n\t\t]\n\t}\n}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?steamids=76561198000000000",
+          "account": "steam"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 1,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"commentpermission\": 1,\n\t\t\t\t\"profileurl\": \"https://steamcommunity.com/profiles/76561198000000000/\",\n\t\t\t\t\"personastate\": 1\n\t\t\t}\n\t\t]\n\t}\n}"
+        }
+      }
+    ]
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "Profile hidden",
+          "Steam hides your profile. Set it to Public, and your game details too."
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 240,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "profile-hidden-line",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "compact"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 280,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "profile-hidden-compact",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "profile-hidden-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 340,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "profile-hidden-full",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Profil caché"
+        ]
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 240,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "profile-hidden-fr-line",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "compact"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 280,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "profile-hidden-fr-compact",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "profile-hidden-fr-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 340,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "profile-hidden-fr-full",
+        "fault": "none"
+      }
+    }
+  ]
+}

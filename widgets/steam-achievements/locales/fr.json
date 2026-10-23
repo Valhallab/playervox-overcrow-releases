@@ -35,9 +35,6 @@
   "nothing-title": "Aucun jeu pour l'instant",
   "nothing": "Lancez un jeu Steam : ses succès s'afficheront ici.",
   "nothing-short": "Lancez un jeu Steam",
-  "private": "Vos détails de jeu sont privés : Steam ne dit pas quel jeu est lancé.",
-  "private-fix": "Steam › Profil › Modifier le profil › Confidentialité › Détails du jeu : Public",
-  "private-short": "Détails de jeu privés",
   "step-short": "Dernière étape : votre profil Steam",
   "profile-help-short": "Steam : votre profil › clic droit › Copier l'adresse",
   "missing": "Succès manquants",
@@ -62,6 +59,13 @@
   "done": "Terminé",
   "nothing-shown": "Rien à afficher",
   "source": "Données de Steam",
-  "not-readable": "Steam ne montre pas vos succès pour ce jeu (jeu prêté ?).",
-  "profile-cancel": "Annuler"
+  "not-readable": "Steam ne donne pas vos succès pour ce jeu. Vérifiez que vos détails de jeu sont Publics dans votre profil Steam.",
+  "profile-cancel": "Annuler",
+  "hidden-details-title": "Détails de jeu cachés",
+  "hidden-details": "Steam cache vos détails de jeu. Réglez-les sur Public (Amis uniquement ne suffit pas).",
+  "hidden-profile-title": "Profil caché",
+  "hidden-profile": "Steam cache votre profil. Réglez-le sur Public, ainsi que vos détails de jeu.",
+  "hidden-path": "Dans Steam : Profil › Modifier le profil › Paramètres de confidentialité",
+  "hidden-details-setting": "Détails des jeux : Public",
+  "hidden-profile-setting": "Mon profil et Détails des jeux : Public"
 }

@@ -30,7 +30,8 @@ test("nothing played: say how to start", async () => {
 test("private game details without a known game", async () => {
   steam.recentHidden = true;
   await minutes(vm, steam, 11);
-  assert.equal(state.phase, "private-empty");
+  assert.equal(state.phase, "hidden");
+  assert.equal(state.hidden, "details");
 });
 
 test("without a game shown, Steam down says so, never 'Play a Steam game'", async () => {

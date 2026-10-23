@@ -84,15 +84,17 @@ test("a new unlock is New for 60 s, and only then", async () => {
   assert.equal(logic.isNew(fresh, state), false);
 });
 
-test("out of game: last game played, read every 10 minutes", async () => {
+test("out of game: last game played, read when the game stops, then every 10 minutes", async () => {
+  const before = steam.count("GetPlayerAchievements");
   steam.playing = null;
   await minutes(vm, steam, 1);
   assert.equal(state.game.playing, false);
   assert.equal(logic.eyebrow(state), "Last game played");
   assert.equal(logic.eyebrowClass(state), "eyebrow");
-  // Ten minutes after the last read in game, not before.
+  // The last unlocks at once, then ten minutes later, not before.
   const achievements = steam.count("GetPlayerAchievements");
-  await minutes(vm, steam, 8);
+  assert.equal(achievements, before + 1);
+  await minutes(vm, steam, 9);
   assert.equal(steam.count("GetPlayerAchievements"), achievements);
   await minutes(vm, steam, 1);
   assert.equal(steam.count("GetPlayerAchievements"), achievements + 1);

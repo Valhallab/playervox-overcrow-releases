@@ -14,11 +14,11 @@
     },
     {
       "permission": "network:GET https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/",
-      "text": "Finds your last game played and its icon when you are not in a game. When the game changes, then every 10 minutes out of game."
+      "text": "Finds your last game played and its icon when you are not in a game. When the game changes or stops, then every 10 minutes out of game."
     },
     {
       "permission": "network:GET https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/",
-      "text": "Reads which achievements of the shown game you unlocked, and when. Once a minute in game, every 10 minutes out of game."
+      "text": "Reads which achievements of the shown game you unlocked, and when; its refusal also tells that Steam hides your game details. Once a minute in game, every 10 minutes out of game or after a refusal."
     },
     {
       "permission": "network:GET https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/",

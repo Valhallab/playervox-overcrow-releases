@@ -161,8 +161,24 @@ export function parseRecent(body: JsonValue): Recent | null {
 function statsError(body: JsonValue): string | null {
   return text(object(object(body)?.["playerstats"])?.["error"]);
 }
-export function hasNoStats(body: JsonValue): boolean {
-  return /no stats/i.test(statsError(body) ?? "");
+
+/**
+ * Why Steam refused the achievements of a game, from S4's status and body:
+ * - `hidden`: 403 `Profile is not public`. Steam answers so when the game
+ *   details are not Public (Friends Only included), even to the account's
+ *   own key, and also for a game the player does not own: the caller tells
+ *   them apart (see `read`).
+ * - `unreadable`: Steam names no stats for this player (`Requested app has
+ *   no stats`, `success: false`).
+ * - `null`: not a refusal (a server failure, or an answer to read).
+ */
+export function refusal(status: number, body: JsonValue): "hidden" | "unreadable" | null {
+  const error = statsError(body) ?? "";
+  if (status === 403 || /not public/i.test(error)) return "hidden";
+  const stats = object(object(body)?.["playerstats"]);
+  if (status >= 400 && status < 500 && error !== "") return "unreadable";
+  if (status >= 200 && status < 300 && stats !== null && stats["success"] === false) return "unreadable";
+  return null;
 }
 
 /** One achievement of S4: `[apiname, unlocktime]` when unlocked. */
@@ -442,7 +458,9 @@ function rarityValue(value: number): string {
 // State
 
 export type Layout = "line" | "compact" | "standard" | "full";
-export type Phase = "loading" | "profile" | "nothing" | "private-empty" | "empty-unreachable" | "game";
+export type Phase = "loading" | "profile" | "nothing" | "hidden" | "empty-unreachable" | "game";
+/** What Steam hides: the whole profile, or the game details only. */
+export type Hidden = "" | "profile" | "details";
 export type Stale = "" | "unreachable" | "quota";
 
 export interface GameView {
@@ -453,9 +471,7 @@ export interface GameView {
   header: string;
   /** From a fresh S2 read with this `gameid`. */
   playing: boolean;
-  /** Steam hides the game details. */
-  privateGame: boolean;
-  /** Steam answered 403 for this game's achievements (not owned…). */
+  /** Steam names no achievements of this player for this game (not owned…). */
   readable: boolean;
   /** The list of the game's achievements was read (else: still reading). */
   known: boolean;
@@ -503,6 +519,8 @@ export interface Profile {
 declare module "@overcrow/sdk" {
   interface WidgetState {
     phase: Phase;
+    /** What Steam hides, in the `hidden` phase. */
+    hidden: Hidden;
     profile: Profile;
     game: GameView | null;
     /** The few achievements the view shows, chosen by `compute`. */
@@ -529,6 +547,7 @@ declare module "@overcrow/sdk" {
 
 export const state = initState({
   phase: "loading" as Phase,
+  hidden: "" as Hidden,
   profile: { status: "idle", value: "", canCancel: false } as Profile,
   game: null as GameView | null,
   lists: { latest: null, tracked: [], recent: [], missing: [], pick: [] } as Lists,
@@ -564,9 +583,11 @@ const model = {
   /** The game the snapshot's icon belongs to. */
   iconHashOf: 0,
   playing: false,
-  privateGame: false,
   readable: true,
-  noStats: false,
+  /** What Steam hides; `""` once a read shows the game details. */
+  hidden: "" as Hidden,
+  /** `hidden` is the stored value. */
+  hiddenSaved: true,
   /** The last S3 read hid the games (private game details). */
   recentHidden: false,
   unlocked: null as Map<string, number> | null,
@@ -682,8 +703,36 @@ function failed(outcome: Outcome, now: number): void {
   // "Playing now" only from a fresh read.
   model.playing = false;
   // Without a game shown, never "Play a Steam game" while Steam is down.
-  if (state.phase === "loading" || state.phase === "nothing" || state.phase === "private-empty") state.phase = "empty-unreachable";
+  if (state.phase === "loading" || state.phase === "nothing") state.phase = "empty-unreachable";
   render();
+}
+
+/**
+ * Steam hides the game details (or the whole profile): said instead of a
+ * game, since the running one cannot be known. Kept for the next start.
+ */
+function hide(hidden: Exclude<Hidden, "">, now: number): void {
+  succeeded(now);
+  model.playing = false;
+  saveHidden(hidden);
+  state.hidden = hidden;
+  state.phase = "hidden";
+}
+
+/** A read showed the game details: no longer hidden (stored at the end of the read). */
+function reveal(): void {
+  if (model.hidden === "") return;
+  model.hidden = "";
+  model.hiddenSaved = false;
+}
+
+/** Stores what Steam hides, only when it changes. */
+function saveHidden(hidden: Hidden): void {
+  if (model.hidden === hidden && model.hiddenSaved) return;
+  model.hidden = hidden;
+  model.hiddenSaved = true;
+  if (hidden === "") void storage.remove({ key: "hidden" }).catch(() => null);
+  else void storage.set({ key: "hidden", value: hidden }).catch(() => null);
 }
 
 function succeeded(now: number): void {
@@ -728,15 +777,23 @@ async function read(): Promise<void> {
   const summary = parseSummary(summaryAnswer.body, model.steamid);
   if (summary === null || summary === "notfound") return failed({ kind: "server" }, now);
 
+  // A private profile hides everything, the running game first: nothing
+  // else is asked until it is public.
+  if (!summary.visible) return hide("profile", now);
+
   let appid = summary.appid ?? 0;
+  // A game that stops being named: quit, or hidden since. Steam is asked at
+  // once which, never a minute of guessing.
+  const stopped = model.playing && appid === 0;
   model.playing = appid !== 0;
-  model.privateGame = !summary.visible;
+  // Steam names the running game only with public game details.
+  if (appid !== 0) reveal();
   // The running game's name, or none yet (S3 or S5 give it): never the
   // previous game's.
   if (appid !== 0 && (summary.gameName !== null || appid !== model.appid)) model.gameName = summary.gameName ?? "";
 
   const switched = appid !== 0 && appid !== model.appid;
-  const recentDue = switched || (appid === 0 && (model.readRecent === 0 || now - model.readRecent >= OUT_OF_GAME_EVERY));
+  const recentDue = switched || stopped || (appid === 0 && (model.readRecent === 0 || now - model.readRecent >= OUT_OF_GAME_EVERY));
   if (recentDue && canCall("recent", now)) {
     const recentAnswer = await call("recent", { steamid: model.steamid, count: 5 }, "recent", now);
     if (recentAnswer.kind !== "ok") return failed(recentAnswer, now);
@@ -744,6 +801,8 @@ async function read(): Promise<void> {
     if (recent === null) return failed({ kind: "server" }, now);
     model.readRecent = now;
     model.recentHidden = recent.hidden;
+    // The games show again, none played lately: nothing left to say hidden.
+    if (!recent.hidden && recent.games.length === 0) reveal();
     for (const game of recent.games) if (game.icon !== "") model.icons.set(game.appid, game.icon);
     if (appid === 0) {
       const last = recent.games[0];
@@ -754,11 +813,12 @@ async function read(): Promise<void> {
     }
   }
   // Hidden games without a running one: the game details are private.
-  if (appid === 0 && model.recentHidden) model.privateGame = true;
+  if (appid === 0 && model.recentHidden) return hide("details", now);
   if (appid === 0) appid = model.appid;
   if (appid === 0) {
     succeeded(now);
-    state.phase = model.privateGame ? "private-empty" : "nothing";
+    if (model.hidden !== "") return hide(model.hidden, now);
+    state.phase = "nothing";
     render();
     return;
   }
@@ -772,21 +832,28 @@ async function read(): Promise<void> {
   if (schema === undefined) return;
   if (model.gameName === "" && schema.gameName !== "") model.gameName = schema.gameName;
 
-  if (schema.list.length > 0 && !model.noStats && !model.privateGame) {
-    // Not readable (403): asked again every 10 minutes, never in a loop.
-    const playerEvery = model.playing && model.readable ? MINUTE : OUT_OF_GAME_EVERY;
-    const playerDue = model.unlocked === null || now - model.readPlayer >= playerEvery - TICK_SLACK;
+  if (schema.list.length > 0) {
+    // Refused (hidden details, not readable): asked again every 10 minutes,
+    // never in a loop; the first read of a game at once.
+    const playerEvery = model.playing && model.readable && model.hidden === "" ? MINUTE : OUT_OF_GAME_EVERY;
+    const playerDue = stopped || model.readPlayer === 0 || now - model.readPlayer >= playerEvery - TICK_SLACK;
     if (playerDue && canCall("player", now)) {
       // Without `l`: names come from the schema, the answer stays small.
       const playerAnswer = await call("player", { steamid: model.steamid, appid }, "player", now);
-      if (playerAnswer.kind === "status" && playerAnswer.status === 403) {
-        // The key works (the host's probe passed): Steam does not show these
-        // achievements (a borrowed game, or private details).
+      const refused = playerAnswer.kind === "ok" || playerAnswer.kind === "status" ? refusal(playerAnswer.status, playerAnswer.body) : null;
+      // The key works (S2 just answered). Steam named this game as running,
+      // which it does only with public game details: the game itself is not
+      // readable (not owned…). A game guessed from the last ones played is
+      // one the player owns: Steam hides the game details, and the game is
+      // not shown, since it may not be the one running.
+      if (refused === "hidden" && !model.playing) {
+        model.readPlayer = now;
+        return hide("details", now);
+      }
+      if (refused !== null) {
         model.readable = false;
-      } else if (playerAnswer.kind !== "ok" && !(playerAnswer.kind === "status" && hasNoStats(playerAnswer.body))) {
+      } else if (playerAnswer.kind !== "ok") {
         return failed(playerAnswer, now);
-      } else if (playerAnswer.kind !== "ok" || hasNoStats(playerAnswer.body)) {
-        model.noStats = true;
       } else {
         const unlocked = await unlockedOf(playerAnswer);
         if (unlocked === null) return failed({ kind: "server" }, now);
@@ -798,9 +865,12 @@ async function read(): Promise<void> {
         if ([...unlocked.keys()].some((id) => !known.has(id))) forgetSchema(appid);
         model.readable = true;
       }
+      reveal();
       model.readPlayer = now;
     }
   }
+  // Still hidden since the last refusal (asked again in 10 minutes).
+  if (model.hidden !== "") return hide(model.hidden, now);
 
   const rarity = model.rarity.get(appid);
   if (schema.list.length > 0 && (rarity === undefined || now - rarity.at >= RARITY_EVERY) && canCall("rarity", now)) {
@@ -810,6 +880,8 @@ async function read(): Promise<void> {
   }
 
   succeeded(now);
+  saveHidden("");
+  state.hidden = "";
   state.phase = "game";
   render();
   void saveSnapshot();
@@ -902,7 +974,6 @@ function switchGame(appid: number): void {
   model.unlocked = null;
   model.readPlayer = 0;
   model.readable = true;
-  model.noStats = false;
   state.fresh = {};
   state.picking = false;
 }
@@ -968,14 +1039,13 @@ function render(): void {
     namedFrom = schema;
     nameVersion += 1;
   }
-  const hasAch = list.length > 0 && !model.noStats;
+  const hasAch = list.length > 0;
   state.game = {
     appid,
     name: model.gameName || schema?.gameName || "",
     icon: gameIconUrl(appid, model.icons.get(appid) ?? (appid === model.iconHashOf ? model.iconHash : "")),
     header: headerUrl(appid),
     playing: model.playing && state.stale === "",
-    privateGame: model.privateGame,
     readable: model.readable,
     known: schema !== undefined,
     hasAch,
@@ -1018,8 +1088,8 @@ function wantedImages(): string[] {
 /** Loads the wanted images two at a time, each once; a failure waits an hour. */
 async function loadImages(): Promise<void> {
   // Nothing goes to Steam, images included, before Steam is connected or
-  // while the widget is hidden.
-  if (!model.connected || !host.visible) return;
+  // while the widget is hidden; and only for the game shown.
+  if (!model.connected || !host.visible || state.phase !== "game") return;
   for (const url of wantedImages()) {
     if (url in state.images || images.loading.has(url) || failedRecently(url)) continue;
     if (images.loading.size >= 2) return;
@@ -1184,7 +1254,6 @@ async function saveSnapshot(): Promise<void> {
     readAt: state.readAt,
     unlocked,
     rarity: rarity === undefined ? null : Object.fromEntries(rarity.values),
-    noStats: model.noStats,
   };
   if (JSON.stringify(snapshot).length > SNAPSHOT_MAX) snapshot = { ...snapshot, rarity: null };
   if (JSON.stringify(snapshot).length > SNAPSHOT_MAX) snapshot = { ...snapshot, unlocked: null };
@@ -1208,7 +1277,6 @@ async function restore(): Promise<void> {
     model.gameName = text(snapshot["name"]) ?? "";
     model.iconHash = text(snapshot["icon"]) ?? "";
     model.iconHashOf = appid;
-    model.noStats = snapshot["noStats"] === true;
     const unlocked = object(snapshot["unlocked"]);
     if (unlocked !== null) {
       model.unlocked = new Map(Object.entries(unlocked).flatMap(([id, at]) => (typeof at === "number" ? [[id, at] as [string, number]] : [])));
@@ -1221,10 +1289,17 @@ async function restore(): Promise<void> {
     }
     await loadSchema(appid, language());
     state.readAt = whole(snapshot["readAt"]) ?? 0;
-    if (model.schemas.has(schemaKey(appid, language())) || model.noStats) {
+    if (model.schemas.has(schemaKey(appid, language()))) {
       state.phase = "game";
       render();
     }
+  }
+  // Hidden at the last read: said at once, never a game that may be stale.
+  const hidden = await storage.get({ key: "hidden" }).catch(() => null);
+  if (hidden === "profile" || hidden === "details") {
+    model.hidden = hidden;
+    state.hidden = hidden;
+    state.phase = "hidden";
   }
 }
 
@@ -1275,6 +1350,9 @@ export async function submitProfile(): Promise<void> {
   }
   const changed = steamid !== model.steamid;
   model.steamid = steamid;
+  // Another profile, or the same one checked again: the next read says.
+  saveHidden("");
+  state.hidden = "";
   model.input = state.profile.value.trim();
   await storage.set({ key: "profile", value: { steamid, input: model.input } }).catch(() => null);
   if (changed) {
@@ -1375,7 +1453,9 @@ onHost((changed) => {
     state.locale = host.locale;
     // Names and descriptions come in the user's language, at once.
     if (model.appid !== 0 && model.connected && host.visible) {
-      void ensureSchema(model.appid, language(), Date.now()).then(() => render());
+      void ensureSchema(model.appid, language(), Date.now()).then(() => {
+        if (state.phase === "game") render();
+      });
     }
   }
   if (changed.includes("visible") && host.visible) void refresh();
@@ -1483,18 +1563,41 @@ export function muted(g: GameView): string {
   if (!g.known) return t("loading");
   return g.readable ? t("no-achievements") : t("not-readable");
 }
+/** Achievements refused: where to check the game details, where there is room. */
+export function showFix(g: GameView, v: number): boolean {
+  const shown = layout(v);
+  return g.known && !g.readable && (shown === "standard" || shown === "full");
+}
+
+/** The hidden state's texts: what Steam hides, and where to make it public. */
+export function hiddenTitle(s: typeof state): string {
+  return t(s.hidden === "profile" ? "hidden-profile-title" : "hidden-details-title");
+}
+export function hiddenBody(s: typeof state): string {
+  return t(s.hidden === "profile" ? "hidden-profile" : "hidden-details");
+}
+/** Where the setting is in Steam, then the setting itself. */
+export function hiddenPath(_s: typeof state): string {
+  return t("hidden-path");
+}
+export function hiddenSetting(s: typeof state): string {
+  return t(s.hidden === "profile" ? "hidden-profile-setting" : "hidden-details-setting");
+}
+/** One line has room for the title only: the rest in its tooltip. */
+export function hiddenTip(s: typeof state): string {
+  return `${hiddenBody(s)} ${hiddenPath(s)} › ${hiddenSetting(s)}`;
+}
 
 export function isStale(s: typeof state): boolean {
   return s.stale !== "";
 }
 export function eyebrow(s: typeof state): string {
   if (s.stale !== "") return t(`stale-${s.stale}`, { age: age(s.now - s.readAt) });
-  if (s.game?.privateGame) return t("private-short");
   return s.game?.playing ? t("playing") : t("last-played");
 }
 export function eyebrowClass(s: typeof state): string {
   if (s.stale !== "") return "eyebrow warn stale";
-  return s.game?.privateGame ? "eyebrow warn" : s.game?.playing ? "eyebrow live" : "eyebrow";
+  return s.game?.playing ? "eyebrow live" : "eyebrow";
 }
 export function staleIcon(s: typeof state): string {
   return s.stale === "quota" ? "hourglass" : "cloud-off";

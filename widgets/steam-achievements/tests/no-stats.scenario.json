@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
-  "name": "private",
-  "description": "A private profile: amber heading and the last values kept; in Full, the way to make them public.",
+  "name": "no-stats",
+  "description": "Steam answers 400 Requested app has no stats although the game lists achievements: the same neutral line, never 'no achievements', no server failure.",
   "host": {
     "startAt": 1767225600000,
     "storage": {
@@ -22,7 +22,31 @@
         "response": {
           "status": 200,
           "contentType": "application/json",
-          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 3,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"gameid\": \"1874000\",\n\t\t\t\t\"gameextrainfo\": \"Ashen Crown\"\n\t\t\t}\n\t\t]\n\t}\n}"
+          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 3,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"commentpermission\": 1,\n\t\t\t\t\"profileurl\": \"https://steamcommunity.com/profiles/76561198000000000/\",\n\t\t\t\t\"personastate\": 1,\n\t\t\t\t\"lastlogoff\": 1767223800,\n\t\t\t\t\"timecreated\": 1400000000,\n\t\t\t\t\"personastateflags\": 0,\n\t\t\t\t\"gameid\": \"1874000\",\n\t\t\t\t\"gameextrainfo\": \"Ashen Crown\"\n\t\t\t}\n\t\t]\n\t}\n}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?steamids=76561198000000000",
+          "account": "steam"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 3,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"commentpermission\": 1,\n\t\t\t\t\"profileurl\": \"https://steamcommunity.com/profiles/76561198000000000/\",\n\t\t\t\t\"personastate\": 1,\n\t\t\t\t\"lastlogoff\": 1767223800,\n\t\t\t\t\"timecreated\": 1400000000,\n\t\t\t\t\"personastateflags\": 0,\n\t\t\t\t\"gameid\": \"1874000\",\n\t\t\t\t\"gameextrainfo\": \"Ashen Crown\"\n\t\t\t}\n\t\t]\n\t}\n}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?steamids=76561198000000000",
+          "account": "steam"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 3,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"commentpermission\": 1,\n\t\t\t\t\"profileurl\": \"https://steamcommunity.com/profiles/76561198000000000/\",\n\t\t\t\t\"personastate\": 1,\n\t\t\t\t\"lastlogoff\": 1767223800,\n\t\t\t\t\"timecreated\": 1400000000,\n\t\t\t\t\"personastateflags\": 0,\n\t\t\t\t\"gameid\": \"1874000\",\n\t\t\t\t\"gameextrainfo\": \"Ashen Crown\"\n\t\t\t}\n\t\t]\n\t}\n}"
         }
       },
       {
@@ -34,7 +58,7 @@
         "response": {
           "status": 200,
           "contentType": "application/json",
-          "body": "{\n\t\"response\": {\n\t\t\"total_count\": 1,\n\t\t\"games\": [\n\t\t\t{\n\t\t\t\t\"appid\": 1874000,\n\t\t\t\t\"name\": \"Ashen Crown\",\n\t\t\t\t\"playtime_2weeks\": 300,\n\t\t\t\t\"playtime_forever\": 3000,\n\t\t\t\t\"img_icon_url\": \"a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1\"\n\t\t\t}\n\t\t]\n\t}\n}"
+          "body": "{\n\t\"response\": {\n\t\t\"total_count\": 1,\n\t\t\"games\": [\n\t\t\t{\n\t\t\t\t\"appid\": 1874000,\n\t\t\t\t\"name\": \"Ashen Crown\",\n\t\t\t\t\"playtime_2weeks\": 300,\n\t\t\t\t\"playtime_forever\": 3000,\n\t\t\t\t\"img_icon_url\": \"a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1\",\n\t\t\t\t\"playtime_windows_forever\": 3000,\n\t\t\t\t\"playtime_mac_forever\": 0,\n\t\t\t\t\"playtime_linux_forever\": 0,\n\t\t\t\t\"playtime_deck_forever\": 0\n\t\t\t}\n\t\t]\n\t}\n}"
         }
       },
       {
@@ -46,7 +70,7 @@
         "response": {
           "status": 200,
           "contentType": "application/json",
-          "body": "{\n\t\"response\": {\n\t\t\"total_count\": 1,\n\t\t\"games\": [\n\t\t\t{\n\t\t\t\t\"appid\": 1874000,\n\t\t\t\t\"name\": \"Ashen Crown\",\n\t\t\t\t\"playtime_2weeks\": 300,\n\t\t\t\t\"playtime_forever\": 3000,\n\t\t\t\t\"img_icon_url\": \"a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1\"\n\t\t\t}\n\t\t]\n\t}\n}"
+          "body": "{\n\t\"response\": {\n\t\t\"total_count\": 1,\n\t\t\"games\": [\n\t\t\t{\n\t\t\t\t\"appid\": 1874000,\n\t\t\t\t\"name\": \"Ashen Crown\",\n\t\t\t\t\"playtime_2weeks\": 300,\n\t\t\t\t\"playtime_forever\": 3000,\n\t\t\t\t\"img_icon_url\": \"a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1\",\n\t\t\t\t\"playtime_windows_forever\": 3000,\n\t\t\t\t\"playtime_mac_forever\": 0,\n\t\t\t\t\"playtime_linux_forever\": 0,\n\t\t\t\t\"playtime_deck_forever\": 0\n\t\t\t}\n\t\t]\n\t}\n}"
         }
       },
       {
@@ -64,13 +88,13 @@
       {
         "request": {
           "method": "GET",
-          "url": "https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?appid=1874000&l=french",
+          "url": "https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?steamid=76561198000000000&appid=1874000",
           "account": "steam"
         },
         "response": {
-          "status": 200,
+          "status": 400,
           "contentType": "application/json",
-          "body": "{\n\t\"game\": {\n\t\t\"gameName\": \"Ashen Crown\",\n\t\t\"gameVersion\": \"12\",\n\t\t\"availableGameStats\": {\n\t\t\t\"achievements\": [\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"A1\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Couronne de cendres\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Prendre le trône de cendres\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0100100100100100100100100100100000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0190190190190190190190190190190000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"A2\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Lame du veilleur\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Forger la lame du veilleur\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0200200200200200200200200200200000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0290290290290290290290290290290000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"A3\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Rempart\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Parer 100 attaques\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0300300300300300300300300300300000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0390390390390390390390390390390000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"A4\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Braise éternelle\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Rallumer tous les braseros\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0400400400400400400400400400400000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0490490490490490490490490490490000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"A9\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Première lueur\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Finir le prologue\",\n\t\t\t\t\t\"icon\": \"\",\n\t\t\t\t\t\"icongray\": \"\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"A10\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Œil du gouffre\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Vaincre le Veilleur sans subir de dégâts\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0500500500500500500500500500500000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0590590590590590590590590590590000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"A11\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Clé des profondeurs\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Ouvrir toutes les portes scellées\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0600600600600600600600600600600000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0690690690690690690690690690690000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"A12\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Le Roi pâle\",\n\t\t\t\t\t\"hidden\": 1,\n\t\t\t\t\t\"description\": \"\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0900900900900900900900900900900000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0990990990990990990990990990990000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"A13\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Nuit sans fin\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Finir le jeu en mode Cauchemar\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0700700700700700700700700700700000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0790790790790790790790790790790000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"A14\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Joyau parfait\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Réunir toutes les gemmes en une partie\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0800800800800800800800800800800000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0890890890890890890890890890890000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"A15\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Marcheur des cendres\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Traverser les landes sans monture\",\n\t\t\t\t\t\"icon\": \"\",\n\t\t\t\t\t\"icongray\": \"\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z0\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 1\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0100100100100100100100100100100000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0190190190190190190190190190190000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z1\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 2\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0200200200200200200200200200200000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0290290290290290290290290290290000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z2\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 3\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0300300300300300300300300300300000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0390390390390390390390390390390000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z3\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 4\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0400400400400400400400400400400000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0490490490490490490490490490490000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z4\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 5\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0500500500500500500500500500500000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0590590590590590590590590590590000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z5\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 6\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0600600600600600600600600600600000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0690690690690690690690690690690000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z6\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 7\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0700700700700700700700700700700000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0790790790790790790790790790790000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z7\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 8\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0800800800800800800800800800800000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0890890890890890890890890890890000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z8\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 9\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0900900900900900900900900900900000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0990990990990990990990990990990000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z9\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 10\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0100100100100100100100100100100000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0190190190190190190190190190190000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z10\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 11\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0200200200200200200200200200200000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0290290290290290290290290290290000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z11\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 12\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0300300300300300300300300300300000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0390390390390390390390390390390000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z12\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 13\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0400400400400400400400400400400000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0490490490490490490490490490490000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z13\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 14\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0500500500500500500500500500500000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0590590590590590590590590590590000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z14\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 15\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0600600600600600600600600600600000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0690690690690690690690690690690000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z15\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 16\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0700700700700700700700700700700000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0790790790790790790790790790790000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z16\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 17\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0800800800800800800800800800800000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0890890890890890890890890890890000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z17\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 18\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0900900900900900900900900900900000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0990990990990990990990990990990000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z18\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 19\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0100100100100100100100100100100000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0190190190190190190190190190190000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z19\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 20\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0200200200200200200200200200200000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0290290290290290290290290290290000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z20\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 21\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0300300300300300300300300300300000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0390390390390390390390390390390000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z21\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 22\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0400400400400400400400400400400000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0490490490490490490490490490490000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z22\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 23\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0500500500500500500500500500500000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0590590590590590590590590590590000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z23\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 24\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0600600600600600600600600600600000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0690690690690690690690690690690000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z24\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 25\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0700700700700700700700700700700000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0790790790790790790790790790790000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z25\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 26\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0800800800800800800800800800800000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0890890890890890890890890890890000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z26\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 27\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0900900900900900900900900900900000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0990990990990990990990990990990000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z27\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 28\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0100100100100100100100100100100000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0190190190190190190190190190190000000000.jpg\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"Z28\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Zéphyr, épreuve 29\",\n\t\t\t\t\t\"hidden\": 0,\n\t\t\t\t\t\"description\": \"Une épreuve des landes\",\n\t\t\t\t\t\"icon\": \"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1874000/0200200200200200200200200200200000000000.jpg\",\n\t\t\t\t\t\"icongray\": \"http://media.steampowered.com/steamcommunity/public/images/apps/1874000/0290290290290290290290290290290000000000.jpg\"\n\t\t\t\t}\n\t\t\t],\n\t\t\t\"stats\": [\n\t\t\t\t{\n\t\t\t\t\t\"name\": \"STAT_RUNS\",\n\t\t\t\t\t\"defaultvalue\": 0,\n\t\t\t\t\t\"displayName\": \"Runs\"\n\t\t\t\t}\n\t\t\t]\n\t\t}\n\t}\n}"
+          "body": "{\n\t\"playerstats\": {\n\t\t\"error\": \"Requested app has no stats\",\n\t\t\"success\": false\n\t}\n}"
         }
       },
       {
@@ -80,9 +104,9 @@
           "account": "steam"
         },
         "response": {
-          "status": 200,
+          "status": 400,
           "contentType": "application/json",
-          "body": "{\n\t\"playerstats\": {\n\t\t\"steamID\": \"76561198000000000\",\n\t\t\"gameName\": \"Ashen Crown\",\n\t\t\"achievements\": [\n\t\t\t{\n\t\t\t\t\"apiname\": \"A1\",\n\t\t\t\t\"achieved\": 1,\n\t\t\t\t\"unlocktime\": 1767225420\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"A2\",\n\t\t\t\t\"achieved\": 1,\n\t\t\t\t\"unlocktime\": 1767221760\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"A3\",\n\t\t\t\t\"achieved\": 1,\n\t\t\t\t\"unlocktime\": 1767051600\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"A4\",\n\t\t\t\t\"achieved\": 1,\n\t\t\t\t\"unlocktime\": 1766961600\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"A9\",\n\t\t\t\t\"achieved\": 1,\n\t\t\t\t\"unlocktime\": 1766877600\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"A10\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"A11\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"A12\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"A13\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"A14\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"A15\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z0\",\n\t\t\t\t\"achieved\": 1,\n\t\t\t\t\"unlocktime\": 1766025600\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z1\",\n\t\t\t\t\"achieved\": 1,\n\t\t\t\t\"unlocktime\": 1765939200\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z2\",\n\t\t\t\t\"achieved\": 1,\n\t\t\t\t\"unlocktime\": 1765852800\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z3\",\n\t\t\t\t\"achieved\": 1,\n\t\t\t\t\"unlocktime\": 1765766400\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z4\",\n\t\t\t\t\"achieved\": 1,\n\t\t\t\t\"unlocktime\": 1765680000\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z5\",\n\t\t\t\t\"achieved\": 1,\n\t\t\t\t\"unlocktime\": 1765593600\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z6\",\n\t\t\t\t\"achieved\": 1,\n\t\t\t\t\"unlocktime\": 1765507200\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z7\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z8\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z9\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z10\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z11\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z12\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z13\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z14\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z15\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z16\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z17\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z18\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z19\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z20\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z21\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z22\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z23\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z24\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z25\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z26\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z27\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"apiname\": \"Z28\",\n\t\t\t\t\"achieved\": 0,\n\t\t\t\t\"unlocktime\": 0\n\t\t\t}\n\t\t],\n\t\t\"success\": true\n\t}\n}"
+          "body": "{\n\t\"playerstats\": {\n\t\t\"error\": \"Requested app has no stats\",\n\t\t\"success\": false\n\t}\n}"
         }
       },
       {
@@ -315,66 +339,6 @@
           "contentType": "image/jpeg",
           "bodyBase64": "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMDAgQDAwMEBAQFBgoGBgUFBgwICQcKDgwPDg4MDQ0PERYTDxAVEQ0NExoTFRcYGRkZDxIbHRsYHRYYGRj/2wBDAQQEBAYFBgsGBgsYEA0QGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBj/wAARCABAAEADASIAAhEBAxEB/8QAHAAAAgIDAQEAAAAAAAAAAAAABQYDBwAECAEC/8QAQRAAAQIEAwMGCQkJAAAAAAAAAQIDAAQFBgcRIRIxQRNRY5Sz0hZWYWRxgZOj0xcyM0JGg5HB0RUiIzVDUnSh4f/EABQBAQAAAAAAAAAAAAAAAAAAAAD/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwDlKi0W3U2XRpmYt2UnJiaYW668866CSHlpGiVgbkjhBFuiWsrfaNP9vMfEiWgNcph7bp81cHv3ILsSw0gBzdtWmoAm0pH1Pv8AfiZNq2gRn4JyXt3+/DJIUSoTyVKkZCYmQnRRabKgPwgim1q6B/JZ/wBir9IBLNq2gNfBKS9u/wB+IHLatJI0tKR9u/8AEh7Va1dy0os+fuFfpGjP0KpSTQcnKfMy6FHIKdaKQT64BIcodrIOloU8+l+Y+JA2t0S3jZdZmZa3ZSTmJVhDrTzLrpIJeQk6KWRuUeENz0t5IEV9rk8PbiPmrY9+3AblqNbeG9vHzdwe/chuoNCmq1VWpCTSC4veo/NQOJPkhbsxG1hjb56B3t3IuzDGdpTMq9IbKGqi4razUrV5IG4ejm9cA6USjydCpDdPkkZJGq1cVq4qMEDu3xg/GM1zPPAe8MiY0qpTJSsUt2Qn2+UZcG7PIpPAjyiNzccozLjAc83Fb01QauuRmhtZDabcG5aeBH5iE27GtjDa4f8AHb7duLgxmvKjUqXp1uIlBUq7OPpUzLNL2VsN/WcUeAOWQB37+EVReiAnDK4D0DQ9+3ATWMAcL6AeZl3t3Ia5N5+UmUTEs6pl5BzQtJ1SeeFmwkZ4V0A5f0Xdfvlwztp15oC4bXr6K5Sxt5ibZSlL4KdkKOXzk+Q/6g5loNYpOmzj1OqTM9Lk8o0raAzICucHLgYtyj1aWrNNRMMLRymQ5VoK2i0ojcfyPGAI+mE3Ee/pDD+0TUXm1TM/MK5CRkkaqfdI00/tGmZ9W8iC91XTR7NtWZr9bmksyzKTspJ/edXlohI4qP8A3hHPNMbqt5XUvEO7W9iZdA/ZsjtFSJNnLTIH6x3+snjoHxQqPUlTszdF0TSpy4Kjkt9xY+gTwbTzAaDIc2URX0AMLq/v+ga7duGtxOuRhYv1OWFdfPQtduiAlw+RnhRQD0TvbLhmQmK+sa+LOpuHNJp1SrzcrNy6HEuNKYdVkS6pQ1SkjcRDCMRbB8aGOrPdyAZ0gZwWodXfo1TTMNK/hLID6AAdtI4enXQwiDEiwPGdnqz3cj6+UmwPGdnq73cgMrMxVsTMQ3KvXpR+Tt6kvqbp1LmUAF1Y0U64OOvp4DnzY1DTQZQufKVYHjOz1Z7uR4cSLAP2nZ6s93IA6tOeekLOIKcsJ68eha7dETnEawD9qGerPdyF2+b4s6pYc1anU2vNzU3MIbS20lh1O1k6lR1UkDcDAf/Z"
         }
-      },
-      {
-        "request": {
-          "method": "GET",
-          "url": "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?steamids=76561198000000000",
-          "account": "steam"
-        },
-        "response": {
-          "status": 200,
-          "contentType": "application/json",
-          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 1,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\"\n\t\t\t}\n\t\t]\n\t}\n}"
-        }
-      },
-      {
-        "request": {
-          "method": "GET",
-          "url": "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?steamids=76561198000000000",
-          "account": "steam"
-        },
-        "response": {
-          "status": 200,
-          "contentType": "application/json",
-          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 1,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\"\n\t\t\t}\n\t\t]\n\t}\n}"
-        }
-      },
-      {
-        "request": {
-          "method": "GET",
-          "url": "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?steamids=76561198000000000",
-          "account": "steam"
-        },
-        "response": {
-          "status": 200,
-          "contentType": "application/json",
-          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 1,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\"\n\t\t\t}\n\t\t]\n\t}\n}"
-        }
-      },
-      {
-        "request": {
-          "method": "GET",
-          "url": "https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/?steamid=76561198000000000&count=5",
-          "account": "steam"
-        },
-        "response": {
-          "status": 200,
-          "contentType": "application/json",
-          "body": "{\n\t\"response\": {}\n}"
-        }
-      },
-      {
-        "request": {
-          "method": "GET",
-          "url": "https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/?steamid=76561198000000000&count=5",
-          "account": "steam"
-        },
-        "response": {
-          "status": 200,
-          "contentType": "application/json",
-          "body": "{\n\t\"response\": {}\n}"
-        }
       }
     ]
   },
@@ -383,125 +347,29 @@
       "expect": {
         "state": "running",
         "text": [
-          "Playing now"
-        ]
-      }
-    },
-    {
-      "advance": {
-        "ms": 60000
-      }
-    },
-    {
-      "expect": {
-        "text": [
-          "Game details private"
+          "Steam doesn't share your achievements for this game. Check that your game details are Public in your Steam profile."
+        ],
+        "noText": [
+          "no Steam achievements",
+          "Unreachable"
         ],
         "fault": "none"
       }
     },
     {
-      "menu": {
-        "id": "layout",
-        "value": "line"
-      }
-    },
-    {
-      "host": {
-        "size": {
-          "width": 240,
-          "height": 200
-        }
+      "advance": {
+        "ms": 120000
       }
     },
     {
       "expect": {
-        "image": "private-line",
-        "fault": "none"
-      }
-    },
-    {
-      "menu": {
-        "id": "layout",
-        "value": "compact"
-      }
-    },
-    {
-      "host": {
-        "size": {
-          "width": 280,
-          "height": 200
-        }
-      }
-    },
-    {
-      "expect": {
-        "image": "private-compact",
-        "fault": "none"
-      }
-    },
-    {
-      "menu": {
-        "id": "layout",
-        "value": "standard"
-      }
-    },
-    {
-      "host": {
-        "size": {
-          "width": 300,
-          "height": 200
-        }
-      }
-    },
-    {
-      "expect": {
-        "image": "private-standard",
-        "fault": "none"
-      }
-    },
-    {
-      "menu": {
-        "id": "layout",
-        "value": "full"
-      }
-    },
-    {
-      "host": {
-        "size": {
-          "width": 340,
-          "height": 200
-        }
-      }
-    },
-    {
-      "expect": {
-        "image": "private-full",
-        "fault": "none"
-      }
-    },
-    {
-      "host": {
-        "locale": "fr"
-      }
-    },
-    {
-      "menu": {
-        "id": "layout",
-        "value": "standard"
-      }
-    },
-    {
-      "host": {
-        "size": {
-          "width": 300,
-          "height": 200
-        }
-      }
-    },
-    {
-      "expect": {
-        "image": "private-fr-standard",
+        "text": [
+          "Playing now",
+          "Steam doesn't share your achievements for this game. Check that your game details are Public in your Steam profile."
+        ],
+        "noText": [
+          "Unreachable"
+        ],
         "fault": "none"
       }
     }

@@ -30,7 +30,7 @@
         "response": {
           "status": 200,
           "contentType": "application/json",
-          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 3,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"gameid\": \"1874000\",\n\t\t\t\t\"gameextrainfo\": \"Ashen Crown\"\n\t\t\t}\n\t\t]\n\t}\n}"
+          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 3,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"commentpermission\": 1,\n\t\t\t\t\"profileurl\": \"https://steamcommunity.com/profiles/76561198000000000/\",\n\t\t\t\t\"personastate\": 1,\n\t\t\t\t\"lastlogoff\": 1767223800,\n\t\t\t\t\"timecreated\": 1400000000,\n\t\t\t\t\"personastateflags\": 0,\n\t\t\t\t\"gameid\": \"1874000\",\n\t\t\t\t\"gameextrainfo\": \"Ashen Crown\"\n\t\t\t}\n\t\t]\n\t}\n}"
         }
       },
       {
@@ -54,7 +54,7 @@
         "response": {
           "status": 200,
           "contentType": "application/json",
-          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 3,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"gameid\": \"1874000\",\n\t\t\t\t\"gameextrainfo\": \"Ashen Crown\"\n\t\t\t}\n\t\t]\n\t}\n}"
+          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 3,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"commentpermission\": 1,\n\t\t\t\t\"profileurl\": \"https://steamcommunity.com/profiles/76561198000000000/\",\n\t\t\t\t\"personastate\": 1,\n\t\t\t\t\"lastlogoff\": 1767223800,\n\t\t\t\t\"timecreated\": 1400000000,\n\t\t\t\t\"personastateflags\": 0,\n\t\t\t\t\"gameid\": \"1874000\",\n\t\t\t\t\"gameextrainfo\": \"Ashen Crown\"\n\t\t\t}\n\t\t]\n\t}\n}"
         }
       },
       {
@@ -66,7 +66,7 @@
         "response": {
           "status": 200,
           "contentType": "application/json",
-          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 3,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"gameid\": \"1874000\",\n\t\t\t\t\"gameextrainfo\": \"Ashen Crown\"\n\t\t\t}\n\t\t]\n\t}\n}"
+          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 3,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"commentpermission\": 1,\n\t\t\t\t\"profileurl\": \"https://steamcommunity.com/profiles/76561198000000000/\",\n\t\t\t\t\"personastate\": 1,\n\t\t\t\t\"lastlogoff\": 1767223800,\n\t\t\t\t\"timecreated\": 1400000000,\n\t\t\t\t\"personastateflags\": 0,\n\t\t\t\t\"gameid\": \"1874000\",\n\t\t\t\t\"gameextrainfo\": \"Ashen Crown\"\n\t\t\t}\n\t\t]\n\t}\n}"
         }
       },
       {
@@ -78,7 +78,7 @@
         "response": {
           "status": 200,
           "contentType": "application/json",
-          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 3,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"gameid\": \"1874000\",\n\t\t\t\t\"gameextrainfo\": \"Ashen Crown\"\n\t\t\t}\n\t\t]\n\t}\n}"
+          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 3,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"commentpermission\": 1,\n\t\t\t\t\"profileurl\": \"https://steamcommunity.com/profiles/76561198000000000/\",\n\t\t\t\t\"personastate\": 1,\n\t\t\t\t\"lastlogoff\": 1767223800,\n\t\t\t\t\"timecreated\": 1400000000,\n\t\t\t\t\"personastateflags\": 0,\n\t\t\t\t\"gameid\": \"1874000\",\n\t\t\t\t\"gameextrainfo\": \"Ashen Crown\"\n\t\t\t}\n\t\t]\n\t}\n}"
         }
       },
       {
@@ -90,7 +90,7 @@
         "response": {
           "status": 200,
           "contentType": "application/json",
-          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 3,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"gameid\": \"1874000\",\n\t\t\t\t\"gameextrainfo\": \"Ashen Crown\"\n\t\t\t}\n\t\t]\n\t}\n}"
+          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 3,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"commentpermission\": 1,\n\t\t\t\t\"profileurl\": \"https://steamcommunity.com/profiles/76561198000000000/\",\n\t\t\t\t\"personastate\": 1,\n\t\t\t\t\"lastlogoff\": 1767223800,\n\t\t\t\t\"timecreated\": 1400000000,\n\t\t\t\t\"personastateflags\": 0,\n\t\t\t\t\"gameid\": \"1874000\",\n\t\t\t\t\"gameextrainfo\": \"Ashen Crown\"\n\t\t\t}\n\t\t]\n\t}\n}"
         }
       },
       {
@@ -102,7 +102,7 @@
         "response": {
           "status": 200,
           "contentType": "application/json",
-          "body": "{\n\t\"response\": {\n\t\t\"total_count\": 1,\n\t\t\"games\": [\n\t\t\t{\n\t\t\t\t\"appid\": 1874000,\n\t\t\t\t\"name\": \"Ashen Crown\",\n\t\t\t\t\"playtime_2weeks\": 300,\n\t\t\t\t\"playtime_forever\": 3000,\n\t\t\t\t\"img_icon_url\": \"a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1\"\n\t\t\t}\n\t\t]\n\t}\n}"
+          "body": "{\n\t\"response\": {\n\t\t\"total_count\": 1,\n\t\t\"games\": [\n\t\t\t{\n\t\t\t\t\"appid\": 1874000,\n\t\t\t\t\"name\": \"Ashen Crown\",\n\t\t\t\t\"playtime_2weeks\": 300,\n\t\t\t\t\"playtime_forever\": 3000,\n\t\t\t\t\"img_icon_url\": \"a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1\",\n\t\t\t\t\"playtime_windows_forever\": 3000,\n\t\t\t\t\"playtime_mac_forever\": 0,\n\t\t\t\t\"playtime_linux_forever\": 0,\n\t\t\t\t\"playtime_deck_forever\": 0\n\t\t\t}\n\t\t]\n\t}\n}"
         }
       },
       {
@@ -114,7 +114,7 @@
         "response": {
           "status": 200,
           "contentType": "application/json",
-          "body": "{\n\t\"response\": {\n\t\t\"total_count\": 1,\n\t\t\"games\": [\n\t\t\t{\n\t\t\t\t\"appid\": 1874000,\n\t\t\t\t\"name\": \"Ashen Crown\",\n\t\t\t\t\"playtime_2weeks\": 300,\n\t\t\t\t\"playtime_forever\": 3000,\n\t\t\t\t\"img_icon_url\": \"a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1\"\n\t\t\t}\n\t\t]\n\t}\n}"
+          "body": "{\n\t\"response\": {\n\t\t\"total_count\": 1,\n\t\t\"games\": [\n\t\t\t{\n\t\t\t\t\"appid\": 1874000,\n\t\t\t\t\"name\": \"Ashen Crown\",\n\t\t\t\t\"playtime_2weeks\": 300,\n\t\t\t\t\"playtime_forever\": 3000,\n\t\t\t\t\"img_icon_url\": \"a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1\",\n\t\t\t\t\"playtime_windows_forever\": 3000,\n\t\t\t\t\"playtime_mac_forever\": 0,\n\t\t\t\t\"playtime_linux_forever\": 0,\n\t\t\t\t\"playtime_deck_forever\": 0\n\t\t\t}\n\t\t]\n\t}\n}"
         }
       },
       {

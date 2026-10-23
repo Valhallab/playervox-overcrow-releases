@@ -8,12 +8,12 @@
     {
       "locale": "en",
       "name": "Steam achievements",
-      "description": "Your Steam achievements for the game you play: progress, latest unlocked and the next ones to get, with their rarity. Choose what to show, track up to three achievements. Updated every minute. Needs Steam connected in PlayerVox OverCrow and your profile link. Your Steam key can also manage item trades: this widget only reads, and the key goes only to api.steampowered.com. Revoke it at steamcommunity.com/dev/apikey. PlayerVox is not affiliated with Valve Corporation."
+      "description": "Your Steam achievements for the game you play: progress, latest unlocked and the next ones to get, with their rarity. Choose what to show, track up to three achievements. Updated every minute. Needs Steam connected in PlayerVox OverCrow, your profile link and public game details. Your Steam key can also manage item trades: this widget only reads, and the key goes only to api.steampowered.com. Revoke it at steamcommunity.com/dev/apikey. PlayerVox is not affiliated with Valve Corporation."
     },
     {
       "locale": "fr",
       "name": "Succès Steam",
-      "description": "Vos succès Steam du jeu en cours : progression, derniers débloqués et prochains à obtenir, avec leur rareté. Choisissez quoi afficher, suivez jusqu'à trois succès. Mis à jour chaque minute. Il faut connecter Steam dans PlayerVox OverCrow et donner le lien de votre profil. Votre clé Steam gère aussi vos échanges : ce widget ne fait que lire et la clé ne va qu'à api.steampowered.com. Révocation : steamcommunity.com/dev/apikey. PlayerVox n'est pas affilié à Valve Corporation."
+      "description": "Vos succès Steam du jeu en cours : progression, derniers débloqués et prochains à obtenir, avec leur rareté. Choisissez quoi afficher, suivez jusqu'à trois succès. Mis à jour chaque minute. Il faut Steam connecté dans PlayerVox OverCrow, votre lien de profil et des détails de jeu publics. Votre clé Steam gère aussi vos échanges : ce widget ne fait que lire, la clé ne va qu'à api.steampowered.com. Révocation : steamcommunity.com/dev/apikey. PlayerVox n'est pas affilié à Valve Corporation."
     }
   ]
 }

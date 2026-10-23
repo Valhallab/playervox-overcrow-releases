@@ -19,6 +19,8 @@ export function achievementsOf(count, prefix = "ACH") {
 export function fakeSteam() {
   const steam = {
     visible: 3,
+    /** Game details: `public`, `friends` (Friends Only) or `private`. */
+    details: "public",
     playing: null,
     recentHidden: false,
     recent: [],
@@ -52,7 +54,8 @@ export function fakeSteam() {
       if (path === "/ISteamUser/GetPlayerSummaries/v2/") {
         if (query.steamids !== ID) return json(200, { response: { players: [] } });
         const player = { steamid: ID, communityvisibilitystate: steam.visible };
-        if (steam.playing !== null && steam.visible === 3) {
+        // The running game only with a public profile and public game details.
+        if (steam.playing !== null && steam.visible === 3 && steam.details === "public") {
           player.gameid = String(steam.playing);
           player.gameextrainfo = steam.games[steam.playing]?.name ?? "Game";
         }
@@ -69,7 +72,14 @@ export function fakeSteam() {
         return json(200, { game: { gameName: game.name, availableGameStats: game.schema.length === 0 ? {} : { achievements: game.schema.map((a) => ({ ...a, displayName: name(a) })) } } });
       }
       if (path === "/ISteamUserStats/GetPlayerAchievements/v1/") {
-        if (game === undefined || game.schema.length === 0) return json(400, { playerstats: { error: "Requested app has no stats", success: false } });
+        // Anything but public game details: 403, even to the account's own key.
+        if (steam.visible !== 3 || steam.details !== "public") return json(403, { playerstats: { error: "Profile is not public", success: false } });
+        // An answer of its own (Steam's other refusals).
+        if (game?.answer !== undefined) return json(game.answer.status, game.answer.body);
+        // A game the player does not own (and does not borrow): the same 403,
+        // with public game details (measured by other projects in 2026).
+        if (game?.owned === false) return json(403, { playerstats: { error: "Profile is not public", success: false } });
+        if (game === undefined || game.schema.length === 0 || game.noStats === true) return json(400, { playerstats: { error: "Requested app has no stats", success: false } });
         return json(200, { playerstats: { steamID: ID, success: true, achievements: game.schema.map((a) => ({ apiname: a.name, achieved: a.name in game.unlocked ? 1 : 0, unlocktime: game.unlocked[a.name] ?? 0 })) } });
       }
       if (path === "/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/") {

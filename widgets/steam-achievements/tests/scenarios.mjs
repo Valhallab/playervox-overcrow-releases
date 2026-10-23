@@ -75,15 +75,30 @@ const urls = {
   probe: `${API}/ISteamWebAPIUtil/GetSupportedAPIList/v1/`,
 };
 
-function summary({ playing = null, visible = 3 } = {}) {
-  const player = { steamid: ID, communityvisibilitystate: visible, profilestate: 1, personaname: "Nova" };
-  if (playing !== null && visible === 3) Object.assign(player, { gameid: String(playing.appid), gameextrainfo: playing.name });
+/**
+ * GetPlayerSummaries as Steam sends it. A private profile (1) keeps only its
+ * public fields. The running game only with a public profile and public game
+ * details: Steam's privacy page says Game details also decide whether you
+ * are seen in game and which game.
+ */
+function summary({ playing = null, visible = 3, details = "public" } = {}) {
+  const player = { steamid: ID, communityvisibilitystate: visible, profilestate: 1, personaname: "Nova", commentpermission: 1, profileurl: `https://steamcommunity.com/profiles/${ID}/`, personastate: 1 };
+  if (visible === 3) Object.assign(player, { lastlogoff: at(30), timecreated: 1_400_000_000, personastateflags: 0 });
+  if (playing !== null && visible === 3 && details === "public") Object.assign(player, { gameid: String(playing.appid), gameextrainfo: playing.name });
   return json(200, { response: { players: [player] } });
 }
-function recent(games, hidden = false) {
+/** GetRecentlyPlayedGames; `{}` when Steam hides the games; playtime 0 when the player keeps it private. */
+function recent(games, hidden = false, { playtime = true } = {}) {
   if (hidden) return json(200, { response: {} });
-  return json(200, { response: { total_count: games.length, games: games.map((game) => ({ appid: game.appid, name: game.name, playtime_2weeks: 300, playtime_forever: 3000, img_icon_url: ICON_HASH[game.icon] })) } });
+  if (games.length === 0) return json(200, { response: { total_count: 0 } });
+  const time = (minutes) => (playtime ? minutes : 0);
+  return json(200, { response: { total_count: games.length, games: games.map((game) => ({ appid: game.appid, name: game.name, playtime_2weeks: time(300), playtime_forever: time(3000), img_icon_url: ICON_HASH[game.icon], playtime_windows_forever: time(3000), playtime_mac_forever: 0, playtime_linux_forever: 0, playtime_deck_forever: 0 })) } });
 }
+/** Steam's refusals of GetPlayerAchievements, as other projects measured them in 2026. */
+const NOT_PUBLIC = () => json(403, { playerstats: { error: "Profile is not public", success: false } });
+/** The host checks the key after a 403 of an account route: it still works. */
+const probes = (count) => repeat(count, () => fixture(urls.probe, json(200, { apilist: { interfaces: [] } })));
+const NO_STATS = () => json(400, { playerstats: { error: "Requested app has no stats", success: false } });
 /** How Steam names an icon: `old` URLs on old hosts, `current` URLs, or the file alone. */
 const ICON_FORMS = {
   old: (game, file, gray) => (gray ? `http://media.steampowered.com` : `https://steamcdn-a.akamaihd.net`) + `/steamcommunity/public/images/apps/${game.appid}/${file}`,
@@ -101,7 +116,9 @@ function schema(game, l, form = "old") {
   }));
   // Steam lists the game's stats after its achievements.
   const stats = [{ name: "STAT_RUNS", defaultvalue: 0, displayName: "Runs" }];
-  return json(200, { game: { gameName: game.name, gameVersion: "12", availableGameStats: achievements.length ? { achievements, stats } : { stats } } });
+  // A game without achievements nor stats: `{ "game": {} }`, nothing else.
+  if (achievements.length === 0) return json(200, { game: {} });
+  return json(200, { game: { gameName: game.name, gameVersion: "12", availableGameStats: { achievements, stats } } });
 }
 function player(game, unlockedNow = {}) {
   const achievements = game.achievements.map((a) => {
@@ -250,44 +267,114 @@ scenario("no-achievements", "Neon Courier has no achievements: said once, no ach
   ],
 });
 
-scenario("private", "A private profile: amber heading and the last values kept; in Full, the way to make them public.", {
-  host: { storage: { ...profile } },
+// --- what Steam hides: said instead of a game, with where to change it.
+const RUNE = { appid: 1_874_300, name: "Rune Table", header: "header-courier", icon: "game-tide", achievements: ASHEN.achievements };
+scenario("details-hidden", "Game details Friends Only: Steam names no running game and refuses the achievements of the last one played (403 Profile is not public); said with where to set them Public, no game guessed.", {
   http: [
-    ...reads(ASHEN, { minutes: 0 }),
-    ...repeat(3, () => fixture(urls.summary, summary({ visible: 1 }))),
-    ...repeat(2, () => fixture(urls.recent, recent([], true))),
-  ],
-  steps: [
-    { expect: { state: "running", text: ["Playing now"] } },
-    { advance: { ms: MIN } },
-    { expect: { text: ["Game details private"], fault: "none" } },
-    ...layouts("private"),
-    { host: { locale: "fr" } },
-    ...layouts("private-fr", ["standard"]),
-  ],
-});
-
-scenario("not-readable", "Steam answers 403 for the achievements while the host's probe passes: the game stays, a neutral line instead of the bar.", {
-  http: [
-    ...repeat(2, () => fixture(urls.summary, summary({ playing: ASHEN }))),
+    ...repeat(12, () => fixture(urls.summary, summary({ playing: RUNE, details: "friends" }))),
     ...repeat(2, () => fixture(urls.recent, recent([ASHEN]))),
     fixture(urls.schema(ASHEN), schema(ASHEN, "english")),
     fixture(urls.schema(ASHEN, "french"), schema(ASHEN, "french")),
-    ...repeat(3, () => fixture(urls.player(ASHEN), json(403, {}))),
-    ...repeat(6, () => fixture(urls.probe, json(200, { apilist: { interfaces: [] } }))),
+    ...repeat(2, () => fixture(urls.player(ASHEN), NOT_PUBLIC())),
+    ...probes(4),
+  ],
+  steps: [
+    { expect: { state: "running", text: ["Game details hidden", "Steam hides your game details. Set them to Public (Friends Only is not enough)."], noText: ["Ashen Crown", "Rune Table", "Playing now", "Last game played"], fault: "none" } },
+    ...layouts("details-hidden"),
+    { host: { scale: 1500 } },
+    ...layouts("details-hidden-150", ["compact", "standard"]),
+    { host: { locale: "fr", scale: 1000 } },
+    { expect: { text: ["Détails de jeu cachés", "Steam cache vos détails de jeu. Réglez-les sur Public (Amis uniquement ne suffit pas)."] } },
+    ...layouts("details-hidden-fr"),
+    { host: { scale: 1500 } },
+    ...layouts("details-hidden-fr-150", ["compact", "standard"]),
+    { host: { theme: "light", scale: 1000 } },
+    ...layouts("details-hidden-fr-light", ["standard"]),
+    // Ten minutes later, asked once again: still hidden, no loop.
+    { advance: { ms: 10 * MIN } },
+    { expect: { text: ["Détails de jeu cachés"], fault: "none" } },
+  ],
+});
+
+scenario("details-hidden-after-game", "In game, then the game details go Friends Only: at the next minute the game is no longer shown as running nor guessed; the hidden details are said.", {
+  http: [
+    ...reads(ASHEN, { minutes: 0 }),
+    ...repeat(3, () => fixture(urls.summary, summary({ playing: ASHEN, details: "friends" }))),
+    fixture(urls.recent, recent([ASHEN])),
+    fixture(urls.player(ASHEN), NOT_PUBLIC()),
+    ...probes(2),
+  ],
+  steps: [
+    { expect: { state: "running", text: ["Playing now", "12 / 40"] } },
+    { advance: { ms: MIN } },
+    { expect: { text: ["Game details hidden"], noText: ["Playing now", "Ashen Crown"], fault: "none" } },
+  ],
+});
+
+scenario("profile-hidden", "A private profile: Steam keeps only its public fields; said with where to set it Public, nothing else asked.", {
+  http: [...repeat(3, () => fixture(urls.summary, summary({ playing: ASHEN, visible: 1 })))],
+  steps: [
+    { expect: { state: "running", text: ["Profile hidden", "Steam hides your profile. Set it to Public, and your game details too."], fault: "none" } },
+    ...layouts("profile-hidden"),
+    { host: { locale: "fr" } },
+    { expect: { text: ["Profil caché"] } },
+    ...layouts("profile-hidden-fr"),
+  ],
+});
+
+scenario("not-readable", "Steam names the running game but refuses its achievements (403 with public details: a game the player does not own): the game stays, a neutral line instead of the bar, no guess.", {
+  http: [
+    ...repeat(2, () => fixture(urls.summary, summary({ playing: ASHEN }))),
+    ...repeat(2, () => fixture(urls.recent, recent([COURIER]))),
+    fixture(urls.schema(ASHEN), schema(ASHEN, "english")),
+    fixture(urls.schema(ASHEN, "french"), schema(ASHEN, "french")),
+    ...repeat(3, () => fixture(urls.player(ASHEN), NOT_PUBLIC())),
+    ...probes(6),
     fixture(urls.rarity(ASHEN), rarity(ASHEN), false),
     ...images(ASHEN),
   ],
   steps: [
-    { expect: { state: "running", text: ["Steam doesn't show your achievements for this game (borrowed game?)."], fault: "none" } },
-    ...layouts("not-readable", ["compact", "standard"]),
+    { expect: { state: "running", text: ["Playing now", "Steam doesn't share your achievements for this game. Check that your game details are Public in your Steam profile."], noText: ["borrowed", "no Steam achievements"], fault: "none" } },
+    ...layouts("not-readable", ["line", "compact", "standard", "full"]),
     { host: { scale: 1500 } },
     ...layouts("not-readable-150", ["compact", "standard"]),
     { host: { locale: "fr", scale: 1000 } },
-    ...layouts("not-readable-fr", ["compact", "standard"]),
+    { expect: { text: ["Steam ne donne pas vos succès pour ce jeu. Vérifiez que vos détails de jeu sont Publics dans votre profil Steam."], noText: ["prêté"] } },
+    ...layouts("not-readable-fr", ["line", "compact", "standard", "full"]),
     { host: { scale: 1500 } },
     ...layouts("not-readable-fr-150", ["compact", "standard"]),
   ],
+});
+
+scenario("no-stats", "Steam answers 400 Requested app has no stats although the game lists achievements: the same neutral line, never 'no achievements', no server failure.", {
+  http: [
+    ...repeat(3, () => fixture(urls.summary, summary({ playing: ASHEN }))),
+    ...repeat(2, () => fixture(urls.recent, recent([ASHEN]))),
+    fixture(urls.schema(ASHEN), schema(ASHEN, "english")),
+    ...repeat(2, () => fixture(urls.player(ASHEN), NO_STATS())),
+    fixture(urls.rarity(ASHEN), rarity(ASHEN), false),
+    ...images(ASHEN),
+  ],
+  steps: [
+    { expect: { state: "running", text: ["Steam doesn't share your achievements for this game. Check that your game details are Public in your Steam profile."], noText: ["no Steam achievements", "Unreachable"], fault: "none" } },
+    { advance: { ms: 2 * MIN } },
+    { expect: { text: ["Playing now", "Steam doesn't share your achievements for this game. Check that your game details are Public in your Steam profile."], noText: ["Unreachable"], fault: "none" } },
+  ],
+});
+
+scenario("borrowed", "A game borrowed through Steam Families, readable: Steam names it as running and gives its achievements, though it is not among the recent games; shown as any game.", {
+  http: [
+    ...reads(RUNE, { recentGames: [ASHEN] }),
+  ],
+  steps: [
+    { expect: { state: "running", text: ["Rune Table", "Playing now", "12 / 40"], fault: "none" } },
+    ...layouts("borrowed", ["standard"]),
+  ],
+});
+
+scenario("playtime-private", "Total playtime kept private: Steam lists the recent games with no time; out of game, the last game played as usual.", {
+  http: reads(ASHEN, { playing: false }).map((entry) => (entry.request.url === urls.recent ? fixture(urls.recent, recent([ASHEN], false, { playtime: false })) : entry)),
+  steps: [{ expect: { state: "running", text: ["Last game played", "12 / 40"], fault: "none" } }],
 });
 
 scenario("nothing", "No game now and none recently: how to start.", {
