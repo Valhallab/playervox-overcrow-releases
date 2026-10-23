@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "tracked-done",
-  "description": "A tracked achievement unlocks: green check and Unlocked … ago, until Stop tracking.",
+  "description": "A tracked achievement unlocks: green check and Unlocked … ago, until it is unticked; with three tracked, it goes last.",
   "host": {
     "startAt": 1767225600000,
     "storage": {
@@ -9,10 +9,14 @@
         "steamid": "76561198000000000",
         "input": "https://steamcommunity.com/profiles/76561198000000000"
       },
-      "tracked": {
-        "appid": 1874000,
-        "api": "A13"
-      }
+      "tracked": [
+        {
+          "appid": 1874000,
+          "ids": [
+            "A13"
+          ]
+        }
+      ]
     }
   },
   "fixtures": {

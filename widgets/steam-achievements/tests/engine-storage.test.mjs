@@ -1,5 +1,5 @@
 // Storage stays within the host's quotas (64 KiB a value, 256 KiB in all)
-// whatever the games: the profile, the tracked achievement and the last view
+// whatever the games: the profile, the tracked achievements and the last view
 // are always kept; achievement lists only as room allows.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -13,6 +13,8 @@ const EN = JSON.parse(readFileSync(new URL("../locales/en.json", import.meta.url
 const vm = installRuntime({ now: Date.UTC(2026, 0, 1, 12), host: { messages: EN, grants: ["storage", "network", "account:steam"] }, accounts: { steam: "connected" } });
 const steam = fakeSteam();
 steam.storage.set("profile", { steamid: ID, input: ID });
+// Twenty games of three tracked achievements each, the longest IDs kept.
+steam.storage.set("tracked", Array.from({ length: 20 }, (_, n) => ({ appid: 1000 + n, ids: ["x", "y", "z"].map((c) => c.repeat(128)) })));
 // Accented French descriptions weigh more in UTF-8 than characters.
 for (const appid of [1, 2, 3, 4, 5]) {
   const schema = achievementsOf(240, `G${appid}`).map((a) => ({ ...a, description: `Réussir l'épreuve « éclat » numéro ${a.name} sans être vu, même à l'aube ${"é".repeat(120)}` }));
@@ -40,7 +42,11 @@ test("five large games in a row: every write fits, the essentials are kept", asy
   const index = steam.storage.get("schemas") ?? [];
   const parts = [...steam.storage.keys()].filter((key) => key.startsWith("schema:"));
   assert.equal(parts.length, index.reduce((sum, entry) => sum + entry.chunks, 0));
-  logic.pick(logic.pickList(state)[0]?.id ?? "");
+  vm.menu("track");
+  for (const a of logic.pickList(state).slice(0, 3)) logic.toggleTrack(a.id);
+  logic.closePick();
   await settle(vm, steam);
   assert.equal(steam.refusedWrites, 0);
+  assert.equal(steam.storage.get("tracked").length, 20, "twenty games kept, the oldest dropped");
+  assert.equal(steam.storage.get("tracked").at(-1).appid, 5);
 });

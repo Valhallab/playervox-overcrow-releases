@@ -176,6 +176,23 @@ test("every text key the logic and the view use exists in both languages", () =>
   assert.deepEqual(Object.keys(EN).sort(), Object.keys(FR).sort());
 });
 
+test("tracked achievements: three per game, twenty games, anything else dropped", () => {
+  assert.deepEqual([...logic.parseTracked(null)], []);
+  assert.deepEqual([...logic.parseTracked({ appid: 7, api: "A" })], []);
+  assert.deepEqual([...logic.parseTracked([
+    { appid: 7, ids: ["A", "B", "A", "C", "D"] },
+    { appid: 0, ids: ["A"] },
+    { appid: 8, ids: [] },
+    { appid: 9, ids: [1, "", "x".repeat(129), "E"] },
+    { appid: "10", ids: ["F"] },
+  ])], [[7, ["A", "B", "C"]], [9, ["E"]]]);
+  const many = Array.from({ length: 25 }, (_, n) => ({ appid: n + 1, ids: ["A"] }));
+  const kept = logic.parseTracked(many);
+  assert.equal(kept.size, logic.TRACKED_GAMES);
+  assert.equal([...kept.keys()][0], 6, "the most recent twenty");
+  assert.equal(logic.MAX_TRACKED, 3);
+});
+
 test("the manifest reads only, never a trade route", () => {
   const manifest = read("../manifest.json");
   const allowed = ["/ISteamUser/", "/IPlayerService/", "/ISteamUserStats/"];

@@ -67,24 +67,83 @@ test("Change Steam profile… opens the step with the link, Cancel goes back", a
   assert.equal(state.phase, "game");
 });
 
-test("Track an achievement…: the picker, the tracked card, Stop tracking", async () => {
+test("Track achievements…: up to three, ticked and unticked in place", async () => {
   vm.menu("track");
   assert.equal(state.picking, true);
-  const list = logic.pickList(state);
-  assert.ok(list.every((a) => !a.achieved));
-  logic.pick("ACH_3");
-  assert.equal(state.picking, false);
+  const ids = () => logic.pickList(state).map((a) => a.id);
+  const order = ids();
+  assert.ok(logic.pickList(state).every((a) => !a.achieved));
+  logic.toggleTrack("ACH_3");
+  assert.equal(state.picking, true, "the list stays open");
   await settle(vm, steam);
-  assert.deepEqual(steam.storage.get("tracked"), { appid: 100, api: "ACH_3" });
+  assert.deepEqual(steam.storage.get("tracked"), [{ appid: 100, ids: ["ACH_3"] }]);
+  // One tracked: its own card, as before.
   assert.equal(logic.tracked(state).id, "ACH_3");
   assert.equal(logic.featured(state, 0).id, "ACH_3");
-  steam.games[100].unlocked.ACH_3 = 1767400000;
-  await minutes(vm, steam, 1);
-  assert.equal(logic.cardClass(logic.tracked(state), state), "feature tracked done");
-  assert.match(logic.featureMeta(logic.tracked(state), state), /^Unlocked /);
-  vm.menu("track");
-  logic.pick("");
+  assert.equal(logic.trackedMany(state), false);
+  logic.toggleTrack("ACH_1");
+  logic.toggleTrack("ACH_2");
+  assert.deepEqual(ids(), order, "a ticked row stays under the pointer");
+  assert.equal(logic.pickRowClass(logic.pickList(state).find((a) => a.id === "ACH_1"), state), "pick-row on");
+  assert.equal(logic.pickLabel(logic.pickList(state).find((a) => a.id === "ACH_1"), state), "Achievement 1, tracked");
+  // Three: the others wait.
+  assert.equal(logic.pickFull(state), true);
+  assert.equal(logic.pickCount(state), "3 / 3");
+  const other = logic.pickList(state).find((a) => a.id === "ACH_4");
+  assert.equal(logic.pickDisabled(other, state), true);
+  assert.equal(logic.pickRowClass(other, state), "pick-row off");
+  logic.toggleTrack("ACH_4");
+  assert.deepEqual(state.tracked, ["ACH_3", "ACH_1", "ACH_2"], "never a fourth");
+  logic.closePick();
+  assert.equal(state.picking, false);
+  // Several: one card, in the order they were added; never repeated below.
+  assert.equal(logic.trackedMany(state), true);
   assert.equal(logic.tracked(state), null);
+  assert.equal(logic.featured(state, 0), null);
+  assert.deepEqual(logic.trackedList(state).map((a) => a.id), ["ACH_3", "ACH_1", "ACH_2"]);
+  assert.ok(logic.missing(state, 12, 0).every((a) => !state.tracked.includes(a.id)));
+  // One unlocks: checked, last, until it is unticked.
+  steam.games[100].unlocked.ACH_1 = 1767400000;
+  await minutes(vm, steam, 1);
+  assert.deepEqual(logic.trackedList(state).map((a) => a.id), ["ACH_3", "ACH_2", "ACH_1"]);
+  const done = logic.trackedList(state)[2];
+  assert.equal(logic.cardClass(done, state), "feature tracked done");
+  assert.match(logic.featureMeta(done, state), /^Unlocked /);
+  assert.ok(logic.recent(state, 6).every((a) => a.id !== "ACH_1"), "not repeated in Recently unlocked");
+  await minutes(vm, steam, 90);
+  assert.deepEqual(state.tracked, ["ACH_3", "ACH_1", "ACH_2"], "still tracked later");
+  // The list opens with the tracked ones first, the unlocked one included.
+  vm.menu("track");
+  assert.deepEqual(ids().slice(0, 3), ["ACH_3", "ACH_2", "ACH_1"]);
+  for (const id of ["ACH_3", "ACH_1", "ACH_2"]) logic.toggleTrack(id);
+  logic.closePick();
+  await settle(vm, steam);
+  assert.equal(logic.hasTracked(state), false);
+  assert.equal(logic.featured(state, 0).id, "ACH_1", "the latest again");
+  assert.deepEqual(steam.storage.get("tracked"), []);
+});
+
+test("tracked achievements are kept per game", async () => {
+  vm.menu("track");
+  logic.toggleTrack("ACH_4");
+  logic.closePick();
+  steam.games[200] = { name: "Neon Courier", schema: achievementsOf(3, "N"), unlocked: {} };
+  steam.playing = 200;
+  steam.recent = [200, 100];
+  await minutes(vm, steam, 2);
+  assert.equal(state.game.name, "Neon Courier");
+  assert.deepEqual(state.tracked, []);
+  vm.menu("track");
+  logic.toggleTrack("N_1");
+  logic.closePick();
+  await settle(vm, steam);
+  assert.deepEqual(steam.storage.get("tracked"), [{ appid: 100, ids: ["ACH_4"] }, { appid: 200, ids: ["N_1"] }]);
+  steam.playing = 100;
+  steam.recent = [100, 200];
+  await minutes(vm, steam, 2);
+  assert.equal(state.game.name, "Ashen Crown");
+  assert.deepEqual(state.tracked, ["ACH_4"]);
+  assert.equal(logic.tracked(state).id, "ACH_4");
 });
 
 test("Passive mode closes the picker", () => {

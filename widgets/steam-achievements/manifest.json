@@ -318,8 +318,8 @@
         "type": "action",
         "id": "track",
         "label": {
-          "en": "Track an achievement…",
-          "fr": "Suivre un succès…"
+          "en": "Track achievements…",
+          "fr": "Suivre des succès…"
         }
       },
       {

@@ -19,6 +19,22 @@
   </box>
 </component>
 
+<component name="trackedcard" props="items">
+  <box class="tracked-card">
+    <box class="feature-top"><icon class="pin" name="pin"/><text class="section-title">{t("tracked-many")}</text></box>
+    <for each={items} as="a" key={a.id}>
+      <box class={a.achieved ? "trow done" : "trow"} tooltip={achDesc(a)}>
+        <achicon a={a} cls="row-icon"/>
+        <box class="row-text">
+          <text class={concealed(a) ? "row-name hidden" : "row-name"}>{achName(a)}</text>
+          <text class={a.achieved ? "row-desc ok" : "row-desc"}>{featureMeta(a, state)}</text>
+        </box>
+        <if test={a.achieved}><icon class="done-icon" name="circle-check"/></if>
+      </box>
+    </for>
+  </box>
+</component>
+
 <component name="gameicon" props="cls">
   <if test={iconSrc(state) != ""}><image class={cls} src={iconSrc(state)} label={state.game.name}/></if>
   <else><box class={fallbackClass(cls)}><icon name="gamepad-2"/></box></else>
@@ -87,25 +103,29 @@
 
   <else-if test={state.picking && state.interactive}>
     <box class="picker">
-      <text class="eyebrow accent">{t("pick-title")}</text>
-      <text class="pmsg">{t("pick-hint")}</text>
+      <box class="picker-top">
+        <text class="eyebrow accent">{t("pick-title")}</text>
+        <text class={pickFull(state) ? "counter max" : "counter"}>{pickCount(state)}</text>
+      </box>
+      <if test={pickFull(state)}><text class="pmsg warn"><icon class="inline-icon" name="circle-alert"/><span>&#32;{t("pick-full")}</span></text></if>
+      <else><text class="pmsg">{t("pick-hint")}</text></else>
       <scroll class="pick-list">
         <for each={pickList(state)} as="a" key={a.id}>
-          <button class="pick-row" label={achName(a)} on:activate={pick(a.id)}>
+          <button class={pickRowClass(a, state)} label={pickLabel(a, state)} disabled={pickDisabled(a, state)} on:activate={toggleTrack(a.id)}>
             <achicon a={a} cls="row-icon"/>
             <box class="row-text">
-              <text class="row-name">{achName(a)}</text>
+              <text class={concealed(a) ? "row-name hidden" : "row-name"}>{achName(a)}</text>
               <text class="row-desc">{achDesc(a)}</text>
             </box>
-            <if test={showRarity(state.optionsVersion) && rarityShort(a) != ""}><text class="row-side">{rarityShort(a)}</text></if>
+            <if test={a.achieved}><icon class="row-ok" name="circle-check"/></if>
+            <else-if test={showRarity(state.optionsVersion) && rarityShort(a) != ""}><text class="row-side">{rarityShort(a)}</text></else-if>
+            <if test={isTracked(a, state)}><box class="check on"><icon name="check"/></box></if>
+            <else><box class="check"/></else>
           </button>
         </for>
       </scroll>
       <box class="pick-actions">
-        <if test={state.tracked != ""}>
-          <button class="ghost" on:activate={pick("")}><text class="ghost-text">{t("pick-none")}</text></button>
-        </if>
-        <button class="ghost" on:activate={cancelPick}><text class="ghost-text">{t("cancel")}</text></button>
+        <button class="pbutton" on:activate={closePick}><text class="pbutton-text">{t("done")}</text></button>
       </box>
     </box>
   </else-if>
@@ -178,6 +198,9 @@
         </box>
       </if>
 
+      <if test={layout(state.optionsVersion) == "standard" && hasAch(state.game) && trackedMany(state)}>
+        <trackedcard items={trackedList(state)}/>
+      </if>
       <if test={layout(state.optionsVersion) == "standard" && hasAch(state.game) && featured(state, state.optionsVersion)}>
         <feature a={featured(state, state.optionsVersion)} title={featuredTitle(state, state.optionsVersion)} metaText={featureMeta(featured(state, state.optionsVersion), state)} cls={cardClass(featured(state, state.optionsVersion), state)}/>
       </if>
@@ -186,7 +209,8 @@
         <if test={tracked(state)}>
           <feature a={tracked(state)} title={t("tracked")} metaText={featureMeta(tracked(state), state)} cls={cardClass(tracked(state), state)}/>
         </if>
-        <if test={!missingOnly(state.optionsVersion) && !tracked(state) && latest(state)}>
+        <if test={trackedMany(state)}><trackedcard items={trackedList(state)}/></if>
+        <if test={!missingOnly(state.optionsVersion) && !hasTracked(state) && latest(state)}>
           <feature a={latest(state)} title={t("latest")} metaText={meta(latest(state), state)} cls={cardClass(latest(state), state)}/>
         </if>
         <box class="lists">

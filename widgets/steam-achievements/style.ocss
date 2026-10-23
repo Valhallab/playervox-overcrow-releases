@@ -272,6 +272,29 @@
 .feature.tracked {
   border-color: var(--color-border-strong);
 }
+/* Several tracked: one card, a row each. */
+.tracked-card {
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+}
+.trow {
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 28px;
+}
+.trow .row-name {
+  font-weight: 600;
+}
+.trow.done .row-name {
+  color: var(--color-text-secondary);
+}
+.row-desc.ok {
+  color: var(--color-success);
+}
 @keyframes unlock {
   from { border-color: var(--color-accent); }
   to { border-color: transparent; }
@@ -458,6 +481,57 @@
 .pick-row:hover,
 .pick-row:focus {
   background: var(--color-surface-hover);
+}
+.pick-row.on {
+  background: var(--color-accent-soft);
+}
+.pick-row:disabled {
+  opacity: 0.42;
+}
+.pick-row:disabled:hover {
+  background: transparent;
+}
+.picker-top {
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.counter {
+  flex-shrink: 0;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+.counter.max {
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+}
+.pmsg.warn {
+  color: var(--color-warning);
+}
+/* The check of a picker row: the whole row is the button. */
+.check {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid var(--color-text-subtle);
+  border-radius: 5px;
+  font-size: 13px;
+}
+.check.on {
+  border-color: var(--color-accent);
+  color: var(--color-on-accent);
+  background: var(--color-accent);
+}
+.row-ok {
+  flex-shrink: 0;
+  font-size: 14px;
+  color: var(--color-success);
 }
 .pick-actions {
   justify-content: end;

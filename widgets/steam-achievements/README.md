@@ -23,7 +23,7 @@ Valve Corporation ([trademarks](../../TRADEMARKS.md)).
 | Steam not connected, key refused | PlayerVox OverCrow's own panel over the widget ("Steam is not connected", "Connect Steam"): the widget draws no account screen |
 | Profile | "Last step · Your Steam profile": a field for the profile link (`steamcommunity.com/id/<name>`, `/profiles/<id>`, a SteamID or a custom name), in Interactive mode; in Passive mode, a line saying to switch to Interactive mode |
 | Loading | A skeleton, on the very first start only |
-| Playing now | The game (store image, name), a green "Playing now", the count, bar and percentage, then by layout the tracked, next or latest achievement, and in Full the recently unlocked and next ones |
+| Playing now | The game (store image, name), a green "Playing now", the count, bar and percentage, then by layout the tracked achievements (one: its own card; two or three: one card, a row each), else the next or latest achievement, and in Full the recently unlocked and next ones |
 | New unlock | The card in the accent colour, pulsing twice, with "New" for a minute |
 | Last game played | The same, with a neutral "Last game played" heading: not playing is not a problem |
 | All achievements | Green bar and check |
@@ -50,7 +50,7 @@ user's language.
 | Achievements › Show rarity | On (default): "4.2% of players"; off, the description instead |
 | Achievements › Reveal hidden achievements | Off (default): "Hidden achievement", "Revealed when you unlock it.", a lock |
 | Steam logo | On (default): the Steam symbol on the game card; off, the word "Steam" |
-| Track an achievement… | In Interactive mode: the missing achievements, then the chosen one stays first, with a green check once unlocked, until "Stop tracking" |
+| Track achievements… | In Interactive mode: a checklist, the tracked ones first, then the missing achievements; a click ticks or unticks at once, up to three per game ("Limit reached" greys the other rows), "Done" closes it. The rows keep their place while it is open. Tracked achievements stay at the top of the widget in the order they were added; one unlocked goes last with a green check and "Unlocked … ago", until it is unticked. Each game keeps its own (the last 20 games) |
 | Change Steam profile… | The profile step, with the current link and Cancel |
 
 ## Permissions
@@ -59,7 +59,7 @@ user's language.
 | --- | --- |
 | `account:steam` | The integrated Steam service. Read only: the widget never calls a trade route (`IEconService`), and PlayerVox OverCrow refuses any route outside the read interfaces of the player and the games |
 | `network` | Six `GET` routes of `https://api.steampowered.com` (below); the store image of a game on two Steam image hosts; the icons of achievements and games on `https://shared.akamai.steamstatic.com/community_assets/images/apps/`, a `file` parameter (`<name>.jpg`, catalog feature `network-file-param`) |
-| `storage` | The profile link, the tracked achievement, the last values shown and the achievement lists of the last three games |
+| `storage` | The profile link, the tracked achievements (three per game, 20 games), the last values shown and the achievement lists of the last three games |
 
 | Route | When |
 | --- | --- |
@@ -114,7 +114,7 @@ your computer and sends it only to `api.steampowered.com`. To revoke it:
   whole list, and memory holds the shown game only.
 - **Storage.** The achievement lists of past games are kept within 180 kB
   in all (parts of 20,000 characters, the oldest making room), so the
-  profile, the tracked achievement and the last view always fit the
+  profile, the tracked achievements and the last view always fit the
   host's 256 KiB; a larger list stays in memory, a failed write leaves
   nothing behind. A list that misses an achievement Steam reports (the game
   was updated) is read again. The last view is kept so a

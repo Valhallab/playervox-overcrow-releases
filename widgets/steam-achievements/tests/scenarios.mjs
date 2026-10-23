@@ -485,28 +485,51 @@ option("opt-rows-5", "Five rows per list.", { rows: 5 }, ["full"]);
 option("opt-no-logo", "Steam logo off: the word Steam in its place.", { "show-logo": false }, ["compact", "standard", "full"]);
 
 // --- tracking.
-scenario("track", "Track an achievement…: the list, the choice first on the widget, Stop tracking.", {
+scenario("track", "Track achievements…: the checklist, one tracked on its own card, three in one card, the others greyed at three, then all unticked.", {
   host: { mode: "interactive" },
   http: reads(ASHEN, { minutes: 2, unlockedNow: {} }),
   steps: [
     { expect: { state: "running" } },
     { menu: { id: "track" } },
-    { expect: { text: ["Track an achievement", "Endless Night"] } },
+    { expect: { text: ["Track achievements", "0 / 3", "Up to 3. They stay at the top of the widget.", "Endless Night"] } },
     ...layouts("picker", ["standard", "full"]),
     { host: { locale: "fr" } },
     ...layouts("picker-fr", ["standard"]),
     { host: { locale: "en" } },
     { pointer: { click: { label: "Endless Night" } } },
-    { expect: { text: ["Tracked achievement", "Endless Night"], noText: ["Track an achievement"] } },
+    { expect: { text: ["1 / 3"], fault: "none" } },
+    { pointer: { click: { text: "Done" } } },
+    { expect: { text: ["Tracked achievement", "Endless Night"], noText: ["Track achievements"] } },
     ...layouts("tracked", ["standard", "full"]),
     { menu: { id: "track" } },
-    { pointer: { click: { text: "Stop tracking" } } },
-    { expect: { noText: ["Tracked achievement"], text: ["Latest achievement"], fault: "none" } },
+    { pointer: { click: { label: "Eye of the Abyss" } } },
+    { pointer: { click: { label: "Deep Key" } } },
+    { expect: { text: ["3 / 3", "Limit reached: untick one to add another."], noText: ["Up to 3."], fault: "none" } },
+    // A greyed row does nothing.
+    { pointer: { click: { label: "Flawless Gem" } } },
+    { expect: { text: ["3 / 3"], fault: "none" } },
+    ...layouts("picker-max", ["standard"]),
+    { host: { locale: "fr" } },
+    ...layouts("picker-max-fr", ["standard"]),
+    { host: { locale: "en" } },
+    { pointer: { click: { text: "Done" } } },
+    { expect: { text: ["Tracked", "Endless Night", "Eye of the Abyss", "Deep Key"], noText: ["Tracked achievement", "Latest achievement"], fault: "none" } },
+    ...layouts("tracked-many", ["compact", "standard", "full"]),
+    { host: { locale: "fr" } },
+    ...layouts("tracked-many-fr", ["standard"]),
+    { host: { locale: "en" } },
+    { menu: { id: "track" } },
+    { pointer: { click: { label: "Endless Night, tracked" } } },
+    { pointer: { click: { label: "Eye of the Abyss, tracked" } } },
+    { pointer: { click: { label: "Deep Key, tracked" } } },
+    { expect: { text: ["0 / 3"] } },
+    { pointer: { click: { text: "Done" } } },
+    { expect: { noText: ["Tracked achievement", "Tracked"], text: ["Latest achievement"], fault: "none" } },
   ],
 });
 
-scenario("tracked-done", "A tracked achievement unlocks: green check and Unlocked … ago, until Stop tracking.", {
-  host: { storage: { ...profile, tracked: { appid: ASHEN.appid, api: "A13" } } },
+scenario("tracked-done", "A tracked achievement unlocks: green check and Unlocked … ago, until it is unticked; with three tracked, it goes last.", {
+  host: { storage: { ...profile, tracked: [{ appid: ASHEN.appid, ids: ["A13"] }] } },
   http: [
     ...repeat(1, () => fixture(urls.summary, summary({ playing: ASHEN }))),
     ...repeat(1, () => fixture(urls.player(ASHEN), player(ASHEN))),
@@ -519,6 +542,23 @@ scenario("tracked-done", "A tracked achievement unlocks: green check and Unlocke
     ...layouts("tracked-done", ["standard"]),
     { host: { locale: "fr" } },
     ...layouts("tracked-done-fr", ["standard"]),
+  ],
+});
+
+scenario("tracked-many-done", "Three tracked, the first unlocks: checked in green, last of the card, still tracked.", {
+  host: { storage: { ...profile, tracked: [{ appid: 1, ids: ["X"] }, { appid: ASHEN.appid, ids: ["A13", "A10", "A11"] }] } },
+  http: [
+    ...repeat(1, () => fixture(urls.summary, summary({ playing: ASHEN }))),
+    ...repeat(1, () => fixture(urls.player(ASHEN), player(ASHEN))),
+    ...reads(ASHEN, { minutes: 3, unlockedNow: { A13: 0 } }),
+  ],
+  steps: [
+    { expect: { state: "running", text: ["Tracked", "Endless Night", "Eye of the Abyss", "Deep Key"] } },
+    { advance: { ms: 3 * MIN } },
+    { expect: { text: ["Unlocked 3 min ago"], fault: "none" } },
+    ...layouts("tracked-many-done", ["standard", "full"]),
+    { host: { locale: "fr" } },
+    ...layouts("tracked-many-done-fr", ["standard"]),
   ],
 });
 

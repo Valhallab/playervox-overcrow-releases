@@ -42,7 +42,7 @@
     },
     {
       "permission": "storage",
-      "text": "Keeps your profile link, the achievement you track, the last values shown and the achievement lists of your last three games, on this computer."
+      "text": "Keeps your profile link, the achievements you track (up to three per game, for your last 20 games), the last values shown and the achievement lists of your last three games, on this computer."
     }
   ]
 }

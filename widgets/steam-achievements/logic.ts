@@ -49,6 +49,10 @@ const OUT_OF_GAME_EVERY = 10 * MINUTE;
 const RARITY_EVERY = 24 * 60 * MINUTE;
 const NEW_FOR = MINUTE;
 const IMAGE_RETRY_AFTER = 60 * MINUTE;
+/** Achievements tracked at once in one game. */
+export const MAX_TRACKED = 3;
+/** Games whose tracked achievements are kept, the most recently changed. */
+export const TRACKED_GAMES = 20;
 /** Backoff of a 5xx or a 429, minutes: then 10 min. */
 const BACKOFF_MINUTES = [1, 2, 4, 8, 10] as const;
 
@@ -480,12 +484,13 @@ export interface Ach {
  */
 export interface Lists {
   latest: Ach | null;
-  tracked: Ach | null;
-  /** Unlocked, newest first (7 at most: the latest and 6 rows). */
+  /** Tracked, in the order they were added, the unlocked ones last. */
+  tracked: Ach[];
+  /** Unlocked, newest first (9 at most: 6 rows, and the latest or the tracked ones). */
   recent: Ach[];
-  /** Missing in the chosen order (13 at most: 12 rows and the tracked one). */
+  /** Missing in the chosen order (15 at most: 12 rows and the tracked ones). */
   missing: Ach[];
-  /** The picker's list (50 at most), only while it is open. */
+  /** The picker's list, only while it is open: the tracked ones, then 50 missing at most. */
   pick: Ach[];
 }
 
@@ -502,7 +507,8 @@ declare module "@overcrow/sdk" {
     game: GameView | null;
     /** The few achievements the view shows, chosen by `compute`. */
     lists: Lists;
-    tracked: string;
+    /** IDs tracked in the shown game, in the order they were added. */
+    tracked: string[];
     picking: boolean;
     stale: Stale;
     /** When the shown data was last read, Unix ms. */
@@ -525,8 +531,8 @@ export const state = initState({
   phase: "loading" as Phase,
   profile: { status: "idle", value: "", canCancel: false } as Profile,
   game: null as GameView | null,
-  lists: { latest: null, tracked: null, recent: [], missing: [], pick: [] } as Lists,
-  tracked: "",
+  lists: { latest: null, tracked: [], recent: [], missing: [], pick: [] } as Lists,
+  tracked: [] as string[],
   picking: false,
   stale: "" as Stale,
   readAt: 0,
@@ -567,7 +573,8 @@ const model = {
   rarity: new Map<number, { at: number; values: Map<string, number> }>(),
   schemas: new Map<string, SchemaEntry>(),
   icons: new Map<number, string>(),
-  tracked: { appid: 0, api: "" },
+  /** Tracked IDs by game, the most recently changed game last. */
+  tracked: new Map<number, string[]>(),
   /** Last request of each route (the schema: of each language). */
   lastCall: new Map<string, number>(),
   /** Last S4 and S3 reads of the shown game, Unix ms. */
@@ -975,7 +982,12 @@ function render(): void {
     unlocked: hasAch ? list.reduce((count, entry) => count + (unlocked.has(entry.api) ? 1 : 0), 0) : 0,
     total: hasAch ? list.length : 0,
   };
-  state.tracked = model.tracked.appid === appid ? model.tracked.api : "";
+  // An achievement the game no longer lists is no longer tracked.
+  const ids = model.tracked.get(appid) ?? [];
+  if (list.length > 0 && ids.some((id) => !list.some((entry) => entry.api === id))) {
+    setTracked(appid, ids.filter((id) => list.some((entry) => entry.api === id)));
+  }
+  state.tracked = model.tracked.get(appid) ?? [];
   compute();
   void loadImages();
 }
@@ -998,7 +1010,7 @@ function wantedImages(): string[] {
   if (game === null) return [];
   const wanted = [game.header, game.icon];
   const v = state.optionsVersion;
-  const shown = [featured(state, v), tracked(state), ...recent(state, rows(v)), ...missing(state, rows(v) * 2, v), ...state.lists.pick];
+  const shown = [featured(state, v), ...state.lists.tracked, ...recent(state, rows(v)), ...missing(state, rows(v) * 2, v), ...state.lists.pick];
   for (const a of shown) if (a !== null && hasIcon(a)) wanted.push(achIcon(a));
   return wanted.filter((url, index) => url !== "" && wanted.indexOf(url) === index);
 }
@@ -1046,7 +1058,7 @@ const SCHEMA_PART_CHARS = 20_000;
 const PART_MAX_BYTES = 63_000;
 /**
  * Bytes the stored lists may take in all: the host's 256 KiB minus room
- * for the profile, the tracked achievement, the last view (48 kB) and the
+ * for the profile, the tracked achievements, the last view (48 kB) and the
  * index. A game beyond stays in memory only.
  */
 const SCHEMA_STORE_BYTES = 180_000;
@@ -1188,8 +1200,7 @@ async function restore(): Promise<void> {
   }
   model.steamid = steamid;
   model.input = text(profile?.["input"]) ?? steamid;
-  const tracked = object(await storage.get({ key: "tracked" }).catch(() => null));
-  model.tracked = { appid: whole(tracked?.["appid"]) ?? 0, api: text(tracked?.["api"]) ?? "" };
+  model.tracked = parseTracked(await storage.get({ key: "tracked" }).catch(() => null));
   const snapshot = object(await storage.get({ key: "snapshot" }).catch(() => null));
   const appid = whole(snapshot?.["appid"]);
   if (snapshot !== null && appid !== null && appid > 0) {
@@ -1303,16 +1314,45 @@ function openProfile(): void {
 // ---------------------------------------------------------------------------
 // Tracking
 
-export function pick(id: string): void {
+/** The stored tracked achievements: `[{ appid, ids }]`, anything else dropped. */
+export function parseTracked(value: JsonValue): Map<number, string[]> {
+  const tracked = new Map<number, string[]>();
+  if (!Array.isArray(value)) return tracked;
+  for (const entry of value.slice(-TRACKED_GAMES)) {
+    const appid = whole(object(entry)?.["appid"]);
+    const list = object(entry)?.["ids"];
+    if (appid === null || appid === 0 || !Array.isArray(list)) continue;
+    const ids = [...new Set(list.filter((id): id is string => typeof id === "string" && id !== "" && id.length <= 128))].slice(0, MAX_TRACKED);
+    if (ids.length > 0) tracked.set(appid, ids);
+  }
+  return tracked;
+}
+
+/** Sets the tracked IDs of a game, newest game last, and keeps them. */
+function setTracked(appid: number, ids: string[]): void {
+  model.tracked.delete(appid);
+  if (ids.length > 0) model.tracked.set(appid, ids);
+  for (const key of model.tracked.keys()) {
+    if (model.tracked.size <= TRACKED_GAMES) break;
+    model.tracked.delete(key);
+  }
+  const value = [...model.tracked].map(([game, list]) => ({ appid: game, ids: list }));
+  void storage.set({ key: "tracked", value }).catch(() => null);
+}
+
+/** Ticks or unticks an achievement of the shown game: at most `MAX_TRACKED`. */
+export function toggleTrack(id: string): void {
   const appid = state.game?.appid ?? 0;
-  model.tracked = { appid: id === "" ? 0 : appid, api: id };
-  state.tracked = id;
-  state.picking = false;
+  if (appid === 0 || id === "") return;
+  const ids = model.tracked.get(appid) ?? [];
+  if (!ids.includes(id) && ids.length >= MAX_TRACKED) return;
+  const next = ids.includes(id) ? ids.filter((other) => other !== id) : [...ids, id];
+  setTracked(appid, next);
+  state.tracked = next;
   compute();
-  void storage.set({ key: "tracked", value: { appid: model.tracked.appid, api: id } }).catch(() => null);
   void loadImages();
 }
-export function cancelPick(): void {
+export function closePick(): void {
   state.picking = false;
 }
 
@@ -1343,6 +1383,7 @@ onHost((changed) => {
 
 onMenu((row) => {
   if (row === "track" && state.game !== null && state.game.hasAch) {
+    pickOrder = [];
     state.picking = true;
     compute();
     void loadImages();
@@ -1494,6 +1535,27 @@ export function best<T>(items: readonly T[], k: number, before: (a: T, b: T) => 
   return out;
 }
 
+/** The tracked achievements in the order they were added, the unlocked ones last. */
+function trackedOf(ids: readonly string[]): Ach[] {
+  const list = ids.flatMap((id) => achList.find((a) => a.id === id) ?? []);
+  return [...list.filter((a) => !a.achieved), ...list.filter((a) => a.achieved)];
+}
+
+/**
+ * The picker's rows: the tracked ones, then the 50 first missing. Their
+ * order is set when it opens and holds while it is open: a ticked row stays
+ * under the pointer.
+ */
+let pickOrder: string[] = [];
+function pickOf(missingList: Ach[], before: (a: Ach, b: Ach) => boolean): Ach[] {
+  if (pickOrder.length === 0) {
+    const rest = best(missingList.filter((a) => !state.tracked.includes(a.id)), 50, before);
+    pickOrder = [...trackedOf(state.tracked), ...rest].map((a) => a.id);
+  }
+  const byId = new Map(achList.map((a) => [a.id, a]));
+  return pickOrder.flatMap((id) => byId.get(id) ?? []);
+}
+
 /** Chooses what the view shows; after each read, option, choice or language. */
 function compute(): void {
   const by = order();
@@ -1506,13 +1568,13 @@ function compute(): void {
   };
   const unlockedList = achList.filter((a) => a.achieved);
   const missingList = achList.filter((a) => !a.achieved);
-  const recentList = best(unlockedList, 7, (a, b) => a.at > b.at);
+  const recentList = best(unlockedList, 6 + MAX_TRACKED, (a, b) => a.at > b.at);
   state.lists = {
     latest: recentList[0] ?? null,
-    tracked: state.tracked === "" ? null : (achList.find((a) => a.id === state.tracked) ?? null),
+    tracked: trackedOf(state.tracked),
     recent: recentList,
-    missing: best(missingList, 13, missingBefore),
-    pick: state.picking ? best(missingList.filter((a) => a.id !== state.tracked), 50, missingBefore) : [],
+    missing: best(missingList, 12 + MAX_TRACKED, missingBefore),
+    pick: state.picking ? pickOf(missingList, missingBefore) : [],
   };
 }
 
@@ -1525,19 +1587,34 @@ export function latest(s: typeof state): Ach | null {
 export function anyNew(s: typeof state): boolean {
   return s.lists.recent.some((a) => isNew(a, s));
 }
-/** Unlocked ones, newest first, without the one already on its own card. */
+/** Unlocked ones, newest first, without those already on a card. */
 export function recent(s: typeof state, n: number): Ach[] {
-  const shown = tracked(s) ?? latest(s);
-  return s.lists.recent.filter((a) => a.id !== shown?.id).slice(0, n);
+  const shown = hasTracked(s) ? s.tracked : [latest(s)?.id ?? ""];
+  return s.lists.recent.filter((a) => !shown.includes(a.id)).slice(0, n);
 }
 export function missing(s: typeof state, n: number, _v: number): Ach[] {
-  return s.lists.missing.filter((a) => a.id !== s.tracked).slice(0, n);
+  return s.lists.missing.filter((a) => !s.tracked.includes(a.id)).slice(0, n);
 }
+export function isTracked(a: Ach, s: typeof state): boolean {
+  return s.tracked.includes(a.id);
+}
+export function hasTracked(s: typeof state): boolean {
+  return s.lists.tracked.length > 0;
+}
+/** The one tracked achievement, on its own card; `null` for none or several. */
 export function tracked(s: typeof state): Ach | null {
+  return s.lists.tracked.length === 1 ? (s.lists.tracked[0] ?? null) : null;
+}
+/** Several tracked: one card, a row each. */
+export function trackedMany(s: typeof state): boolean {
+  return s.lists.tracked.length > 1;
+}
+export function trackedList(s: typeof state): Ach[] {
   return s.lists.tracked;
 }
-/** The second card of Standard: tracked, else next missing (missing only), else latest. */
+/** The second card of Standard: the one tracked, else next missing (missing only), else latest; none for several tracked. */
 export function featured(s: typeof state, v: number): Ach | null {
+  if (trackedMany(s)) return null;
   return tracked(s) ?? (missingOnly(v) ? (missing(s, 1, v)[0] ?? null) : latest(s));
 }
 export function featuredTitle(s: typeof state, v: number): string {
@@ -1545,15 +1622,33 @@ export function featuredTitle(s: typeof state, v: number): string {
   return missingOnly(v) ? t("next-one") : t("latest");
 }
 export function cardClass(a: Ach, s: typeof state): string {
-  if (a.id === s.tracked) return a.achieved ? "feature tracked done" : "feature tracked";
+  if (isTracked(a, s)) return a.achieved ? "feature tracked done" : "feature tracked";
   return isNew(a, s) ? "feature new" : "feature";
 }
 export function featureMeta(a: Ach, s: typeof state): string {
-  if (a.id === s.tracked && a.achieved && a.at > 0) return t("tracked-done", { ago: ago(s.now - a.at) });
+  if (isTracked(a, s) && a.achieved && a.at > 0) return t("tracked-done", { ago: ago(s.now - a.at) });
   return meta(a, s);
 }
 export function pickList(s: typeof state): Ach[] {
   return s.lists.pick;
+}
+/** Tracking is full: the other rows of the picker wait. */
+export function pickFull(s: typeof state): boolean {
+  return s.tracked.length >= MAX_TRACKED;
+}
+export function pickCount(s: typeof state): string {
+  return t("pick-count", { count: num(s.tracked.length), max: num(MAX_TRACKED) });
+}
+export function pickDisabled(a: Ach, s: typeof state): boolean {
+  return pickFull(s) && !isTracked(a, s);
+}
+export function pickRowClass(a: Ach, s: typeof state): string {
+  if (isTracked(a, s)) return "pick-row on";
+  return pickFull(s) ? "pick-row off" : "pick-row";
+}
+/** The row's accessible name says whether it is tracked. */
+export function pickLabel(a: Ach, s: typeof state): string {
+  return isTracked(a, s) ? t("pick-on", { name: achName(a) }) : achName(a);
 }
 export function rootClass(s: typeof state): string {
   return `root ${layout(s.optionsVersion)}${s.narrow ? " narrow" : ""}${s.wide ? " wide" : ""}`;

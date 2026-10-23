@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "track",
-  "description": "Track an achievement…: the list, the choice first on the widget, Stop tracking.",
+  "description": "Track achievements…: the checklist, one tracked on its own card, three in one card, the others greyed at three, then all unticked.",
   "host": {
     "startAt": 1767225600000,
     "storage": {
@@ -381,7 +381,9 @@
     {
       "expect": {
         "text": [
-          "Track an achievement",
+          "Track achievements",
+          "0 / 3",
+          "Up to 3. They stay at the top of the widget.",
           "Endless Night"
         ]
       }
@@ -466,11 +468,26 @@
     {
       "expect": {
         "text": [
+          "1 / 3"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Done"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
           "Tracked achievement",
           "Endless Night"
         ],
         "noText": [
-          "Track an achievement"
+          "Track achievements"
         ]
       }
     },
@@ -522,14 +539,251 @@
     {
       "pointer": {
         "click": {
-          "text": "Stop tracking"
+          "label": "Eye of the Abyss"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Deep Key"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "3 / 3",
+          "Limit reached: untick one to add another."
+        ],
+        "noText": [
+          "Up to 3."
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Flawless Gem"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "3 / 3"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "picker-max-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "picker-max-fr-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Done"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Tracked",
+          "Endless Night",
+          "Eye of the Abyss",
+          "Deep Key"
+        ],
+        "noText": [
+          "Tracked achievement",
+          "Latest achievement"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "compact"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 280,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "tracked-many-compact",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "tracked-many-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 340,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "tracked-many-full",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "tracked-many-fr-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en"
+      }
+    },
+    {
+      "menu": {
+        "id": "track"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Endless Night, tracked"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Eye of the Abyss, tracked"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Deep Key, tracked"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "0 / 3"
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Done"
         }
       }
     },
     {
       "expect": {
         "noText": [
-          "Tracked achievement"
+          "Tracked achievement",
+          "Tracked"
         ],
         "text": [
           "Latest achievement"
