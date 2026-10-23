@@ -137,7 +137,8 @@ timers.every(20_000, () => {
   subscription; a gap means events were lost.
 - `data` holds the event's fields under Twitch's names (see Twitch's
   EventSub reference), `null` where Twitch sent none; texts and lists are
-  cut to fixed bounds.
+  cut to fixed bounds. What viewers write is never part of it: a cheer or
+  a resubscription comes without its message.
 - `types` narrows the subscription to some of the declared types; a type
   the declaration does not list fails with `permission_denied`.
 - In a test scenario, `fixtures.subscriptions["twitch.events.subscribe"]`

@@ -246,7 +246,15 @@ fn texts_lists_and_sizes_are_bounded() {
     });
     let data = project_event(event("channel.cheer"), &raw).expect("cheer");
     assert_eq!(data["user_name"], "No va");
-    assert_eq!(data["message"].as_str().unwrap().chars().count(), 500);
+    // Format and bidirectional controls go: a name cannot turn the text
+    // around.
+    let raw = json!({"user_id": "1", "user_login": "nova",
+        "user_name": "No\u{202E}va\u{200B}\u{2066}\u{FEFF}!", "broadcaster_user_id": "2", "bits": 1});
+    let data = project_event(event("channel.cheer"), &raw).expect("cheer");
+    assert_eq!(data["user_name"], "Nova!");
+    let raw = json!({"id": "g", "description": "d".repeat(4000)});
+    let data = project_event(event("channel.goal.begin"), &raw).expect("goal");
+    assert_eq!(data["description"].as_str().unwrap().chars().count(), 200);
     // An identifier that is not one is null.
     let raw = json!({"id": "a b", "broadcaster_user_id": "2", "total": 1, "level": 1});
     let data = project_event(event("channel.hype_train.end"), &raw).expect("train");
@@ -300,4 +308,46 @@ fn the_service_of_the_events() {
         assert!(SERVICE_EVENT_WINDOW.value >= 8);
         assert!(SERVICE_EVENT_WINDOW.value * MAX_SERVICE_EVENT_BYTES.value <= 512 * 1024);
     }
+}
+
+/// What viewers write (the message of a cheer, of a resubscription) is chat
+/// text: Helix does not give it under the scopes a widget declares, and a
+/// widget with an account may not read the chat (a sensitive capability).
+/// No event carries it.
+#[test]
+fn viewer_messages_never_reach_a_widget() {
+    fn names(
+        fields: &[overcrow_widget_schema::integrated::EventField],
+        out: &mut Vec<&'static str>,
+    ) {
+        for field in fields {
+            out.push(field.name);
+            match field.value {
+                overcrow_widget_schema::integrated::EventValue::Object(inner)
+                | overcrow_widget_schema::integrated::EventValue::List(_, inner) => {
+                    names(inner, out)
+                }
+                _ => {}
+            }
+        }
+    }
+    for entry in TWITCH.events {
+        let mut fields = Vec::new();
+        names(entry.fields, &mut fields);
+        assert!(!fields.contains(&"message"), "{}", entry.kind);
+        assert!(!fields.contains(&"text"), "{}", entry.kind);
+    }
+    let cheer = json!({"is_anonymous": false, "user_id": "1", "user_login": "nova", "user_name": "Nova",
+        "broadcaster_user_id": "2", "message": "a viewer's words", "bits": 100});
+    let data = project_event(event("channel.cheer"), &cheer).expect("cheer");
+    assert_eq!(data.get("message"), None);
+    assert_eq!(data["bits"], 100);
+    let resub = json!({"user_id": "1", "user_login": "nova", "user_name": "Nova", "broadcaster_user_id": "2",
+        "tier": "1000", "message": {"text": "a viewer's words", "emotes": [{"begin": 0, "end": 1, "id": "9"}]},
+        "cumulative_months": 15, "streak_months": 1, "duration_months": 6});
+    let data =
+        project_event(event("channel.subscription.message"), &resub).expect("resubscription");
+    assert_eq!(data.get("message"), None);
+    assert_eq!(data["cumulative_months"], 15);
+    assert!(!data.to_string().contains("a viewer's words"));
 }

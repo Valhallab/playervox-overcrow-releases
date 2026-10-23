@@ -143,7 +143,9 @@ timers.every(20_000, () => {
   perdus.
 - `data` contient les champs de l’événement sous les noms de Twitch (voir la
   référence EventSub de Twitch), `null` là où Twitch n’a rien envoyé ; les
-  textes et les listes sont coupés à des bornes fixes.
+  textes et les listes sont coupés à des bornes fixes. Ce qu’écrivent les
+  spectateurs n’en fait jamais partie : un cheer ou un réabonnement arrive
+  sans son message.
 - `types` restreint l’abonnement à certains des types déclarés ; un type que
   la déclaration ne liste pas échoue avec `permission_denied`.
 - Dans un scénario de test, `fixtures.subscriptions["twitch.events.subscribe"]`

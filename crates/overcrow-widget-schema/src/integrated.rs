@@ -160,7 +160,8 @@ pub enum EventCondition {
 /// else (absent, another type, an invalid identifier or time) is `null`.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum EventValue {
-    /// Text cut to this many characters, control characters as spaces.
+    /// Text cut to this many characters, control characters as spaces,
+    /// format and bidirectional controls removed.
     Text(usize),
     /// An identifier or keyword: ASCII letters, digits and `_-.:`, at most
     /// 64 bytes.
@@ -203,7 +204,6 @@ const fn field(name: &'static str, value: EventValue) -> EventField {
 const NAME_CHARS: usize = 64;
 const TITLE_CHARS: usize = 120;
 const CHOICE_CHARS: usize = 60;
-const MESSAGE_CHARS: usize = 500;
 const DESCRIPTION_CHARS: usize = 200;
 
 const USER: [EventField; 3] = [
@@ -275,6 +275,10 @@ const HYPE_TRAIN_FIELDS: &[EventField] = &[
     field("cooldown_ends_at", EventValue::Time),
 ];
 
+// What viewers write with a cheer or a resubscription (`message`) is chat
+// text: Helix does not give it under `bits:read` or
+// `channel:read:subscriptions`, and a widget with an account may not read
+// the chat (a sensitive capability). It is never part of an event.
 const CHEER_FIELDS: &[EventField] = &[
     field("is_anonymous", EventValue::Bool),
     USER[0],
@@ -283,14 +287,7 @@ const CHEER_FIELDS: &[EventField] = &[
     BROADCASTER[0],
     BROADCASTER[1],
     BROADCASTER[2],
-    field("message", EventValue::Text(MESSAGE_CHARS)),
     field("bits", EventValue::Integer),
-];
-
-const EMOTE: &[EventField] = &[
-    field("begin", EventValue::Integer),
-    field("end", EventValue::Integer),
-    field("id", EventValue::Id),
 ];
 
 const SUBSCRIPTION_FIELDS: &[EventField] = &[
@@ -305,13 +302,6 @@ const SUBSCRIPTION_FIELDS: &[EventField] = &[
     field("is_anonymous", EventValue::Bool),
     field("total", EventValue::Integer),
     field("cumulative_total", EventValue::Integer),
-    field(
-        "message",
-        EventValue::Object(&[
-            field("text", EventValue::Text(MESSAGE_CHARS)),
-            field("emotes", EventValue::List(32, EMOTE)),
-        ]),
-    ),
     field("cumulative_months", EventValue::Integer),
     field("streak_months", EventValue::Integer),
     field("duration_months", EventValue::Integer),
@@ -495,6 +485,20 @@ pub const TWITCH_EVENT_TYPES: &[&str] = &[
     "channel.prediction.end",
 ];
 
+/// Invisible format characters: zero-width, bidirectional embeddings,
+/// overrides and isolates, the Arabic letter mark, soft hyphen and BOM.
+fn is_format(character: char) -> bool {
+    matches!(
+        character,
+        '\u{00AD}'
+            | '\u{061C}'
+            | '\u{200B}'..='\u{200F}'
+            | '\u{202A}'..='\u{202E}'
+            | '\u{2060}'..='\u{2069}'
+            | '\u{FEFF}'
+    )
+}
+
 /// The projection of an event's payload (`payload.event`) a widget
 /// receives: every field of the type, `null` where Twitch sent none or
 /// something else, nothing more. `None` when the payload is not an object
@@ -522,6 +526,7 @@ fn project_value(kind: EventValue, value: &Value) -> Value {
         EventValue::Text(max) => value.as_str().map_or(Value::Null, |text| {
             Value::String(
                 text.chars()
+                    .filter(|character| !is_format(*character))
                     .take(max)
                     .map(|character| {
                         if character.is_control() {
