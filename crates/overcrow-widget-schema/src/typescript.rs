@@ -151,7 +151,7 @@ fn capabilities(out: &mut String) {
             Requirement::Permission(name) => {
                 by_permission.entry(name).or_default().push(service.name)
             }
-            Requirement::None | Requirement::Account => {}
+            Requirement::None | Requirement::Account | Requirement::Service(_) => {}
         }
     }
     out.push_str("\n/** The services each capability authorizes. */\nexport interface CapabilityServices {\n");
@@ -505,6 +505,12 @@ fn method(out: &mut String, indent: &str, name: &str, service: &Service) {
         Requirement::Account => {
             text.push_str(" Requires the account `id` the manifest declares, granted by the user.");
         }
+        Requirement::Service(id) => {
+            let _ = write!(
+                text,
+                " Requires the `{id}` service the manifest names, granted by the user."
+            );
+        }
     }
     if service.gesture {
         text.push_str(" Call it while handling a gesture event (`activate`, `keydown`…), or it fails with `gesture_required`.");
@@ -598,7 +604,8 @@ fn value_type(ty: &ValueType) -> String {
         ValueType::NumberList(_) => "readonly number[]".into(),
         ValueType::Record("<color>") => "Color".into(),
         ValueType::Record("ServiceError") => ts_name("ServiceError").into(),
-        ValueType::Record(_) | ValueType::ListOf(..) => "unknown".into(),
+        ValueType::ListOf(..) => "readonly string[]".into(),
+        ValueType::Record(_) => "unknown".into(),
         ValueType::Json => "JsonValue".into(),
     }
 }

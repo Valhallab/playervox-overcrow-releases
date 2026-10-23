@@ -526,6 +526,57 @@ pub const SHAPES: &[NamedShape] = &[
         ]),
         "Twitch chat state.",
     ),
+    named(
+        "TwitchEvent",
+        Shape::Record(&[
+            member(
+                "seq",
+                Shape::Integer,
+                "Order of the event in the subscription, from 1, without gaps unless events were dropped.",
+            ),
+            member(
+                "type",
+                Shape::Keyword(crate::integrated::TWITCH_EVENT_TYPES),
+                "The EventSub type, among those subscribed.",
+            ),
+            member(
+                "at",
+                Shape::Integer,
+                "When the host received it, in Unix milliseconds of the host's clock.",
+            ),
+            member(
+                "data",
+                Shape::Json,
+                "The host's projection of the event: the fields of the type's table under Twitch's names, `null` where Twitch sent none.",
+            ),
+        ]),
+        "One live Twitch event.",
+    ),
+    named(
+        "TwitchEvents",
+        Shape::Record(&[
+            member(
+                "state",
+                Shape::Keyword(&["live", "off"]),
+                "`live` while the host is subscribed at Twitch.",
+            ),
+            member(
+                "reason",
+                Shape::Nullable(&Shape::Keyword(&[
+                    "connecting",
+                    "not_connected",
+                    "unavailable",
+                ])),
+                "Why the state is `off`; `null` when `live`.",
+            ),
+            member(
+                "events",
+                Shape::List(&Shape::Named("TwitchEvent")),
+                "The latest events, oldest first.",
+            ),
+        ]),
+        "Live Twitch events of the widget's declared types.",
+    ),
 ];
 
 pub fn shape(name: &str) -> Option<&'static NamedShape> {

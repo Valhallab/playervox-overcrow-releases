@@ -365,3 +365,30 @@ fn the_twitch_service_is_the_hosts_twitch_account() {
         Ok(())
     );
 }
+
+/// Live Twitch events are a data subscription: a scenario gives their
+/// first value and publishes the next ones, checked against their shape.
+#[test]
+fn twitch_events_are_published_by_the_scenario() {
+    let live = json!({"state": "live", "reason": null, "events": [
+        {"seq": 1, "type": "channel.goal.progress", "at": 1_761_200_000_000_u64, "data": {"id": "1"}}
+    ]});
+    let read = |value: Value| {
+        parse(
+            &serde_json::to_vec(&json!({
+                "scenarioVersion": 1,
+                "name": "events",
+                "fixtures": {"subscriptions": {
+                    "twitch.events.subscribe": {"state": "off", "reason": "connecting", "events": []}
+                }},
+                "steps": [{"publish": {"service": "twitch.events.subscribe", "value": value}}],
+            }))
+            .expect("bytes"),
+        )
+    };
+    read(live).expect("a live update");
+    let error = read(json!({"state": "live", "events": []})).expect_err("not the shape");
+    assert_eq!(error.path, "steps[0].publish.value");
+    let error = read(json!({"state": "off", "reason": "token", "events": []})).expect_err("reason");
+    assert_eq!(error.path, "steps[0].publish.value");
+}

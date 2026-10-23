@@ -18,12 +18,13 @@ use std::collections::BTreeSet;
 use serde_json::{Map, Value};
 
 use crate::identifiers::{reads_as_any, reads_as_reserved_name};
-use crate::integrated::{IntegratedService, READER_GUARDS, service_named};
+use crate::integrated::{IntegratedService, READER_GUARDS, ServiceEvent, service_named};
 use crate::json::{has_exact_fields, integer_in};
 use crate::limits::{
     MAX_ACCOUNT_ID_BYTES, MAX_ACCOUNT_KEY_BYTES, MAX_ACCOUNT_NAME_CHARS, MAX_ACCOUNT_ORIGINS,
     MAX_ACCOUNT_URL_BYTES, MAX_ACCOUNTS, MAX_AUTH_SCHEME_BYTES, MAX_HEADER_NAME_BYTES,
-    MAX_OAUTH_CLIENT_ID_BYTES, MAX_OAUTH_SCOPE_BYTES, MAX_OAUTH_SCOPES, MIN_ACCOUNT_KEY_BYTES,
+    MAX_OAUTH_CLIENT_ID_BYTES, MAX_OAUTH_SCOPE_BYTES, MAX_OAUTH_SCOPES, MAX_SERVICE_EVENTS,
+    MIN_ACCOUNT_KEY_BYTES,
 };
 use crate::manifest::{ManifestError, canonical_https_origin, valid_literal_segment};
 use crate::model::{Field, ValueType};
@@ -148,6 +149,11 @@ pub const SERVICE_ACCOUNT_FIELDS: &[Field] = &[
         "required",
         ValueType::Bool,
         "As for a declared account; default `true`.",
+    ),
+    Field::optional(
+        "events",
+        ValueType::ListOf("event type", &MAX_SERVICE_EVENTS),
+        "A service with live events only (Twitch): distinct types of the service's table, each read by a scope among `scopes`; the host subscribes on the user's own channel and `twitch.events.subscribe` delivers them. Not part of the permission's detail: an event reads what its scope already opens. Needs the feature `twitch-events`.",
     ),
 ];
 
@@ -439,6 +445,9 @@ pub struct Account {
     /// The integrated service the entry names; `None` for a declared
     /// account. Its definition fills the fields above.
     pub service: Option<&'static IntegratedService>,
+    /// The service's live events the widget receives, in the declared
+    /// order; empty for a declared account.
+    pub events: Vec<&'static ServiceEvent>,
 }
 
 impl Account {
@@ -615,6 +624,7 @@ fn validate_account(value: &Value) -> Result<Account, ManifestError> {
         canonical: value.to_string(),
         image_origins: Vec::new(),
         service: None,
+        events: Vec::new(),
     })
 }
 
@@ -660,6 +670,33 @@ fn validate_service_account(
             });
         }
     }
+    let mut events: Vec<&'static ServiceEvent> = Vec::new();
+    if let Some(listed) = object.get("events") {
+        let listed = listed.as_array().ok_or(invalid)?;
+        // A reader that does not know the field refuses the manifest: an
+        // empty list would need the feature for nothing.
+        if listed.is_empty() || listed.len() as u64 > MAX_SERVICE_EVENTS.value {
+            return Err(invalid);
+        }
+        for kind in listed {
+            let event = kind
+                .as_str()
+                .and_then(|kind| service.event(kind))
+                .ok_or(invalid)?;
+            if !scopes.iter().any(|scope| scope.name == event.scope)
+                || events.iter().any(|known| known.kind == event.kind)
+            {
+                return Err(invalid);
+            }
+            events.push(event);
+        }
+    }
+    // The permission's detail: the declaration without `events`, which
+    // never widens what the scopes open.
+    let mut canonical = value.clone();
+    if let Some(object) = canonical.as_object_mut() {
+        object.remove("events");
+    }
     let origins: Vec<String> = service
         .secret_origins
         .iter()
@@ -700,8 +737,9 @@ fn validate_service_account(
             page: key.page.to_owned(),
         }),
         oauth,
-        canonical: value.to_string(),
+        canonical: canonical.to_string(),
         service: Some(service),
+        events,
     })
 }
 

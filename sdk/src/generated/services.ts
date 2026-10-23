@@ -171,7 +171,12 @@ export interface TwitchServices {
     /** `twitch.chat.favorite`. Requires the `twitch.chat.read` capability, granted by the user. Call it while handling a gesture event (`activate`, `keydown`…), or it fails with `gesture_required`. Result: `null`; `quota_exceeded` beyond `MAX_CHAT_FAVORITES`. */
     favorite(params: P["twitch.chat.favorite"]): Promise<R["twitch.chat.favorite"]>;
   };
+  /** The `twitch.events.*` services. */
+  readonly events: {
+    /** `twitch.events.subscribe`. Requires the `twitch` service the manifest names, granted by the user. Updates: `{ state, reason, events }` at once, then at each change. `state` is `live` once the host has subscribed at Twitch, `off` otherwise, with `reason` `connecting`, `not_connected` (Twitch is not connected, or its connection lacks a declared scope) or `unavailable` (Twitch refused or cannot be reached; the host retries). Twitch replays nothing: at each `live`, read once by `http.fetch` what changed meanwhile, and keep reading while `off`. `events` repeats the latest `SERVICE_EVENT_WINDOW` events of the subscription, oldest first, each `{ seq, type, at, data }`: updates are coalesced, so take only those whose `seq` is above the last one seen; a gap in `seq` means events were missed (read again). `data` is the host's projection of Twitch's event: every field of the type's table, `null` where Twitch sent none. */
+    subscribe(params: P["twitch.events.subscribe"], listener: Listener<R["twitch.events.subscribe"]>): Subscription;
+  };
 }
 
 /** The `twitch.*` services. */
-export const twitch: TwitchServices = /* @__PURE__ */ group("twitch", ["chat.subscribe", "chat.join", "chat.leave", "chat.favorite"]);
+export const twitch: TwitchServices = /* @__PURE__ */ group("twitch", ["chat.subscribe", "chat.join", "chat.leave", "chat.favorite", "events.subscribe"]);

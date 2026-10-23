@@ -1101,6 +1101,24 @@ pub const MAX_OAUTH_SCOPE_BYTES: Limit = fixed(
     Unit::Bytes,
     "Name of one OAuth scope.",
 );
+pub const MAX_SERVICE_EVENTS: Limit = fixed(
+    "MAX_SERVICE_EVENTS",
+    32,
+    Unit::Count,
+    "`events` of an integrated service's declaration.",
+);
+pub const MAX_SERVICE_EVENT_BYTES: Limit = fixed(
+    "MAX_SERVICE_EVENT_BYTES",
+    16 * KIB,
+    Unit::Bytes,
+    "Compact JSON of the `data` of one service event; a larger event is dropped and its `seq` skipped.",
+);
+pub const SERVICE_EVENT_WINDOW: Limit = fixed(
+    "SERVICE_EVENT_WINDOW",
+    16,
+    Unit::Count,
+    "Latest events each update of `twitch.events.subscribe` repeats: updates are coalesced, `seq` tells a new event from one already seen.",
+);
 pub const MAX_DNS_LABEL_BYTES: Limit = fixed(
     "MAX_DNS_LABEL_BYTES",
     63,
@@ -1425,6 +1443,9 @@ pub const ALL: &[&Limit] = &[
     &MAX_OAUTH_CLIENT_ID_BYTES,
     &MAX_OAUTH_SCOPES,
     &MAX_OAUTH_SCOPE_BYTES,
+    &MAX_SERVICE_EVENTS,
+    &MAX_SERVICE_EVENT_BYTES,
+    &SERVICE_EVENT_WINDOW,
     &MAX_DNS_LABEL_BYTES,
     &MAX_DNS_NAME_BYTES,
     &MAX_OBJECT_ID_BYTES,

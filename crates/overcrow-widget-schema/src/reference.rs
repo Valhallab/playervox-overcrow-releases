@@ -768,6 +768,7 @@ epoch.\n\n| Service | Requires | Kind | Gesture | Confirmation | Parameters | Re
             Requirement::Permission(name) => format!("permission `{name}`"),
             Requirement::Capability(name) => format!("capability `{name}`"),
             Requirement::Account => "a declared, granted account (`id`)".to_string(),
+            Requirement::Service(id) => format!("the named, granted service `{id}`"),
         };
         let kind = match service.kind {
             ServiceKind::Call => "call",

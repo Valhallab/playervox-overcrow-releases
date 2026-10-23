@@ -1083,7 +1083,9 @@ fn data_subscription(name: &str) -> Option<&'static overcrow_widget_schema::serv
         service.kind == ServiceKind::Subscribe
             && matches!(
                 service.requires,
-                Requirement::Capability(_) | Requirement::Permission("gameEvents")
+                Requirement::Capability(_)
+                    | Requirement::Permission("gameEvents")
+                    | Requirement::Service(_)
             )
     })
 }

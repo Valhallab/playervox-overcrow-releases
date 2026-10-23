@@ -424,6 +424,15 @@ fn services_reference_declared_authority() {
                 assert!(service.name.starts_with("account."), "{}", service.name);
                 assert_eq!(service.params.first().map(|p| p.name), Some("id"));
             }
+            services::Requirement::Service(id) => {
+                let service_entry =
+                    overcrow_widget_schema::integrated::service_named(id).expect("in the table");
+                assert!(
+                    service.name.starts_with(&format!("{}.", service_entry.id)),
+                    "{}",
+                    service.name
+                );
+            }
             services::Requirement::Permission(name) => {
                 assert!(permissions::permission(name).is_some(), "{}", service.name);
             }

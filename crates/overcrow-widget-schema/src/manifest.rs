@@ -272,8 +272,9 @@ impl Manifest {
     /// The catalog v2 features a reader must support to run this manifest
     /// (`account-key`, `account-oauth`, or the integrated service's
     /// `service-steam`…, `network-file-param` for a network rule with a
-    /// `file` parameter, and `menu-closes` for a menu row that names
-    /// `closesMenu`); empty for a manifest without any.
+    /// `file` parameter, `menu-closes` for a menu row that names
+    /// `closesMenu`, and `twitch-events` for a Twitch declaration that lists
+    /// `events`); empty for a manifest without any.
     pub fn features(&self) -> BTreeSet<&'static str> {
         let mut features: BTreeSet<&'static str> = self
             .accounts
@@ -283,6 +284,12 @@ impl Manifest {
                 None => account.mode.feature(),
             })
             .collect();
+        features.extend(self.accounts.iter().filter_map(|account| {
+            account
+                .service
+                .filter(|_| !account.events.is_empty())
+                .and_then(|service| service.events_feature)
+        }));
         let rules = self.value["permissions"]["network"].as_array();
         if rules.is_some_and(|rules| rules.iter().any(uses_file_parameter)) {
             features.insert(FEATURE_NETWORK_FILE_PARAM);

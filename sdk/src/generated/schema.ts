@@ -740,6 +740,28 @@ export interface TwitchChat {
   readonly skipped: number;
 }
 
+/** One live Twitch event. */
+export interface TwitchEvent {
+  /** Order of the event in the subscription, from 1, without gaps unless events were dropped. */
+  readonly seq: number;
+  /** The EventSub type, among those subscribed. */
+  readonly type: "channel.goal.begin" | "channel.goal.progress" | "channel.goal.end" | "channel.follow" | "channel.hype_train.begin" | "channel.hype_train.progress" | "channel.hype_train.end" | "channel.cheer" | "channel.subscribe" | "channel.subscription.gift" | "channel.subscription.message" | "channel.poll.begin" | "channel.poll.progress" | "channel.poll.end" | "channel.prediction.begin" | "channel.prediction.progress" | "channel.prediction.lock" | "channel.prediction.end";
+  /** When the host received it, in Unix milliseconds of the host's clock. */
+  readonly at: number;
+  /** The host's projection of the event: the fields of the type's table under Twitch's names, `null` where Twitch sent none. */
+  readonly data: JsonValue;
+}
+
+/** Live Twitch events of the widget's declared types. */
+export interface TwitchEvents {
+  /** `live` while the host is subscribed at Twitch. */
+  readonly state: "live" | "off";
+  /** Why the state is `off`; `null` when `live`. */
+  readonly reason: "connecting" | "not_connected" | "unavailable" | null;
+  /** The latest events, oldest first. */
+  readonly events: ReadonlyArray<TwitchEvent>;
+}
+
 // Services.
 
 /** Every service name. */
@@ -904,6 +926,11 @@ export interface ServiceParamsMap {
     /** `id` of an account the manifest declares, or of the integrated service it names, that the user granted. */
     readonly id: string;
   };
+  /** Parameters of `twitch.events.subscribe`. */
+  readonly "twitch.events.subscribe": {
+    /** Distinct event types among the declaration's `events`; default all of them. A type it does not list fails with `permission_denied`. */
+    readonly types?: readonly string[];
+  };
   /** Parameters of `account.connect`. */
   readonly "account.connect": {
     /** `id` of an account the manifest declares, or of the integrated service it names, that the user granted. */
@@ -987,6 +1014,8 @@ export interface ServiceResultMap {
   readonly "twitch.chat.favorite": null;
   /** `account.subscribe`: `{ state }` at once, then at each change: `signed_out`, `pending` (a sign-in step is open), `connected`, `refused` (the service refused the key) or `expired` (the service asks to sign in again). The widget never sees the secret, the account's name or its scopes; with `required`, the host covers the content until the account is connected. */
   readonly "account.subscribe": AccountStatus;
+  /** `twitch.events.subscribe`: `{ state, reason, events }` at once, then at each change. `state` is `live` once the host has subscribed at Twitch, `off` otherwise, with `reason` `connecting`, `not_connected` (Twitch is not connected, or its connection lacks a declared scope) or `unavailable` (Twitch refused or cannot be reached; the host retries). Twitch replays nothing: at each `live`, read once by `http.fetch` what changed meanwhile, and keep reading while `off`. `events` repeats the latest `SERVICE_EVENT_WINDOW` events of the subscription, oldest first, each `{ seq, type, at, data }`: updates are coalesced, so take only those whose `seq` is above the last one seen; a gap in `seq` means events were missed (read again). `data` is the host's projection of Twitch's event: every field of the type's table, `null` where Twitch sent none. */
+  readonly "twitch.events.subscribe": TwitchEvents;
   /** `account.connect`: `null`; the host shows its account panel for this account, in its current state: the widget's own button for an account that is not `required`. */
   readonly "account.connect": null;
 }
@@ -1033,7 +1062,8 @@ export type SubscribeServiceName =
   | "playervox.reviews.subscribe"
   | "journal.subscribe"
   | "twitch.chat.subscribe"
-  | "account.subscribe";
+  | "account.subscribe"
+  | "twitch.events.subscribe";
 
 /** Services accepted only while a gesture event is handled. */
 export type GestureServiceName =

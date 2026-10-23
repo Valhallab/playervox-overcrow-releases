@@ -10,7 +10,8 @@
 use crate::limits::{
     MAX_ACCOUNT_ID_BYTES, MAX_CHAT_CHANNEL_BYTES, MAX_CHAT_MESSAGE_CHARS, MAX_CLIPBOARD_BYTES,
     MAX_NOTE_BODY_BYTES, MAX_NOTE_ITEMS, MAX_NOTE_TITLE_BYTES, MAX_OBJECT_ID_BYTES,
-    MAX_REQUEST_URL_BYTES, MAX_REVIEW_CHARS, MAX_STORAGE_KEY_BYTES, MIN_TIMER_INTERVAL_MS,
+    MAX_REQUEST_URL_BYTES, MAX_REVIEW_CHARS, MAX_SERVICE_EVENTS, MAX_STORAGE_KEY_BYTES,
+    MIN_TIMER_INTERVAL_MS,
 };
 use crate::model::{Field, Status, ValueType};
 use crate::results::Shape;
@@ -23,6 +24,9 @@ pub enum Requirement {
     /// A third-party account the manifest declares and the user granted
     /// (`account:<id>`), named by the call's `id` parameter.
     Account,
+    /// The integrated service of this ID, named by the manifest and granted
+    /// by the user (`account:<id>`).
+    Service(&'static str),
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -511,6 +515,21 @@ pub const SERVICES: &[Service] = &[
         params: ACCOUNT,
         result: "`{ state }` at once, then at each change: `signed_out`, `pending` (a sign-in step is open), `connected`, `refused` (the service refused the key) or `expired` (the service asks to sign in again). The widget never sees the secret, the account's name or its scopes; with `required`, the host covers the content until the account is connected",
         returns: Shape::Named("AccountStatus"),
+        status: Status::Fixed,
+    },
+    Service {
+        name: "twitch.events.subscribe",
+        requires: Requirement::Service("twitch"),
+        kind: ServiceKind::Subscribe,
+        gesture: false,
+        confirm: false,
+        params: &[Field::optional(
+            "types",
+            ValueType::ListOf("event type", &MAX_SERVICE_EVENTS),
+            "Distinct event types among the declaration's `events`; default all of them. A type it does not list fails with `permission_denied`.",
+        )],
+        result: "`{ state, reason, events }` at once, then at each change. `state` is `live` once the host has subscribed at Twitch, `off` otherwise, with `reason` `connecting`, `not_connected` (Twitch is not connected, or its connection lacks a declared scope) or `unavailable` (Twitch refused or cannot be reached; the host retries). Twitch replays nothing: at each `live`, read once by `http.fetch` what changed meanwhile, and keep reading while `off`. `events` repeats the latest `SERVICE_EVENT_WINDOW` events of the subscription, oldest first, each `{ seq, type, at, data }`: updates are coalesced, so take only those whose `seq` is above the last one seen; a gap in `seq` means events were missed (read again). `data` is the host's projection of Twitch's event: every field of the type's table, `null` where Twitch sent none",
+        returns: Shape::Named("TwitchEvents"),
         status: Status::Fixed,
     },
     gesture(call(

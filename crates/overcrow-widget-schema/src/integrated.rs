@@ -15,13 +15,24 @@
 //! the methods, the allowed and refused paths and the scopes. An addition
 //! takes a new feature name; a path refused later is refused by the host
 //! and the producers only, never by a manifest reader.
+//!
+//! A service may also list live events (`events`, Twitch's EventSub): the
+//! host subscribes on the user's own channel and sends a widget each event
+//! of the types it declares, as a closed projection. The list, each type's
+//! version, scope and fields are frozen with the release that announces
+//! `twitch-events` in the same way.
+
+use serde_json::{Map, Value};
 
 use crate::accounts::{AccountMode, Charset, KeyFormat, OAuthFlow, ScopeAccess, ScopeParam};
+use crate::limits::MAX_SERVICE_EVENT_BYTES;
 
 /// Feature a manifest naming the Steam service needs (catalog v2 `requires`).
 pub const FEATURE_SERVICE_STEAM: &str = "service-steam";
 /// Feature a manifest naming the Twitch service needs.
 pub const FEATURE_SERVICE_TWITCH: &str = "service-twitch";
+/// Feature a manifest needs when its Twitch declaration lists `events`.
+pub const FEATURE_TWITCH_EVENTS: &str = "twitch-events";
 
 /// A text in each interface language.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -137,6 +148,432 @@ impl ServicePath {
     }
 }
 
+/// What the host's subscription names: the user's own channel, as
+/// broadcaster, and as moderator too where the type needs one.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum EventCondition {
+    Broadcaster,
+    BroadcasterAndModerator,
+}
+
+/// The value of one field of an event, as the host projects it. Anything
+/// else (absent, another type, an invalid identifier or time) is `null`.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum EventValue {
+    /// Text cut to this many characters, control characters as spaces.
+    Text(usize),
+    /// An identifier or keyword: ASCII letters, digits and `_-.:`, at most
+    /// 64 bytes.
+    Id,
+    /// An integer below 2^53 in magnitude.
+    Integer,
+    Bool,
+    /// An RFC 3339 time as Twitch writes it, at most 40 bytes.
+    Time,
+    Object(&'static [EventField]),
+    /// A list of objects, cut to its first items.
+    List(usize, &'static [EventField]),
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct EventField {
+    pub name: &'static str,
+    pub value: EventValue,
+}
+
+/// A live event a widget may receive.
+#[derive(Debug, Eq, PartialEq)]
+pub struct ServiceEvent {
+    /// The service's own name of the type (`channel.goal.progress`).
+    pub kind: &'static str,
+    /// The version the host subscribes to.
+    pub version: &'static str,
+    /// The read scope a widget must declare itself to receive it.
+    pub scope: &'static str,
+    pub condition: EventCondition,
+    /// The fields the widget receives, under the service's names; a field
+    /// the service does not send for this type is `null`.
+    pub fields: &'static [EventField],
+}
+
+const fn field(name: &'static str, value: EventValue) -> EventField {
+    EventField { name, value }
+}
+
+const NAME_CHARS: usize = 64;
+const TITLE_CHARS: usize = 120;
+const CHOICE_CHARS: usize = 60;
+const MESSAGE_CHARS: usize = 500;
+const DESCRIPTION_CHARS: usize = 200;
+
+const USER: [EventField; 3] = [
+    field("user_id", EventValue::Id),
+    field("user_login", EventValue::Id),
+    field("user_name", EventValue::Text(NAME_CHARS)),
+];
+const BROADCASTER: [EventField; 3] = [
+    field("broadcaster_user_id", EventValue::Id),
+    field("broadcaster_user_login", EventValue::Id),
+    field("broadcaster_user_name", EventValue::Text(NAME_CHARS)),
+];
+
+const GOAL_FIELDS: &[EventField] = &[
+    field("id", EventValue::Id),
+    BROADCASTER[0],
+    BROADCASTER[1],
+    BROADCASTER[2],
+    field("type", EventValue::Id),
+    field("description", EventValue::Text(DESCRIPTION_CHARS)),
+    field("current_amount", EventValue::Integer),
+    field("target_amount", EventValue::Integer),
+    field("started_at", EventValue::Time),
+    field("is_achieved", EventValue::Bool),
+    field("ended_at", EventValue::Time),
+];
+
+const FOLLOW_FIELDS: &[EventField] = &[
+    USER[0],
+    USER[1],
+    USER[2],
+    BROADCASTER[0],
+    BROADCASTER[1],
+    BROADCASTER[2],
+    field("followed_at", EventValue::Time),
+];
+
+const CONTRIBUTION: &[EventField] = &[
+    USER[0],
+    USER[1],
+    USER[2],
+    field("type", EventValue::Id),
+    field("total", EventValue::Integer),
+];
+
+const PARTICIPANT: &[EventField] = &[BROADCASTER[0], BROADCASTER[1], BROADCASTER[2]];
+
+const HYPE_TRAIN_FIELDS: &[EventField] = &[
+    field("id", EventValue::Id),
+    BROADCASTER[0],
+    BROADCASTER[1],
+    BROADCASTER[2],
+    field("type", EventValue::Id),
+    field("level", EventValue::Integer),
+    field("total", EventValue::Integer),
+    field("progress", EventValue::Integer),
+    field("goal", EventValue::Integer),
+    field("top_contributions", EventValue::List(10, CONTRIBUTION)),
+    field(
+        "shared_train_participants",
+        EventValue::List(10, PARTICIPANT),
+    ),
+    field("is_shared_train", EventValue::Bool),
+    field("all_time_high_level", EventValue::Integer),
+    field("all_time_high_total", EventValue::Integer),
+    field("started_at", EventValue::Time),
+    field("expires_at", EventValue::Time),
+    field("ended_at", EventValue::Time),
+    field("cooldown_ends_at", EventValue::Time),
+];
+
+const CHEER_FIELDS: &[EventField] = &[
+    field("is_anonymous", EventValue::Bool),
+    USER[0],
+    USER[1],
+    USER[2],
+    BROADCASTER[0],
+    BROADCASTER[1],
+    BROADCASTER[2],
+    field("message", EventValue::Text(MESSAGE_CHARS)),
+    field("bits", EventValue::Integer),
+];
+
+const EMOTE: &[EventField] = &[
+    field("begin", EventValue::Integer),
+    field("end", EventValue::Integer),
+    field("id", EventValue::Id),
+];
+
+const SUBSCRIPTION_FIELDS: &[EventField] = &[
+    USER[0],
+    USER[1],
+    USER[2],
+    BROADCASTER[0],
+    BROADCASTER[1],
+    BROADCASTER[2],
+    field("tier", EventValue::Id),
+    field("is_gift", EventValue::Bool),
+    field("is_anonymous", EventValue::Bool),
+    field("total", EventValue::Integer),
+    field("cumulative_total", EventValue::Integer),
+    field(
+        "message",
+        EventValue::Object(&[
+            field("text", EventValue::Text(MESSAGE_CHARS)),
+            field("emotes", EventValue::List(32, EMOTE)),
+        ]),
+    ),
+    field("cumulative_months", EventValue::Integer),
+    field("streak_months", EventValue::Integer),
+    field("duration_months", EventValue::Integer),
+];
+
+const VOTING: &[EventField] = &[
+    field("is_enabled", EventValue::Bool),
+    field("amount_per_vote", EventValue::Integer),
+];
+
+const CHOICE: &[EventField] = &[
+    field("id", EventValue::Id),
+    field("title", EventValue::Text(CHOICE_CHARS)),
+    field("bits_votes", EventValue::Integer),
+    field("channel_points_votes", EventValue::Integer),
+    field("votes", EventValue::Integer),
+];
+
+const POLL_FIELDS: &[EventField] = &[
+    field("id", EventValue::Id),
+    BROADCASTER[0],
+    BROADCASTER[1],
+    BROADCASTER[2],
+    field("title", EventValue::Text(TITLE_CHARS)),
+    field("choices", EventValue::List(10, CHOICE)),
+    field("bits_voting", EventValue::Object(VOTING)),
+    field("channel_points_voting", EventValue::Object(VOTING)),
+    field("status", EventValue::Id),
+    field("started_at", EventValue::Time),
+    field("ends_at", EventValue::Time),
+    field("ended_at", EventValue::Time),
+];
+
+const PREDICTOR: &[EventField] = &[
+    USER[0],
+    USER[1],
+    USER[2],
+    field("channel_points_won", EventValue::Integer),
+    field("channel_points_used", EventValue::Integer),
+];
+
+const OUTCOME: &[EventField] = &[
+    field("id", EventValue::Id),
+    field("title", EventValue::Text(CHOICE_CHARS)),
+    field("color", EventValue::Id),
+    field("users", EventValue::Integer),
+    field("channel_points", EventValue::Integer),
+    field("top_predictors", EventValue::List(5, PREDICTOR)),
+];
+
+const PREDICTION_FIELDS: &[EventField] = &[
+    field("id", EventValue::Id),
+    BROADCASTER[0],
+    BROADCASTER[1],
+    BROADCASTER[2],
+    field("title", EventValue::Text(TITLE_CHARS)),
+    field("outcomes", EventValue::List(10, OUTCOME)),
+    field("winning_outcome_id", EventValue::Id),
+    field("status", EventValue::Id),
+    field("started_at", EventValue::Time),
+    field("locks_at", EventValue::Time),
+    field("locked_at", EventValue::Time),
+    field("ended_at", EventValue::Time),
+];
+
+const fn on_channel(
+    kind: &'static str,
+    version: &'static str,
+    scope: &'static str,
+    fields: &'static [EventField],
+) -> ServiceEvent {
+    ServiceEvent {
+        kind,
+        version,
+        scope,
+        condition: EventCondition::Broadcaster,
+        fields,
+    }
+}
+
+const GOALS: &str = "channel:read:goals";
+const HYPE_TRAINS: &str = "channel:read:hype_train";
+const SUBSCRIPTIONS: &str = "channel:read:subscriptions";
+const POLLS: &str = "channel:read:polls";
+const PREDICTIONS: &str = "channel:read:predictions";
+
+/// Twitch's EventSub types a widget may receive, version 1 of the list
+/// (`twitch-events`): each on the user's own channel, each read by a scope
+/// the table already offers.
+pub const TWITCH_EVENTS: &[ServiceEvent] = &[
+    on_channel("channel.goal.begin", "1", GOALS, GOAL_FIELDS),
+    on_channel("channel.goal.progress", "1", GOALS, GOAL_FIELDS),
+    on_channel("channel.goal.end", "1", GOALS, GOAL_FIELDS),
+    ServiceEvent {
+        kind: "channel.follow",
+        version: "2",
+        scope: "moderator:read:followers",
+        condition: EventCondition::BroadcasterAndModerator,
+        fields: FOLLOW_FIELDS,
+    },
+    on_channel(
+        "channel.hype_train.begin",
+        "2",
+        HYPE_TRAINS,
+        HYPE_TRAIN_FIELDS,
+    ),
+    on_channel(
+        "channel.hype_train.progress",
+        "2",
+        HYPE_TRAINS,
+        HYPE_TRAIN_FIELDS,
+    ),
+    on_channel(
+        "channel.hype_train.end",
+        "2",
+        HYPE_TRAINS,
+        HYPE_TRAIN_FIELDS,
+    ),
+    on_channel("channel.cheer", "1", "bits:read", CHEER_FIELDS),
+    on_channel("channel.subscribe", "1", SUBSCRIPTIONS, SUBSCRIPTION_FIELDS),
+    on_channel(
+        "channel.subscription.gift",
+        "1",
+        SUBSCRIPTIONS,
+        SUBSCRIPTION_FIELDS,
+    ),
+    on_channel(
+        "channel.subscription.message",
+        "1",
+        SUBSCRIPTIONS,
+        SUBSCRIPTION_FIELDS,
+    ),
+    on_channel("channel.poll.begin", "1", POLLS, POLL_FIELDS),
+    on_channel("channel.poll.progress", "1", POLLS, POLL_FIELDS),
+    on_channel("channel.poll.end", "1", POLLS, POLL_FIELDS),
+    on_channel(
+        "channel.prediction.begin",
+        "1",
+        PREDICTIONS,
+        PREDICTION_FIELDS,
+    ),
+    on_channel(
+        "channel.prediction.progress",
+        "1",
+        PREDICTIONS,
+        PREDICTION_FIELDS,
+    ),
+    on_channel(
+        "channel.prediction.lock",
+        "1",
+        PREDICTIONS,
+        PREDICTION_FIELDS,
+    ),
+    on_channel(
+        "channel.prediction.end",
+        "1",
+        PREDICTIONS,
+        PREDICTION_FIELDS,
+    ),
+];
+
+/// The names of [`TWITCH_EVENTS`], in the same order.
+pub const TWITCH_EVENT_TYPES: &[&str] = &[
+    "channel.goal.begin",
+    "channel.goal.progress",
+    "channel.goal.end",
+    "channel.follow",
+    "channel.hype_train.begin",
+    "channel.hype_train.progress",
+    "channel.hype_train.end",
+    "channel.cheer",
+    "channel.subscribe",
+    "channel.subscription.gift",
+    "channel.subscription.message",
+    "channel.poll.begin",
+    "channel.poll.progress",
+    "channel.poll.end",
+    "channel.prediction.begin",
+    "channel.prediction.progress",
+    "channel.prediction.lock",
+    "channel.prediction.end",
+];
+
+/// The projection of an event's payload (`payload.event`) a widget
+/// receives: every field of the type, `null` where Twitch sent none or
+/// something else, nothing more. `None` when the payload is not an object
+/// or the projection exceeds `MAX_SERVICE_EVENT_BYTES`.
+pub fn project_event(event: &ServiceEvent, raw: &Value) -> Option<Value> {
+    let projected = project_object(event.fields, raw.as_object()?);
+    let bytes = serde_json::to_vec(&projected).ok()?.len() as u64;
+    (bytes <= MAX_SERVICE_EVENT_BYTES.value).then_some(projected)
+}
+
+fn project_object(fields: &[EventField], raw: &Map<String, Value>) -> Value {
+    let mut object = Map::new();
+    for field in fields {
+        let value = raw
+            .get(field.name)
+            .map_or(Value::Null, |value| project_value(field.value, value));
+        object.insert(field.name.to_owned(), value);
+    }
+    Value::Object(object)
+}
+
+fn project_value(kind: EventValue, value: &Value) -> Value {
+    const MAX_SAFE_INTEGER: u64 = (1 << 53) - 1;
+    match kind {
+        EventValue::Text(max) => value.as_str().map_or(Value::Null, |text| {
+            Value::String(
+                text.chars()
+                    .take(max)
+                    .map(|character| {
+                        if character.is_control() {
+                            ' '
+                        } else {
+                            character
+                        }
+                    })
+                    .collect(),
+            )
+        }),
+        EventValue::Id => value
+            .as_str()
+            .filter(|id| {
+                !id.is_empty()
+                    && id.len() <= 64
+                    && id
+                        .bytes()
+                        .all(|byte| byte.is_ascii_alphanumeric() || b"_-.:".contains(&byte))
+            })
+            .map_or(Value::Null, |id| Value::String(id.to_owned())),
+        EventValue::Integer => match (value.as_i64(), value.as_u64()) {
+            (Some(integer), _) if integer.unsigned_abs() <= MAX_SAFE_INTEGER => value.clone(),
+            (_, Some(integer)) if integer <= MAX_SAFE_INTEGER => value.clone(),
+            _ => Value::Null,
+        },
+        EventValue::Bool => value.as_bool().map_or(Value::Null, Value::Bool),
+        EventValue::Time => value
+            .as_str()
+            .filter(|time| {
+                (20..=40).contains(&time.len())
+                    && time
+                        .bytes()
+                        .all(|byte| byte.is_ascii_digit() || b"TZ:.+-".contains(&byte))
+            })
+            .map_or(Value::Null, |time| Value::String(time.to_owned())),
+        EventValue::Object(fields) => value
+            .as_object()
+            .map_or(Value::Null, |object| project_object(fields, object)),
+        EventValue::List(max, fields) => value.as_array().map_or(Value::Null, |items| {
+            Value::Array(
+                items
+                    .iter()
+                    .filter_map(Value::as_object)
+                    .take(max)
+                    .map(|object| project_object(fields, object))
+                    .collect(),
+            )
+        }),
+    }
+}
+
 #[derive(Debug, Eq, PartialEq)]
 pub struct IntegratedService {
     pub id: &'static str,
@@ -166,6 +603,10 @@ pub struct IntegratedService {
     pub oauth: Option<ServiceOAuth>,
     /// Scopes a widget may ask for (OAuth mode).
     pub scopes: &'static [ServiceScope],
+    /// Live events a widget may receive; empty for a service without.
+    pub events: &'static [ServiceEvent],
+    /// The feature a manifest that lists `events` needs.
+    pub events_feature: Option<&'static str>,
 }
 
 const fn read(name: &'static str, en: &'static str, fr: &'static str) -> ServiceScope {
@@ -263,6 +704,8 @@ pub const STEAM: IntegratedService = IntegratedService {
     }),
     oauth: None,
     scopes: &[],
+    events: &[],
+    events_feature: None,
 };
 
 /// Twitch Helix with OverCrow's own Twitch connection: the public client of
@@ -370,6 +813,8 @@ pub const TWITCH: IntegratedService = IntegratedService {
             "les spectateurs de votre chat",
         ),
     ],
+    events: TWITCH_EVENTS,
+    events_feature: Some(FEATURE_TWITCH_EVENTS),
 };
 
 /// What a manifest reader refuses of a declared account that imitates an
@@ -453,6 +898,11 @@ impl IntegratedService {
     /// The scope `name` a widget may ask for.
     pub fn scope(&self, name: &str) -> Option<&'static ServiceScope> {
         self.scopes.iter().find(|scope| scope.name == name)
+    }
+
+    /// The live event type `kind` a widget may receive.
+    pub fn event(&self, kind: &str) -> Option<&'static ServiceEvent> {
+        self.events.iter().find(|event| event.kind == kind)
     }
 
     /// Origins of the host's OAuth endpoints.

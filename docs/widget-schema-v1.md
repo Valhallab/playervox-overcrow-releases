@@ -186,6 +186,9 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MAX_OAUTH_CLIENT_ID_BYTES` | 128 bytes | fixed | `clientId` of an OAuth account. |
 | `MAX_OAUTH_SCOPES` | 16 | fixed | `scopes` of an OAuth account. |
 | `MAX_OAUTH_SCOPE_BYTES` | 128 bytes | fixed | Name of one OAuth scope. |
+| `MAX_SERVICE_EVENTS` | 32 | fixed | `events` of an integrated service's declaration. |
+| `MAX_SERVICE_EVENT_BYTES` | 16 KiB | fixed | Compact JSON of the `data` of one service event; a larger event is dropped and its `seq` skipped. |
+| `SERVICE_EVENT_WINDOW` | 16 | fixed | Latest events each update of `twitch.events.subscribe` repeats: updates are coalesced, `seq` tells a new event from one already seen. |
 | `MAX_DNS_LABEL_BYTES` | 63 bytes | fixed | One dot-separated label of a network origin host or of a widget ID. |
 | `MAX_DNS_NAME_BYTES` | 253 bytes | fixed | Host name of one network origin. |
 | `MAX_OBJECT_ID_BYTES` | 128 bytes | fixed | Opaque object ID or cursor exchanged with a capability service. |
@@ -948,6 +951,7 @@ An entry of `permissions.accounts` that names an integrated service. The account
 | `service` | `steam` \| `twitch` | yes | An integrated service of the table: PlayerVox defines its origins, how the secret is sent, its key page or OAuth client and the paths no widget reaches; the user connects it once and every widget that names it shares the connection. The account's `id` is the service's: the permission key is `account:<service>` and the routes name it in `account`. Only `scopes` and `required` stand beside it. |
 | `scopes` | list of `scope name` ≤ `MAX_OAUTH_SCOPES` | no | OAuth services only: distinct scopes among those the service offers, all read-only in version 1; default none. |
 | `required` | boolean | no | As for a declared account; default `true`. |
+| `events` | list of `event type` ≤ `MAX_SERVICE_EVENTS` | no | A service with live events only (Twitch): distinct types of the service's table, each read by a scope among `scopes`; the host subscribes on the user's own channel and `twitch.events.subscribe` delivers them. Not part of the permission's detail: an event reads what its scope already opens. Needs the feature `twitch-events`. |
 
 ### Integrated services
 
@@ -1019,6 +1023,7 @@ Authority is checked by the host at every call, immediately before acting. Gestu
 | `twitch.chat.leave` | capability `twitch.chat.read` | call | yes | no | none | `null`; the host forgets the channel | `null` | fixed |
 | `twitch.chat.favorite` | capability `twitch.chat.read` | call | yes | no | `channel`: text ≤ `MAX_CHAT_CHANNEL_BYTES`; `favorite`: boolean | `null`; `quota_exceeded` beyond `MAX_CHAT_FAVORITES` | `null` | fixed |
 | `account.subscribe` | a declared, granted account (`id`) | subscribe | no | no | `id`: identifier ≤ `MAX_ACCOUNT_ID_BYTES` | `{ state }` at once, then at each change: `signed_out`, `pending` (a sign-in step is open), `connected`, `refused` (the service refused the key) or `expired` (the service asks to sign in again). The widget never sees the secret, the account's name or its scopes; with `required`, the host covers the content until the account is connected | `AccountStatus` | fixed |
+| `twitch.events.subscribe` | the named, granted service `twitch` | subscribe | no | no | `types?`: list of `event type` ≤ `MAX_SERVICE_EVENTS` | `{ state, reason, events }` at once, then at each change. `state` is `live` once the host has subscribed at Twitch, `off` otherwise, with `reason` `connecting`, `not_connected` (Twitch is not connected, or its connection lacks a declared scope) or `unavailable` (Twitch refused or cannot be reached; the host retries). Twitch replays nothing: at each `live`, read once by `http.fetch` what changed meanwhile, and keep reading while `off`. `events` repeats the latest `SERVICE_EVENT_WINDOW` events of the subscription, oldest first, each `{ seq, type, at, data }`: updates are coalesced, so take only those whose `seq` is above the last one seen; a gap in `seq` means events were missed (read again). `data` is the host's projection of Twitch's event: every field of the type's table, `null` where Twitch sent none | `TwitchEvents` | fixed |
 | `account.connect` | a declared, granted account (`id`) | call | yes | no | `id`: identifier ≤ `MAX_ACCOUNT_ID_BYTES` | `null`; the host shows its account panel for this account, in its current state: the widget's own button for an account that is not `required` | `null` | fixed |
 
 ### Result shapes
@@ -1322,6 +1327,27 @@ Twitch chat state. `{ account, channel, joinState, failure, favorites, canSend, 
 | `messages` | list of `ChatMessage` | Messages, oldest first: the whole list with `reset`; otherwise the new messages, to append, and the changed ones, which replace the message of the same `id` in place. |
 | `removed` | list of text | IDs of removed messages. |
 | `skipped` | integer | New messages the host left out since the previous update, because the chat is faster than it delivers; 0 with `reset`. A removal is never left out. |
+
+#### `TwitchEvent`
+
+One live Twitch event. `{ seq, type, at, data }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `seq` | integer | Order of the event in the subscription, from 1, without gaps unless events were dropped. |
+| `type` | `channel.goal.begin` \| `channel.goal.progress` \| `channel.goal.end` \| `channel.follow` \| `channel.hype_train.begin` \| `channel.hype_train.progress` \| `channel.hype_train.end` \| `channel.cheer` \| `channel.subscribe` \| `channel.subscription.gift` \| `channel.subscription.message` \| `channel.poll.begin` \| `channel.poll.progress` \| `channel.poll.end` \| `channel.prediction.begin` \| `channel.prediction.progress` \| `channel.prediction.lock` \| `channel.prediction.end` | The EventSub type, among those subscribed. |
+| `at` | integer | When the host received it, in Unix milliseconds of the host's clock. |
+| `data` | JSON | The host's projection of the event: the fields of the type's table under Twitch's names, `null` where Twitch sent none. |
+
+#### `TwitchEvents`
+
+Live Twitch events of the widget's declared types. `{ state, reason, events }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `state` | `live` \| `off` | `live` while the host is subscribed at Twitch. |
+| `reason` | `connecting` \| `not_connected` \| `unavailable` or `null` | Why the state is `off`; `null` when `live`. |
+| `events` | list of `TwitchEvent` | The latest events, oldest first. |
 
 Service error codes: `invalid_request`, `permission_denied`, `gesture_required`, `not_connected`, `account_refused`, `stale_context`, `unavailable`, `busy`, `cancelled`, `quota_exceeded`, `unsupported`, `url_invalid`, `resolve_failed`, `address_denied`, `too_many_addresses`, `peer_mismatch`, `redirect_denied`, `encoding_denied`, `content_type_denied`, `response_metadata_limit`, `request_body_limit`, `response_body_limit`, `image_invalid`, `timeout`, `transport_failed`.
 
