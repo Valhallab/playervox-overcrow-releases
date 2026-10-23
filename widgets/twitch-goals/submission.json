@@ -2,7 +2,7 @@
   "justifications": [
     {
       "permission": "account:twitch",
-      "text": "Uses the Twitch connection of PlayerVox OverCrow, read only, with three read permissions: your goals (channel:read:goals), your followers (moderator:read:followers) and your Hype Trains (channel:read:hype_train). It also receives the live events of these three permissions (goals, follows, Hype Trains) that PlayerVox OverCrow subscribes to on your channel. The widget never sees the token: PlayerVox OverCrow adds it to the four routes below, on api.twitch.tv only. Nothing is written to Twitch, and nothing read is stored."
+      "text": "Uses PlayerVox OverCrow's Twitch connection, read only, with three read permissions: your goals (channel:read:goals), followers (moderator:read:followers) and Hype Trains (channel:read:hype_train), and their live events on your channel. The widget never sees the token: PlayerVox OverCrow adds it to the four routes below, on api.twitch.tv only. Nothing is written to Twitch, and nothing read is stored."
     },
     {
       "permission": "network:GET https://api.twitch.tv/helix/users",
