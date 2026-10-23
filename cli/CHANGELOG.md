@@ -7,8 +7,24 @@ change between betas; 1.0.0 will freeze them under semantic versioning.
 The CLI's version enters no package: a package depends only on the
 widget's sources and the embedded SDK.
 
-## Unreleased
+## 1.0.0-beta.8
 
+Not released yet.
+
+- `submit` no longer sends a version again, nor refuses it, when only
+  what never enters the package changed (a README, tests) and the CLI that
+  built its package then embedded another SDK: it reads back the sources
+  that version was sent with (`GET /api/v1/publish/versions/:id/sources`,
+  a signed link checked against the digest the creator space keeps),
+  builds them as it builds the local ones, and ends with `outcome`
+  `already_known` and `known.match` `rebuilt` when both packages are the
+  same. Other widget files under the same number are still refused
+  (`submit.version_known_differs`), and the message names the files that
+  differ (`view.ocml` for `view.json`, the changed scripts for
+  `logic.js`). When the sources cannot be read back (an API without that
+  route, sources deleted, a link that is not https://, bytes that are not
+  the ones sent, sources that no longer build), another package is refused
+  as before, and the message says why.
 - A `toggle`, `choice` or `action` row of `wrapper.menu` may set
   `"closesMenu": true`: the host closes its options menu after a click on
   that row (it stays open by default). `check` and `admit` accept it;

@@ -455,9 +455,13 @@ the widget folder (the current one without argument) or a ZIP of it.
 
 Before checking anything else, `submit` looks for a version of the same
 number in the creator space. When it has the same sources (byte for byte,
-as `submit` zips them) or, once admitted, the same package, nothing is
-sent: the run ends on that version's state, with `outcome`
-`already_known`.
+as `submit` zips them), the same package once admitted, or the same widget
+files, nothing is sent: the run ends on that version's state, with
+`outcome` `already_known`. The same widget files are sources that differ
+only in what never enters the package (a README, tests): `submit` reads
+back the sources that version was sent with and builds them as it builds
+yours, so a package built by another version of the CLI, with another
+SDK, is no reason to send them again.
 
 - Status 0: it is published, approved, in review, or waits for your answer
   to requested changes.
@@ -466,8 +470,10 @@ sent: the run ends on that version's state, with `outcome`
   raise the version in `manifest.json` to send other sources.
 - A version still being checked is followed, as after a submission.
 
-The same number with another package is refused before sending
-(`submit.version_known_differs`): raise the version in `manifest.json`.
+The same number with other widget files is refused before sending
+(`submit.version_known_differs`), with the files that differ: raise the
+version in `manifest.json`. When the sources sent then cannot be read
+back, the message says why, and another package is refused the same way.
 A CI job can therefore run `submit` on every push: a version already sent
 changes nothing.
 
@@ -751,7 +757,7 @@ change announces any other change.
 | `archive` | `submit`: `kind` (`folder`, zipped by the tool, or `archive`), `bytes`, `sha256`, `files`, `uncompressedBytes`, `ignored`. |
 | `local` | `submit`: `admitted`, `version`, `minimumVersion`, `previousVersion`, `permissions` (`keys`, `added`, `changed`, `removed`, `reviewType`), `diagnostics`. |
 | `requirements` | `submit`: `justifications` (`required`, `given`, `missing`, `unused`), `privacyPolicy` (`required`, `present`), `reviewType`, `submissions` (`limit`, `remaining`, `nextSubmissionAt`), `review` (`available`, `blockedBy`), `agreement` (`version`, `accepted`), `blockers` (`code`). |
-| `known` | `submit`: the version the creator space already has (nothing was sent): `versionId`, `state`, `match` (`sources` or `package`). |
+| `known` | `submit`: the version the creator space already has (nothing was sent): `versionId`, `state`, `match` (`sources`, `package`, or `rebuilt`: the same widget files). |
 | `submission` | `submit`: `id`, `state`, `resumed`, `quota`. |
 | `version` | The creator space's version, its fields in camelCase: `id`, `version`, `state`, `reviewType`, `checks` (`key`, `status`, `diagnostics`), `reviewBlockers`, `completeInPortal` (`message`, `url`), `permissions`, `remarks`, `deadline`, `history`… |
 | `versions` | `status` without `--version`: every version. |

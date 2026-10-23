@@ -480,9 +480,14 @@ ce dossier.
 
 Avant toute autre vérification, `submit` cherche une version du même
 numéro dans l’espace créateurs. Si elle a les mêmes sources (octet pour
-octet, telles que `submit` les zippe) ou, une fois admise, le même paquet,
-rien n’est envoyé : la commande se termine sur l’état de cette version,
-avec `outcome` `already_known`.
+octet, telles que `submit` les zippe), le même paquet une fois admise, ou
+les mêmes fichiers du widget, rien n’est envoyé : la commande se termine sur
+l’état de cette version, avec `outcome` `already_known`. Les mêmes fichiers
+du widget sont des sources qui ne diffèrent que par ce qui n’entre jamais
+dans le paquet (un README, des tests) : `submit` relit les sources envoyées
+pour cette version et les construit comme les vôtres ; un paquet construit
+par une autre version de la CLI, avec un autre SDK, n’oblige donc pas à les
+renvoyer.
 
 - Code 0 : elle est publiée, approuvée, en revue, ou attend votre réponse à
   des modifications demandées.
@@ -493,8 +498,11 @@ avec `outcome` `already_known`.
   sources.
 - Une version encore en contrôle est suivie, comme après un envoi.
 
-Le même numéro avec un autre paquet est refusé avant l’envoi
-(`submit.version_known_differs`) : montez la version dans `manifest.json`.
+Le même numéro avec d’autres fichiers du widget est refusé avant l’envoi
+(`submit.version_known_differs`), avec les fichiers qui diffèrent : montez
+la version dans `manifest.json`. Si les sources envoyées alors ne peuvent
+pas être relues, le message dit pourquoi, et un autre paquet est refusé de
+la même façon.
 Une CI peut donc lancer `submit` à chaque push : une version déjà envoyée
 ne change rien.
 
@@ -788,7 +796,7 @@ est annoncé par un nouveau `formatVersion`.
 | `archive` | `submit` : `kind` (`folder`, zippé par l’outil, ou `archive`), `bytes`, `sha256`, `files`, `uncompressedBytes`, `ignored`. |
 | `local` | `submit` : `admitted`, `version`, `minimumVersion`, `previousVersion`, `permissions` (`keys`, `added`, `changed`, `removed`, `reviewType`), `diagnostics`. |
 | `requirements` | `submit` : `justifications` (`required`, `given`, `missing`, `unused`), `privacyPolicy` (`required`, `present`), `reviewType`, `submissions` (`limit`, `remaining`, `nextSubmissionAt`), `review` (`available`, `blockedBy`), `agreement` (`version`, `accepted`), `blockers` (`code`). |
-| `known` | `submit` : la version que l’espace créateurs a déjà (rien n’est parti) : `versionId`, `state`, `match` (`sources` ou `package`). |
+| `known` | `submit` : la version que l’espace créateurs a déjà (rien n’est parti) : `versionId`, `state`, `match` (`sources`, `package`, ou `rebuilt` : les mêmes fichiers du widget). |
 | `submission` | `submit` : `id`, `state`, `resumed`, `quota`. |
 | `version` | La version de l’espace créateurs, ses champs en camelCase : `id`, `version`, `state`, `reviewType`, `checks` (`key`, `status`, `diagnostics`), `reviewBlockers`, `completeInPortal` (`message`, `url`), `permissions`, `remarks`, `deadline`, `history`… |
 | `versions` | `status` sans `--version` : toutes les versions. |

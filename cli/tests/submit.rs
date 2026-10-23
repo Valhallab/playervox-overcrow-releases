@@ -12,6 +12,7 @@ use std::process::{Command, Output};
 
 use fake_api::{FakeApi, KEY, Reply, SECRET, VERSION_ID, error, version};
 use serde_json::{Value, json};
+use sha2::{Digest as _, Sha256};
 
 const BIN: &str = env!("CARGO_BIN_EXE_overcrow-widget");
 
@@ -1655,6 +1656,203 @@ fn the_same_version_with_another_package_is_refused() {
     assert!(
         shown.contains("raise the version in manifest.json"),
         "{shown}"
+    );
+}
+
+/// The archive `submit` sends for `project`, as the creator space keeps it.
+fn sent_archive(project: &Project) -> Vec<u8> {
+    let api = FakeApi::start(Some(project.previous()));
+    api.polls(vec![version("checking"), version("in_review")]);
+    let output = project.submit(&api, &["--no-wait"]);
+    assert!(sent(&api), "{}", text(&output.stderr));
+    api.uploaded().expect("the archive sent")
+}
+
+/// The project's 1.3.1 as the creator space has it, sent from `known`:
+/// published, with a package that CLI built then (another digest).
+fn known_from(known: &Project) -> FakeApi {
+    let archive = sent_archive(known);
+    let digest: String = Sha256::digest(&archive)
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect();
+    let api = FakeApi::start(Some(known.previous()));
+    api.known(vec![known_version(
+        "published",
+        &digest,
+        Some(&"ab".repeat(32)),
+    )]);
+    api.sources(VERSION_ID, archive);
+    api
+}
+
+#[test]
+fn the_same_widget_files_rebuilt_are_known() {
+    // Sent once; then only its README and a test changed, and another CLI
+    // (another SDK) builds another package from the same widget files.
+    let known = Project::new();
+    let project = Project::new();
+    fs::write(
+        project.root.join("README.md"),
+        "# Lol timers\n\nOther words.\n",
+    )
+    .expect("README");
+    fs::write(project.root.join("tests/notes.txt"), "a test of mine\n").expect("test file");
+    let api = known_from(&known);
+    let (output, report) = project.submit_json(&api, &[]);
+    assert_eq!(code(&output), Some(0), "{report}");
+    assert!(!sent(&api));
+    assert!(api.violations().is_empty(), "{:?}", api.violations());
+    assert_eq!(report["outcome"], "already_known");
+    assert_eq!(
+        report["known"],
+        json!({"versionId": 77, "state": "published", "match": "rebuilt"})
+    );
+    let lines = api.lines();
+    assert!(
+        lines.ends_with(&[
+            "GET /api/v1/publish/versions/77/sources".to_owned(),
+            "GET /download/77".to_owned(),
+        ]),
+        "{lines:?}"
+    );
+    let api = known_from(&known);
+    let output = project.submit(&api, &[]);
+    let shown = text(&output.stdout);
+    assert!(
+        shown.contains(
+            "1.3.1 is already in the creator space (#77, same widget files): nothing was sent."
+        ),
+        "{shown}"
+    );
+}
+
+#[test]
+fn other_widget_files_of_the_same_number_are_refused_by_name() {
+    let known = Project::new();
+    let project = Project::new();
+    fs::write(
+        project.root.join("locales/en.json"),
+        r#"{"decrement": "Less", "increment": "More"}"#,
+    )
+    .expect("locale");
+    let api = known_from(&known);
+    let (output, report) = project.submit_json(&api, &[]);
+    assert_eq!(code(&output), Some(1), "{report}");
+    assert!(!sent(&api));
+    let refusal = report["local"]["diagnostics"]
+        .as_array()
+        .expect("diagnostics")
+        .iter()
+        .find(|diagnostic| diagnostic["code"] == "submit.version_known_differs")
+        .cloned()
+        .unwrap_or_else(|| panic!("{report}"));
+    assert_eq!(
+        refusal["message"],
+        "version 1.3.1 is already in the creator space with other widget files: locales/en.json differs"
+    );
+    assert_eq!(refusal["help"], "raise the version in manifest.json");
+}
+
+#[test]
+fn widget_files_compared_one_by_one_name_each_change() {
+    let known = Project::new();
+    let project = Project::new();
+    fs::write(
+        project.root.join("locales/en.json"),
+        r#"{"decrement": "Less", "increment": "More"}"#,
+    )
+    .expect("locale");
+    let view = fs::read_to_string(project.root.join("view.ocml")).expect("view");
+    fs::write(project.root.join("view.ocml"), format!("{view}\n")).expect("view");
+    let style = fs::read_to_string(project.root.join("style.ocss")).expect("style");
+    fs::write(
+        project.root.join("style.ocss"),
+        format!("{style}\n/* other */\n"),
+    )
+    .expect("style");
+    let api = known_from(&known);
+    let (output, report) = project.submit_json(&api, &[]);
+    assert_eq!(code(&output), Some(1), "{report}");
+    let message = report["local"]["diagnostics"].to_string();
+    assert!(
+        message.contains("with other widget files: locales/en.json and style.ocss differ"),
+        "{message}"
+    );
+}
+
+#[test]
+fn sources_that_cannot_be_read_back_keep_the_package_refusal() {
+    let project = Project::new();
+    // An API without the route: the packages alone are compared.
+    let api = FakeApi::start(Some(project.previous()));
+    api.known(vec![known_version(
+        "published",
+        &"00".repeat(32),
+        Some(&"ab".repeat(32)),
+    )]);
+    let (output, report) = project.submit_json(&api, &[]);
+    assert_eq!(code(&output), Some(1), "{report}");
+    assert!(!sent(&api));
+    assert!(
+        report["local"]["diagnostics"].to_string().contains(
+            "version 1.3.1 is already in the creator space with another package, and its sources could not be compared: the creator space does not give them"
+        ),
+        "{report}"
+    );
+    // Sources deleted: the creator space's reason ends the sentence.
+    let api = FakeApi::start(Some(project.previous()));
+    api.known(vec![known_version(
+        "published",
+        &"00".repeat(32),
+        Some(&"ab".repeat(32)),
+    )]);
+    api.on(
+        "sources",
+        vec![Reply::Json(
+            410,
+            error("sources_purged", "The sources of this widget were deleted."),
+        )],
+    );
+    let (_, report) = project.submit_json(&api, &[]);
+    assert!(
+        report["local"]["diagnostics"].to_string().contains(
+            "its sources could not be compared: the sources of this widget were deleted\""
+        ),
+        "{report}"
+    );
+    // Sources whose bytes are not the ones announced are never rebuilt.
+    let known = Project::new();
+    fs::write(known.root.join("README.md"), "# Sent before\n").expect("README");
+    let api = known_from(&known);
+    api.on(
+        "download",
+        vec![Reply::Raw(200, b"PK\x03\x04 other bytes".to_vec())],
+    );
+    let (output, report) = project.submit_json(&api, &[]);
+    assert_eq!(code(&output), Some(1), "{report}");
+    assert!(
+        report["local"]["diagnostics"].to_string().contains(
+            "its sources could not be compared: the sources received are not the ones sent"
+        ),
+        "{report}"
+    );
+    // A link that is neither https:// nor the local test API.
+    let api = known_from(&known);
+    api.on(
+        "sources",
+        vec![Reply::Json(
+            200,
+            json!({"sources": {"url": "http://storage.example/a.zip", "expires_at": "2026-10-23T12:05:00Z", "sha256": "00".repeat(32), "bytes": 10}}),
+        )],
+    );
+    let (output, report) = project.submit_json(&api, &[]);
+    assert_eq!(code(&output), Some(1), "{report}");
+    assert!(
+        report["local"]["diagnostics"].to_string().contains(
+            "its sources could not be compared: the link to the sources is not an https:// link"
+        ),
+        "{report}"
     );
 }
 

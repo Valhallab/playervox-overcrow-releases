@@ -96,7 +96,8 @@ pub fn submit(raw_key: Option<String>, options: &SubmitOptions<'_>) -> ExitCode 
         json!({"id": key.widget_id, "publisher": key.publisher, "status": context.widget_status}),
     );
     // A version of this number the creator space already has: the same
-    // sources (or, below, the same package) are never sent again.
+    // sources (or, below, the same package, or its sources rebuilt into the
+    // same package) are never sent again.
     let known = match find_known(&client, &sources) {
         Ok(known) => known,
         Err(failure) => return out.fail_request(&failure, Outcome::Error),
@@ -115,15 +116,15 @@ pub fn submit(raw_key: Option<String>, options: &SubmitOptions<'_>) -> ExitCode 
         Some(found) => (Some(found.version), found.package),
         None => (None, None),
     };
-    let checked = match check_locally(
-        &key,
-        &context,
-        &texts,
-        sources,
-        known_package.as_deref(),
-        options,
-        &mut out,
-    ) {
+    let compare = known
+        .as_ref()
+        .zip(known_package.as_deref())
+        .map(|(version, package)| KnownPackage {
+            client: &client,
+            version,
+            sha256: package,
+        });
+    let checked = match check_locally(&key, &context, &texts, sources, compare, options, &mut out) {
         Ok(checked) => checked,
         Err(Stop::Error { code, message }) => return out.fail(&code, &message, Map::new()),
         Err(Stop::Refused) => {
@@ -131,10 +132,10 @@ pub fn submit(raw_key: Option<String>, options: &SubmitOptions<'_>) -> ExitCode 
             return out.finish(Outcome::RefusedLocally);
         }
     };
-    if checked.same_package
+    if let Some(matched) = checked.same_package
         && let Some(version) = known
     {
-        return conclude_known(&client, version, "package", &checked.files, options, out);
+        return conclude_known(&client, version, matched, &checked.files, options, out);
     }
     if checked.refused {
         out.say("Nothing was sent.");
@@ -190,8 +191,17 @@ struct Checked {
     /// it again with `review_blockers`).
     blockers: Vec<&'static str>,
     /// The package is the one of the version of this number the creator
-    /// space already has: nothing is sent.
-    same_package: bool,
+    /// space already has (`package`), or the one its sources rebuild into
+    /// (`rebuilt`): nothing is sent.
+    same_package: Option<&'static str>,
+}
+
+/// The package of the version of the sources' number the creator space
+/// already has, and how to read its sources back.
+struct KnownPackage<'a> {
+    client: &'a Client,
+    version: &'a api::Version,
+    sha256: &'a str,
 }
 
 /// The version of the sources' number the creator space already has.
@@ -250,8 +260,13 @@ fn conclude_known(
         "known",
         json!({"versionId": version.id, "state": version.state, "match": matched}),
     );
+    let same = match matched {
+        "rebuilt" => "same widget files",
+        "package" => "same package",
+        _ => "same sources",
+    };
     out.say(&format!(
-        "Version    {} is already in the creator space (#{}, same {matched}): nothing was sent.",
+        "Version    {} is already in the creator space (#{}, {same}): nothing was sent.",
         sanitize::line(&version.version),
         version.id
     ));
@@ -280,7 +295,7 @@ fn check_locally(
     context: &Context,
     texts: &Texts,
     sources: (Tree, Vec<u8>, &'static str),
-    known_package: Option<&str>,
+    known: Option<KnownPackage<'_>>,
     options: &SubmitOptions<'_>,
     out: &mut Out,
 ) -> Result<Checked, Stop> {
@@ -381,11 +396,41 @@ fn check_locally(
     let permissions = &admitted["permissions"];
     let version = admitted["version"].as_str().unwrap_or_default().to_owned();
     // The creator space has this number already: the same package is a
-    // version it knows; another package needs another number.
-    if let Some(known) = known_package
+    // version it knows. Another package may come from the same widget files
+    // built by another CLI (another SDK): its sources, rebuilt here, tell.
+    // Other widget files need another number.
+    if let Some(known) = known
         && let Some(local) = admitted["package"]["sha256"].as_str()
     {
-        if known == local {
+        let matched = if known.sha256 == local {
+            Some("package")
+        } else {
+            match rebuild_known(key, context, &known) {
+                Ok((rebuilt, _)) if rebuilt["package"]["sha256"].as_str() == Some(local) => {
+                    Some("rebuilt")
+                }
+                Ok((rebuilt, sent)) => {
+                    report.push(known_differs(
+                        &version,
+                        &format!(
+                            "with other widget files: {}",
+                            differing_files((&admitted, &tree), (&rebuilt, &sent))
+                        ),
+                    ));
+                    None
+                }
+                Err(why) => {
+                    report.push(known_differs(
+                        &version,
+                        &format!(
+                            "with another package, and its sources could not be compared: {why}"
+                        ),
+                    ));
+                    None
+                }
+            }
+        };
+        if let Some(matched) = matched {
             return Ok(Checked {
                 version,
                 archive,
@@ -393,20 +438,9 @@ fn check_locally(
                 files: tree.files,
                 refused: false,
                 blockers: Vec::new(),
-                same_package: true,
+                same_package: Some(matched),
             });
         }
-        report.push(
-            Diagnostic::error(
-                "submit.version_known_differs",
-                format!(
-                    "version {} is already in the creator space with another package",
-                    sanitize::line(&version)
-                ),
-            )
-            .in_file("manifest.json")
-            .help("raise the version in manifest.json"),
-        );
     }
     if let (Some(current), Some(minimum)) = (
         SemVer::parse(&version),
@@ -530,8 +564,134 @@ fn check_locally(
         files: tree.files,
         refused: report.errors() > 0,
         blockers,
-        same_package: false,
+        same_package: None,
     })
+}
+
+/// A sentence of the API (`The sources of this widget were deleted.`) as
+/// the end of one of the CLI's.
+fn clause(text: &str) -> String {
+    let text = text.trim().trim_end_matches('.');
+    let mut characters = text.chars();
+    match (characters.next(), characters.next()) {
+        (Some(first), Some(second)) if first.is_uppercase() && !second.is_uppercase() => first
+            .to_lowercase()
+            .chain(text[first.len_utf8()..].chars())
+            .collect(),
+        _ => text.to_owned(),
+    }
+}
+
+/// A script the bundle may take in (`tests/` never is).
+fn is_script(path: &str) -> bool {
+    !path.starts_with("tests/")
+        && [".ts", ".mts", ".cts", ".js", ".mjs", ".cjs"]
+            .iter()
+            .any(|extension| path.ends_with(extension))
+        && !path.ends_with(".d.ts")
+}
+
+fn known_differs(version: &str, how: &str) -> Diagnostic {
+    Diagnostic::error(
+        "submit.version_known_differs",
+        format!(
+            "version {} is already in the creator space {how}",
+            sanitize::line(version)
+        ),
+    )
+    .in_file("manifest.json")
+    .help("raise the version in manifest.json")
+}
+
+/// The sources the known version was sent with and their admission report,
+/// rebuilt by this CLI: read back through a signed link, checked against
+/// the digest the creator space keeps, admitted as the local sources are.
+/// The reason, when they cannot be.
+fn rebuild_known(
+    key: &KeyInfo,
+    context: &Context,
+    known: &KnownPackage<'_>,
+) -> Result<(Value, Tree), String> {
+    let path = format!("/api/v1/publish/versions/{}/sources", known.version.id);
+    let link = match known.client.get(&path) {
+        Ok(answer) => serde_json::from_slice::<Value>(&answer.body)
+            .ok()
+            .and_then(|answer| answer["sources"]["url"].as_str().map(str::to_owned))
+            .ok_or_else(|| "the creator space's answer cannot be read".to_owned())?,
+        // An API without the route.
+        Err(Failure::Api { status: 404, .. }) => {
+            return Err("the creator space does not give them".into());
+        }
+        Err(failure) => return Err(clause(&failure.message())),
+    };
+    let bytes = known
+        .client
+        .get_signed(&link, sourcetree::MAX_ARCHIVE_BYTES)
+        .map_err(|failure| clause(&failure.message()))?;
+    let expected = known.version.value["sources"]["sha256"].as_str();
+    if expected != Some(hex(&sha256(&bytes)).as_str()) {
+        return Err("the sources received are not the ones sent".into());
+    }
+    let mut report = Report::default();
+    let tree = sourcetree::read_archive_bytes(&bytes, "the sources sent", &mut report)
+        .ok_or_else(|| "they cannot be read".to_owned())?;
+    let rebuilt = admit_archive(key, context, &tree, &mut report)?;
+    if rebuilt["package"]["sha256"].is_string() {
+        Ok((rebuilt, tree))
+    } else {
+        Err("they no longer build with this CLI".into())
+    }
+}
+
+/// The widget files that make the two packages differ, as a sentence:
+/// each package file by the source it comes from (`view.ocml` for
+/// `view.json`, the scripts that changed for `logic.js`).
+fn differing_files(local: (&Value, &Tree), known: (&Value, &Tree)) -> String {
+    let files = |report: &Value| {
+        report["package"]["files"]
+            .as_object()
+            .cloned()
+            .unwrap_or_default()
+    };
+    let (packaged, sent) = (files(local.0), files(known.0));
+    let mut names = BTreeSet::new();
+    for path in packaged.keys().chain(sent.keys()) {
+        // The ledger lists the other files' digests: it differs with them.
+        if path == "ledger.json"
+            || packaged.get(path).map(|file| &file["sha256"])
+                == sent.get(path).map(|file| &file["sha256"])
+        {
+            continue;
+        }
+        match path.as_str() {
+            "view.json" => {
+                names.insert("view.ocml".to_owned());
+            }
+            "logic.js" => {
+                let scripts: Vec<&String> = local
+                    .1
+                    .files
+                    .keys()
+                    .chain(known.1.files.keys())
+                    .filter(|path| is_script(path))
+                    .filter(|path| local.1.files.get(*path) != known.1.files.get(*path))
+                    .collect();
+                if scripts.is_empty() {
+                    names.insert("the logic".to_owned());
+                }
+                names.extend(scripts.into_iter().map(|path| sanitize::line(path)));
+            }
+            other => {
+                names.insert(sanitize::line(other));
+            }
+        }
+    }
+    let names: Vec<String> = names.into_iter().collect();
+    match names.as_slice() {
+        [] => "the package differs".to_owned(),
+        [one] => format!("{one} differs"),
+        [rest @ .., last] => format!("{} and {last} differ", rest.join(", ")),
+    }
 }
 
 /// The sources as the archive that will be sent: a folder is zipped, then

@@ -1,13 +1,14 @@
 //! A local stand-in for the creator space's publish API
-//! (`/api/v1/publish/*`, JSON in snake_case) and for its signed upload,
-//! for the tests of `submit` and `status`. Nothing reaches the network.
+//! (`/api/v1/publish/*`, JSON in snake_case), for its signed upload and
+//! its signed links to a version's sources, for the tests of `submit` and
+//! `status`. Nothing reaches the network.
 //!
 //! Each route answers from a queue of [`Reply`]s (the last one repeats);
 //! [`Reply::Auto`] does what the API does. Every request is recorded, and
 //! what the API would refuse is recorded as a violation: a request without
-//! the CLI's user agent, an API request without the key, an upload that
-//! carries the key or whose signed headers or bytes are not the declared
-//! ones.
+//! the CLI's user agent, an API request without the key, an upload or a
+//! download that carries the key, an upload whose signed headers or bytes
+//! are not the declared ones.
 #![allow(dead_code)]
 
 use std::collections::{HashMap, HashSet, VecDeque};
@@ -94,6 +95,10 @@ struct State {
     /// What `GET versions/77` answers, poll after poll (the last repeats).
     polls: VecDeque<Value>,
     next_id: u64,
+    /// The sources of known versions, by version ID: `GET
+    /// versions/:id/sources` links to them (404 for the others, as an API
+    /// without that route answers).
+    sources: HashMap<u64, Vec<u8>>,
 }
 
 pub struct FakeApi {
@@ -209,6 +214,10 @@ fn base64(bytes: &[u8]) -> String {
     out
 }
 
+fn hex(bytes: &[u8]) -> String {
+    bytes.iter().map(|byte| format!("{byte:02x}")).collect()
+}
+
 fn unhex(text: &str) -> Vec<u8> {
     (0..text.len() / 2)
         .filter_map(|index| u8::from_str_radix(text.get(index * 2..index * 2 + 2)?, 16).ok())
@@ -236,6 +245,7 @@ impl FakeApi {
             submissions: Vec::new(),
             polls: VecDeque::from([version("in_review")]),
             next_id: 812,
+            sources: HashMap::new(),
         }));
         let shared = Arc::clone(&state);
         std::thread::spawn(move || {
@@ -247,7 +257,8 @@ impl FakeApi {
     }
 
     /// The replies of `route` (`key`, `context`, `create`, `submission`,
-    /// `upload`, `finalize`, `versions`, `version`), in order.
+    /// `upload`, `finalize`, `versions`, `version`, `sources`, `download`),
+    /// in order.
     pub fn on(&self, route: &'static str, replies: Vec<Reply>) {
         self.state
             .lock()
@@ -259,6 +270,12 @@ impl FakeApi {
     /// The versions the creator space already has (`GET versions`).
     pub fn known(&self, versions: Vec<Value>) {
         self.state.lock().unwrap().listing = Listing::Known(versions);
+    }
+
+    /// The sources version `id` was sent with: `GET versions/:id/sources`
+    /// links to them, with their digest.
+    pub fn sources(&self, id: u64, archive: Vec<u8>) {
+        self.state.lock().unwrap().sources.insert(id, archive);
     }
 
     /// `GET versions` lists the version being polled and an older one.
@@ -373,10 +390,17 @@ fn route(request: &Request) -> Option<(&'static str, Option<u64>)> {
                 id(&rest["submissions/".len()..rest.len() - "/finalize".len()]),
             )
         }
+        ("GET", Some(rest)) if rest.starts_with("versions/") && rest.ends_with("/sources") => (
+            "sources",
+            id(&rest["versions/".len()..rest.len() - "/sources".len()]),
+        ),
         ("GET", Some(rest)) if rest.starts_with("versions/") => {
             ("version", id(&rest["versions/".len()..]))
         }
         ("PUT", None) if path.starts_with("/upload/") => ("upload", id(&path["/upload/".len()..])),
+        ("GET", None) if path.starts_with("/download/") => {
+            ("download", id(&path["/download/".len()..]))
+        }
         _ => return None,
     })
 }
@@ -403,11 +427,11 @@ fn serve(mut stream: TcpStream, shared: &Arc<Mutex<State>>) {
         return;
     };
     let authorization = request.header("authorization");
-    if name == "upload" {
+    if name == "upload" || name == "download" {
         if authorization.is_some() {
             state
                 .violations
-                .push("the upload carries an Authorization header".into());
+                .push(format!("the {name} carries an Authorization header"));
         }
     } else if authorization != Some(&format!("Bearer {KEY}")) {
         state.violations.push(format!(
@@ -427,6 +451,14 @@ fn serve(mut stream: TcpStream, shared: &Arc<Mutex<State>>) {
     let (status, body, cut) = match reply {
         Reply::Json(status, value) => (status, value.to_string().into_bytes(), false),
         Reply::Raw(status, body) => (status, body, false),
+        Reply::Auto if name == "download" => match id.and_then(|id| state.sources.get(&id)) {
+            Some(archive) => (200, archive.clone(), false),
+            None => (
+                404,
+                b"<Error><Code>NoSuchKey</Code></Error>".to_vec(),
+                false,
+            ),
+        },
         Reply::Auto | Reply::Cut => {
             let (status, value) = auto(&mut state, name, id, &request);
             let body = value
@@ -630,6 +662,18 @@ fn auto(state: &mut State, name: &str, id: Option<u64>, request: &Request) -> (u
             older["state"] = json!("checks_failed");
             (200, Some(json!({"versions": [summary, older]})))
         }
+        "sources" => match id.and_then(|id| state.sources.get(&id)) {
+            Some(archive) => (
+                200,
+                Some(json!({"sources": {
+                    "url": format!("{url}/download/{}?X-Amz-Signature=fake-signature", id.unwrap_or_default()),
+                    "expires_at": "2026-10-23T12:05:00Z",
+                    "sha256": hex(&Sha256::digest(archive)),
+                    "bytes": archive.len(),
+                }})),
+            ),
+            None => (404, Some(error("not_found", "Not found."))),
+        },
         "version" => {
             if let Listing::Known(known) = &state.listing
                 && let Some(found) = known.iter().find(|item| item["id"].as_u64() == id).cloned()

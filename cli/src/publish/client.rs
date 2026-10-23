@@ -125,8 +125,9 @@ impl Origin {
         &self.base
     }
 
-    /// Whether the signed upload may go to `url`: HTTPS (the API chose the
-    /// storage), or, with a local test API, plain HTTP to that same API.
+    /// Whether a signed link (the upload, a version's sources) may go to
+    /// `url`: HTTPS (the API chose the storage), or, with a local test API,
+    /// plain HTTP to that same API.
     pub fn upload_allowed(&self, url: &str) -> bool {
         let Ok(uri) = url.parse::<Uri>() else {
             return false;
@@ -487,20 +488,7 @@ impl Client {
             ));
         }
         let headers = upload_headers(&upload.headers, bytes.len()).map_err(Failure::Refused)?;
-        let shown = upload
-            .url
-            .parse::<Uri>()
-            .map(|uri| {
-                format!(
-                    "{}://{}{}",
-                    uri.scheme_str().unwrap_or_default(),
-                    uri.authority()
-                        .map(|authority| authority.as_str())
-                        .unwrap_or_default(),
-                    uri.path()
-                )
-            })
-            .unwrap_or_default();
+        let shown = shown_link(&upload.url);
         let started = Instant::now();
         let mut request = self.uploader.put(&upload.url);
         for (name, value) in &headers {
@@ -536,6 +524,64 @@ impl Client {
             _ => Err(Failure::Status(status)),
         }
     }
+
+    /// A signed download (the sources of a version): never the key, at
+    /// most `limit` bytes, tried again on a transient failure.
+    pub fn get_signed(&self, url: &str, limit: u64) -> Result<Vec<u8>, Failure> {
+        if !self.origin.upload_allowed(url) {
+            return Err(Failure::Refused(
+                "the link to the sources is not an https:// link".into(),
+            ));
+        }
+        let shown = shown_link(url);
+        let answer = self.with_retries(|| {
+            let started = Instant::now();
+            let mut response = match self.uploader.get(url).call() {
+                Ok(response) => response,
+                Err(error) => {
+                    let failure = network(&error);
+                    self.log(&format!(
+                        "  GET {} (signed link) -> {}",
+                        sanitize::line(&shown),
+                        failure.code()
+                    ));
+                    return Err(failure);
+                }
+            };
+            let status = response.status().as_u16();
+            let body = response.body_mut().with_config().limit(limit).read_to_vec();
+            self.log(&format!(
+                "  GET {} (signed link) -> {status} ({} ms)",
+                sanitize::line(&shown),
+                started.elapsed().as_millis()
+            ));
+            match status {
+                200..=299 => Ok(Answer {
+                    body: body.map_err(|error| network(&error))?,
+                }),
+                300..=399 => Err(Failure::Redirect(status)),
+                _ => Err(Failure::Status(status)),
+            }
+        })?;
+        Ok(answer.body)
+    }
+}
+
+/// A signed link as the verbose log shows it: without its query, which
+/// carries the signature.
+fn shown_link(url: &str) -> String {
+    url.parse::<Uri>()
+        .map(|uri| {
+            format!(
+                "{}://{}{}",
+                uri.scheme_str().unwrap_or_default(),
+                uri.authority()
+                    .map(|authority| authority.as_str())
+                    .unwrap_or_default(),
+                uri.path()
+            )
+        })
+        .unwrap_or_default()
 }
 
 /// A 2xx answer, or the failure an answer means.
