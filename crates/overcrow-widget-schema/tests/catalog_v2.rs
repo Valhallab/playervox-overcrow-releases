@@ -262,6 +262,15 @@ fn catalog_v2_vectors_mean_what_they_say() {
         valid("suspended-built-in").targets[0].target.status,
         TargetStatus::SecuritySuspended
     );
+    assert!(full.widgets.iter().all(|w| w.first_published_at.is_none()));
+    let dated = valid("first-published");
+    assert_eq!(dated.widgets[0].first_published_at, Some(1_788_252_240));
+    assert_eq!(
+        dated.widgets[1].first_published_at,
+        Some(dated.generated_at)
+    );
+    assert_eq!(dated.widgets[2].first_published_at, None);
+    assert_eq!(dated.targets, full.targets);
     let empty = valid("empty");
     assert!(empty.widgets.is_empty() && empty.targets.is_empty());
     assert_eq!(empty.categories.len(), 7);

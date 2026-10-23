@@ -1950,6 +1950,7 @@ The catalog v2 is `https://overcrow.playervox.com/marketplace/widgets/v2/catalog
 | `listing` | `ListingV2` | yes | Store text and links. |
 | `preview` | `PreviewV2` | no | One PNG preview for every version. |
 | `requires` | `list of feature names` | no | Features a reader must support to use the entry. Unless it is a list of features the reader supports, the reader skips the widget and its targets. |
+| `firstPublishedAt` | `UTC timestamp` | no | When the ID first entered a catalog, never after `generatedAt`; it never changes once signed. Display information: readers show the widget as new for a while. |
 
 ### `ListingV2`
 

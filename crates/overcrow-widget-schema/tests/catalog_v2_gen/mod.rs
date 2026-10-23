@@ -332,6 +332,14 @@ pub fn generate() -> BTreeMap<String, Vec<u8>> {
         })),
     );
 
+    put(
+        "valid/first-published",
+        envelope(&edit(&full, |c| {
+            c["widgets"][0]["firstPublishedAt"] = json!("2026-09-01T08:44:00Z");
+            c["widgets"][WEATHER]["firstPublishedAt"] = json!("2026-09-30T00:00:00Z");
+        })),
+    );
+
     // Envelope and signature.
     let payload = serde_json::to_vec(&full).expect("payload");
     put(
@@ -405,6 +413,13 @@ pub fn generate() -> BTreeMap<String, Vec<u8>> {
     });
     signed("payload--targets-missing", &|c| {
         object(c).remove("targets");
+    });
+
+    signed("first_published--after-generated", &|c| {
+        c["widgets"][0]["firstPublishedAt"] = json!("2026-09-30T00:00:01Z")
+    });
+    signed("first_published--date-only", &|c| {
+        c["widgets"][0]["firstPublishedAt"] = json!("2026-09-01")
     });
 
     // Categories.

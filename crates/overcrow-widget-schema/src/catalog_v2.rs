@@ -239,6 +239,11 @@ pub const WIDGET_FIELDS: &[Field] = &[
         ValueType::Record("list of feature names"),
         "Features a reader must support to use the entry. Unless it is a list of features the reader supports, the reader skips the widget and its targets.",
     ),
+    Field::optional(
+        "firstPublishedAt",
+        ValueType::Record("UTC timestamp"),
+        "When the ID first entered a catalog, never after `generatedAt`; it never changes once signed. Display information: readers show the widget as new for a while.",
+    ),
 ];
 
 pub const LISTING_FIELDS: &[Field] = &[
@@ -436,6 +441,9 @@ pub enum CatalogV2Error {
     ReleaseNotes,
     DuplicateTarget,
     UnknownWidget,
+    /// A widget's `firstPublishedAt`: not a UTC timestamp, or after the
+    /// catalog's `generatedAt`.
+    FirstPublished,
 }
 
 impl CatalogV2Error {
@@ -479,6 +487,7 @@ impl CatalogV2Error {
             Self::ReleaseNotes => "release_notes",
             Self::DuplicateTarget => "duplicate_target",
             Self::UnknownWidget => "unknown_widget",
+            Self::FirstPublished => "first_published",
         }
     }
 }
@@ -532,6 +541,9 @@ pub struct Widget {
     pub listing: Listing,
     /// One PNG preview for every version (`image/png`).
     pub preview: Option<PackageRef>,
+    /// When the ID first entered a catalog (Unix seconds), if the producer
+    /// says so.
+    pub first_published_at: Option<i64>,
 }
 
 /// A listed version: the v1 target (its `built_in` and `preview` copied from
@@ -665,6 +677,7 @@ pub fn validate_catalog(
         &publishers,
         origin,
         supported,
+        generated_at,
     )?;
     let targets = targets(&object["targets"], &widgets, &skipped, origin, supported)?;
 
@@ -862,6 +875,7 @@ fn widgets(
     publishers: &[Publisher],
     origin: Origin,
     features: &[&str],
+    generated_at: i64,
 ) -> Result<(Vec<Widget>, BTreeSet<String>), CatalogV2Error> {
     use CatalogV2Error as E;
     let mut widgets: Vec<Widget> = Vec::new();
@@ -916,12 +930,22 @@ fn widgets(
             .get("preview")
             .map(|preview| validate_preview(preview, origin, id))
             .transpose()?;
+        let first_published_at = entry
+            .get("firstPublishedAt")
+            .map(|time| {
+                time.as_str()
+                    .and_then(catalog::parse_timestamp)
+                    .filter(|time| *time <= generated_at)
+                    .ok_or(E::FirstPublished)
+            })
+            .transpose()?;
         widgets.push(Widget {
             id: id.to_owned(),
             publisher: publisher.handle.clone(),
             built_in,
             listing,
             preview,
+            first_published_at,
         });
     }
     Ok((widgets, skipped))
@@ -1677,6 +1701,51 @@ mod tests {
         refused(CatalogV2Error::CategoryRef, |c| {
             c["widgets"][2]["listing"]["category"] = json!("racing");
         });
+    }
+
+    #[test]
+    fn first_published_at_is_display_information_checked_when_present() {
+        // Absent: nothing to show, as from every producer before it.
+        let catalog = check(&valid()).expect("valid");
+        assert!(
+            catalog
+                .widgets
+                .iter()
+                .all(|w| w.first_published_at.is_none())
+        );
+
+        let mut payload = valid();
+        payload["widgets"][TIMERS]["firstPublishedAt"] = json!("2026-10-05T08:44:00Z");
+        // The catalog's own time is the latest allowed: a widget entering now.
+        payload["widgets"][0]["firstPublishedAt"] = json!("2026-11-02T10:00:00Z");
+        let catalog = check(&payload).expect("valid");
+        assert_eq!(
+            catalog.widgets[TIMERS].first_published_at,
+            parse_timestamp("2026-10-05T08:44:00Z")
+        );
+        assert_eq!(
+            catalog.widgets[0].first_published_at,
+            Some(catalog.generated_at)
+        );
+        assert_eq!(catalog.widgets[2].first_published_at, None);
+
+        for bad in [
+            json!("2026-11-02T10:00:01Z"),
+            json!("2026-10-05"),
+            json!("2026-10-05T08:44:00+02:00"),
+            json!("2026-02-30T00:00:00Z"),
+            json!(1_791_189_840),
+            json!(null),
+        ] {
+            refused(CatalogV2Error::FirstPublished, |c| {
+                c["widgets"][TIMERS]["firstPublishedAt"] = bad.clone()
+            });
+        }
+        // A skipped widget's date is never read.
+        let mut payload = valid();
+        payload["widgets"][TIMERS]["requires"] = json!(["entitlement"]);
+        payload["widgets"][TIMERS]["firstPublishedAt"] = json!("soon");
+        assert!(check(&payload).is_ok());
     }
 
     #[test]

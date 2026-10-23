@@ -168,6 +168,14 @@ changes without a new version. Widget IDs are unique.
 - `preview` is one PNG image (`image/png`, at most `MAX_PREVIEW_BYTES`) at its
   exact URL, at most 1024 × 768 pixels and 4 MiB once decoded: the Control
   Center refuses a larger one, so the creator space never accepts it.
+- `firstPublishedAt` (optional, `YYYY-MM-DDTHH:MM:SSZ`) is when the ID first
+  entered a catalog, v1 or v2, never after `generatedAt`. The producer sets
+  it once and copies it unchanged to every later catalog, so an update or a
+  new version never moves it. It is display information: the marketplace and
+  the Control Center show the widget as new for 15 days after it. Readers
+  that predate it ignore it; a reader that knows it refuses the catalog when
+  the value is not such a timestamp or is after `generatedAt`
+  (`first_published`).
 
 ### Listing
 
