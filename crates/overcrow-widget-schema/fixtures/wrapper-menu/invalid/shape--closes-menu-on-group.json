@@ -1,0 +1,23 @@
+{
+  "menu": [
+    {
+      "type": "group",
+      "id": "more",
+      "label": {
+        "en": "More",
+        "fr": "Plus"
+      },
+      "closesMenu": true,
+      "rows": [
+        {
+          "type": "action",
+          "id": "reset",
+          "label": {
+            "en": "Reset",
+            "fr": "Réinitialiser"
+          }
+        }
+      ]
+    }
+  ]
+}

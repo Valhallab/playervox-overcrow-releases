@@ -1,0 +1,17 @@
+{
+  "menu": [
+    {
+      "type": "slider",
+      "id": "size",
+      "label": {
+        "en": "Size",
+        "fr": "Taille"
+      },
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "default": 5,
+      "closesMenu": true
+    }
+  ]
+}

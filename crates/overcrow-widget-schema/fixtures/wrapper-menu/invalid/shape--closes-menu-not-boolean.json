@@ -1,0 +1,13 @@
+{
+  "menu": [
+    {
+      "type": "action",
+      "id": "track",
+      "label": {
+        "en": "Track",
+        "fr": "Suivre"
+      },
+      "closesMenu": "yes"
+    }
+  ]
+}

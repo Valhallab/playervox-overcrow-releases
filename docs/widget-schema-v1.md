@@ -737,7 +737,7 @@ Keys are the permissions of [Permissions](#permissions); a sensitive capability 
 
 ## Wrapper menu
 
-The manifest `wrapper` object extends the host options menu (ADR 0001, D12). Host rows (opacity, content size, fit to content, a row per account the widget's granted capabilities need, a note when a widening update waits) come first, are separated and are not declared here; passive visibility is the toolbar's eye, not a menu row. Widget rows only set a declared value or emit a declared event: they cannot change a grant, open a URL or act as the gesture of a write intent. Values are stored by the host profile store and reach the VM in `Init` and `Snapshot` after durable acknowledgement.
+The manifest `wrapper` object extends the host options menu (ADR 0001, D12). Host rows (opacity, content size, fit to content, a row per account the widget's granted capabilities need, a note when a widening update waits) come first, are separated and are not declared here; passive visibility is the toolbar's eye, not a menu row. Widget rows only set a declared value or emit a declared event: they cannot change a grant, open a URL or act as the gesture of a write intent. Values are stored by the host profile store and reach the VM in `Init` and `Snapshot` after durable acknowledgement. The menu stays open after a click on a row, unless a `toggle`, `choice` or `action` row sets `closesMenu`.
 
 ### `wrapper`
 
@@ -765,6 +765,7 @@ Boolean switch.
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
 | `default` | boolean | yes | Initial value. |
+| `closesMenu` | boolean | no | `true`: the menu closes after a click on this row. By default it stays open. |
 
 #### `slider`
 
@@ -785,10 +786,15 @@ One value among declared choices.
 | --- | --- | --- | --- |
 | `choices` | list of `MenuChoice` ≤ `MAX_MENU_CHOICES` | yes | At least `MIN_MENU_CHOICES` choices. |
 | `default` | identifier ≤ `MAX_MENU_ID_BYTES` | yes | Value of one declared choice. |
+| `closesMenu` | boolean | no | `true`: the menu closes after a click on this row. By default it stays open. |
 
 #### `action`
 
 Sends a `menu` event carrying the row ID to the VM. Not a user gesture.
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `closesMenu` | boolean | no | `true`: the menu closes after a click on this row. By default it stays open. |
 
 #### `group`
 

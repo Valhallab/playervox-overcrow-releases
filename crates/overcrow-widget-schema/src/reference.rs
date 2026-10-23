@@ -541,7 +541,8 @@ widget's granted capabilities need, a note when a widening update waits) come fi
 separated and are not declared here; passive visibility is the toolbar's eye, not a menu \
 row. Widget rows only set a declared value or emit a declared event: they cannot change a \
 grant, open a URL or act as the gesture of a write intent. Values are stored by the host profile store and reach the VM in `Init` and `Snapshot` \
-after durable acknowledgement.\n\n### `wrapper`\n\n",
+after durable acknowledgement. The menu stays open after a click on a row, unless a \
+`toggle`, `choice` or `action` row sets `closesMenu`.\n\n### `wrapper`\n\n",
     );
     fields_table(out, WRAPPER_FIELDS);
     out.push_str("### Fields of every row\n\n");

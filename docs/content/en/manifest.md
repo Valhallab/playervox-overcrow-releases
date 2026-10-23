@@ -248,6 +248,13 @@ else: it cannot grant a permission or open a link, and choosing a row is
 not a [user action](services.md#calls-that-need-a-user-action) that allows
 a protected service call.
 
+The menu stays open after a click, so that the user can change several
+rows in a row. Add `"closesMenu": true` to a `toggle`, `choice` or `action`
+row that opens something in your widget, such as a list to pick from: the
+menu closes after the click and the user sees what opened. PlayerVox
+OverCrow 0.8.1-beta.1 or later reads `closesMenu`; an earlier version
+refuses a manifest that has it.
+
 ### Fields of every row
 
 <!-- generated:menu-row-fields -->
@@ -292,6 +299,7 @@ Boolean switch.
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
 | `default` | boolean | yes | Initial value. |
+| `closesMenu` | boolean | no | `true`: the menu closes after a click on this row. By default it stays open. |
 
 ### `slider`
 
@@ -312,10 +320,15 @@ One value among declared choices.
 | --- | --- | --- | --- |
 | `choices` | list of `MenuChoice` ≤ 16 | yes | At least 2 choices. |
 | `default` | identifier ≤ 48 bytes | yes | Value of one declared choice. |
+| `closesMenu` | boolean | no | `true`: the menu closes after a click on this row. By default it stays open. |
 
 ### `action`
 
 Calls the handler registered with `onMenu`, with the row ID. Not a user action.
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `closesMenu` | boolean | no | `true`: the menu closes after a click on this row. By default it stays open. |
 
 ### `group`
 

@@ -1,0 +1,69 @@
+{
+  "menu": [
+    {
+      "type": "action",
+      "id": "track",
+      "label": {
+        "en": "Track achievements…",
+        "fr": "Suivre des succès…"
+      },
+      "icon": "list-checks",
+      "closesMenu": true
+    },
+    {
+      "type": "action",
+      "id": "refresh",
+      "label": {
+        "en": "Refresh",
+        "fr": "Actualiser"
+      },
+      "closesMenu": false
+    },
+    {
+      "type": "toggle",
+      "id": "compact",
+      "label": {
+        "en": "Compact",
+        "fr": "Compact"
+      },
+      "default": false,
+      "closesMenu": true
+    },
+    {
+      "type": "group",
+      "id": "view",
+      "label": {
+        "en": "View",
+        "fr": "Vue"
+      },
+      "rows": [
+        {
+          "type": "choice",
+          "id": "layout",
+          "label": {
+            "en": "Layout",
+            "fr": "Disposition"
+          },
+          "choices": [
+            {
+              "value": "list",
+              "label": {
+                "en": "List",
+                "fr": "Liste"
+              }
+            },
+            {
+              "value": "grid",
+              "label": {
+                "en": "Grid",
+                "fr": "Grille"
+              }
+            }
+          ],
+          "default": "list",
+          "closesMenu": true
+        }
+      ]
+    }
+  ]
+}

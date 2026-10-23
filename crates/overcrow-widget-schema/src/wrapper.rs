@@ -6,7 +6,8 @@
 //! Rows only set a declared value or emit a declared event. Values are stored
 //! by the host profile store and reach the VM in `Init` and `Snapshot` after
 //! durable acknowledgement; an `action` row reaches it as a `menu` event,
-//! which is never a user gesture.
+//! which is never a user gesture. The menu stays open after a click unless
+//! the row sets `closesMenu`.
 
 use std::collections::BTreeSet;
 
@@ -76,6 +77,14 @@ pub const HOST_FEATURES: &[&str] = &[
     "telemetry.gpuTemperature",
 ];
 
+/// `closesMenu` of the `toggle`, `choice` and `action` rows: the rows a
+/// single click completes. Absent means `false`.
+const CLOSES_MENU: Field = Field::optional(
+    "closesMenu",
+    ValueType::Bool,
+    "`true`: the menu closes after a click on this row. By default it stays open.",
+);
+
 /// `{ "en": …, "fr": … }`: non-empty, trimmed, no control character.
 pub const LABEL_FIELDS: &[Field] = &[
     Field::required("en", ValueType::Record("label text"), "English label."),
@@ -99,11 +108,10 @@ pub const ROW_TYPES: &[RowType] = &[
     RowType {
         name: "toggle",
         summary: "Boolean switch.",
-        fields: &[Field::required(
-            "default",
-            ValueType::Bool,
-            "Initial value.",
-        )],
+        fields: &[
+            Field::required("default", ValueType::Bool, "Initial value."),
+            CLOSES_MENU,
+        ],
     },
     RowType {
         name: "slider",
@@ -129,12 +137,13 @@ pub const ROW_TYPES: &[RowType] = &[
                 ValueType::Identifier(&MAX_MENU_ID_BYTES),
                 "Value of one declared choice.",
             ),
+            CLOSES_MENU,
         ],
     },
     RowType {
         name: "action",
         summary: "Sends a `menu` event carrying the row ID to the VM. Not a user gesture.",
-        fields: &[],
+        fields: &[CLOSES_MENU],
     },
     RowType {
         name: "group",
@@ -271,6 +280,12 @@ fn validate_row<'a>(
             .is_some_and(|feature| HOST_FEATURES.contains(&feature))
     {
         return Err(MenuError::InvalidCondition);
+    }
+    if object
+        .get("closesMenu")
+        .is_some_and(|value| !value.is_boolean())
+    {
+        return Err(MenuError::Shape);
     }
 
     match kind {
