@@ -15,7 +15,14 @@
         },
         "error": "busy"
       }
-    ]
+    ],
+    "subscriptions": {
+      "twitch.events.subscribe": {
+        "state": "off",
+        "reason": "connecting",
+        "events": []
+      }
+    }
   },
   "steps": [
     {

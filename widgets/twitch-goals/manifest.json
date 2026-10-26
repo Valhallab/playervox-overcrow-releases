@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "apiVersion": 1,
   "id": "com.playervox.overcrow.twitch.goals",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "name": {
     "en": "Live goals",
     "fr": "Objectifs du live"
@@ -30,6 +30,15 @@
           "channel:read:goals",
           "moderator:read:followers",
           "channel:read:hype_train"
+        ],
+        "events": [
+          "channel.goal.begin",
+          "channel.goal.progress",
+          "channel.goal.end",
+          "channel.follow",
+          "channel.hype_train.begin",
+          "channel.hype_train.progress",
+          "channel.hype_train.end"
         ]
       }
     ],

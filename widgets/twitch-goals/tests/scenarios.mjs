@@ -38,7 +38,10 @@ const GOALS_READ = fetched(urls.goals);
 const READ = [GOALS_READ, fetched(urls.followers), fetched(urls.hype)];
 /** The widget's first calls: the account's state, then its channel. */
 const SUBSCRIBED = { service: "account.subscribe", params: { id: "twitch" }, outcome: "ok" };
-const START_CALLS = [SUBSCRIBED, fetched(urls.user), ...READ];
+/** Its live events, off until a scenario says otherwise (the host answers at once). */
+const EVENTS_SUBSCRIBED = { service: "twitch.events.subscribe", params: {}, outcome: "ok" };
+const EVENTS_OFF = { "twitch.events.subscribe": { state: "off", reason: "connecting", events: [] } };
+const START_CALLS = [SUBSCRIBED, EVENTS_SUBSCRIBED, fetched(urls.user), ...READ];
 
 // The channel of the approved mockups, all invented.
 const GOALS = {
@@ -135,9 +138,10 @@ function withMenus(steps, initial) {
 }
 
 const written = new Set();
-function scenario(name, description, { host = {}, http = [], steps: plan }) {
+function scenario(name, description, { host = {}, http = [], subscriptions = EVENTS_OFF, steps: plan }) {
   const steps = withMenus(plan, host.options ?? {});
-  const value = { scenarioVersion: 1, name, description, host: { startAt: START, ...host }, fixtures: { http }, steps };
+  const fixtures = { http, subscriptions };
+  const value = { scenarioVersion: 1, name, description, host: { startAt: START, ...host }, fixtures, steps };
   writeFileSync(new URL(`${name}.scenario.json`, here), `${JSON.stringify(value, null, 2)}\n`);
   written.add(`${name}.scenario.json`);
 }
@@ -371,7 +375,7 @@ for (const [name, account, description] of [
   scenario(name, description, {
     host: { frame: true, accounts: { twitch: account } },
     steps: [
-      { expect: { state: "running", image: name, fault: "none", calls: [SUBSCRIBED] } },
+      { expect: { state: "running", image: name, fault: "none", calls: [SUBSCRIBED, EVENTS_SUBSCRIBED] } },
       { advance: { ms: 2 * MIN } },
       { host: FR },
       { expect: { image: `${name}-fr`, fault: "none", calls: [] } },
@@ -405,7 +409,7 @@ for (const [name, description, options, list] of OPTIONS) {
 scenario("opt-all-off", "Every option off from the start, Hype Train included: Nothing to show at once, no route called.", {
   host: { options: { "goal-subs": false, "goal-followers": false, "goal-bits": false, "goal-cheerers": false, "show-followers": false, "show-last-follower": false, "show-hype": false } },
   steps: [
-    { expect: { state: "running", text: ["Nothing to show"], noText: ["Reading your goals…"], fault: "none", calls: [SUBSCRIBED] } },
+    { expect: { state: "running", text: ["Nothing to show"], noText: ["Reading your goals…"], fault: "none", calls: [SUBSCRIBED, EVENTS_SUBSCRIBED] } },
     { advance: { ms: 2 * MIN } },
     { expect: { calls: [], image: "opt-all-off", fault: "none" } },
   ],
@@ -486,6 +490,37 @@ scenario("shown-again", "Hidden, then shown again: read at once if the last read
     { expect: { calls: [] } },
     { advance: { ms: 1000 } },
     { expect: { text: ["Karaoke night"], fault: "none", calls: READ } },
+  ],
+});
+
+// --- live events (`twitch.events`): on screen at once, no read while
+// they keep the routes current.
+const EVENTS = "twitch.events.subscribe";
+const live = (events = []) => ({ publish: { service: EVENTS, value: { state: "live", reason: null, events } } });
+const KARAOKE = goals(GOALS.en).body;
+const progress = (seq, current) => ({
+  seq, type: "channel.goal.progress", at: START + 3 * MIN,
+  data: {
+    id: "g1", broadcaster_user_id: CHANNEL, broadcaster_user_login: "novalive", broadcaster_user_name: "NovaLive",
+    type: "subscription_count", description: "Karaoke night", current_amount: current, target_amount: 50,
+    started_at: JSON.parse(KARAOKE).data[0].created_at, is_achieved: null, ended_at: null,
+  },
+});
+scenario("live-event", "Live events: one read to catch up, none while live, a goal's progress on screen at once; off again, a read every 20 seconds.", {
+  http: reads({ minutes: 1 }),
+  steps: [
+    { expect: { state: "running", calls: START_CALLS } },
+    live(),
+    { expect: { calls: [] } },
+    { advance: { ms: TICK } },
+    { expect: { calls: READ } },
+    { advance: { ms: 2 * MIN } },
+    { expect: { calls: [] } },
+    live([progress(1, 44)]),
+    { expect: { calls: [], text: ["Karaoke night"], image: "live-event", fault: "none" } },
+    { publish: { service: EVENTS, value: { state: "off", reason: "unavailable", events: [progress(1, 44)] } } },
+    { advance: { ms: TICK } },
+    { expect: { calls: READ, fault: "none" } },
   ],
 });
 

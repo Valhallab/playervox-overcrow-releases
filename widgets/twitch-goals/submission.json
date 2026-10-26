@@ -2,7 +2,7 @@
   "justifications": [
     {
       "permission": "account:twitch",
-      "text": "Uses the Twitch connection of PlayerVox OverCrow, read only, with three read permissions: your goals (channel:read:goals), your followers (moderator:read:followers) and your Hype Trains (channel:read:hype_train). The widget never sees the token: PlayerVox OverCrow adds it to the four routes below, on api.twitch.tv only. Nothing is written to Twitch, and nothing read is stored."
+      "text": "Uses the Twitch connection of PlayerVox OverCrow, read only, with three read permissions: your goals (channel:read:goals), your followers (moderator:read:followers) and your Hype Trains (channel:read:hype_train). It also receives the live events of these three permissions (goals, follows, Hype Trains) that PlayerVox OverCrow subscribes to on your channel. The widget never sees the token: PlayerVox OverCrow adds it to the four routes below, on api.twitch.tv only. Nothing is written to Twitch, and nothing read is stored."
     },
     {
       "permission": "network:GET https://api.twitch.tv/helix/users",
@@ -10,15 +10,15 @@
     },
     {
       "permission": "network:GET https://api.twitch.tv/helix/goals",
-      "text": "Reads your channel's active goals and their progress (channel:read:goals). Every 20 seconds while the widget is shown, when the options show goals; once a minute at most while Twitch fails."
+      "text": "Reads your channel's active goals and their progress (channel:read:goals). Once when the live events start or one was missed, and every 20 seconds while they are off and the widget is shown, when the options show goals; once a minute at most while Twitch fails."
     },
     {
       "permission": "network:GET https://api.twitch.tv/helix/channels/followers",
-      "text": "Reads your follower count and the latest follower, one at a time (first=1; moderator:read:followers). Every 20 seconds while the widget is shown, when the options show followers; once a minute at most while Twitch fails."
+      "text": "Reads your follower count and the latest follower, one at a time (first=1; moderator:read:followers). Once when the live events start or one was missed, and every 20 seconds while they are off and the widget is shown, when the options show followers; once a minute at most while Twitch fails."
     },
     {
       "permission": "network:GET https://api.twitch.tv/helix/hypetrain/status",
-      "text": "Reads whether a Hype Train runs on your channel, its level, progress and end (channel:read:hype_train). Every 20 seconds while the widget is shown, when the options show the Hype Train; once a minute at most while Twitch fails."
+      "text": "Reads whether a Hype Train runs on your channel, its level, progress and end (channel:read:hype_train). Once when the live events start or one was missed, and every 20 seconds while they are off and the widget is shown, when the options show the Hype Train; once a minute at most while Twitch fails."
     }
   ]
 }

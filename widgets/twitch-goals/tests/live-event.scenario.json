@@ -1,0 +1,402 @@
+{
+  "scenarioVersion": 1,
+  "name": "live-event",
+  "description": "Live events: one read to catch up, none while live, a goal's progress on screen at once; off again, a read every 20 seconds.",
+  "host": {
+    "startAt": 1767225600000
+  },
+  "fixtures": {
+    "http": [
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/users",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"141981764\",\"login\":\"novalive\",\"display_name\":\"NovaLive\",\"type\":\"\",\"broadcaster_type\":\"affiliate\",\"description\":\"\",\"profile_image_url\":\"\",\"offline_image_url\":\"\",\"view_count\":0,\"created_at\":\"2019-05-01T10:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1284,\"data\":[{\"user_id\":\"70000001\",\"user_login\":\"nyxarcade\",\"user_name\":\"NyxArcade\",\"followed_at\":\"2025-12-31T23:56:00Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":null,\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1284,\"data\":[{\"user_id\":\"70000001\",\"user_login\":\"nyxarcade\",\"user_name\":\"NyxArcade\",\"followed_at\":\"2025-12-31T23:56:20Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":null,\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1284,\"data\":[{\"user_id\":\"70000001\",\"user_login\":\"nyxarcade\",\"user_name\":\"NyxArcade\",\"followed_at\":\"2025-12-31T23:56:40Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":null,\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1284,\"data\":[{\"user_id\":\"70000001\",\"user_login\":\"nyxarcade\",\"user_name\":\"NyxArcade\",\"followed_at\":\"2025-12-31T23:57:00Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":null,\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      }
+    ],
+    "subscriptions": {
+      "twitch.events.subscribe": {
+        "state": "off",
+        "reason": "connecting",
+        "events": []
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "calls": [
+          {
+            "service": "account.subscribe",
+            "params": {
+              "id": "twitch"
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "twitch.events.subscribe",
+            "params": {},
+            "outcome": "ok"
+          },
+          {
+            "service": "http.fetch",
+            "params": {
+              "url": "https://api.twitch.tv/helix/users",
+              "method": "GET",
+              "as": "text"
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "http.fetch",
+            "params": {
+              "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+              "method": "GET",
+              "as": "text"
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "http.fetch",
+            "params": {
+              "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+              "method": "GET",
+              "as": "text"
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "http.fetch",
+            "params": {
+              "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+              "method": "GET",
+              "as": "text"
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.events.subscribe",
+        "value": {
+          "state": "live",
+          "reason": null,
+          "events": []
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": []
+      }
+    },
+    {
+      "advance": {
+        "ms": 20000
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "http.fetch",
+            "params": {
+              "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+              "method": "GET",
+              "as": "text"
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "http.fetch",
+            "params": {
+              "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+              "method": "GET",
+              "as": "text"
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "http.fetch",
+            "params": {
+              "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+              "method": "GET",
+              "as": "text"
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 120000
+      }
+    },
+    {
+      "expect": {
+        "calls": []
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.events.subscribe",
+        "value": {
+          "state": "live",
+          "reason": null,
+          "events": [
+            {
+              "seq": 1,
+              "type": "channel.goal.progress",
+              "at": 1767225780000,
+              "data": {
+                "id": "g1",
+                "broadcaster_user_id": "141981764",
+                "broadcaster_user_login": "novalive",
+                "broadcaster_user_name": "NovaLive",
+                "type": "subscription_count",
+                "description": "Karaoke night",
+                "current_amount": 44,
+                "target_amount": 50,
+                "started_at": "2025-12-31T23:00:00Z",
+                "is_achieved": null,
+                "ended_at": null
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "expect": {
+        "calls": [],
+        "text": [
+          "Karaoke night"
+        ],
+        "image": "live-event",
+        "fault": "none"
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.events.subscribe",
+        "value": {
+          "state": "off",
+          "reason": "unavailable",
+          "events": [
+            {
+              "seq": 1,
+              "type": "channel.goal.progress",
+              "at": 1767225780000,
+              "data": {
+                "id": "g1",
+                "broadcaster_user_id": "141981764",
+                "broadcaster_user_login": "novalive",
+                "broadcaster_user_name": "NovaLive",
+                "type": "subscription_count",
+                "description": "Karaoke night",
+                "current_amount": 44,
+                "target_amount": 50,
+                "started_at": "2025-12-31T23:00:00Z",
+                "is_achieved": null,
+                "ended_at": null
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 20000
+      }
+    },
+    {
+      "expect": {
+        "calls": [
+          {
+            "service": "http.fetch",
+            "params": {
+              "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+              "method": "GET",
+              "as": "text"
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "http.fetch",
+            "params": {
+              "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+              "method": "GET",
+              "as": "text"
+            },
+            "outcome": "ok"
+          },
+          {
+            "service": "http.fetch",
+            "params": {
+              "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+              "method": "GET",
+              "as": "text"
+            },
+            "outcome": "ok"
+          }
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}
