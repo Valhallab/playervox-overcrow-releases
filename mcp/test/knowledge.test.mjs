@@ -76,7 +76,7 @@ test("explanations of permissions and codes", () => {
   assert.match(network.advice, /maxResponseBytes/);
   const media = explainPermission("media.read", "fr");
   assert.equal(media.sensitive, true);
-  assert.match(media.advice, /network or clipboardWrite/);
+  assert.match(media.advice, /network, links or clipboardWrite/);
   assert.equal(explainPermission("root.access", "en"), undefined);
   const account = explainPermission("account:steam", "en");
   assert.equal(account.kind, "account");

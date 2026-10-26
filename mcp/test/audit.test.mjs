@@ -211,6 +211,37 @@ clipboard.writeText({ text: "at start" });
   );
 });
 
+test("a link opens only on the user's click, and a declared site is used", async () => {
+  const links = [{ origin: "https://runlog.example", pathPrefix: "/runs/" }];
+  const opening = widget("links-open", {
+    "manifest.json": manifest({ links }),
+    "logic.ts": `import { links, timers } from "@overcrow/sdk";
+export function openRun(): void {
+  void links.open({ url: "https://runlog.example/runs/1" });
+}
+timers.every(60000, () => {
+  void links.open({ url: "https://runlog.example/runs/2" });
+});
+void links.open({ url: "https://runlog.example/runs/3" });
+`,
+    "view.ocml": "<box><button on:activate={openRun}><text>Open</text></button></box>\n",
+  });
+  const found = rules(await auditWidget(opening));
+  assert.ok(found.includes("high:link-without-action"), found.join(", "));
+  assert.ok(found.includes("medium:link-without-action"), found.join(", "));
+  assert.equal(found.filter((rule) => rule.endsWith(":link-without-action")).length, 2);
+  const result = await auditWidget(opening);
+  assert.ok(result.authority.some((line) => /runlog\.example\/runs\//.test(line)));
+
+  const unused = widget("links-unused", {
+    "manifest.json": manifest({ links }),
+    "logic.ts": "export function nothing(): void {}\n",
+    "view.ocml": "<box><button on:activate={nothing}><text>Go</text></button></box>\n",
+  });
+  const findings = (await auditWidget(unused)).findings;
+  assert.ok(findings.some((f) => f.rule === "unused-permission" && /links/.test(f.message)));
+});
+
 test("network polling below a minute per route needs a justification (rule 4.2)", async () => {
   const route = "network:GET https://api.example.org/v1/score";
   const polling = async (ms, justifications) => {

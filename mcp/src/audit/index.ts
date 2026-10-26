@@ -68,6 +68,14 @@ export function authoritySummary(manifest: Record<string, unknown> | null): stri
   }
   if (permissions.storage === true)
     out.push(`Storage: ${table.permissions.storage?.en.meaning ?? "host-managed storage"}`);
+  const links = Array.isArray(permissions.links)
+    ? (permissions.links as Record<string, unknown>[])
+    : [];
+  for (const rule of links) {
+    out.push(
+      `Links: opens ${String(rule.origin ?? "")}${String(rule.pathPrefix ?? "/")} in the browser, on a click.`,
+    );
+  }
   if (permissions.clipboardWrite === true)
     out.push(`Clipboard: ${table.permissions.clipboardWrite?.en.meaning ?? "text writes"}`);
   const events = Array.isArray(permissions.gameEvents) ? (permissions.gameEvents as string[]) : [];

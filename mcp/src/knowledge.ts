@@ -163,14 +163,16 @@ export function readDoc(slug: string, locale: Locale, section?: string) {
 
 const PERMISSION_ADVICE: Record<string, string> = {
   network:
-    "Declare one rule per route the widget really requests: method, origin and exact path, with each {parameter} constrained (enum, integer with min and max, or a short slug) rather than free text. Set maxResponseBytes just above the largest real response. Never send the user's data without a reason, and say in listing.json what is sent and why. Every server you add learns when the user plays.",
+    "Declare one rule per route the widget really requests: method, origin and exact path, with each {parameter} constrained (enum, integer with min and max, or a short slug) rather than free text. Set maxResponseBytes just above the largest real response. Never send the user's data without a reason, and say in listing.json what is sent and why. Every server you add learns when the user plays. After a 429 or a 503, wait as the retry-after or ratelimit-reset response header says before reading again.",
   storage:
     "Keep only what the widget needs to come back to (settings, a small cache), well under 256 KiB in all and 64 KiB per value, and bound what you store. With a sensitive capability, storage lasts only while OverCrow runs.",
+  links:
+    "Declare only the sites the widget opens, each with the narrowest pathPrefix that covers its pages (\"/my/edit/\" rather than the whole site). Open a page only in the handler of a user action (on:activate of a button), with a button that says where it leads: OverCrow refuses it otherwise (gesture_required), shows the address and asks the user the first time for each site. Never put the user's data in the address. A widget with a sensitive capability opens no link; a widget with an account opens only its service's sites.",
   clipboardWrite:
     "Write only in the handler of a user action (on:activate of a button), only the text the user asked to copy, and never on a timer or a data update: OverCrow refuses it otherwise (gesture_required).",
   gameEvents: "Subscribe only to the events the widget shows.",
   capabilities:
-    "Each capability needs the user's consent. A sensitive capability cannot be combined with network or clipboardWrite (OverCrow refuses the manifest): the data it reads cannot leave the computer.",
+    "Each capability needs the user's consent. A sensitive capability cannot be combined with network, links or clipboardWrite (OverCrow refuses the manifest): the data it reads cannot leave the computer.",
 };
 
 const ACCOUNT_MEANING: Record<Locale, string> = {
@@ -239,7 +241,7 @@ export function explainPermission(name: string, locale: Locale) {
     const advice = [
       "Ask for it only if the widget shows or uses this data, and handle its refusal: the user may say no (check hasGrant).",
       capability.sensitive
-        ? "It is sensitive: the widget cannot also declare network or clipboardWrite, and its storage lasts only while OverCrow runs."
+        ? "It is sensitive: the widget cannot also declare network, links or clipboardWrite, and its storage lasts only while OverCrow runs."
         : null,
       capability.account
         ? `It needs the user's ${capability.account} account connected in OverCrow; handle not_connected.`

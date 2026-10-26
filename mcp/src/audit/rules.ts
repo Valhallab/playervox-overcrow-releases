@@ -122,6 +122,12 @@ function unusedAuthority(context: Context): void {
       name: "network",
     },
     {
+      key: "links",
+      on: Array.isArray(permissions.links) && (permissions.links as unknown[]).length > 0,
+      services: ["links.open"],
+      name: "links",
+    },
+    {
       key: "gameEvents",
       on: Array.isArray(permissions.gameEvents) && (permissions.gameEvents as unknown[]).length > 0,
       services: ["gameEvents.subscribe"],
@@ -814,8 +820,21 @@ function depthAt(tokens: readonly Token[], index: number): number {
   return depth;
 }
 
-function clipboardOutsideGesture(context: Context): void {
-  for (const open of calls(context.tokens, ["clipboard", "writeText"])) {
+/** `service` called outside the handler of a user action: OverCrow refuses it. */
+function outsideGesture(
+  context: Context,
+  path: string[],
+  report: (
+    topLevel: boolean,
+    owner: { name: string } | undefined,
+  ) => {
+    rule: string;
+    message: string;
+    fix: string;
+    example?: ExampleRef;
+  },
+): void {
+  for (const open of calls(context.tokens, path)) {
     const line = context.tokens[open]?.line ?? null;
     const owner = enclosing(context.ranges, open);
     const isGestureHandler = (name: string) =>
@@ -832,20 +851,38 @@ function clipboardOutsideGesture(context: Context): void {
     if (confirmed) continue;
     const topLevel = owner === undefined && depthAt(context.tokens, open) === 0;
     add(context, {
-      rule: "clipboard-without-action",
+      ...report(topLevel, owner),
       area: "security",
       severity: topLevel ? "high" : "medium",
       file: context.logicFile,
       line,
-      message: topLevel
-        ? "clipboard.writeText runs when the widget starts: it would write without the user asking."
-        : owner
-          ? `clipboard.writeText is in ${owner.name}, which no button or key of the view calls directly.`
-          : "clipboard.writeText is in a callback (a timer, a subscription…) that no user action calls.",
-      fix: "Write to the clipboard only in the handler of a user action (on:activate of a button): OverCrow refuses it otherwise (gesture_required), and the user must always know what is copied.",
-      example: { widget: "warframe-market", file: "logic.ts", find: "export function copy(" },
     });
   }
+}
+
+function linkOutsideGesture(context: Context): void {
+  outsideGesture(context, ["links", "open"], (topLevel, owner) => ({
+    rule: "link-without-action",
+    message: topLevel
+      ? "links.open runs when the widget starts: it would open a page without the user asking."
+      : owner
+        ? `links.open is in ${owner.name}, which no button or key of the view calls directly.`
+        : "links.open is in a callback (a timer, a subscription…) that no user action calls.",
+    fix: "Open a page only in the handler of a user action (on:activate of a button that says where it leads): OverCrow refuses it otherwise (gesture_required).",
+  }));
+}
+
+function clipboardOutsideGesture(context: Context): void {
+  outsideGesture(context, ["clipboard", "writeText"], (topLevel, owner) => ({
+    rule: "clipboard-without-action",
+    message: topLevel
+      ? "clipboard.writeText runs when the widget starts: it would write without the user asking."
+      : owner
+        ? `clipboard.writeText is in ${owner.name}, which no button or key of the view calls directly.`
+        : "clipboard.writeText is in a callback (a timer, a subscription…) that no user action calls.",
+    fix: "Write to the clipboard only in the handler of a user action (on:activate of a button): OverCrow refuses it otherwise (gesture_required), and the user must always know what is copied.",
+    example: { widget: "warframe-market", file: "logic.ts", find: "export function copy(" },
+  }));
 }
 
 const SCAN_WINDOW = 4096;
@@ -1315,6 +1352,7 @@ export function runRules(project: WidgetProject): Finding[] {
     largeResponses(context);
   }
   clipboardOutsideGesture(context);
+  linkOutsideGesture(context);
   fastTimers(context);
   unboundedLists(context);
   redraws(context);

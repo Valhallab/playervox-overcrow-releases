@@ -467,6 +467,8 @@ export function describeReview(item: Record<string, unknown>): string {
       return `Capability ${cleanLine(String(item.name), 64)}${item.sensitive ? " (sensitive)" : ""}${item.account ? `, needs a ${cleanLine(String(item.account), 32)} account` : ""}.`;
     case "network":
       return `Network: ${cleanLine(String(item.method), 8)} ${cleanLine(String(item.origin), 200)}${cleanLine(String(item.path), 300)}, responses up to ${size(Number(item.maxResponseBytes))}${typeof item.account === "string" ? `, with the ${cleanLine(item.account, 32)} account` : ""}.`;
+    case "link":
+      return `Link: opens pages of ${cleanLine(String(item.origin), 200)}${cleanLine(String(item.pathPrefix), 300)} in the browser when the user clicks.`;
     case "clipboardWrite":
       return "Clipboard: writes text when the user acts.";
     case "storage":
