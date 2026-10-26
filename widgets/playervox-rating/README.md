@@ -77,7 +77,11 @@ The draft stays, the button comes back, and a message shows above it:
 | `busy` (another publication is in flight, or too many requests) | "An operation is already in progress. Please try again shortly." |
 | `stale_context` (the game or the account changed meanwhile) | "The account or game changed. Review your changes before saving." |
 | `permission_denied` | "This action is not available for your account." |
+| `review_removed_by_moderation` (PlayerVox's moderation removed this review) | "This review was removed by moderation. Edit it, or post the rating without a review." |
 | `unavailable`, `timeout` (no answer from PlayerVox within 30 s) and any other | "PlayerVox is unavailable for this game right now." |
+
+Older PlayerVox OverCrow versions answer `invalid_request` for a review
+the moderation removed.
 
 Should OverCrow give no answer at all, the button comes back after 40 s
 with the last message.

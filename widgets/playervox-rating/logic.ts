@@ -15,7 +15,6 @@ import {
   type Color,
   type DrawCommand,
   type RatingState,
-  type ServiceErrorCode,
   type ServiceErrorPayload,
   type Subscription,
   type Timer,
@@ -415,8 +414,11 @@ export function buttonLabel(view: View): string {
   return published(view.rating) === null ? "publish" : "update";
 }
 
-/** Message key of a refused publication. */
-export function errorKey(code: ServiceErrorCode | null): string {
+/**
+ * Message key of a refused publication. The code is a string: OverCrow
+ * versions after this widget's SDK may answer codes it does not name.
+ */
+export function errorKey(code: string | null): string {
   switch (code) {
     case "invalid_request":
       return "error-invalid";
@@ -428,6 +430,8 @@ export function errorKey(code: ServiceErrorCode | null): string {
       return "error-stale";
     case "permission_denied":
       return "error-forbidden";
+    case "review_removed_by_moderation":
+      return "error-moderated";
     default:
       // `unavailable`, `timeout`, `gesture_required` and the rest.
       return "error-unavailable";

@@ -31,5 +31,6 @@
   "error-busy": "An operation is already in progress. Please try again shortly.",
   "error-stale": "The account or game changed. Review your changes before saving.",
   "error-forbidden": "This action is not available for your account.",
+  "error-moderated": "This review was removed by moderation. Edit it, or post the rating without a review.",
   "error-unavailable": "PlayerVox is unavailable for this game right now."
 }

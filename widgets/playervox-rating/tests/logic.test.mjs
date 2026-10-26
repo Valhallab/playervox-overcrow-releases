@@ -218,6 +218,9 @@ test("a refused publication shows its message and keeps the draft", () => {
     ["busy", "error-busy"],
     ["stale_context", "error-stale"],
     ["permission_denied", "error-forbidden"],
+    // PlayerVox's moderation removed this review: edit it, or publish
+    // without one.
+    ["review_removed_by_moderation", "error-moderated"],
     ["unavailable", "error-unavailable"],
     ["timeout", "error-unavailable"],
     ["gesture_required", "error-unavailable"],
