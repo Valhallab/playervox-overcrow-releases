@@ -481,7 +481,13 @@ while a confirmation is open.
 
 The address of a page carries data too. A widget with a sensitive
 capability opens no link, and a widget with an account opens only pages of
-that account's service: what it reads there cannot leave for another site.
+that account's service, so what it reads there cannot leave for another
+site: for a declared account, the exact origins of its `origins`, key page
+or sign-in page; for Steam, `https://steamcommunity.com` under `/my/`,
+`/id/`, `/profiles/`, `/app/` or `/stats/`, and `https://store.steampowered.com`
+under `/app/`; for Twitch, `https://www.twitch.tv` under `/settings/` and
+`https://dashboard.twitch.tv` under `/u/`. A service's redirector to other
+sites is never among them.
 
 ### Game events
 

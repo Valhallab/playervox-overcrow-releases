@@ -229,7 +229,7 @@ pub fn manifest_diagnostic(error: ManifestError, source: &str) -> Diagnostic {
         ManifestError::AccountLink => (
             "permissions.links",
             "with an account, every link must stay on the account's service".into(),
-            Some("a link's address could carry the account's data to another site: link only to the service's own sites (Steam: steampowered.com, steamcommunity.com; a declared account: the hosts of its `origins`, key page or sign-in page), or remove the rule".into()),
+            Some("a link's address could carry the account's data to another site: Steam allows https://steamcommunity.com under /my/, /id/, /profiles/, /app/ or /stats/ and https://store.steampowered.com under /app/; Twitch allows https://www.twitch.tv under /settings/ and https://dashboard.twitch.tv under /u/; a declared account allows the exact origins (port included) of its `origins`, key page or sign-in page. Narrow the rule, or remove it".into()),
         ),
         ManifestError::Account => (
             "permissions.accounts",

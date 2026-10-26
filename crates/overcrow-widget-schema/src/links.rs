@@ -88,7 +88,7 @@ pub fn canonical_link_path(path: &str) -> bool {
 /// Whether `prefix` allows `path`, both canonical: a prefix ending with `/`
 /// allows what starts with it; any other allows itself and what is below
 /// it.
-fn covers(prefix: &str, path: &str) -> bool {
+pub(crate) fn covers(prefix: &str, path: &str) -> bool {
     if prefix.ends_with('/') {
         path.starts_with(prefix)
     } else {

@@ -498,8 +498,14 @@ de 2048 octets) et `busy` tant qu’une confirmation est ouverte.
 
 L’adresse d’une page porte aussi des données. Un widget doté d’une
 capability sensible n’ouvre aucun lien, et un widget doté d’un compte
-n’ouvre que des pages du service de ce compte : ce qu’il y lit ne peut pas
-partir vers un autre site.
+n’ouvre que des pages du service de ce compte, pour que ce qu’il y lit ne
+puisse pas partir vers un autre site : pour un compte déclaré, les
+origines exactes de ses `origins`, de sa page de clé ou de sa page de
+connexion ; pour Steam, `https://steamcommunity.com` sous `/my/`, `/id/`,
+`/profiles/`, `/app/` ou `/stats/`, et `https://store.steampowered.com`
+sous `/app/` ; pour Twitch, `https://www.twitch.tv` sous `/settings/` et
+`https://dashboard.twitch.tv` sous `/u/`. Un redirecteur du service vers
+d’autres sites n’en fait jamais partie.
 
 ### Événements de jeu
 

@@ -599,6 +599,18 @@ pub struct IntegratedService {
     pub events: &'static [ServiceEvent],
     /// The feature a manifest that lists `events` needs.
     pub events_feature: Option<&'static str>,
+    /// The pages a widget that names the service may open
+    /// (`permissions.links`): exact origins and the path prefixes under
+    /// them, none of which leads to a redirector to another site.
+    pub links: &'static [ServiceLink],
+}
+
+/// Pages of a service's site a widget may open: a link rule of this origin
+/// whose `pathPrefix` lies under one of these prefixes.
+#[derive(Debug, Eq, PartialEq)]
+pub struct ServiceLink {
+    pub origin: &'static str,
+    pub prefixes: &'static [&'static str],
 }
 
 const fn read(name: &'static str, en: &'static str, fr: &'static str) -> ServiceScope {
@@ -698,6 +710,20 @@ pub const STEAM: IntegratedService = IntegratedService {
     scopes: &[],
     events: &[],
     events_feature: None,
+    // The player's own pages (`/my/` is the signed-in player: privacy
+    // settings, badges, inventory), profiles, game hubs and stats, and the
+    // store's game pages; never `/linkfilter/`, Steam's redirector to any
+    // address, nor the store's sign-in and its `redir`.
+    links: &[
+        ServiceLink {
+            origin: "https://steamcommunity.com",
+            prefixes: &["/my/", "/id/", "/profiles/", "/app/", "/stats/"],
+        },
+        ServiceLink {
+            origin: "https://store.steampowered.com",
+            prefixes: &["/app/"],
+        },
+    ],
 };
 
 /// Twitch Helix with OverCrow's own Twitch connection: the public client of
@@ -807,6 +833,18 @@ pub const TWITCH: IntegratedService = IntegratedService {
     ],
     events: TWITCH_EVENTS,
     events_feature: Some(FEATURE_TWITCH_EVENTS),
+    // The player's settings and their creator dashboard (goals, stream
+    // manager).
+    links: &[
+        ServiceLink {
+            origin: "https://www.twitch.tv",
+            prefixes: &["/settings/"],
+        },
+        ServiceLink {
+            origin: "https://dashboard.twitch.tv",
+            prefixes: &["/u/"],
+        },
+    ],
 };
 
 /// What a manifest reader refuses of a declared account that imitates an

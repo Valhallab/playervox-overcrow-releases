@@ -187,8 +187,9 @@ fn a_link_carries_no_sensitive_data_away() {
 
 #[test]
 fn with_an_account_links_stay_on_its_service() {
-    // An integrated service: its domains.
-    let steam = |origin: &str| {
+    // An integrated service: only the pages PlayerVox lists for it, never
+    // a redirector that would carry the account's data to another site.
+    let steam = |origin: &str, prefix: &str| {
         base(json!({
             "accounts": [{"service": "steam"}],
             "network": [{
@@ -197,20 +198,32 @@ fn with_an_account_links_stay_on_its_service() {
                 "path": "/ISteamUser/GetPlayerSummaries/v2/",
                 "account": "steam"
             }],
-            "links": [{"origin": origin, "pathPrefix": "/my/edit/"}]
+            "links": [{"origin": origin, "pathPrefix": prefix}]
         }))
     };
-    validate(&steam("https://steamcommunity.com")).expect("Steam's site");
-    validate(&steam("https://store.steampowered.com")).expect("under a Steam domain");
-    assert_eq!(
-        validate(&steam("https://runlog.example")).err(),
-        Some("account_link")
-    );
-    assert_eq!(
-        validate(&steam("https://steamcommunity.com.runlog.example")).err(),
-        Some("account_link")
-    );
-    // A declared account: the hosts of its origins and of its key page.
+    validate(&steam("https://steamcommunity.com", "/my/edit/")).expect("privacy settings");
+    validate(&steam("https://steamcommunity.com", "/my/")).expect("the player's profile");
+    validate(&steam("https://store.steampowered.com", "/app/")).expect("a store page");
+    for (origin, prefix) in [
+        // Steam's redirector to any address.
+        ("https://steamcommunity.com", "/linkfilter/"),
+        // The whole site would include it.
+        ("https://steamcommunity.com", "/"),
+        ("https://store.steampowered.com", "/login/"),
+        // Another host under a Steam domain, or another site.
+        ("https://partner.steampowered.com", "/"),
+        ("https://steamcommunity.com:8443", "/my/"),
+        ("https://runlog.example", "/my/"),
+        ("https://steamcommunity.com.runlog.example", "/my/"),
+    ] {
+        assert_eq!(
+            validate(&steam(origin, prefix)).err(),
+            Some("account_link"),
+            "{origin}{prefix}"
+        );
+    }
+    // A declared account: the exact origins of its routes and of its key
+    // page, port included.
     let declared = |origin: &str| {
         base(json!({
             "accounts": [{
@@ -227,16 +240,20 @@ fn with_an_account_links_stay_on_its_service() {
             "links": [{"origin": origin}]
         }))
     };
-    validate(&declared("https://runlog.example")).expect("the key page's host");
-    validate(&declared("https://api.runlog.example")).expect("an origin's host");
-    assert_eq!(
-        validate(&declared("https://other.example")).err(),
-        Some("account_link")
-    );
-    assert_eq!(
-        validate(&declared("https://www.runlog.example")).err(),
-        Some("account_link")
-    );
+    validate(&declared("https://runlog.example")).expect("the key page's origin");
+    validate(&declared("https://api.runlog.example")).expect("an origin");
+    for origin in [
+        "https://other.example",
+        "https://www.runlog.example",
+        "https://runlog.example:8443",
+        "https://api.runlog.example:8443",
+    ] {
+        assert_eq!(
+            validate(&declared(origin)).err(),
+            Some("account_link"),
+            "{origin}"
+        );
+    }
 }
 
 #[test]

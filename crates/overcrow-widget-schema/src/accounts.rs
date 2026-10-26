@@ -459,26 +459,28 @@ impl Account {
             .map(String::as_str)
     }
 
-    /// Whether a link rule stays on the account's service: under one of an
-    /// integrated service's domains, or on the host of one of a declared
-    /// account's origins, of its key page or of its sign-in page. The data
-    /// the account gives the widget never leaves for another site in an
-    /// address.
+    /// Whether a link rule stays on the account's service: for an
+    /// integrated service, under one of the pages its table lists (exact
+    /// origin, path prefix within one of its prefixes); for a declared
+    /// account, on the exact origin, port included, of one of its
+    /// `origins`, of its key page or of its sign-in page. The data the
+    /// account gives the widget never leaves for another site in an
+    /// address, not even through a redirector of the service.
     pub fn owns_link(&self, rule: &crate::links::LinkRule) -> bool {
-        let host = rule.host();
         if let Some(service) = self.service {
-            return service
-                .domains
-                .iter()
-                .any(|domain| host == *domain || host.ends_with(&format!(".{domain}")));
+            return service.links.iter().any(|link| {
+                link.origin == rule.origin
+                    && link
+                        .prefixes
+                        .iter()
+                        .any(|prefix| crate::links::covers(prefix, &rule.path_prefix))
+            });
         }
-        let host_of = |url: &str| {
-            url.strip_prefix("https://")
-                .unwrap_or(url)
-                .split(['/', ':', '?', '#'])
-                .next()
-                .unwrap_or_default()
-                .to_ascii_lowercase()
+        // `https://host[:port]` of an address the declaration validated.
+        let origin_of = |url: &str| {
+            let rest = url.strip_prefix("https://").unwrap_or_default();
+            let authority = rest.split(['/', '?', '#']).next().unwrap_or_default();
+            format!("https://{}", authority.to_ascii_lowercase())
         };
         self.origins
             .iter()
@@ -489,7 +491,7 @@ impl Account {
                     .as_ref()
                     .and_then(|oauth| oauth.authorize.as_deref()),
             )
-            .any(|url| host_of(url) == host)
+            .any(|url| origin_of(url) == rule.origin)
     }
 
     /// Whether a scope can change the user's account.
