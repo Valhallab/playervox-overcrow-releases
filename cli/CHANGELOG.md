@@ -21,8 +21,15 @@ widget's sources and the embedded SDK.
   `links.open` to run a widget that calls it.
 - A test scenario's `http` fixture may give `response.headers`, the
   response headers `http.fetch` passes on to a widget.
+- A Steam declaration may list `events` (`stats.saved`), which
+  `steam.events.subscribe` delivers; `check` and `admit` accept them and
+  refuse an unknown type (`manifest.account`). A manifest with them needs
+  the catalog feature `steam-events`; the headless runtime this CLI pins
+  must know `steam.events.subscribe` to run a widget that subscribes, and a
+  scenario gives its updates as for `twitch.events.subscribe`.
 - It embeds `@overcrow/sdk` 1.3.0: `links.open`, the `headers` of
-  `http.fetch` answers and the service error `review_removed_by_moderation`.
+  `http.fetch` answers, the service error `review_removed_by_moderation`
+  and `steam.events`.
 
 ## 1.0.0-beta.8
 

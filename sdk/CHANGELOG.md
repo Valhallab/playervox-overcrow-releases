@@ -22,6 +22,12 @@ links for widgets:
   It is empty with an older PlayerVox OverCrow. The `HttpHeaders` type.
 - The service error `review_removed_by_moderation`: PlayerVox's moderation
   removed the review a rating form publishes.
+- `steam.events.subscribe` (`steam.events`): the local Steam events of the
+  account the widget follows, of the types the manifest lists in `events`
+  beside the Steam service. `stats.saved` tells that the Steam client of
+  the player's computer saved that account's stats of a game, as at each
+  achievement unlocked: `{ appid }` and the time. The `SteamEvent` and
+  `SteamEvents` types.
 
 ## 1.2.0
 

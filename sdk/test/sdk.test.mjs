@@ -104,6 +104,22 @@ test("live Twitch events subscribe with their types and pass each update through
   assert.equal(updates[1].error.code, "permission_denied");
 });
 
+test("local Steam events subscribe for the account the widget names", () => {
+  const updates = [];
+  const steamid = "76561197985436232";
+  overcrow.steam.events.subscribe({ steamid }, (update) => updates.push(update));
+  const [, entry] = [...vm.subscriptions].at(-1);
+  assert.equal(entry.service, "steam.events.subscribe");
+  assert.deepEqual(entry.params, { steamid });
+  const value = {
+    state: "live",
+    reason: null,
+    events: [{ seq: 1, type: "stats.saved", at: 1, data: { appid: 2315050 } }],
+  };
+  entry.update({ value, final: false });
+  assert.deepEqual(updates[0], { ok: true, value, final: false });
+});
+
 test("account services name the declared account; the secret never shows", async () => {
   vm.host = { ...HOST, grants: ["account:steam"] };
   assert.ok(overcrow.hasGrant("account:steam"));

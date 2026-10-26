@@ -392,3 +392,31 @@ fn twitch_events_are_published_by_the_scenario() {
     let error = read(json!({"state": "off", "reason": "token", "events": []})).expect_err("reason");
     assert_eq!(error.path, "steps[0].publish.value");
 }
+
+/// Local Steam events too: the first value and the next ones, each checked
+/// against its shape (`stats.saved`, `{ appid }`).
+#[test]
+fn steam_events_are_published_by_the_scenario() {
+    let saved = json!({"state": "live", "reason": null, "events": [
+        {"seq": 1, "type": "stats.saved", "at": 1_761_505_519_565_u64, "data": {"appid": 2_315_050}}
+    ]});
+    let read = |value: Value| {
+        parse(
+            &serde_json::to_vec(&json!({
+                "scenarioVersion": 1,
+                "name": "events",
+                "fixtures": {"subscriptions": {
+                    "steam.events.subscribe": {"state": "off", "reason": "unavailable", "events": []}
+                }},
+                "steps": [{"publish": {"service": "steam.events.subscribe", "value": value}}],
+            }))
+            .expect("bytes"),
+        )
+    };
+    read(saved).expect("a saved game");
+    let error = read(json!({"state": "live", "reason": null, "events": [
+        {"seq": 1, "type": "channel.follow", "at": 1, "data": {}}
+    ]}))
+    .expect_err("a Twitch type");
+    assert_eq!(error.path, "steps[0].publish.value");
+}

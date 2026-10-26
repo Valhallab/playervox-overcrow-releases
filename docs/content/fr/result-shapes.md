@@ -384,4 +384,25 @@ Un événement Twitch en direct. `{ seq, type, at, data }`
 | `state` | `live` \| `off` | `live` tant que l'hôte est abonné chez Twitch. |
 | `reason` | `connecting` \| `not_connected` \| `unavailable` ou `null` | Pourquoi l'état est `off` ; `null` en `live`. |
 | `events` | liste de [`TwitchEvent`](#twitchevent) | Les derniers événements, du plus ancien au plus récent. |
+
+### `SteamEvent`
+
+Un événement Steam local. `{ seq, type, at, data }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `seq` | entier | Rang de l'événement dans l'abonnement, à partir de 1, sans trou sauf si des événements ont été perdus. |
+| `type` | `stats.saved` | Le type, parmi ceux de l'abonnement. |
+| `at` | entier | Quand le client Steam l'a enregistré, en millisecondes Unix de l'horloge de l'hôte, jamais après la mise à jour. |
+| `data` | JSON | Les champs de la table du type : `{ appid }` pour `stats.saved`. |
+
+### `SteamEvents`
+
+Événements Steam locaux des types que le widget déclare, pour le compte qu'il nomme. `{ state, reason, events }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `state` | `live` \| `off` | `live` tant que l'hôte surveille les stats du client Steam sur cet ordinateur. |
+| `reason` | `connecting` \| `not_connected` \| `unavailable` ou `null` | Pourquoi l'état est `off` ; `null` en `live`. |
+| `events` | liste de [`SteamEvent`](#steamevent) | Les derniers événements, du plus ancien au plus récent. |
 <!-- /generated:result-shapes -->

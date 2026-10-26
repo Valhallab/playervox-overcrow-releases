@@ -11,7 +11,7 @@
     "max": { "width": 480, "height": 320 }
   },
   "permissions": {
-    "accounts": [{ "service": "steam" }],
+    "accounts": [{ "service": "steam", "events": ["stats.saved"] }],
     "network": [
       {
         "origin": "https://api.steampowered.com",

@@ -120,6 +120,7 @@ l’utilisateur.
 | `playervox` | espace de noms | `score.subscribe`, `rating.subscribe`, `reviews.subscribe`, `reviews.page({ page?, followedOnly? })`. |
 | `journal` | espace de noms | `subscribe(listener)` ; `page({ cursor? })` ; `delete({ session })` pendant une action de l’utilisateur, après confirmation de celui-ci. |
 | `twitch` | espace de noms | `chat.subscribe(listener)` ; `chat.join({ channel })`, `chat.leave()`, `chat.favorite({ channel, favorite })` pendant une action de l’utilisateur ; `events.subscribe({ types }, listener)`, les [événements en direct](integrated-services.md#événements-en-direct-twitch) que le manifeste liste. |
+| `steam` | espace de noms | `events.subscribe({ steamid, types }, listener)`, les [événements locaux](integrated-services.md#événements-locaux-steam) du compte Steam que le widget suit. |
 | `account` | espace de noms | `subscribe({ id }, listener)` ; `connect({ id })` pendant une action de l’utilisateur. Un [compte tiers](accounts.md) que le manifeste déclare, ou un [service intégré](integrated-services.md) qu’il nomme. |
 | `call(service, params?)` | fonction | Appelle par son nom n’importe quel service qui répond une seule fois. |
 | `subscribe(service, params, listener)` | fonction | S’abonne par son nom à n’importe quel service d’abonnement. |
@@ -174,7 +175,7 @@ donne `null`, `""` ou un `ArrayBuffer` vide.
 Les types des autres espaces de noms sont générés à partir du schéma :
 `AccountServices`, `ClipboardServices`, `FpsServices`, `GameEventsServices`,
 `JournalServices`, `LinksServices`, `MediaServices`, `NotesServices`, `PlayervoxServices`,
-`SessionServices`, `StopwatchServices`, `StorageServices`,
+`SessionServices`, `SteamServices`, `StopwatchServices`, `StorageServices`,
 `TelemetryServices` et `TwitchServices`. Chaque service est décrit dans la
 [référence des services](service-reference.md).
 
@@ -266,7 +267,7 @@ donc toujours à ce que PlayerVox OverCrow accepte.
 | `ServiceName`, `CallServiceName`, `SubscribeServiceName`, `GestureServiceName` | Les noms de service : tous, ceux qui répondent une seule fois, les abonnements, et ceux qui demandent une action de l’utilisateur. |
 | `ServiceParamsMap`, `ServiceResultMap` | Les paramètres et le résultat de chaque service. |
 | `ServiceErrorCode`, `ServiceErrorPayload` | Les [codes d’erreur](services.md#erreurs), et la valeur `{ code }` qui en porte un. |
-| `Session`, `Telemetry`, `Fps`, `Stopwatch`, `Media`, `Notes`, `Note`, `NoteItem`, `CreatedNote`, `Score`, `Rating`, `RatingState`, `Review`, `ReviewsState`, `ReviewsPage`, `JournalState`, `JournalPage`, `JournalSession`, `TwitchChat`, `ChatMessage`, `ChatFragment`, `TwitchEvents`, `TwitchEvent`, `AccountStatus`, `GameEvent`, `HttpResponse`, `HttpHeaders` | Les [formes de résultat](result-shapes.md). |
+| `Session`, `Telemetry`, `Fps`, `Stopwatch`, `Media`, `Notes`, `Note`, `NoteItem`, `CreatedNote`, `Score`, `Rating`, `RatingState`, `Review`, `ReviewsState`, `ReviewsPage`, `JournalState`, `JournalPage`, `JournalSession`, `TwitchChat`, `ChatMessage`, `ChatFragment`, `TwitchEvents`, `TwitchEvent`, `SteamEvents`, `SteamEvent`, `AccountStatus`, `GameEvent`, `HttpResponse`, `HttpHeaders` | Les [formes de résultat](result-shapes.md). |
 | `Permission`, `Capability`, `SensitiveCapability`, `CapabilityServices`, `PermissionServices` | Les permissions et les capabilities du manifeste, et les services que chacune autorise. |
 | `AccountGrant` | L’accord d’un compte tiers, `account:<id>` : `hasGrant` le prend, `host.grants` le liste. |
 | `Locale`, `Theme`, `Mode`, `Region`, `NumberFormat`, `DateOrder` | Les valeurs de `host`. |

@@ -364,6 +364,15 @@ mise à jour.
 - **Chaque mise à jour** : `{ state, reason, events }` tout de suite, puis à chaque changement. `state` vaut `live` une fois l'hôte abonné chez Twitch, `off` sinon, avec `reason` `connecting`, `not_connected` (Twitch n'est pas connecté, ou sa connexion n'a pas un scope déclaré) ou `unavailable` (Twitch a refusé ou est injoignable ; l'hôte réessaie). Twitch ne rejoue rien : à chaque `live`, relisez une fois par `http.fetch` ce qui a changé entre-temps, et continuez à lire tant que c'est `off`. `events` répète les 16 derniers événements de l'abonnement, du plus ancien au plus récent, chacun `{ seq, type, at, data }` : les mises à jour sont fusionnées, ne prenez donc que ceux dont le `seq` dépasse le dernier vu ; un trou dans `seq` veut dire que des événements ont été perdus (relisez). `data` est la projection par l'hôte de l'événement de Twitch : chaque champ de la table du type, `null` là où Twitch n'a rien envoyé
 - **Forme** : [`TwitchEvents`](result-shapes.md#twitchevents)
 
+### `steam.events.subscribe`
+
+- **Nature** : abonnement
+- **Exige** : le service `steam` nommé et accordé
+- **Quand l’appeler** : À tout moment
+- **Paramètres** : `steamid` : texte ≤ 17 octets ; `types?` : liste de `event type` ≤ 32
+- **Chaque mise à jour** : `{ state, reason, events }` tout de suite, puis à chaque changement. `state` vaut `live` tant que l'hôte surveille les stats du client Steam sur cet ordinateur, `off` sinon, avec `reason` `connecting`, `not_connected` (Steam n'est pas connecté) ou `unavailable` (aucun client Steam trouvé sur cet ordinateur). Steam ne pousse rien et l'hôte ne rejoue rien : les événements disent seulement quand relire par `http.fetch`, et le widget continue aussi à lire à son rythme (Steam peut tourner sur un autre ordinateur). `events` répète les 16 derniers événements de l'abonnement, du plus ancien au plus récent, chacun `{ seq, type, at, data }` : les mises à jour sont fusionnées, ne prenez donc que ceux dont le `seq` dépasse le dernier vu ; un trou dans `seq` veut dire que des événements ont été perdus (relisez). `stats.saved` : le client Steam a enregistré les stats d'un jeu de ce compte, à chaque succès obtenu et à d'autres moments ; `data` vaut `{ appid }`, `at` l'heure de l'enregistrement. Un seul abonnement par widget à la fois : un autre échoue avec `busy`
+- **Forme** : [`SteamEvents`](result-shapes.md#steamevents)
+
 ### `account.connect`
 
 - **Nature** : appel, à réponse unique

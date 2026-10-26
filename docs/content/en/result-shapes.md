@@ -382,4 +382,25 @@ Live Twitch events of the widget's declared types. `{ state, reason, events }`
 | `state` | `live` \| `off` | `live` while the host is subscribed at Twitch. |
 | `reason` | `connecting` \| `not_connected` \| `unavailable` or `null` | Why the state is `off`; `null` when `live`. |
 | `events` | list of [`TwitchEvent`](#twitchevent) | The latest events, oldest first. |
+
+### `SteamEvent`
+
+One local Steam event. `{ seq, type, at, data }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `seq` | integer | Order of the event in the subscription, from 1, without gaps unless events were dropped. |
+| `type` | `stats.saved` | The type, among those subscribed. |
+| `at` | integer | When the Steam client saved it, in Unix milliseconds of the host's clock, never later than the update. |
+| `data` | JSON | The fields of the type's table: `{ appid }` for `stats.saved`. |
+
+### `SteamEvents`
+
+Local Steam events of the widget's declared types, for the account it names. `{ state, reason, events }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `state` | `live` \| `off` | `live` while the host watches the Steam client's stats on this computer. |
+| `reason` | `connecting` \| `not_connected` \| `unavailable` or `null` | Why the state is `off`; `null` when `live`. |
+| `events` | list of [`SteamEvent`](#steamevent) | The latest events, oldest first. |
 <!-- /generated:result-shapes -->

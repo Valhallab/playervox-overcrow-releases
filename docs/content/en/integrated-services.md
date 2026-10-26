@@ -15,7 +15,7 @@ or pages for another account: it names the service.
 
 <!-- source: docs/content/examples/steam-stats/manifest.json -->
 ```json
-    "accounts": [{ "service": "steam" }],
+    "accounts": [{ "service": "steam", "events": ["stats.saved"] }],
     "network": [
       {
         "origin": "https://api.steampowered.com",
@@ -154,6 +154,61 @@ timers.every(20_000, () => {
 | `channel.poll.begin`, `channel.poll.progress`, `channel.poll.end` | 1 | `channel:read:polls` |
 | `channel.prediction.begin`, `channel.prediction.progress`, `channel.prediction.lock`, `channel.prediction.end` | 1 | `channel:read:predictions` |
 
+## Local events (Steam)
+
+Steam pushes nothing, but the Steam client of the player's computer saves
+each account's stats of a game the moment an achievement unlocks. From
+PlayerVox OverCrow 0.9.0-beta.1, a widget that names Steam can hear of it
+and read the achievements at once instead of waiting for its next read:
+
+<!-- source: docs/content/examples/steam-stats/manifest.json -->
+```json
+    "accounts": [{ "service": "steam", "events": ["stats.saved"] }],
+```
+
+- `events` asks the player nothing more: an event only tells when to read
+  what the widget's routes already read.
+- A version with these events needs the catalog feature `steam-events`:
+  the catalog offers it to OverCrow 0.9.0-beta.1 or later, and an older
+  application keeps the previous version.
+- OverCrow looks at the dates of the Steam client's stats files on this
+  computer, only for the account the widget names and only while a widget
+  listens. It reads nothing in them, and the widget learns the game and
+  the time alone.
+
+`steam.events.subscribe` takes the SteamID64 of the account the widget
+follows and delivers its events:
+
+<!-- source: docs/content/examples/steam-stats/logic.ts -->
+```ts
+  let lastSeq = 0;
+
+  events = steam.events.subscribe({ steamid }, (update) => {
+    if (!update.ok) return;
+    for (const event of update.value.events) {
+      if (event.seq <= lastSeq) continue; // seen in an earlier update
+      lastSeq = event.seq;
+      void load();
+    }
+  });
+```
+
+- `stats.saved` comes at each achievement unlocked and at other times too
+  (a game's start, Steam's own sync, several games in a row): read the
+  achievements again, at most every few seconds, and expect nothing new.
+  Steam's Web API may answer with the old list for a few seconds.
+- `state` is `live` while OverCrow watches the Steam client on this
+  computer, `off` otherwise, with `reason` `connecting`, `not_connected`
+  (Steam is not connected) or `unavailable` (no Steam client found). The
+  player may play on another computer: keep reading at your own pace too.
+- `seq`, `at`, `types` and the test scenario work as for Twitch above;
+  `data` is `{ appid }`. One subscription per widget at a time: another
+  fails with `busy`.
+
+| Type | Version | Data |
+| --- | --- | --- |
+| `stats.saved` | 1 | `appid` |
+
 ## Reference
 
 ### `permissions.accounts` with a service
@@ -164,7 +219,7 @@ timers.every(20_000, () => {
 | `service` | `steam` \| `twitch` | yes | An integrated service of the table: PlayerVox defines its origins, how the secret is sent, its key page or OAuth client and the paths no widget reaches; the user connects it once and every widget that names it shares the connection. The account's `id` is the service's: the permission key is `account:<service>` and the routes name it in `account`. Only `scopes`, `required` and `events` stand beside it. |
 | `scopes` | list of `scope name` ≤ 16 | no | OAuth services only: distinct scopes among those the service offers, all read-only in version 1; default none. |
 | `required` | boolean | no | As for a declared account; default `true`. |
-| `events` | list of `event type` ≤ 32 | no | A service with live events only (Twitch): distinct types of the service's table, each read by a scope among `scopes`; the host subscribes on the user's own channel and `twitch.events.subscribe` delivers them. Not part of the permission's detail: an event reads what its scope already opens. Needs the feature `twitch-events`. |
+| `events` | list of `event type` ≤ 32 | no | A service with live events only (Twitch, Steam): distinct types of the service's table, each read by a scope among `scopes` where it has one. Twitch's come from the user's own channel by `twitch.events.subscribe`; Steam's from the Steam client of the user's computer, for the account the widget names, by `steam.events.subscribe`. Not part of the permission's detail: an event tells what the service's routes already read. Needs the feature `twitch-events` or `steam-events`. |
 <!-- /generated:integrated-service-fields -->
 
 ### The services

@@ -2,7 +2,8 @@
 // integrated Steam service: the player connects Steam once in PlayerVox
 // OverCrow, which adds the key to the requests of the route that names the
 // service. The widget never sees the key.
-import { account, http, initState, ServiceError, storage, timers } from "@overcrow/sdk";
+import { account, http, initState, ServiceError, steam, storage, timers } from "@overcrow/sdk";
+import type { Subscription } from "@overcrow/sdk";
 
 declare module "@overcrow/sdk" {
   interface WidgetState {
@@ -43,9 +44,30 @@ async function load(): Promise<void> {
   }
 }
 
+let events: Subscription | undefined;
+
+// The Steam client of this computer tells when it saves the stats of a game
+// of the account (an achievement unlocked, a game's start): read again at
+// once instead of waiting for the next read.
+function listen(steamid: string): void {
+  events?.cancel();
+  if (!/^\d{17}$/.test(steamid)) return;
+  let lastSeq = 0;
+
+  events = steam.events.subscribe({ steamid }, (update) => {
+    if (!update.ok) return;
+    for (const event of update.value.events) {
+      if (event.seq <= lastSeq) continue; // seen in an earlier update
+      lastSeq = event.seq;
+      void load();
+    }
+  });
+}
+
 export function steamIdTyped(value: string): void {
   state.steamId = value.trim();
   void storage.set({ key: "steamId", value: state.steamId });
+  listen(state.steamId);
   void load();
 }
 
@@ -61,6 +83,7 @@ account.subscribe({ id: "steam" }, (update) => {
 });
 storage.get({ key: "steamId" }).then((saved) => {
   state.steamId = typeof saved === "string" ? saved : "";
+  listen(state.steamId);
   void load();
 });
 timers.every(5 * 60 * 1000, refresh);
