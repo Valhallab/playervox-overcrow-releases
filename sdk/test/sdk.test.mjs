@@ -10,7 +10,7 @@ const settle = () => new Promise((resolve) => setImmediate(resolve));
 const lastCall = () => vm.calls[vm.calls.length - 1];
 
 test("the version and the runtime surface are exported", () => {
-  assert.equal(overcrow.SDK_VERSION, "1.2.0");
+  assert.equal(overcrow.SDK_VERSION, "1.3.0");
   assert.equal(overcrow.RUNTIME_SURFACE, "0.1");
 });
 
@@ -174,15 +174,26 @@ test("http.fetch sends the body raw and decodes the answer", async () => {
     contentType: "application/json",
   });
   assert.equal(lastCall().body, '{"a":1}');
-  lastCall().resolve({ status: 200, contentType: "application/json", body: { ok: true } });
-  assert.deepEqual(await json, { status: 200, contentType: "application/json", body: { ok: true } });
+  lastCall().resolve({
+    status: 429,
+    contentType: "application/json",
+    headers: { "retry-after": "30", "ratelimit-reset": "1700000060" },
+    body: { ok: false },
+  });
+  assert.deepEqual(await json, {
+    status: 429,
+    contentType: "application/json",
+    headers: { "retry-after": "30", "ratelimit-reset": "1700000060" },
+    body: { ok: false },
+  });
 
   const text = overcrow.http.fetch("https://api.example.com/v1/t", { as: "text", body: "hi" });
   assert.deepEqual(lastCall().params.method, "GET");
   assert.equal(lastCall().params.contentType, "text/plain");
   assert.equal(lastCall().body, "hi");
+  // A host older than SDK 1.3 sends no headers: they read as none.
   lastCall().resolve({ status: 204, contentType: null });
-  assert.deepEqual(await text, { status: 204, contentType: null, body: "" });
+  assert.deepEqual(await text, { status: 204, contentType: null, headers: {}, body: "" });
 
   const quoted = overcrow.http.fetch("https://api.example.com/v1/q", {
     as: "bytes",
@@ -196,8 +207,11 @@ test("http.fetch sends the body raw and decodes the answer", async () => {
   const image = overcrow.http.fetch("https://cdn.example.com/a.png", { as: "image" });
   assert.equal(lastCall().body, undefined);
   assert.equal("contentType" in lastCall().params, false);
-  lastCall().resolve({ status: 200, asset: "asset:0000000000000001" });
-  assert.deepEqual(await image, { status: 200, asset: "asset:0000000000000001" });
+  lastCall().resolve({ status: 200, asset: "asset:0000000000000001", headers: { etag: '"7"' } });
+  assert.deepEqual(await image, { status: 200, asset: "asset:0000000000000001", headers: { etag: '"7"' } });
+  const older = overcrow.http.fetch("https://cdn.example.com/b.png", { as: "image" });
+  lastCall().resolve({ status: 200, asset: "asset:0000000000000002" });
+  assert.deepEqual(await older, { status: 200, asset: "asset:0000000000000002", headers: {} });
 
   const denied = overcrow.http.fetch("https://other.example.com/", { as: "json" });
   lastCall().reject({ code: "permission_denied" });

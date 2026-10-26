@@ -1,6 +1,6 @@
 # Référence du SDK
 
-`@overcrow/sdk` 1.2 est l’API de la logique d’un widget PlayerVox OverCrow :
+`@overcrow/sdk` 1.3 est l’API de la logique d’un widget PlayerVox OverCrow :
 l’état, les données de l’hôte, les services, les minuteurs, le dessin, le
 menu d’options, les messages, les journaux et le formatage. Cette page liste
 tous les exports du paquet. [La logique](logic.md) et
@@ -11,7 +11,7 @@ projet créé par `overcrow-widget init` le liste déjà : lancez-y
 `npm install`.
 
 ```sh
-npm install --save-dev --save-exact @overcrow/sdk@1.2.0
+npm install --save-dev --save-exact @overcrow/sdk@1.3.0
 ```
 
 <!-- source: widgets/clock/logic.ts -->
@@ -37,7 +37,7 @@ chaque paramètre et chaque valeur qui sort de la VM.
 
 | Export | Nature | Résumé |
 | --- | --- | --- |
-| `SDK_VERSION` | constante | `"1.2.0"`. |
+| `SDK_VERSION` | constante | `"1.3.0"`. |
 | `RUNTIME_SURFACE` | constante | `"0.1"`, la version de l’interface intégrée de la VM dont ce SDK a besoin. |
 
 ## État et vue
@@ -107,8 +107,9 @@ l’utilisateur.
 | Export | Nature | Résumé |
 | --- | --- | --- |
 | `storage` | espace de noms | `get({ key })`, `set({ key, value })`, `remove({ key })`, `keys()`. Permission `storage`. |
-| `http` | espace de noms | `fetch(url, { as, method?, body?, contentType? })`. Permission `network`. |
+| `http` | espace de noms | `fetch(url, { as, method?, body?, contentType? })`, dont la réponse donne `status`, les `headers` lisibles et le corps. Permission `network`. |
 | `clipboard` | espace de noms | `writeText({ text })`, pendant une action de l’utilisateur. Permission `clipboardWrite`. |
+| `links` | espace de noms | `open({ url })`, pendant une action de l’utilisateur : une page d’un site déclaré, dans le navigateur de l’utilisateur. Permission `links`. |
 | `gameEvents` | espace de noms | `subscribe(listener)`. Permission `gameEvents`. |
 | `session` | espace de noms | `subscribe(listener)`. Capability `session.read`. |
 | `telemetry` | espace de noms | `subscribe(listener)`. Capability `telemetry.read`. |
@@ -172,7 +173,7 @@ donne `null`, `""` ou un `ArrayBuffer` vide.
 
 Les types des autres espaces de noms sont générés à partir du schéma :
 `AccountServices`, `ClipboardServices`, `FpsServices`, `GameEventsServices`,
-`JournalServices`, `MediaServices`, `NotesServices`, `PlayervoxServices`,
+`JournalServices`, `LinksServices`, `MediaServices`, `NotesServices`, `PlayervoxServices`,
 `SessionServices`, `StopwatchServices`, `StorageServices`,
 `TelemetryServices` et `TwitchServices`. Chaque service est décrit dans la
 [référence des services](service-reference.md).
@@ -265,7 +266,7 @@ donc toujours à ce que PlayerVox OverCrow accepte.
 | `ServiceName`, `CallServiceName`, `SubscribeServiceName`, `GestureServiceName` | Les noms de service : tous, ceux qui répondent une seule fois, les abonnements, et ceux qui demandent une action de l’utilisateur. |
 | `ServiceParamsMap`, `ServiceResultMap` | Les paramètres et le résultat de chaque service. |
 | `ServiceErrorCode`, `ServiceErrorPayload` | Les [codes d’erreur](services.md#erreurs), et la valeur `{ code }` qui en porte un. |
-| `Session`, `Telemetry`, `Fps`, `Stopwatch`, `Media`, `Notes`, `Note`, `NoteItem`, `CreatedNote`, `Score`, `Rating`, `RatingState`, `Review`, `ReviewsState`, `ReviewsPage`, `JournalState`, `JournalPage`, `JournalSession`, `TwitchChat`, `ChatMessage`, `ChatFragment`, `TwitchEvents`, `TwitchEvent`, `AccountStatus`, `GameEvent`, `HttpResponse` | Les [formes de résultat](result-shapes.md). |
+| `Session`, `Telemetry`, `Fps`, `Stopwatch`, `Media`, `Notes`, `Note`, `NoteItem`, `CreatedNote`, `Score`, `Rating`, `RatingState`, `Review`, `ReviewsState`, `ReviewsPage`, `JournalState`, `JournalPage`, `JournalSession`, `TwitchChat`, `ChatMessage`, `ChatFragment`, `TwitchEvents`, `TwitchEvent`, `AccountStatus`, `GameEvent`, `HttpResponse`, `HttpHeaders` | Les [formes de résultat](result-shapes.md). |
 | `Permission`, `Capability`, `SensitiveCapability`, `CapabilityServices`, `PermissionServices` | Les permissions et les capabilities du manifeste, et les services que chacune autorise. |
 | `AccountGrant` | L’accord d’un compte tiers, `account:<id>` : `hasGrant` le prend, `host.grants` le liste. |
 | `Locale`, `Theme`, `Mode`, `Region`, `NumberFormat`, `DateOrder` | Les valeurs de `host`. |

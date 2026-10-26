@@ -35,7 +35,7 @@ image.
 
 `@overcrow/sdk/testing` est fourni avec le SDK : `npm install` dans un
 projet créé par `overcrow-widget init`, sinon
-`npm install --save-dev --save-exact @overcrow/sdk@1.2.0`.
+`npm install --save-dev --save-exact @overcrow/sdk@1.3.0`.
 
 `installRuntime()` met en place une doublure de PlayerVox OverCrow avant
 l’import de la logique : les appels de service renvoient des promesses que

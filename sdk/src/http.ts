@@ -1,6 +1,6 @@
 import { runtime } from "./runtime.js";
 import { toServiceError } from "./services.js";
-import type { AssetHandle, JsonValue, ServiceParamsMap } from "./generated/schema.js";
+import type { AssetHandle, HttpHeaders, JsonValue, ServiceParamsMap } from "./generated/schema.js";
 
 /** How `fetch` returns the response body. */
 export type BodyType = ServiceParamsMap["http.fetch"]["as"];
@@ -34,13 +34,21 @@ export interface BodyTypes {
   readonly bytes: ArrayBuffer;
 }
 
-/** The response of {@link HttpServices.fetch}. */
+/**
+ * The response of {@link HttpServices.fetch}. `headers` holds the response
+ * headers a widget may read (`retry-after`, the rate limit fields, `date`,
+ * `etag`, `last-modified`, `cache-control`, `expires`, `age`), by lowercase
+ * name, when the response has them; it is empty with a PlayerVox OverCrow
+ * older than SDK 1.3.
+ */
 export type FetchResponse<A extends BodyType> = A extends "image"
-  ? { readonly status: number; readonly asset: AssetHandle }
+  ? { readonly status: number; readonly asset: AssetHandle; readonly headers: HttpHeaders }
   : A extends keyof BodyTypes
     ? {
         readonly status: number;
         readonly contentType: string | null;
+        /** Response headers a widget may read, by lowercase name. */
+        readonly headers: HttpHeaders;
         /** Decoded body; `null`, `""` or an empty buffer when the response has none. */
         readonly body: BodyTypes[A];
       }
@@ -63,7 +71,8 @@ const EMPTY: { readonly [A in keyof BodyTypes]: () => BodyTypes[A] } = {
  *
  * @example
  * ```ts
- * const { status, body } = await http.fetch("https://api.example.com/v1/weather", { as: "json" });
+ * const { status, headers, body } = await http.fetch("https://api.example.com/v1/weather", { as: "json" });
+ * // After a 429, wait as the server asks: headers["retry-after"] (seconds).
  * ```
  */
 function fetch<A extends BodyType>(
@@ -82,13 +91,17 @@ function fetch<A extends BodyType>(
     .call("http.fetch", params, text)
     .then(
       (value) => {
+        // A host older than SDK 1.3 sends no `headers`.
+        const headers = (value as { headers?: HttpHeaders }).headers ?? {};
         if (as === "image") {
-          return value as FetchResponse<A>;
+          const image = value as { status: number; asset: AssetHandle };
+          return { status: image.status, asset: image.asset, headers } as FetchResponse<A>;
         }
         const response = value as { status: number; contentType: string | null; body?: unknown };
         return {
           status: response.status,
           contentType: response.contentType,
+          headers,
           body: response.body ?? EMPTY[as as keyof BodyTypes](),
         } as FetchResponse<A>;
       },

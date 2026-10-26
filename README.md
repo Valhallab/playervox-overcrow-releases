@@ -70,7 +70,7 @@ MCP server `@overcrow/mcp`
 | Path | Content |
 | --- | --- |
 | `crates/` | The public widget contract, shared with PlayerVox OverCrow at a pinned revision: `overcrow-widget-schema` (schema and validators), `overcrow-widget-format` (`view.ocml` compiler, `style.ocss` parser), `overcrow-widget-devchannel` ([development channel](docs/dev-channel.md)), `overcrow-widget-scenario` ([test scenarios](https://overcrow.playervox.com/docs/en/testing/)) |
-| `sdk/` | `@overcrow/sdk` 1.2, the TypeScript API of widget logic, with types generated from the schema ([guide](https://overcrow.playervox.com/docs/en/logic/), [reference](https://overcrow.playervox.com/docs/en/sdk/)) |
+| `sdk/` | `@overcrow/sdk` 1.3, the TypeScript API of widget logic, with types generated from the schema ([guide](https://overcrow.playervox.com/docs/en/logic/), [reference](https://overcrow.playervox.com/docs/en/sdk/)) |
 | `cli/` | `overcrow-widget`: `init`, `check`, `package`, `inspect`, `dev`, `doctor`, `test`, `admit` ([guide](https://overcrow.playervox.com/docs/en/cli/), [internals](docs/cli.md)) |
 | `mcp/` | `@overcrow/mcp`, the MCP server that lets an AI assistant create, check, test, audit and package widgets ([guide](https://overcrow.playervox.com/docs/en/mcp/), [README](mcp/README.md)) |
 | `templates/` | The templates of `overcrow-widget init`: blank, counter, list, chart |

@@ -7,6 +7,23 @@ change between betas; 1.0.0 will freeze them under semantic versioning.
 The CLI's version enters no package: a package depends only on the
 widget's sources and the embedded SDK.
 
+## Unreleased
+
+- `permissions.links` declares the sites a widget opens in the player's
+  browser with `links.open`. `check` and `admit` accept it and refuse a
+  rule outside its grammar, or one that repeats or covers another
+  (`manifest.link_rule`), links beside a sensitive capability
+  (`manifest.sensitive_egress`), and, with an account, a link off the
+  account's service (`manifest.account_link`). `admit` and `inspect` list
+  the sites, and the permission key `link:<origin><pathPrefix>` asks a
+  justification at `submit`. A manifest with links needs the catalog
+  feature `open-links`; the headless runtime this CLI pins must know
+  `links.open` to run a widget that calls it.
+- A test scenario's `http` fixture may give `response.headers`, the
+  response headers `http.fetch` passes on to a widget.
+- It embeds `@overcrow/sdk` 1.3.0: `links.open`, the `headers` of
+  `http.fetch` answers and the service error `review_removed_by_moderation`.
+
 ## 1.0.0-beta.8
 
 Released in the creator tools ZIPs of PlayerVox OverCrow 0.8.1-beta.1's

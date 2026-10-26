@@ -7,9 +7,25 @@ version it was built with, so a new SDK never changes a published widget.
 An incompatible change would be 2.0.0. Every 1.x release needs the VM's
 runtime surface 0.1, which OverCrow keeps for widget API v1.
 
+## 1.3.0
+
+Not released yet. Ships with the release of PlayerVox OverCrow that opens
+links for widgets:
+
+- `links.open({ url })` (`links`): opens a page of a site the manifest
+  declares in `permissions.links`, in the user's browser, during a user
+  action. PlayerVox OverCrow shows the address and asks the user the first
+  time for each site.
+- `http.fetch` answers give `headers`: the response headers a widget may
+  read (`retry-after`, the rate limit fields, `date`, `etag`,
+  `last-modified`, `cache-control`, `expires`, `age`), by lowercase name.
+  It is empty with an older PlayerVox OverCrow. The `HttpHeaders` type.
+- The service error `review_removed_by_moderation`: PlayerVox's moderation
+  removed the review a rating form publishes.
+
 ## 1.2.0
 
-Not released yet. Ships with PlayerVox OverCrow 0.8.1-beta.1, the first
+Ships with PlayerVox OverCrow 0.8.1-beta.1, the first
 release that delivers live Twitch events to widgets:
 
 - `twitch.events.subscribe` (`twitch.events`): the live events of the

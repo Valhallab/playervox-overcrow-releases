@@ -33,7 +33,7 @@ is "Increase", then checks the new text and image.
 
 `@overcrow/sdk/testing` comes with the SDK: `npm install` in a project made
 by `overcrow-widget init`, otherwise
-`npm install --save-dev --save-exact @overcrow/sdk@1.2.0`.
+`npm install --save-dev --save-exact @overcrow/sdk@1.3.0`.
 
 `installRuntime()` puts a stand-in for PlayerVox OverCrow in place before
 the logic is imported: service calls return promises that your test settles,

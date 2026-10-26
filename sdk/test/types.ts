@@ -110,6 +110,18 @@ export async function checks(): Promise<void> {
   });
   void overcrow.account.connect({ id: "steam" });
 
+  void overcrow.links.open({ url: "https://runlog.example/runs/1" });
+  // @ts-expect-error the address is a parameter object's member
+  void overcrow.links.open("https://runlog.example/runs/1");
+  void overcrow.http.fetch("https://api.example.com/v1/x", { as: "json" }).then((response) => {
+    const wait: string | undefined = response.headers["retry-after"];
+    // @ts-expect-error a header the response never gives a widget
+    const cookie = response.headers["set-cookie"];
+    void [wait, cookie];
+  });
+  const moderated: overcrow.ServiceErrorCode = "review_removed_by_moderation";
+  void moderated;
+
   const seconds: boolean = overcrow.option("seconds", true);
   overcrow.timers.atEach("minute", () => {}).cancel();
   const label: string = overcrow.formatNumber(1234.5) + overcrow.t("key", { n: 1 });
