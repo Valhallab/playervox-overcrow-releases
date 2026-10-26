@@ -92,10 +92,17 @@
             "min": 1,
             "max": 99999999,
             "required": true
+          },
+          "l": {
+            "type": "enum",
+            "values": [
+              "english",
+              "french"
+            ]
           }
         },
         "account": "steam",
-        "maxResponseBytes": 1048576
+        "maxResponseBytes": 3145728
       },
       {
         "origin": "https://api.steampowered.com",
@@ -118,7 +125,7 @@
           }
         },
         "account": "steam",
-        "maxResponseBytes": 2097152
+        "maxResponseBytes": 3145728
       },
       {
         "origin": "https://api.steampowered.com",
@@ -132,7 +139,7 @@
             "required": true
           }
         },
-        "maxResponseBytes": 1048576
+        "maxResponseBytes": 2097152
       },
       {
         "origin": "https://shared.akamai.steamstatic.com",
@@ -182,6 +189,9 @@
       }
     ],
     "storage": true
+  },
+  "vm": {
+    "heapMiB": 32
   },
   "wrapper": {
     "menu": [

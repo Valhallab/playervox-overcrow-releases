@@ -116,6 +116,17 @@ test("player achievements, the schema and the rarity", () => {
   assert.deepEqual([...rarity], [["A", 4.2], ["B", 15.5]]);
 });
 
+test("player achievements asked with l: names and descriptions, nothing hidden, no icon", () => {
+  assert.deepEqual(logic.namedItem({ apiname: "A1", achieved: 1, unlocktime: 5, name: "Crown of Ashes", description: "Claim the throne" }), {
+    api: "A1", name: "Crown of Ashes", desc: "Claim the throne", hidden: false, icon: "", iconGray: "",
+  });
+  // Without a name, the API name; without a description, none.
+  assert.deepEqual(logic.namedItem({ apiname: "A2", achieved: 0, unlocktime: 0 }), { api: "A2", name: "A2", desc: "", hidden: false, icon: "", iconGray: "" });
+  assert.equal(logic.namedItem({ apiname: "", name: "x" }), null);
+  assert.equal(logic.namedItem({ name: "x" }), null);
+  assert.equal(logic.namedItem("x"), null);
+});
+
 test("images are asked from the declared hosts only", () => {
   const file = `${"c".repeat(40)}.jpg`;
   // Every form Steam gives: old and current paths on any host, or the file alone.

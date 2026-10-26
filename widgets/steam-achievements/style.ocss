@@ -508,6 +508,36 @@
   font-size: 14px;
   color: var(--color-success);
 }
+/* Thousands of achievements: a search above the list, more rows below. */
+.psearch {
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+.pick-more {
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+}
+.pick-more:hover,
+.pick-more:focus {
+  background: var(--color-surface-hover);
+}
+.pick-more-icon {
+  font-size: 14px;
+  color: var(--color-accent);
+}
+.pick-more-text {
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  color: var(--color-accent);
+}
+.pick-note {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
 .pick-actions {
   justify-content: end;
   gap: var(--space-3);

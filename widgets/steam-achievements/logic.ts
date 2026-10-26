@@ -53,6 +53,13 @@ const IMAGE_RETRY_AFTER = 60 * MINUTE;
 export const MAX_TRACKED = 3;
 /** Games whose tracked achievements are kept, the most recently changed. */
 export const TRACKED_GAMES = 20;
+/** Rows the checklist adds at a time. */
+export const PICK_PAGE = 50;
+/**
+ * Missing rows the checklist shows at most: about ten elements a row, well
+ * within the view's 4,096; a search reaches the others.
+ */
+export const PICK_MAX = 200;
 /** Backoff of a 5xx or a 429, minutes: then 10 min. */
 const BACKOFF_MINUTES = [1, 2, 4, 8, 10] as const;
 
@@ -187,6 +194,15 @@ export function playerItem(entry: JsonValue): [string, number] | null {
   const api = text(item?.["apiname"]);
   if (api === null || whole(item?.["achieved"]) !== 1) return null;
   return [api, whole(item?.["unlocktime"]) ?? 0];
+}
+
+/** One achievement of S4 asked with `l`: its name and description, as a list entry. */
+export function namedItem(entry: JsonValue): SchemaAch | null {
+  const item = object(entry);
+  const api = text(item?.["apiname"]);
+  if (api === null || api === "") return null;
+  // Steam says neither which are hidden nor their icons here.
+  return { api, name: text(item?.["name"]) || api, desc: text(item?.["description"]) ?? "", hidden: false, icon: "", iconGray: "" };
 }
 
 /** S4: unlock time (Unix seconds) of each unlocked achievement by API name. */
@@ -506,7 +522,7 @@ export interface Lists {
   recent: Ach[];
   /** Missing in the chosen order (15 at most: 12 rows and the tracked ones). */
   missing: Ach[];
-  /** The picker's list, only while it is open: the tracked ones, then 50 missing at most. */
+  /** The picker's list, only while it is open: the tracked ones, then the missing ones shown so far. */
   pick: Ach[];
 }
 
@@ -528,6 +544,13 @@ declare module "@overcrow/sdk" {
     /** IDs tracked in the shown game, in the order they were added. */
     tracked: string[];
     picking: boolean;
+    /** Missing ones the checklist could still add. */
+    pickLeft: number;
+    /** The checklist shows its most rows: a search reaches the others. */
+    pickCapped: boolean;
+    /** The checklist's search, and whether it has one (more than a page missing). */
+    pickQuery: string;
+    pickSearch: boolean;
     stale: Stale;
     /** When the shown data was last read, Unix ms. */
     readAt: number;
@@ -553,6 +576,10 @@ export const state = initState({
   lists: { latest: null, tracked: [], recent: [], missing: [], pick: [] } as Lists,
   tracked: [] as string[],
   picking: false,
+  pickLeft: 0,
+  pickCapped: false,
+  pickQuery: "",
+  pickSearch: false,
   stale: "" as Stale,
   readAt: 0,
   fresh: {} as Record<string, number>,
@@ -593,6 +620,15 @@ const model = {
   unlocked: null as Map<string, number> | null,
   rarity: new Map<number, { at: number; values: Map<string, number> }>(),
   schemas: new Map<string, SchemaEntry>(),
+  /**
+   * Games whose list exceeded the schema route's bound, and when: their
+   * names come from S4 asked with `l`; the schema is tried again a day later.
+   */
+  tooLarge: new Map<number, number>(),
+  /** Achievements S4 listed for the shown game, while its list is not read. */
+  playerTotal: 0,
+  /** Their API names, the last resort for names. */
+  playerIds: [] as string[],
   icons: new Map<number, string>(),
   /** Tracked IDs by game, the most recently changed game last. */
   tracked: new Map<number, string[]>(),
@@ -640,6 +676,8 @@ type Outcome =
   | { kind: "unreachable" }
   | { kind: "quota" }
   | { kind: "server" }
+  /** The answer is larger than the route's bound (`maxResponseBytes`). */
+  | { kind: "too-large" }
   /** The host's own network budget is full (`busy`): no read happened. */
   | { kind: "busy" }
   | { kind: "stop" };
@@ -680,6 +718,7 @@ async function call(
     if (code === "account_refused" || code === "not_connected" || code === "permission_denied") return { kind: "stop" };
     if (code === "encoding_denied" || code === "content_type_denied") return { kind: "server" };
     if (code === "busy") return { kind: "busy" };
+    if (code === "response_body_limit") return { kind: "too-large" };
     return { kind: "unreachable" };
   }
 }
@@ -692,7 +731,7 @@ function failed(outcome: Outcome, now: number): void {
     model.retryAt = now + MINUTE;
     return;
   }
-  if (outcome.kind === "quota" || outcome.kind === "server" || (outcome.kind === "status" && outcome.status >= 500)) {
+  if (outcome.kind === "quota" || outcome.kind === "server" || outcome.kind === "too-large" || (outcome.kind === "status" && outcome.status >= 500)) {
     model.failures += 1;
     model.retryAt = now + backoff(model.failures);
     state.stale = outcome.kind === "quota" ? "quota" : "unreachable";
@@ -825,49 +864,41 @@ async function read(): Promise<void> {
   if (appid !== model.appid) switchGame(appid);
 
   const lang = language();
-  const found = await ensureSchema(appid, lang, now);
+  // A large list (thousands of achievements) takes a while to read in
+  // slices: the player's achievements first, for the count and the bar.
+  let early: "done" | "hidden" | Outcome = "done";
+  const beforeSlices = async (): Promise<void> => {
+    early = await playerStep(appid, now, stopped, null);
+    if (early === "done" && (model.unlocked !== null || !model.readable)) showGame(now);
+  };
+  let found = await ensureSchema(appid, lang, now, beforeSlices);
+  // Beyond the schema's bound: the names from S4 asked with `l`, a large
+  // answer too, after the count.
+  if (found === TOO_LARGE) {
+    if (model.unlocked === null) await beforeSlices();
+    found = early === "done" ? await namedList(appid, lang, now) : null;
+  }
+  const step = early as "done" | "hidden" | Outcome;
+  if (step === "hidden") return hide("details", now);
+  if (step !== "done") return failed(step, now);
   if (found !== null && "kind" in found) return failed(found, now);
   // In another language, the English list serves until its own arrives.
   const schema = found ?? model.schemas.get(schemaKey(appid, "english"));
-  if (schema === undefined) return;
+  if (schema === undefined) {
+    // Not read yet (once a minute at most): what is known stays shown.
+    if (state.phase === "game") render();
+    return;
+  }
   if (model.gameName === "" && schema.gameName !== "") model.gameName = schema.gameName;
+  // The list is read: the API names kept as a last resort are no longer needed.
+  model.playerIds = [];
+  // A game without achievements: Steam's refusal of S4 says nothing more.
+  if (schema.list.length === 0) model.readable = true;
 
   if (schema.list.length > 0) {
-    // Refused (hidden details, not readable): asked again every 10 minutes,
-    // never in a loop; the first read of a game at once.
-    const playerEvery = model.playing && model.readable && model.hidden === "" ? MINUTE : OUT_OF_GAME_EVERY;
-    const playerDue = stopped || model.readPlayer === 0 || now - model.readPlayer >= playerEvery - TICK_SLACK;
-    if (playerDue && canCall("player", now)) {
-      // Without `l`: names come from the schema, the answer stays small.
-      const playerAnswer = await call("player", { steamid: model.steamid, appid }, "player", now);
-      const refused = playerAnswer.kind === "ok" || playerAnswer.kind === "status" ? refusal(playerAnswer.status, playerAnswer.body) : null;
-      // The key works (S2 just answered). Steam named this game as running,
-      // which it does only with public game details: the game itself is not
-      // readable (not owned…). A game guessed from the last ones played is
-      // one the player owns: Steam hides the game details, and the game is
-      // not shown, since it may not be the one running.
-      if (refused === "hidden" && !model.playing) {
-        model.readPlayer = now;
-        return hide("details", now);
-      }
-      if (refused !== null) {
-        model.readable = false;
-      } else if (playerAnswer.kind !== "ok") {
-        return failed(playerAnswer, now);
-      } else {
-        const unlocked = await unlockedOf(playerAnswer);
-        if (unlocked === null) return failed({ kind: "server" }, now);
-        markNew(unlocked, now);
-        model.unlocked = unlocked;
-        // An achievement the stored list does not know: the game was
-        // updated; its list is read again.
-        const known = new Set(schema.list.map((entry) => entry.api));
-        if ([...unlocked.keys()].some((id) => !known.has(id))) forgetSchema(appid);
-        model.readable = true;
-      }
-      reveal();
-      model.readPlayer = now;
-    }
+    const step = await playerStep(appid, now, stopped, schema);
+    if (step === "hidden") return hide("details", now);
+    if (step !== "done") return failed(step, now);
   }
   // Still hidden since the last refusal (asked again in 10 minutes).
   if (model.hidden !== "") return hide(model.hidden, now);
@@ -887,16 +918,130 @@ async function read(): Promise<void> {
   void saveSnapshot();
 }
 
+/** Shows the game as known so far: the count and the bar before the names. */
+function showGame(now: number): void {
+  succeeded(now);
+  if (model.hidden !== "") return;
+  state.phase = "game";
+  render();
+}
+
+/**
+ * S4 of the shown game when due: the unlocked achievements, or Steam's
+ * refusal. `schema` is the game's list, `null` while it is not read.
+ */
+async function playerStep(appid: number, now: number, stopped: boolean, schema: SchemaEntry | null): Promise<"done" | "hidden" | Outcome> {
+  // Refused (hidden details, not readable): asked again every 10 minutes,
+  // never in a loop; the first read of a game at once.
+  const playerEvery = model.playing && model.readable && model.hidden === "" ? MINUTE : OUT_OF_GAME_EVERY;
+  const playerDue = stopped || model.readPlayer === 0 || now - model.readPlayer >= playerEvery - TICK_SLACK;
+  if (!playerDue || !canCall("player", now)) return "done";
+  // Without `l`: names come from the schema, the answer stays small.
+  const playerAnswer = await call("player", { steamid: model.steamid, appid }, "player", now);
+  const refused = playerAnswer.kind === "ok" || playerAnswer.kind === "status" ? refusal(playerAnswer.status, playerAnswer.body) : null;
+  // The key works (S2 just answered). Steam named this game as running,
+  // which it does only with public game details: the game itself is not
+  // readable (not owned…). A game guessed from the last ones played is
+  // one the player owns: Steam hides the game details, and the game is
+  // not shown, since it may not be the one running.
+  if (refused === "hidden" && !model.playing) {
+    model.readPlayer = now;
+    return "hidden";
+  }
+  if (refused !== null) {
+    model.readable = false;
+  } else if (playerAnswer.kind !== "ok") {
+    return playerAnswer;
+  } else {
+    const read = await playerOf(playerAnswer, schema === null);
+    if (read === null) return { kind: "server" };
+    markNew(read.unlocked, now);
+    model.unlocked = read.unlocked;
+    if (schema === null) {
+      model.playerTotal = read.total;
+      model.playerIds = read.ids;
+    } else {
+      // An achievement the stored list does not know: the game was
+      // updated; its list is read again.
+      const known = new Set(schema.list.map((entry) => entry.api));
+      if ([...read.unlocked.keys()].some((id) => !known.has(id))) forgetSchema(appid);
+    }
+    model.readable = true;
+  }
+  reveal();
+  model.readPlayer = now;
+  return "done";
+}
+
+/**
+ * The list of a game beyond the schema's bound, from S4 asked with `l`
+ * (names and descriptions, no icons, nothing said hidden); beyond its own
+ * bound, the API names S4 gave. Kept in memory for the session.
+ */
+async function namedList(appid: number, lang: string, now: number): Promise<SchemaEntry | null | Outcome> {
+  const key = `player:${lang}`;
+  if (!canCall(key, now)) return null;
+  const answer = await call("player", { steamid: model.steamid, appid, l: lang }, key, now);
+  let list: SchemaAch[] | null = null;
+  if (answer.kind === "ok") {
+    list = [];
+    const into = list;
+    const ok = answer.text === ""
+      ? Array.isArray(object(object(answer.body)?.["playerstats"])?.["achievements"])
+      : (await readItems(answer.text, "achievements", (entry) => {
+          const item = namedItem(entry);
+          if (item !== null) into.push(item);
+        })) === "read";
+    if (answer.text === "") {
+      const items = object(object(answer.body)?.["playerstats"])?.["achievements"];
+      if (Array.isArray(items)) for (const entry of items) {
+        const item = namedItem(entry);
+        if (item !== null) into.push(item);
+      }
+    }
+    if (!ok) list = null;
+  } else if (answer.kind === "too-large" && model.playerIds.length > 0) {
+    list = model.playerIds.map((api) => ({ api, name: api, desc: "", hidden: false, icon: "", iconGray: "" }));
+  } else if (answer.kind === "status" && answer.status < 500) {
+    // Refused: S4 without `l` says why, at its next read.
+    return null;
+  } else if (answer.kind !== "too-large") {
+    return answer;
+  }
+  if (list === null) return answer.kind === "too-large" ? null : { kind: "server" };
+  const schema: SchemaEntry = { list, gameName: "" };
+  model.schemas.set(schemaKey(appid, lang), schema);
+  model.playerIds = [];
+  return schema;
+}
+
+/** A game whose list exceeded the schema's bound within a day. */
+const TOO_LARGE = "too-large";
+function knownTooLarge(appid: number, now: number): boolean {
+  const at = model.tooLarge.get(appid);
+  return at !== undefined && now - at < RARITY_EVERY - TICK_SLACK;
+}
+
 /**
  * The achievements of `appid` in `lang`: from memory, storage, or Steam
- * (once a minute at most); `null` when not read yet, or the failure.
+ * (once a minute at most); `null` when not read yet, `TOO_LARGE` beyond the
+ * route's bound (tried again a day later, never said), or the failure.
  */
-async function ensureSchema(appid: number, lang: string, now: number): Promise<SchemaEntry | null | Outcome> {
+async function ensureSchema(appid: number, lang: string, now: number, beforeSlices?: () => Promise<void>): Promise<SchemaEntry | null | Outcome | typeof TOO_LARGE> {
   const known = model.schemas.get(schemaKey(appid, lang)) ?? (await loadSchema(appid, lang));
   if (known !== null && known !== undefined) return known;
+  if (knownTooLarge(appid, now)) return TOO_LARGE;
   // One list per game and language: another language is another request.
   if (!canCall(`schema:${lang}`, now)) return null;
   const answer = await call("schema", { appid, l: lang }, `schema:${lang}`, now);
+  if (answer.kind === "too-large") {
+    // A handful of games at most: the oldest goes past 32.
+    model.tooLarge.delete(appid);
+    model.tooLarge.set(appid, now);
+    if (model.tooLarge.size > 32) model.tooLarge.delete(model.tooLarge.keys().next().value ?? 0);
+    return TOO_LARGE;
+  }
+  model.tooLarge.delete(appid);
   let schema: SchemaEntry;
   if (answer.kind === "status" && answer.status < 500) {
     // A game without stats can answer 400 (or 403) for its schema.
@@ -904,6 +1049,7 @@ async function ensureSchema(appid: number, lang: string, now: number): Promise<S
   } else if (answer.kind !== "ok") {
     return answer;
   } else {
+    if (answer.text !== "" && beforeSlices !== undefined) await beforeSlices();
     const read = await schemaOf(answer, appid);
     if (read === null) return { kind: "server" };
     schema = read;
@@ -939,17 +1085,29 @@ async function schemaOf(answer: Ok, appid: number): Promise<SchemaEntry | null> 
   return ok ? { list, gameName } : null;
 }
 
-/** S4 at once, or in slices. */
-async function unlockedOf(answer: Ok): Promise<Map<string, number> | null> {
-  if (answer.text === "") return parsePlayerAchievements(answer.body);
+interface PlayerRead { unlocked: Map<string, number>; total: number; ids: string[] }
+
+/** S4 at once, or in slices: the unlocked ones, and all of them when `withIds`. */
+async function playerOf(answer: Ok, withIds: boolean): Promise<PlayerRead | null> {
+  const read: PlayerRead = { unlocked: new Map(), total: 0, ids: [] };
+  const each = (entry: JsonValue): void => {
+    const api = text(object(entry)?.["apiname"]);
+    if (api === null) return;
+    read.total += 1;
+    if (withIds) read.ids.push(api);
+    const pair = playerItem(entry);
+    if (pair !== null) read.unlocked.set(pair[0], pair[1]);
+  };
+  if (answer.text === "") {
+    const unlocked = parsePlayerAchievements(answer.body);
+    if (unlocked === null) return null;
+    const list = object(object(answer.body)?.["playerstats"])?.["achievements"];
+    if (Array.isArray(list)) for (const entry of list) each(entry);
+    return read;
+  }
   // `success` closes the answer, after the achievements.
   if (!/"success":\s*true/.test(answer.text.slice(-256))) return null;
-  const unlocked = new Map<string, number>();
-  const ok = (await readItems(answer.text, "achievements", (entry) => {
-    const pair = playerItem(entry);
-    if (pair !== null) unlocked.set(pair[0], pair[1]);
-  })) === "read";
-  return ok ? unlocked : null;
+  return (await readItems(answer.text, "achievements", each)) === "read" ? read : null;
 }
 
 /** S6 at once, or in slices. */
@@ -972,6 +1130,8 @@ function switchGame(appid: number): void {
   if (images.failedAt.size > 256) images.failedAt.clear();
   model.appid = appid;
   model.unlocked = null;
+  model.playerTotal = 0;
+  model.playerIds = [];
   model.readPlayer = 0;
   model.readable = true;
   state.fresh = {};
@@ -1039,7 +1199,9 @@ function render(): void {
     namedFrom = schema;
     nameVersion += 1;
   }
-  const hasAch = list.length > 0;
+  // Not read yet: the count S4 gave, names to come.
+  const total = list.length > 0 ? list.length : schema === undefined ? model.playerTotal : 0;
+  const hasAch = total > 0;
   state.game = {
     appid,
     name: model.gameName || schema?.gameName || "",
@@ -1049,8 +1211,8 @@ function render(): void {
     readable: model.readable,
     known: schema !== undefined,
     hasAch,
-    unlocked: hasAch ? list.reduce((count, entry) => count + (unlocked.has(entry.api) ? 1 : 0), 0) : 0,
-    total: hasAch ? list.length : 0,
+    unlocked: list.length > 0 ? list.reduce((count, entry) => count + (unlocked.has(entry.api) ? 1 : 0), 0) : hasAch ? unlocked.size : 0,
+    total,
   };
   // An achievement the game no longer lists is no longer tracked.
   const ids = model.tracked.get(appid) ?? [];
@@ -1430,8 +1592,42 @@ export function toggleTrack(id: string): void {
   compute();
   void loadImages();
 }
+/** Opens the checklist: the tracked ones, then the first `PICK_PAGE` missing. */
+export function openPick(): void {
+  if (state.game === null || !state.game.hasAch || !state.game.known) return;
+  pickOrder = null;
+  pickRows = PICK_PAGE;
+  state.pickQuery = "";
+  state.pickSearch = state.game.total - state.game.unlocked > PICK_PAGE;
+  state.picking = true;
+  compute();
+  void loadImages();
+}
+/** `PICK_PAGE` more missing rows at the end of the checklist. */
+export function showMorePicks(): void {
+  if (!state.picking || state.pickLeft === 0 || pickMissing >= PICK_MAX) return;
+  pickRows += PICK_PAGE;
+  compute();
+  void loadImages();
+}
 export function closePick(): void {
   state.picking = false;
+}
+/** The checklist's search: names as sorted by name, accents and case aside. */
+export function pickTyped(value: string): void {
+  if (!state.picking) return;
+  state.pickQuery = value.slice(0, 64);
+  pickOrder = null;
+  pickRows = PICK_PAGE;
+  compute();
+  void loadImages();
+}
+function pickMatcher(): (a: Ach) => boolean {
+  const query = sortKey(state.pickQuery.trim());
+  if (query === "") return () => true;
+  // A hidden achievement matches by what is shown of it, never its name.
+  const keys = sortKeys();
+  return (a) => (keys.get(a.id) ?? sortKey(achName(a))).includes(query);
 }
 
 // ---------------------------------------------------------------------------
@@ -1462,12 +1658,7 @@ onHost((changed) => {
 });
 
 onMenu((row) => {
-  if (row === "track" && state.game !== null && state.game.hasAch) {
-    pickOrder = [];
-    state.picking = true;
-    compute();
-    void loadImages();
-  }
+  if (row === "track") openPick();
   if (row === "change-profile") openProfile();
 });
 
@@ -1560,13 +1751,13 @@ export function countText(g: GameView, v: number): string {
   return missingOnly(v) ? t("missing-count", { count: num(g.total - g.unlocked) }) : "";
 }
 export function muted(g: GameView): string {
-  if (!g.known) return t("loading");
-  return g.readable ? t("no-achievements") : t("not-readable");
+  if (!g.readable) return t("not-readable");
+  return g.known ? t("no-achievements") : t("loading");
 }
 /** Achievements refused: where to check the game details, where there is room. */
 export function showFix(g: GameView, v: number): boolean {
   const shown = layout(v);
-  return g.known && !g.readable && (shown === "standard" || shown === "full");
+  return !g.readable && (shown === "standard" || shown === "full");
 }
 
 /** The hidden state's texts: what Steam hides, and where to make it public. */
@@ -1649,12 +1840,30 @@ function trackedOf(ids: readonly string[]): Ach[] {
  * order is set when it opens and holds while it is open: a ticked row stays
  * under the pointer.
  */
-let pickOrder: string[] = [];
-function pickOf(missingList: Ach[], before: (a: Ach, b: Ach) => boolean): Ach[] {
-  if (pickOrder.length === 0) {
-    const rest = best(missingList.filter((a) => !state.tracked.includes(a.id)), 50, before);
-    pickOrder = [...trackedOf(state.tracked), ...rest].map((a) => a.id);
+let pickOrder: string[] | null = null;
+/** Missing rows wanted: `PICK_PAGE`, as many more at each "more", `PICK_MAX` at most. */
+let pickRows = PICK_PAGE;
+/** Missing rows already in `pickOrder`. */
+let pickMissing = 0;
+function pickOf(missingList: Ach[], before: (a: Ach, b: Ach) => boolean, matches: (a: Ach) => boolean): Ach[] {
+  if (pickOrder === null) {
+    pickOrder = trackedOf(state.tracked).filter(matches).map((a) => a.id);
+    pickMissing = 0;
   }
+  const kept = new Set(pickOrder);
+  const rest = missingList.filter((a) => !kept.has(a.id) && !state.tracked.includes(a.id) && matches(a));
+  const want = Math.min(pickRows, PICK_MAX) - pickMissing;
+  let added = 0;
+  if (want > 0 && rest.length > 0) {
+    // The rows already shown keep their place; the next ones follow.
+    // `best` stays one pass for a window of `PICK_MAX` rows.
+    const next = best(rest, want, before).map((a) => a.id);
+    pickOrder = [...pickOrder, ...next];
+    pickMissing += next.length;
+    added = next.length;
+  }
+  state.pickLeft = rest.length - added;
+  state.pickCapped = state.pickLeft > 0 && pickMissing >= PICK_MAX;
   const byId = new Map(achList.map((a) => [a.id, a]));
   return pickOrder.flatMap((id) => byId.get(id) ?? []);
 }
@@ -1677,8 +1886,12 @@ function compute(): void {
     tracked: trackedOf(state.tracked),
     recent: recentList,
     missing: best(missingList, 12 + MAX_TRACKED, missingBefore),
-    pick: state.picking ? pickOf(missingList, missingBefore) : [],
+    pick: state.picking ? pickOf(missingList, missingBefore, pickMatcher()) : [],
   };
+  if (!state.picking) {
+    state.pickLeft = 0;
+    state.pickCapped = false;
+  }
 }
 
 export function isNew(a: Ach, s: typeof state): boolean {
@@ -1734,6 +1947,17 @@ export function featureMeta(a: Ach, s: typeof state): string {
 }
 export function pickList(s: typeof state): Ach[] {
   return s.lists.pick;
+}
+/** Missing ones left to show in the checklist: its "more" row. */
+export function pickMore(s: typeof state): boolean {
+  return s.picking && s.pickLeft > 0 && !s.pickCapped;
+}
+/** Nothing matches the checklist's search. */
+export function pickNone(s: typeof state): boolean {
+  return s.picking && s.pickQuery.trim() !== "" && s.lists.pick.length === 0;
+}
+export function pickMoreText(s: typeof state): string {
+  return t("pick-more", { count: num(Math.min(PICK_PAGE, s.pickLeft)) });
 }
 /** Tracking is full: the other rows of the picker wait. */
 export function pickFull(s: typeof state): boolean {

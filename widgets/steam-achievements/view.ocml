@@ -132,6 +132,9 @@
       </box>
       <if test={pickFull(state)}><text class="pmsg warn"><icon class="inline-icon" name="circle-alert"/><span>&#32;{t("pick-full")}</span></text></if>
       <else><text class="pmsg">{t("pick-hint")}</text></else>
+      <if test={state.pickSearch}>
+        <field class="pfield psearch" placeholder={t("pick-search")} label={t("pick-search")} value={state.pickQuery} max-length="64" on:input={pickTyped(event.value)}/>
+      </if>
       <scroll class="pick-list">
         <for each={pickList(state)} as="a" key={a.id}>
           <button class={pickRowClass(a, state)} label={pickLabel(a, state)} disabled={pickDisabled(a, state)} on:activate={toggleTrack(a.id)}>
@@ -146,6 +149,14 @@
             <else><box class="check"/></else>
           </button>
         </for>
+        <if test={pickMore(state)}>
+          <button class="pick-more" on:activate={showMorePicks}>
+            <icon class="pick-more-icon" name="chevron-down"/>
+            <text class="pick-more-text">{pickMoreText(state)}</text>
+          </button>
+        </if>
+        <else-if test={state.pickCapped}><text class="pick-note">{t("pick-cap")}</text></else-if>
+        <else-if test={pickNone(state)}><text class="pick-note">{t("pick-none")}</text></else-if>
       </scroll>
       <box class="pick-actions">
         <button class="pbutton" on:activate={closePick}><text class="pbutton-text">{t("done")}</text></button>
@@ -208,6 +219,9 @@
           </box>
         </if>
         <else><text class="muted-line">{muted(state.game)}</text></else>
+        <if test={hasAch(state.game) && !state.game.known && layout(state.optionsVersion) != "compact"}>
+          <text class="muted-line">{t("loading")}</text>
+        </if>
         <if test={showFix(state.game, state.optionsVersion)}>
           <box class="fix-path">
             <icon class="fix-icon" name="settings"/>
@@ -226,7 +240,7 @@
         <feature a={featured(state, state.optionsVersion)} title={featuredTitle(state, state.optionsVersion)} metaText={featureMeta(featured(state, state.optionsVersion), state)} cls={cardClass(featured(state, state.optionsVersion), state)}/>
       </if>
 
-      <if test={layout(state.optionsVersion) == "full" && hasAch(state.game)}>
+      <if test={layout(state.optionsVersion) == "full" && hasAch(state.game) && state.game.known}>
         <if test={tracked(state)}>
           <feature a={tracked(state)} title={t("tracked")} metaText={featureMeta(tracked(state), state)} cls={cardClass(tracked(state), state)}/>
         </if>

@@ -18,15 +18,15 @@
     },
     {
       "permission": "network:GET https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/",
-      "text": "Reads which achievements of the shown game you unlocked, and when; its refusal also tells that Steam hides your game details. Once a minute in game, every 10 minutes out of game or after a refusal."
+      "text": "Reads which achievements of the shown game you unlocked, and when; its refusal also tells that Steam hides your game details. Once a minute in game, every 10 minutes out of game or after a refusal. Up to 3 MiB, for games of thousands of achievements. With your language (l), once per game, only when a game's list exceeds its own route's bound: then this gives the names and descriptions instead."
     },
     {
       "permission": "network:GET https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/",
-      "text": "Reads the names, descriptions and icons of the shown game's achievements, in your language. Once per game and language, then kept in storage."
+      "text": "Reads the names, descriptions and icons of the shown game's achievements, in your language. Once per game and language, then kept in storage. Up to 3 MiB, so that a game of 5,000 achievements, Steam's own limit, still shows them."
     },
     {
       "permission": "network:GET https://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/",
-      "text": "Reads the share of players who unlocked each achievement (rarity). Once per game and day, without your key."
+      "text": "Reads the share of players who unlocked each achievement (rarity). Once per game and day, without your key. Up to 2 MiB, for games of thousands of achievements."
     },
     {
       "permission": "network:GET https://shared.akamai.steamstatic.com/community_assets/images/apps/{app}/{file}",

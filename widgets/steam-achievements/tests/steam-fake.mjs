@@ -30,6 +30,11 @@ export function fakeSteam() {
     fail: null,
     /** Per route: a status for that route only. */
     routeStatus: {},
+    /**
+     * The manifest's response bounds, applied as the host does: a larger
+     * answer fails with `response_body_limit`. `null` turns them off.
+     */
+    bounds: null,
     images: { fail: new Set() },
     requests: [],
     storage: new Map(),
@@ -69,7 +74,7 @@ export function fakeSteam() {
       if (path === "/ISteamUserStats/GetSchemaForGame/v2/") {
         if (game === undefined) return json(400, {});
         const name = (a) => (query.l === "french" ? `${a.displayName} (fr)` : a.displayName);
-        return json(200, { game: { gameName: game.name, availableGameStats: game.schema.length === 0 ? {} : { achievements: game.schema.map((a) => ({ ...a, displayName: name(a) })) } } });
+        return bounded(steam, "schema", json(200, { game: { gameName: game.name, availableGameStats: game.schema.length === 0 ? {} : { achievements: game.schema.map((a) => ({ ...a, displayName: name(a) })) } } }));
       }
       if (path === "/ISteamUserStats/GetPlayerAchievements/v1/") {
         // Anything but public game details: 403, even to the account's own key.
@@ -80,10 +85,13 @@ export function fakeSteam() {
         // with public game details (measured by other projects in 2026).
         if (game?.owned === false) return json(403, { playerstats: { error: "Profile is not public", success: false } });
         if (game === undefined || game.schema.length === 0 || game.noStats === true) return json(400, { playerstats: { error: "Requested app has no stats", success: false } });
-        return json(200, { playerstats: { steamID: ID, success: true, achievements: game.schema.map((a) => ({ apiname: a.name, achieved: a.name in game.unlocked ? 1 : 0, unlocktime: game.unlocked[a.name] ?? 0 })) } });
+        // With `l`, Steam adds each achievement's name and description; as
+        // in Steam's answers, `success` closes it.
+        const named = (a) => (query.l === undefined ? {} : { name: query.l === "french" ? `${a.displayName} (fr)` : a.displayName, description: a.description });
+        return bounded(steam, "player" + (query.l === undefined ? "" : ":l"), json(200, { playerstats: { steamID: ID, gameName: game.name, achievements: game.schema.map((a) => ({ apiname: a.name, achieved: a.name in game.unlocked ? 1 : 0, unlocktime: game.unlocked[a.name] ?? 0, ...named(a) })), success: true } }));
       }
       if (path === "/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/") {
-        return json(200, { achievementpercentages: { achievements: (game?.schema ?? []).map((a, index) => ({ name: a.name, percent: 50 - index })) } });
+        return bounded(steam, "rarity", json(200, { achievementpercentages: { achievements: (game?.schema ?? []).map((a, index) => ({ name: a.name, percent: 50 - index })) } }));
       }
       return json(404, {});
     },
@@ -92,6 +100,14 @@ export function fakeSteam() {
     },
   };
   return steam;
+}
+
+/** The manifest's `maxResponseBytes` of each route, by name. */
+export const MANIFEST_BOUNDS = { schema: 3 * 1024 * 1024, player: 3 * 1024 * 1024, "player:l": 3 * 1024 * 1024, rarity: 2 * 1024 * 1024 };
+
+function bounded(steam, route, answer) {
+  const bound = steam.bounds?.[route];
+  return bound !== undefined && Buffer.byteLength(answer.value.body) > bound ? { error: "response_body_limit" } : answer;
 }
 
 // The widget reads answers as text (large ones are parsed in slices).

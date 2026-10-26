@@ -23,6 +23,7 @@ Valve Corporation ([trademarks](../../TRADEMARKS.md)).
 | Steam not connected, key refused | PlayerVox OverCrow's own panel over the widget ("Steam is not connected", "Connect Steam"): the widget draws no account screen |
 | Profile | "Last step · Your Steam profile": a field for the profile link (`steamcommunity.com/id/<name>`, `/profiles/<id>`, a SteamID or a custom name), in Interactive mode; in Passive mode, a line saying to switch to Interactive mode |
 | Loading | A skeleton, on the very first start only |
+| Thousands of achievements | The count, bar and percentage within seconds, then "Reading your achievements…" under them until the names are read (a few seconds per thousand achievements, once per session) |
 | Playing now | The game (store image, name), a green "Playing now", the count, bar and percentage, then by layout the tracked achievements (one: its own card; two or three: one card, a row each), else the next or latest achievement, and in Full the recently unlocked and next ones |
 | New unlock | The card in the accent colour, pulsing twice, with "New" for a minute |
 | Last game played | The same, with a neutral "Last game played" heading: not playing is not a problem |
@@ -49,9 +50,9 @@ user's language.
 | Achievements › Only missing achievements | The count becomes "28 missing", Standard shows the next one to get, Full one "Missing achievements" list of twice the rows |
 | Achievements › Sort missing | Easiest first (default), Rarest first, By name |
 | Achievements › Show rarity | On (default): "4.2% of players"; off, the description instead |
-| Achievements › Reveal hidden achievements | Off (default): "Hidden achievement", "Revealed when you unlock it.", a lock |
+| Achievements › Reveal hidden achievements | Off (default): "Hidden achievement", "Revealed when you unlock it.", a lock. No effect for the few games of more than about 6,000 achievements: Steam does not say which ones are hidden there |
 | Steam logo | On (default): the Steam symbol on the game card; off, the word "Steam" |
-| Track achievements… | In Interactive mode: a checklist, the tracked ones first, then the missing achievements; a click ticks or unticks at once, up to three per game ("Limit reached" greys the other rows), "Done" closes it. The rows keep their place while it is open. Tracked achievements stay at the top of the widget in the order they were added; one unlocked goes last with a green check and "Unlocked … ago", until it is unticked. Each game keeps its own (the last 20 games) |
+| Track achievements… | In Interactive mode: a checklist, the tracked ones first, then the missing achievements; a click ticks or unticks at once, up to three per game ("Limit reached" greys the other rows), "Done" closes it. The rows keep their place while it is open. With more than 50 missing achievements, a search field above the list (by name, accents and case aside; a hidden achievement never by its name), and "50 more" at its end, up to 200 rows; the search reaches the others. Tracked achievements stay at the top of the widget in the order they were added; one unlocked goes last with a green check and "Unlocked … ago", until it is unticked. Each game keeps its own (the last 20 games) |
 | Change Steam profile… | The profile step, with the current link and Cancel |
 
 Both last rows close the menu, so that what they open shows at once
@@ -71,9 +72,9 @@ keep the previous version of the widget).
 | `ISteamUser/ResolveVanityURL/v1` | When you enter a profile link with a custom name |
 | `ISteamUser/GetPlayerSummaries/v2` | Every minute while shown: the game running and the profile's visibility |
 | `IPlayerService/GetRecentlyPlayedGames/v1` | When the game changes, then every 10 minutes out of game |
-| `ISteamUserStats/GetPlayerAchievements/v1` | Every minute in game, every 10 minutes out of game |
-| `ISteamUserStats/GetSchemaForGame/v2` | Once per game and language, then kept |
-| `ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2` | Once per game and day, without the key |
+| `ISteamUserStats/GetPlayerAchievements/v1` | Every minute in game, every 10 minutes out of game (up to 3 MiB). With `l`, once per game and language, only for a game whose list exceeds its route's bound: the names and descriptions instead |
+| `ISteamUserStats/GetSchemaForGame/v2` | Once per game and language, then kept (up to 3 MiB: Steam's limit of 5,000 achievements per game fits); a list beyond, tried again a day later |
+| `ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2` | Once per game and day, without the key (up to 2 MiB) |
 
 At worst, in game all day: about 2,880 calls a day, far under the 100,000
 of Steam's terms.
@@ -121,10 +122,14 @@ your computer and sends it only to `api.steampowered.com`. To revoke it:
   `lock`), a missing store image the game's icon, then `gamepad-2`.
 - **Large games.** Answers over 64 kB (a game with hundreds or thousands
   of achievements) are read as text by a small JSON scanner, 16 KiB per VM
-  turn, 100 ms apart, so no turn nears the VM's budget; the list of a game
-  is limited to 2 MiB (games of about 6,000 achievements). The view only
-  ever receives the few achievements it shows, chosen without sorting the
-  whole list, and memory holds the shown game only.
+  turn, 100 ms apart, so no turn nears the VM's budget. A list to read
+  that way comes after the player's achievements, which give the count
+  and the bar first. The list of a game is limited to 3 MiB, enough for
+  Steam's limit of 5,000 achievements; the few older games beyond it take
+  their names and descriptions from the player's achievements asked in
+  the user's language, without icons nor hidden flags. The view only ever
+  receives the few achievements it shows, chosen without sorting the whole
+  list, and memory holds the shown game only.
 - **Storage.** The achievement lists of past games are kept within 180 kB
   in all (parts of 20,000 characters, the oldest making room), so the
   profile, the tracked achievements and the last view always fit the

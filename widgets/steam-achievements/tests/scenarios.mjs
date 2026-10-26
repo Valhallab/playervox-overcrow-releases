@@ -66,7 +66,7 @@ const repeat = (count, make) => Array.from({ length: count }, make);
 const urls = {
   summary: `${API}/ISteamUser/GetPlayerSummaries/v2/?steamids=${ID}`,
   recent: `${API}/IPlayerService/GetRecentlyPlayedGames/v1/?steamid=${ID}&count=5`,
-  player: (game) => `${API}/ISteamUserStats/GetPlayerAchievements/v1/?steamid=${ID}&appid=${game.appid}`,
+  player: (game, l = null) => `${API}/ISteamUserStats/GetPlayerAchievements/v1/?steamid=${ID}&appid=${game.appid}` + (l === null ? "" : `&l=${l}`),
   schema: (game, l = "english") => `${API}/ISteamUserStats/GetSchemaForGame/v2/?appid=${game.appid}&l=${l}`,
   rarity: (game) => `${API}/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?gameid=${game.appid}`,
   vanity: (name) => `${API}/ISteamUser/ResolveVanityURL/v1/?vanityurl=${name}`,
@@ -120,10 +120,13 @@ function schema(game, l, form = "old") {
   if (achievements.length === 0) return json(200, { game: {} });
   return json(200, { game: { gameName: game.name, gameVersion: "12", availableGameStats: { achievements, stats } } });
 }
-function player(game, unlockedNow = {}) {
+function player(game, unlockedNow = {}, l = null) {
   const achievements = game.achievements.map((a) => {
     const ago = a.api in unlockedNow ? unlockedNow[a.api] : a.ago;
-    return { apiname: a.api, achieved: ago === null ? 0 : 1, unlocktime: ago === null ? 0 : at(ago) };
+    const item = { apiname: a.api, achieved: ago === null ? 0 : 1, unlocktime: ago === null ? 0 : at(ago) };
+    // With `l`, Steam adds the name and description, nothing about hidden ones.
+    if (l !== null) Object.assign(item, { name: l === "french" ? a.fr : a.en, description: l === "french" ? a.descFr : a.descEn });
+    return item;
   });
   return json(200, { playerstats: { steamID: ID, gameName: game.name, achievements, success: true } });
 }
@@ -755,5 +758,81 @@ scenario("large-game", "A game of 1,500 achievements: read, sorted and shown in 
     { expect: { text: ["500 / 1,500", "Archive entry 1"], fault: "none" } },
     { advance: { ms: 2 * MIN } },
     { expect: { fault: "none", state: "running", image: "full" } },
+  ],
+});
+
+// --- thousands of achievements: Steam's cap (5,000), and a game from before it.
+const lore = (count) => Array.from({ length: count }, (_, n) => ({
+  api: `LORE_PAGE_${n}`, en: `Lore page ${n + 1}`, fr: `Page de savoir ${n + 1}`, ic: (n % 9) + 1,
+  ago: n % 4 === 0 ? 20_000 + n : null, rarity: n % 11 === 0 ? null : (n % 97) + 0.5,
+  descEn: "Find the lore page hidden in the old archive", descFr: "Trouver la page de savoir cachée dans les vieilles archives",
+  hidden: n % 100 === 99, icon: true,
+}));
+// A recent game: no store header on either host, its icon and name instead.
+const noHeader = (game) => [
+  fixture(urls.header(game), { status: 404, contentType: "text/html", body: "Not found" }, false),
+  fixture(urls.headerCdn(game), { status: 404, contentType: "text/html", body: "Not found" }, false),
+];
+const ARCHIVE = { appid: 1_874_500, name: "Endless Archive", header: "header-courier", icon: "game-tide", achievements: lore(5000) };
+// In French, as the mockups are: one list (French) to answer.
+const NB = "\u00a0";
+scenario("huge-game", "5,000 achievements, Steam's cap, in French: a list of about 2.4 MiB within the schema's 3 MiB bound. The count shows within seconds from the player's achievements, the names once the list is read; the checklist has a search and adds 50 rows at a time. No fault.", {
+  host: { locale: "fr", region: { numberFormat: "fr", dateOrder: "dmy" }, options: { layout: "standard" }, size: { width: WIDTH.standard, height: 200 } },
+  http: [
+    ...repeat(3, () => fixture(urls.summary, summary({ playing: ARCHIVE }))),
+    fixture(urls.recent, recent([ARCHIVE])),
+    fixture(urls.schema(ARCHIVE, "french"), schema(ARCHIVE, "french")),
+    ...repeat(3, () => fixture(urls.player(ARCHIVE), player(ARCHIVE))),
+    fixture(urls.rarity(ARCHIVE), rarity(ARCHIVE), false),
+    ...images(ARCHIVE).filter((entry) => !entry.request.url.includes("/header.jpg")),
+    ...noHeader(ARCHIVE),
+  ],
+  steps: [
+    { advance: { ms: 4000 } },
+    { expect: { state: "running", text: ["Endless Archive", `1${NB}250 / 5${NB}000`, "Lecture de vos succès…"], fault: "none", image: "progressive" } },
+    { advance: { ms: 40_000 } },
+    { expect: { text: [`1${NB}250 / 5${NB}000`, "Page de savoir 1"], noText: ["Lecture de vos succès…"], fault: "none", image: "standard" } },
+    { menu: { id: "layout", value: "full" } },
+    { host: { size: { width: WIDTH.full, height: 200 } } },
+    { expect: { fault: "none", image: "full" } },
+    { menu: { id: "layout", value: "standard" } },
+    { host: { mode: "interactive", size: { width: WIDTH.standard, height: 200 } } },
+    { menu: { id: "track" } },
+    { expect: { text: ["Suivre des succès", "0 / 3"], fault: "none", image: "pick" } },
+    ...repeat(4, () => ({ pointer: { wheel: { target: { at: [150, 150] }, dx: 0, dy: 100 } } })),
+    { expect: { text: ["50 de plus"], fault: "none", image: "pick-more" } },
+    { pointer: { click: { text: "50 de plus" } } },
+    ...repeat(8, () => ({ pointer: { wheel: { target: { at: [150, 150] }, dx: 0, dy: 100 } } })),
+    { expect: { text: ["50 de plus"], fault: "none" } },
+    { pointer: { click: { label: "Chercher un succès" } } },
+    { text: "savoir 123" },
+    { expect: { text: ["Page de savoir 123", "Page de savoir 1239"], noText: ["50 de plus"], fault: "none", image: "pick-search" } },
+  ],
+});
+
+const VAULT = { appid: 1_874_600, name: "Endless Vault", header: "header-courier", icon: "game-tide", achievements: lore(12_000) };
+scenario("huge-game-beyond", "12,000 achievements, a game from before Steam's cap: its list exceeds the schema's bound (the host refuses it), so the names come from the player's achievements asked with l (about 2.4 MiB within 3 MiB), with the generic icon. Never a refusal, no warning, no fault.", {
+  host: { options: { layout: "standard" }, size: { width: WIDTH.standard, height: 200 } },
+  http: [
+    ...repeat(3, () => fixture(urls.summary, summary({ playing: VAULT }))),
+    fixture(urls.recent, recent([VAULT])),
+    failure(urls.schema(VAULT), "response_body_limit"),
+    ...repeat(2, () => fixture(urls.player(VAULT), player(VAULT))),
+    fixture(urls.player(VAULT, "english"), player(VAULT, {}, "english")),
+    fixture(urls.rarity(VAULT), rarity(VAULT), false),
+    fixture(`${ICON_HOST}/${VAULT.appid}/${ICON_HASH[VAULT.icon]}.jpg`, jpeg(VAULT.icon), false),
+    ...noHeader(VAULT),
+  ],
+  steps: [
+    { advance: { ms: 10_000 } },
+    { expect: { state: "running", text: ["Endless Vault", "3,000 / 12,000"], noText: ["Unreachable"], fault: "none", image: "progressive" } },
+    { advance: { ms: 50_000 } },
+    { expect: { text: ["3,000 / 12,000", "Lore page 1"], noText: ["Reading your achievements…", "Unreachable"], fault: "none", image: "standard" } },
+    { menu: { id: "layout", value: "full" } },
+    { host: { size: { width: WIDTH.full, height: 200 } } },
+    { expect: { fault: "none", image: "full" } },
+    { host: { mode: "interactive" } },
+    { menu: { id: "track" } },
+    { expect: { text: ["Track achievements"], fault: "none", image: "pick" } },
   ],
 });
