@@ -554,7 +554,7 @@ pub const SERVICES: &[Service] = &[
             Field::required(
                 "steamid",
                 ValueType::Text(&MAX_STEAMID_BYTES),
-                "The SteamID64 of the account the widget follows: 17 digits from `7656119`. Another value fails with `invalid_request`.",
+                "The SteamID64 of the account the widget follows: 17 digits, an individual account. Another value fails with `invalid_request`.",
             ),
             Field::optional(
                 "types",

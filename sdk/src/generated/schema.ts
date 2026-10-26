@@ -987,7 +987,7 @@ export interface ServiceParamsMap {
   };
   /** Parameters of `steam.events.subscribe`. */
   readonly "steam.events.subscribe": {
-    /** The SteamID64 of the account the widget follows: 17 digits from `7656119`. Another value fails with `invalid_request`. */
+    /** The SteamID64 of the account the widget follows: 17 digits, an individual account. Another value fails with `invalid_request`. */
     readonly steamid: string;
     /** Distinct event types among the declaration's `events`; default all of them. A type it does not list fails with `permission_denied`. */
     readonly types?: readonly string[];
