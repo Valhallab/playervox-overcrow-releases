@@ -16,11 +16,12 @@ use crate::json::{has_exact_fields, integer_in, parse_strict};
 use crate::limits::{
     MAX_ACCOUNTS, MAX_DNS_LABEL_BYTES, MAX_DNS_NAME_BYTES, MAX_ENUM_VALUE_BYTES, MAX_ENUM_VALUES,
     MAX_FILE_EXTENSION_BYTES, MAX_FILE_EXTENSIONS, MAX_FILE_PARAMETER_BYTES, MAX_GAME_EVENTS,
-    MAX_HTTP_DECLARED_RESPONSE_BYTES, MAX_MANIFEST_BYTES, MAX_NETWORK_PATH_BYTES,
+    MAX_HTTP_DECLARED_RESPONSE_BYTES, MAX_LINK_RULES, MAX_MANIFEST_BYTES, MAX_NETWORK_PATH_BYTES,
     MAX_NETWORK_RULES, MAX_PARAMETER_NAME_BYTES, MAX_PATH_PARAMS, MAX_QUERY_PARAMS,
     MAX_SLUG_PARAMETER_BYTES, MAX_STRING_PARAMETER_BYTES, MAX_WIDGET_EDGE_PX, MAX_WIDGET_ID_BYTES,
     MAX_WIDGET_NAME_CHARS, MIN_WIDGET_ID_BYTES, VM_HEAP_BYTES, VM_MAX_HEAP_BYTES,
 };
+use crate::links::{FEATURE_OPEN_LINKS, LinkRule, validate_links};
 use crate::model::{Field, ValueType, field, is_keyword};
 use crate::permissions::{
     CAPABILITIES, NETWORK_RULE_FIELDS, PARAMETER_CONSTRAINTS, capability_named,
@@ -150,6 +151,11 @@ pub const PERMISSION_FIELDS: &[Field] = &[
         "Distinct network rules.",
     ),
     Field::optional(
+        "links",
+        ValueType::ListOf("LinkRule", &MAX_LINK_RULES),
+        "Web pages the widget may open in the user's browser with `links.open`, after a click: distinct rules, none covering another of its origin. Not with a sensitive capability; with an account, only on the account's service. Needs the catalog feature `open-links`.",
+    ),
+    Field::optional(
         "storage",
         ValueType::Bool,
         "Host key-value storage; default `false`.",
@@ -190,8 +196,16 @@ pub enum ManifestError {
     NetworkRule,
     GameEvent,
     Capability,
-    /// A sensitive capability together with `network` or `clipboardWrite`.
+    /// A sensitive capability together with `network`, `links` or
+    /// `clipboardWrite`.
     SensitiveEgress,
+    /// `permissions.links`: more than `MAX_LINK_RULES`, a rule outside its
+    /// grammar, or a rule that repeats or covers another of its origin.
+    LinkRule,
+    /// With an account, a link rule outside the account's service: not
+    /// under an integrated service's domains, or not on the host of a
+    /// declared account's origins, key page or sign-in page.
+    AccountLink,
     Wrapper,
     /// `requires` is not a list of distinct host features.
     Requires,
@@ -235,6 +249,8 @@ impl ManifestError {
             Self::GameEvent => "game_event",
             Self::Capability => "capability",
             Self::SensitiveEgress => "sensitive_egress",
+            Self::LinkRule => "link_rule",
+            Self::AccountLink => "account_link",
             Self::Wrapper => "wrapper",
             Self::Requires => "requires",
             Self::Account => "account",
@@ -273,8 +289,9 @@ impl Manifest {
     /// (`account-key`, `account-oauth`, or the integrated service's
     /// `service-steam`…, `network-file-param` for a network rule with a
     /// `file` parameter, `menu-closes` for a menu row that names
-    /// `closesMenu`, and `twitch-events` for a Twitch declaration that lists
-    /// `events`); empty for a manifest without any.
+    /// `closesMenu`, `twitch-events` for a Twitch declaration that lists
+    /// `events`, and `open-links` for `permissions.links`); empty for a
+    /// manifest without any.
     pub fn features(&self) -> BTreeSet<&'static str> {
         let mut features: BTreeSet<&'static str> = self
             .accounts
@@ -297,6 +314,9 @@ impl Manifest {
         if crate::wrapper::names_closes_menu(&self.value["wrapper"]) {
             features.insert(crate::wrapper::FEATURE_MENU_CLOSES);
         }
+        if !self.permissions.links.is_empty() {
+            features.insert(FEATURE_OPEN_LINKS);
+        }
         features
     }
 
@@ -313,6 +333,8 @@ pub struct Permissions {
     pub network: BTreeSet<String>,
     pub storage: bool,
     pub clipboard_write: bool,
+    /// The link rules, each `https://host[:port]` and its path prefix.
+    pub links: BTreeSet<LinkRule>,
     pub game_events: BTreeSet<String>,
     pub capabilities: BTreeSet<&'static str>,
     /// Each account declaration in compact JSON with sorted keys: any
@@ -327,6 +349,7 @@ impl Permissions {
         !self.network.is_subset(&previous.network)
             || (self.storage && !previous.storage)
             || (self.clipboard_write && !previous.clipboard_write)
+            || !self.links.is_subset(&previous.links)
             || !self.game_events.is_subset(&previous.game_events)
             || !self.capabilities.is_subset(&previous.capabilities)
             || !self.accounts.is_subset(&previous.accounts)
@@ -563,10 +586,13 @@ fn validate_permissions(permissions: &Value) -> Result<(Permissions, Vec<Account
         }
     }
 
+    let links = validate_links(object.get("links"))?;
+
     let permissions = Permissions {
         network,
         storage: flag("storage")?,
         clipboard_write: flag("clipboardWrite")?,
+        links,
         game_events,
         capabilities,
         accounts: accounts
@@ -574,8 +600,11 @@ fn validate_permissions(permissions: &Value) -> Result<(Permissions, Vec<Account
             .map(|account| account.canonical.clone())
             .collect(),
     };
+    // The address of a page leaves the computer like a request does.
     if permissions.has_sensitive_capability()
-        && (!permissions.network.is_empty() || permissions.clipboard_write)
+        && (!permissions.network.is_empty()
+            || !permissions.links.is_empty()
+            || permissions.clipboard_write)
     {
         return Err(ManifestError::SensitiveEgress);
     }
@@ -587,6 +616,13 @@ fn validate_permissions(permissions: &Value) -> Result<(Permissions, Vec<Account
         return Err(ManifestError::SensitiveEgress);
     }
     validate_account_routes(&accounts, rules)?;
+    if !permissions
+        .links
+        .iter()
+        .all(|rule| accounts.iter().all(|account| account.owns_link(rule)))
+    {
+        return Err(ManifestError::AccountLink);
+    }
     Ok((permissions, accounts))
 }
 

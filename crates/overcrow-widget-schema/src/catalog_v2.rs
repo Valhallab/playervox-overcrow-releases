@@ -88,6 +88,7 @@ pub use crate::integrated::{FEATURE_SERVICE_STEAM, FEATURE_SERVICE_TWITCH, FEATU
 /// a reader whose broker does not match it would refuse the manifest.
 pub const FEATURE_NETWORK_FILE_PARAM: &str = "network-file-param";
 
+pub use crate::links::FEATURE_OPEN_LINKS;
 pub use crate::wrapper::FEATURE_MENU_CLOSES;
 
 /// Every feature name of `requires` this schema defines. A reader passes
@@ -101,6 +102,7 @@ pub const KNOWN_FEATURES: &[&str] = &[
     FEATURE_NETWORK_FILE_PARAM,
     FEATURE_MENU_CLOSES,
     FEATURE_TWITCH_EVENTS,
+    FEATURE_OPEN_LINKS,
 ];
 
 pub const ENVELOPE_FIELDS: &[Field] = &[
@@ -1898,7 +1900,8 @@ mod tests {
                 "service-twitch",
                 "network-file-param",
                 "menu-closes",
-                "twitch-events"
+                "twitch-events",
+                "open-links"
             ]
         );
         let mut payload = valid();

@@ -19,6 +19,7 @@ pub mod integrated;
 pub mod ipc;
 pub mod json;
 pub mod limits;
+pub mod links;
 pub mod manifest;
 pub mod model;
 pub mod package;

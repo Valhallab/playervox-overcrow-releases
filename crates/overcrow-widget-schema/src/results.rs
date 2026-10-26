@@ -746,14 +746,13 @@ impl Shape {
                 .map(Shape::describe)
                 .collect::<Vec<_>>()
                 .join(" or "),
-            Self::Fields(names, inner) => format!(
-                "object of {}, each {} when present",
+            Self::Fields(names, _) => format!(
+                "`{{ {} }}`",
                 names
                     .iter()
-                    .map(|name| format!("`{name}`"))
+                    .map(|name| format!("{name}?"))
                     .collect::<Vec<_>>()
-                    .join(", "),
-                inner.describe()
+                    .join(", ")
             ),
             Self::Named(name) => format!("`{name}`"),
         }

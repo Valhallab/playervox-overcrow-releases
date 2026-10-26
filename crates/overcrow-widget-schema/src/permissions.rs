@@ -33,6 +33,11 @@ pub const PERMISSIONS: &[Permission] = &[
         with_sensitive: SensitiveRule::Forbidden,
     },
     Permission {
+        name: "links",
+        summary: "Web pages of declared sites opened in the user's browser on a click, at most `MAX_LINK_RULES` rules; the host shows each address and asks the user once per site.",
+        with_sensitive: SensitiveRule::Forbidden,
+    },
+    Permission {
         name: "storage",
         summary: "Host-managed key-value storage partitioned by widget ID, within `STORAGE_QUOTA_BYTES`.",
         with_sensitive: SensitiveRule::ProcessLifetime,
@@ -130,7 +135,7 @@ pub const PARAMETER_CONSTRAINTS: &[Field] = &[
 pub struct Capability {
     pub name: &'static str,
     pub summary: &'static str,
-    /// Sensitive capabilities exclude `network` and `clipboardWrite` and make
+    /// Sensitive capabilities exclude `network`, `links` and `clipboardWrite` and make
     /// `storage` process-lifetime only.
     pub sensitive: bool,
     /// Account connection the host must hold before the service answers.

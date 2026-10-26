@@ -459,6 +459,39 @@ impl Account {
             .map(String::as_str)
     }
 
+    /// Whether a link rule stays on the account's service: under one of an
+    /// integrated service's domains, or on the host of one of a declared
+    /// account's origins, of its key page or of its sign-in page. The data
+    /// the account gives the widget never leaves for another site in an
+    /// address.
+    pub fn owns_link(&self, rule: &crate::links::LinkRule) -> bool {
+        let host = rule.host();
+        if let Some(service) = self.service {
+            return service
+                .domains
+                .iter()
+                .any(|domain| host == *domain || host.ends_with(&format!(".{domain}")));
+        }
+        let host_of = |url: &str| {
+            url.strip_prefix("https://")
+                .unwrap_or(url)
+                .split(['/', ':', '?', '#'])
+                .next()
+                .unwrap_or_default()
+                .to_ascii_lowercase()
+        };
+        self.origins
+            .iter()
+            .map(String::as_str)
+            .chain(self.key.as_ref().map(|key| key.page.as_str()))
+            .chain(
+                self.oauth
+                    .as_ref()
+                    .and_then(|oauth| oauth.authorize.as_deref()),
+            )
+            .any(|url| host_of(url) == host)
+    }
+
     /// Whether a scope can change the user's account.
     pub fn has_write_scope(&self) -> bool {
         self.oauth.as_ref().is_some_and(|oauth| {

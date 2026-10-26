@@ -27,6 +27,7 @@ use crate::ipc::{
     VM_MESSAGES,
 };
 use crate::limits;
+use crate::links::LINK_RULE_FIELDS;
 use crate::manifest::{
     DIMENSION_FIELDS, MANIFEST_FIELDS, NAME_FIELDS, PERMISSION_FIELDS, SIZING_FIELDS, VM_FIELDS,
 };
@@ -363,7 +364,7 @@ nothing else about the VM budgets can be changed by a manifest.\n\n",
     fields_table(out, VM_FIELDS);
     out.push_str(
         "### `Permissions`\n\nKeys are the permissions of [Permissions](#permissions); a \
-sensitive capability rejects `network` rules and `clipboardWrite: true`.\n\n",
+sensitive capability rejects `network` rules, `links` rules and `clipboardWrite: true`.\n\n",
     );
     fields_table(out, PERMISSION_FIELDS);
 }
@@ -585,6 +586,12 @@ requires consent recorded by the host.\n\n\
     out.push_str("\n### Network rules\n\n");
     fields_table(out, NETWORK_RULE_FIELDS);
     out.push_str(
+        "### Link rules\n\n`links.open` opens an address only on the user's click, after the host \
+showed it and, the first time for its origin, the user agreed. The host parses the address, then \
+`links::link_allowed` matches its origin and canonical path against the rules.\n\n",
+    );
+    fields_table(out, LINK_RULE_FIELDS);
+    out.push_str(
         "### `ParameterConstraint` types\n\n| Type | Shape | Accepts |\n| --- | --- | --- |\n",
     );
     for constraint in PARAMETER_CONSTRAINTS {
@@ -750,6 +757,17 @@ fn shape_members(out: &mut String, shape: &Shape, prefix: &str) {
             for shape in *shapes {
                 shape_members(out, shape, prefix);
             }
+        }
+        Shape::Fields(names, inner) => {
+            out.push_str("| Member | Shape | Meaning |\n| --- | --- | --- |\n");
+            for name in *names {
+                let _ = writeln!(
+                    out,
+                    "| `{prefix}{name}` | {} | Present when the response has it. |",
+                    inner.describe()
+                );
+            }
+            out.push('\n');
         }
         _ => {}
     }

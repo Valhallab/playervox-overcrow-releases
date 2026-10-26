@@ -909,6 +909,24 @@ pub const MAX_NETWORK_RULES: Limit = fixed(
     Unit::Count,
     "Network rules declared by one package.",
 );
+pub const MAX_LINK_RULES: Limit = fixed(
+    "MAX_LINK_RULES",
+    8,
+    Unit::Count,
+    "Link rules (`permissions.links`) declared by one package.",
+);
+pub const MAX_LINK_PREFIX_BYTES: Limit = fixed(
+    "MAX_LINK_PREFIX_BYTES",
+    256,
+    Unit::Bytes,
+    "`pathPrefix` of one link rule.",
+);
+pub const MAX_LINK_URL_BYTES: Limit = fixed(
+    "MAX_LINK_URL_BYTES",
+    2048,
+    Unit::Bytes,
+    "Address one `links.open` call opens, as the widget writes it and as the host shows it.",
+);
 pub const MAX_REQUEST_URL_BYTES: Limit = fixed(
     "MAX_REQUEST_URL_BYTES",
     2048,
@@ -1417,6 +1435,9 @@ pub const ALL: &[&Limit] = &[
     &MAX_STORAGE_VALUE_BYTES,
     &MAX_CLIPBOARD_BYTES,
     &MAX_NETWORK_RULES,
+    &MAX_LINK_RULES,
+    &MAX_LINK_PREFIX_BYTES,
+    &MAX_LINK_URL_BYTES,
     &MAX_REQUEST_URL_BYTES,
     &MAX_HTTP_REQUEST_BYTES,
     &MAX_HTTP_RESPONSE_BYTES,

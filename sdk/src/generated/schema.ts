@@ -53,6 +53,7 @@ export type DateOrder = Region["dateOrder"];
 export type Permission =
   | "network"
   | "accounts"
+  | "links"
   | "storage"
   | "clipboardWrite"
   | "gameEvents"
@@ -140,6 +141,8 @@ export interface PermissionServices {
   readonly "network": "http.fetch";
   /** The user's account on one third-party service, kept by the host and added to the network rules that name it; at most `MAX_ACCOUNTS`. */
   readonly "accounts": never;
+  /** Web pages of declared sites opened in the user's browser on a click, at most `MAX_LINK_RULES` rules; the host shows each address and asks the user once per site. */
+  readonly "links": "links.open";
   /** Host-managed key-value storage partitioned by widget ID, within `STORAGE_QUOTA_BYTES`. */
   readonly "storage": "storage.get" | "storage.set" | "storage.remove" | "storage.keys";
   /** Text clipboard writes on a current Interactive gesture. */
@@ -847,6 +850,11 @@ export interface ServiceParamsMap {
     /** Text. */
     readonly text: string;
   };
+  /** Parameters of `links.open`. */
+  readonly "links.open": {
+    /** Absolute `https` address of a page a link rule allows. */
+    readonly url: string;
+  };
   /** Parameters of `gameEvents.subscribe`. */
   readonly "gameEvents.subscribe": Record<string, never>;
   /** Parameters of `session.subscribe`. */
@@ -982,6 +990,8 @@ export interface ServiceResultMap {
   readonly "http.fetch": HttpResponse;
   /** `clipboard.writeText`: `null`. */
   readonly "clipboard.writeText": null;
+  /** `links.open`: `null` once the host handed the address to the browser. The host shows the address and, the first time for its origin, asks the user, who may later take that back in the Control Center; `cancelled` when the user declines; `permission_denied` for an address no rule allows; `url_invalid` for one that is not a plain HTTPS address (credentials, a path with encoded or dot segments, beyond `MAX_LINK_URL_BYTES`); `busy` while a confirmation is open; `unavailable` when no browser could open it. */
+  readonly "links.open": null;
   /** `gameEvents.subscribe`: `{ event, at }` for each declared event. */
   readonly "gameEvents.subscribe": GameEvent;
   /** `session.subscribe`: `{ elapsedMs, at }` counted from the start of the game process, or `null` without an active game. */
@@ -1055,6 +1065,7 @@ export type CallServiceName =
   | "storage.keys"
   | "http.fetch"
   | "clipboard.writeText"
+  | "links.open"
   | "media.previous"
   | "media.playPause"
   | "media.next"
@@ -1092,6 +1103,7 @@ export type SubscribeServiceName =
 /** Services accepted only while a gesture event is handled. */
 export type GestureServiceName =
   | "clipboard.writeText"
+  | "links.open"
   | "media.previous"
   | "media.playPause"
   | "media.next"

@@ -1043,7 +1043,7 @@ fn check_target(path: &str, target: &Target) -> Checked {
 fn is_item(name: &str) -> bool {
     matches!(
         name,
-        "network" | "storage" | "clipboardWrite" | "gameEvents"
+        "network" | "links" | "storage" | "clipboardWrite" | "gameEvents"
     ) || capability_named(name).is_some()
         // `account:twitch` names the integrated Twitch service; whether the
         // manifest declares the account is checked against it.
@@ -1882,6 +1882,9 @@ pub fn declared_items(manifest: &Manifest) -> BTreeSet<String> {
     let mut items = BTreeSet::new();
     if !permissions.network.is_empty() {
         items.insert("network".to_owned());
+    }
+    if !permissions.links.is_empty() {
+        items.insert("links".to_owned());
     }
     if permissions.storage {
         items.insert("storage".to_owned());

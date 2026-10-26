@@ -56,6 +56,15 @@ export interface JournalServices {
 /** The `journal.*` services. */
 export const journal: JournalServices = /* @__PURE__ */ group("journal", ["subscribe", "page", "delete"]);
 
+/** The `links.*` services. */
+export interface LinksServices {
+  /** `links.open`. Requires the `links` permission. Call it while handling a gesture event (`activate`, `keydown`…), or it fails with `gesture_required`. The host asks the user to confirm first. Result: `null` once the host handed the address to the browser. The host shows the address and, the first time for its origin, asks the user, who may later take that back in the Control Center; `cancelled` when the user declines; `permission_denied` for an address no rule allows; `url_invalid` for one that is not a plain HTTPS address (credentials, a path with encoded or dot segments, beyond `MAX_LINK_URL_BYTES`); `busy` while a confirmation is open; `unavailable` when no browser could open it. */
+  open(params: P["links.open"]): Promise<R["links.open"]>;
+}
+
+/** The `links.*` services. */
+export const links: LinksServices = /* @__PURE__ */ group("links", ["open"]);
+
 /** The `media.*` services. */
 export interface MediaServices {
   /** `media.subscribe`. Requires the `media.read` capability, granted by the user. Updates: `null` without a player, or `{ player, title, artists, playing, canPrevious, canPlayPause, canNext, cover }`: `player` an opaque ID, `artists` a list, `cover` an `asset:` handle of at most 512 px or `null`. */

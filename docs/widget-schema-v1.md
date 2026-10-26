@@ -154,6 +154,9 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MAX_STORAGE_VALUE_BYTES` | 64 KiB | fixed | Serialized JSON size of one storage value. |
 | `MAX_CLIPBOARD_BYTES` | 16 KiB | fixed | Text of one clipboard write. |
 | `MAX_NETWORK_RULES` | 32 | fixed | Network rules declared by one package. |
+| `MAX_LINK_RULES` | 8 | fixed | Link rules (`permissions.links`) declared by one package. |
+| `MAX_LINK_PREFIX_BYTES` | 256 bytes | fixed | `pathPrefix` of one link rule. |
+| `MAX_LINK_URL_BYTES` | 2 KiB | fixed | Address one `links.open` call opens, as the widget writes it and as the host shows it. |
 | `MAX_REQUEST_URL_BYTES` | 2 KiB | fixed | Original URL text of one request, as today. |
 | `MAX_HTTP_REQUEST_BYTES` | 256 KiB | fixed | Body of one outgoing request. |
 | `MAX_HTTP_RESPONSE_BYTES` | 1 MiB | fixed | Body of one response delivered to the VM when its network rule declares no `maxResponseBytes`, and of every `as: "image"` response; must fit the VM heap. |
@@ -728,12 +731,13 @@ A widget that needs more than the default heap requests it here; nothing else ab
 
 ### `Permissions`
 
-Keys are the permissions of [Permissions](#permissions); a sensitive capability rejects `network` rules and `clipboardWrite: true`.
+Keys are the permissions of [Permissions](#permissions); a sensitive capability rejects `network` rules, `links` rules and `clipboardWrite: true`.
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
 | `accounts` | list of `Account` ≤ `MAX_ACCOUNTS` | no | The user's account on a third-party service, which the host keeps and adds to the network rules that name it; the widget never sees the secret. Present only with one entry: a declared account, or an integrated service the widget names. With an account, every network rule targets one of its origins, and no sensitive capability or `clipboardWrite` is allowed. |
 | `network` | list of `NetworkRule` ≤ `MAX_NETWORK_RULES` | no | Distinct network rules. |
+| `links` | list of `LinkRule` ≤ `MAX_LINK_RULES` | no | Web pages the widget may open in the user's browser with `links.open`, after a click: distinct rules, none covering another of its origin. Not with a sensitive capability; with an account, only on the account's service. Needs the catalog feature `open-links`. |
 | `storage` | boolean | no | Host key-value storage; default `false`. |
 | `clipboardWrite` | boolean | no | Clipboard text writes; default `false`. |
 | `gameEvents` | list of `game event` ≤ `MAX_GAME_EVENTS` | no | Distinct `overcrow.game.<name>.v1` event names. |
@@ -832,6 +836,7 @@ Declaring a permission or capability grants nothing: activation requires consent
 | --- | --- | --- |
 | `network` | manifest rejected | Exact HTTPS routes reachable through the host broker, at most `MAX_NETWORK_RULES` rules. |
 | `accounts` | manifest rejected | The user's account on one third-party service, kept by the host and added to the network rules that name it; at most `MAX_ACCOUNTS`. |
+| `links` | manifest rejected | Web pages of declared sites opened in the user's browser on a click, at most `MAX_LINK_RULES` rules; the host shows each address and asks the user once per site. |
 | `storage` | process-lifetime data only | Host-managed key-value storage partitioned by widget ID, within `STORAGE_QUOTA_BYTES`. |
 | `clipboardWrite` | manifest rejected | Text clipboard writes on a current Interactive gesture. |
 | `gameEvents` | allowed | Named semantic game events `overcrow.game.<name>.v1`, at most `MAX_GAME_EVENTS`. |
@@ -848,6 +853,15 @@ Declaring a permission or capability grants nothing: activation requires consent
 | `queryParams` | `name → ParameterConstraint` | no | Allowed query parameters, at most `MAX_QUERY_PARAMS`, each optionally `required`; others are refused. |
 | `maxResponseBytes` | integer 1..=3145728 | no | Largest response body of this route, 1..=`MAX_HTTP_DECLARED_RESPONSE_BYTES`; `MAX_HTTP_RESPONSE_BYTES` when absent. Not for `as: "image"`, which keeps `MAX_HTTP_RESPONSE_BYTES`. When several rules allow a request, the largest bound applies. |
 | `account` | identifier ≤ `MAX_ACCOUNT_ID_BYTES` | no | `id` of the declared account: the host adds the user's secret to the requests this rule allows, and to no other. Two rules of the same origin and method that may match one URL name the same account, or none; no rule targets a declared OAuth endpoint. |
+
+### Link rules
+
+`links.open` opens an address only on the user's click, after the host showed it and, the first time for its origin, the user agreed. The host parses the address, then `links::link_allowed` matches its origin and canonical path against the rules.
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `origin` | `origin` | yes | Canonical `https://host[:port]` origin, as in a network rule: no credentials, IP literal or local name. |
+| `pathPrefix` | text ≤ `MAX_LINK_PREFIX_BYTES` | no | The part of the site the widget may open: `/` and literal segments (ASCII letters, digits, `.`, `_`, `~` and `-`; no `.` or `..` segment), with or without a final `/`. `/runs/` allows `/runs/` and what is below it; `/app` allows `/app` and what is below `/app/`, not `/apps`. Default `/`, the whole site. |
 
 ### `ParameterConstraint` types
 
@@ -996,6 +1010,7 @@ Authority is checked by the host at every call, immediately before acting. Gestu
 | `storage.keys` | permission `storage` | call | no | no | none | list of keys | list of text | fixed |
 | `http.fetch` | permission `network` | call | no | no | `url`: text ≤ `MAX_REQUEST_URL_BYTES`; `method`: `GET` \| `POST` \| `PUT` \| `PATCH` \| `DELETE`; `contentType?`: `application/json` \| `text/plain`; `as`: `json` \| `text` \| `bytes` \| `image` | `{ status, contentType, headers }` with the body as raw payload ≤ the rule's `maxResponseBytes` (`MAX_HTTP_RESPONSE_BYTES` when absent), or `{ status, asset, headers }` from a body ≤ `MAX_HTTP_RESPONSE_BYTES`; `headers` holds the response's headers of `RESPONSE_HEADERS` only; on a rule that names an account, `not_connected` while it is not connected and `account_refused` when the service refused its secret | `HttpResponse` | fixed |
 | `clipboard.writeText` | permission `clipboardWrite` | call | yes | no | `text`: text ≤ `MAX_CLIPBOARD_BYTES` | `null` | `null` | fixed |
+| `links.open` | permission `links` | call | yes | yes | `url`: text ≤ `MAX_LINK_URL_BYTES` | `null` once the host handed the address to the browser. The host shows the address and, the first time for its origin, asks the user, who may later take that back in the Control Center; `cancelled` when the user declines; `permission_denied` for an address no rule allows; `url_invalid` for one that is not a plain HTTPS address (credentials, a path with encoded or dot segments, beyond `MAX_LINK_URL_BYTES`); `busy` while a confirmation is open; `unavailable` when no browser could open it | `null` | fixed |
 | `gameEvents.subscribe` | permission `gameEvents` | subscribe | no | no | none | `{ event, at }` for each declared event | `GameEvent` | fixed |
 | `session.subscribe` | capability `session.read` | subscribe | no | no | none | `{ elapsedMs, at }` counted from the start of the game process, or `null` without an active game | `Session` or `null` | fixed |
 | `telemetry.subscribe` | capability `telemetry.read` | subscribe | no | no | none | `{ cpu, ram, cpuTemperature, gpuTemperature, sources }`, or `null` without an active game: `cpu` is the game's share of the whole machine in % (0–100), `ram` its resident bytes, temperatures are °C or `null`, `sources` `{ cpuTemperature, gpuTemperature }` says whether the host has each sensor | `Telemetry` or `null` | fixed |
@@ -1057,7 +1072,25 @@ Answer of `http.fetch`. `{ status, contentType, headers }` or `{ status, asset, 
 
 #### `HttpHeaders`
 
-Headers of an `http.fetch` response, by lowercase name: only those of `RESPONSE_HEADERS` the response has, each printable ASCII of at most `MAX_HTTP_HEADER_VALUE_BYTES`; a repeated header is joined by `, `. Any other header never reaches the widget. object of `retry-after`, `ratelimit`, `ratelimit-policy`, `ratelimit-limit`, `ratelimit-remaining`, `ratelimit-reset`, `x-ratelimit-limit`, `x-ratelimit-remaining`, `x-ratelimit-reset`, `date`, `etag`, `last-modified`, `cache-control`, `expires`, `age`, each text when present
+Headers of an `http.fetch` response, by lowercase name: only those of `RESPONSE_HEADERS` the response has, each printable ASCII of at most `MAX_HTTP_HEADER_VALUE_BYTES`; a repeated header is joined by `, `. Any other header never reaches the widget. `{ retry-after?, ratelimit?, ratelimit-policy?, ratelimit-limit?, ratelimit-remaining?, ratelimit-reset?, x-ratelimit-limit?, x-ratelimit-remaining?, x-ratelimit-reset?, date?, etag?, last-modified?, cache-control?, expires?, age? }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `retry-after` | text | Present when the response has it. |
+| `ratelimit` | text | Present when the response has it. |
+| `ratelimit-policy` | text | Present when the response has it. |
+| `ratelimit-limit` | text | Present when the response has it. |
+| `ratelimit-remaining` | text | Present when the response has it. |
+| `ratelimit-reset` | text | Present when the response has it. |
+| `x-ratelimit-limit` | text | Present when the response has it. |
+| `x-ratelimit-remaining` | text | Present when the response has it. |
+| `x-ratelimit-reset` | text | Present when the response has it. |
+| `date` | text | Present when the response has it. |
+| `etag` | text | Present when the response has it. |
+| `last-modified` | text | Present when the response has it. |
+| `cache-control` | text | Present when the response has it. |
+| `expires` | text | Present when the response has it. |
+| `age` | text | Present when the response has it. |
 
 #### `GameEvent`
 

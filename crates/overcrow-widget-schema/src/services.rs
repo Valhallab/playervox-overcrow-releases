@@ -9,9 +9,9 @@
 
 use crate::limits::{
     MAX_ACCOUNT_ID_BYTES, MAX_CHAT_CHANNEL_BYTES, MAX_CHAT_MESSAGE_CHARS, MAX_CLIPBOARD_BYTES,
-    MAX_NOTE_BODY_BYTES, MAX_NOTE_ITEMS, MAX_NOTE_TITLE_BYTES, MAX_OBJECT_ID_BYTES,
-    MAX_REQUEST_URL_BYTES, MAX_REVIEW_CHARS, MAX_SERVICE_EVENTS, MAX_STORAGE_KEY_BYTES,
-    MIN_TIMER_INTERVAL_MS,
+    MAX_LINK_URL_BYTES, MAX_NOTE_BODY_BYTES, MAX_NOTE_ITEMS, MAX_NOTE_TITLE_BYTES,
+    MAX_OBJECT_ID_BYTES, MAX_REQUEST_URL_BYTES, MAX_REVIEW_CHARS, MAX_SERVICE_EVENTS,
+    MAX_STORAGE_KEY_BYTES, MIN_TIMER_INTERVAL_MS,
 };
 use crate::model::{Field, Status, ValueType};
 use crate::results::Shape;
@@ -256,6 +256,18 @@ pub const SERVICES: &[Service] = &[
             "Text.",
         )],
         "`null`",
+        Status::Fixed,
+    ))
+    .returning(Shape::Null),
+    confirmed(call(
+        "links.open",
+        Requirement::Permission("links"),
+        &[Field::required(
+            "url",
+            ValueType::Text(&MAX_LINK_URL_BYTES),
+            "Absolute `https` address of a page a link rule allows.",
+        )],
+        "`null` once the host handed the address to the browser. The host shows the address and, the first time for its origin, asks the user, who may later take that back in the Control Center; `cancelled` when the user declines; `permission_denied` for an address no rule allows; `url_invalid` for one that is not a plain HTTPS address (credentials, a path with encoded or dot segments, beyond `MAX_LINK_URL_BYTES`); `busy` while a confirmation is open; `unavailable` when no browser could open it",
         Status::Fixed,
     ))
     .returning(Shape::Null),
