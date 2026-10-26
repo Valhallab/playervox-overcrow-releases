@@ -47,8 +47,11 @@ dans le Centre de contrôle ; en retirer une redémarre le widget sans elle.
 PlayerVox OverCrow vérifie de nouveau la permission à chaque appel
 d’un service.
 
-Quatre permissions ouvrent les services généraux : `network` (des routes
-HTTPS exactes, par le broker de PlayerVox OverCrow), `storage` (un stockage
+Cinq permissions ouvrent les services généraux : `network` (des routes
+HTTPS exactes, par le broker de PlayerVox OverCrow), `links` (des pages de
+sites déclarés, ouvertes dans le navigateur de l’utilisateur sur un clic,
+après que PlayerVox OverCrow a montré l’adresse et, la première fois pour
+chaque site, que l’utilisateur a accepté), `storage` (un stockage
 clé-valeur pour ce seul widget), `clipboardWrite` (l’écriture de texte,
 pendant une action de l’utilisateur) et `gameEvents` (des événements de jeu
 nommés).
@@ -56,7 +59,8 @@ nommés).
 Les capabilities donnent accès à des données et à des actions de
 PlayerVox OverCrow et des comptes de l’utilisateur. Une capability
 **sensible** révèle des données personnelles ou le jeu en cours : un widget
-qui en déclare une ne peut pas déclarer aussi `network` ni `clipboardWrite`,
+qui en déclare une ne peut pas déclarer aussi `network`, `links` ni
+`clipboardWrite`,
 et son stockage ne dure que le temps de son processus, pour que ces données
 ne puissent pas quitter la machine par le widget.
 
@@ -66,8 +70,8 @@ widget déclare. La connexion, les codes, les clés et les jetons sont
 demandés dans les panneaux d’OverCrow et conservés par OverCrow, et un widget
 ne reçoit que les données que décrit sa capability ou les réponses de ses
 propres routes. Un widget doté d’un compte ne parle qu’à ce service : un
-seul compte, chaque règle réseau sur ses origines, aucune capability
-sensible et pas de presse-papiers. Voir
+seul compte, chaque règle réseau sur ses origines, des liens vers les seuls
+sites de son service, aucune capability sensible et pas de presse-papiers. Voir
 [les comptes tiers](accounts.md#confinement) et
 [les services intégrés](integrated-services.md).
 
@@ -116,6 +120,8 @@ remplit, modifie et valide lui-même. Votre logique peut les lire, pas les
   doté d’un compte ne voit jamais sa clé ni son jeton, seulement les réponses
   de ses routes.
 - Lire le presse-papiers.
+- Ouvrir une page sans le clic de l’utilisateur, hors des sites qu’il déclare,
+  ou sans que PlayerVox OverCrow ait d’abord montré l’adresse.
 - Écrire des journaux en production : la sortie de `log.*` n’apparaît que
   dans une session de développement locale.
 - S’accorder une permission, ou utiliser une ligne de menu comme action de

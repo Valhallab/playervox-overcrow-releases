@@ -4,5 +4,6 @@
   "not_connected": "Waiting for your Run Log key",
   "account_refused": "Run Log refused the key",
   "unavailable": "Run Log is unavailable",
-  "refresh": "Refresh"
+  "refresh": "Refresh",
+  "open": "Open on Run Log"
 }

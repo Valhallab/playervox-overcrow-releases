@@ -254,6 +254,7 @@ The tables below say, for each service, when it can be called.
 | --- | --- | --- |
 | `network` | Exact HTTPS routes reachable through the host broker, at most 32 rules. | manifest rejected |
 | `accounts` | The user's account on one third-party service, kept by the host and added to the network rules that name it; at most 1. | manifest rejected |
+| `links` | Web pages of declared sites opened in the user's browser on a click, at most 8 rules; the host shows each address and asks the user once per site. | manifest rejected |
 | `storage` | Host-managed key-value storage partitioned by widget ID, within 256 KiB. | process-lifetime data only |
 | `clipboardWrite` | Text clipboard writes, during a user action in Interactive mode. | manifest rejected |
 | `gameEvents` | Named semantic game events `overcrow.game.<name>.v1`, at most 32. | allowed |
@@ -264,6 +265,7 @@ The tables below say, for each service, when it can be called.
 | Permission | Service | When it can be called |
 | --- | --- | --- |
 | `network` | `http.fetch` | At any time |
+| `links` | `links.open` | Only during a user action |
 | `storage` | `storage.get` | At any time |
 | `storage` | `storage.set` | At any time |
 | `storage` | `storage.remove` | At any time |
@@ -441,6 +443,45 @@ user action. A widget cannot read the clipboard.
 
 Text that the user selects in a `text` element with the `selectable`
 attribute is copied by PlayerVox OverCrow itself, and needs no permission.
+
+### Links
+
+`links.open({ url })` opens a page in the user's browser, only during a
+user action, and only on a site that `permissions.links` declares. A rule
+gives the site's `origin` and, optionally, the part of it the widget opens
+(`pathPrefix`); `{ "origin": "https://runlog.example", "pathPrefix": "/runs/" }`
+allows `https://runlog.example/runs/42?tab=splits`, not the site's other
+pages.
+
+<!-- generated:link-rule-fields -->
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `origin` | `origin` | yes | Canonical `https://host[:port]` origin, as in a network rule: no credentials, IP literal or local name. |
+| `pathPrefix` | text ≤ 256 bytes | no | The part of the site the widget may open: `/` and literal segments (ASCII letters, digits, `.`, `_`, `~` and `-`; no `.` or `..` segment), with or without a final `/`. `/runs/` allows `/runs/` and what is below it; `/app` allows `/app` and what is below `/app/`, not `/apps`. Default `/`, the whole site. |
+<!-- /generated:link-rule-fields -->
+
+<!-- source: docs/content/examples/run-log/logic.ts -->
+```ts
+export function openRun(): void {
+  if (state.run === "") return;
+  links.open({ url: `https://runlog.example/runs/${state.run}` }).catch(() => {
+    // cancelled when the player declines: nothing to show.
+  });
+}
+```
+
+PlayerVox OverCrow shows the address, then asks the user the first time a
+widget opens a page of a site; the answer holds for that site and that
+widget, until the user takes it back in the Control Center. Several rules
+of one origin share that answer. The call fails with `cancelled` when the
+user declines, `permission_denied` for an address no rule allows,
+`url_invalid` for one that is not a plain HTTPS address (credentials, a
+path with encoded or dot segments, longer than 2048 bytes) and `busy`
+while a confirmation is open.
+
+The address of a page carries data too. A widget with a sensitive
+capability opens no link, and a widget with an account opens only pages of
+that account's service: what it reads there cannot leave for another site.
 
 ### Game events
 

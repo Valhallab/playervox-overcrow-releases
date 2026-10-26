@@ -102,6 +102,10 @@ see [limit constants](sdk.md#limit-constants).
 | `MAX_REQUEST_URL_BYTES` | 2 KiB | URL text of one request. |
 | `MAX_HTTP_REQUEST_BYTES` | 256 KiB | Body of one outgoing request. |
 | `MAX_HTTP_RESPONSE_BYTES` | 1 MiB | Body of one response delivered to the widget when its network rule declares no `maxResponseBytes`, and of every `as: "image"` response. |
+| `MAX_HTTP_HEADER_VALUE_BYTES` | 256 bytes | Value of one response header `http.fetch` gives a widget (`RESPONSE_HEADERS`), repetitions joined; a longer one is left out. |
+| `MAX_LINK_RULES` | 8 | Link rules (`permissions.links`) declared by one package. |
+| `MAX_LINK_PREFIX_BYTES` | 256 bytes | `pathPrefix` of one link rule. |
+| `MAX_LINK_URL_BYTES` | 2 KiB | Address one `links.open` call opens, as the widget writes it and as the host shows it. |
 | `MAX_HTTP_DECLARED_RESPONSE_BYTES` | 3 MiB | Largest `maxResponseBytes` of one network rule: the body of one response the rule allows, delivered to the widget. |
 | `MAX_HTTP_RESPONSE_BYTES_PER_WIDGET` | 4 MiB | Response bytes one widget's requests in flight may reserve, each the bound of its rule; `busy` beyond. Equals `MAX_HTTP_CONCURRENT_PER_WIDGET` × `MAX_HTTP_RESPONSE_BYTES`, so rules without `maxResponseBytes` never reach it. |
 | `MAX_HTTP_RESPONSE_BYTES_GLOBAL` | 64 MiB | Response bytes all widgets' requests in flight may reserve; `busy` beyond. Equals `MAX_HTTP_CONCURRENT_GLOBAL` × `MAX_HTTP_RESPONSE_BYTES`. |

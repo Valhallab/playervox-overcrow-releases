@@ -50,17 +50,41 @@ Which service gives which shape is in the
 <!-- generated:result-shapes -->
 ### `HttpResponse`
 
-Answer of `http.fetch`. `{ status, contentType }` or `{ status, asset }`
+Answer of `http.fetch`. `{ status, contentType, headers }` or `{ status, asset, headers }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
 | `status` | integer | HTTP status. |
 | `contentType` | text or `null` | Response media type; the SDK adds the decoded body, `body`. |
+| `headers` | [`HttpHeaders`](#httpheaders) | The response's headers of `RESPONSE_HEADERS`. |
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
 | `status` | integer | HTTP status. |
 | `asset` | `asset:` handle | The decoded image (`as: "image"`). |
+| `headers` | [`HttpHeaders`](#httpheaders) | The response's headers of `RESPONSE_HEADERS`. |
+
+### `HttpHeaders`
+
+Headers of an `http.fetch` response, by lowercase name: only those of `RESPONSE_HEADERS` the response has, each printable ASCII of at most 256 bytes; a repeated header is joined by `, `. Any other header never reaches the widget. `{ retry-after?, ratelimit?, ratelimit-policy?, ratelimit-limit?, ratelimit-remaining?, ratelimit-reset?, x-ratelimit-limit?, x-ratelimit-remaining?, x-ratelimit-reset?, date?, etag?, last-modified?, cache-control?, expires?, age? }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `retry-after` | text | Present when the response has it. |
+| `ratelimit` | text | Present when the response has it. |
+| `ratelimit-policy` | text | Present when the response has it. |
+| `ratelimit-limit` | text | Present when the response has it. |
+| `ratelimit-remaining` | text | Present when the response has it. |
+| `ratelimit-reset` | text | Present when the response has it. |
+| `x-ratelimit-limit` | text | Present when the response has it. |
+| `x-ratelimit-remaining` | text | Present when the response has it. |
+| `x-ratelimit-reset` | text | Present when the response has it. |
+| `date` | text | Present when the response has it. |
+| `etag` | text | Present when the response has it. |
+| `last-modified` | text | Present when the response has it. |
+| `cache-control` | text | Present when the response has it. |
+| `expires` | text | Present when the response has it. |
+| `age` | text | Present when the response has it. |
 
 ### `GameEvent`
 

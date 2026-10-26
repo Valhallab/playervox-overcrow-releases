@@ -179,6 +179,7 @@ qu’elle autorise.
 | --- | --- | --- | --- |
 | `accounts` | liste de `Account` ≤ 1 | non | Le compte de l’utilisateur sur un service tiers, que l’hôte garde et ajoute aux règles réseau qui le nomment ; le widget ne voit jamais le secret. Présent seulement avec une entrée : un compte déclaré, ou un service intégré que le widget nomme. Avec un compte, chaque règle réseau vise l’une de ses origines, et aucune capability sensible ni `clipboardWrite` n’est permise. |
 | `network` | liste de `NetworkRule` ≤ 32 | non | Règles réseau, distinctes. |
+| `links` | liste de `LinkRule` ≤ 8 | non | Pages web que le widget peut ouvrir dans le navigateur de l’utilisateur avec `links.open`, après un clic : des règles distinctes, aucune ne couvrant une autre de son origine. Pas avec une capability sensible ; avec un compte, seulement sur le service du compte. Demande la fonctionnalité de catalogue `open-links`. |
 | `storage` | booléen | non | Stockage clé-valeur tenu par l’hôte ; `false` par défaut. |
 | `clipboardWrite` | booléen | non | Écriture de texte dans le presse-papiers ; `false` par défaut. |
 | `gameEvents` | liste de `game event` ≤ 32 | non | Noms d’événements `overcrow.game.<name>.v1`, distincts. |

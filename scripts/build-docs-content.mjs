@@ -318,6 +318,10 @@ const LIMIT_GROUPS = {
     "MAX_REQUEST_URL_BYTES",
     "MAX_HTTP_REQUEST_BYTES",
     "MAX_HTTP_RESPONSE_BYTES",
+    "MAX_HTTP_HEADER_VALUE_BYTES",
+    "MAX_LINK_RULES",
+    "MAX_LINK_PREFIX_BYTES",
+    "MAX_LINK_URL_BYTES",
     "MAX_HTTP_DECLARED_RESPONSE_BYTES",
     "MAX_HTTP_RESPONSE_BYTES_PER_WIDGET",
     "MAX_HTTP_RESPONSE_BYTES_GLOBAL",
@@ -1152,6 +1156,7 @@ const GENERATORS = {
   capabilities,
   "capability-list": capabilityList,
   "network-rule-fields": (t) => fields(t, "Permissions > Network rules"),
+  "link-rule-fields": (t) => fields(t, "Permissions > Link rules"),
   // Third-party accounts and integrated services.
   "account-fields": (t) => fields(t, "Permissions > Accounts"),
   "account-send": (t) => fields(t, "Permissions > AccountSend"),

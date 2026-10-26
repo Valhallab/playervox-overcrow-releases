@@ -4,5 +4,6 @@
   "not_connected": "En attente de votre clé Run Log",
   "account_refused": "Run Log a refusé la clé",
   "unavailable": "Run Log ne répond pas",
-  "refresh": "Actualiser"
+  "refresh": "Actualiser",
+  "open": "Ouvrir sur Run Log"
 }

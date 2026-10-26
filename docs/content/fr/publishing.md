@@ -27,8 +27,9 @@ créateurs. Elle n’exécute jamais votre code ni `tsc` :
 3. elle vérifie les limites du schéma, les IDs réservés, `listing.json`,
    l’aperçu et, pour les widgets PlayerVox, la licence MIT ;
 4. elle liste l’autorité que demande le widget, comme la voit le
-   relecteur : capabilities sensibles, chaque route réseau, écritures dans
-   le presse-papiers, stockage et événements de jeu.
+   relecteur : capabilities sensibles, chaque route réseau, chaque site que
+   le widget peut ouvrir, écritures dans le presse-papiers, stockage et
+   événements de jeu.
 
 `--listing optional` vérifie le dossier comme le fait l’espace créateurs,
 où `listing.json` peut manquer. La commande se termine avec le code de
@@ -116,8 +117,8 @@ l’installation, puis à chaque démarrage du widget. Voir
 Une nouvelle version de votre widget est une nouvelle soumission, avec une
 `version` plus élevée : une version publiée n’est jamais remplacée. Une
 mise à jour dont le manifeste demande plus que la version installée (une
-règle réseau, un événement de jeu, une capability, le stockage ou le
-presse-papiers) exige l’accord de l’utilisateur, dans le Centre de
+règle réseau, une règle de lien, un événement de jeu, une capability, le
+stockage ou le presse-papiers) exige l’accord de l’utilisateur, dans le Centre de
 contrôle, avant de s’exécuter.
 
 ## Statuts des versions

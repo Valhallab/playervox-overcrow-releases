@@ -42,15 +42,17 @@ any. Later, the user allows or takes back each permission in the Control
 Center; taking one back restarts the widget without it.
 PlayerVox OverCrow checks the permission again at every call of a service.
 
-Four permissions open general services: `network` (exact HTTPS routes,
-through PlayerVox OverCrow's broker), `storage` (a key-value store for this
-widget only), `clipboardWrite` (writing text, during a user action) and
-`gameEvents` (named game events).
+Five permissions open general services: `network` (exact HTTPS routes,
+through PlayerVox OverCrow's broker), `links` (pages of declared sites,
+opened in the user's browser on a click, after PlayerVox OverCrow showed the
+address and, the first time for each site, the user agreed), `storage` (a
+key-value store for this widget only), `clipboardWrite` (writing text,
+during a user action) and `gameEvents` (named game events).
 
 Capabilities give access to data and actions of PlayerVox OverCrow and of
 the user's accounts. A **sensitive** capability reveals personal data or the
-game being played: a widget that declares one cannot also declare `network`
-or `clipboardWrite`, and its storage lasts only as long as its process, so
+game being played: a widget that declares one cannot also declare `network`,
+`links` or `clipboardWrite`, and its storage lasts only as long as its process, so
 the data cannot leave the machine through the widget.
 
 Account connections belong to PlayerVox OverCrow: the PlayerVox account,
@@ -59,7 +61,8 @@ declares. Sign-in, codes, keys and tokens are asked for in OverCrow's own
 panels and kept by OverCrow, and a widget receives only the data its
 capability describes or the answers of its own routes. A widget with an
 account talks only to that service: one account, every network rule on its
-origins, no sensitive capability and no clipboard. See
+origins, links only to its service's sites, no sensitive capability and no
+clipboard. See
 [third-party accounts](accounts.md#confinement) and
 [integrated services](integrated-services.md).
 
@@ -100,6 +103,8 @@ logic can read them, not set them. See
 - Read account tokens, cookies or credentials: a widget with an account
   never sees its key or token, only the answers of its routes.
 - Read the clipboard.
+- Open a page without the user's click, outside the sites it declares, or
+  without PlayerVox OverCrow showing the address first.
 - Write to logs in production: `log.*` output appears only in a local
   development session.
 - Grant itself a permission, or use a menu row as a user action.

@@ -82,7 +82,7 @@ update.
 - **Requires**: permission `network`
 - **When it can be called**: At any time
 - **Parameters**: `url`: text ≤ 2 KiB; `method`: `GET` \| `POST` \| `PUT` \| `PATCH` \| `DELETE`; `contentType?`: `application/json` \| `text/plain`; `as`: `json` \| `text` \| `bytes` \| `image`
-- **Result**: `{ status, contentType }` with the body, ≤ the rule's `maxResponseBytes` (1 MiB when absent), or `{ status, asset }` from a body ≤ 1 MiB; on a rule that names an account, `not_connected` while it is not connected and `account_refused` when the service refused its secret
+- **Result**: `{ status, contentType, headers }` with the body, ≤ the rule's `maxResponseBytes` (1 MiB when absent), or `{ status, asset, headers }` from a body ≤ 1 MiB; `headers` holds only the response headers a widget may read; on a rule that names an account, `not_connected` while it is not connected and `account_refused` when the service refused its secret
 - **Shape**: [`HttpResponse`](result-shapes.md#httpresponse)
 
 ### `clipboard.writeText`
@@ -92,6 +92,15 @@ update.
 - **When it can be called**: Only during a user action
 - **Parameters**: `text`: text ≤ 16 KiB
 - **Result**: `null`
+
+### `links.open`
+
+- **Kind**: call, answered once; the user confirms it first, in a dialog drawn by PlayerVox OverCrow
+- **Requires**: permission `links`
+- **When it can be called**: Only during a user action
+- **Parameters**: `url`: text ≤ 2 KiB
+- **Result**: `null` once the host handed the address to the browser. The host shows the address and, the first time for its origin, asks the user, who may later take that back in the Control Center; `cancelled` when the user declines; `permission_denied` for an address no rule allows; `url_invalid` for one that is not a plain HTTPS address (credentials, a path with encoded or dot segments, beyond 2 KiB); `busy` while a confirmation is open; `unavailable` when no browser could open it
+- **Shape**: `null`
 
 ### `gameEvents.subscribe`
 

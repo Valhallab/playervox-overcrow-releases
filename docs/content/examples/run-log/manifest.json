@@ -33,6 +33,7 @@
         "maxResponseBytes": 16384,
         "account": "runlog"
       }
-    ]
+    ],
+    "links": [{ "origin": "https://runlog.example", "pathPrefix": "/runs/" }]
   }
 }

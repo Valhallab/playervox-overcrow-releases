@@ -174,6 +174,7 @@ it allows.
 | --- | --- | --- | --- |
 | `accounts` | list of `Account` ≤ 1 | no | The user's account on a third-party service, which the host keeps and adds to the network rules that name it; the widget never sees the secret. Present only with one entry: a declared account, or an integrated service the widget names. With an account, every network rule targets one of its origins, and no sensitive capability or `clipboardWrite` is allowed. |
 | `network` | list of `NetworkRule` ≤ 32 | no | Distinct network rules. |
+| `links` | list of `LinkRule` ≤ 8 | no | Web pages the widget may open in the user's browser with `links.open`, after a click: distinct rules, none covering another of its origin. Not with a sensitive capability; with an account, only on the account's service. Needs the catalog feature `open-links`. |
 | `storage` | boolean | no | Host key-value storage; default `false`. |
 | `clipboardWrite` | boolean | no | Clipboard text writes; default `false`. |
 | `gameEvents` | list of `game event` ≤ 32 | no | Distinct `overcrow.game.<name>.v1` event names. |

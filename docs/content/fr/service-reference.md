@@ -84,7 +84,7 @@ mise à jour.
 - **Exige** : permission `network`
 - **Quand l’appeler** : À tout moment
 - **Paramètres** : `url` : texte ≤ 2 Kio ; `method` : `GET` \| `POST` \| `PUT` \| `PATCH` \| `DELETE` ; `contentType?` : `application/json` \| `text/plain` ; `as` : `json` \| `text` \| `bytes` \| `image`
-- **Résultat** : `{ status, contentType }` avec le corps, d’une taille ≤ au `maxResponseBytes` de la règle (1 Mio quand il est absent), ou `{ status, asset }` à partir d’un corps ≤ 1 Mio ; sur une règle qui nomme un compte, `not_connected` tant qu’il n’est pas connecté et `account_refused` quand le service a refusé son secret
+- **Résultat** : `{ status, contentType, headers }` avec le corps, d’une taille ≤ au `maxResponseBytes` de la règle (1 Mio quand il est absent), ou `{ status, asset, headers }` à partir d’un corps ≤ 1 Mio ; `headers` ne contient que les en-têtes de réponse qu’un widget peut lire ; sur une règle qui nomme un compte, `not_connected` tant qu’il n’est pas connecté et `account_refused` quand le service a refusé son secret
 - **Forme** : [`HttpResponse`](result-shapes.md#httpresponse)
 
 ### `clipboard.writeText`
@@ -94,6 +94,15 @@ mise à jour.
 - **Quand l’appeler** : Seulement pendant une action de l’utilisateur
 - **Paramètres** : `text` : texte ≤ 16 Kio
 - **Résultat** : `null`
+
+### `links.open`
+
+- **Nature** : appel, à réponse unique ; l’utilisateur le confirme d’abord, dans une boîte de dialogue dessinée par PlayerVox OverCrow
+- **Exige** : permission `links`
+- **Quand l’appeler** : Seulement pendant une action de l’utilisateur
+- **Paramètres** : `url` : texte ≤ 2 Kio
+- **Résultat** : `null` une fois que l’hôte a confié l’adresse au navigateur. L’hôte montre l’adresse et, la première fois pour son origine, demande l’accord de l’utilisateur, qui peut le retirer plus tard dans le Centre de contrôle ; `cancelled` quand l’utilisateur refuse ; `permission_denied` pour une adresse qu’aucune règle ne permet ; `url_invalid` pour une adresse qui n’est pas une simple adresse HTTPS (identifiants, chemin avec des segments encodés ou des points, au-delà de 2 Kio) ; `busy` tant qu’une confirmation est ouverte ; `unavailable` quand aucun navigateur n’a pu l’ouvrir
+- **Forme** : `null`
 
 ### `gameEvents.subscribe`
 

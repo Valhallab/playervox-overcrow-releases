@@ -104,6 +104,10 @@ que la logique peut lire sont aussi des constantes du SDK : voir
 | `MAX_REQUEST_URL_BYTES` | 2 Kio | Texte de l’URL d’une requête. |
 | `MAX_HTTP_REQUEST_BYTES` | 256 Kio | Corps d’une requête sortante. |
 | `MAX_HTTP_RESPONSE_BYTES` | 1 Mio | Corps d’une réponse remise au widget quand sa règle réseau ne déclare pas de `maxResponseBytes`, et de toute réponse `as: "image"`. |
+| `MAX_HTTP_HEADER_VALUE_BYTES` | 256 octets | Valeur d’un en-tête de réponse que `http.fetch` donne à un widget (`RESPONSE_HEADERS`), répétitions jointes ; une valeur plus longue est omise. |
+| `MAX_LINK_RULES` | 8 | Règles de lien (`permissions.links`) déclarées par un paquet. |
+| `MAX_LINK_PREFIX_BYTES` | 256 octets | `pathPrefix` d’une règle de lien. |
+| `MAX_LINK_URL_BYTES` | 2 Kio | Adresse qu’ouvre un appel de `links.open`, telle que le widget l’écrit et telle que l’hôte la montre. |
 | `MAX_HTTP_DECLARED_RESPONSE_BYTES` | 3 Mio | Plus grand `maxResponseBytes` d’une règle réseau : le corps d’une réponse que la règle autorise, remis au widget. |
 | `MAX_HTTP_RESPONSE_BYTES_PER_WIDGET` | 4 Mio | Octets de réponse que les requêtes en cours d’un widget peuvent réserver, chacune à hauteur de la limite de sa règle ; `busy` au-delà. Vaut `MAX_HTTP_CONCURRENT_PER_WIDGET` × `MAX_HTTP_RESPONSE_BYTES` : les règles sans `maxResponseBytes` ne l’atteignent jamais. |
 | `MAX_HTTP_RESPONSE_BYTES_GLOBAL` | 64 Mio | Octets de réponse que les requêtes en cours de tous les widgets peuvent réserver ; `busy` au-delà. Vaut `MAX_HTTP_CONCURRENT_GLOBAL` × `MAX_HTTP_RESPONSE_BYTES`. |

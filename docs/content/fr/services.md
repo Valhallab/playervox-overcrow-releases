@@ -264,6 +264,7 @@ Les tableaux ci-dessous indiquent, pour chaque service, quand l’appeler.
 | --- | --- | --- |
 | `network` | Routes HTTPS exactes, joignables par le broker de l’hôte ; au plus 32 règles. | manifeste refusé |
 | `accounts` | Le compte de l’utilisateur sur un service tiers, gardé par l’hôte et ajouté aux règles réseau qui le nomment ; au plus 1. | manifeste refusé |
+| `links` | Pages web de sites déclarés, ouvertes dans le navigateur de l’utilisateur sur un clic, au plus 8 règles ; l’hôte montre chaque adresse et demande l’accord de l’utilisateur une fois par site. | manifeste refusé |
 | `storage` | Stockage clé-valeur tenu par l’hôte, cloisonné par ID de widget, dans la limite de 256 Kio. | données conservées le temps du processus seulement |
 | `clipboardWrite` | Écriture de texte dans le presse-papiers, pendant une action de l’utilisateur en mode interactif. | manifeste refusé |
 | `gameEvents` | Événements de jeu sémantiques nommés `overcrow.game.<name>.v1`, au plus 32. | admis |
@@ -274,6 +275,7 @@ Les tableaux ci-dessous indiquent, pour chaque service, quand l’appeler.
 | Permission | Service | Quand l’appeler |
 | --- | --- | --- |
 | `network` | `http.fetch` | À tout moment |
+| `links` | `links.open` | Seulement pendant une action de l’utilisateur |
 | `storage` | `storage.get` | À tout moment |
 | `storage` | `storage.set` | À tout moment |
 | `storage` | `storage.remove` | À tout moment |
@@ -457,6 +459,47 @@ le presse-papiers.
 Le texte que l’utilisateur sélectionne dans un élément `text` doté de
 l’attribut `selectable` est copié par PlayerVox OverCrow lui-même, sans
 aucune permission.
+
+### Liens
+
+`links.open({ url })` ouvre une page dans le navigateur de l’utilisateur,
+seulement pendant une action de l’utilisateur, et seulement sur un site que
+`permissions.links` déclare. Une règle donne l’`origin` du site et, au
+besoin, la partie que le widget ouvre (`pathPrefix`) ;
+`{ "origin": "https://runlog.example", "pathPrefix": "/runs/" }` permet
+`https://runlog.example/runs/42?tab=splits`, pas les autres pages du site.
+
+<!-- generated:link-rule-fields -->
+| Champ | Type | Obligatoire | Signification |
+| --- | --- | --- | --- |
+| `origin` | `origin` | oui | Origine canonique `https://host[:port]`, comme dans une règle réseau : ni identifiants, ni adresse IP littérale, ni nom local. |
+| `pathPrefix` | texte ≤ 256 octets | non | La partie du site que le widget peut ouvrir : `/` et des segments littéraux (lettres ASCII, chiffres, `.`, `_`, `~` et `-` ; aucun segment `.` ou `..`), avec ou sans `/` final. `/runs/` permet `/runs/` et ce qui est en dessous ; `/app` permet `/app` et ce qui est sous `/app/`, pas `/apps`. Par défaut `/`, tout le site. |
+<!-- /generated:link-rule-fields -->
+
+<!-- source: docs/content/examples/run-log/logic.ts -->
+```ts
+export function openRun(): void {
+  if (state.run === "") return;
+  links.open({ url: `https://runlog.example/runs/${state.run}` }).catch(() => {
+    // cancelled when the player declines: nothing to show.
+  });
+}
+```
+
+PlayerVox OverCrow montre l’adresse, puis demande l’accord de
+l’utilisateur la première fois qu’un widget ouvre une page d’un site ; la
+réponse vaut pour ce site et ce widget, jusqu’à ce que l’utilisateur la
+retire dans le Centre de contrôle. Plusieurs règles d’une même origine
+partagent cette réponse. L’appel échoue avec `cancelled` quand
+l’utilisateur refuse, `permission_denied` pour une adresse qu’aucune règle
+ne permet, `url_invalid` pour une adresse qui n’est pas une simple adresse
+HTTPS (identifiants, chemin avec des segments encodés ou des points, plus
+de 2048 octets) et `busy` tant qu’une confirmation est ouverte.
+
+L’adresse d’une page porte aussi des données. Un widget doté d’une
+capability sensible n’ouvre aucun lien, et un widget doté d’un compte
+n’ouvre que des pages du service de ce compte : ce qu’il y lit ne peut pas
+partir vers un autre site.
 
 ### Événements de jeu
 

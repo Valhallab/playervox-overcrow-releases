@@ -11,6 +11,10 @@
     {
       "permission": "network:GET https://api.runlog.example/v1/me/runs/latest",
       "text": "Reads the latest run, every 5 minutes at most."
+    },
+    {
+      "permission": "link:https://runlog.example/runs/",
+      "text": "Opens the player's latest run on Run Log when they click its button."
     }
   ],
   "reviewMessage": "Test with any Run Log account and its key from runlog.example/settings/api."

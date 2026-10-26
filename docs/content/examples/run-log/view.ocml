@@ -4,6 +4,11 @@
   <text class="time">{state.time}</text>
   <box class="footer">
     <text class="status">{t(state.status)}</text>
+    <if test={state.run != ""}>
+      <button class="refresh" label={t("open")} on:activate={openRun}>
+        <icon name="external-link"/>
+      </button>
+    </if>
     <button class="refresh" label={t("refresh")} on:activate={refresh}>
       <icon name="refresh-cw"/>
     </button>

@@ -25,8 +25,8 @@ never runs your code or `tsc`:
 3. it checks the schema bounds, the reserved IDs, `listing.json`, the
    preview and, for PlayerVox widgets, the MIT license;
 4. it lists the authority the widget requests, as the reviewer sees it:
-   sensitive capabilities, every network route, clipboard writes, storage
-   and game events.
+   sensitive capabilities, every network route, every site the widget may
+   open, clipboard writes, storage and game events.
 
 `--listing optional` checks the folder as the creator space does, where
 `listing.json` may be absent. The command ends with status 1 when the
@@ -108,8 +108,8 @@ time it starts the widget. See
 
 A new version of your widget is a new submission with a higher `version`:
 a published version is never replaced. An update whose manifest asks for
-more than the installed version (a network rule, a game event, a
-capability, storage or the clipboard) needs the user's approval in the
+more than the installed version (a network rule, a link rule, a game event,
+a capability, storage or the clipboard) needs the user's approval in the
 Control Center before it runs.
 
 ## Version statuses

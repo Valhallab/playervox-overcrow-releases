@@ -52,17 +52,41 @@ quelle forme.
 <!-- generated:result-shapes -->
 ### `HttpResponse`
 
-Réponse de `http.fetch`. `{ status, contentType }` ou `{ status, asset }`
+Réponse de `http.fetch`. `{ status, contentType, headers }` ou `{ status, asset, headers }`
 
 | Membre | Forme | Signification |
 | --- | --- | --- |
 | `status` | entier | Code d’état HTTP. |
 | `contentType` | texte ou `null` | Type de média de la réponse ; le SDK y ajoute le corps décodé, `body`. |
+| `headers` | [`HttpHeaders`](#httpheaders) | Les en-têtes de la réponse parmi `RESPONSE_HEADERS`. |
 
 | Membre | Forme | Signification |
 | --- | --- | --- |
 | `status` | entier | Code d’état HTTP. |
 | `asset` | identifiant `asset:` | L’image décodée (`as: "image"`). |
+| `headers` | [`HttpHeaders`](#httpheaders) | Les en-têtes de la réponse parmi `RESPONSE_HEADERS`. |
+
+### `HttpHeaders`
+
+En-têtes d’une réponse de `http.fetch`, par nom en minuscules : seulement ceux de `RESPONSE_HEADERS` que la réponse contient, chacun en ASCII imprimable d’au plus 256 octets ; un en-tête répété est joint par `, `. Aucun autre en-tête n’atteint le widget. `{ retry-after?, ratelimit?, ratelimit-policy?, ratelimit-limit?, ratelimit-remaining?, ratelimit-reset?, x-ratelimit-limit?, x-ratelimit-remaining?, x-ratelimit-reset?, date?, etag?, last-modified?, cache-control?, expires?, age? }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `retry-after` | texte | Présent quand la réponse le contient. |
+| `ratelimit` | texte | Présent quand la réponse le contient. |
+| `ratelimit-policy` | texte | Présent quand la réponse le contient. |
+| `ratelimit-limit` | texte | Présent quand la réponse le contient. |
+| `ratelimit-remaining` | texte | Présent quand la réponse le contient. |
+| `ratelimit-reset` | texte | Présent quand la réponse le contient. |
+| `x-ratelimit-limit` | texte | Présent quand la réponse le contient. |
+| `x-ratelimit-remaining` | texte | Présent quand la réponse le contient. |
+| `x-ratelimit-reset` | texte | Présent quand la réponse le contient. |
+| `date` | texte | Présent quand la réponse le contient. |
+| `etag` | texte | Présent quand la réponse le contient. |
+| `last-modified` | texte | Présent quand la réponse le contient. |
+| `cache-control` | texte | Présent quand la réponse le contient. |
+| `expires` | texte | Présent quand la réponse le contient. |
+| `age` | texte | Présent quand la réponse le contient. |
 
 ### `GameEvent`
 
