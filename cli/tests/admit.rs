@@ -377,6 +377,7 @@ fn the_review_lists_every_requested_authority() {
             "network": [{"origin": "https://api.example.com", "method": "GET", "path": "/v1/count"}],
             "storage": true,
             "clipboardWrite": true,
+            "links": [{"origin": "https://example.com", "pathPrefix": "/help/"}],
             "gameEvents": ["overcrow.game.match.started.v1"],
             "capabilities": ["fps.read"]
         });
@@ -394,6 +395,7 @@ fn the_review_lists_every_requested_authority() {
         [
             "capability",
             "network",
+            "link",
             "clipboardWrite",
             "storage",
             "gameEvent"
@@ -401,6 +403,15 @@ fn the_review_lists_every_requested_authority() {
     );
     assert_eq!(report["review"][1]["origin"], "https://api.example.com");
     assert_eq!(report["review"][1]["maxResponseBytes"], 1_048_576);
+    assert_eq!(report["review"][2]["origin"], "https://example.com");
+    assert_eq!(report["review"][2]["pathPrefix"], "/help/");
+    let shown = text(&cli(&["admit", path(&root), "--publisher", "nova"]).stdout);
+    assert!(
+        shown.contains(
+            "link            https://example.com/help/, opened in the browser on a click"
+        ),
+        "{shown}"
+    );
 
     // A declared response bound is shown to the reviewer.
     edit_manifest(&root, |manifest| {

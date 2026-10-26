@@ -1,7 +1,8 @@
 //! Stable keys of the authority a manifest requests, and what an update
 //! adds to it. The keys are shared with the creator space and its MCP
-//! server: `network:<METHOD> <origin><path>`, `storage`, `clipboardWrite`,
-//! `capability:<name>`, `gameEvent:<name>` and `account:<id>`.
+//! server: `network:<METHOD> <origin><path>`, `link:<origin><pathPrefix>`,
+//! `storage`, `clipboardWrite`, `capability:<name>`, `gameEvent:<name>` and
+//! `account:<id>`.
 //!
 //! A network key names a route; the rest of its rule (path and query
 //! constraints, response bound) is its detail. An update whose route stays
@@ -70,6 +71,10 @@ pub fn keys(manifest: &Manifest) -> BTreeMap<String, BTreeSet<String>> {
             value["path"].as_str().unwrap_or_default()
         );
         keys.entry(key).or_default().insert(rule.clone());
+    }
+    for link in &permissions.links {
+        keys.entry(format!("link:{}{}", link.origin, link.path_prefix))
+            .or_default();
     }
     if permissions.storage {
         keys.entry("storage".into()).or_default();
@@ -161,12 +166,15 @@ mod tests {
             "storage": true,
             "clipboardWrite": true,
             "gameEvents": ["overcrow.game.match.started.v1"],
+            "links": [{"origin": "https://nova.gg", "pathPrefix": "/timers/"}, {"origin": "https://help.nova.gg"}],
         })));
         assert_eq!(
             keys.keys().collect::<Vec<_>>(),
             [
                 "clipboardWrite",
                 "gameEvent:overcrow.game.match.started.v1",
+                "link:https://help.nova.gg/",
+                "link:https://nova.gg/timers/",
                 "network:GET https://api.nova.gg/v1/timers",
                 "storage",
             ]

@@ -781,6 +781,13 @@ fn review(manifest: &Manifest) -> Vec<Value> {
             items.push(item);
         }
     }
+    for link in &permissions.links {
+        items.push(json!({
+            "kind": "link",
+            "origin": link.origin,
+            "pathPrefix": link.path_prefix,
+        }));
+    }
     if permissions.clipboard_write {
         items.push(json!({"kind": "clipboardWrite"}));
     }
@@ -1055,6 +1062,11 @@ pub fn render_human(report: &Value) -> String {
                     ""
                 },
                 parameters_text(&item)
+            ),
+            Some("link") => format!(
+                "link            {}{}, opened in the browser on a click",
+                text(&item["origin"]),
+                text(&item["pathPrefix"])
             ),
             Some("clipboardWrite") => "clipboardWrite  text on a user gesture".to_owned(),
             Some("storage") => {

@@ -218,8 +218,18 @@ pub fn manifest_diagnostic(error: ManifestError, source: &str) -> Diagnostic {
         ),
         ManifestError::SensitiveEgress => (
             "permissions",
-            "a sensitive capability cannot be combined with `network` or `clipboardWrite`".into(),
-            Some("drop the network rules and clipboard access, or the sensitive capability".into()),
+            "a sensitive capability cannot be combined with `network`, `links` or `clipboardWrite`".into(),
+            Some("the data it reads must not leave the computer, and a link's address carries data too: drop the network rules, links and clipboard access, or the sensitive capability".into()),
+        ),
+        ManifestError::LinkRule => (
+            "permissions.links",
+            "a `permissions.links` rule is invalid, repeated or covered by another".into(),
+            Some("at most 8 rules, each an HTTPS `origin` (as in a network rule) and an optional `pathPrefix` of literal segments from `/`; two rules of one origin must not cover each other: keep the wider one".into()),
+        ),
+        ManifestError::AccountLink => (
+            "permissions.links",
+            "with an account, every link must stay on the account's service".into(),
+            Some("a link's address could carry the account's data to another site: link only to the service's own sites (Steam: steampowered.com, steamcommunity.com; a declared account: the hosts of its `origins`, key page or sign-in page), or remove the rule".into()),
         ),
         ManifestError::Account => (
             "permissions.accounts",
@@ -966,6 +976,8 @@ mod tests {
             ManifestError::AccountScope,
             ManifestError::AccountService,
             ManifestError::ServiceRoute,
+            ManifestError::LinkRule,
+            ManifestError::AccountLink,
         ] {
             let diagnostic = manifest_diagnostic(error, "{}");
             assert_eq!(diagnostic.code, format!("manifest.{}", error.as_str()));

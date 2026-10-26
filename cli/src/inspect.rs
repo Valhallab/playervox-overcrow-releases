@@ -119,6 +119,14 @@ pub fn render(package: &Package, archive_len: usize) -> String {
             "no"
         }
     );
+    if permissions.links.is_empty() {
+        let _ = writeln!(out, "  links           none");
+    } else {
+        let _ = writeln!(out, "  links           opened in the browser on a click");
+        for link in &permissions.links {
+            let _ = writeln!(out, "    - {}{}", link.origin, link.path_prefix);
+        }
+    }
     let _ = writeln!(
         out,
         "  clipboardWrite  {}",
@@ -196,6 +204,7 @@ pub fn render_json(package: &Package, archive_len: usize) -> String {
         "permissions": {
             "network": package.manifest.value["permissions"]["network"].as_array().cloned().unwrap_or_default(),
             "storage": permissions.storage,
+            "links": package.manifest.value["permissions"]["links"].as_array().cloned().unwrap_or_default(),
             "clipboardWrite": permissions.clipboard_write,
             "gameEvents": permissions.game_events,
             "capabilities": permissions.capabilities,
