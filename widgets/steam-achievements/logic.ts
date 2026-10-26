@@ -4,8 +4,11 @@
 // Only `GET` routes of the player and game interfaces; never a trade route.
 //
 // Rhythm: one timer a minute, never two requests of one route less than a
-// minute apart, nothing while hidden. Values never disappear: a failed read
-// keeps what was shown and says how old it is.
+// minute apart, nothing while hidden. When the Steam client of this computer
+// saves the stats of a game (an achievement unlocked), PlayerVox OverCrow
+// says so (`steam.events`): that game's achievements are read at once, never
+// twice within 5 seconds. Values never disappear: a failed read keeps what
+// was shown and says how old it is.
 import {
   account,
   formatNumber,
@@ -15,10 +18,13 @@ import {
   onHost,
   onMenu,
   option,
+  steam,
   storage,
   t,
   timers,
   type JsonValue,
+  type Subscription,
+  type Timer,
 } from "@overcrow/sdk";
 
 // ---------------------------------------------------------------------------
@@ -60,6 +66,20 @@ export const PICK_PAGE = 50;
  * within the view's 4,096; a search reaches the others.
  */
 export const PICK_MAX = 200;
+/**
+ * Least time between two reads of one route that a local Steam save asks:
+ * Steam writes a game's stats several times for one achievement, and
+ * dozens of games at its start; a large game's list is megabytes. Twelve
+ * reads a minute at most, far below Steam's daily quota, and still at once
+ * to the player.
+ */
+export const EVENT_FLOOR = 5_000;
+/**
+ * After a save whose read shows nothing new (Steam's Web API lags behind
+ * its client by a few seconds), the looks again, from the save: then the
+ * minute.
+ */
+export const EVENT_LOOKS = [10_000, 30_000] as const;
 /** Backoff of a 5xx or a 429, minutes: then 10 min. */
 const BACKOFF_MINUTES = [1, 2, 4, 8, 10] as const;
 
@@ -661,6 +681,102 @@ measure();
 const language = (): "english" | "french" => (host.locale === "fr" ? "french" : "english");
 const schemaKey = (appid: number, l: string): string => `${appid}:${l}`;
 
+/** What the local Steam events ask (`steam.events`). */
+const events = {
+  subscription: null as Subscription | null,
+  /** The account the subscription names. */
+  steamid: "",
+  lastSeq: 0,
+  /** A read due: the summary (another game, a missed save), the shown game's achievements. */
+  summary: false,
+  player: false,
+  /** The save the looks again count from, and the next look. */
+  savedAt: 0,
+  look: EVENT_LOOKS.length as number,
+  floorTimer: null as Timer | null,
+  lookTimer: null as Timer | null,
+};
+
+/** How long `route` waits for the floor of a read a save asks. */
+function floorLeft(route: Route, now: number): number {
+  const last = model.lastCall.get(route);
+  return last === undefined ? 0 : Math.max(0, last + EVENT_FLOOR - now);
+}
+
+/** A read a save asks of `route`, due now. */
+function asked(route: "summary" | "player", now: number): boolean {
+  return events[route] && floorLeft(route, now) === 0;
+}
+
+/** Listens for the followed account's saves; again for another account. */
+function listen(): void {
+  if (events.steamid === model.steamid) return;
+  events.subscription?.cancel();
+  events.subscription = null;
+  events.steamid = model.steamid;
+  events.lastSeq = 0;
+  if (model.steamid === "") return;
+  events.subscription = steam.events.subscribe({ steamid: model.steamid }, (update) => {
+    // Refused or unknown (an older PlayerVox OverCrow): the minute.
+    if (!update.ok) return;
+    let saved = false;
+    for (const event of update.value.events) {
+      if (event.seq <= events.lastSeq) continue;
+      const missed = event.seq > events.lastSeq + 1;
+      events.lastSeq = event.seq;
+      const appid = whole(object(event.data)?.["appid"]) ?? 0;
+      if (missed || appid !== model.appid) events.summary = true;
+      if (missed || appid === model.appid) events.player = true;
+      saved = true;
+    }
+    if (!saved) return;
+    events.savedAt = Date.now();
+    events.look = 0;
+    events.lookTimer?.cancel();
+    events.lookTimer = null;
+    if (!armFloor()) void refresh();
+  });
+}
+
+/**
+ * Waits for the floor of the reads saves ask; `false` when they are due
+ * now (or none is). Hidden, nothing: shown again, the widget reads.
+ */
+function armFloor(): boolean {
+  events.floorTimer?.cancel();
+  events.floorTimer = null;
+  const now = Date.now();
+  const waits = [events.summary ? floorLeft("summary", now) : Infinity, events.player ? floorLeft("player", now) : Infinity];
+  const wait = Math.min(...waits);
+  if (wait === Infinity || wait === 0) return false;
+  events.floorTimer = timers.after(wait, () => {
+    events.floorTimer = null;
+    void refresh();
+  });
+  return true;
+}
+
+/**
+ * A read of the shown game's achievements that a save asked: something new
+ * ends the looks; nothing new plans the next one, if any is left.
+ */
+function looked(found: boolean): void {
+  events.lookTimer?.cancel();
+  events.lookTimer = null;
+  if (found) {
+    events.look = EVENT_LOOKS.length;
+    return;
+  }
+  const next = EVENT_LOOKS[events.look];
+  if (next === undefined) return;
+  events.look += 1;
+  events.lookTimer = timers.after(Math.max(0, events.savedAt + next - Date.now()), () => {
+    events.lookTimer = null;
+    events.player = true;
+    if (!armFloor()) void refresh();
+  });
+}
+
 /** Whether `route` may be called now: never twice within a minute. */
 export function canCall(route: Route | string, now: number, every = MINUTE): boolean {
   const last = model.lastCall.get(route);
@@ -796,6 +912,9 @@ export async function refresh(): Promise<void> {
   if (model.pending) {
     model.pending = false;
     void refresh();
+  } else if (events.summary || events.player) {
+    // A save asked a read the floor delayed.
+    armFloor();
   }
 }
 
@@ -807,7 +926,13 @@ async function read(): Promise<void> {
   const checked = model.checked;
   model.checked = null;
   const fresh = checked !== null && checked.steamid === model.steamid && now - checked.at < MINUTE - TICK_SLACK;
-  if (!fresh && (now < model.retryAt - TICK_SLACK || !canCall("summary", now))) return;
+  const waiting = now < model.retryAt - TICK_SLACK;
+  if (!fresh && (waiting || !(canCall("summary", now) || asked("summary", now)))) {
+    // A save of the game shown: its achievements alone.
+    if (!waiting && asked("player", now)) await lookAgain(now);
+    return;
+  }
+  events.summary = false;
   const summaryAnswer: Outcome =
     fresh && checked !== null
       ? { kind: "ok", status: 200, body: checked.body, text: "" }
@@ -918,6 +1043,22 @@ async function read(): Promise<void> {
   void saveSnapshot();
 }
 
+/** The shown game's achievements, read again because a save asked. */
+async function lookAgain(now: number): Promise<void> {
+  const appid = model.appid;
+  if (appid === 0 || state.phase !== "game") {
+    events.player = false;
+    return;
+  }
+  const schema = model.schemas.get(schemaKey(appid, language())) ?? model.schemas.get(schemaKey(appid, "english")) ?? null;
+  const step = await playerStep(appid, now, false, schema);
+  if (step === "hidden") return hide("details", now);
+  if (step !== "done") return failed(step, now);
+  succeeded(now);
+  render();
+  void saveSnapshot();
+}
+
 /** Shows the game as known so far: the count and the bar before the names. */
 function showGame(now: number): void {
   succeeded(now);
@@ -934,8 +1075,10 @@ async function playerStep(appid: number, now: number, stopped: boolean, schema: 
   // Refused (hidden details, not readable): asked again every 10 minutes,
   // never in a loop; the first read of a game at once.
   const playerEvery = model.playing && model.readable && model.hidden === "" ? MINUTE : OUT_OF_GAME_EVERY;
-  const playerDue = stopped || model.readPlayer === 0 || now - model.readPlayer >= playerEvery - TICK_SLACK;
-  if (!playerDue || !canCall("player", now)) return "done";
+  const save = asked("player", now);
+  const playerDue = save || stopped || model.readPlayer === 0 || now - model.readPlayer >= playerEvery - TICK_SLACK;
+  if (!playerDue || !(save || canCall("player", now))) return "done";
+  events.player = false;
   // Without `l`: names come from the schema, the answer stays small.
   const playerAnswer = await call("player", { steamid: model.steamid, appid }, "player", now);
   const refused = playerAnswer.kind === "ok" || playerAnswer.kind === "status" ? refusal(playerAnswer.status, playerAnswer.body) : null;
@@ -955,6 +1098,10 @@ async function playerStep(appid: number, now: number, stopped: boolean, schema: 
   } else {
     const read = await playerOf(playerAnswer, schema === null);
     if (read === null) return { kind: "server" };
+    const before = model.unlocked;
+    const found = [...read.unlocked.keys()].some((id) => before?.has(id) !== true);
+    // A save's read plans the next look; any read that finds something ends them.
+    if (save || found) looked(found);
     markNew(read.unlocked, now);
     model.unlocked = read.unlocked;
     if (schema === null) {
@@ -1512,6 +1659,7 @@ export async function submitProfile(): Promise<void> {
   }
   const changed = steamid !== model.steamid;
   model.steamid = steamid;
+  listen();
   // Another profile, or the same one checked again: the next read says.
   saveHidden("");
   state.hidden = "";
@@ -1677,7 +1825,10 @@ timers.every(MINUTE, () => {
   void refresh();
 });
 
-void restore().then(() => refresh());
+void restore().then(() => {
+  listen();
+  return refresh();
+});
 
 // ---------------------------------------------------------------------------
 // View helpers (the view's expressions)

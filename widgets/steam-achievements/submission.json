@@ -2,7 +2,7 @@
   "justifications": [
     {
       "permission": "account:steam",
-      "text": "Uses the Steam connection of PlayerVox OverCrow to read your game and your achievements, read only. Your Steam key is sensitive: it can also manage your item trades. This widget never calls a trade route (no IEconService), never sees the key, and PlayerVox OverCrow sends the key only to api.steampowered.com. To revoke it: steamcommunity.com/dev/apikey, then \"Revoke My Steam Web API Key\". Never show that page on stream."
+      "text": "Uses PlayerVox OverCrow's Steam connection to read your game and achievements, read only, and its signal of when Steam on this PC saves a game's achievements (game and time only), to read them at once. Your Steam key can also manage item trades: this widget never calls a trade route (no IEconService), never sees the key, and PlayerVox OverCrow sends it only to api.steampowered.com. To revoke it: steamcommunity.com/dev/apikey, then \"Revoke My Steam Web API Key\". Never show that page on stream."
     },
     {
       "permission": "network:GET https://api.steampowered.com/ISteamUser/ResolveVanityURL/v1/",
@@ -18,7 +18,7 @@
     },
     {
       "permission": "network:GET https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/",
-      "text": "Reads which achievements of the shown game you unlocked, and when; its refusal also tells that Steam hides your game details. Once a minute in game, every 10 minutes out of game or after a refusal. Up to 3 MiB, for games of thousands of achievements. With your language (l), once per game, only when a game's list exceeds its own route's bound: then this gives the names and descriptions instead."
+      "text": "Reads which achievements of the shown game you unlocked, and when; its refusal also tells that Steam hides your game details. Once a minute in game, at once when Steam on this PC saves them (never twice in 5 s), every 10 minutes out of game or after a refusal. Up to 3 MiB, for games of thousands of achievements. With your language (l), once per game, only when a game's list exceeds its own route's bound: then this gives the names and descriptions instead."
     },
     {
       "permission": "network:GET https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/",

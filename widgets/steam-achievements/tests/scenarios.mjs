@@ -171,13 +171,13 @@ const STAGE = (await import("../../../scripts/compose-previews.mjs")).STAGE_COLO
 const WIDTH = { line: 240, compact: 280, standard: 300, full: 340 };
 const profile = { profile: { steamid: ID, input: `https://steamcommunity.com/profiles/${ID}` } };
 
-function scenario(name, description, { host = {}, http = [], steps }) {
+function scenario(name, description, { host = {}, http = [], subscriptions, steps }) {
   const value = {
     scenarioVersion: 1,
     name,
     description,
     host: { startAt: START, storage: { ...profile }, ...host },
-    fixtures: { http },
+    fixtures: subscriptions === undefined ? { http } : { http, subscriptions },
     steps,
   };
   writeFileSync(new URL(`${name}.scenario.json`, here), `${JSON.stringify(value, null, 2)}\n`);
@@ -707,6 +707,85 @@ scenario("cadence", "Ten minutes in game: one summary and one achievements read 
     { expect: { state: "running" } },
     { advance: { ms: 10 * MIN } },
     { expect: { fault: "none", text: ["12 / 40"] } },
+  ],
+});
+
+// --- local Steam events (PlayerVox OverCrow 0.9): the Steam client of this
+// computer saved the stats of a game of the followed account.
+const EVENTS = "steam.events.subscribe";
+const LIVE = { subscriptions: { [EVENTS]: { state: "live", reason: null, events: [] } } };
+const saved = (seq, game, atMs) => ({
+  publish: { service: EVENTS, value: { state: "live", reason: null, events: [{ seq, type: "stats.saved", at: atMs, data: { appid: game.appid } }] } },
+});
+/** The reads of `game` at start, then `players` more of its achievements (`unlockedNow` after the first `from`), and `summaries` more summaries. */
+function eventReads(game, { summaries, players, from = 0, unlockedNow = { A13: 0 } }) {
+  return [
+    ...repeat(1 + summaries, () => fixture(urls.summary, summary({ playing: game }))),
+    fixture(urls.recent, recent([game])),
+    fixture(urls.schema(game), schema(game, "english")),
+    fixture(urls.schema(game, "french"), schema(game, "french")),
+    ...repeat(1 + players, (_, n) => fixture(urls.player(game), player(game, n > from ? unlockedNow : {}))),
+    fixture(urls.rarity(game), rarity(game), false),
+    ...images(game),
+  ];
+}
+
+scenario("event-reads-now", "A save of the game shown: its achievements read at once, Endless Night shown 5 s after the unlock; then the minute.", {
+  ...LIVE,
+  http: eventReads(ASHEN, { summaries: 1, players: 1 }),
+  steps: [
+    { expect: { state: "running", text: ["12 / 40"] } },
+    { advance: { ms: 5_000 } },
+    saved(1, ASHEN, START + 5_000),
+    { expect: { text: ["13 / 40", "Endless Night", "New"], fault: "none" } },
+    // The minute's tick reads the summary; the achievements, read 55 s ago, wait.
+    { advance: { ms: 56_000 } },
+    { expect: { text: ["13 / 40"], fault: "none" } },
+  ],
+});
+
+scenario("event-follow-ups", "Steam's answer lags behind its client: read at once, again at +10 s, and at +30 s it shows the unlock; then nothing until a minute after.", {
+  ...LIVE,
+  http: eventReads(ASHEN, { summaries: 2, players: 4, from: 2 }),
+  steps: [
+    { expect: { state: "running", text: ["12 / 40"] } },
+    { advance: { ms: 5_000 } },
+    saved(1, ASHEN, START + 5_000),
+    { expect: { text: ["12 / 40"], fault: "none" } },
+    { advance: { ms: 10_000 } },
+    { expect: { text: ["12 / 40"], fault: "none" } },
+    { advance: { ms: 19_000 } },
+    { expect: { text: ["12 / 40"], fault: "none" } },
+    { advance: { ms: 1_000 } },
+    { expect: { text: ["13 / 40", "Endless Night"], fault: "none" } },
+    // No third look; the minute reads the achievements a minute after the last look.
+    { advance: { ms: 90_000 } },
+    { expect: { text: ["13 / 40"], fault: "none" } },
+  ],
+});
+
+scenario("no-signal-cadence", "Without the local signal (Steam elsewhere, an older Steam): one summary and one achievements read a minute, as before.", {
+  subscriptions: { [EVENTS]: { state: "off", reason: "unavailable", events: [] } },
+  http: reads(ASHEN, { minutes: 10 }),
+  steps: [
+    { expect: { state: "running" } },
+    { advance: { ms: 10 * MIN } },
+    { expect: { fault: "none", text: ["12 / 40"] } },
+  ],
+});
+
+scenario("event-while-hidden", "A save while hidden: nothing is read; shown again 10 s later, the achievements at once.", {
+  ...LIVE,
+  http: eventReads(ASHEN, { summaries: 0, players: 1 }),
+  steps: [
+    { expect: { state: "running", text: ["12 / 40"] } },
+    { advance: { ms: 5_000 } },
+    { host: { visible: false } },
+    { advance: { ms: 5_000 } },
+    saved(1, ASHEN, START + 10_000),
+    { advance: { ms: 10_000 } },
+    { host: { visible: true } },
+    { expect: { text: ["13 / 40", "Endless Night"], fault: "none" } },
   ],
 });
 

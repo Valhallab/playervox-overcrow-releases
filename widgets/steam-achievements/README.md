@@ -72,7 +72,7 @@ keep the previous version of the widget).
 | `ISteamUser/ResolveVanityURL/v1` | When you enter a profile link with a custom name |
 | `ISteamUser/GetPlayerSummaries/v2` | Every minute while shown: the game running and the profile's visibility |
 | `IPlayerService/GetRecentlyPlayedGames/v1` | When the game changes, then every 10 minutes out of game |
-| `ISteamUserStats/GetPlayerAchievements/v1` | Every minute in game, every 10 minutes out of game (up to 3 MiB). With `l`, once per game and language, only for a game whose list exceeds its route's bound: the names and descriptions instead |
+| `ISteamUserStats/GetPlayerAchievements/v1` | Every minute in game, at once when Steam on this computer saves the game's achievements (never twice within 5 seconds), every 10 minutes out of game (up to 3 MiB). With `l`, once per game and language, only for a game whose list exceeds its route's bound: the names and descriptions instead |
 | `ISteamUserStats/GetSchemaForGame/v2` | Once per game and language, then kept (up to 3 MiB: Steam's limit of 5,000 achievements per game fits); a list beyond, tried again a day later |
 | `ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2` | Once per game and day, without the key (up to 2 MiB) |
 
@@ -94,6 +94,18 @@ your computer and sends it only to `api.steampowered.com`. To revoke it:
   the delivery of the tick); the list of achievements once per game and
   language, so a language switch reads its names at once; the profile's
   check is the first read.
+- **Local signal.** From PlayerVox OverCrow 0.9.0-beta.1 (`steam.events`,
+  catalog feature `steam-events`; earlier versions keep 1.0.2), the host
+  says when the Steam client of this computer saves a game's stats of the
+  followed account (`stats.saved`: the game and the time, nothing else).
+  For the game shown, its achievements are read at once, never twice within
+  5 seconds; if Steam's answer shows nothing new yet (its Web API lags
+  behind its client by a few seconds), they are read again 10 and 30
+  seconds after the save, then at the minute. A save of another game reads
+  the summary at once (Steam switched games), as does a missed save (a gap
+  in `seq`). Hidden, nothing is read; shown again, what a save asked is read
+  at once. Without the signal (Steam on another computer, an older
+  application), the minute as before.
 - **Failures.** A network failure or a timeout retries every minute; a 5xx
   or a 429 waits 1, 2, 4, 8 then 10 minutes (`http.fetch` gives no
   `Retry-After`); a refusal of a game's achievements (403, 400 with an
@@ -155,7 +167,8 @@ your computer and sends it only to `api.steampowered.com`. To revoke it:
 - Games outside Steam are not seen.
 - Store images are sometimes missing (recent games name them with a hash
   no route gives): the game's icon replaces them.
-- Updated every minute, not live.
+- Without the local signal (Steam on another computer), updated every
+  minute, not live.
 
 ## Tests
 
