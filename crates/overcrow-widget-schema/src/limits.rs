@@ -1141,7 +1141,13 @@ pub const SERVICE_EVENT_WINDOW: Limit = fixed(
     "SERVICE_EVENT_WINDOW",
     16,
     Unit::Count,
-    "Latest events each update of `twitch.events.subscribe` repeats: updates are coalesced, `seq` tells a new event from one already seen.",
+    "Latest events each update of `twitch.events.subscribe` and `steam.events.subscribe` repeats: updates are coalesced, `seq` tells a new event from one already seen.",
+);
+pub const MAX_STEAMID_BYTES: Limit = fixed(
+    "MAX_STEAMID_BYTES",
+    17,
+    Unit::Bytes,
+    "`steamid` of `steam.events.subscribe`: a SteamID64, 17 digits.",
 );
 pub const MAX_DNS_LABEL_BYTES: Limit = fixed(
     "MAX_DNS_LABEL_BYTES",
@@ -1474,6 +1480,7 @@ pub const ALL: &[&Limit] = &[
     &MAX_SERVICE_EVENTS,
     &MAX_SERVICE_EVENT_BYTES,
     &SERVICE_EVENT_WINDOW,
+    &MAX_STEAMID_BYTES,
     &MAX_DNS_LABEL_BYTES,
     &MAX_DNS_NAME_BYTES,
     &MAX_OBJECT_ID_BYTES,

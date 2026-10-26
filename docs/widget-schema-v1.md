@@ -192,7 +192,8 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MAX_OAUTH_SCOPE_BYTES` | 128 bytes | fixed | Name of one OAuth scope. |
 | `MAX_SERVICE_EVENTS` | 32 | fixed | `events` of an integrated service's declaration. |
 | `MAX_SERVICE_EVENT_BYTES` | 16 KiB | fixed | Compact JSON of the `data` of one service event; a larger event is dropped and its `seq` skipped. |
-| `SERVICE_EVENT_WINDOW` | 16 | fixed | Latest events each update of `twitch.events.subscribe` repeats: updates are coalesced, `seq` tells a new event from one already seen. |
+| `SERVICE_EVENT_WINDOW` | 16 | fixed | Latest events each update of `twitch.events.subscribe` and `steam.events.subscribe` repeats: updates are coalesced, `seq` tells a new event from one already seen. |
+| `MAX_STEAMID_BYTES` | 17 bytes | fixed | `steamid` of `steam.events.subscribe`: a SteamID64, 17 digits. |
 | `MAX_DNS_LABEL_BYTES` | 63 bytes | fixed | One dot-separated label of a network origin host or of a widget ID. |
 | `MAX_DNS_NAME_BYTES` | 253 bytes | fixed | Host name of one network origin. |
 | `MAX_OBJECT_ID_BYTES` | 128 bytes | fixed | Opaque object ID or cursor exchanged with a capability service. |
@@ -966,7 +967,7 @@ An entry of `permissions.accounts` that names an integrated service. The account
 | `service` | `steam` \| `twitch` | yes | An integrated service of the table: PlayerVox defines its origins, how the secret is sent, its key page or OAuth client and the paths no widget reaches; the user connects it once and every widget that names it shares the connection. The account's `id` is the service's: the permission key is `account:<service>` and the routes name it in `account`. Only `scopes`, `required` and `events` stand beside it. |
 | `scopes` | list of `scope name` ≤ `MAX_OAUTH_SCOPES` | no | OAuth services only: distinct scopes among those the service offers, all read-only in version 1; default none. |
 | `required` | boolean | no | As for a declared account; default `true`. |
-| `events` | list of `event type` ≤ `MAX_SERVICE_EVENTS` | no | A service with live events only (Twitch): distinct types of the service's table, each read by a scope among `scopes`; the host subscribes on the user's own channel and `twitch.events.subscribe` delivers them. Not part of the permission's detail: an event reads what its scope already opens. Needs the feature `twitch-events`. |
+| `events` | list of `event type` ≤ `MAX_SERVICE_EVENTS` | no | A service with live events only (Twitch, Steam): distinct types of the service's table, each read by a scope among `scopes` where it has one. Twitch's come from the user's own channel by `twitch.events.subscribe`; Steam's from the Steam client of the user's computer, for the account the widget names, by `steam.events.subscribe`. Not part of the permission's detail: an event tells what the service's routes already read. Needs the feature `twitch-events` or `steam-events`. |
 
 ### Integrated services
 
@@ -1040,6 +1041,7 @@ Authority is checked by the host at every call, immediately before acting. Gestu
 | `twitch.chat.favorite` | capability `twitch.chat.read` | call | yes | no | `channel`: text ≤ `MAX_CHAT_CHANNEL_BYTES`; `favorite`: boolean | `null`; `quota_exceeded` beyond `MAX_CHAT_FAVORITES` | `null` | fixed |
 | `account.subscribe` | a declared, granted account (`id`) | subscribe | no | no | `id`: identifier ≤ `MAX_ACCOUNT_ID_BYTES` | `{ state }` at once, then at each change: `signed_out`, `pending` (a sign-in step is open), `connected`, `refused` (the service refused the key) or `expired` (the service asks to sign in again). The widget never sees the secret, the account's name or its scopes; with `required`, the host covers the content until the account is connected | `AccountStatus` | fixed |
 | `twitch.events.subscribe` | the named, granted service `twitch` | subscribe | no | no | `types?`: list of `event type` ≤ `MAX_SERVICE_EVENTS` | `{ state, reason, events }` at once, then at each change. `state` is `live` once the host has subscribed at Twitch, `off` otherwise, with `reason` `connecting`, `not_connected` (Twitch is not connected, or its connection lacks a declared scope) or `unavailable` (Twitch refused or cannot be reached; the host retries). Twitch replays nothing: at each `live`, read once by `http.fetch` what changed meanwhile, and keep reading while `off`. `events` repeats the latest `SERVICE_EVENT_WINDOW` events of the subscription, oldest first, each `{ seq, type, at, data }`: updates are coalesced, so take only those whose `seq` is above the last one seen; a gap in `seq` means events were missed (read again). `data` is the host's projection of Twitch's event: every field of the type's table, `null` where Twitch sent none | `TwitchEvents` | fixed |
+| `steam.events.subscribe` | the named, granted service `steam` | subscribe | no | no | `steamid`: text ≤ `MAX_STEAMID_BYTES`; `types?`: list of `event type` ≤ `MAX_SERVICE_EVENTS` | `{ state, reason, events }` at once, then at each change. `state` is `live` while the host watches the Steam client's stats on this computer, `off` otherwise, with `reason` `connecting`, `not_connected` (Steam is not connected) or `unavailable` (no Steam client found on this computer). Steam pushes nothing and the host replays nothing: the events only say when to read again by `http.fetch`, and the widget keeps reading at its own pace too (Steam may run on another computer). `events` repeats the latest `SERVICE_EVENT_WINDOW` events of the subscription, oldest first, each `{ seq, type, at, data }`: updates are coalesced, so take only those whose `seq` is above the last one seen; a gap in `seq` means events were missed (read again). `stats.saved`: the Steam client saved the stats of a game of that account, at each achievement unlocked and at other times; `data` is `{ appid }`, `at` the time of the save. At most one subscription per widget at a time: another fails with `busy` | `SteamEvents` | fixed |
 | `account.connect` | a declared, granted account (`id`) | call | yes | no | `id`: identifier ≤ `MAX_ACCOUNT_ID_BYTES` | `null`; the host shows its account panel for this account, in its current state: the widget's own button for an account that is not `required` | `null` | fixed |
 
 ### Result shapes
@@ -1388,6 +1390,27 @@ Live Twitch events of the widget's declared types. `{ state, reason, events }`
 | `state` | `live` \| `off` | `live` while the host is subscribed at Twitch. |
 | `reason` | `connecting` \| `not_connected` \| `unavailable` or `null` | Why the state is `off`; `null` when `live`. |
 | `events` | list of `TwitchEvent` | The latest events, oldest first. |
+
+#### `SteamEvent`
+
+One local Steam event. `{ seq, type, at, data }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `seq` | integer | Order of the event in the subscription, from 1, without gaps unless events were dropped. |
+| `type` | `stats.saved` | The type, among those subscribed. |
+| `at` | integer | When the Steam client saved it, in Unix milliseconds of the host's clock, never later than the update. |
+| `data` | JSON | The fields of the type's table: `{ appid }` for `stats.saved`. |
+
+#### `SteamEvents`
+
+Local Steam events of the widget's declared types, for the account it names. `{ state, reason, events }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `state` | `live` \| `off` | `live` while the host watches the Steam client's stats on this computer. |
+| `reason` | `connecting` \| `not_connected` \| `unavailable` or `null` | Why the state is `off`; `null` when `live`. |
+| `events` | list of `SteamEvent` | The latest events, oldest first. |
 
 Service error codes: `invalid_request`, `permission_denied`, `gesture_required`, `not_connected`, `account_refused`, `review_removed_by_moderation`, `stale_context`, `unavailable`, `busy`, `cancelled`, `quota_exceeded`, `unsupported`, `url_invalid`, `resolve_failed`, `address_denied`, `too_many_addresses`, `peer_mismatch`, `redirect_denied`, `encoding_denied`, `content_type_denied`, `response_metadata_limit`, `request_body_limit`, `response_body_limit`, `image_invalid`, `timeout`, `transport_failed`.
 

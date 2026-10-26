@@ -153,7 +153,7 @@ pub const SERVICE_ACCOUNT_FIELDS: &[Field] = &[
     Field::optional(
         "events",
         ValueType::ListOf("event type", &MAX_SERVICE_EVENTS),
-        "A service with live events only (Twitch): distinct types of the service's table, each read by a scope among `scopes`; the host subscribes on the user's own channel and `twitch.events.subscribe` delivers them. Not part of the permission's detail: an event reads what its scope already opens. Needs the feature `twitch-events`.",
+        "A service with live events only (Twitch, Steam): distinct types of the service's table, each read by a scope among `scopes` where it has one. Twitch's come from the user's own channel by `twitch.events.subscribe`; Steam's from the Steam client of the user's computer, for the account the widget names, by `steam.events.subscribe`. Not part of the permission's detail: an event tells what the service's routes already read. Needs the feature `twitch-events` or `steam-events`.",
     ),
 ];
 
@@ -718,7 +718,9 @@ fn validate_service_account(
                 .as_str()
                 .and_then(|kind| service.event(kind))
                 .ok_or(invalid)?;
-            if !scopes.iter().any(|scope| scope.name == event.scope)
+            if event
+                .scope
+                .is_some_and(|needed| !scopes.iter().any(|scope| scope.name == needed))
                 || events.iter().any(|known| known.kind == event.kind)
             {
                 return Err(invalid);

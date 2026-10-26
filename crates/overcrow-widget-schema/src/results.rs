@@ -597,6 +597,57 @@ pub const SHAPES: &[NamedShape] = &[
         ]),
         "Live Twitch events of the widget's declared types.",
     ),
+    named(
+        "SteamEvent",
+        Shape::Record(&[
+            member(
+                "seq",
+                Shape::Integer,
+                "Order of the event in the subscription, from 1, without gaps unless events were dropped.",
+            ),
+            member(
+                "type",
+                Shape::Keyword(crate::integrated::STEAM_EVENT_TYPES),
+                "The type, among those subscribed.",
+            ),
+            member(
+                "at",
+                Shape::Integer,
+                "When the Steam client saved it, in Unix milliseconds of the host's clock, never later than the update.",
+            ),
+            member(
+                "data",
+                Shape::Json,
+                "The fields of the type's table: `{ appid }` for `stats.saved`.",
+            ),
+        ]),
+        "One local Steam event.",
+    ),
+    named(
+        "SteamEvents",
+        Shape::Record(&[
+            member(
+                "state",
+                Shape::Keyword(&["live", "off"]),
+                "`live` while the host watches the Steam client's stats on this computer.",
+            ),
+            member(
+                "reason",
+                Shape::Nullable(&Shape::Keyword(&[
+                    "connecting",
+                    "not_connected",
+                    "unavailable",
+                ])),
+                "Why the state is `off`; `null` when `live`.",
+            ),
+            member(
+                "events",
+                Shape::List(&Shape::Named("SteamEvent")),
+                "The latest events, oldest first.",
+            ),
+        ]),
+        "Local Steam events of the widget's declared types, for the account it names.",
+    ),
 ];
 
 /// Response headers `http.fetch` gives a widget, by lowercase name: how

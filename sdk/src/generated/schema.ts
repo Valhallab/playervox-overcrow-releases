@@ -789,6 +789,28 @@ export interface TwitchEvents {
   readonly events: ReadonlyArray<TwitchEvent>;
 }
 
+/** One local Steam event. */
+export interface SteamEvent {
+  /** Order of the event in the subscription, from 1, without gaps unless events were dropped. */
+  readonly seq: number;
+  /** The type, among those subscribed. */
+  readonly type: "stats.saved";
+  /** When the Steam client saved it, in Unix milliseconds of the host's clock, never later than the update. */
+  readonly at: number;
+  /** The fields of the type's table: `{ appid }` for `stats.saved`. */
+  readonly data: JsonValue;
+}
+
+/** Local Steam events of the widget's declared types, for the account it names. */
+export interface SteamEvents {
+  /** `live` while the host watches the Steam client's stats on this computer. */
+  readonly state: "live" | "off";
+  /** Why the state is `off`; `null` when `live`. */
+  readonly reason: "connecting" | "not_connected" | "unavailable" | null;
+  /** The latest events, oldest first. */
+  readonly events: ReadonlyArray<SteamEvent>;
+}
+
 // Services.
 
 /** Every service name. */
@@ -963,6 +985,13 @@ export interface ServiceParamsMap {
     /** Distinct event types among the declaration's `events`; default all of them. A type it does not list fails with `permission_denied`. */
     readonly types?: readonly string[];
   };
+  /** Parameters of `steam.events.subscribe`. */
+  readonly "steam.events.subscribe": {
+    /** The SteamID64 of the account the widget follows: 17 digits from `7656119`. Another value fails with `invalid_request`. */
+    readonly steamid: string;
+    /** Distinct event types among the declaration's `events`; default all of them. A type it does not list fails with `permission_denied`. */
+    readonly types?: readonly string[];
+  };
   /** Parameters of `account.connect`. */
   readonly "account.connect": {
     /** `id` of an account the manifest declares, or of the integrated service it names, that the user granted. */
@@ -1050,6 +1079,8 @@ export interface ServiceResultMap {
   readonly "account.subscribe": AccountStatus;
   /** `twitch.events.subscribe`: `{ state, reason, events }` at once, then at each change. `state` is `live` once the host has subscribed at Twitch, `off` otherwise, with `reason` `connecting`, `not_connected` (Twitch is not connected, or its connection lacks a declared scope) or `unavailable` (Twitch refused or cannot be reached; the host retries). Twitch replays nothing: at each `live`, read once by `http.fetch` what changed meanwhile, and keep reading while `off`. `events` repeats the latest `SERVICE_EVENT_WINDOW` events of the subscription, oldest first, each `{ seq, type, at, data }`: updates are coalesced, so take only those whose `seq` is above the last one seen; a gap in `seq` means events were missed (read again). `data` is the host's projection of Twitch's event: every field of the type's table, `null` where Twitch sent none. */
   readonly "twitch.events.subscribe": TwitchEvents;
+  /** `steam.events.subscribe`: `{ state, reason, events }` at once, then at each change. `state` is `live` while the host watches the Steam client's stats on this computer, `off` otherwise, with `reason` `connecting`, `not_connected` (Steam is not connected) or `unavailable` (no Steam client found on this computer). Steam pushes nothing and the host replays nothing: the events only say when to read again by `http.fetch`, and the widget keeps reading at its own pace too (Steam may run on another computer). `events` repeats the latest `SERVICE_EVENT_WINDOW` events of the subscription, oldest first, each `{ seq, type, at, data }`: updates are coalesced, so take only those whose `seq` is above the last one seen; a gap in `seq` means events were missed (read again). `stats.saved`: the Steam client saved the stats of a game of that account, at each achievement unlocked and at other times; `data` is `{ appid }`, `at` the time of the save. At most one subscription per widget at a time: another fails with `busy`. */
+  readonly "steam.events.subscribe": SteamEvents;
   /** `account.connect`: `null`; the host shows its account panel for this account, in its current state: the widget's own button for an account that is not `required`. */
   readonly "account.connect": null;
 }
@@ -1098,7 +1129,8 @@ export type SubscribeServiceName =
   | "journal.subscribe"
   | "twitch.chat.subscribe"
   | "account.subscribe"
-  | "twitch.events.subscribe";
+  | "twitch.events.subscribe"
+  | "steam.events.subscribe";
 
 /** Services accepted only while a gesture event is handled. */
 export type GestureServiceName =

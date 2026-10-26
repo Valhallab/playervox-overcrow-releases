@@ -118,11 +118,11 @@ fn each_event_is_of_the_table_and_read_by_a_declared_scope() {
 }
 
 #[test]
-fn only_a_service_with_events_takes_them() {
+fn each_service_takes_only_its_own_types() {
     let steam = base(json!({"service": "steam", "events": ["channel.goal.end"]}));
     assert_eq!(validate(&steam).err(), Some("account"));
-    assert!(STEAM.events.is_empty());
-    assert_eq!(STEAM.events_feature, None);
+    assert!(STEAM.event("channel.goal.end").is_none());
+    assert!(TWITCH.event("stats.saved").is_none());
 }
 
 #[test]
@@ -148,7 +148,7 @@ fn the_table_is_the_eighteen_types_of_the_read_scopes() {
     let table: Vec<(&str, &str, &str)> = TWITCH
         .events
         .iter()
-        .map(|event| (event.kind, event.version, event.scope))
+        .map(|event| (event.kind, event.version, event.scope.expect("scoped")))
         .collect();
     assert_eq!(
         table,
@@ -196,7 +196,11 @@ fn the_table_is_the_eighteen_types_of_the_read_scopes() {
     );
     for event in TWITCH.events {
         // Every scope is a read scope a widget may ask for.
-        assert!(TWITCH.scope(event.scope).is_some(), "{}", event.kind);
+        assert!(
+            TWITCH.scope(event.scope.expect("scoped")).is_some(),
+            "{}",
+            event.kind
+        );
         let condition = if event.kind == "channel.follow" {
             EventCondition::BroadcasterAndModerator
         } else {

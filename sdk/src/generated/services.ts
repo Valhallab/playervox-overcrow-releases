@@ -130,6 +130,18 @@ export interface SessionServices {
 /** The `session.*` services. */
 export const session: SessionServices = /* @__PURE__ */ group("session", ["subscribe"]);
 
+/** The `steam.*` services. */
+export interface SteamServices {
+  /** The `steam.events.*` services. */
+  readonly events: {
+    /** `steam.events.subscribe`. Requires the `steam` service the manifest names, granted by the user. Updates: `{ state, reason, events }` at once, then at each change. `state` is `live` while the host watches the Steam client's stats on this computer, `off` otherwise, with `reason` `connecting`, `not_connected` (Steam is not connected) or `unavailable` (no Steam client found on this computer). Steam pushes nothing and the host replays nothing: the events only say when to read again by `http.fetch`, and the widget keeps reading at its own pace too (Steam may run on another computer). `events` repeats the latest `SERVICE_EVENT_WINDOW` events of the subscription, oldest first, each `{ seq, type, at, data }`: updates are coalesced, so take only those whose `seq` is above the last one seen; a gap in `seq` means events were missed (read again). `stats.saved`: the Steam client saved the stats of a game of that account, at each achievement unlocked and at other times; `data` is `{ appid }`, `at` the time of the save. At most one subscription per widget at a time: another fails with `busy`. */
+    subscribe(params: P["steam.events.subscribe"], listener: Listener<R["steam.events.subscribe"]>): Subscription;
+  };
+}
+
+/** The `steam.*` services. */
+export const steam: SteamServices = /* @__PURE__ */ group("steam", ["events.subscribe"]);
+
 /** The `stopwatch.*` services. */
 export interface StopwatchServices {
   /** `stopwatch.subscribe`. Requires the `stopwatch.read` capability, granted by the user. Updates: `{ running, elapsedMs, at, shortcuts }`, or `null` without an active game; `shortcuts` `{ toggle, reset, bound }` holds host-formatted key chords. */

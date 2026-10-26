@@ -16,11 +16,14 @@
 //! takes a new feature name; a path refused later is refused by the host
 //! and the producers only, never by a manifest reader.
 //!
-//! A service may also list live events (`events`, Twitch's EventSub): the
-//! host subscribes on the user's own channel and sends a widget each event
-//! of the types it declares, as a closed projection. The list, each type's
+//! A service may also list live events (`events`): Twitch's EventSub, which
+//! the host subscribes to on the user's own channel, and Steam's local
+//! client, whose stats files of the account a widget names the host
+//! watches on the user's computer. The host sends a widget each event of
+//! the types it declares, as a closed projection. The list, each type's
 //! version, scope and fields are frozen with the release that announces
-//! `twitch-events` in the same way.
+//! the service's events feature (`twitch-events`, `steam-events`) in the
+//! same way.
 
 use serde_json::{Map, Value};
 
@@ -33,6 +36,8 @@ pub const FEATURE_SERVICE_STEAM: &str = "service-steam";
 pub const FEATURE_SERVICE_TWITCH: &str = "service-twitch";
 /// Feature a manifest needs when its Twitch declaration lists `events`.
 pub const FEATURE_TWITCH_EVENTS: &str = "twitch-events";
+/// Feature a manifest needs when its Steam declaration lists `events`.
+pub const FEATURE_STEAM_EVENTS: &str = "steam-events";
 
 /// A text in each interface language.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -148,12 +153,15 @@ impl ServicePath {
     }
 }
 
-/// What the host's subscription names: the user's own channel, as
-/// broadcaster, and as moderator too where the type needs one.
+/// Where the host takes the events: at Twitch, on the user's own channel,
+/// as broadcaster, and as moderator too where the type needs one; or from
+/// the service's client on the user's computer, for the account the widget
+/// names.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum EventCondition {
     Broadcaster,
     BroadcasterAndModerator,
+    LocalClient,
 }
 
 /// The value of one field of an event, as the host projects it. Anything
@@ -190,8 +198,9 @@ pub struct ServiceEvent {
     pub kind: &'static str,
     /// The version the host subscribes to.
     pub version: &'static str,
-    /// The read scope a widget must declare itself to receive it.
-    pub scope: &'static str,
+    /// The read scope a widget must declare itself to receive it; `None`
+    /// for a service without scopes (a key).
+    pub scope: Option<&'static str>,
     pub condition: EventCondition,
     /// The fields the widget receives, under the service's names; a field
     /// the service does not send for this type is `null`.
@@ -377,7 +386,7 @@ const fn on_channel(
     ServiceEvent {
         kind,
         version,
-        scope,
+        scope: Some(scope),
         condition: EventCondition::Broadcaster,
         fields,
     }
@@ -399,7 +408,7 @@ pub const TWITCH_EVENTS: &[ServiceEvent] = &[
     ServiceEvent {
         kind: "channel.follow",
         version: "2",
-        scope: "moderator:read:followers",
+        scope: Some("moderator:read:followers"),
         condition: EventCondition::BroadcasterAndModerator,
         fields: FOLLOW_FIELDS,
     },
@@ -485,6 +494,28 @@ pub const TWITCH_EVENT_TYPES: &[&str] = &[
     "channel.prediction.lock",
     "channel.prediction.end",
 ];
+
+const STATS_FIELDS: &[EventField] = &[EventField {
+    name: "appid",
+    value: EventValue::Integer,
+}];
+
+/// Steam's local types a widget may receive, version 1 of the list
+/// (`steam-events`). `stats.saved`: the Steam client of this computer saved
+/// the stats of a game of the account the widget names, which it does at
+/// each achievement unlocked and at other times (a game's start, Steam's
+/// own sync). The host sees it by the date of the account's stats file of
+/// that game and reads nothing in it.
+pub const STEAM_EVENTS: &[ServiceEvent] = &[ServiceEvent {
+    kind: "stats.saved",
+    version: "1",
+    scope: None,
+    condition: EventCondition::LocalClient,
+    fields: STATS_FIELDS,
+}];
+
+/// The names of [`STEAM_EVENTS`], in the same order.
+pub const STEAM_EVENT_TYPES: &[&str] = &["stats.saved"];
 
 /// The projection of an event's payload (`payload.event`) a widget
 /// receives: every field of the type, `null` where Twitch sent none or
@@ -708,8 +739,8 @@ pub const STEAM: IntegratedService = IntegratedService {
     }),
     oauth: None,
     scopes: &[],
-    events: &[],
-    events_feature: None,
+    events: STEAM_EVENTS,
+    events_feature: Some(FEATURE_STEAM_EVENTS),
     // The player's own pages (`/my/` is the signed-in player: privacy
     // settings, badges, inventory), profiles, game hubs and stats, and the
     // store's game pages; never `/linkfilter/`, Steam's redirector to any
