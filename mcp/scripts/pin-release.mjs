@@ -1,7 +1,8 @@
 // Pins @overcrow/mcp to a published OverCrow release: copies the
 // `creatorTools` entry of its release.json (each platform's ZIP and every
 // file in it, with sizes and SHA-256) into src/bootstrap/pin.json, with the
-// npm integrity of the SDK (sdk/package.json's version) and of the
+// npm integrity of the SDK (its latest released version: sdk/package.json's,
+// or the changelog's previous section while that one is not released yet) and of the
 // TypeScript of the templates, with the SHA-256 of the files tsc runs.
 //
 //   node scripts/pin-release.mjs <version>    write the pin
@@ -85,6 +86,24 @@ async function typescriptPin(version) {
   };
 }
 
+/**
+ * The SDK version on npm: sdk/package.json's, or, while its changelog
+ * section says "Not released yet", the section before it.
+ */
+function releasedSdk() {
+  const current = JSON.parse(readFileSync(join(repository, "sdk", "package.json"), "utf8")).version;
+  const changelog = readFileSync(join(repository, "sdk", "CHANGELOG.md"), "utf8").replaceAll(
+    "\r\n",
+    "\n",
+  );
+  const [first, previous] = [...changelog.matchAll(/^## (\S+)\n\n([^\n]*)/gm)];
+  if (first?.[1] !== current)
+    throw new Error("the SDK changelog's first section is not its version");
+  if (!first[2].startsWith("Not released yet")) return current;
+  if (!previous) throw new Error("no released SDK in the changelog");
+  return previous[1];
+}
+
 /** The pin of `version`, from its published release.json; null when not published. */
 async function pinOf(version) {
   if (!VERSION.test(version)) throw new Error(`not a release version: ${version}`);
@@ -114,7 +133,7 @@ async function pinOf(version) {
       files: entry.files.map(({ path, size, sha256 }) => ({ path, size, sha256 })),
     };
   }
-  const sdk = JSON.parse(readFileSync(join(repository, "sdk", "package.json"), "utf8")).version;
+  const sdk = releasedSdk();
   const typescript = JSON.parse(
     readFileSync(join(repository, "templates", "shared", "package.json"), "utf8"),
   ).devDependencies.typescript;
