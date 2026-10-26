@@ -166,6 +166,7 @@ subscription that fails delivers the same error in its last update.
 | `gesture_required` | The service can be called only during a user action, and this call was not made while one was handled, or that action already allowed another call. |
 | `not_connected` | The service needs an account of the user that is not connected at the moment: PlayerVox, an integrated service (Steam, Twitch) or the account the widget declares. |
 | `account_refused` | The service refused the account's key or sign-in on this route (a status of the account's `refusedStatus`). The account is now `refused` or `expired`, and PlayerVox OverCrow asks the user for a new key or to sign in again. |
+| `review_removed_by_moderation` | `playervox.rating.publish`: PlayerVox's moderation removed this review, and a review cannot be published again as it was. Nothing is saved: the user edits the review, or publishes the rating without one. |
 | `stale_context` | What the call was about changed before the answer: another game, another account, another media player, an object deleted meanwhile. Read the current state again. |
 | `unavailable` | PlayerVox OverCrow's source for this data failed, or cannot act right now. A subscription that ends with it can be started again later. |
 | `busy` | Too much is in progress: a confirmation is already open, a queue or the budget of network responses is full, or the provider asks to wait. Try again later. |

@@ -1036,7 +1036,7 @@ Failure of a call or of a subscription, and of a `submit` intent. `{ code }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
-| `code` | `invalid_request` \| `permission_denied` \| `gesture_required` \| `not_connected` \| `account_refused` \| `stale_context` \| `unavailable` \| `busy` \| `cancelled` \| `quota_exceeded` \| `unsupported` \| `url_invalid` \| `resolve_failed` \| `address_denied` \| `too_many_addresses` \| `peer_mismatch` \| `redirect_denied` \| `encoding_denied` \| `content_type_denied` \| `response_metadata_limit` \| `request_body_limit` \| `response_body_limit` \| `image_invalid` \| `timeout` \| `transport_failed` | Failure code. |
+| `code` | `invalid_request` \| `permission_denied` \| `gesture_required` \| `not_connected` \| `account_refused` \| `review_removed_by_moderation` \| `stale_context` \| `unavailable` \| `busy` \| `cancelled` \| `quota_exceeded` \| `unsupported` \| `url_invalid` \| `resolve_failed` \| `address_denied` \| `too_many_addresses` \| `peer_mismatch` \| `redirect_denied` \| `encoding_denied` \| `content_type_denied` \| `response_metadata_limit` \| `request_body_limit` \| `response_body_limit` \| `image_invalid` \| `timeout` \| `transport_failed` | Failure code. |
 
 #### `HttpResponse`
 
@@ -1349,7 +1349,7 @@ Live Twitch events of the widget's declared types. `{ state, reason, events }`
 | `reason` | `connecting` \| `not_connected` \| `unavailable` or `null` | Why the state is `off`; `null` when `live`. |
 | `events` | list of `TwitchEvent` | The latest events, oldest first. |
 
-Service error codes: `invalid_request`, `permission_denied`, `gesture_required`, `not_connected`, `account_refused`, `stale_context`, `unavailable`, `busy`, `cancelled`, `quota_exceeded`, `unsupported`, `url_invalid`, `resolve_failed`, `address_denied`, `too_many_addresses`, `peer_mismatch`, `redirect_denied`, `encoding_denied`, `content_type_denied`, `response_metadata_limit`, `request_body_limit`, `response_body_limit`, `image_invalid`, `timeout`, `transport_failed`.
+Service error codes: `invalid_request`, `permission_denied`, `gesture_required`, `not_connected`, `account_refused`, `review_removed_by_moderation`, `stale_context`, `unavailable`, `busy`, `cancelled`, `quota_exceeded`, `unsupported`, `url_invalid`, `resolve_failed`, `address_denied`, `too_many_addresses`, `peer_mismatch`, `redirect_denied`, `encoding_denied`, `content_type_denied`, `response_metadata_limit`, `request_body_limit`, `response_body_limit`, `image_invalid`, `timeout`, `transport_failed`.
 
 ### Write intents
 

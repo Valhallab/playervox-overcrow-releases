@@ -379,6 +379,7 @@ export type ServiceErrorCode =
   | "gesture_required"
   | "not_connected"
   | "account_refused"
+  | "review_removed_by_moderation"
   | "stale_context"
   | "unavailable"
   | "busy"
@@ -403,7 +404,7 @@ export type ServiceErrorCode =
 /** Failure of a call or of a subscription, and of a `submit` intent. */
 export interface ServiceErrorPayload {
   /** Failure code. */
-  readonly code: "invalid_request" | "permission_denied" | "gesture_required" | "not_connected" | "account_refused" | "stale_context" | "unavailable" | "busy" | "cancelled" | "quota_exceeded" | "unsupported" | "url_invalid" | "resolve_failed" | "address_denied" | "too_many_addresses" | "peer_mismatch" | "redirect_denied" | "encoding_denied" | "content_type_denied" | "response_metadata_limit" | "request_body_limit" | "response_body_limit" | "image_invalid" | "timeout" | "transport_failed";
+  readonly code: "invalid_request" | "permission_denied" | "gesture_required" | "not_connected" | "account_refused" | "review_removed_by_moderation" | "stale_context" | "unavailable" | "busy" | "cancelled" | "quota_exceeded" | "unsupported" | "url_invalid" | "resolve_failed" | "address_denied" | "too_many_addresses" | "peer_mismatch" | "redirect_denied" | "encoding_denied" | "content_type_denied" | "response_metadata_limit" | "request_body_limit" | "response_body_limit" | "image_invalid" | "timeout" | "transport_failed";
 }
 
 /** Answer of `http.fetch`. */

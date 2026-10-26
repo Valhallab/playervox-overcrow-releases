@@ -549,6 +549,7 @@ pub const SERVICE_ERRORS: &[&str] = &[
     "gesture_required",
     "not_connected",
     "account_refused",
+    "review_removed_by_moderation",
     "stale_context",
     "unavailable",
     "busy",

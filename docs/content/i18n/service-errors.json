@@ -19,6 +19,10 @@
     "en": "The service refused the account's key or sign-in on this route (a status of the account's `refusedStatus`). The account is now `refused` or `expired`, and PlayerVox OverCrow asks the user for a new key or to sign in again.",
     "fr": "Le service a refusé la clé ou la connexion du compte sur cette route (un statut de `refusedStatus` du compte). Le compte est maintenant `refused` ou `expired`, et PlayerVox OverCrow demande à l’utilisateur une nouvelle clé ou une nouvelle connexion."
   },
+  "review_removed_by_moderation": {
+    "en": "`playervox.rating.publish`: PlayerVox's moderation removed this review, and a review cannot be published again as it was. Nothing is saved: the user edits the review, or publishes the rating without one.",
+    "fr": "`playervox.rating.publish` : la modération de PlayerVox a retiré cet avis, et un avis ne peut pas être republié tel quel. Rien n’est enregistré : l’utilisateur modifie l’avis, ou publie la note sans avis."
+  },
   "stale_context": {
     "en": "What the call was about changed before the answer: another game, another account, another media player, an object deleted meanwhile. Read the current state again.",
     "fr": "Ce sur quoi portait l’appel a changé avant la réponse : un autre jeu, un autre compte, un autre lecteur multimédia, un objet supprimé entre-temps. Relisez l’état courant."

@@ -171,6 +171,7 @@ dernière mise à jour.
 | `gesture_required` | Le service ne peut être appelé que pendant une action de l’utilisateur, et cet appel n’a pas eu lieu pendant le traitement d’une telle action, ou cette action a déjà autorisé un autre appel. |
 | `not_connected` | Le service a besoin d’un compte de l’utilisateur qui n’est pas connecté pour le moment : PlayerVox, un service intégré (Steam, Twitch) ou le compte que le widget déclare. |
 | `account_refused` | Le service a refusé la clé ou la connexion du compte sur cette route (un statut de `refusedStatus` du compte). Le compte est maintenant `refused` ou `expired`, et PlayerVox OverCrow demande à l’utilisateur une nouvelle clé ou une nouvelle connexion. |
+| `review_removed_by_moderation` | `playervox.rating.publish` : la modération de PlayerVox a retiré cet avis, et un avis ne peut pas être republié tel quel. Rien n’est enregistré : l’utilisateur modifie l’avis, ou publie la note sans avis. |
 | `stale_context` | Ce sur quoi portait l’appel a changé avant la réponse : un autre jeu, un autre compte, un autre lecteur multimédia, un objet supprimé entre-temps. Relisez l’état courant. |
 | `unavailable` | La source de PlayerVox OverCrow pour ces données a échoué, ou ne peut pas agir pour l’instant. Un abonnement qui se termine ainsi peut être relancé plus tard. |
 | `busy` | Trop d’opérations sont en cours : une confirmation est déjà ouverte, une file ou le budget des réponses réseau est plein, ou le fournisseur demande d’attendre. Réessayez plus tard. |

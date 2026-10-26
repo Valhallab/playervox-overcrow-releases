@@ -647,3 +647,12 @@ fn default_sizes_name_host_drawn_elements_and_keyword_conditions() {
     assert_eq!(ring.map(|row| row.height), Some(style::Extent::Px(48)));
     assert_eq!(default_size("canvas", |_| None), None);
 }
+
+#[test]
+fn a_review_staff_removed_has_its_own_code() {
+    // PlayerVox refuses a rating whose review its moderation removed: the
+    // widget says so, instead of a generic failure.
+    assert!(services::SERVICE_ERRORS.contains(&"review_removed_by_moderation"));
+    let publish = services::write_intent("playervox.rating.publish").expect("intent");
+    assert_eq!(publish.capability, "playervox.rating.write");
+}
