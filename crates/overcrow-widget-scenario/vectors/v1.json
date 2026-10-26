@@ -702,6 +702,40 @@
     ]
    },
    "derived": {}
+  },
+  {
+   "name": "http headers",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "fixtures": {
+     "http": [
+      {
+       "request": {
+        "method": "GET",
+        "url": "https://api.example.com/v1/items"
+       },
+       "response": {
+        "status": 429,
+        "contentType": "application/json",
+        "headers": {
+         "retry-after": "30",
+         "ratelimit-reset": "1700000060",
+         "date": "Tue, 14 Nov 2023 22:13:20 GMT"
+        },
+        "body": "{}"
+       }
+      }
+     ]
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   }
   }
  ],
  "invalid": [
@@ -2357,6 +2391,161 @@
     ]
    },
    "path": "steps[0].expect.intents"
+  },
+  {
+   "name": "http unlisted header",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "fixtures": {
+     "http": [
+      {
+       "request": {
+        "method": "GET",
+        "url": "https://api.example.com/v1/items"
+       },
+       "response": {
+        "status": 200,
+        "headers": {
+         "set-cookie": "session=1"
+        }
+       }
+      }
+     ]
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "fixtures.http[0].response.headers"
+  },
+  {
+   "name": "http header name not lowercase",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "fixtures": {
+     "http": [
+      {
+       "request": {
+        "method": "GET",
+        "url": "https://api.example.com/v1/items"
+       },
+       "response": {
+        "status": 200,
+        "headers": {
+         "Retry-After": "30"
+        }
+       }
+      }
+     ]
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "fixtures.http[0].response.headers"
+  },
+  {
+   "name": "http header value with control",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "fixtures": {
+     "http": [
+      {
+       "request": {
+        "method": "GET",
+        "url": "https://api.example.com/v1/items"
+       },
+       "response": {
+        "status": 200,
+        "headers": {
+         "retry-after": "30\n"
+        }
+       }
+      }
+     ]
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "fixtures.http[0].response.headers"
+  },
+  {
+   "name": "http empty header value",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "fixtures": {
+     "http": [
+      {
+       "request": {
+        "method": "GET",
+        "url": "https://api.example.com/v1/items"
+       },
+       "response": {
+        "status": 200,
+        "headers": {
+         "etag": ""
+        }
+       }
+      }
+     ]
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "fixtures.http[0].response.headers"
+  },
+  {
+   "name": "http header value too long",
+   "scenario": {
+    "scenarioVersion": 1,
+    "name": "vector",
+    "fixtures": {
+     "http": [
+      {
+       "request": {
+        "method": "GET",
+        "url": "https://api.example.com/v1/items"
+       },
+       "response": {
+        "status": 200,
+        "headers": {
+         "etag": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+       }
+      }
+     ]
+    },
+    "steps": [
+     {
+      "expect": {
+       "state": "running"
+      }
+     }
+    ]
+   },
+   "path": "fixtures.http[0].response.headers"
   }
  ],
  "againstManifest": [

@@ -945,6 +945,12 @@ pub const MAX_HTTP_RESPONSE_BYTES_GLOBAL: Limit = fixed(
     Unit::Bytes,
     "Response bytes all widgets' requests in flight may reserve; `busy` beyond. Equals `MAX_HTTP_CONCURRENT_GLOBAL` × `MAX_HTTP_RESPONSE_BYTES`, the worst case before declared bounds existed.",
 );
+pub const MAX_HTTP_HEADER_VALUE_BYTES: Limit = fixed(
+    "MAX_HTTP_HEADER_VALUE_BYTES",
+    256,
+    Unit::Bytes,
+    "Value of one response header `http.fetch` gives a widget (`RESPONSE_HEADERS`), repetitions joined; a longer one is left out.",
+);
 pub const MAX_HTTP_CONCURRENT_PER_WIDGET: Limit = fixed(
     "MAX_HTTP_CONCURRENT_PER_WIDGET",
     4,
@@ -1417,6 +1423,7 @@ pub const ALL: &[&Limit] = &[
     &MAX_HTTP_DECLARED_RESPONSE_BYTES,
     &MAX_HTTP_RESPONSE_BYTES_PER_WIDGET,
     &MAX_HTTP_RESPONSE_BYTES_GLOBAL,
+    &MAX_HTTP_HEADER_VALUE_BYTES,
     &MAX_HTTP_CONCURRENT_PER_WIDGET,
     &MAX_HTTP_CONCURRENT_GLOBAL,
     &HTTP_TIMEOUT_MS,

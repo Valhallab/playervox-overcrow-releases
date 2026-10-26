@@ -393,6 +393,24 @@ Un widget a au plus quatre requêtes en cours à la fois, et elles partagent
 un budget d’octets de réponse : une requête qui n’y tient pas échoue
 aussitôt avec `busy`.
 
+#### En-têtes de réponse
+
+`headers` donne les en-têtes de réponse qui aident un widget à lire un
+service avec retenue, par nom en minuscules, et aucun autre :
+
+- quand réessayer : `retry-after`, et les champs de limite de débit
+  `ratelimit`, `ratelimit-policy`, `ratelimit-limit`, `ratelimit-remaining`,
+  `ratelimit-reset` et leurs formes `x-ratelimit-…` ;
+- l’horloge du serveur, pour les lire : `date` ;
+- si la donnée a changé, et combien de temps elle reste fraîche : `etag`,
+  `last-modified`, `cache-control`, `expires` et `age`.
+
+Un en-tête que la réponse n’a pas est absent. Un en-tête répété est joint
+par `, `, et une valeur qui n’est pas de l’ASCII imprimable ou dépasse
+256 octets est omise. Cookies, identifiants, ID de requête et adresses
+n’atteignent jamais un widget. Un PlayerVox OverCrow antérieur au SDK 1.3
+n’en donne aucun : `headers` est alors vide.
+
 ### Stockage
 
 `storage` est un stockage clé-valeur que PlayerVox OverCrow tient pour votre

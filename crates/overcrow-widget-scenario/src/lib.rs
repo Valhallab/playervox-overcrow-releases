@@ -26,8 +26,9 @@ use overcrow_widget_schema::accounts::{
 use overcrow_widget_schema::ipc::FAULT_CATEGORY_NAMES;
 use overcrow_widget_schema::limits::{
     MAX_CLIPBOARD_BYTES, MAX_CONTENT_SCALE, MAX_HTTP_DECLARED_RESPONSE_BYTES,
-    MAX_HTTP_RESPONSE_BYTES, MAX_REQUEST_URL_BYTES, MAX_STORAGE_KEY_BYTES, MAX_STORAGE_KEYS,
-    MAX_STORAGE_VALUE_BYTES, MIN_CONTENT_SCALE, STORAGE_QUOTA_BYTES,
+    MAX_HTTP_HEADER_VALUE_BYTES, MAX_HTTP_RESPONSE_BYTES, MAX_REQUEST_URL_BYTES,
+    MAX_STORAGE_KEY_BYTES, MAX_STORAGE_KEYS, MAX_STORAGE_VALUE_BYTES, MIN_CONTENT_SCALE,
+    STORAGE_QUOTA_BYTES,
 };
 use overcrow_widget_schema::manifest::Manifest;
 use overcrow_widget_schema::permissions::capability_named;
@@ -597,15 +598,19 @@ impl HttpFixture {
     }
 }
 
-/// What the broker returns: a status, the one content type and the body,
-/// as text or in base64 (images). Redirections are refused by the broker
-/// (`redirect_denied`), so no 3xx.
+/// What the broker returns: a status, the one content type, the headers a
+/// widget reads and the body, as text or in base64 (images). Redirections
+/// are refused by the broker (`redirect_denied`), so no 3xx.
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct HttpResponse {
     pub status: u16,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content_type: Option<String>,
+    /// Headers of `RESPONSE_HEADERS` by lowercase name, as the widget
+    /// receives them (`headers` of the answer); none when absent.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub headers: BTreeMap<String, String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub body: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1702,6 +1707,21 @@ fn check_http(path: &str, fixture: &HttpFixture) -> Checked {
                 return Err(ScenarioError::new(
                     format!("{here}.contentType"),
                     format!("printable ASCII, 1 to {MAX_HTTP_CONTENT_TYPE_BYTES} bytes"),
+                ));
+            }
+            if response.headers.iter().any(|(name, value)| {
+                !results::RESPONSE_HEADERS.contains(&name.as_str())
+                    || value.is_empty()
+                    || value.len() as u64 > MAX_HTTP_HEADER_VALUE_BYTES.value
+                    || value.bytes().any(|byte| !(0x20..=0x7e).contains(&byte))
+                    || value.trim() != value
+            }) {
+                return Err(ScenarioError::new(
+                    format!("{here}.headers"),
+                    format!(
+                        "headers of RESPONSE_HEADERS by lowercase name, each printable ASCII, trimmed, 1 to {} bytes",
+                        MAX_HTTP_HEADER_VALUE_BYTES.value
+                    ),
                 ));
             }
             if response.body.is_some() && response.body_base64.is_some() {

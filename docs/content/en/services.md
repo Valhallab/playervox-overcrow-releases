@@ -380,6 +380,24 @@ At most four requests of a widget are in flight at once, and they share a
 budget of response bytes: a request that does not fit fails with `busy` at
 once.
 
+#### Response headers
+
+`headers` gives the response headers that help a widget read a service
+politely, by lowercase name, and no others:
+
+- when to try again: `retry-after`, and the rate limit fields `ratelimit`,
+  `ratelimit-policy`, `ratelimit-limit`, `ratelimit-remaining`,
+  `ratelimit-reset` and their `x-ratelimit-…` forms;
+- the server's clock, to read them: `date`;
+- whether the data changed, and how long it stays fresh: `etag`,
+  `last-modified`, `cache-control`, `expires` and `age`.
+
+A header the response does not have is absent. A repeated header is joined
+by `, `, and a value that is not printable ASCII or is longer than 256
+bytes is left out. Cookies, credentials, request IDs and addresses never
+reach a widget. A PlayerVox OverCrow older than SDK 1.3 gives none:
+`headers` is then empty.
+
 ### Storage
 
 `storage` is a key-value store that PlayerVox OverCrow keeps for your widget

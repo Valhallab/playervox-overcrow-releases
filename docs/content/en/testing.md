@@ -192,7 +192,7 @@ not of the widget.
 | --- | --- |
 | `subscriptions` | The value of a subscription when it starts; `publish` steps send the next ones. |
 | `calls` | The calls of a service, in order: `{ "value": … }` or `{ "error": code }`. A call beyond them is an error of the scenario. |
-| `http` | The `http.fetch` requests, each used once: `{ "request": { method, url }, "response": { status, contentType, body } }` (or `bodyBase64`), or `{ "request": …, "error": code }`. The manifest's network rules apply first, and the response bounds apply as in the overlay. `request.account` names the account a request is sent with: the fixture answers only a request sent so, and a status of the account's `refusedStatus` plays a refusal ([third-party accounts](accounts.md#testing)). |
+| `http` | The `http.fetch` requests, each used once: `{ "request": { method, url }, "response": { status, contentType, headers, body } }` (or `bodyBase64`), or `{ "request": …, "error": code }`. `headers` gives response headers the widget reads, by lowercase name, among those `http.fetch` passes on ([response headers](services.md#response-headers)). The manifest's network rules apply first, and the response bounds apply as in the overlay. `request.account` names the account a request is sent with: the fixture answers only a request sent so, and a status of the account's `refusedStatus` plays a refusal ([third-party accounts](accounts.md#testing)). |
 | `confirmations` | `accept` or `cancel`, in order, for PlayerVox OverCrow's confirmation of `notes.delete` and `journal.delete`. |
 | `intents` | The answer to each submitted [write intent](forms.md#forms-that-write-user-data), in order: `"accepted"`, `{ "error": code }` or `"pending"`. |
 

@@ -4,10 +4,12 @@
 //! [`Shape::matches`] checks a JSON value against one.
 //!
 //! Records are exact: every member is present (a nullable member as `null`)
-//! and no other key is. A member that may be absent does not exist in v1.
+//! and no other key is. Only a [`Shape::Fields`] object, whose members are
+//! some of a closed list of names, has members that may be absent.
 
-use serde_json::Value;
+use serde_json::{Map, Value};
 
+use crate::limits::MAX_HTTP_HEADER_VALUE_BYTES;
 use crate::services::SERVICE_ERRORS;
 
 /// The type of one JSON value.
@@ -30,6 +32,9 @@ pub enum Shape {
     Record(&'static [Member]),
     /// Exactly one of these shapes; records are told apart by their keys.
     OneOf(&'static [Shape]),
+    /// An object whose members are some of these names, each of the shape:
+    /// a member that does not apply is absent.
+    Fields(&'static [&'static str], &'static Shape),
     /// A shape of [`SHAPES`], by name.
     Named(&'static str),
 }
@@ -94,6 +99,11 @@ pub const SHAPES: &[NamedShape] = &[
                     NULLABLE_TEXT,
                     "Response media type; the body is the raw payload.",
                 ),
+                member(
+                    "headers",
+                    Shape::Named("HttpHeaders"),
+                    "The response's headers of `RESPONSE_HEADERS`.",
+                ),
             ]),
             Shape::Record(&[
                 member("status", Shape::Integer, "HTTP status."),
@@ -102,9 +112,19 @@ pub const SHAPES: &[NamedShape] = &[
                     Shape::Asset,
                     "The decoded image (`as: \"image\"`).",
                 ),
+                member(
+                    "headers",
+                    Shape::Named("HttpHeaders"),
+                    "The response's headers of `RESPONSE_HEADERS`.",
+                ),
             ]),
         ]),
         "Answer of `http.fetch`.",
+    ),
+    named(
+        "HttpHeaders",
+        Shape::Fields(RESPONSE_HEADERS, &Shape::Text),
+        "Headers of an `http.fetch` response, by lowercase name: only those of `RESPONSE_HEADERS` the response has, each printable ASCII of at most `MAX_HTTP_HEADER_VALUE_BYTES`; a repeated header is joined by `, `. Any other header never reaches the widget.",
     ),
     named(
         "GameEvent",
@@ -579,6 +599,74 @@ pub const SHAPES: &[NamedShape] = &[
     ),
 ];
 
+/// Response headers `http.fetch` gives a widget, by lowercase name: how
+/// long to wait (`retry-after`, the RateLimit fields of the IETF draft,
+/// their earlier and `x-` forms), the server's clock to read them
+/// (`date`), whether the data changed (`etag`, `last-modified`) and how
+/// long it stays fresh (`cache-control`, `expires`, `age`). Nothing that
+/// sets or names a session, an identity or a request (`set-cookie`,
+/// `authorization`, request IDs), nor an address (`location`, `link`).
+pub const RESPONSE_HEADERS: &[&str] = &[
+    "retry-after",
+    "ratelimit",
+    "ratelimit-policy",
+    "ratelimit-limit",
+    "ratelimit-remaining",
+    "ratelimit-reset",
+    "x-ratelimit-limit",
+    "x-ratelimit-remaining",
+    "x-ratelimit-reset",
+    "date",
+    "etag",
+    "last-modified",
+    "cache-control",
+    "expires",
+    "age",
+];
+
+/// The `headers` of an `http.fetch` answer, from the response's header
+/// fields (name in any case, raw value): each name of [`RESPONSE_HEADERS`]
+/// the response has, its value trimmed, a repeated one joined by `, `. A
+/// header with an empty occurrence, a byte outside printable ASCII, or a
+/// value beyond `MAX_HTTP_HEADER_VALUE_BYTES` is left out whole.
+pub fn response_headers<'a>(
+    fields: impl IntoIterator<Item = (&'a str, &'a [u8])>,
+) -> Map<String, Value> {
+    let mut joined: Map<String, Value> = Map::new();
+    let mut refused: Vec<&'static str> = Vec::new();
+    for (name, value) in fields {
+        let Some(name) = RESPONSE_HEADERS
+            .iter()
+            .find(|listed| listed.eq_ignore_ascii_case(name))
+        else {
+            continue;
+        };
+        let value = value.trim_ascii();
+        let printable = !value.is_empty() && value.iter().all(|byte| (0x20..=0x7e).contains(byte));
+        if !printable {
+            refused.push(name);
+            continue;
+        }
+        let value = String::from_utf8_lossy(value);
+        match joined.get_mut(*name) {
+            Some(Value::String(previous)) => {
+                previous.push_str(", ");
+                previous.push_str(&value);
+            }
+            _ => {
+                joined.insert((*name).to_owned(), Value::String(value.into_owned()));
+            }
+        }
+    }
+    joined.retain(|name, value| {
+        !refused.contains(&name.as_str())
+            && value
+                .as_str()
+                .is_some_and(|value| value.len() as u64 <= MAX_HTTP_HEADER_VALUE_BYTES.value)
+    });
+    joined
+}
+
 pub fn shape(name: &str) -> Option<&'static NamedShape> {
     SHAPES.iter().find(|shape| shape.name == name)
 }
@@ -619,6 +707,11 @@ impl Shape {
                     })
             }),
             Self::OneOf(shapes) => shapes.iter().filter(|shape| shape.matches(value)).count() == 1,
+            Self::Fields(names, inner) => value.as_object().is_some_and(|object| {
+                object
+                    .iter()
+                    .all(|(name, entry)| names.contains(&name.as_str()) && inner.matches(entry))
+            }),
             Self::Named(name) => shape(name).is_some_and(|named| named.shape.matches(value)),
         }
     }
@@ -653,6 +746,15 @@ impl Shape {
                 .map(Shape::describe)
                 .collect::<Vec<_>>()
                 .join(" or "),
+            Self::Fields(names, inner) => format!(
+                "object of {}, each {} when present",
+                names
+                    .iter()
+                    .map(|name| format!("`{name}`"))
+                    .collect::<Vec<_>>()
+                    .join(", "),
+                inner.describe()
+            ),
             Self::Named(name) => format!("`{name}`"),
         }
     }

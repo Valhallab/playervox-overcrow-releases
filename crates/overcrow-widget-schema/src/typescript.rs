@@ -647,6 +647,16 @@ fn shape(out: &mut String, indent: &str, shape: &Shape) {
                 self::shape(out, indent, alternative);
             }
         }
+        Shape::Fields(names, inner) => {
+            let inner_indent = format!("{indent}  ");
+            out.push_str("{\n");
+            for name in *names {
+                let _ = write!(out, "{inner_indent}readonly {}?: ", quote(name));
+                self::shape(out, &inner_indent, inner);
+                out.push_str(";\n");
+            }
+            let _ = write!(out, "{indent}}}");
+        }
         Shape::Named(name) => out.push_str(ts_name(name)),
     }
 }

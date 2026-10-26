@@ -3,13 +3,14 @@
 
 use std::collections::BTreeSet;
 
-use overcrow_widget_schema::results::{SHAPES, Shape, shape};
+use overcrow_widget_schema::limits::MAX_HTTP_HEADER_VALUE_BYTES;
+use overcrow_widget_schema::results::{RESPONSE_HEADERS, SHAPES, Shape, response_headers, shape};
 use overcrow_widget_schema::services::SERVICES;
 use serde_json::json;
 
 fn walk(shape: &Shape, names: &mut Vec<&'static str>) {
     match shape {
-        Shape::Nullable(inner) | Shape::List(inner) => walk(inner, names),
+        Shape::Nullable(inner) | Shape::List(inner) | Shape::Fields(_, inner) => walk(inner, names),
         Shape::Record(members) => members.iter().for_each(|member| walk(&member.shape, names)),
         Shape::OneOf(shapes) => shapes.iter().for_each(|shape| walk(shape, names)),
         Shape::Named(name) => names.push(name),
@@ -295,10 +296,14 @@ fn scalars_are_checked() {
 #[test]
 fn alternatives_match_exactly_one() {
     let response = Shape::Named("HttpResponse");
-    assert!(response.matches(&json!({"status": 200, "contentType": "application/json"})));
-    assert!(response.matches(&json!({"status": 200, "contentType": null})));
-    assert!(response.matches(&json!({"status": 200, "asset": "asset:0000000000000001"})));
-    assert!(!response.matches(&json!({"status": 200})));
+    assert!(
+        response.matches(&json!({"status": 200, "contentType": "application/json", "headers": {}}))
+    );
+    assert!(response.matches(&json!({"status": 200, "contentType": null, "headers": {}})));
+    assert!(response.matches(
+        &json!({"status": 200, "asset": "asset:0000000000000001", "headers": {"etag": "\"1\""}})
+    ));
+    assert!(!response.matches(&json!({"status": 200, "headers": {}})));
     let fragment = Shape::Named("ChatFragment");
     assert!(fragment.matches(&json!({"text": "hi"})));
     assert!(fragment.matches(&json!({"emote": "asset:0000000000000002", "alt": "Kappa"})));
@@ -319,4 +324,69 @@ fn nested_lists_and_names_are_checked() {
     });
     assert!(!notes.matches(&json!({"active": null, "notes": [bad]})));
     assert!(!Shape::Named("Nope").matches(&json!(null)));
+}
+
+#[test]
+fn a_response_gives_only_the_listed_headers() {
+    let headers = Shape::Named("HttpHeaders");
+    assert!(headers.matches(&json!({})));
+    assert!(headers.matches(&json!({"retry-after": "30", "ratelimit-reset": "1700000000"})));
+    // Another name, another type: not the shape.
+    assert!(!headers.matches(&json!({"set-cookie": "a=b"})));
+    assert!(!headers.matches(&json!({"retry-after": 30})));
+    for name in [
+        "set-cookie",
+        "cookie",
+        "authorization",
+        "www-authenticate",
+        "location",
+        "x-request-id",
+        "server",
+        "link",
+    ] {
+        assert!(!RESPONSE_HEADERS.contains(&name), "{name}");
+    }
+    for name in RESPONSE_HEADERS {
+        assert_eq!(name.to_ascii_lowercase(), *name);
+    }
+}
+
+#[test]
+fn response_headers_keep_listed_printable_bounded_values() {
+    let long = "a".repeat(MAX_HTTP_HEADER_VALUE_BYTES.value as usize + 1);
+    let fits = "a".repeat(MAX_HTTP_HEADER_VALUE_BYTES.value as usize);
+    let raw: Vec<(&str, &[u8])> = vec![
+        // Names in any case; the value trimmed.
+        ("Retry-After", b" 120 "),
+        ("Set-Cookie", b"session=secret"),
+        ("X-Request-Id", b"abc"),
+        // A repeated header is joined as RFC 9110 reads it.
+        ("Cache-Control", b"max-age=60"),
+        ("cache-control", b"public"),
+        // A value that is not printable ASCII, or too long, is left out.
+        ("ETag", b"\"caf\xc3\xa9\""),
+        ("Last-Modified", long.as_bytes()),
+        ("Expires", fits.as_bytes()),
+        ("Age", b"1\r\n2"),
+        ("Date", b""),
+        ("RateLimit-Remaining", b"799"),
+    ];
+    let headers = response_headers(raw);
+    assert_eq!(
+        serde_json::Value::Object(headers.clone()),
+        json!({
+            "retry-after": "120",
+            "cache-control": "max-age=60, public",
+            "expires": fits,
+            "ratelimit-remaining": "799",
+        })
+    );
+    assert!(Shape::Named("HttpHeaders").matches(&serde_json::Value::Object(headers)));
+    // A repetition that makes the value too long drops it.
+    let half = "b".repeat(MAX_HTTP_HEADER_VALUE_BYTES.value as usize / 2);
+    let joined = response_headers(vec![("age", half.as_bytes()), ("age", half.as_bytes())]);
+    assert!(joined.is_empty());
+    // One bad occurrence drops the header: never half a value.
+    let mixed = response_headers(vec![("etag", &b"\"1\""[..]), ("etag", &b"\x01"[..])]);
+    assert!(mixed.is_empty());
 }

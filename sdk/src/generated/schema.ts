@@ -413,11 +413,34 @@ export type HttpResponse = {
   readonly status: number;
   /** Response media type; the body is the raw payload. */
   readonly contentType: string | null;
+  /** The response's headers of `RESPONSE_HEADERS`. */
+  readonly headers: HttpHeaders;
 } | {
   /** HTTP status. */
   readonly status: number;
   /** The decoded image (`as: "image"`). */
   readonly asset: AssetHandle;
+  /** The response's headers of `RESPONSE_HEADERS`. */
+  readonly headers: HttpHeaders;
+};
+
+/** Headers of an `http.fetch` response, by lowercase name: only those of `RESPONSE_HEADERS` the response has, each printable ASCII of at most `MAX_HTTP_HEADER_VALUE_BYTES`; a repeated header is joined by `, `. Any other header never reaches the widget. */
+export type HttpHeaders = {
+  readonly "retry-after"?: string;
+  readonly "ratelimit"?: string;
+  readonly "ratelimit-policy"?: string;
+  readonly "ratelimit-limit"?: string;
+  readonly "ratelimit-remaining"?: string;
+  readonly "ratelimit-reset"?: string;
+  readonly "x-ratelimit-limit"?: string;
+  readonly "x-ratelimit-remaining"?: string;
+  readonly "x-ratelimit-reset"?: string;
+  readonly "date"?: string;
+  readonly "etag"?: string;
+  readonly "last-modified"?: string;
+  readonly "cache-control"?: string;
+  readonly "expires"?: string;
+  readonly "age"?: string;
 };
 
 /** One game event. */
@@ -955,7 +978,7 @@ export interface ServiceResultMap {
   readonly "storage.remove": null;
   /** `storage.keys`: list of keys. */
   readonly "storage.keys": ReadonlyArray<string>;
-  /** `http.fetch`: `{ status, contentType }` with the body as raw payload ≤ the rule's `maxResponseBytes` (`MAX_HTTP_RESPONSE_BYTES` when absent), or `{ status, asset }` from a body ≤ `MAX_HTTP_RESPONSE_BYTES`; on a rule that names an account, `not_connected` while it is not connected and `account_refused` when the service refused its secret. */
+  /** `http.fetch`: `{ status, contentType, headers }` with the body as raw payload ≤ the rule's `maxResponseBytes` (`MAX_HTTP_RESPONSE_BYTES` when absent), or `{ status, asset, headers }` from a body ≤ `MAX_HTTP_RESPONSE_BYTES`; `headers` holds the response's headers of `RESPONSE_HEADERS` only; on a rule that names an account, `not_connected` while it is not connected and `account_refused` when the service refused its secret. */
   readonly "http.fetch": HttpResponse;
   /** `clipboard.writeText`: `null`. */
   readonly "clipboard.writeText": null;
