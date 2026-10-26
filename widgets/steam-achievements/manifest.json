@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "apiVersion": 1,
   "id": "com.playervox.overcrow.steam.achievements",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "name": {
     "en": "Steam achievements",
     "fr": "Succès Steam"
@@ -320,7 +320,8 @@
         "label": {
           "en": "Track achievements…",
           "fr": "Suivre des succès…"
-        }
+        },
+        "closesMenu": true
       },
       {
         "type": "action",
@@ -328,7 +329,8 @@
         "label": {
           "en": "Change Steam profile…",
           "fr": "Changer de profil Steam…"
-        }
+        },
+        "closesMenu": true
       }
     ]
   }

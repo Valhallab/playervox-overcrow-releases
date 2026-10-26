@@ -54,6 +54,10 @@ user's language.
 | Track achievements… | In Interactive mode: a checklist, the tracked ones first, then the missing achievements; a click ticks or unticks at once, up to three per game ("Limit reached" greys the other rows), "Done" closes it. The rows keep their place while it is open. Tracked achievements stay at the top of the widget in the order they were added; one unlocked goes last with a green check and "Unlocked … ago", until it is unticked. Each game keeps its own (the last 20 games) |
 | Change Steam profile… | The profile step, with the current link and Cancel |
 
+Both last rows close the menu, so that what they open shows at once
+(`closesMenu`, PlayerVox OverCrow 0.8.1-beta.1 and later; earlier versions
+keep the previous version of the widget).
+
 ## Permissions
 
 | Permission | Why |
