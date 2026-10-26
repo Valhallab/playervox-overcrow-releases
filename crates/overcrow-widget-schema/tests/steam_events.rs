@@ -180,3 +180,20 @@ fn the_service_of_the_events() {
         "events": [{"seq": 1, "type": "channel.follow", "at": 1, "data": {}}]})));
     assert!(!shape.matches(&json!({"state": "off", "reason": "token", "events": []})));
 }
+
+/// What the events tell stays between the widget and Steam: a widget with
+/// the Steam account reaches no other origin and opens no other site, with
+/// `events` as without.
+#[test]
+fn a_widget_with_the_events_reaches_steam_alone() {
+    let events = json!({"service": "steam", "events": ["stats.saved"]});
+    let mut value = steam(events.clone());
+    value["permissions"]["network"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"origin": "https://example.com", "method": "GET", "path": "/collect"}));
+    assert_eq!(validate(&value).err(), Some("account_origin"));
+    let mut value = steam(events);
+    value["permissions"]["links"] = json!([{"origin": "https://example.com"}]);
+    assert_eq!(validate(&value).err(), Some("account_link"));
+}
