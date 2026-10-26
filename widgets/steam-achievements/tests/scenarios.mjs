@@ -346,6 +346,21 @@ scenario("not-readable", "Steam names the running game but refuses its achieveme
   ],
 });
 
+// --- the user's number format: the numbers follow it as soon as it changes.
+scenario("region", "Numbers follow the host's number format, not the language, as soon as it changes: us 4.2% then fr 4,2% and de 4,2%, without waiting for the next read.", {
+  host: { region: { numberFormat: "us" } },
+  http: reads(ASHEN),
+  steps: [
+    { menu: { id: "layout", value: "standard" } },
+    { host: { size: { width: WIDTH.standard, height: 200 } } },
+    { expect: { state: "running", text: ["3 min ago · 4.2% of players"], fault: "none", image: "region-us" } },
+    { host: { region: { numberFormat: "fr" } } },
+    { expect: { text: ["3 min ago · 4,2% of players"], noText: ["4.2%"], image: "region-fr" } },
+    { host: { region: { numberFormat: "de" } } },
+    { expect: { text: ["3 min ago · 4,2% of players"], noText: ["4.2%"] } },
+  ],
+});
+
 scenario("no-stats", "Steam answers 400 Requested app has no stats although the game lists achievements: the same neutral line, never 'no achievements', no server failure.", {
   http: [
     ...repeat(3, () => fixture(urls.summary, summary({ playing: ASHEN }))),
