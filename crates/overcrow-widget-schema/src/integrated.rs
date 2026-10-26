@@ -161,7 +161,8 @@ pub enum EventCondition {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum EventValue {
     /// Text cut to this many characters, control characters as spaces,
-    /// format and bidirectional controls removed.
+    /// hidden characters removed as from display text
+    /// ([`crate::text::strip_hidden`]).
     Text(usize),
     /// An identifier or keyword: ASCII letters, digits and `_-.:`, at most
     /// 64 bytes.
@@ -485,20 +486,6 @@ pub const TWITCH_EVENT_TYPES: &[&str] = &[
     "channel.prediction.end",
 ];
 
-/// Invisible format characters: zero-width, bidirectional embeddings,
-/// overrides and isolates, the Arabic letter mark, soft hyphen and BOM.
-fn is_format(character: char) -> bool {
-    matches!(
-        character,
-        '\u{00AD}'
-            | '\u{061C}'
-            | '\u{200B}'..='\u{200F}'
-            | '\u{202A}'..='\u{202E}'
-            | '\u{2060}'..='\u{2069}'
-            | '\u{FEFF}'
-    )
-}
-
 /// The projection of an event's payload (`payload.event`) a widget
 /// receives: every field of the type, `null` where Twitch sent none or
 /// something else, nothing more. `None` when the payload is not an object
@@ -525,8 +512,8 @@ fn project_value(kind: EventValue, value: &Value) -> Value {
     match kind {
         EventValue::Text(max) => value.as_str().map_or(Value::Null, |text| {
             Value::String(
-                text.chars()
-                    .filter(|character| !is_format(*character))
+                crate::text::strip_hidden(text)
+                    .chars()
                     .take(max)
                     .map(|character| {
                         if character.is_control() {

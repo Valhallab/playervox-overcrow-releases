@@ -252,6 +252,18 @@ fn texts_lists_and_sizes_are_bounded() {
         "user_name": "No\u{202E}va\u{200B}\u{2066}\u{FEFF}!", "broadcaster_user_id": "2", "bits": 1});
     let data = project_event(event("channel.cheer"), &raw).expect("cheer");
     assert_eq!(data["user_name"], "Nova!");
+    // Every character a label never holds goes too, as in the catalog's
+    // display text: line separators, Mongolian vowel separator, deprecated
+    // format controls, interlinear annotations, tags.
+    let raw = json!({"user_id": "1", "user_login": "nova", "broadcaster_user_id": "2",
+        "user_name": "a\u{2028}b\u{E0041}c\u{180E}d\u{206A}e\u{FFF9}f\u{2029}"});
+    let data = project_event(event("channel.follow"), &raw).expect("follow");
+    assert_eq!(data["user_name"], "abcdef");
+    // A variation selector stays after its character, never at the start or
+    // in a run, where it would hide text.
+    let raw = json!({"id": "g", "description": "\u{FE0F}Go\u{2B50}\u{FE0F}\u{FE0E}\u{FE0F}!"});
+    let data = project_event(event("channel.goal.begin"), &raw).expect("goal");
+    assert_eq!(data["description"], "Go\u{2B50}\u{FE0F}!");
     let raw = json!({"id": "g", "description": "d".repeat(4000)});
     let data = project_event(event("channel.goal.begin"), &raw).expect("goal");
     assert_eq!(data["description"].as_str().unwrap().chars().count(), 200);

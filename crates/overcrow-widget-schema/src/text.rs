@@ -58,6 +58,32 @@ pub fn hidden_character(text: &str) -> Option<(usize, char)> {
     None
 }
 
+/// `text` without its hidden characters: every [`INVISIBLE_CHARACTERS`]
+/// one and every misplaced variation selector (at the start, or after
+/// another selector), the characters [`hidden_character`] finds. Text a
+/// host projects from a third party (Twitch event fields) goes through it,
+/// so that it reads as the catalog's display text does.
+pub fn strip_hidden(text: &str) -> String {
+    let mut kept = String::with_capacity(text.len());
+    let mut previous: Option<char> = None;
+    for character in text.chars() {
+        if INVISIBLE_CHARACTERS
+            .iter()
+            .any(|range| range.contains(&character))
+        {
+            continue;
+        }
+        if VARIATION_SELECTORS.contains(&character)
+            && previous.is_none_or(|previous| VARIATION_SELECTORS.contains(&previous))
+        {
+            continue;
+        }
+        kept.push(character);
+        previous = Some(character);
+    }
+    kept
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -78,5 +104,18 @@ mod tests {
             Some((2, '\u{fe0f}'))
         );
         assert_eq!(hidden_character("\u{23f1}\u{fe0f} Timer"), None);
+    }
+
+    #[test]
+    fn strip_hidden_leaves_what_hidden_character_accepts() {
+        assert_eq!(strip_hidden("Clock"), "Clock");
+        assert_eq!(strip_hidden("\u{202e}a\u{200b}b\u{e0041}"), "ab");
+        assert_eq!(
+            strip_hidden("\u{fe0f}\u{23f1}\u{fe0f}\u{fe0f} Timer"),
+            "\u{23f1}\u{fe0f} Timer"
+        );
+        for text in ["a\u{2028}b", "\u{fe0f}x", "x\u{fe0e}\u{fe0f}", "\u{180e}"] {
+            assert_eq!(hidden_character(&strip_hidden(text)), None, "{text:?}");
+        }
     }
 }
