@@ -78,8 +78,10 @@ fn the_table_is_one_local_type() {
 fn events_need_their_feature() {
     assert_eq!(FEATURE_STEAM_EVENTS, "steam-events");
     assert!(KNOWN_FEATURES.contains(&FEATURE_STEAM_EVENTS));
-    let manifest =
-        validate(&steam(json!({"service": "steam", "events": ["stats.saved"]}))).expect("events");
+    let manifest = validate(&steam(
+        json!({"service": "steam", "events": ["stats.saved"]}),
+    ))
+    .expect("events");
     assert_eq!(
         manifest.features().into_iter().collect::<Vec<_>>(),
         ["service-steam", "steam-events"]
@@ -137,9 +139,11 @@ fn events_never_widen_the_permissions() {
     let without = validate(&steam(json!({"service": "steam"})))
         .expect("without")
         .permissions;
-    let with = validate(&steam(json!({"service": "steam", "events": ["stats.saved"]})))
-        .expect("with")
-        .permissions;
+    let with = validate(&steam(
+        json!({"service": "steam", "events": ["stats.saved"]}),
+    ))
+    .expect("with")
+    .permissions;
     assert_eq!(with.accounts, without.accounts);
     assert!(!with.widens(&without));
     assert!(!without.widens(&with));
@@ -176,8 +180,10 @@ fn the_service_of_the_events() {
     });
     assert!(shape.matches(&update));
     assert!(shape.matches(&json!({"state": "off", "reason": "unavailable", "events": []})));
-    assert!(!shape.matches(&json!({"state": "off", "reason": "unavailable",
-        "events": [{"seq": 1, "type": "channel.follow", "at": 1, "data": {}}]})));
+    assert!(
+        !shape.matches(&json!({"state": "off", "reason": "unavailable",
+        "events": [{"seq": 1, "type": "channel.follow", "at": 1, "data": {}}]}))
+    );
     assert!(!shape.matches(&json!({"state": "off", "reason": "token", "events": []})));
 }
 
