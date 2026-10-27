@@ -9,8 +9,10 @@
 //! but gains a rule detail asks for other authority too: such a key is
 //! `changed` (widened), and, like an `added` one, calls for a full review,
 //! as the host asks the player again (`Permissions::widens`). An account's
-//! detail is its whole declaration: any change of it is `changed`, and a
-//! route that gains `account` is a changed route.
+//! detail is its declaration without its `events` and `local` data: any
+//! change of it is `changed`, and a route that gains `account` is a changed
+//! route. An account that gains events or local data changes no key, yet
+//! calls for a full review.
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -96,6 +98,28 @@ pub fn keys(manifest: &Manifest) -> BTreeMap<String, BTreeSet<String>> {
     keys
 }
 
+/// Whether an account of `current` receives an event type or reads a kind
+/// of local data the same account of `previous` did not. They change no key
+/// (no new consent), yet the review must look at them: a full review.
+fn gains_events_or_local(previous: &Manifest, current: &Manifest) -> bool {
+    current.accounts.iter().any(|account| {
+        previous
+            .accounts
+            .iter()
+            .find(|before| before.id == account.id)
+            .is_some_and(|before| {
+                account
+                    .events
+                    .iter()
+                    .any(|event| !before.events.contains(event))
+                    || account
+                        .local
+                        .iter()
+                        .any(|data| !before.local.contains(data))
+            })
+    })
+}
+
 pub fn compare(previous: &Manifest, current: &Manifest) -> Comparison {
     let (before, after) = (keys(previous), keys(current));
     let added: Vec<String> = after
@@ -115,11 +139,12 @@ pub fn compare(previous: &Manifest, current: &Manifest) -> Comparison {
         .filter(|(key, details)| before.get(*key).is_some_and(|old| !details.is_subset(old)))
         .map(|(key, _)| key.clone())
         .collect();
-    let review = if added.is_empty() && changed.is_empty() {
-        ReviewType::Quick
-    } else {
-        ReviewType::Full
-    };
+    let review =
+        if added.is_empty() && changed.is_empty() && !gains_events_or_local(previous, current) {
+            ReviewType::Quick
+        } else {
+            ReviewType::Full
+        };
     Comparison {
         added,
         removed,
@@ -364,6 +389,35 @@ mod tests {
             assert_eq!(comparison.changed, ["account:twitch"]);
             assert_eq!(comparison.review, ReviewType::Full);
         }
+    }
+
+    #[test]
+    fn an_account_gaining_events_or_local_data_needs_a_full_review() {
+        let before = goals(json!({"service": "twitch", "scopes": ["channel:read:goals"]}));
+        let after = goals(
+            json!({"service": "twitch", "scopes": ["channel:read:goals"],
+                                  "events": ["channel.goal.begin"]}),
+        );
+        let comparison = compare(&before, &after);
+        // No key changes: no justification, no new consent; a full review.
+        assert!(comparison.added.is_empty() && comparison.changed.is_empty());
+        assert_eq!(comparison.review, ReviewType::Full);
+        // Dropping them asks for less: a quick review.
+        assert_eq!(compare(&after, &before).review, ReviewType::Quick);
+        assert_eq!(compare(&after, &after).review, ReviewType::Quick);
+        let steam = |account: Value| {
+            manifest(json!({
+                "accounts": [account],
+                "network": [{"method": "GET", "origin": "https://api.steampowered.com",
+                             "path": "/ISteamUserStats/GetPlayerAchievements/v1/", "account": "steam"}],
+            }))
+        };
+        let comparison = compare(
+            &steam(json!({"service": "steam"})),
+            &steam(json!({"service": "steam", "local": ["achievements"]})),
+        );
+        assert!(comparison.changed.is_empty());
+        assert_eq!(comparison.review, ReviewType::Full);
     }
 
     fn manifest_without_account() -> Manifest {

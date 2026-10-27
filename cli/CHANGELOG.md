@@ -41,6 +41,10 @@ widget's sources and the embedded SDK.
   catalog feature `steam-local-achievements`; the headless runtime this CLI
   pins must know `steam.achievements.local` to run a widget that calls it,
   and a scenario gives its answers under `fixtures.calls`.
+- `admit` gives each integrated service's `events` and `local` data in its
+  review item, and with `--previous` the ones the previous version declared
+  (`previousEvents`, `previousLocal`), since they change no permission key;
+  `inspect` lists the accounts with their scopes, events and local data.
 - It embeds `@overcrow/sdk` 1.3.0: `links.open`, the `headers` of
   `http.fetch` answers, the service error `review_removed_by_moderation`,
   `steam.events`, `steam.achievements` and `game`.

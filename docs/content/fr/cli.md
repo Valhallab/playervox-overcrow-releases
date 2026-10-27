@@ -192,9 +192,11 @@ overcrow-widget inspect dist/nova.my-widget-0.1.0.ocpkg
 Valide un paquet comme le fait PlayerVox OverCrow, puis le montre tel qu’un
 relecteur le voit : l’ID, la version et les noms ; la taille et le SHA-256
 de l’archive ; la version du SDK que contient son `logic.js` ; chaque
-permission en toutes lettres (routes réseau avec les contraintes de leurs
-paramètres et la limite de réponse déclarée, stockage, presse-papiers,
-événements de jeu) ; chaque capability avec son résumé, en précisant si
+permission en toutes lettres (comptes avec leurs scopes, leurs événements
+en direct et les données que PlayerVox OverCrow lit sur le PC ; routes
+réseau avec les contraintes de leurs paramètres et la limite de réponse
+déclarée, stockage, sites qu’il peut ouvrir, presse-papiers, événements de
+jeu) ; chaque capability avec son résumé, en précisant si
 elle est sensible ou demande un compte ; le nombre de lignes du menu ; et
 chaque fichier avec sa taille et son SHA-256. Quand OverCrow refuserait le
 paquet, la commande le signale à la place, avec la raison.
@@ -383,7 +385,8 @@ Chaque permission a une clé stable, la même dans l’espace créateurs :
 | `clipboardWrite` | Les écritures dans le presse-papiers. |
 | `capability:<name>` | Une capability. |
 | `gameEvent:<name>` | Un événement de jeu. |
-| `account:<id>` | Le [compte tiers](accounts.md) `<id>`, ou le [service intégré](integrated-services.md) que le widget nomme (`account:steam`), avec toute sa déclaration. |
+| `link:https://help.nova.gg/runs/` | Un site que le widget peut ouvrir : origine et préfixe de chemin. |
+| `account:<id>` | Le [compte tiers](accounts.md) `<id>`, ou le [service intégré](integrated-services.md) que le widget nomme (`account:steam`), avec sa déclaration, hors `events` et `local`. |
 
 Une clé est *ajoutée* quand la version précédente ne l’avait pas,
 *élargie* quand sa route reste mais que sa règle change (contraintes du
@@ -766,7 +769,7 @@ est annoncé par un nouveau `formatVersion`.
 | `reproducible` | `viewJson` et `archive`, comparés avec `--package`, sinon `null`. |
 | `listing` | `bytes`, `sha256`, `spdxLicense` et `preview` de `listing.json`. |
 | `sources` | `kind` (`folder` ou `archive`), `files`, `bytes`, `ignored` (`path`, `reason`) et, pour un ZIP, `sha256` et `prefix` (le dossier englobant). |
-| `review` | Les pouvoirs à relire, un objet par élément (`kind`, puis ses champs). Le compte vient en premier (`"kind": "account"` : sa déclaration, ou le service intégré qu’il nomme, `writes` et les `routes` qui le nomment) ; un élément `network` nomme son `account`, et a `"secretHint": true` quand il peut renvoyer des clés ou des jetons. |
+| `review` | Les pouvoirs à relire, un objet par élément (`kind`, puis ses champs). Le compte vient en premier (`"kind": "account"` : sa déclaration, ou le service intégré qu’il nomme avec ses `events` et ses données `local`, `writes` et les `routes` qui le nomment ; avec `--previous`, `previousEvents` et `previousLocal`, `null` pour un compte nouveau) ; un élément `link` donne son `origin` et son `pathPrefix` ; un élément `network` nomme son `account`, et a `"secretHint": true` quand il peut renvoyer des clés ou des jetons. |
 | `permissions` | `keys` ; avec `--previous`, aussi `previous` (`id`, `version`), `added`, `changed`, `removed` et `reviewType` (`full` ou `quick`), sinon `null`. |
 | `listingPolicy` | `required` ou `optional` (`--listing`). |
 | `diagnostics` | Les diagnostics, comme ci-dessus. |

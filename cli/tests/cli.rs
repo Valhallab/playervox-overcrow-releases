@@ -251,6 +251,54 @@ fn warnings_fail_only_with_deny_warnings() {
 }
 
 #[test]
+fn inspect_lists_accounts_with_their_events_and_local_data() {
+    let (_temporary, root) = project("blank");
+    replace(
+        &root,
+        "manifest.json",
+        "\"sizing\": {",
+        r#""permissions": {
+    "accounts": [{ "service": "steam", "events": ["stats.saved"], "local": ["achievements"] }],
+    "network": [{
+      "origin": "https://api.steampowered.com", "method": "GET",
+      "path": "/ISteamUserStats/GetPlayerAchievements/v1/",
+      "queryParams": {
+        "steamid": { "type": "slug", "maxLength": 17, "required": true },
+        "appid": { "type": "slug", "maxLength": 10, "required": true }
+      },
+      "account": "steam"
+    }]
+  },
+  "sizing": {"#,
+    );
+    let out = root.join("blank.ocpkg");
+    let output = cli(&[
+        "package",
+        root.to_str().expect("UTF-8"),
+        "--no-typecheck",
+        "--out",
+        out.to_str().expect("UTF-8"),
+    ]);
+    assert!(output.status.success(), "{}", text(&output.stderr));
+    let inspected = cli(&["inspect", out.to_str().expect("UTF-8")]);
+    assert!(inspected.status.success());
+    let report = text(&inspected.stdout);
+    assert!(
+        report.contains(
+            "    - Steam (steam), integrated service steam; events stats.saved; data read on this PC achievements"
+        ),
+        "{report}"
+    );
+    let inspected = cli(&["inspect", out.to_str().expect("UTF-8"), "--format", "json"]);
+    let value: serde_json::Value = serde_json::from_slice(&inspected.stdout).expect("JSON");
+    assert_eq!(
+        value["permissions"]["accounts"],
+        serde_json::json!([{"id": "steam", "name": "Steam", "service": "steam", "scopes": [],
+                            "events": ["stats.saved"], "local": ["achievements"]}])
+    );
+}
+
+#[test]
 fn inspect_refuses_what_the_host_refuses() {
     let (_temporary, root) = project("blank");
     let out = root.join("blank.ocpkg");

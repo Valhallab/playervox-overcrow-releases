@@ -184,9 +184,10 @@ overcrow-widget inspect dist/nova.my-widget-0.1.0.ocpkg
 
 Validates a package as PlayerVox OverCrow does, then shows it as a reviewer
 sees it: the ID, version and names; the size and SHA-256 of the archive; the
-SDK version its `logic.js` contains; each permission in words (network
-routes with their parameter constraints and declared response bound,
-storage, clipboard, game events); each capability with its summary and
+SDK version its `logic.js` contains; each permission in words (accounts
+with their scopes, live events and the data PlayerVox OverCrow reads on the
+PC; network routes with their parameter constraints and declared response
+bound, storage, the sites it may open, clipboard, game events); each capability with its summary and
 whether it is sensitive or needs an account; the number of menu rows; and
 every file with its size and SHA-256. A package that OverCrow would refuse
 is reported instead, with the reason.
@@ -367,7 +368,8 @@ Each permission has a stable key, the same in the creator space:
 | `clipboardWrite` | Clipboard writes. |
 | `capability:<name>` | A capability. |
 | `gameEvent:<name>` | A game event. |
-| `account:<id>` | The [third-party account](accounts.md) `<id>`, or the [integrated service](integrated-services.md) the widget names (`account:steam`), with its whole declaration. |
+| `link:https://help.nova.gg/runs/` | A site the widget may open: origin and path prefix. |
+| `account:<id>` | The [third-party account](accounts.md) `<id>`, or the [integrated service](integrated-services.md) the widget names (`account:steam`), with its declaration, apart from its `events` and `local` data. |
 
 A key is *added* when the previous version did not have it, *widened* when
 its route stays but its rule changes (path or query constraints, response
@@ -727,7 +729,7 @@ change announces any other change.
 | `reproducible` | `viewJson` and `archive`, compared with `--package`, else `null`. |
 | `listing` | `bytes`, `sha256`, `spdxLicense` and `preview` of `listing.json`. |
 | `sources` | `kind` (`folder` or `archive`), `files`, `bytes`, `ignored` (`path`, `reason`) and, for a ZIP, `sha256` and `prefix` (the wrapping folder). |
-| `review` | The authority to review, one object per item (`kind`, then its fields). The account comes first (`"kind": "account"`: its declaration, or the integrated service it names, `writes` and the `routes` that name it); a `network` item names its `account`, and has `"secretHint": true` when it may return keys or tokens. |
+| `review` | The authority to review, one object per item (`kind`, then its fields). The account comes first (`"kind": "account"`: its declaration, or the integrated service it names with its `events` and `local` data, `writes` and the `routes` that name it; with `--previous`, `previousEvents` and `previousLocal`, `null` for a new account); a `link` item gives its `origin` and `pathPrefix`; a `network` item names its `account`, and has `"secretHint": true` when it may return keys or tokens. |
 | `permissions` | `keys`; with `--previous`, also `previous` (`id`, `version`), `added`, `changed`, `removed` and `reviewType` (`full` or `quick`), else `null`. |
 | `listingPolicy` | `required` or `optional` (`--listing`). |
 | `diagnostics` | The diagnostics, as above. |

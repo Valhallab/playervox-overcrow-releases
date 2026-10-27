@@ -25,7 +25,7 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use overcrow_widget_schema::accounts::{AccountMode, ScopeAccess};
+use overcrow_widget_schema::accounts::{Account, AccountMode, ScopeAccess};
 use overcrow_widget_schema::catalog::validate_listing;
 use overcrow_widget_schema::identifiers::{
     EXAMPLE_HANDLES, HandleError, OwnershipError, id_owner, validate_handle,
@@ -660,7 +660,15 @@ fn check_preview(path: &str, findings: &mut Findings) -> Option<(String, String)
 
 /// What a maintainer reviews, in order: each item is a fact about the
 /// requested authority, not a verdict.
+#[cfg(test)]
 fn review(manifest: &Manifest) -> Vec<Value> {
+    review_against(manifest, None)
+}
+
+/// The review list; with the previous version, each integrated service also
+/// gives the events and local data that version declared, which change no
+/// permission key and are only seen here.
+fn review_against(manifest: &Manifest, previous: Option<&Manifest>) -> Vec<Value> {
     let permissions = &manifest.permissions;
     let mut items = Vec::new();
     let rules = manifest.value["permissions"]["network"]
@@ -694,6 +702,12 @@ fn review(manifest: &Manifest) -> Vec<Value> {
         // widget asks for and its routes; nothing for the reviewer to check
         // about origins or sending.
         if let Some(service) = account.service {
+            let before = previous.and_then(|previous| {
+                previous
+                    .accounts
+                    .iter()
+                    .find(|other| other.id == account.id && other.service.is_some())
+            });
             let scopes: Vec<Value> = account
                 .oauth
                 .iter()
@@ -729,6 +743,10 @@ fn review(manifest: &Manifest) -> Vec<Value> {
                 "scopes": scopes,
                 "writes": writes,
                 "routes": routes,
+                "events": events_of(account),
+                "local": local_of(account),
+                "previousEvents": before.map(events_of),
+                "previousLocal": before.map(local_of),
             }));
             continue;
         }
@@ -748,6 +766,10 @@ fn review(manifest: &Manifest) -> Vec<Value> {
             "refusedStatus": account.refused_status,
             "writes": writes,
             "routes": routes,
+            "events": Value::Null,
+            "local": Value::Null,
+            "previousEvents": Value::Null,
+            "previousLocal": Value::Null,
         }));
     }
     for name in &permissions.capabilities {
@@ -801,6 +823,16 @@ fn review(manifest: &Manifest) -> Vec<Value> {
         items.push(json!({"kind": "gameEvent", "name": event}));
     }
     items
+}
+
+/// The event types an account subscribes to, in the manifest's order.
+fn events_of(account: &Account) -> Vec<&'static str> {
+    account.events.iter().map(|event| event.kind).collect()
+}
+
+/// The kinds of data the host reads on the PC for an account.
+fn local_of(account: &Account) -> Vec<&'static str> {
+    account.local.iter().map(|data| data.kind).collect()
 }
 
 /// `permissions`: the stable keys and, with a previous version, the
@@ -869,7 +901,7 @@ fn render_json(findings: &Findings, options: &Options<'_>, report: &Report) -> V
         },
         "listing": listing,
         "sources": options.sources,
-        "review": review(manifest),
+        "review": review_against(manifest, findings.previous.as_ref().map(|(previous, _)| previous)),
         "permissions": permissions_json(findings),
         "diagnostics": diagnostics,
     })
@@ -974,8 +1006,24 @@ pub fn render_human(report: &Value) -> String {
                     .flatten()
                     .map(|scope| format!("{} ({})", text(&scope["name"]), text(&scope["access"])))
                     .collect();
+                let names = |field: &str| -> Vec<String> {
+                    item[field]
+                        .as_array()
+                        .into_iter()
+                        .flatten()
+                        .map(&text)
+                        .collect()
+                };
+                let (events, local) = (names("events"), names("local"));
+                let mut uses = Vec::new();
+                if !events.is_empty() {
+                    uses.push(format!("events {}", events.join(", ")));
+                }
+                if !local.is_empty() {
+                    uses.push(format!("data read on this PC {}", local.join(", ")));
+                }
                 format!(
-                    "account         {} ({}), integrated service, sent only to {}{CONTINUED}{}{}",
+                    "account         {} ({}), integrated service, sent only to {}{CONTINUED}{}{}{}",
                     text(&item["name"]),
                     text(&item["service"]),
                     origins.join(", "),
@@ -983,6 +1031,11 @@ pub fn render_human(report: &Value) -> String {
                         "no scope".to_owned()
                     } else {
                         format!("scopes {}", scopes.join(", "))
+                    },
+                    if uses.is_empty() {
+                        String::new()
+                    } else {
+                        format!("{CONTINUED}{}", uses.join("; "))
                     },
                     required_text(&item["required"])
                 )
@@ -1495,5 +1548,75 @@ mod tests {
         let declared = review(&quests(false, false));
         assert_eq!(declared[0]["service"], Value::Null);
         assert_eq!(declared[0]["scopes"], Value::Null);
+    }
+
+    fn steam_goals(account: Value) -> Manifest {
+        manifest(json!({
+            "accounts": [account],
+            "network": [{
+                "origin": "https://api.steampowered.com", "method": "GET",
+                "path": "/ISteamUserStats/GetPlayerAchievements/v1/",
+                "queryParams": {
+                    "steamid": {"type": "slug", "maxLength": 17, "required": true},
+                    "appid": {"type": "slug", "maxLength": 10, "required": true}
+                },
+                "account": "steam"
+            }],
+        }))
+    }
+
+    #[test]
+    fn the_review_shows_an_integrated_services_events_and_local_data() {
+        let items = review(&steam_goals(
+            json!({"service": "steam", "events": ["stats.saved"], "local": ["achievements"]}),
+        ));
+        assert_eq!(items[0]["events"], json!(["stats.saved"]));
+        assert_eq!(items[0]["local"], json!(["achievements"]));
+        // Without a previous version, nothing to compare with.
+        assert_eq!(items[0]["previousEvents"], Value::Null);
+        assert_eq!(items[0]["previousLocal"], Value::Null);
+        let plain = review(&steam_goals(json!({"service": "steam"})));
+        assert_eq!(plain[0]["events"], json!([]));
+        assert_eq!(plain[0]["local"], json!([]));
+    }
+
+    #[test]
+    fn the_review_gives_an_accounts_previous_events_and_local_data() {
+        let before = steam_goals(json!({"service": "steam", "events": ["stats.saved"]}));
+        let after = steam_goals(
+            json!({"service": "steam", "events": ["stats.saved"], "local": ["achievements"]}),
+        );
+        let items = review_against(&after, Some(&before));
+        assert_eq!(items[0]["previousEvents"], json!(["stats.saved"]));
+        assert_eq!(items[0]["previousLocal"], json!([]));
+        // An account the previous version did not have has nothing to compare with.
+        let items = review_against(&after, Some(&quests(false, false)));
+        assert_eq!(items[0]["previousEvents"], Value::Null);
+        assert_eq!(items[0]["previousLocal"], Value::Null);
+    }
+
+    #[test]
+    fn a_declared_account_has_no_events_or_local_data() {
+        let items = review_against(&quests(false, false), Some(&quests(false, false)));
+        for field in ["events", "local", "previousEvents", "previousLocal"] {
+            assert_eq!(items[0][field], Value::Null, "{field}");
+        }
+    }
+
+    #[test]
+    fn the_human_review_shows_an_accounts_events_and_local_data() {
+        let report = json!({
+            "id": "nova.steam-goals", "version": "1.1.0", "publisher": "nova",
+            "package": {"bytes": 1, "sha256": "00"}, "reproducible": {"viewJson": true},
+            "review": [review(&steam_goals(
+                json!({"service": "steam", "events": ["stats.saved"], "local": ["achievements"]}),
+            ))[0].clone()],
+            "permissions": {"previous": null},
+        });
+        let text = render_human(&report);
+        assert!(
+            text.contains("events stats.saved; data read on this PC achievements"),
+            "{text}"
+        );
     }
 }

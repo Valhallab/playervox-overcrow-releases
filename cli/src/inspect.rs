@@ -4,6 +4,7 @@
 
 use std::fmt::Write as _;
 
+use overcrow_widget_schema::accounts::Account;
 use overcrow_widget_schema::package::{Package, hex, sha256};
 use overcrow_widget_schema::permissions::capability_named;
 use serde_json::{Value, json};
@@ -90,6 +91,40 @@ pub fn render(package: &Package, archive_len: usize) -> String {
 
     let permissions = &manifest.permissions;
     let _ = writeln!(out, "\nPermissions (what the widget may reach)");
+    if manifest.accounts.is_empty() {
+        let _ = writeln!(out, "  accounts        none");
+    } else {
+        let _ = writeln!(
+            out,
+            "  accounts        the user's account on another service:"
+        );
+        for account in &manifest.accounts {
+            let summary = account_json(account);
+            let mut line = format!("    - {} ({})", account.name, account.id);
+            match account.service {
+                Some(service) => {
+                    let _ = write!(line, ", integrated service {}", service.id);
+                }
+                None => line.push_str(", declared account"),
+            }
+            for (field, label) in [
+                ("scopes", "scopes"),
+                ("events", "events"),
+                ("local", "data read on this PC"),
+            ] {
+                let names: Vec<&str> = summary[field]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .filter_map(Value::as_str)
+                    .collect();
+                if !names.is_empty() {
+                    let _ = write!(line, "; {label} {}", names.join(", "));
+                }
+            }
+            let _ = writeln!(out, "{line}");
+        }
+    }
     let network = value["permissions"]["network"].as_array();
     match network.filter(|rules| !rules.is_empty()) {
         Some(rules) => {
@@ -186,6 +221,24 @@ pub fn render(package: &Package, archive_len: usize) -> String {
     out
 }
 
+/// An account as inspect describes it: its service, the scopes it asks for,
+/// the live events it receives and the data the host reads on the PC.
+fn account_json(account: &Account) -> Value {
+    json!({
+        "id": account.id,
+        "name": account.name,
+        "service": account.service.map(|service| service.id),
+        "scopes": account
+            .oauth
+            .iter()
+            .flat_map(|oauth| &oauth.scopes)
+            .map(|scope| scope.name.as_str())
+            .collect::<Vec<_>>(),
+        "events": account.events.iter().map(|event| event.kind).collect::<Vec<_>>(),
+        "local": account.local.iter().map(|data| data.kind).collect::<Vec<_>>(),
+    })
+}
+
 pub fn render_json(package: &Package, archive_len: usize) -> String {
     let files: Vec<Value> = package
         .paths()
@@ -202,6 +255,7 @@ pub fn render_json(package: &Package, archive_len: usize) -> String {
         "sdk": linked_sdk(package),
         "heapBytes": package.manifest.heap_bytes,
         "permissions": {
+            "accounts": package.manifest.accounts.iter().map(account_json).collect::<Vec<_>>(),
             "network": package.manifest.value["permissions"]["network"].as_array().cloned().unwrap_or_default(),
             "storage": permissions.storage,
             "links": package.manifest.value["permissions"]["links"].as_array().cloned().unwrap_or_default(),
