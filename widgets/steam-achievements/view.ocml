@@ -89,6 +89,7 @@
       <box class="empty" tooltip={hiddenTip(state)}>
         <icon class="empty-icon warn" name="eye-off"/>
         <text class="line-text">{hiddenTitle(state)}</text>
+        <if test={settingsLink(state)}><button class="line-link" label={t("open-settings")} tooltip={t("open-settings")} on:activate={openSettings}><icon name="external-link"/></button></if>
       </box>
     </if>
     <else>
@@ -104,6 +105,10 @@
               <text class="fix-value">{hiddenSetting(state)}</text>
             </box>
           </box>
+          <if test={settingsLink(state)}>
+            <button class="ghost open-link" on:activate={openSettings}><text class="ghost-text">{t("open-settings")}</text><icon class="link-icon" name="external-link"/></button>
+          </if>
+          <if test={linkNote(state) != ""}><text class="pmsg warn"><icon class="inline-icon" name="circle-alert"/><span>&#32;{linkNote(state)}</span></text></if>
         </box>
       </box>
     </else>

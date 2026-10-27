@@ -1,0 +1,260 @@
+{
+  "scenarioVersion": 1,
+  "name": "settings-link-profile",
+  "description": "A private profile, in Interactive mode: the same button under the path to My profile and Game details.",
+  "host": {
+    "startAt": 1767225600000,
+    "storage": {
+      "profile": {
+        "steamid": "76561198000000000",
+        "input": "https://steamcommunity.com/profiles/76561198000000000"
+      }
+    },
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "calls": {
+      "steam.achievements.local": [
+        {
+          "error": "unavailable"
+        },
+        {
+          "error": "unavailable"
+        },
+        {
+          "error": "unavailable"
+        },
+        {
+          "error": "unavailable"
+        },
+        {
+          "error": "unavailable"
+        },
+        {
+          "error": "unavailable"
+        },
+        {
+          "error": "unavailable"
+        },
+        {
+          "error": "unavailable"
+        }
+      ]
+    },
+    "http": [
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?steamids=76561198000000000",
+          "account": "steam"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 1,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"commentpermission\": 1,\n\t\t\t\t\"profileurl\": \"https://steamcommunity.com/profiles/76561198000000000/\",\n\t\t\t\t\"personastate\": 1\n\t\t\t}\n\t\t]\n\t}\n}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?steamids=76561198000000000",
+          "account": "steam"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 1,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"commentpermission\": 1,\n\t\t\t\t\"profileurl\": \"https://steamcommunity.com/profiles/76561198000000000/\",\n\t\t\t\t\"personastate\": 1\n\t\t\t}\n\t\t]\n\t}\n}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?steamids=76561198000000000",
+          "account": "steam"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\n\t\"response\": {\n\t\t\"players\": [\n\t\t\t{\n\t\t\t\t\"steamid\": \"76561198000000000\",\n\t\t\t\t\"communityvisibilitystate\": 1,\n\t\t\t\t\"profilestate\": 1,\n\t\t\t\t\"personaname\": \"Nova\",\n\t\t\t\t\"commentpermission\": 1,\n\t\t\t\t\"profileurl\": \"https://steamcommunity.com/profiles/76561198000000000/\",\n\t\t\t\t\"personastate\": 1\n\t\t\t}\n\t\t]\n\t}\n}"
+        }
+      }
+    ]
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "Profile hidden",
+          "Open Steam settings"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 240,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "settings-link-profile-line",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "compact"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 280,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "settings-link-profile-compact",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "settings-link-profile-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 340,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "settings-link-profile-full",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 240,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "settings-link-profile-fr-line",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "compact"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 280,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "settings-link-profile-fr-compact",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 300,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "settings-link-profile-fr-standard",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 340,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "settings-link-profile-fr-full",
+        "fault": "none"
+      }
+    }
+  ]
+}

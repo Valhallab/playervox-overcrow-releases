@@ -713,6 +713,33 @@
   font-weight: 600;
   color: var(--color-text);
 }
+/* The button to Steam's privacy settings, under the path: an aid, not the
+   screen's main action (no accent). */
+.open-link {
+  align-self: start;
+  gap: var(--space-3);
+  margin-top: var(--space-1);
+}
+.link-icon {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+/* One line: the icon alone at the line's end, the line keeping its height. */
+.line-link {
+  width: 22px;
+  height: 22px;
+  margin: -3px -4px -3px auto;
+  justify-content: center;
+  align-items: center;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.line-link:hover {
+  background: var(--color-surface-hover);
+}
 .skeleton {
   flex-direction: column;
   gap: var(--space-4);

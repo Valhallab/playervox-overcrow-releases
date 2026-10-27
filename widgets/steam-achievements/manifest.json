@@ -191,6 +191,12 @@
         "maxResponseBytes": 262144
       }
     ],
+    "links": [
+      {
+        "origin": "https://steamcommunity.com",
+        "pathPrefix": "/my/edit/settings"
+      }
+    ],
     "storage": true
   },
   "vm": {

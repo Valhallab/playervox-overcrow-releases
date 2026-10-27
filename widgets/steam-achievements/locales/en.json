@@ -71,5 +71,8 @@
   "hidden-profile": "Steam hides your profile. Set it to Public, and your game details too.",
   "hidden-path": "In Steam: Profile › Edit Profile › Privacy Settings",
   "hidden-details-setting": "Game details: Public",
-  "hidden-profile-setting": "My profile and Game details: Public"
+  "hidden-profile-setting": "My profile and Game details: Public",
+  "open-settings": "Open Steam settings",
+  "link-refused": "Allow “Open web pages” in the Control Center.",
+  "link-failed": "Your browser didn't open. Try again."
 }

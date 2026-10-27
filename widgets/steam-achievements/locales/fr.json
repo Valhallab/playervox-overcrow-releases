@@ -71,5 +71,8 @@
   "hidden-profile": "Steam cache votre profil. Réglez-le sur Public, ainsi que vos détails de jeu.",
   "hidden-path": "Dans Steam : Profil › Modifier le profil › Paramètres de confidentialité",
   "hidden-details-setting": "Détails des jeux : Public",
-  "hidden-profile-setting": "Mon profil et Détails des jeux : Public"
+  "hidden-profile-setting": "Mon profil et Détails des jeux : Public",
+  "open-settings": "Ouvrir les réglages Steam",
+  "link-refused": "Autorisez « Ouvrir des pages web » dans le Centre de contrôle.",
+  "link-failed": "Le navigateur ne s'est pas ouvert. Réessayez."
 }

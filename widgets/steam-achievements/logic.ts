@@ -18,6 +18,7 @@ import {
   host,
   http,
   initState,
+  links,
   onHost,
   onMenu,
   option,
@@ -556,6 +557,11 @@ export type Phase = "loading" | "profile" | "nothing" | "hidden" | "empty-unreac
 /** What Steam hides: the whole profile, or the game details only. */
 export type Hidden = "" | "profile" | "details";
 export type Stale = "" | "unreachable" | "quota";
+/**
+ * `refused`: "Open web pages" is not allowed (unticked at install, or taken
+ * back in the Control Center); `failed`: the browser did not open.
+ */
+export type LinkFailure = "" | "refused" | "failed";
 
 export interface GameView {
   appid: number;
@@ -643,6 +649,8 @@ declare module "@overcrow/sdk" {
     locale: string;
     optionsVersion: number;
     theme: string;
+    /** Why the last click on "Open Steam settings" opened nothing, if it says. */
+    link: LinkFailure;
   }
 }
 
@@ -669,6 +677,7 @@ export const state = initState({
   locale: host.locale,
   optionsVersion: 0,
   theme: host.theme,
+  link: "" as LinkFailure,
 });
 
 // ---------------------------------------------------------------------------
@@ -2261,9 +2270,45 @@ export function hiddenPath(_s: typeof state): string {
 export function hiddenSetting(s: typeof state): string {
   return t(s.hidden === "profile" ? "hidden-profile-setting" : "hidden-details-setting");
 }
-/** One line has room for the title only: the rest in its tooltip. */
+/** One line has room for the title only: the rest in its tooltip, with what the link could not do. */
 export function hiddenTip(s: typeof state): string {
-  return `${hiddenBody(s)} ${hiddenPath(s)} › ${hiddenSetting(s)}`;
+  const note = linkNote(s);
+  return `${hiddenBody(s)} ${hiddenPath(s)} › ${hiddenSetting(s)}${note === "" ? "" : ` ${note}`}`;
+}
+
+/**
+ * Steam's privacy settings: the player's own page once signed in to
+ * steamcommunity.com, else Steam's sign-in, which returns there. The one
+ * page `permissions.links` declares.
+ */
+export const STEAM_PRIVACY_SETTINGS = "https://steamcommunity.com/my/edit/settings";
+
+/**
+ * The button to Steam's privacy settings: where the widget says Steam hides
+ * the profile or the game details, in Interactive mode (a click is needed),
+ * unless "Open web pages" is not allowed.
+ */
+export function settingsLink(s: typeof state): boolean {
+  return s.interactive && s.phase === "hidden" && s.link !== "refused";
+}
+/** What the last click could not do, beside the button; `""` for nothing to say. */
+export function linkNote(s: typeof state): string {
+  if (!s.interactive || s.phase !== "hidden") return "";
+  return s.link === "refused" ? t("link-refused") : s.link === "failed" ? t("link-failed") : "";
+}
+
+/**
+ * The button's click. PlayerVox OverCrow shows the address and asks the
+ * first time; declined (`cancelled`) or already asking (`busy`), nothing to
+ * say: the player sees the host's panel.
+ */
+export function openSettings(): void {
+  state.link = "";
+  links.open({ url: STEAM_PRIVACY_SETTINGS }).catch((error: unknown) => {
+    const code = (error as { code?: string }).code ?? "";
+    if (code === "permission_denied") state.link = "refused";
+    else if (code === "unavailable") state.link = "failed";
+  });
 }
 
 export function isStale(s: typeof state): boolean {

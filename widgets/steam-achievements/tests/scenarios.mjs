@@ -187,9 +187,10 @@ function localPage(game, unlockedNow = {}) {
   return { value: { appid: game.appid, total: achievements.length, achievements } };
 }
 
-function scenario(name, description, { host = {}, http = [], subscriptions, calls = { [LOCAL]: repeat(8, NOTHING_HERE) }, steps }) {
+function scenario(name, description, { host = {}, http = [], subscriptions, confirmations, calls = { [LOCAL]: repeat(8, NOTHING_HERE) }, steps }) {
   const fixtures = { calls, http };
   if (subscriptions !== undefined) fixtures.subscriptions = subscriptions;
+  if (confirmations !== undefined) fixtures.confirmations = confirmations;
   const value = {
     scenarioVersion: 1,
     name,
@@ -290,15 +291,17 @@ scenario("no-achievements", "Neon Courier has no achievements: said once, no ach
 
 // --- what Steam hides: said instead of a game, with where to change it.
 const RUNE = { appid: 1_874_300, name: "Rune Table", header: "header-courier", icon: "game-tide", achievements: ASHEN.achievements };
+/** Steam's answers while the game details are Friends Only, for `minutes` minutes. */
+const detailsHidden = (minutes = 11) => [
+  ...repeat(minutes + 1, () => fixture(urls.summary, summary({ playing: RUNE, details: "friends" }))),
+  ...repeat(2, () => fixture(urls.recent, recent([ASHEN]))),
+  fixture(urls.schema(ASHEN), schema(ASHEN, "english")),
+  fixture(urls.schema(ASHEN, "french"), schema(ASHEN, "french")),
+  ...repeat(2, () => fixture(urls.player(ASHEN), NOT_PUBLIC())),
+  ...probes(4),
+];
 scenario("details-hidden", "Game details Friends Only: Steam names no running game and refuses the achievements of the last one played (403 Profile is not public); said with where to set them Public, no game guessed.", {
-  http: [
-    ...repeat(12, () => fixture(urls.summary, summary({ playing: RUNE, details: "friends" }))),
-    ...repeat(2, () => fixture(urls.recent, recent([ASHEN]))),
-    fixture(urls.schema(ASHEN), schema(ASHEN, "english")),
-    fixture(urls.schema(ASHEN, "french"), schema(ASHEN, "french")),
-    ...repeat(2, () => fixture(urls.player(ASHEN), NOT_PUBLIC())),
-    ...probes(4),
-  ],
+  http: detailsHidden(),
   steps: [
     { expect: { state: "running", text: ["Game details hidden", "Steam hides your game details. Set them to Public (Friends Only is not enough)."], noText: ["Ashen Crown", "Rune Table", "Playing now", "Last game played"], fault: "none" } },
     ...layouts("details-hidden"),
@@ -340,6 +343,62 @@ scenario("profile-hidden", "A private profile: Steam keeps only its public field
     { host: { locale: "fr" } },
     { expect: { text: ["Profil caché"] } },
     ...layouts("profile-hidden-fr"),
+  ],
+});
+
+// --- the button to Steam's privacy settings (Interactive mode only).
+const OPEN_EN = "Open Steam settings";
+const NOTES = ["Allow “Open web pages” in the Control Center.", "Your browser didn't open. Try again."];
+scenario("settings-link", "Game details Friends Only, in Interactive mode: under the path, a button opens Steam's privacy settings (in One line, the icon alone). PlayerVox OverCrow asks the first time for steamcommunity.com: declined, nothing said; accepted, the page opens; the next click opens it without asking.", {
+  host: { mode: "interactive" },
+  http: detailsHidden(1),
+  confirmations: ["cancel", "accept"],
+  steps: [
+    { expect: { state: "running", text: ["Game details hidden", OPEN_EN], fault: "none" } },
+    ...layouts("settings-link"),
+    { host: { scale: 1500 } },
+    ...layouts("settings-link-150"),
+    { host: { locale: "fr", scale: 1000 } },
+    { expect: { text: ["Ouvrir les réglages Steam"] } },
+    ...layouts("settings-link-fr"),
+    { host: { scale: 1500 } },
+    ...layouts("settings-link-fr-150"),
+    { host: { theme: "light", scale: 1000, locale: "en" } },
+    ...layouts("settings-link-light", ["standard"]),
+    { host: { theme: "dark" } },
+    // Declined in the host's panel, then accepted, then without the panel.
+    { pointer: { click: { text: OPEN_EN } } },
+    { expect: { text: [OPEN_EN], noText: NOTES, fault: "none" } },
+    { pointer: { click: { text: OPEN_EN } } },
+    { expect: { text: [OPEN_EN], noText: NOTES, fault: "none" } },
+    { pointer: { click: { text: OPEN_EN } } },
+    { expect: { text: [OPEN_EN], noText: NOTES, fault: "none" } },
+  ],
+});
+
+scenario("settings-link-profile", "A private profile, in Interactive mode: the same button under the path to My profile and Game details.", {
+  host: { mode: "interactive" },
+  http: [...repeat(3, () => fixture(urls.summary, summary({ playing: ASHEN, visible: 1 })))],
+  steps: [
+    { expect: { state: "running", text: ["Profile hidden", OPEN_EN], fault: "none" } },
+    ...layouts("settings-link-profile"),
+    { host: { locale: "fr" } },
+    ...layouts("settings-link-profile-fr"),
+  ],
+});
+
+scenario("settings-link-refused", "\"Open web pages\" unticked at install: the click is refused by PlayerVox OverCrow, and the button gives way to what to allow, and where (in One line, in its tooltip).", {
+  host: { mode: "interactive", grants: ["account:steam", "game.read", "network", "storage"] },
+  http: detailsHidden(1),
+  steps: [
+    { expect: { state: "running", text: [OPEN_EN], fault: "none" } },
+    { menu: { id: "layout", value: "standard" } },
+    { pointer: { click: { text: OPEN_EN } } },
+    { expect: { text: [NOTES[0]], noText: [OPEN_EN], fault: "none" } },
+    ...layouts("settings-link-refused", ["line", "compact", "standard", "full"]),
+    { host: { locale: "fr" } },
+    { expect: { text: ["Autorisez «\u00a0Ouvrir des pages web\u00a0» dans le Centre de contrôle."] } },
+    ...layouts("settings-link-refused-fr", ["compact", "standard"]),
   ],
 });
 

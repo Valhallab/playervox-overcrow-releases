@@ -51,6 +51,9 @@ export function fakeSteam() {
     local: null,
     /** Every `steam.achievements.local` call's parameters. */
     localCalls: [],
+    /** Every page `links.open` asked, and the host's answer: `null` (opened) or an error code. */
+    opened: [],
+    linkAnswer: null,
     handle(url) {
       steam.requests.push(url);
       const parsed = new URL(url);
@@ -173,6 +176,10 @@ export async function settle(vm, steam, { delay = 0 } = {}) {
         if (saved === undefined || saved === null) call.reject("unavailable");
         else if (typeof saved === "string") call.reject(saved);
         else call.resolve(localPage(saved, call.params));
+      } else if (call.service === "links.open") {
+        steam.opened.push(call.params.url);
+        if (steam.linkAnswer === null) call.resolve(null);
+        else call.reject(steam.linkAnswer);
       } else if (call.service === "http.fetch") {
         // A real network takes time: the next request starts later.
         if (delay > 0) vm.advance(delay);

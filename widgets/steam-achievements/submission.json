@@ -45,6 +45,10 @@
       "text": "The same store image on Steam's other image host, when the first one has none."
     },
     {
+      "permission": "link:https://steamcommunity.com/my/edit/settings",
+      "text": "Opens Steam's privacy settings page in your browser, only when you click \"Open Steam settings\" where the widget says Steam hides your profile or game details, so that you can set them to Public. PlayerVox OverCrow shows the address and asks you the first time. Signed out, Steam shows its sign-in page first, then the settings."
+    },
+    {
       "permission": "storage",
       "text": "Keeps your profile link, the achievements you track (up to three per game, for your last 20 games), the last values shown and the achievement lists of your last three games, on this computer."
     }
