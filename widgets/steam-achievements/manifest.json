@@ -29,6 +29,7 @@
         "events": ["stats.saved"]
       }
     ],
+    "capabilities": ["game.read"],
     "network": [
       {
         "origin": "https://api.steampowered.com",

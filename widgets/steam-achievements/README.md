@@ -64,6 +64,7 @@ keep the previous version of the widget).
 | Permission | Why |
 | --- | --- |
 | `account:steam` | The integrated Steam service. Read only: the widget never calls a trade route (`IEconService`), and PlayerVox OverCrow refuses any route outside the read interfaces of the player and the games |
+| `game.read` | The game PlayerVox OverCrow says you are playing (`game.subscribe`): its Steam app ID and name, even when your Steam status is Invisible or offline. Not sensitive: the overlay is a game aid |
 | `network` | Six `GET` routes of `https://api.steampowered.com` (below); the store image of a game on two Steam image hosts; the icons of achievements and games on `https://shared.akamai.steamstatic.com/community_assets/images/apps/`, a `file` parameter (`<name>.jpg`, catalog feature `network-file-param`) |
 | `storage` | The profile link, the tracked achievements (three per game, 20 games), the last values shown and the achievement lists of the last three games |
 
@@ -72,7 +73,7 @@ keep the previous version of the widget).
 | `ISteamUser/ResolveVanityURL/v1` | When you enter a profile link with a custom name |
 | `ISteamUser/GetPlayerSummaries/v2` | Every minute while shown: the game running and the profile's visibility |
 | `IPlayerService/GetRecentlyPlayedGames/v1` | When the game changes, then every 10 minutes out of game |
-| `ISteamUserStats/GetPlayerAchievements/v1` | Every minute in game, at once when Steam on this computer saves the game's achievements (never twice within 5 seconds), every 10 minutes out of game (up to 3 MiB). With `l`, once per game and language, only for a game whose list exceeds its route's bound: the names and descriptions instead |
+| `ISteamUserStats/GetPlayerAchievements/v1` | Every minute in game, at once when Steam on this computer saves the game's achievements or your game changes (never twice within 5 seconds), every 10 minutes out of game (up to 3 MiB). With `l`, once per game and language, only for a game whose list exceeds its route's bound: the names and descriptions instead |
 | `ISteamUserStats/GetSchemaForGame/v2` | Once per game and language, then kept (up to 3 MiB: Steam's limit of 5,000 achievements per game fits); a list beyond, tried again a day later |
 | `ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2` | Once per game and day, without the key (up to 2 MiB) |
 
@@ -94,6 +95,22 @@ your computer and sends it only to `api.steampowered.com`. To revoke it:
   the delivery of the tick); the list of achievements once per game and
   language, so a language switch reads its names at once; the profile's
   check is the first read.
+- **Current game.** From PlayerVox OverCrow 0.9.0-beta.1 (`game.read`,
+  catalog feature `active-game`), the game the host says is running comes
+  first, then the one Steam's presence names (`gameid`), then the last one
+  played. Steam names no game while the status is Invisible or offline:
+  the host's game is shown all the same, as playing, with what Steam knows
+  of its achievements (in Steam's offline mode, the new ones once Steam is
+  back online). A change of the host's game reads the summary, the new
+  game's list and its achievements at once, never twice within 5 seconds;
+  hidden, once shown again. A game outside the Steam store (added by hand,
+  a non-Steam shortcut), no game, a refusal of the permission or an older
+  application: Steam's presence, as before. A refusal (403) of the host's
+  game that Steam does not name says the game details are hidden, unless
+  the widget has proof they are public for this account (an answer of
+  `GetPlayerAchievements`, or a game the presence named, kept in storage):
+  then the game itself is not readable. The proof falls with a refusal of
+  a game of the recent list, or another profile.
 - **Local signal.** From PlayerVox OverCrow 0.9.0-beta.1 (`steam.events`,
   catalog feature `steam-events`; earlier versions keep 1.0.2), the host
   says when the Steam client of this computer saves a game's stats of the
@@ -164,7 +181,10 @@ your computer and sends it only to `api.steampowered.com`. To revoke it:
 - Whether a game is borrowed through Steam Families is not shown (that
   needs a route the widget does not use); a borrowed game Steam reads
   shows as any game.
-- Games outside Steam are not seen.
+- Games outside the Steam store are not seen.
+- Without proof that the game details are public, a game the player does
+  not own, refused while Steam's presence names none, says the details are
+  hidden.
 - Store images are sometimes missing (recent games name them with a hash
   no route gives): the game's icon replaces them.
 - Without the local signal (Steam on another computer), updated every

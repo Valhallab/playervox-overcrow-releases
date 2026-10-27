@@ -12,6 +12,7 @@
 import {
   account,
   formatNumber,
+  game,
   host,
   http,
   initState,
@@ -637,6 +638,14 @@ const model = {
   hiddenSaved: true,
   /** The last S3 read hid the games (private game details). */
   recentHidden: false,
+  /**
+   * The game details of `steamid` are public: S4 answered for a game, or
+   * Steam's presence named one. A refusal of the host's game is then the
+   * game itself (not owned), not hidden details. Kept in storage.
+   */
+  publicDetails: false,
+  /** The shown game is the one Steam's presence names. */
+  named: false,
   unlocked: null as Map<string, number> | null,
   rarity: new Map<number, { at: number; values: Map<string, number> }>(),
   schemas: new Map<string, SchemaEntry>(),
@@ -681,6 +690,21 @@ measure();
 const language = (): "english" | "french" => (host.locale === "fr" ? "french" : "english");
 const schemaKey = (appid: number, l: string): string => `${appid}:${l}`;
 
+/**
+ * The game PlayerVox OverCrow says is running (`game.subscribe`): first,
+ * even when Steam's presence names none (Invisible, offline). `0` without
+ * one, outside the Steam store, or with an older PlayerVox OverCrow.
+ */
+const active = { appid: 0, name: "" };
+
+/** Whether the game details of the account are proven public, and stored. */
+function setPublicDetails(proven: boolean): void {
+  if (model.publicDetails === proven) return;
+  model.publicDetails = proven;
+  if (proven) void storage.set({ key: "publicDetails", value: model.steamid }).catch(() => null);
+  else void storage.remove({ key: "publicDetails" }).catch(() => null);
+}
+
 /** What the local Steam events ask (`steam.events`). */
 const events = {
   subscription: null as Subscription | null,
@@ -690,6 +714,8 @@ const events = {
   /** A read due: the summary (another game, a missed save), the shown game's achievements. */
   summary: false,
   player: false,
+  /** The host's game changed: the new game's list too, whatever the route's minute. */
+  schema: false,
   /** The save the looks again count from, and the next look. */
   savedAt: 0,
   look: EVENT_LOOKS.length as number,
@@ -698,7 +724,7 @@ const events = {
 };
 
 /** How long `route` waits for the floor of a read a save asks. */
-function floorLeft(route: Route, now: number): number {
+function floorLeft(route: Route | string, now: number): number {
   const last = model.lastCall.get(route);
   return last === undefined ? 0 : Math.max(0, last + EVENT_FLOOR - now);
 }
@@ -945,16 +971,24 @@ async function read(): Promise<void> {
   // else is asked until it is public.
   if (!summary.visible) return hide("profile", now);
 
-  let appid = summary.appid ?? 0;
+  // The host's game first: Steam's presence names none while the status is
+  // Invisible or offline.
+  const presence = summary.appid ?? 0;
+  let appid = active.appid !== 0 ? active.appid : presence;
+  model.named = presence !== 0 && presence === appid;
+  const name = model.named ? summary.gameName : active.name || null;
   // A game that stops being named: quit, or hidden since. Steam is asked at
   // once which, never a minute of guessing.
   const stopped = model.playing && appid === 0;
   model.playing = appid !== 0;
   // Steam names the running game only with public game details.
-  if (appid !== 0) reveal();
+  if (presence !== 0) {
+    reveal();
+    setPublicDetails(true);
+  }
   // The running game's name, or none yet (S3 or S5 give it): never the
   // previous game's.
-  if (appid !== 0 && (summary.gameName !== null || appid !== model.appid)) model.gameName = summary.gameName ?? "";
+  if (appid !== 0 && (name !== null || appid !== model.appid)) model.gameName = name ?? "";
 
   const switched = appid !== 0 && appid !== model.appid;
   const recentDue = switched || stopped || (appid === 0 && (model.readRecent === 0 || now - model.readRecent >= OUT_OF_GAME_EVERY));
@@ -997,6 +1031,7 @@ async function read(): Promise<void> {
     if (early === "done" && (model.unlocked !== null || !model.readable)) showGame(now);
   };
   let found = await ensureSchema(appid, lang, now, beforeSlices);
+  events.schema = false;
   // Beyond the schema's bound: the names from S4 asked with `l`, a large
   // answer too, after the count.
   if (found === TOO_LARGE) {
@@ -1085,9 +1120,12 @@ async function playerStep(appid: number, now: number, stopped: boolean, schema: 
   // The key works (S2 just answered). Steam named this game as running,
   // which it does only with public game details: the game itself is not
   // readable (not owned…). A game guessed from the last ones played is
-  // one the player owns: Steam hides the game details, and the game is
-  // not shown, since it may not be the one running.
-  if (refused === "hidden" && !model.playing) {
+  // one the player owns: Steam hides the game details (no longer proven
+  // public), and the game is not shown, since it may not be the one
+  // running. The host's game that Steam does not name (Invisible,
+  // offline): hidden details, unless they are proven public.
+  if (refused === "hidden" && !model.playing) setPublicDetails(false);
+  if (refused === "hidden" && (!model.playing || (!model.named && !model.publicDetails))) {
     model.readPlayer = now;
     return "hidden";
   }
@@ -1098,6 +1136,7 @@ async function playerStep(appid: number, now: number, stopped: boolean, schema: 
   } else {
     const read = await playerOf(playerAnswer, schema === null);
     if (read === null) return { kind: "server" };
+    setPublicDetails(true);
     const before = model.unlocked;
     const found = [...read.unlocked.keys()].some((id) => before?.has(id) !== true);
     // A save's read plans the next look; any read that finds something ends them.
@@ -1179,7 +1218,10 @@ async function ensureSchema(appid: number, lang: string, now: number, beforeSlic
   if (known !== null && known !== undefined) return known;
   if (knownTooLarge(appid, now)) return TOO_LARGE;
   // One list per game and language: another language is another request.
-  if (!canCall(`schema:${lang}`, now)) return null;
+  // The host's new game: at once, never twice within 5 seconds.
+  const switched = events.schema && floorLeft(`schema:${lang}`, now) === 0;
+  if (!canCall(`schema:${lang}`, now) && !switched) return null;
+  events.schema = false;
   const answer = await call("schema", { appid, l: lang }, `schema:${lang}`, now);
   if (answer.kind === "too-large") {
     // A handful of games at most: the oldest goes past 32.
@@ -1603,6 +1645,7 @@ async function restore(): Promise<void> {
       render();
     }
   }
+  model.publicDetails = (await storage.get({ key: "publicDetails" }).catch(() => null)) === steamid;
   // Hidden at the last read: said at once, never a game that may be stale.
   const hidden = await storage.get({ key: "hidden" }).catch(() => null);
   if (hidden === "profile" || hidden === "details") {
@@ -1658,6 +1701,7 @@ export async function submitProfile(): Promise<void> {
     return;
   }
   const changed = steamid !== model.steamid;
+  if (changed) setPublicDetails(false);
   model.steamid = steamid;
   listen();
   // Another profile, or the same one checked again: the next read says.
@@ -1808,6 +1852,23 @@ onHost((changed) => {
 onMenu((row) => {
   if (row === "track") openPick();
   if (row === "change-profile") openProfile();
+});
+
+// The host's game (`game.read`). Refused, unknown (an older PlayerVox
+// OverCrow) or ended: Steam's presence, as before. A change reads at once
+// (never twice within 5 seconds); hidden, when shown again.
+game.subscribe((update) => {
+  const value = update.ok ? update.value : null;
+  const appid = value?.steamAppId ?? 0;
+  active.name = value?.name ?? "";
+  if (appid === active.appid) return;
+  active.appid = appid;
+  // The summary says the rest; the new game's achievements come with it,
+  // whatever the route's minute.
+  events.summary = true;
+  events.player = true;
+  events.schema = true;
+  if (!armFloor()) void refresh();
 });
 
 account.subscribe({ id: "steam" }, (update) => {
