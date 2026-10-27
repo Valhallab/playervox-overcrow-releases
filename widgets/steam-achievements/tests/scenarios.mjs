@@ -451,7 +451,7 @@ scenario("profile-invalid", "A store link is not a profile: refused before any r
     { pointer: { click: { label: "Link to your Steam profile" } } },
     { text: "store.steampowered.com/app/1874000" },
     { key: { key: "Enter" } },
-    { expect: { text: [" This is not a Steam profile link. Example: steamcommunity.com/id/yourname"], calls: [{ service: "account.subscribe", outcome: "ok" }, { service: "storage.get", outcome: "ok" }] } },
+    { expect: { text: [" This is not a Steam profile link. Example: steamcommunity.com/id/yourname"], calls: [{ service: "game.subscribe" }, { service: "account.subscribe", outcome: "ok" }, { service: "storage.get", outcome: "ok" }] } },
     ...layouts("profile-invalid", ["compact", "standard"]),
   ],
 });
@@ -786,6 +786,67 @@ scenario("event-while-hidden", "A save while hidden: nothing is read; shown agai
     { advance: { ms: 10_000 } },
     { host: { visible: true } },
     { expect: { text: ["13 / 40", "Endless Night"], fault: "none" } },
+  ],
+});
+
+// --- the game PlayerVox OverCrow says is running (PlayerVox OverCrow 0.9):
+// first, even when Steam's presence names none (Invisible, offline).
+const GAME = "game.subscribe";
+const hostGame = (game) => ({ steamAppId: game.appid, name: game.name });
+
+scenario("invisible-host-game", "Status Invisible: Steam names no game and the last one played is Neon Courier; the host's game, Ashen Crown, shows as playing with its achievements.", {
+  subscriptions: { [GAME]: hostGame(ASHEN), ...LIVE.subscriptions },
+  http: reads(ASHEN, { playing: false, recentGames: [COURIER, ASHEN] }),
+  steps: [
+    { expect: { state: "running", text: ["Ashen Crown", "Playing now", "12 / 40"], noText: ["Neon Courier", "Last game played"], fault: "none" } },
+    ...layouts("invisible-host-game", ["standard"]),
+  ],
+});
+
+scenario("host-game-switch", "Status Invisible: the host's game changes from Ashen Crown to Neon Courier; read at once, the new game alone.", {
+  subscriptions: { [GAME]: hostGame(ASHEN), ...LIVE.subscriptions },
+  http: [
+    ...reads(ASHEN, { minutes: 0, playing: false, recentGames: [ASHEN] }),
+    fixture(urls.summary, summary({ playing: null })),
+    fixture(urls.recent, recent([COURIER, ASHEN])),
+    fixture(urls.schema(COURIER), schema(COURIER, "english")),
+    ...images(COURIER),
+  ],
+  steps: [
+    { expect: { state: "running", text: ["Ashen Crown", "12 / 40"] } },
+    { advance: { ms: 10_000 } },
+    { publish: { service: GAME, value: hostGame(COURIER) } },
+    { expect: { text: ["Neon Courier", "Playing now", "This game has no Steam achievements."], noText: ["Ashen Crown", "12 / 40"], fault: "none" } },
+    ...layouts("host-game-switch", ["standard"]),
+  ],
+});
+
+scenario("host-game-no-steam-id", "A game outside the Steam store (steamAppId null) and no game Steam names: the last game played, as before.", {
+  subscriptions: { [GAME]: { steamAppId: null, name: "Manual game" }, ...LIVE.subscriptions },
+  http: reads(ASHEN, { playing: false }),
+  steps: [
+    { expect: { state: "running", text: ["Ashen Crown", "Last game played"], noText: ["Manual game", "Playing now"], fault: "none" } },
+    ...layouts("host-game-no-steam-id", ["standard"]),
+  ],
+});
+
+scenario("steam-offline-host-game", "Steam's offline mode: no game named, the host's game shows with the achievements Steam knows; back online, Steam saves the stats and the new achievement shows.", {
+  subscriptions: { [GAME]: hostGame(ASHEN), ...LIVE.subscriptions },
+  http: [
+    ...repeat(1, () => fixture(urls.summary, summary({ playing: null }))),
+    fixture(urls.recent, recent([COURIER, ASHEN])),
+    fixture(urls.schema(ASHEN), schema(ASHEN, "english")),
+    fixture(urls.schema(ASHEN, "french"), schema(ASHEN, "french")),
+    fixture(urls.player(ASHEN), player(ASHEN)),
+    fixture(urls.player(ASHEN), player(ASHEN, { A13: 0 })),
+    fixture(urls.rarity(ASHEN), rarity(ASHEN), false),
+    ...images(ASHEN),
+  ],
+  steps: [
+    { expect: { state: "running", text: ["Ashen Crown", "Playing now", "12 / 40"], fault: "none" } },
+    { advance: { ms: 5_000 } },
+    saved(1, ASHEN, START + 5_000),
+    { expect: { text: ["13 / 40", "Endless Night", "New"], fault: "none" } },
   ],
 });
 

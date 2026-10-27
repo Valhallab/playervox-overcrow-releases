@@ -33,6 +33,9 @@
         ],
         "calls": [
           {
+            "service": "game.subscribe"
+          },
+          {
             "service": "account.subscribe",
             "outcome": "ok"
           },
