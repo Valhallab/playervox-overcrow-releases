@@ -24,7 +24,7 @@
   },
   "permissions": {
     "capabilities": [
-      "game.read"
+      "game.write"
     ]
   }
 }

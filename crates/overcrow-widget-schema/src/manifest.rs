@@ -11,7 +11,7 @@ use std::collections::BTreeSet;
 use serde_json::{Map, Value};
 
 use crate::accounts::{Account, validate_account_routes, validate_accounts};
-use crate::catalog_v2::FEATURE_NETWORK_FILE_PARAM;
+use crate::catalog_v2::{FEATURE_ACTIVE_GAME, FEATURE_NETWORK_FILE_PARAM};
 use crate::json::{has_exact_fields, integer_in, parse_strict};
 use crate::limits::{
     MAX_ACCOUNTS, MAX_DNS_LABEL_BYTES, MAX_DNS_NAME_BYTES, MAX_ENUM_VALUE_BYTES, MAX_ENUM_VALUES,
@@ -290,8 +290,9 @@ impl Manifest {
     /// `service-steam`…, `network-file-param` for a network rule with a
     /// `file` parameter, `menu-closes` for a menu row that names
     /// `closesMenu`, `twitch-events` for a Twitch declaration that lists
-    /// `events`, and `open-links` for `permissions.links`); empty for a
-    /// manifest without any.
+    /// `events`, `open-links` for `permissions.links`, and `active-game`
+    /// for `game.read` or the PlayerVox score beside a way out); empty for
+    /// a manifest without any.
     pub fn features(&self) -> BTreeSet<&'static str> {
         let mut features: BTreeSet<&'static str> = self
             .accounts
@@ -316,6 +317,16 @@ impl Manifest {
         }
         if !self.permissions.links.is_empty() {
             features.insert(FEATURE_OPEN_LINKS);
+        }
+        let permissions = &self.permissions;
+        let way_out = !permissions.network.is_empty()
+            || !permissions.links.is_empty()
+            || permissions.clipboard_write
+            || !self.accounts.is_empty();
+        if permissions.capabilities.contains("game.read")
+            || (permissions.capabilities.contains("playervox.score.read") && way_out)
+        {
+            features.insert(FEATURE_ACTIVE_GAME);
         }
         features
     }

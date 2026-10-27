@@ -66,6 +66,7 @@ export type Capability =
   | "media.read"
   | "media.control"
   | "session.read"
+  | "game.read"
   | "stopwatch.read"
   | "stopwatch.control"
   | "notes.read"
@@ -88,7 +89,6 @@ export type SensitiveCapability =
   | "media.control"
   | "notes.read"
   | "notes.write"
-  | "playervox.score.read"
   | "playervox.rating.read"
   | "playervox.rating.write"
   | "playervox.reviews.read"
@@ -109,6 +109,8 @@ export interface CapabilityServices {
   readonly "media.control": "media.previous" | "media.playPause" | "media.next";
   /** Duration of the active game session, without the game identity. */
   readonly "session.read": "session.subscribe";
+  /** Name and Steam app ID of the active game. */
+  readonly "game.read": "game.subscribe";
   /** State of the host's single manual stopwatch and its shortcuts. */
   readonly "stopwatch.read": "stopwatch.subscribe";
   /** Start, pause and reset the host's single manual stopwatch. */
@@ -117,7 +119,7 @@ export interface CapabilityServices {
   readonly "notes.read": "notes.subscribe";
   /** Create, select, save, check and delete notes; text only through host-bound intents. */
   readonly "notes.write": "notes.create" | "notes.select" | "notes.setItem" | "notes.delete";
-  /** Public PlayerVox score of the active game; sensitive because it reveals the game. */
+  /** Public PlayerVox score of the active game. */
   readonly "playervox.score.read": "playervox.score.subscribe";
   /** The user's own rating of the active game. */
   readonly "playervox.rating.read": "playervox.rating.subscribe";
@@ -460,6 +462,14 @@ export interface Session {
   readonly elapsedMs: number;
   /** Host monotonic clock in ms at which `elapsedMs` was measured. */
   readonly at: number;
+}
+
+/** The active game. */
+export interface Game {
+  /** Steam app ID, 1–2147483647, or `null` outside the Steam store. */
+  readonly steamAppId: number | null;
+  /** Name in the user's game list, one line of at most 512 bytes, or `null`. */
+  readonly name: string | null;
 }
 
 /** Resource use of the active game. */
@@ -881,6 +891,8 @@ export interface ServiceParamsMap {
   readonly "gameEvents.subscribe": Record<string, never>;
   /** Parameters of `session.subscribe`. */
   readonly "session.subscribe": Record<string, never>;
+  /** Parameters of `game.subscribe`. */
+  readonly "game.subscribe": Record<string, never>;
   /** Parameters of `telemetry.subscribe`. */
   readonly "telemetry.subscribe": Record<string, never>;
   /** Parameters of `fps.subscribe`. */
@@ -1025,6 +1037,8 @@ export interface ServiceResultMap {
   readonly "gameEvents.subscribe": GameEvent;
   /** `session.subscribe`: `{ elapsedMs, at }` counted from the start of the game process, or `null` without an active game. */
   readonly "session.subscribe": Session | null;
+  /** `game.subscribe`: `{ steamAppId, name }` of the active game, or `null` without one: `steamAppId` is the game's Steam app ID, `null` for a game outside the Steam store (a game added by hand, a non-Steam shortcut), and `name` the game's name in the user's game list, `null` when the host has none. */
+  readonly "game.subscribe": Game | null;
   /** `telemetry.subscribe`: `{ cpu, ram, cpuTemperature, gpuTemperature, sources }`, or `null` without an active game: `cpu` is the game's share of the whole machine in % (0–100), `ram` its resident bytes, temperatures are °C or `null`, `sources` `{ cpuTemperature, gpuTemperature }` says whether the host has each sensor. */
   readonly "telemetry.subscribe": Telemetry | null;
   /** `fps.subscribe`: `{ fps, stale, status }`: `fps` a number or `null`; the host sets `stale` 3 s after the last sample; `status` is `ready`, `waiting`, `unsupported`, `permission_denied`, `ambiguous`, `events_lost` or `unavailable`. */
@@ -1118,6 +1132,7 @@ export type CallServiceName =
 export type SubscribeServiceName =
   | "gameEvents.subscribe"
   | "session.subscribe"
+  | "game.subscribe"
   | "telemetry.subscribe"
   | "fps.subscribe"
   | "media.subscribe"

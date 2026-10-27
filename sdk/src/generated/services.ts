@@ -34,6 +34,15 @@ export interface FpsServices {
 /** The `fps.*` services. */
 export const fps: FpsServices = /* @__PURE__ */ group("fps", ["subscribe"]);
 
+/** The `game.*` services. */
+export interface GameServices {
+  /** `game.subscribe`. Requires the `game.read` capability, granted by the user. Updates: `{ steamAppId, name }` of the active game, or `null` without one: `steamAppId` is the game's Steam app ID, `null` for a game outside the Steam store (a game added by hand, a non-Steam shortcut), and `name` the game's name in the user's game list, `null` when the host has none. */
+  subscribe(listener: Listener<R["game.subscribe"]>): Subscription;
+}
+
+/** The `game.*` services. */
+export const game: GameServices = /* @__PURE__ */ group("game", ["subscribe"]);
+
 /** The `gameEvents.*` services. */
 export interface GameEventsServices {
   /** `gameEvents.subscribe`. Requires the `gameEvents` permission. Updates: `{ event, at }` for each declared event. */

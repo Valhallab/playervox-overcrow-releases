@@ -883,11 +883,12 @@ Declaring a permission or capability grants nothing: activation requires consent
 | `media.read` | yes | none | fixed | Now-playing metadata and cover art handle. |
 | `media.control` | yes | none | fixed | Previous, play/pause and next. |
 | `session.read` | no | none | fixed | Duration of the active game session, without the game identity. |
+| `game.read` | no | none | fixed | Name and Steam app ID of the active game. |
 | `stopwatch.read` | no | none | fixed | State of the host's single manual stopwatch and its shortcuts. |
 | `stopwatch.control` | no | none | fixed | Start, pause and reset the host's single manual stopwatch. |
 | `notes.read` | yes | none | fixed | The user's notes and checklists: one document shared by every game. |
 | `notes.write` | yes | none | fixed | Create, select, save, check and delete notes; text only through host-bound intents. |
-| `playervox.score.read` | yes | none | fixed | Public PlayerVox score of the active game; sensitive because it reveals the game. |
+| `playervox.score.read` | no | none | fixed | Public PlayerVox score of the active game. |
 | `playervox.rating.read` | yes | PlayerVox | fixed | The user's own rating of the active game. |
 | `playervox.rating.write` | yes | PlayerVox | fixed | Publish a rating and review through a host-bound intent. |
 | `playervox.reviews.read` | yes | PlayerVox | fixed | Paged player reviews of the active game, optionally from followed players only. |
@@ -1014,6 +1015,7 @@ Authority is checked by the host at every call, immediately before acting. Gestu
 | `links.open` | permission `links` | call | yes | yes | `url`: text ≤ `MAX_LINK_URL_BYTES` | `null` once the host handed the address to the browser. The host shows the address and, the first time for its origin, asks the user, who may later take that back in the Control Center; `cancelled` when the user declines; `permission_denied` for an address no rule allows; `url_invalid` for one that is not a plain HTTPS address (credentials, a path with encoded or dot segments, beyond `MAX_LINK_URL_BYTES`); `busy` while a confirmation is open; `unavailable` when no browser could open it | `null` | fixed |
 | `gameEvents.subscribe` | permission `gameEvents` | subscribe | no | no | none | `{ event, at }` for each declared event | `GameEvent` | fixed |
 | `session.subscribe` | capability `session.read` | subscribe | no | no | none | `{ elapsedMs, at }` counted from the start of the game process, or `null` without an active game | `Session` or `null` | fixed |
+| `game.subscribe` | capability `game.read` | subscribe | no | no | none | `{ steamAppId, name }` of the active game, or `null` without one: `steamAppId` is the game's Steam app ID, `null` for a game outside the Steam store (a game added by hand, a non-Steam shortcut), and `name` the game's name in the user's game list, `null` when the host has none | `Game` or `null` | fixed |
 | `telemetry.subscribe` | capability `telemetry.read` | subscribe | no | no | none | `{ cpu, ram, cpuTemperature, gpuTemperature, sources }`, or `null` without an active game: `cpu` is the game's share of the whole machine in % (0–100), `ram` its resident bytes, temperatures are °C or `null`, `sources` `{ cpuTemperature, gpuTemperature }` says whether the host has each sensor | `Telemetry` or `null` | fixed |
 | `fps.subscribe` | capability `fps.read` | subscribe | no | no | none | `{ fps, stale, status }`: `fps` a number or `null`; the host sets `stale` 3 s after the last sample; `status` is `ready`, `waiting`, `unsupported`, `permission_denied`, `ambiguous`, `events_lost` or `unavailable` | `Fps` | fixed |
 | `media.subscribe` | capability `media.read` | subscribe | no | no | `cover?`: boolean | `null` without a player, or `{ player, title, artists, playing, canPrevious, canPlayPause, canNext, cover }`: `player` an opaque ID, `artists` a list, `cover` an `asset:` handle of at most 512 px or `null` | `Media` or `null` | fixed |
@@ -1111,6 +1113,15 @@ Duration of the active game session. `{ elapsedMs, at }`
 | --- | --- | --- |
 | `elapsedMs` | integer | Time since the game process started. |
 | `at` | integer | Host monotonic clock in ms at which `elapsedMs` was measured. |
+
+#### `Game`
+
+The active game. `{ steamAppId, name }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `steamAppId` | integer or `null` | Steam app ID, 1–2147483647, or `null` outside the Steam store. |
+| `name` | text or `null` | Name in the user's game list, one line of at most 512 bytes, or `null`. |
 
 #### `Telemetry`
 

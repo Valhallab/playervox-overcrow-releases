@@ -389,7 +389,9 @@ fn capabilities_match_adr_0001_as_amended_by_p0_6() {
             "fps.read",
             "stopwatch.read",
             "stopwatch.control",
-            "session.read"
+            "session.read",
+            "game.read",
+            "playervox.score.read"
         ])
     );
     for name in ["telemetry.read", "fps.read", "media.read", "media.control"] {

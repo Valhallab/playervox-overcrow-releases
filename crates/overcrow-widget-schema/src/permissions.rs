@@ -199,6 +199,13 @@ pub const CAPABILITIES: &[Capability] = &[
         "Duration of the active game session, without the game identity.",
     ),
     capability(
+        "game.read",
+        false,
+        None,
+        Status::Fixed,
+        "Name and Steam app ID of the active game.",
+    ),
+    capability(
         "stopwatch.read",
         false,
         None,
@@ -228,10 +235,10 @@ pub const CAPABILITIES: &[Capability] = &[
     ),
     capability(
         "playervox.score.read",
-        true,
+        false,
         None,
         Status::Fixed,
-        "Public PlayerVox score of the active game; sensitive because it reveals the game.",
+        "Public PlayerVox score of the active game.",
     ),
     capability(
         "playervox.rating.read",

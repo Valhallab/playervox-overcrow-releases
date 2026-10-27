@@ -147,6 +147,22 @@ pub const SHAPES: &[NamedShape] = &[
         "Duration of the active game session.",
     ),
     named(
+        "Game",
+        Shape::Record(&[
+            member(
+                "steamAppId",
+                NULLABLE_INTEGER,
+                "Steam app ID, 1–2147483647, or `null` outside the Steam store.",
+            ),
+            member(
+                "name",
+                NULLABLE_TEXT,
+                "Name in the user's game list, one line of at most 512 bytes, or `null`.",
+            ),
+        ]),
+        "The active game.",
+    ),
+    named(
         "Telemetry",
         Shape::Record(&[
             member(

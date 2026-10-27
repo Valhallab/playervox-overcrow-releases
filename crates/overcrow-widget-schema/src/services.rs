@@ -291,6 +291,13 @@ pub const SERVICES: &[Service] = &[
     )
     .returning(Shape::Nullable(&Shape::Named("Session"))),
     subscribe(
+        "game.subscribe",
+        "game.read",
+        "`{ steamAppId, name }` of the active game, or `null` without one: `steamAppId` is the game's Steam app ID, `null` for a game outside the Steam store (a game added by hand, a non-Steam shortcut), and `name` the game's name in the user's game list, `null` when the host has none",
+        Status::Fixed,
+    )
+    .returning(Shape::Nullable(&Shape::Named("Game"))),
+    subscribe(
         "telemetry.subscribe",
         "telemetry.read",
         "`{ cpu, ram, cpuTemperature, gpuTemperature, sources }`, or `null` without an active game: `cpu` is the game's share of the whole machine in % (0–100), `ram` its resident bytes, temperatures are °C or `null`, `sources` `{ cpuTemperature, gpuTemperature }` says whether the host has each sensor",

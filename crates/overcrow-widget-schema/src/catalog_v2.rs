@@ -90,6 +90,12 @@ pub use crate::integrated::{
 /// a reader whose broker does not match it would refuse the manifest.
 pub const FEATURE_NETWORK_FILE_PARAM: &str = "network-file-param";
 
+/// The active game is not sensitive: `game.read`, or the PlayerVox score
+/// beside a way out of the computer (`network`, `links`, `clipboardWrite`
+/// or an account). A reader that holds the game sensitive would refuse the
+/// manifest.
+pub const FEATURE_ACTIVE_GAME: &str = "active-game";
+
 pub use crate::links::FEATURE_OPEN_LINKS;
 pub use crate::wrapper::FEATURE_MENU_CLOSES;
 
@@ -106,6 +112,7 @@ pub const KNOWN_FEATURES: &[&str] = &[
     FEATURE_TWITCH_EVENTS,
     FEATURE_OPEN_LINKS,
     FEATURE_STEAM_EVENTS,
+    FEATURE_ACTIVE_GAME,
 ];
 
 pub const ENVELOPE_FIELDS: &[Field] = &[
@@ -1905,7 +1912,8 @@ mod tests {
                 "menu-closes",
                 "twitch-events",
                 "open-links",
-                "steam-events"
+                "steam-events",
+                "active-game"
             ]
         );
         let mut payload = valid();
