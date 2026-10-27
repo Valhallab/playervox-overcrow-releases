@@ -61,17 +61,3 @@ test("with proof (a read of another game): the game is not readable", async () =
   assert.equal(state.game.appid, 300);
   assert.equal(state.game.readable, false, "not readable");
 });
-
-test("a refusal of a game of the recent list: the proof falls, hidden again", async () => {
-  steam.details = "friends";
-  await wait(10_000);
-  // No game running: the recent list's game is refused.
-  await hostGame(null);
-  assert.equal(state.phase, "hidden");
-  assert.equal(state.hidden, "details");
-  assert.equal(steam.storage.get("publicDetails"), undefined, "the proof fell");
-  await wait(10_000);
-  await hostGame({ steamAppId: 300, name: "Borrowed Lantern" });
-  assert.equal(state.phase, "hidden");
-  assert.equal(state.hidden, "details");
-});

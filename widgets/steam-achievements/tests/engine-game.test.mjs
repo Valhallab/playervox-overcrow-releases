@@ -96,10 +96,33 @@ test("hidden: nothing; shown again after a change: at once", async () => {
   assert.ok(player(100) >= 3, "read when shown");
 });
 
-test("the game ends: the last game played, no longer playing", async () => {
+test("out of the game (focus elsewhere, or quit): the host's last game, no longer playing", async () => {
+  await wait(10_000);
+  const schemas = steam.count("GetSchemaForGame");
+  await hostGame(null);
+  // Not Steam's recent list (Courier of Tides), which lags behind.
+  assert.equal(state.game.appid, 100);
+  assert.equal(state.game.name, "Ashen Crown");
+  assert.equal(state.game.playing, false);
+  assert.equal(steam.count("GetSchemaForGame"), schemas, "the same game: nothing read again");
+});
+
+test("back in the game: the same game, an achievement unlocked meanwhile marked new", async () => {
+  await wait(10_000);
+  steam.games[100].unlocked.ACH_2 = Math.floor(Date.now() / 1000);
+  await hostGame({ steamAppId: 100, name: "Ashen Crown" });
+  assert.equal(state.game.appid, 100);
+  assert.equal(state.game.playing, true);
+  assert.equal(state.game.unlocked, 3);
+  assert.ok("ACH_2" in state.fresh, "marked new: the known achievements were kept");
+});
+
+test("the host's last game comes before a non-Steam game's presence-less fallback", async () => {
   await wait(10_000);
   await hostGame(null);
-  assert.equal(state.game.appid, 200);
+  await wait(10_000);
+  await hostGame({ steamAppId: null, name: "Manual game" });
+  assert.equal(state.game.appid, 100);
   assert.equal(state.game.playing, false);
 });
 

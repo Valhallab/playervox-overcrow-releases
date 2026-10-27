@@ -821,6 +821,22 @@ scenario("host-game-switch", "Status Invisible: the host's game changes from Ash
   ],
 });
 
+scenario("host-game-out-of-focus", "Status Invisible: the game loses the focus (the host gives no game), then gets it back. The host's last game stays shown, as the last one played, never Steam's lagging recent list; back in the game, playing again, nothing read anew.", {
+  subscriptions: { [GAME]: hostGame(ASHEN), ...LIVE.subscriptions },
+  http: reads(ASHEN, { minutes: 3, playing: false, recentGames: [COURIER, ASHEN] }),
+  steps: [
+    { expect: { state: "running", text: ["Ashen Crown", "Playing now", "12 / 40"] } },
+    // Past the minute: Steam's recent list may be read again.
+    { advance: { ms: 70_000 } },
+    { publish: { service: GAME, value: null } },
+    { expect: { text: ["Ashen Crown", "Last game played", "12 / 40"], noText: ["Neon Courier", "Playing now"], fault: "none" } },
+    ...layouts("host-game-out-of-focus", ["standard"]),
+    { advance: { ms: 10_000 } },
+    { publish: { service: GAME, value: hostGame(ASHEN) } },
+    { expect: { text: ["Ashen Crown", "Playing now", "12 / 40"], noText: ["Neon Courier"], fault: "none" } },
+  ],
+});
+
 scenario("host-game-no-steam-id", "A game outside the Steam store (steamAppId null) and no game Steam names: the last game played, as before.", {
   subscriptions: { [GAME]: { steamAppId: null, name: "Manual game" }, ...LIVE.subscriptions },
   http: reads(ASHEN, { playing: false }),

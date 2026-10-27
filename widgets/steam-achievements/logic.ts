@@ -646,6 +646,8 @@ const model = {
   publicDetails: false,
   /** The shown game is the one Steam's presence names. */
   named: false,
+  /** The shown game came from the host: running, or the last one. */
+  fromHost: false,
   unlocked: null as Map<string, number> | null,
   rarity: new Map<number, { at: number; values: Map<string, number> }>(),
   schemas: new Map<string, SchemaEntry>(),
@@ -695,7 +697,7 @@ const schemaKey = (appid: number, l: string): string => `${appid}:${l}`;
  * even when Steam's presence names none (Invisible, offline). `0` without
  * one, outside the Steam store, or with an older PlayerVox OverCrow.
  */
-const active = { appid: 0, name: "" };
+const active = { appid: 0, name: "", last: 0, lastName: "" };
 
 /** Whether the game details of the account are proven public, and stored. */
 function setPublicDetails(proven: boolean): void {
@@ -976,6 +978,7 @@ async function read(): Promise<void> {
   const presence = summary.appid ?? 0;
   let appid = active.appid !== 0 ? active.appid : presence;
   model.named = presence !== 0 && presence === appid;
+  model.fromHost = active.appid !== 0;
   const name = model.named ? summary.gameName : active.name || null;
   // A game that stops being named: quit, or hidden since. Steam is asked at
   // once which, never a minute of guessing.
@@ -1002,13 +1005,20 @@ async function read(): Promise<void> {
     // The games show again, none played lately: nothing left to say hidden.
     if (!recent.hidden && recent.games.length === 0) reveal();
     for (const game of recent.games) if (game.icon !== "") model.icons.set(game.appid, game.icon);
-    if (appid === 0) {
+    if (appid === 0 && active.last === 0) {
       const last = recent.games[0];
       if (last !== undefined) {
         appid = last.appid;
         if (appid !== model.appid) model.gameName = last.name;
       }
     }
+  }
+  // The host's last game, before the recent list: the same game shown
+  // keeps what is known of it.
+  if (appid === 0 && active.last !== 0) {
+    appid = active.last;
+    model.fromHost = true;
+    if (appid !== model.appid) model.gameName = active.lastName;
   }
   // Hidden games without a running one: the game details are private.
   if (appid === 0 && model.recentHidden) return hide("details", now);
@@ -1124,8 +1134,9 @@ async function playerStep(appid: number, now: number, stopped: boolean, schema: 
   // public), and the game is not shown, since it may not be the one
   // running. The host's game that Steam does not name (Invisible,
   // offline): hidden details, unless they are proven public.
-  if (refused === "hidden" && !model.playing) setPublicDetails(false);
-  if (refused === "hidden" && (!model.playing || (!model.named && !model.publicDetails))) {
+  const fromRecent = !model.playing && !model.fromHost;
+  if (refused === "hidden" && fromRecent) setPublicDetails(false);
+  if (refused === "hidden" && (fromRecent || (!model.named && !model.publicDetails))) {
     model.readPlayer = now;
     return "hidden";
   }
@@ -1863,6 +1874,12 @@ game.subscribe((update) => {
   active.name = value?.name ?? "";
   if (appid === active.appid) return;
   active.appid = appid;
+  // Out of the game (focus elsewhere, or quit), the host's last game is
+  // the last one played: Steam's recent list lags behind it.
+  if (appid !== 0) {
+    active.last = appid;
+    active.lastName = active.name;
+  }
   // The summary says the rest; the new game's achievements come with it,
   // whatever the route's minute.
   events.summary = true;

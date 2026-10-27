@@ -103,7 +103,11 @@ your computer and sends it only to `api.steampowered.com`. To revoke it:
   of its achievements (in Steam's offline mode, the new ones once Steam is
   back online). A change of the host's game reads the summary, the new
   game's list and its achievements at once, never twice within 5 seconds;
-  hidden, once shown again. A game outside the Steam store (added by hand,
+  hidden, once shown again. Out of the game (the focus elsewhere, or the
+  game quit), the host's last game stays shown, as the last one played,
+  before Steam's recent list, which lags behind; back in it, nothing is
+  read anew and an achievement unlocked meanwhile shows as new. A game
+  outside the Steam store (added by hand,
   a non-Steam shortcut), no game, a refusal of the permission or an older
   application: Steam's presence, as before. A refusal (403) of the host's
   game that Steam does not name says the game details are hidden, unless
