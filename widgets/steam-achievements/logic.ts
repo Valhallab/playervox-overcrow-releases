@@ -86,6 +86,13 @@ export const EVENT_FLOOR = 5_000;
 export const EVENT_LOOKS = [10_000, 30_000] as const;
 /** Backoff of a 5xx or a 429, minutes: then 10 min. */
 const BACKOFF_MINUTES = [1, 2, 4, 8, 10] as const;
+/**
+ * The longest wait a 429's Retry-After imposes on its route. Steam limits a
+ * key by day: even "tomorrow" costs a request an hour at most, refused
+ * anyway, while a value out of bounds (a far date, a wrong clock) never
+ * stops the widget for days unsaid. The hour images wait after a failure.
+ */
+export const MAX_RETRY_AFTER = 60 * MINUTE;
 
 // ---------------------------------------------------------------------------
 // Pure readers (unit-tested in tests/logic.test.mjs)
@@ -466,6 +473,53 @@ export function backoff(failures: number): number {
   return (BACKOFF_MINUTES[index] ?? 10) * MINUTE;
 }
 
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const IMF_FIXDATE = /^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), (\d{2}) ([A-Z][a-z]{2}) (\d{4}) (\d{2}):(\d{2}):(\d{2}) GMT$/;
+const RFC_850 = /^(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday), (\d{2})-([A-Z][a-z]{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}) GMT$/;
+const ASCTIME = /^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) ([A-Z][a-z]{2}) ([ \d]\d) (\d{2}):(\d{2}):(\d{2}) (\d{4})$/;
+
+/**
+ * An HTTP date in any of its three forms (RFC 9110, 5.6.7), Unix ms, or
+ * `null`. A two-digit year is the one closest to `now`'s century, never
+ * more than 50 years ahead.
+ */
+export function httpDate(text: string, now: number): number | null {
+  let parts: [string, string, string, string, string, string] | null = null;
+  let match = IMF_FIXDATE.exec(text);
+  if (match !== null) parts = [match[1]!, match[2]!, match[3]!, match[4]!, match[5]!, match[6]!];
+  else if ((match = RFC_850.exec(text)) !== null) {
+    const thisYear = new Date(now).getUTCFullYear();
+    let year = thisYear - (thisYear % 100) + Number(match[3]);
+    if (year > thisYear + 50) year -= 100;
+    parts = [match[1]!, match[2]!, String(year), match[4]!, match[5]!, match[6]!];
+  } else if ((match = ASCTIME.exec(text)) !== null) {
+    parts = [match[2]!.trim(), match[1]!, match[6]!, match[3]!, match[4]!, match[5]!];
+  }
+  if (parts === null) return null;
+  const [day, month, year, hour, minute, second] = parts.map((part, index) => (index === 1 ? MONTHS.indexOf(part) : Number(part)));
+  if (month === -1 || hour! > 23 || minute! > 59 || second! > 60) return null;
+  // A leap second is the second before.
+  const at = Date.UTC(year!, month!, day!, hour!, minute!, Math.min(second!, 59));
+  // No 30 February: the date must stay the one written.
+  return new Date(at).getUTCDate() === day ? at : null;
+}
+
+/**
+ * How long a 429 asks to wait, from its `retry-after` and `date` headers
+ * received at `now`, milliseconds and at most `MAX_RETRY_AFTER`; `null`
+ * when there is no readable value (then the backoff alone). A date counts
+ * from the response's own `date` when it has one, so that this computer's
+ * clock does not matter.
+ */
+export function retryAfter(value: string | undefined, date: string | undefined, now: number): number | null {
+  const text = value?.trim() ?? "";
+  if (/^\d+$/.test(text)) return Math.min(MAX_RETRY_AFTER, Number(text) * 1000);
+  const at = httpDate(text, now);
+  if (at === null) return null;
+  const from = date === undefined ? null : httpDate(date.trim(), now);
+  return Math.min(MAX_RETRY_AFTER, Math.max(0, at - (from ?? now)));
+}
+
 // ---------------------------------------------------------------------------
 // Texts
 
@@ -673,6 +727,8 @@ const model = {
   readRecent: 0,
   failures: 0,
   retryAt: 0,
+  /** Routes a 429 asked to wait (Retry-After), until then (Unix ms). */
+  waitUntil: new Map<Route, number>(),
   busy: false,
   pending: false,
   /** The summary the profile step just read, used as the next read's. */
@@ -961,6 +1017,8 @@ type Outcome =
   | { kind: "status"; status: number; body: JsonValue }
   | { kind: "unreachable" }
   | { kind: "quota" }
+  /** The route waits what a 429 asked (Retry-After): no request was made. */
+  | { kind: "wait" }
   | { kind: "server" }
   /** The answer is larger than the route's bound (`maxResponseBytes`). */
   | { kind: "too-large" }
@@ -980,13 +1038,22 @@ async function call(
   key: string = route,
   at: number = Date.now(),
 ): Promise<Outcome> {
+  // Steam asked this route to wait: nothing leaves before, whatever asks
+  // (the minute, a save, the profile step). The tick's second of slack.
+  if (at < (model.waitUntil.get(route) ?? 0) - TICK_SLACK) return { kind: "wait" };
   // Stamped with the read's own time, not when the request leaves: a slow
   // answer to the first route never pushes the others to the next minute.
   model.lastCall.set(key, at);
   try {
     // Text: a large answer is parsed in slices, never in one turn.
     const response = await http.fetch(`${ROUTES[route]}?${query(params)}`, { as: "text" });
-    if (response.status === 429) return { kind: "quota" };
+    if (response.status === 429) {
+      // Counted from the answer; without the header, the backoff alone.
+      const received = Date.now();
+      const wait = retryAfter(response.headers?.["retry-after"], response.headers?.["date"], received);
+      if (wait !== null && wait > 0) model.waitUntil.set(route, received + wait);
+      return { kind: "quota" };
+    }
     const large = response.body.length > SLICE_FROM;
     let body: JsonValue = null;
     if (!large && response.body !== "") {
@@ -1015,6 +1082,15 @@ function failed(outcome: Outcome, now: number): void {
   if (outcome.kind === "busy") {
     // Nothing was asked of Steam: the view stays as it is, next minute again.
     model.retryAt = now + MINUTE;
+    return;
+  }
+  if (outcome.kind === "wait") {
+    // Still limited, as Steam said: no request, so no failure counted (the
+    // backoff would grow without one); the minute asks again.
+    state.stale = "quota";
+    model.playing = false;
+    if (state.phase === "loading" || state.phase === "nothing") state.phase = "empty-unreachable";
+    render();
     return;
   }
   if (outcome.kind === "quota" || outcome.kind === "server" || outcome.kind === "too-large" || (outcome.kind === "status" && outcome.status >= 500)) {
@@ -1875,7 +1951,7 @@ export async function submitProfile(): Promise<void> {
     if (resolved === null) {
       // Steam did not answer: say so where the user looks.
       state.profile = { ...state.profile, status: "idle" };
-      state.stale = answer.kind === "quota" ? "quota" : "unreachable";
+      state.stale = answer.kind === "quota" || answer.kind === "wait" ? "quota" : "unreachable";
       return;
     }
     steamid = resolved.steamid;
@@ -1890,7 +1966,7 @@ export async function submitProfile(): Promise<void> {
   }
   if (summary === null) {
     state.profile = { ...state.profile, status: "idle" };
-    state.stale = answer.kind === "quota" ? "quota" : "unreachable";
+    state.stale = answer.kind === "quota" || answer.kind === "wait" ? "quota" : "unreachable";
     return;
   }
   const changed = steamid !== model.steamid;

@@ -158,6 +158,51 @@ test("backoff: 1, 2, 4, 8, then 10 minutes", () => {
   assert.deepEqual([1, 2, 3, 4, 5, 9].map((n) => logic.backoff(n) / 60_000), [1, 2, 4, 8, 10, 10]);
 });
 
+test("Retry-After: seconds, or the three HTTP date forms, bounded to an hour", () => {
+  const now = Date.UTC(2026, 0, 1, 12);
+  assert.equal(logic.MAX_RETRY_AFTER, 60 * 60_000);
+  for (const [value, expected] of [
+    ["120", 120_000],
+    [" 120 ", 120_000],
+    ["0", 0],
+    ["3600", 3_600_000],
+    ["3601", 3_600_000],
+    ["99999999999999999999", 3_600_000],
+    // IMF-fixdate, RFC 850 and asctime (RFC 9110, 5.6.7).
+    ["Thu, 01 Jan 2026 12:02:00 GMT", 120_000],
+    ["Thursday, 01-Jan-26 12:02:00 GMT", 120_000],
+    ["Thu Jan  1 12:02:00 2026", 120_000],
+    ["Thu Jan 01 12:02:00 2026", 120_000],
+    ["Fri, 02 Jan 2026 12:00:00 GMT", 3_600_000],
+    // Already past: no wait.
+    ["Thu, 01 Jan 2026 11:00:00 GMT", 0],
+    // Unreadable: as no header.
+    ["", null],
+    ["-5", null],
+    ["1.5", null],
+    ["2 minutes", null],
+    ["Thu, 32 Jan 2026 12:00:00 GMT", null],
+    ["Fri, 30 Feb 2026 12:00:00 GMT", null],
+    ["Thu, 01 Jan 2026 24:00:00 GMT", null],
+    ["Thu, 01 Jan 2026 12:02:00 UTC", null],
+    ["Thu, 1 Jan 2026 12:02:00 GMT", null],
+    ["2026-01-01T12:02:00Z", null],
+  ]) {
+    assert.equal(logic.retryAfter(value, undefined, now), expected, JSON.stringify(value));
+  }
+  assert.equal(logic.retryAfter(undefined, undefined, now), null);
+});
+
+test("Retry-After as a date counts from the response's Date, else from this computer's clock", () => {
+  const now = Date.UTC(2026, 0, 1, 12);
+  // The server is an hour ahead: two minutes by its clock.
+  assert.equal(logic.retryAfter("Thu, 01 Jan 2026 13:02:00 GMT", "Thu, 01 Jan 2026 13:00:00 GMT", now), 120_000);
+  // An unreadable Date: this computer's clock.
+  assert.equal(logic.retryAfter("Thu, 01 Jan 2026 12:02:00 GMT", "yesterday", now), 120_000);
+  // Seconds never depend on the Date.
+  assert.equal(logic.retryAfter("30", "Thu, 01 Jan 2026 13:00:00 GMT", now), 30_000);
+});
+
 test("texts follow the locale and the number format", () => {
   assert.equal(logic.percentOf(12, 40), "30%");
   assert.equal(logic.ago(3 * 60_000), "3 min ago");

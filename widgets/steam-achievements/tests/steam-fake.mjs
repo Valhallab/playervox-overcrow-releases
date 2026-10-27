@@ -26,9 +26,12 @@ export function fakeSteam() {
     recent: [],
     vanity: { nova_player: ID },
     games: {},
-    /** A failure of every API route: `{ status }` or `{ error }`. */
+    /**
+     * A failure of every API route: `{ status }` or `{ error }`, `headers`
+     * with a status (the response headers the host gives, lowercase).
+     */
     fail: null,
-    /** Per route: a status for that route only. */
+    /** Per route: a status for that route only, or `{ status, headers }`. */
     routeStatus: {},
     /**
      * The manifest's response bounds, applied as the host does: a larger
@@ -56,10 +59,11 @@ export function fakeSteam() {
         if (steam.images.fail.has(url)) return { error: "redirect_denied" };
         return { value: { status: 200, asset: `asset:${url.length}` } };
       }
-      if (steam.fail !== null) return steam.fail.error ? { error: steam.fail.error } : json(steam.fail.status, {});
+      if (steam.fail !== null) return steam.fail.error ? { error: steam.fail.error } : json(steam.fail.status, {}, steam.fail.headers);
       const path = parsed.pathname;
-      for (const [route, status] of Object.entries(steam.routeStatus)) {
-        if (path.includes(route)) return json(status, status === 400 ? { playerstats: { error: "Requested app has no stats", success: false } } : {});
+      for (const [route, answer] of Object.entries(steam.routeStatus)) {
+        const { status, headers } = typeof answer === "number" ? { status: answer, headers: undefined } : answer;
+        if (path.includes(route)) return json(status, status === 400 ? { playerstats: { error: "Requested app has no stats", success: false } } : {}, headers);
       }
       if (path === "/ISteamUser/ResolveVanityURL/v1/") {
         const steamid = steam.vanity[query.vanityurl.toLowerCase()];
@@ -120,8 +124,8 @@ function bounded(steam, route, answer) {
 }
 
 // The widget reads answers as text (large ones are parsed in slices).
-function json(status, body) {
-  return { value: { status, contentType: "application/json", body: JSON.stringify(body) } };
+function json(status, body, headers = {}) {
+  return { value: { status, contentType: "application/json", headers, body: JSON.stringify(body) } };
 }
 
 /** The host's answer: newest first, 4,096 a page from `offset`. */

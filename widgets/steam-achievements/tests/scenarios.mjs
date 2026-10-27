@@ -555,6 +555,26 @@ scenario("quota", "Steam limits the requests (429): the values stay, Rate limite
   ],
 });
 
+scenario("retry-after", "Steam limits the requests and says when to try again (429, Retry-After: 300): the profile route is not asked again for 5 minutes, Rate limited meanwhile; then the game as before.", {
+  http: [
+    ...reads(ASHEN, { minutes: 0 }),
+    fixture(urls.summary, { ...json(429, {}), headers: { "retry-after": "300" } }),
+    ...repeat(2, () => fixture(urls.summary, summary({ playing: ASHEN }))),
+    ...repeat(2, () => fixture(urls.player(ASHEN), player(ASHEN))),
+  ],
+  steps: [
+    { expect: { state: "running", text: ["Playing now"], fault: "none" } },
+    { advance: { ms: MIN } },
+    { expect: { text: ["Rate limited · 1 min ago"], fault: "none" } },
+    // A request within the 5 minutes would read the game again.
+    { advance: { ms: 4 * MIN } },
+    { expect: { text: ["Rate limited · 5 min ago"], noText: ["Playing now"], fault: "none" } },
+    ...layouts("retry-after", ["line", "standard"]),
+    { advance: { ms: MIN } },
+    { expect: { text: ["Playing now"], fault: "none" } },
+  ],
+});
+
 scenario("empty-unreachable", "Steam unreachable at the very first start: no value yet, say so.", {
   host: { storage: { ...profile } },
   http: [failure(urls.summary, "resolve_failed")],

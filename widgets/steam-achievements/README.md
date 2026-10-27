@@ -139,8 +139,12 @@ your computer and sends it only to `api.steampowered.com`. To revoke it:
   twice within 5 seconds, then 10 and 30 seconds after the save if it
   shows nothing new yet; otherwise the minute, as before.
 - **Failures.** A network failure or a timeout retries every minute; a 5xx
-  or a 429 waits 1, 2, 4, 8 then 10 minutes (`http.fetch` gives no
-  `Retry-After`); a refusal of a game's achievements (403, 400 with an
+  or a 429 waits 1, 2, 4, 8 then 10 minutes. A 429 with `Retry-After`
+  (seconds, or an HTTP date counted from the answer's own `Date`) also
+  keeps its route from being asked again before then, whatever asks it (the
+  minute, a save, the profile step), an hour at most: Steam limits a key by
+  day, and a far date or a wrong clock must not stop the widget for days.
+  Meanwhile the heading still says "Rate limited"; a refusal of a game's achievements (403, 400 with an
   error, `success: false`) is asked again every 10 minutes, never in a loop.
   PlayerVox OverCrow's own network budget being full (`busy`) is not a
   failure of Steam: the view stays, the next minute reads again.
