@@ -268,5 +268,8 @@ que la logique peut lire sont aussi des constantes du SDK : voir
 | `MAX_SERVICE_EVENTS` | 32 | `events` de la déclaration d'un service intégré. |
 | `MAX_SERVICE_EVENT_BYTES` | 16 Kio | JSON compact du `data` d'un événement de service ; un événement plus grand est abandonné et son `seq` sauté. |
 | `SERVICE_EVENT_WINDOW` | 16 | Derniers événements que répète chaque mise à jour de `twitch.events.subscribe` et de `steam.events.subscribe` : les mises à jour sont fusionnées, `seq` distingue un nouvel événement d'un événement déjà vu. |
-| `MAX_STEAMID_BYTES` | 17 octets | `steamid` de `steam.events.subscribe` : un SteamID64, 17 chiffres. |
+| `MAX_STEAMID_BYTES` | 17 octets | `steamid` de `steam.events.subscribe` et de `steam.achievements.local` : un SteamID64, 17 chiffres. |
+| `MAX_LOCAL_DATA` | 8 | Types de données locales qu’une déclaration de service liste (`local`). |
+| `MAX_LOCAL_ACHIEVEMENTS` | 4096 | Succès que donne une réponse de `steam.achievements.local`, à partir de son `offset` ; le reste par les pages suivantes. |
+| `MAX_ACHIEVEMENT_NAME_BYTES` | 128 octets | Nom d’API d’un succès Steam, borné comme Steam le borne : ASCII imprimable. |
 <!-- /generated:limits -->

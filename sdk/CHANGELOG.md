@@ -34,6 +34,12 @@ links for widgets:
   account may declare it. The `Game` type.
 - `playervox.score.read` is no longer sensitive, so it leaves the
   `SensitiveCapability` type.
+- `steam.achievements.local` (`steam.achievements`): the achievements of a
+  game the Steam client of the player's computer saved as unlocked for the
+  account the widget follows, at once and whatever the game details'
+  privacy: `{ appid, total, achievements: [{ name, unlockedAt }] }`, when
+  the manifest lists `local: ["achievements"]` beside the Steam service.
+  The `SteamLocalAchievement` and `SteamLocalAchievements` types.
 
 ## 1.2.0
 

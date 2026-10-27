@@ -444,3 +444,39 @@ fn the_active_game_is_published_by_the_scenario() {
     let error = read(json!({"steamAppId": 1}), Value::Null).expect_err("no name");
     assert!(error.path.starts_with("fixtures"), "{}", error.path);
 }
+
+/// Local Steam achievements: a scenario answers `steam.achievements.local`
+/// under `fixtures.calls`, each answer checked against its shape; the host
+/// gives the refusals of its own checks itself.
+#[test]
+fn steam_local_achievements_are_answered_by_the_scenario() {
+    let read = |reply: Value| {
+        parse(
+            &serde_json::to_vec(&json!({
+                "scenarioVersion": 1,
+                "name": "local",
+                "fixtures": {"calls": {"steam.achievements.local": [reply]}},
+                "steps": [{"expect": {"fault": "none"}}],
+            }))
+            .expect("bytes"),
+        )
+    };
+    read(
+        json!({"value": {"appid": 1_806_840, "total": 1, "achievements": [
+            {"name": "ACH_FROG_FOUND", "unlockedAt": 1_761_568_118_000_u64}
+        ]}}),
+    )
+    .expect("a page");
+    read(json!({"error": "unavailable"})).expect("nothing to read");
+    let error = read(json!({"value": {"appid": 1, "total": 0, "achievements": [], "path": "/x"}}))
+        .expect_err("another key");
+    assert_eq!(
+        error.path,
+        "fixtures.calls.steam.achievements.local[0].value"
+    );
+    let error = read(json!({"error": "permission_denied"})).expect_err("the host's own");
+    assert_eq!(
+        error.path,
+        "fixtures.calls.steam.achievements.local[0].error"
+    );
+}

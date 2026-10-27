@@ -134,6 +134,19 @@ test("the active game comes by subscription", () => {
   ]);
 });
 
+test("local Steam achievements are read by call for the account the widget names", async () => {
+  const params = { steamid: "76561197985436232", appid: 1806840 };
+  const pending = overcrow.steam.achievements.local(params);
+  assert.deepEqual({ service: lastCall().service, params: lastCall().params }, { service: "steam.achievements.local", params });
+  const value = { appid: 1806840, total: 1, achievements: [{ name: "ACH_FROG_FOUND", unlockedAt: 1761568118000 }] };
+  lastCall().resolve(value);
+  assert.deepEqual(await pending, value);
+  const failing = overcrow.steam.achievements.local({ ...params, offset: 4096 });
+  lastCall().reject({ code: "unavailable" });
+  const error = await failing.catch((caught) => caught);
+  assert.equal(error.code, "unavailable");
+});
+
 test("account services name the declared account; the secret never shows", async () => {
   vm.host = { ...HOST, grants: ["account:steam"] };
   assert.ok(overcrow.hasGrant("account:steam"));

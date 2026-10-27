@@ -380,6 +380,15 @@ update.
 - **Each update**: `{ state, reason, events }` at once, then at each change. `state` is `live` while the host watches the Steam client's stats on this computer, `off` otherwise, with `reason` `connecting`, `not_connected` (Steam is not connected) or `unavailable` (no Steam client found on this computer). Steam pushes nothing and the host replays nothing: the events only say when to read again by `http.fetch`, and the widget keeps reading at its own pace too (Steam may run on another computer). `events` repeats the latest 16 events of the subscription, oldest first, each `{ seq, type, at, data }`: updates are coalesced, so take only those whose `seq` is above the last one seen; a gap in `seq` means events were missed (read again). `stats.saved`: the Steam client saved the stats of a game of that account, at each achievement unlocked and at other times; `data` is `{ appid }`, `at` the time of the save. At most one subscription per widget at a time: another fails with `busy`
 - **Shape**: [`SteamEvents`](result-shapes.md#steamevents)
 
+### `steam.achievements.local`
+
+- **Kind**: call, answered once
+- **Requires**: the named, granted service `steam`
+- **When it can be called**: At any time
+- **Parameters**: `steamid`: text ≤ 17 bytes; `appid`: integer 1 to 4294967295; `offset?`: integer 0 to 1000000
+- **Result**: `{ appid, total, achievements }`: the achievements of that game the Steam client of this computer saved as unlocked for that account, read-only from its own stats files, even before Steam publishes them online and whatever the game details' privacy. `total` counts them all; `achievements` gives at most 4096 from `offset`, newest first, each `{ name, unlockedAt }`: the API name, as `GetSchemaForGame` and `GetPlayerAchievements` give it, and the unlock time in Unix milliseconds, `null` when Steam saved none. Nothing else of the files. An empty list: no achievement unlocked yet. Needs the declaration's `local: ["achievements"]` (`permission_denied` without), not a connected key. `unavailable` when the computer has no Steam client, no stats of that account and game, or files the host cannot read or does not know: keep reading Steam's Web API. One call per widget at a time: another fails with `busy`
+- **Shape**: [`SteamLocalAchievements`](result-shapes.md#steamlocalachievements)
+
 ### `account.connect`
 
 - **Kind**: call, answered once

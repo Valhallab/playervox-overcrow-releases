@@ -6,7 +6,7 @@
   "justifications": [
     {
       "permission": "account:steam",
-      "text": "Reads the player's own Steam profile with the integrated Steam service, on one GET route; it writes nothing."
+      "text": "Reads the player's own Steam profile with the integrated Steam service, on one GET route, and the achievements of the current game that Steam on this computer saved; it writes nothing."
     },
     {
       "permission": "network:GET https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/",

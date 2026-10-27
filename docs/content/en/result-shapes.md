@@ -412,4 +412,23 @@ Local Steam events of the widget's declared types, for the account it names. `{ 
 | `state` | `live` \| `off` | `live` while the host watches the Steam client's stats on this computer. |
 | `reason` | `connecting` \| `not_connected` \| `unavailable` or `null` | Why the state is `off`; `null` when `live`. |
 | `events` | list of [`SteamEvent`](#steamevent) | The latest events, oldest first. |
+
+### `SteamLocalAchievement`
+
+One achievement the Steam client of this computer saved as unlocked. `{ name, unlockedAt }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `name` | text | The achievement's API name, at most 128 bytes of printable ASCII. |
+| `unlockedAt` | integer or `null` | When it was unlocked, in Unix milliseconds; `null` when Steam saved no time. |
+
+### `SteamLocalAchievements`
+
+The unlocked achievements of a game, read on this computer for the account the widget names. `{ appid, total, achievements }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `appid` | integer | The game asked for. |
+| `total` | integer | How many achievements of the game the files hold as unlocked. |
+| `achievements` | list of [`SteamLocalAchievement`](#steamlocalachievement) | A page of them, newest first (`null` times last, then by name). |
 <!-- /generated:result-shapes -->

@@ -15,7 +15,7 @@ or pages for another account: it names the service.
 
 <!-- source: docs/content/examples/steam-stats/manifest.json -->
 ```json
-    "accounts": [{ "service": "steam", "events": ["stats.saved"] }],
+    "accounts": [{ "service": "steam", "events": ["stats.saved"], "local": ["achievements"] }],
     "network": [
       {
         "origin": "https://api.steampowered.com",
@@ -31,8 +31,9 @@ or pages for another account: it names the service.
 - The account's ID is the service's: the permission is `account:steam`, a
   route names it in `account`, and `account.subscribe({ id: "steam" })`
   follows its state.
-- Only `scopes`, `required` and `events` ([live events](#live-events-twitch))
-  stand beside `service`. The origins, the sending and the key page come
+- Only `scopes`, `required`, `events` ([live events](#live-events-twitch))
+  and `local` ([local achievements](#local-achievements-steam)) stand
+  beside `service`. The origins, the sending and the key page come
   from PlayerVox's table below.
 - Twitch takes `scopes` among those it offers, for example
   `{ "service": "twitch", "scopes": ["channel:read:goals"] }`. The player
@@ -163,7 +164,7 @@ and read the achievements at once instead of waiting for its next read:
 
 <!-- source: docs/content/examples/steam-stats/manifest.json -->
 ```json
-    "accounts": [{ "service": "steam", "events": ["stats.saved"] }],
+    "accounts": [{ "service": "steam", "events": ["stats.saved"], "local": ["achievements"] }],
 ```
 
 - `events` asks the player nothing more: an event only tells when to read
@@ -209,6 +210,44 @@ follows and delivers its events:
 | --- | --- | --- |
 | `stats.saved` | 1 | `appid` |
 
+## Local achievements (Steam)
+
+Steam's Web API publishes a new achievement late, from a few seconds to
+several minutes, and not at all while the game details are not public. The
+Steam client of the player's computer has it at once. From PlayerVox
+OverCrow 0.9.0-beta.1, a widget that names Steam can read it there:
+
+<!-- source: docs/content/examples/steam-stats/manifest.json -->
+```json
+    "accounts": [{ "service": "steam", "events": ["stats.saved"], "local": ["achievements"] }],
+```
+
+<!-- source: docs/content/examples/steam-stats/logic.ts -->
+```ts
+    const page = await steam.achievements.local({ steamid: state.steamId, appid });
+    state.unlocked = t("unlocked", { count: page.total });
+```
+
+- OverCrow reads, read-only, the two stats files the Steam client keeps
+  for that account and that game, and gives the widget each unlocked
+  achievement's API name and unlock time (Unix milliseconds, `null` when
+  Steam saved none). Nothing else: no stats, no path, no file.
+- Newest first, 4,096 at most per answer; `total` counts them all, and
+  `offset` reads the next page. An empty list means nothing is unlocked
+  yet.
+- `unavailable` when this computer has no Steam client, no stats of that
+  account and game (Steam may run on another computer), or files OverCrow
+  cannot read: keep reading the Web API, as without local data. Names,
+  icons and rarity still come from the Web API.
+- Read it again at each `stats.saved` of the game: the new achievement is
+  there at once.
+- `local` asks the player nothing more: it is their own data, on their
+  screen, and a widget with the account reaches no one but Steam. It needs
+  the granted Steam service, not a connected key.
+- A version with it needs the catalog feature `steam-local-achievements`.
+- In a test scenario, `fixtures.calls["steam.achievements.local"]` gives
+  the answers, in call order.
+
 ## Reference
 
 ### `permissions.accounts` with a service
@@ -216,10 +255,11 @@ follows and delivers its events:
 <!-- generated:integrated-service-fields -->
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `service` | `steam` \| `twitch` | yes | An integrated service of the table: PlayerVox defines its origins, how the secret is sent, its key page or OAuth client and the paths no widget reaches; the user connects it once and every widget that names it shares the connection. The account's `id` is the service's: the permission key is `account:<service>` and the routes name it in `account`. Only `scopes`, `required` and `events` stand beside it. |
+| `service` | `steam` \| `twitch` | yes | An integrated service of the table: PlayerVox defines its origins, how the secret is sent, its key page or OAuth client and the paths no widget reaches; the user connects it once and every widget that names it shares the connection. The account's `id` is the service's: the permission key is `account:<service>` and the routes name it in `account`. Only `scopes`, `required`, `events` and `local` stand beside it. |
 | `scopes` | list of `scope name` ≤ 16 | no | OAuth services only: distinct scopes among those the service offers, all read-only in version 1; default none. |
 | `required` | boolean | no | As for a declared account; default `true`. |
 | `events` | list of `event type` ≤ 32 | no | A service with live events only (Twitch, Steam): distinct types of the service's table, each read by a scope among `scopes` where it has one. Twitch's come from the user's own channel by `twitch.events.subscribe`; Steam's from the Steam client of the user's computer, for the account the widget names, by `steam.events.subscribe`. Not part of the permission's detail: an event tells what the service's routes already read. Needs the feature `twitch-events` or `steam-events`. |
+| `local` | list of `local data` ≤ 8 | no | A service with local data only (Steam): distinct kinds of the service's table, which the host reads for the widget from the service's client on the user's computer, read-only. Steam's `achievements`: the unlocked achievements of the account the widget names, by `steam.achievements.local`. Not part of the permission's detail: it is the player's own data, shown on their screen, and a widget with the account reaches no one but the service. Needs the feature of each kind (`steam-local-achievements`). |
 <!-- /generated:integrated-service-fields -->
 
 ### The services

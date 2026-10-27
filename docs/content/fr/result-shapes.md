@@ -414,4 +414,23 @@ Un événement Steam local. `{ seq, type, at, data }`
 | `state` | `live` \| `off` | `live` tant que l'hôte surveille les stats du client Steam sur cet ordinateur. |
 | `reason` | `connecting` \| `not_connected` \| `unavailable` ou `null` | Pourquoi l'état est `off` ; `null` en `live`. |
 | `events` | liste de [`SteamEvent`](#steamevent) | Les derniers événements, du plus ancien au plus récent. |
+
+### `SteamLocalAchievement`
+
+Un succès que le client Steam de cet ordinateur a enregistré comme débloqué. `{ name, unlockedAt }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `name` | texte | Le nom d’API du succès, au plus 128 octets d’ASCII imprimable. |
+| `unlockedAt` | entier ou `null` | Quand il a été débloqué, en millisecondes Unix ; `null` si Steam n’a enregistré aucune date. |
+
+### `SteamLocalAchievements`
+
+Les succès débloqués d’un jeu, lus sur cet ordinateur pour le compte que le widget nomme. `{ appid, total, achievements }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `appid` | entier | Le jeu demandé. |
+| `total` | entier | Combien de succès du jeu les fichiers tiennent pour débloqués. |
+| `achievements` | liste de [`SteamLocalAchievement`](#steamlocalachievement) | Une page de ceux-ci, du plus récent au plus ancien (dates `null` en dernier, puis par nom). |
 <!-- /generated:result-shapes -->

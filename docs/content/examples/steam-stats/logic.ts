@@ -2,7 +2,7 @@
 // integrated Steam service: the player connects Steam once in PlayerVox
 // OverCrow, which adds the key to the requests of the route that names the
 // service. The widget never sees the key.
-import { account, http, initState, ServiceError, steam, storage, timers } from "@overcrow/sdk";
+import { account, http, initState, ServiceError, steam, storage, t, timers } from "@overcrow/sdk";
 import type { Subscription } from "@overcrow/sdk";
 
 declare module "@overcrow/sdk" {
@@ -10,14 +10,15 @@ declare module "@overcrow/sdk" {
     steamId: string;
     name: string;
     game: string;
+    unlocked: string;
     status: string;
   }
 }
 
-const state = initState({ steamId: "", name: "", game: "", status: "loading" });
+const state = initState({ steamId: "", name: "", game: "", unlocked: "", status: "loading" });
 
 interface Summaries {
-  response?: { players?: { personaname?: unknown; gameextrainfo?: unknown }[] };
+  response?: { players?: { personaname?: unknown; gameextrainfo?: unknown; gameid?: unknown }[] };
 }
 
 async function load(): Promise<void> {
@@ -36,11 +37,26 @@ async function load(): Promise<void> {
     state.name = typeof player.personaname === "string" ? player.personaname : "";
     state.game = typeof player.gameextrainfo === "string" ? player.gameextrainfo : "";
     state.status = "updated";
+    await readLocal(typeof player.gameid === "string" ? Number(player.gameid) : 0);
   } catch (error) {
     // not_connected until the player connects Steam, account_refused when
     // Steam refuses the key: OverCrow shows its own panel, the widget waits.
     const code = error instanceof ServiceError ? error.code : "";
     state.status = code === "not_connected" || code === "account_refused" ? code : "unavailable";
+  }
+}
+
+// The achievements of the game that the Steam client of this computer saved
+// as unlocked: at once, even with private game details. `unavailable` when
+// Steam runs on another computer: nothing more is shown.
+async function readLocal(appid: number): Promise<void> {
+  state.unlocked = "";
+  if (!Number.isSafeInteger(appid) || appid <= 0) return;
+  try {
+    const page = await steam.achievements.local({ steamid: state.steamId, appid });
+    state.unlocked = t("unlocked", { count: page.total });
+  } catch {
+    // Nothing to read on this computer.
   }
 }
 

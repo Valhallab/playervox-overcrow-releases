@@ -35,9 +35,15 @@ widget's sources and the embedded SDK.
   runtime this CLI pins must know `game.subscribe` to run a widget that
   subscribes, and a scenario gives its updates under `fixtures.subscriptions`
   and `publish` steps.
+- A Steam declaration may list `local` (`achievements`), which
+  `steam.achievements.local` reads; `check` and `admit` accept it and
+  refuse an unknown kind (`manifest.account`). A manifest with it needs the
+  catalog feature `steam-local-achievements`; the headless runtime this CLI
+  pins must know `steam.achievements.local` to run a widget that calls it,
+  and a scenario gives its answers under `fixtures.calls`.
 - It embeds `@overcrow/sdk` 1.3.0: `links.open`, the `headers` of
   `http.fetch` answers, the service error `review_removed_by_moderation`,
-  `steam.events` and `game`.
+  `steam.events`, `steam.achievements` and `game`.
 
 ## 1.0.0-beta.8
 

@@ -234,7 +234,7 @@ pub fn manifest_diagnostic(error: ManifestError, source: &str) -> Diagnostic {
         ManifestError::Account => (
             "permissions.accounts",
             "`permissions.accounts` is invalid".into(),
-            Some("exactly one entry: an integrated service, `{ \"service\": \"steam\" }` or `{ \"service\": \"twitch\", \"scopes\": [...] }` with scopes the service offers, and optional `events` of the service's table (Steam: `stats.saved`; Twitch: types read by a declared scope); or a declared account: an `id` of lowercase letters, digits and `-` (not `playervox` or `twitch`), the service's `name`, `mode` `key` with `send` and `key`, or `oauth` with `oauth`, 1 to 4 HTTPS `origins`, a `send.query` no route of the account declares; see the Accounts section of docs/widget-schema-v1.md".into()),
+            Some("exactly one entry: an integrated service, `{ \"service\": \"steam\" }` or `{ \"service\": \"twitch\", \"scopes\": [...] }` with scopes the service offers, and optional `events` of the service's table (Steam: `stats.saved`; Twitch: types read by a declared scope), Steam's optional `local` (`achievements`); or a declared account: an `id` of lowercase letters, digits and `-` (not `playervox` or `twitch`), the service's `name`, `mode` `key` with `send` and `key`, or `oauth` with `oauth`, 1 to 4 HTTPS `origins`, a `send.query` no route of the account declares; see the Accounts section of docs/widget-schema-v1.md".into()),
         ),
         ManifestError::AccountService => (
             "permissions.accounts",

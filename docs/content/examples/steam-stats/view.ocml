@@ -4,6 +4,7 @@
   <field class="steam-id" label={t("steam-id")} placeholder={t("steam-id-hint")} value={state.steamId} max-length="17" on:input={steamIdTyped(event.value)}/>
   <text class="name">{state.name}</text>
   <text class="game">{state.game}</text>
+  <text class="unlocked">{state.unlocked}</text>
   <box class="footer">
     <text class="status">{t(state.status)}</text>
     <button class="refresh" label={t("refresh")} on:activate={refresh}>

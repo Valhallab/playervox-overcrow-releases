@@ -2,6 +2,7 @@
   "steam-id": "Steam ID",
   "steam-id-hint": "17 digits",
   "loading": "Loading…",
+  "unlocked": "{count} achievements on this PC",
   "updated": "Up to date",
   "no-id": "Enter your Steam ID",
   "not_connected": "Waiting for Steam",

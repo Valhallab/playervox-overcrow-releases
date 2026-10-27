@@ -508,7 +508,8 @@ pub fn pixels(logical: u32, scale: u32) -> u32 {
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Fixtures {
-    /// Provider-backed calls (`stopwatch.toggle`…): answers in call order.
+    /// Provider-backed calls (`stopwatch.toggle`, `steam.achievements.local`…):
+    /// answers in call order.
     /// A call beyond them is an error of the scenario.
     #[serde(default)]
     pub calls: BTreeMap<String, Vec<Reply>>,
@@ -1075,10 +1076,16 @@ fn check_intent_error_code(path: &str, code: &str) -> Checked {
     check_error_code(path, code)
 }
 
-/// A provider-backed call: its answers come from the fixtures.
+/// A provider-backed call: its answers come from the fixtures. A call of an
+/// integrated service (`steam.achievements.local`) too, once the host's
+/// checks of its grant and declaration passed.
 fn provider_call(name: &str) -> Option<&'static overcrow_widget_schema::services::Service> {
     service(name).filter(|service| {
-        service.kind == ServiceKind::Call && matches!(service.requires, Requirement::Capability(_))
+        service.kind == ServiceKind::Call
+            && matches!(
+                service.requires,
+                Requirement::Capability(_) | Requirement::Service(_)
+            )
     })
 }
 

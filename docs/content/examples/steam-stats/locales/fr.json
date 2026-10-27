@@ -2,6 +2,7 @@
   "steam-id": "Identifiant Steam",
   "steam-id-hint": "17 chiffres",
   "loading": "Chargement…",
+  "unlocked": "{count} succès sur ce PC",
   "updated": "À jour",
   "no-id": "Saisissez votre identifiant Steam",
   "not_connected": "En attente de Steam",

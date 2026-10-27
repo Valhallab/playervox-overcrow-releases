@@ -266,5 +266,8 @@ see [limit constants](sdk.md#limit-constants).
 | `MAX_SERVICE_EVENTS` | 32 | `events` of an integrated service's declaration. |
 | `MAX_SERVICE_EVENT_BYTES` | 16 KiB | Compact JSON of the `data` of one service event; a larger event is dropped and its `seq` skipped. |
 | `SERVICE_EVENT_WINDOW` | 16 | Latest events each update of `twitch.events.subscribe` and `steam.events.subscribe` repeats: updates are coalesced, `seq` tells a new event from one already seen. |
-| `MAX_STEAMID_BYTES` | 17 bytes | `steamid` of `steam.events.subscribe`: a SteamID64, 17 digits. |
+| `MAX_STEAMID_BYTES` | 17 bytes | `steamid` of `steam.events.subscribe` and `steam.achievements.local`: a SteamID64, 17 digits. |
+| `MAX_LOCAL_DATA` | 8 | Kinds of local data one service declaration lists (`local`). |
+| `MAX_LOCAL_ACHIEVEMENTS` | 4096 | Achievements one answer of `steam.achievements.local` gives, from its `offset`; the rest by the next pages. |
+| `MAX_ACHIEVEMENT_NAME_BYTES` | 128 bytes | API name of a Steam achievement, as Steam bounds it: printable ASCII. |
 <!-- /generated:limits -->

@@ -382,6 +382,15 @@ mise à jour.
 - **Chaque mise à jour** : `{ state, reason, events }` tout de suite, puis à chaque changement. `state` vaut `live` tant que l'hôte surveille les stats du client Steam sur cet ordinateur, `off` sinon, avec `reason` `connecting`, `not_connected` (Steam n'est pas connecté) ou `unavailable` (aucun client Steam trouvé sur cet ordinateur). Steam ne pousse rien et l'hôte ne rejoue rien : les événements disent seulement quand relire par `http.fetch`, et le widget continue aussi à lire à son rythme (Steam peut tourner sur un autre ordinateur). `events` répète les 16 derniers événements de l'abonnement, du plus ancien au plus récent, chacun `{ seq, type, at, data }` : les mises à jour sont fusionnées, ne prenez donc que ceux dont le `seq` dépasse le dernier vu ; un trou dans `seq` veut dire que des événements ont été perdus (relisez). `stats.saved` : le client Steam a enregistré les stats d'un jeu de ce compte, à chaque succès obtenu et à d'autres moments ; `data` vaut `{ appid }`, `at` l'heure de l'enregistrement. Un seul abonnement par widget à la fois : un autre échoue avec `busy`
 - **Forme** : [`SteamEvents`](result-shapes.md#steamevents)
 
+### `steam.achievements.local`
+
+- **Nature** : appel, à réponse unique
+- **Exige** : le service `steam` nommé et accordé
+- **Quand l’appeler** : À tout moment
+- **Paramètres** : `steamid` : texte ≤ 17 octets ; `appid` : entier de 1 à 4294967295 ; `offset?` : entier de 0 à 1000000
+- **Résultat** : `{ appid, total, achievements }` : les succès de ce jeu que le client Steam de cet ordinateur a enregistrés comme débloqués pour ce compte, lus en lecture seule dans ses propres fichiers de stats, avant même que Steam les publie en ligne et quel que soit le réglage de confidentialité des détails de jeu. `total` les compte tous ; `achievements` en donne au plus 4096 à partir de `offset`, du plus récent au plus ancien, chacun `{ name, unlockedAt }` : le nom d’API, tel que `GetSchemaForGame` et `GetPlayerAchievements` le donnent, et la date de déblocage en millisecondes Unix, `null` si Steam n’en a enregistré aucune. Rien d’autre des fichiers. Une liste vide : aucun succès débloqué pour l’instant. Demande `local: ["achievements"]` dans la déclaration (`permission_denied` sans), pas une clé connectée. `unavailable` quand l’ordinateur n’a pas de client Steam, pas de stats de ce compte et de ce jeu, ou des fichiers que l’hôte ne sait pas lire : continuez à lire l’API Web de Steam. Un appel par widget à la fois : un autre échoue en `busy`
+- **Forme** : [`SteamLocalAchievements`](result-shapes.md#steamlocalachievements)
+
 ### `account.connect`
 
 - **Nature** : appel, à réponse unique
