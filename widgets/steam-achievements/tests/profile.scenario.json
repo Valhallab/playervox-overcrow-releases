@@ -8,6 +8,34 @@
     "mode": "interactive"
   },
   "fixtures": {
+    "calls": {
+      "steam.achievements.local": [
+        {
+          "error": "unavailable"
+        },
+        {
+          "error": "unavailable"
+        },
+        {
+          "error": "unavailable"
+        },
+        {
+          "error": "unavailable"
+        },
+        {
+          "error": "unavailable"
+        },
+        {
+          "error": "unavailable"
+        },
+        {
+          "error": "unavailable"
+        },
+        {
+          "error": "unavailable"
+        }
+      ]
+    },
     "http": []
   },
   "steps": [

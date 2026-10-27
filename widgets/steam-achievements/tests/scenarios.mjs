@@ -171,13 +171,31 @@ const STAGE = (await import("../../../scripts/compose-previews.mjs")).STAGE_COLO
 const WIDTH = { line: 240, compact: 280, standard: 300, full: 340 };
 const profile = { profile: { steamid: ID, input: `https://steamcommunity.com/profiles/${ID}` } };
 
-function scenario(name, description, { host = {}, http = [], subscriptions, steps }) {
+/** `steam.achievements.local`: what the Steam client of this computer saved. */
+const LOCAL = "steam.achievements.local";
+/** Nothing on this computer (Steam elsewhere): every scenario's default. */
+const NOTHING_HERE = () => ({ error: "unavailable" });
+/** This computer's unlocked achievements of `game`, newest first, as the host answers. */
+function localPage(game, unlockedNow = {}) {
+  const achievements = game.achievements
+    .map((a) => {
+      const ago = a.api in unlockedNow ? unlockedNow[a.api] : a.ago;
+      return ago === null ? null : { name: a.api, unlockedAt: at(ago) * 1000 };
+    })
+    .filter((item) => item !== null)
+    .sort((a, b) => b.unlockedAt - a.unlockedAt || (a.name < b.name ? -1 : 1));
+  return { value: { appid: game.appid, total: achievements.length, achievements } };
+}
+
+function scenario(name, description, { host = {}, http = [], subscriptions, calls = { [LOCAL]: repeat(8, NOTHING_HERE) }, steps }) {
+  const fixtures = { calls, http };
+  if (subscriptions !== undefined) fixtures.subscriptions = subscriptions;
   const value = {
     scenarioVersion: 1,
     name,
     description,
     host: { startAt: START, storage: { ...profile }, ...host },
-    fixtures: subscriptions === undefined ? { http } : { http, subscriptions },
+    fixtures,
     steps,
   };
   writeFileSync(new URL(`${name}.scenario.json`, here), `${JSON.stringify(value, null, 2)}\n`);
@@ -863,6 +881,84 @@ scenario("steam-offline-host-game", "Steam's offline mode: no game named, the ho
     { advance: { ms: 5_000 } },
     saved(1, ASHEN, START + 5_000),
     { expect: { text: ["13 / 40", "Endless Night", "New"], fault: "none" } },
+  ],
+});
+
+// --- the achievements the Steam client of this computer saved
+// (`steam.achievements.local`, PlayerVox OverCrow 0.9): there the moment
+// they unlock, whatever the game details' privacy.
+const atStart = (game, players, { details = "public" } = {}) => [
+  ...repeat(2, () => fixture(urls.summary, summary({ playing: null, details }))),
+  ...repeat(2, () => fixture(urls.recent, recent([COURIER, game]))),
+  fixture(urls.schema(game), schema(game, "english")),
+  fixture(urls.schema(game, "french"), schema(game, "french")),
+  ...players,
+  fixture(urls.rarity(game), rarity(game), false),
+  ...images(game),
+];
+
+scenario("local-unlock-now", "Status Invisible: Endless Night unlocks; Steam on this computer has it at once while Steam's Web API does not yet: shown at once, New, no Web API read; the Web API still lags at the next minute (shown all the same), then confirms it.", {
+  subscriptions: { [GAME]: hostGame(ASHEN), ...LIVE.subscriptions },
+  http: [
+    ...atStart(ASHEN, [...repeat(2, () => fixture(urls.player(ASHEN), player(ASHEN))), fixture(urls.player(ASHEN), player(ASHEN, { A13: 0 }))]),
+    fixture(urls.summary, summary({ playing: null })),
+  ],
+  calls: { [LOCAL]: [localPage(ASHEN), ...repeat(4, () => localPage(ASHEN, { A13: 0 }))] },
+  steps: [
+    { expect: { state: "running", text: ["Ashen Crown", "Playing now", "12 / 40"], fault: "none" } },
+    { advance: { ms: 5_000 } },
+    saved(1, ASHEN, START + 5_000),
+    { expect: { text: ["13 / 40", "Endless Night", "New"], fault: "none" } },
+    ...layouts("local-unlock-now", ["standard"]),
+    // The minute: Steam's Web API does not have it yet; still 13.
+    { advance: { ms: 56_000 } },
+    { expect: { text: ["13 / 40", "Endless Night"], fault: "none" } },
+    // The next: it does, the same 13.
+    { advance: { ms: MIN } },
+    { expect: { text: ["13 / 40", "Endless Night"], noText: ["New"], fault: "none" } },
+  ],
+});
+
+scenario("local-details-hidden", "Game details Friends Only and status Invisible: Steam refuses the achievements (403), but this computer has those of the game PlayerVox OverCrow says is running: Ashen Crown shows as usual, named by its list, with its rarity; no hidden-details notice.", {
+  subscriptions: { [GAME]: hostGame(ASHEN), ...LIVE.subscriptions },
+  http: [...atStart(ASHEN, repeat(2, () => fixture(urls.player(ASHEN), NOT_PUBLIC())), { details: "friends" }), ...probes(4)],
+  calls: { [LOCAL]: repeat(6, () => localPage(ASHEN)) },
+  steps: [
+    { expect: { state: "running", text: ["Ashen Crown", "Playing now", "12 / 40", "Crown of Ashes"], noText: ["Game details hidden"], fault: "none" } },
+    ...layouts("local-details-hidden"),
+    { host: { scale: 1500 } },
+    ...layouts("local-details-hidden-150", ["compact", "standard"]),
+    { host: { locale: "fr", scale: 1000 } },
+    { expect: { text: ["Ashen Crown", "Couronne de cendres"], noText: ["Détails de jeu cachés"] } },
+    ...layouts("local-details-hidden-fr"),
+    { host: { scale: 1500 } },
+    ...layouts("local-details-hidden-fr-150", ["compact", "standard"]),
+    { host: { theme: "light", scale: 1000 } },
+    ...layouts("local-details-hidden-fr-light", ["standard"]),
+  ],
+});
+
+scenario("local-steam-offline", "Steam's offline mode: Steam on this computer saves Endless Night, which Steam's Web API will not have until Steam is back online; shown at once, and still shown at the next minutes' reads.", {
+  subscriptions: { [GAME]: hostGame(ASHEN), ...LIVE.subscriptions },
+  http: [...atStart(ASHEN, repeat(3, () => fixture(urls.player(ASHEN), player(ASHEN)))), ...repeat(2, () => fixture(urls.summary, summary({ playing: null })))],
+  calls: { [LOCAL]: [localPage(ASHEN), ...repeat(6, () => localPage(ASHEN, { A13: 0 }))] },
+  steps: [
+    { expect: { state: "running", text: ["Ashen Crown", "12 / 40"], fault: "none" } },
+    { advance: { ms: 5_000 } },
+    saved(1, ASHEN, START + 5_000),
+    { expect: { text: ["13 / 40", "Endless Night", "New"], fault: "none" } },
+    { advance: { ms: 2 * MIN } },
+    { expect: { text: ["13 / 40", "Endless Night"], fault: "none" } },
+  ],
+});
+
+scenario("local-unavailable", "Nothing on this computer (Steam elsewhere): exactly as before, the host's game from Steam's Web API (same image as invisible-host-game).", {
+  subscriptions: { [GAME]: hostGame(ASHEN), ...LIVE.subscriptions },
+  http: reads(ASHEN, { playing: false, recentGames: [COURIER, ASHEN] }),
+  calls: { [LOCAL]: repeat(4, NOTHING_HERE) },
+  steps: [
+    { expect: { state: "running", text: ["Ashen Crown", "Playing now", "12 / 40"], noText: ["Neon Courier", "Last game played"], fault: "none" } },
+    ...layouts("local-unavailable", ["standard"]),
   ],
 });
 
