@@ -290,8 +290,10 @@ impl Manifest {
     /// `service-steam`…, `network-file-param` for a network rule with a
     /// `file` parameter, `menu-closes` for a menu row that names
     /// `closesMenu`, `twitch-events` for a Twitch declaration that lists
-    /// `events`, `open-links` for `permissions.links`, and `active-game`
-    /// for `game.read` or the PlayerVox score beside a way out); empty for
+    /// `events` (`steam-events` for Steam's), `steam-local-achievements`
+    /// for a Steam declaration that lists `local` `achievements`,
+    /// `open-links` for `permissions.links`, and `active-game` for
+    /// `game.read` or the PlayerVox score beside a way out); empty for
     /// a manifest without any.
     pub fn features(&self) -> BTreeSet<&'static str> {
         let mut features: BTreeSet<&'static str> = self
@@ -308,6 +310,11 @@ impl Manifest {
                 .filter(|_| !account.events.is_empty())
                 .and_then(|service| service.events_feature)
         }));
+        features.extend(
+            self.accounts
+                .iter()
+                .flat_map(|account| account.local.iter().map(|local| local.feature)),
+        );
         let rules = self.value["permissions"]["network"].as_array();
         if rules.is_some_and(|rules| rules.iter().any(uses_file_parameter)) {
             features.insert(FEATURE_NETWORK_FILE_PARAM);

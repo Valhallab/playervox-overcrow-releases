@@ -265,7 +265,8 @@ safe, and refuse what an application cannot safely ignore.
    skipped entry is never shown, installed or updated. The schema names its
    features in `KNOWN_FEATURES` (`account-key`, `account-oauth`,
    `service-steam`, `service-twitch`, `network-file-param`, `menu-closes`,
-   `twitch-events`, `open-links`, `steam-events`, `active-game`),
+   `twitch-events`, `open-links`, `steam-events`, `active-game`,
+   `steam-local-achievements`),
    and `Manifest::features` says which ones a manifest needs; a reader
    announces those it implements and skips an entry that names any other.
    Producers name features `[a-z][a-z0-9-]*`. A producer puts `requires` on

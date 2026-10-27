@@ -1147,7 +1147,25 @@ pub const MAX_STEAMID_BYTES: Limit = fixed(
     "MAX_STEAMID_BYTES",
     17,
     Unit::Bytes,
-    "`steamid` of `steam.events.subscribe`: a SteamID64, 17 digits.",
+    "`steamid` of `steam.events.subscribe` and `steam.achievements.local`: a SteamID64, 17 digits.",
+);
+pub const MAX_LOCAL_DATA: Limit = fixed(
+    "MAX_LOCAL_DATA",
+    8,
+    Unit::Count,
+    "Kinds of local data one service declaration lists (`local`).",
+);
+pub const MAX_LOCAL_ACHIEVEMENTS: Limit = fixed(
+    "MAX_LOCAL_ACHIEVEMENTS",
+    4096,
+    Unit::Count,
+    "Achievements one answer of `steam.achievements.local` gives, from its `offset`; the rest by the next pages.",
+);
+pub const MAX_ACHIEVEMENT_NAME_BYTES: Limit = fixed(
+    "MAX_ACHIEVEMENT_NAME_BYTES",
+    128,
+    Unit::Bytes,
+    "API name of a Steam achievement, as Steam bounds it: printable ASCII.",
 );
 pub const MAX_DNS_LABEL_BYTES: Limit = fixed(
     "MAX_DNS_LABEL_BYTES",
@@ -1481,6 +1499,9 @@ pub const ALL: &[&Limit] = &[
     &MAX_SERVICE_EVENT_BYTES,
     &SERVICE_EVENT_WINDOW,
     &MAX_STEAMID_BYTES,
+    &MAX_LOCAL_DATA,
+    &MAX_LOCAL_ACHIEVEMENTS,
+    &MAX_ACHIEVEMENT_NAME_BYTES,
     &MAX_DNS_LABEL_BYTES,
     &MAX_DNS_NAME_BYTES,
     &MAX_OBJECT_ID_BYTES,

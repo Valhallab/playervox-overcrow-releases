@@ -664,6 +664,39 @@ pub const SHAPES: &[NamedShape] = &[
         ]),
         "Local Steam events of the widget's declared types, for the account it names.",
     ),
+    named(
+        "SteamLocalAchievement",
+        Shape::Record(&[
+            member(
+                "name",
+                Shape::Text,
+                "The achievement's API name, at most `MAX_ACHIEVEMENT_NAME_BYTES` of printable ASCII.",
+            ),
+            member(
+                "unlockedAt",
+                Shape::Nullable(&Shape::Integer),
+                "When it was unlocked, in Unix milliseconds; `null` when Steam saved no time.",
+            ),
+        ]),
+        "One achievement the Steam client of this computer saved as unlocked.",
+    ),
+    named(
+        "SteamLocalAchievements",
+        Shape::Record(&[
+            member("appid", Shape::Integer, "The game asked for."),
+            member(
+                "total",
+                Shape::Integer,
+                "How many achievements of the game the files hold as unlocked.",
+            ),
+            member(
+                "achievements",
+                Shape::List(&Shape::Named("SteamLocalAchievement")),
+                "A page of them, newest first (`null` times last, then by name).",
+            ),
+        ]),
+        "The unlocked achievements of a game, read on this computer for the account the widget names.",
+    ),
 ];
 
 /// Response headers `http.fetch` gives a widget, by lowercase name: how

@@ -821,6 +821,24 @@ export interface SteamEvents {
   readonly events: ReadonlyArray<SteamEvent>;
 }
 
+/** One achievement the Steam client of this computer saved as unlocked. */
+export interface SteamLocalAchievement {
+  /** The achievement's API name, at most `MAX_ACHIEVEMENT_NAME_BYTES` of printable ASCII. */
+  readonly name: string;
+  /** When it was unlocked, in Unix milliseconds; `null` when Steam saved no time. */
+  readonly unlockedAt: number | null;
+}
+
+/** The unlocked achievements of a game, read on this computer for the account the widget names. */
+export interface SteamLocalAchievements {
+  /** The game asked for. */
+  readonly appid: number;
+  /** How many achievements of the game the files hold as unlocked. */
+  readonly total: number;
+  /** A page of them, newest first (`null` times last, then by name). */
+  readonly achievements: ReadonlyArray<SteamLocalAchievement>;
+}
+
 // Services.
 
 /** Every service name. */
@@ -1004,6 +1022,15 @@ export interface ServiceParamsMap {
     /** Distinct event types among the declaration's `events`; default all of them. A type it does not list fails with `permission_denied`. */
     readonly types?: readonly string[];
   };
+  /** Parameters of `steam.achievements.local`. */
+  readonly "steam.achievements.local": {
+    /** The SteamID64 of the account the widget follows: 17 digits, an individual account. Another value fails with `invalid_request`. */
+    readonly steamid: string;
+    /** The game's Steam app ID. */
+    readonly appid: number;
+    /** How many achievements of the order to skip, for the next page; default 0. */
+    readonly offset?: number;
+  };
   /** Parameters of `account.connect`. */
   readonly "account.connect": {
     /** `id` of an account the manifest declares, or of the integrated service it names, that the user granted. */
@@ -1095,6 +1122,8 @@ export interface ServiceResultMap {
   readonly "twitch.events.subscribe": TwitchEvents;
   /** `steam.events.subscribe`: `{ state, reason, events }` at once, then at each change. `state` is `live` while the host watches the Steam client's stats on this computer, `off` otherwise, with `reason` `connecting`, `not_connected` (Steam is not connected) or `unavailable` (no Steam client found on this computer). Steam pushes nothing and the host replays nothing: the events only say when to read again by `http.fetch`, and the widget keeps reading at its own pace too (Steam may run on another computer). `events` repeats the latest `SERVICE_EVENT_WINDOW` events of the subscription, oldest first, each `{ seq, type, at, data }`: updates are coalesced, so take only those whose `seq` is above the last one seen; a gap in `seq` means events were missed (read again). `stats.saved`: the Steam client saved the stats of a game of that account, at each achievement unlocked and at other times; `data` is `{ appid }`, `at` the time of the save. At most one subscription per widget at a time: another fails with `busy`. */
   readonly "steam.events.subscribe": SteamEvents;
+  /** `steam.achievements.local`: `{ appid, total, achievements }`: the achievements of that game the Steam client of this computer saved as unlocked for that account, read-only from its own stats files, even before Steam publishes them online and whatever the game details' privacy. `total` counts them all; `achievements` gives at most `MAX_LOCAL_ACHIEVEMENTS` from `offset`, newest first, each `{ name, unlockedAt }`: the API name, as `GetSchemaForGame` and `GetPlayerAchievements` give it, and the unlock time in Unix milliseconds, `null` when Steam saved none. Nothing else of the files. An empty list: no achievement unlocked yet. Needs the declaration's `local: ["achievements"]` (`permission_denied` without), not a connected key. `unavailable` when the computer has no Steam client, no stats of that account and game, or files the host cannot read or does not know: keep reading Steam's Web API. One call per widget at a time: another fails with `busy`. */
+  readonly "steam.achievements.local": SteamLocalAchievements;
   /** `account.connect`: `null`; the host shows its account panel for this account, in its current state: the widget's own button for an account that is not `required`. */
   readonly "account.connect": null;
 }
@@ -1126,6 +1155,7 @@ export type CallServiceName =
   | "twitch.chat.join"
   | "twitch.chat.leave"
   | "twitch.chat.favorite"
+  | "steam.achievements.local"
   | "account.connect";
 
 /** Services that send updates until cancelled. */

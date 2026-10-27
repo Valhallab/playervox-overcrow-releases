@@ -141,6 +141,11 @@ export const session: SessionServices = /* @__PURE__ */ group("session", ["subsc
 
 /** The `steam.*` services. */
 export interface SteamServices {
+  /** The `steam.achievements.*` services. */
+  readonly achievements: {
+    /** `steam.achievements.local`. Requires the `steam` service the manifest names, granted by the user. Result: `{ appid, total, achievements }`: the achievements of that game the Steam client of this computer saved as unlocked for that account, read-only from its own stats files, even before Steam publishes them online and whatever the game details' privacy. `total` counts them all; `achievements` gives at most `MAX_LOCAL_ACHIEVEMENTS` from `offset`, newest first, each `{ name, unlockedAt }`: the API name, as `GetSchemaForGame` and `GetPlayerAchievements` give it, and the unlock time in Unix milliseconds, `null` when Steam saved none. Nothing else of the files. An empty list: no achievement unlocked yet. Needs the declaration's `local: ["achievements"]` (`permission_denied` without), not a connected key. `unavailable` when the computer has no Steam client, no stats of that account and game, or files the host cannot read or does not know: keep reading Steam's Web API. One call per widget at a time: another fails with `busy`. */
+    local(params: P["steam.achievements.local"]): Promise<R["steam.achievements.local"]>;
+  };
   /** The `steam.events.*` services. */
   readonly events: {
     /** `steam.events.subscribe`. Requires the `steam` service the manifest names, granted by the user. Updates: `{ state, reason, events }` at once, then at each change. `state` is `live` while the host watches the Steam client's stats on this computer, `off` otherwise, with `reason` `connecting`, `not_connected` (Steam is not connected) or `unavailable` (no Steam client found on this computer). Steam pushes nothing and the host replays nothing: the events only say when to read again by `http.fetch`, and the widget keeps reading at its own pace too (Steam may run on another computer). `events` repeats the latest `SERVICE_EVENT_WINDOW` events of the subscription, oldest first, each `{ seq, type, at, data }`: updates are coalesced, so take only those whose `seq` is above the last one seen; a gap in `seq` means events were missed (read again). `stats.saved`: the Steam client saved the stats of a game of that account, at each achievement unlocked and at other times; `data` is `{ appid }`, `at` the time of the save. At most one subscription per widget at a time: another fails with `busy`. */
@@ -149,7 +154,7 @@ export interface SteamServices {
 }
 
 /** The `steam.*` services. */
-export const steam: SteamServices = /* @__PURE__ */ group("steam", ["events.subscribe"]);
+export const steam: SteamServices = /* @__PURE__ */ group("steam", ["events.subscribe", "achievements.local"]);
 
 /** The `stopwatch.*` services. */
 export interface StopwatchServices {

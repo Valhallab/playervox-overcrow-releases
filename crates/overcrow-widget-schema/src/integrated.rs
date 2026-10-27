@@ -24,6 +24,14 @@
 //! version, scope and fields are frozen with the release that announces
 //! the service's events feature (`twitch-events`, `steam-events`) in the
 //! same way.
+//!
+//! A service may also list local data (`local`): what the host reads for a
+//! widget from the service's own client on the user's computer, read-only,
+//! and gives it as a closed, bounded result. Steam's achievements first: the
+//! unlocked achievements of the account a widget names, from the two stats
+//! files the Steam client keeps for that account and game. A widget never
+//! gets a path, a file or anything else of it. Each kind is frozen with the
+//! release that announces its feature (`steam-local-achievements`).
 
 use serde_json::{Map, Value};
 
@@ -38,6 +46,9 @@ pub const FEATURE_SERVICE_TWITCH: &str = "service-twitch";
 pub const FEATURE_TWITCH_EVENTS: &str = "twitch-events";
 /// Feature a manifest needs when its Steam declaration lists `events`.
 pub const FEATURE_STEAM_EVENTS: &str = "steam-events";
+/// Feature a manifest needs when its Steam declaration lists `local`
+/// `achievements`.
+pub const FEATURE_STEAM_LOCAL_ACHIEVEMENTS: &str = "steam-local-achievements";
 
 /// A text in each interface language.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -517,6 +528,30 @@ pub const STEAM_EVENTS: &[ServiceEvent] = &[ServiceEvent {
 /// The names of [`STEAM_EVENTS`], in the same order.
 pub const STEAM_EVENT_TYPES: &[&str] = &["stats.saved"];
 
+/// A kind of local data: what the host reads for a widget from the
+/// service's client on the user's computer, and the call that gives it.
+#[derive(Debug, Eq, PartialEq)]
+pub struct LocalData {
+    pub kind: &'static str,
+    /// The service call a widget reads it by.
+    pub service: &'static str,
+    /// The feature a manifest that lists it needs.
+    pub feature: &'static str,
+}
+
+/// Steam's local data, version 1 of the list. `achievements`: the unlocked
+/// achievements of the account the widget names, for one game, as the Steam
+/// client of this computer saved them (`steam.achievements.local`): each
+/// one's API name and unlock time, nothing else of the files.
+pub const STEAM_LOCAL: &[LocalData] = &[LocalData {
+    kind: "achievements",
+    service: "steam.achievements.local",
+    feature: FEATURE_STEAM_LOCAL_ACHIEVEMENTS,
+}];
+
+/// The kinds of [`STEAM_LOCAL`], in the same order.
+pub const STEAM_LOCAL_KINDS: &[&str] = &["achievements"];
+
 /// The projection of an event's payload (`payload.event`) a widget
 /// receives: every field of the type, `null` where Twitch sent none or
 /// something else, nothing more. `None` when the payload is not an object
@@ -630,6 +665,8 @@ pub struct IntegratedService {
     pub events: &'static [ServiceEvent],
     /// The feature a manifest that lists `events` needs.
     pub events_feature: Option<&'static str>,
+    /// Local data a widget may read; empty for a service without.
+    pub local: &'static [LocalData],
     /// The pages a widget that names the service may open
     /// (`permissions.links`): exact origins and the path prefixes under
     /// them, none of which leads to a redirector to another site.
@@ -741,6 +778,7 @@ pub const STEAM: IntegratedService = IntegratedService {
     scopes: &[],
     events: STEAM_EVENTS,
     events_feature: Some(FEATURE_STEAM_EVENTS),
+    local: STEAM_LOCAL,
     // The player's own pages (`/my/` is the signed-in player: privacy
     // settings, badges, inventory), profiles, game hubs and stats, and the
     // store's game pages; never `/linkfilter/`, Steam's redirector to any
@@ -864,6 +902,7 @@ pub const TWITCH: IntegratedService = IntegratedService {
     ],
     events: TWITCH_EVENTS,
     events_feature: Some(FEATURE_TWITCH_EVENTS),
+    local: &[],
     // The player's settings and their creator dashboard (goals, stream
     // manager).
     links: &[
@@ -964,6 +1003,11 @@ impl IntegratedService {
     /// The live event type `kind` a widget may receive.
     pub fn event(&self, kind: &str) -> Option<&'static ServiceEvent> {
         self.events.iter().find(|event| event.kind == kind)
+    }
+
+    /// The kind of local data `kind` a widget may read.
+    pub fn local(&self, kind: &str) -> Option<&'static LocalData> {
+        self.local.iter().find(|local| local.kind == kind)
     }
 
     /// Origins of the host's OAuth endpoints.

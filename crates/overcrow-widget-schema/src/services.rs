@@ -573,6 +573,39 @@ pub const SERVICES: &[Service] = &[
         returns: Shape::Named("SteamEvents"),
         status: Status::Fixed,
     },
+    Service {
+        name: "steam.achievements.local",
+        requires: Requirement::Service("steam"),
+        kind: ServiceKind::Call,
+        gesture: false,
+        confirm: false,
+        params: &[
+            Field::required(
+                "steamid",
+                ValueType::Text(&MAX_STEAMID_BYTES),
+                "The SteamID64 of the account the widget follows: 17 digits, an individual account. Another value fails with `invalid_request`.",
+            ),
+            Field::required(
+                "appid",
+                ValueType::Integer {
+                    min: 1,
+                    max: 4_294_967_295,
+                },
+                "The game's Steam app ID.",
+            ),
+            Field::optional(
+                "offset",
+                ValueType::Integer {
+                    min: 0,
+                    max: 1_000_000,
+                },
+                "How many achievements of the order to skip, for the next page; default 0.",
+            ),
+        ],
+        result: "`{ appid, total, achievements }`: the achievements of that game the Steam client of this computer saved as unlocked for that account, read-only from its own stats files, even before Steam publishes them online and whatever the game details' privacy. `total` counts them all; `achievements` gives at most `MAX_LOCAL_ACHIEVEMENTS` from `offset`, newest first, each `{ name, unlockedAt }`: the API name, as `GetSchemaForGame` and `GetPlayerAchievements` give it, and the unlock time in Unix milliseconds, `null` when Steam saved none. Nothing else of the files. An empty list: no achievement unlocked yet. Needs the declaration's `local: [\"achievements\"]` (`permission_denied` without), not a connected key. `unavailable` when the computer has no Steam client, no stats of that account and game, or files the host cannot read or does not know: keep reading Steam's Web API. One call per widget at a time: another fails with `busy`",
+        returns: Shape::Named("SteamLocalAchievements"),
+        status: Status::Fixed,
+    },
     gesture(call(
         "account.connect",
         Requirement::Account,

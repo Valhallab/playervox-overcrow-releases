@@ -18,13 +18,13 @@ use std::collections::BTreeSet;
 use serde_json::{Map, Value};
 
 use crate::identifiers::{reads_as_any, reads_as_reserved_name};
-use crate::integrated::{IntegratedService, READER_GUARDS, ServiceEvent, service_named};
+use crate::integrated::{IntegratedService, LocalData, READER_GUARDS, ServiceEvent, service_named};
 use crate::json::{has_exact_fields, integer_in};
 use crate::limits::{
     MAX_ACCOUNT_ID_BYTES, MAX_ACCOUNT_KEY_BYTES, MAX_ACCOUNT_NAME_CHARS, MAX_ACCOUNT_ORIGINS,
     MAX_ACCOUNT_URL_BYTES, MAX_ACCOUNTS, MAX_AUTH_SCHEME_BYTES, MAX_HEADER_NAME_BYTES,
-    MAX_OAUTH_CLIENT_ID_BYTES, MAX_OAUTH_SCOPE_BYTES, MAX_OAUTH_SCOPES, MAX_SERVICE_EVENTS,
-    MIN_ACCOUNT_KEY_BYTES,
+    MAX_LOCAL_DATA, MAX_OAUTH_CLIENT_ID_BYTES, MAX_OAUTH_SCOPE_BYTES, MAX_OAUTH_SCOPES,
+    MAX_SERVICE_EVENTS, MIN_ACCOUNT_KEY_BYTES,
 };
 use crate::manifest::{ManifestError, canonical_https_origin, valid_literal_segment};
 use crate::model::{Field, ValueType};
@@ -138,7 +138,7 @@ pub const SERVICE_ACCOUNT_FIELDS: &[Field] = &[
     Field::required(
         "service",
         ValueType::Keyword(&["steam", "twitch"]),
-        "An integrated service of the table: PlayerVox defines its origins, how the secret is sent, its key page or OAuth client and the paths no widget reaches; the user connects it once and every widget that names it shares the connection. The account's `id` is the service's: the permission key is `account:<service>` and the routes name it in `account`. Only `scopes`, `required` and `events` stand beside it.",
+        "An integrated service of the table: PlayerVox defines its origins, how the secret is sent, its key page or OAuth client and the paths no widget reaches; the user connects it once and every widget that names it shares the connection. The account's `id` is the service's: the permission key is `account:<service>` and the routes name it in `account`. Only `scopes`, `required`, `events` and `local` stand beside it.",
     ),
     Field::optional(
         "scopes",
@@ -154,6 +154,11 @@ pub const SERVICE_ACCOUNT_FIELDS: &[Field] = &[
         "events",
         ValueType::ListOf("event type", &MAX_SERVICE_EVENTS),
         "A service with live events only (Twitch, Steam): distinct types of the service's table, each read by a scope among `scopes` where it has one. Twitch's come from the user's own channel by `twitch.events.subscribe`; Steam's from the Steam client of the user's computer, for the account the widget names, by `steam.events.subscribe`. Not part of the permission's detail: an event tells what the service's routes already read. Needs the feature `twitch-events` or `steam-events`.",
+    ),
+    Field::optional(
+        "local",
+        ValueType::ListOf("local data", &MAX_LOCAL_DATA),
+        "A service with local data only (Steam): distinct kinds of the service's table, which the host reads for the widget from the service's client on the user's computer, read-only. Steam's `achievements`: the unlocked achievements of the account the widget names, by `steam.achievements.local`. Not part of the permission's detail: it is the player's own data, shown on their screen, and a widget with the account reaches no one but the service. Needs the feature of each kind (`steam-local-achievements`).",
     ),
 ];
 
@@ -448,6 +453,9 @@ pub struct Account {
     /// The service's live events the widget receives, in the declared
     /// order; empty for a declared account.
     pub events: Vec<&'static ServiceEvent>,
+    /// The service's local data the widget reads, in the declared order;
+    /// empty for a declared account.
+    pub local: Vec<&'static LocalData>,
 }
 
 impl Account {
@@ -660,6 +668,7 @@ fn validate_account(value: &Value) -> Result<Account, ManifestError> {
         image_origins: Vec::new(),
         service: None,
         events: Vec::new(),
+        local: Vec::new(),
     })
 }
 
@@ -728,11 +737,32 @@ fn validate_service_account(
             events.push(event);
         }
     }
+    let mut local: Vec<&'static LocalData> = Vec::new();
+    if let Some(listed) = object.get("local") {
+        let listed = listed.as_array().ok_or(invalid)?;
+        // As for `events`: an empty list would need a feature for nothing.
+        if listed.is_empty() || listed.len() as u64 > MAX_LOCAL_DATA.value {
+            return Err(invalid);
+        }
+        for kind in listed {
+            let data = kind
+                .as_str()
+                .and_then(|kind| service.local(kind))
+                .ok_or(invalid)?;
+            if local.iter().any(|known| known.kind == data.kind) {
+                return Err(invalid);
+            }
+            local.push(data);
+        }
+    }
     // The permission's detail: the declaration without `events`, which
-    // never widens what the scopes open.
+    // never widens what the scopes open, nor `local`, the player's own
+    // data shown on their screen, which the account lets reach no one but
+    // the service.
     let mut canonical = value.clone();
     if let Some(object) = canonical.as_object_mut() {
         object.remove("events");
+        object.remove("local");
     }
     let origins: Vec<String> = service
         .secret_origins
@@ -777,6 +807,7 @@ fn validate_service_account(
         canonical: canonical.to_string(),
         service: Some(service),
         events,
+        local,
     })
 }
 

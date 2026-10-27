@@ -83,7 +83,8 @@ pub const INITIAL_CATEGORIES: &[(&str, &str, &str)] = &[
 
 pub use crate::accounts::{FEATURE_ACCOUNT_KEY, FEATURE_ACCOUNT_OAUTH};
 pub use crate::integrated::{
-    FEATURE_SERVICE_STEAM, FEATURE_SERVICE_TWITCH, FEATURE_STEAM_EVENTS, FEATURE_TWITCH_EVENTS,
+    FEATURE_SERVICE_STEAM, FEATURE_SERVICE_TWITCH, FEATURE_STEAM_EVENTS,
+    FEATURE_STEAM_LOCAL_ACHIEVEMENTS, FEATURE_TWITCH_EVENTS,
 };
 
 /// A network rule with a `file` parameter (`<name>.<extension>`):
@@ -113,6 +114,7 @@ pub const KNOWN_FEATURES: &[&str] = &[
     FEATURE_OPEN_LINKS,
     FEATURE_STEAM_EVENTS,
     FEATURE_ACTIVE_GAME,
+    FEATURE_STEAM_LOCAL_ACHIEVEMENTS,
 ];
 
 pub const ENVELOPE_FIELDS: &[Field] = &[
@@ -1913,7 +1915,8 @@ mod tests {
                 "twitch-events",
                 "open-links",
                 "steam-events",
-                "active-game"
+                "active-game",
+                "steam-local-achievements"
             ]
         );
         let mut payload = valid();
