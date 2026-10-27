@@ -50,8 +50,8 @@ key-value store for this widget only), `clipboardWrite` (writing text,
 during a user action) and `gameEvents` (named game events).
 
 Capabilities give access to data and actions of PlayerVox OverCrow and of
-the user's accounts. A **sensitive** capability reveals personal data or the
-game being played: a widget that declares one cannot also declare `network`,
+the user's accounts. A **sensitive** capability reveals personal data: a
+widget that declares one cannot also declare `network`,
 `links` or `clipboardWrite`, and its storage lasts only as long as its process, so
 the data cannot leave the machine through the widget.
 

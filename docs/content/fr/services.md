@@ -530,11 +530,12 @@ widget le déclare dans `permissions.accounts` ([comptes tiers](accounts.md)).
 | `media.read` | **oui** | — | Métadonnées du morceau en cours de lecture, et l’image de sa pochette. |
 | `media.control` | **oui** | — | Précédent, lecture/pause et suivant. |
 | `session.read` | non | — | Durée de la session du jeu actif, sans l’identité du jeu. |
+| `game.read` | non | — | Nom et app ID Steam du jeu actif. |
 | `stopwatch.read` | non | — | État du chronomètre manuel de l’hôte, unique, et de ses raccourcis. |
 | `stopwatch.control` | non | — | Démarrer, mettre en pause et réinitialiser le chronomètre manuel de l’hôte, unique. |
 | `notes.read` | **oui** | — | Les notes et listes de tâches de l’utilisateur : un seul document, commun à tous les jeux. |
 | `notes.write` | **oui** | — | Créer, sélectionner, enregistrer, cocher et supprimer des notes ; le texte ne passe que par un formulaire lié à un intent d’écriture. |
-| `playervox.score.read` | **oui** | — | Note publique PlayerVox du jeu actif ; sensible parce qu’elle révèle le jeu. |
+| `playervox.score.read` | non | — | Note publique PlayerVox du jeu actif. |
 | `playervox.rating.read` | **oui** | PlayerVox | La note que l’utilisateur a lui-même donnée au jeu actif. |
 | `playervox.rating.write` | **oui** | PlayerVox | Publier une note et un avis, par un formulaire lié à un intent d’écriture. |
 | `playervox.reviews.read` | **oui** | PlayerVox | Avis des joueurs sur le jeu actif, par pages, limités sur demande aux joueurs suivis. |
@@ -554,6 +555,7 @@ widget le déclare dans `permissions.accounts` ([comptes tiers](accounts.md)).
 | `media.control` | **oui** | `media.playPause` | Seulement pendant une action de l’utilisateur |
 | `media.control` | **oui** | `media.next` | Seulement pendant une action de l’utilisateur |
 | `session.read` | non | `session.subscribe` | À tout moment |
+| `game.read` | non | `game.subscribe` | À tout moment |
 | `stopwatch.read` | non | `stopwatch.subscribe` | À tout moment |
 | `stopwatch.control` | non | `stopwatch.toggle` | Seulement pendant une action de l’utilisateur |
 | `stopwatch.control` | non | `stopwatch.reset` | Seulement pendant une action de l’utilisateur |
@@ -563,7 +565,7 @@ widget le déclare dans `permissions.accounts` ([comptes tiers](accounts.md)).
 | `notes.write` | **oui** | `notes.setItem` | Seulement pendant une action de l’utilisateur |
 | `notes.write` | **oui** | `notes.delete` | Seulement pendant une action de l’utilisateur |
 | `notes.write` | **oui** | [formulaire `notes.save`](forms.md#notessave) | Quand l’utilisateur valide le formulaire |
-| `playervox.score.read` | **oui** | `playervox.score.subscribe` | À tout moment |
+| `playervox.score.read` | non | `playervox.score.subscribe` | À tout moment |
 | `playervox.rating.read` | **oui** | `playervox.rating.subscribe` | À tout moment |
 | `playervox.rating.write` | **oui** | [formulaire `playervox.rating.publish`](forms.md#playervoxratingpublish) | Quand l’utilisateur valide le formulaire |
 | `playervox.reviews.read` | **oui** | `playervox.reviews.subscribe` | À tout moment |
@@ -586,8 +588,8 @@ l’utilisateur saisit lui-même : voir
 
 ### Capabilities sensibles
 
-Une capability **sensible** révèle des données personnelles ou le jeu en
-cours. Un widget qui en déclare une :
+Une capability **sensible** révèle des données personnelles. Un widget qui
+en déclare une :
 
 - ne peut pas déclarer aussi `network` ni `clipboardWrite` : le manifeste
   est refusé ;
@@ -597,6 +599,12 @@ cours. Un widget qui en déclare une :
 Ce qu’un tel widget lit ne peut donc pas quitter la machine par son
 intermédiaire. Si votre widget a besoin à la fois d’une API HTTP et d’une
 capability sensible, faites deux widgets.
+
+Le jeu en cours n’est pas sensible : `game.read` donne son nom et son app ID
+Steam à tout widget qui le déclare, réseau compris, et la note PlayerVox du
+jeu n’est pas sensible non plus. Un lecteur qui les tient encore pour
+sensibles ignore un tel widget : il demande la fonction de catalogue
+`active-game`.
 
 Un widget doté d’un compte est confiné lui aussi : il ne déclare aucune
 capability sensible ni `clipboardWrite`, et chaque règle réseau vise l’une

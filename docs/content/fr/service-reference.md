@@ -122,6 +122,15 @@ mise à jour.
 - **Chaque mise à jour** : `{ elapsedMs, at }` compté depuis le démarrage du processus du jeu, ou `null` sans jeu actif
 - **Forme** : [`Session`](result-shapes.md#session) ou `null`
 
+### `game.subscribe`
+
+- **Nature** : abonnement
+- **Exige** : capability `game.read`
+- **Quand l’appeler** : À tout moment
+- **Paramètres** : aucune
+- **Chaque mise à jour** : `{ steamAppId, name }` du jeu actif, ou `null` sans jeu actif : `steamAppId` est l’app ID Steam du jeu, `null` pour un jeu hors du magasin Steam (un jeu ajouté à la main, un raccourci non Steam), et `name` le nom du jeu dans la liste de l’utilisateur, `null` quand l’hôte n’en a pas
+- **Forme** : [`Game`](result-shapes.md#game) ou `null`
+
 ### `telemetry.subscribe`
 
 - **Nature** : abonnement

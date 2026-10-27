@@ -511,11 +511,12 @@ is not a capability: a widget declares it in `permissions.accounts`
 | `media.read` | **yes** | — | Now-playing metadata and the image of its cover art. |
 | `media.control` | **yes** | — | Previous, play/pause and next. |
 | `session.read` | no | — | Duration of the active game session, without the game identity. |
+| `game.read` | no | — | Name and Steam app ID of the active game. |
 | `stopwatch.read` | no | — | State of the host's single manual stopwatch and its shortcuts. |
 | `stopwatch.control` | no | — | Start, pause and reset the host's single manual stopwatch. |
 | `notes.read` | **yes** | — | The user's notes and checklists: one document shared by every game. |
 | `notes.write` | **yes** | — | Create, select, save, check and delete notes; text only through a form bound to a write intent. |
-| `playervox.score.read` | **yes** | — | Public PlayerVox score of the active game; sensitive because it reveals the game. |
+| `playervox.score.read` | no | — | Public PlayerVox score of the active game. |
 | `playervox.rating.read` | **yes** | PlayerVox | The user's own rating of the active game. |
 | `playervox.rating.write` | **yes** | PlayerVox | Publish a rating and review through a form bound to a write intent. |
 | `playervox.reviews.read` | **yes** | PlayerVox | Paged player reviews of the active game, optionally from followed players only. |
@@ -535,6 +536,7 @@ is not a capability: a widget declares it in `permissions.accounts`
 | `media.control` | **yes** | `media.playPause` | Only during a user action |
 | `media.control` | **yes** | `media.next` | Only during a user action |
 | `session.read` | no | `session.subscribe` | At any time |
+| `game.read` | no | `game.subscribe` | At any time |
 | `stopwatch.read` | no | `stopwatch.subscribe` | At any time |
 | `stopwatch.control` | no | `stopwatch.toggle` | Only during a user action |
 | `stopwatch.control` | no | `stopwatch.reset` | Only during a user action |
@@ -544,7 +546,7 @@ is not a capability: a widget declares it in `permissions.accounts`
 | `notes.write` | **yes** | `notes.setItem` | Only during a user action |
 | `notes.write` | **yes** | `notes.delete` | Only during a user action |
 | `notes.write` | **yes** | [form `notes.save`](forms.md#notessave) | When the user submits the form |
-| `playervox.score.read` | **yes** | `playervox.score.subscribe` | At any time |
+| `playervox.score.read` | no | `playervox.score.subscribe` | At any time |
 | `playervox.rating.read` | **yes** | `playervox.rating.subscribe` | At any time |
 | `playervox.rating.write` | **yes** | [form `playervox.rating.publish`](forms.md#playervoxratingpublish) | When the user submits the form |
 | `playervox.reviews.read` | **yes** | `playervox.reviews.subscribe` | At any time |
@@ -566,8 +568,8 @@ A row whose service is a form is a write that the user types: see
 
 ### Sensitive capabilities
 
-A **sensitive** capability reveals personal data or the game being played.
-A widget that declares one:
+A **sensitive** capability reveals personal data. A widget that declares
+one:
 
 - cannot also declare `network` or `clipboardWrite`: the manifest is
   refused;
@@ -576,6 +578,11 @@ A widget that declares one:
 
 So what such a widget reads cannot leave the machine through it. If your
 widget needs both an HTTP API and a sensitive capability, make two widgets.
+
+The active game is not sensitive: `game.read` gives its name and Steam app
+ID to any widget that declares it, network included, and the PlayerVox
+score of the game is not sensitive either. A reader that still holds them
+sensitive skips such a widget: it needs the catalog feature `active-game`.
 
 A widget with an account is confined too: it declares no sensitive
 capability and no `clipboardWrite`, and every network rule targets one of

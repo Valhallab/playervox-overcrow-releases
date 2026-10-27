@@ -420,3 +420,27 @@ fn steam_events_are_published_by_the_scenario() {
     .expect_err("a Twitch type");
     assert_eq!(error.path, "steps[0].publish.value");
 }
+
+#[test]
+fn the_active_game_is_published_by_the_scenario() {
+    let read = |initial: Value, value: Value| {
+        parse(
+            &serde_json::to_vec(&json!({
+                "scenarioVersion": 1,
+                "name": "game",
+                "fixtures": {"subscriptions": {"game.subscribe": initial}},
+                "steps": [{"publish": {"service": "game.subscribe", "value": value}}],
+            }))
+            .expect("bytes"),
+        )
+    };
+    let frogs = json!({"steamAppId": 1_806_840, "name": "100 Hidden Frogs"});
+    read(Value::Null, frogs.clone()).expect("a Steam game");
+    read(frogs, json!({"steamAppId": null, "name": "Manual game"})).expect("a game outside Steam");
+    read(json!({"steamAppId": null, "name": null}), Value::Null).expect("no game");
+    let error = read(Value::Null, json!({"steamAppId": "1806840", "name": null}))
+        .expect_err("a text app ID");
+    assert_eq!(error.path, "steps[0].publish.value");
+    let error = read(json!({"steamAppId": 1}), Value::Null).expect_err("no name");
+    assert!(error.path.starts_with("fixtures"), "{}", error.path);
+}

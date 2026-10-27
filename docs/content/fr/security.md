@@ -58,7 +58,7 @@ nommés).
 
 Les capabilities donnent accès à des données et à des actions de
 PlayerVox OverCrow et des comptes de l’utilisateur. Une capability
-**sensible** révèle des données personnelles ou le jeu en cours : un widget
+**sensible** révèle des données personnelles : un widget
 qui en déclare une ne peut pas déclarer aussi `network`, `links` ni
 `clipboardWrite`,
 et son stockage ne dure que le temps de son processus, pour que ces données

@@ -120,6 +120,15 @@ update.
 - **Each update**: `{ elapsedMs, at }` counted from the start of the game process, or `null` without an active game
 - **Shape**: [`Session`](result-shapes.md#session) or `null`
 
+### `game.subscribe`
+
+- **Kind**: subscription
+- **Requires**: capability `game.read`
+- **When it can be called**: At any time
+- **Parameters**: none
+- **Each update**: `{ steamAppId, name }` of the active game, or `null` without one: `steamAppId` is the game's Steam app ID, `null` for a game outside the Steam store (a game added by hand, a non-Steam shortcut), and `name` the game's name in the user's game list, `null` when the host has none
+- **Shape**: [`Game`](result-shapes.md#game) or `null`
+
 ### `telemetry.subscribe`
 
 - **Kind**: subscription

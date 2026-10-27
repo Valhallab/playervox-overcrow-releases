@@ -110,6 +110,7 @@ permission or capability, its parameters and the user action at each call.
 | `links` | namespace | `open({ url })`, during a user action: a page of a declared site in the user's browser. Permission `links`. |
 | `gameEvents` | namespace | `subscribe(listener)`. Permission `gameEvents`. |
 | `session` | namespace | `subscribe(listener)`. Capability `session.read`. |
+| `game` | namespace | `subscribe(listener)`. Capability `game.read`. |
 | `telemetry` | namespace | `subscribe(listener)`. Capability `telemetry.read`. |
 | `fps` | namespace | `subscribe(listener)`. Capability `fps.read`. |
 | `media` | namespace | `subscribe({ cover? }, listener)`; `previous`, `playPause`, `next({ player? })` during a user action. |
@@ -171,7 +172,7 @@ with `invalid_request`. A response without a body gives `null`, `""` or an empty
 `ArrayBuffer`.
 
 The types of the other namespaces are generated from the schema:
-`AccountServices`, `ClipboardServices`, `FpsServices`, `GameEventsServices`,
+`AccountServices`, `ClipboardServices`, `FpsServices`, `GameServices`, `GameEventsServices`,
 `JournalServices`, `LinksServices`, `MediaServices`, `NotesServices`, `PlayervoxServices`,
 `SessionServices`, `SteamServices`, `StopwatchServices`, `StorageServices`,
 `TelemetryServices` and `TwitchServices`. Each service is described in the
@@ -261,7 +262,7 @@ what PlayerVox OverCrow accepts.
 | `ServiceName`, `CallServiceName`, `SubscribeServiceName`, `GestureServiceName` | The service names: all of them, those that answer once, the subscriptions, and those that need a user action. |
 | `ServiceParamsMap`, `ServiceResultMap` | The parameters and the result of each service. |
 | `ServiceErrorCode`, `ServiceErrorPayload` | The [error codes](services.md#errors), and the `{ code }` value that carries one. |
-| `Session`, `Telemetry`, `Fps`, `Stopwatch`, `Media`, `Notes`, `Note`, `NoteItem`, `CreatedNote`, `Score`, `Rating`, `RatingState`, `Review`, `ReviewsState`, `ReviewsPage`, `JournalState`, `JournalPage`, `JournalSession`, `TwitchChat`, `ChatMessage`, `ChatFragment`, `TwitchEvents`, `TwitchEvent`, `SteamEvents`, `SteamEvent`, `AccountStatus`, `GameEvent`, `HttpResponse`, `HttpHeaders` | The [result shapes](result-shapes.md). |
+| `Session`, `Game`, `Telemetry`, `Fps`, `Stopwatch`, `Media`, `Notes`, `Note`, `NoteItem`, `CreatedNote`, `Score`, `Rating`, `RatingState`, `Review`, `ReviewsState`, `ReviewsPage`, `JournalState`, `JournalPage`, `JournalSession`, `TwitchChat`, `ChatMessage`, `ChatFragment`, `TwitchEvents`, `TwitchEvent`, `SteamEvents`, `SteamEvent`, `AccountStatus`, `GameEvent`, `HttpResponse`, `HttpHeaders` | The [result shapes](result-shapes.md). |
 | `Permission`, `Capability`, `SensitiveCapability`, `CapabilityServices`, `PermissionServices` | The permissions and capabilities of the manifest, and the services each one allows. |
 | `AccountGrant` | The grant of a third-party account, `account:<id>`: `hasGrant` takes it, `host.grants` lists it. |
 | `Locale`, `Theme`, `Mode`, `Region`, `NumberFormat`, `DateOrder` | The values of `host`. |

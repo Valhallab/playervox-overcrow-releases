@@ -27,9 +27,17 @@ widget's sources and the embedded SDK.
   the catalog feature `steam-events`; the headless runtime this CLI pins
   must know `steam.events.subscribe` to run a widget that subscribes, and a
   scenario gives its updates as for `twitch.events.subscribe`.
+- The capability `game.read` gives a widget the active game through
+  `game.subscribe`. It is not sensitive, nor is `playervox.score.read` any
+  longer: `check` and `admit` accept either beside `network`, `links`,
+  `clipboardWrite` or an account. Such a manifest, and any with
+  `game.read`, needs the catalog feature `active-game`; the headless
+  runtime this CLI pins must know `game.subscribe` to run a widget that
+  subscribes, and a scenario gives its updates under `fixtures.subscriptions`
+  and `publish` steps.
 - It embeds `@overcrow/sdk` 1.3.0: `links.open`, the `headers` of
-  `http.fetch` answers, the service error `review_removed_by_moderation`
-  and `steam.events`.
+  `http.fetch` answers, the service error `review_removed_by_moderation`,
+  `steam.events` and `game`.
 
 ## 1.0.0-beta.8
 

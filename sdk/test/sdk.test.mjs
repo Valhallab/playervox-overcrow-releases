@@ -120,6 +120,20 @@ test("local Steam events subscribe for the account the widget names", () => {
   assert.deepEqual(updates[0], { ok: true, value, final: false });
 });
 
+test("the active game comes by subscription", () => {
+  const updates = [];
+  overcrow.game.subscribe((update) => updates.push(update));
+  const [, entry] = [...vm.subscriptions].at(-1);
+  assert.equal(entry.service, "game.subscribe");
+  const value = { steamAppId: 1806840, name: "100 Hidden Frogs" };
+  entry.update({ value, final: false });
+  entry.update({ value: null, final: false });
+  assert.deepEqual(updates, [
+    { ok: true, value, final: false },
+    { ok: true, value: null, final: false },
+  ]);
+});
+
 test("account services name the declared account; the secret never shows", async () => {
   vm.host = { ...HOST, grants: ["account:steam"] };
   assert.ok(overcrow.hasGrant("account:steam"));

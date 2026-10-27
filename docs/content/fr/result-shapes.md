@@ -106,6 +106,15 @@ Durée de la session du jeu actif. `{ elapsedMs, at }`
 | `elapsedMs` | entier | Temps écoulé depuis le démarrage du processus du jeu. |
 | `at` | entier | Instant de l’horloge monotone de l’hôte, en ms, auquel `elapsedMs` a été mesuré. |
 
+### `Game`
+
+Le jeu actif. `{ steamAppId, name }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `steamAppId` | entier ou `null` | App ID Steam, de 1 à 2147483647, ou `null` hors du magasin Steam. |
+| `name` | texte ou `null` | Nom dans la liste de jeux de l’utilisateur, une ligne de 512 octets au plus, ou `null`. |
+
 ### `Telemetry`
 
 Ressources utilisées par le jeu actif. `{ cpu, ram, cpuTemperature, gpuTemperature, sources }`

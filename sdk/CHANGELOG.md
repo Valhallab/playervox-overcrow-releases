@@ -28,6 +28,12 @@ links for widgets:
   the player's computer saved that account's stats of a game, as at each
   achievement unlocked: `{ appid }` and the time. The `SteamEvent` and
   `SteamEvents` types.
+- `game.subscribe` (`game.read`): the active game, `{ steamAppId, name }`,
+  or `null` without one. `steamAppId` is `null` for a game outside the
+  Steam store. The game is not sensitive: a widget with the network or an
+  account may declare it. The `Game` type.
+- `playervox.score.read` is no longer sensitive, so it leaves the
+  `SensitiveCapability` type.
 
 ## 1.2.0
 

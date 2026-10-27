@@ -104,6 +104,15 @@ Duration of the active game session. `{ elapsedMs, at }`
 | `elapsedMs` | integer | Time since the game process started. |
 | `at` | integer | Host monotonic clock in ms at which `elapsedMs` was measured. |
 
+### `Game`
+
+The active game. `{ steamAppId, name }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `steamAppId` | integer or `null` | Steam app ID, 1–2147483647, or `null` outside the Steam store. |
+| `name` | text or `null` | Name in the user's game list, one line of at most 512 bytes, or `null`. |
+
 ### `Telemetry`
 
 Resource use of the active game. `{ cpu, ram, cpuTemperature, gpuTemperature, sources }`
