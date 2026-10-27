@@ -123,6 +123,8 @@
   aspect-ratio: 2.14;
   flex-shrink: 0;
   object-fit: cover;
+  /* The image is the card's top edge: its corners are the card's. */
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 .head {
   align-items: center;
