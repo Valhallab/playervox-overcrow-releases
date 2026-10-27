@@ -47,7 +47,7 @@ test("the widget listens for the followed account's saves", () => {
   assert.ok(subscription, "subscribed");
   assert.deepEqual(subscription.params, { steamid: ID });
   const manifest = JSON.parse(readFileSync(new URL("../manifest.json", import.meta.url), "utf8"));
-  assert.deepEqual(manifest.permissions.accounts, [{ service: "steam", events: ["stats.saved"] }]);
+  assert.deepEqual(manifest.permissions.accounts, [{ service: "steam", events: ["stats.saved"], local: ["achievements"] }]);
   assert.equal(state.phase, "game");
   assert.deepEqual([state.game.unlocked, player(), summary()], [1, 1, 1]);
 });

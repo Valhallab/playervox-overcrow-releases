@@ -224,7 +224,7 @@ test("the manifest reads only, never a trade route", () => {
     }
     assert.ok(!/IEconService|Trade|Market/i.test(rule.path), rule.path);
   }
-  assert.deepEqual(manifest.permissions.accounts, [{ service: "steam", events: ["stats.saved"] }]);
+  assert.deepEqual(manifest.permissions.accounts, [{ service: "steam", events: ["stats.saved"], local: ["achievements"] }]);
 });
 
 test("by name: no accents or case, œ as oe", () => {

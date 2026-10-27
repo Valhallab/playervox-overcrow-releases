@@ -63,7 +63,7 @@ keep the previous version of the widget).
 
 | Permission | Why |
 | --- | --- |
-| `account:steam` | The integrated Steam service. Read only: the widget never calls a trade route (`IEconService`), and PlayerVox OverCrow refuses any route outside the read interfaces of the player and the games |
+| `account:steam` | The integrated Steam service. Read only: the widget never calls a trade route (`IEconService`), and PlayerVox OverCrow refuses any route outside the read interfaces of the player and the games. With `events` (`stats.saved`) and `local` (`achievements`): when Steam on this computer saves a game's achievements, and which they are |
 | `game.read` | The game PlayerVox OverCrow says you are playing (`game.subscribe`): its Steam app ID and name, even when your Steam status is Invisible or offline. Not sensitive: the overlay is a game aid |
 | `network` | Six `GET` routes of `https://api.steampowered.com` (below); the store image of a game on two Steam image hosts; the icons of achievements and games on `https://shared.akamai.steamstatic.com/community_assets/images/apps/`, a `file` parameter (`<name>.jpg`, catalog feature `network-file-param`) |
 | `storage` | The profile link, the tracked achievements (three per game, 20 games), the last values shown and the achievement lists of the last three games |
@@ -73,7 +73,7 @@ keep the previous version of the widget).
 | `ISteamUser/ResolveVanityURL/v1` | When you enter a profile link with a custom name |
 | `ISteamUser/GetPlayerSummaries/v2` | Every minute while shown: the game running and the profile's visibility |
 | `IPlayerService/GetRecentlyPlayedGames/v1` | When the game changes, then every 10 minutes out of game |
-| `ISteamUserStats/GetPlayerAchievements/v1` | Every minute in game, at once when Steam on this computer saves the game's achievements or your game changes (never twice within 5 seconds), every 10 minutes out of game (up to 3 MiB). With `l`, once per game and language, only for a game whose list exceeds its route's bound: the names and descriptions instead |
+| `ISteamUserStats/GetPlayerAchievements/v1` | Every minute in game, at once when your game changes or, when this computer has none of the game's achievements, when Steam on it saves them (never twice within 5 seconds), every 10 minutes out of game (up to 3 MiB). With `l`, once per game and language, only for a game whose list exceeds its route's bound: the names and descriptions instead |
 | `ISteamUserStats/GetSchemaForGame/v2` | Once per game and language, then kept (up to 3 MiB: Steam's limit of 5,000 achievements per game fits); a list beyond, tried again a day later |
 | `ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2` | Once per game and day, without the key (up to 2 MiB) |
 
@@ -115,18 +115,29 @@ your computer and sends it only to `api.steampowered.com`. To revoke it:
   `GetPlayerAchievements`, or a game the presence named, kept in storage):
   then the game itself is not readable. The proof falls with a refusal of
   a game of the recent list, or another profile.
-- **Local signal.** From PlayerVox OverCrow 0.9.0-beta.1 (`steam.events`,
-  catalog feature `steam-events`; earlier versions keep 1.0.2), the host
-  says when the Steam client of this computer saves a game's stats of the
-  followed account (`stats.saved`: the game and the time, nothing else).
-  For the game shown, its achievements are read at once, never twice within
-  5 seconds; if Steam's answer shows nothing new yet (its Web API lags
-  behind its client by a few seconds), they are read again 10 and 30
-  seconds after the save, then at the minute. A save of another game reads
-  the summary at once (Steam switched games), as does a missed save (a gap
-  in `seq`). Hidden, nothing is read; shown again, what a save asked is read
-  at once. Without the signal (Steam on another computer, an older
-  application), the minute as before.
+- **Local achievements.** From PlayerVox OverCrow 0.9.0-beta.1
+  (`steam.events` and `steam.achievements.local`, catalog features
+  `steam-events` and `steam-local-achievements`; earlier versions keep
+  1.0.2), the host says when the Steam client of this computer saves a
+  game's stats of the followed account (`stats.saved`), and gives the
+  achievements it saved as unlocked: their API names and times, nothing
+  else. Steam's Web API publishes them seconds to minutes later. For the
+  game shown, each save reads them on this computer at once: a new one
+  shows marked new, and Steam's Web API, still read every minute for the
+  names, icons and rarity, confirms it later without marking it again. The
+  first read of a game takes every page (4,096 a page, a large game's one
+  after the other); a save, the first page, where the newest are. With
+  game details that are not public, the game PlayerVox OverCrow says is
+  running shows its achievements from this computer all the same, named by
+  the game's list (Steam gives it whatever the setting): the player's own,
+  on their own screen. In Steam's offline mode, or without the internet,
+  a new achievement shows as well (with the age of the last read). A save
+  of another game reads the summary at once (Steam switched games), as
+  does a missed save (a gap in `seq`). Hidden, nothing is read; shown
+  again, at once. Without achievements on this computer (Steam on another
+  one, an older application), a save reads Steam's Web API at once, never
+  twice within 5 seconds, then 10 and 30 seconds after the save if it
+  shows nothing new yet; otherwise the minute, as before.
 - **Failures.** A network failure or a timeout retries every minute; a 5xx
   or a 429 waits 1, 2, 4, 8 then 10 minutes (`http.fetch` gives no
   `Retry-After`); a refusal of a game's achievements (403, 400 with an
@@ -181,7 +192,8 @@ your computer and sends it only to `api.steampowered.com`. To revoke it:
 
 - Game details that are not Public (Friends Only included) hide the game
   being played and its achievements, even from the player's own key: the
-  widget says so and where to set them Public.
+  widget says so and where to set them Public, unless this computer has
+  the achievements of the game PlayerVox OverCrow says is running.
 - Whether a game is borrowed through Steam Families is not shown (that
   needs a route the widget does not use); a borrowed game Steam reads
   shows as any game.
@@ -191,8 +203,8 @@ your computer and sends it only to `api.steampowered.com`. To revoke it:
   hidden.
 - Store images are sometimes missing (recent games name them with a hash
   no route gives): the game's icon replaces them.
-- Without the local signal (Steam on another computer), updated every
-  minute, not live.
+- Without achievements on this computer (Steam on another one), updated
+  every minute, as fast as Steam's Web API publishes them.
 
 ## Tests
 

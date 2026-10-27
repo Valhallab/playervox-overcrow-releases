@@ -26,7 +26,8 @@
     "accounts": [
       {
         "service": "steam",
-        "events": ["stats.saved"]
+        "events": ["stats.saved"],
+        "local": ["achievements"]
       }
     ],
     "capabilities": ["game.read"],

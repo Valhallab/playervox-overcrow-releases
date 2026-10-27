@@ -39,6 +39,15 @@ export function fakeSteam() {
     requests: [],
     storage: new Map(),
     refusedWrites: 0,
+    /**
+     * What the Steam client of this computer saved (`steam.achievements.local`):
+     * per appid, the unlocked API names with their time in seconds (0: none),
+     * or an error code. `null`: nothing on this computer (`unavailable`), as
+     * a host that does not know the call.
+     */
+    local: null,
+    /** Every `steam.achievements.local` call's parameters. */
+    localCalls: [],
     handle(url) {
       steam.requests.push(url);
       const parsed = new URL(url);
@@ -115,6 +124,15 @@ function json(status, body) {
   return { value: { status, contentType: "application/json", body: JSON.stringify(body) } };
 }
 
+/** The host's answer: newest first, 4,096 a page from `offset`. */
+export const LOCAL_PAGE = 4096;
+function localPage(saved, { appid, offset = 0 }) {
+  const all = Object.entries(saved)
+    .map(([name, time]) => ({ name, unlockedAt: time === 0 ? null : time * 1000 }))
+    .sort((a, b) => (b.unlockedAt ?? -1) - (a.unlockedAt ?? -1) || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+  return { appid, total: all.length, achievements: all.slice(offset, offset + LOCAL_PAGE) };
+}
+
 const flush = () => new Promise((resolve) => setImmediate(resolve));
 
 /** Answers every waiting call as the host and Steam would, until none is left. */
@@ -145,6 +163,12 @@ export async function settle(vm, steam, { delay = 0 } = {}) {
       } else if (call.service === "storage.remove") {
         steam.storage.delete(call.params.key);
         call.resolve(null);
+      } else if (call.service === "steam.achievements.local") {
+        steam.localCalls.push(call.params);
+        const saved = steam.local?.[call.params.appid];
+        if (saved === undefined || saved === null) call.reject("unavailable");
+        else if (typeof saved === "string") call.reject(saved);
+        else call.resolve(localPage(saved, call.params));
       } else if (call.service === "http.fetch") {
         // A real network takes time: the next request starts later.
         if (delay > 0) vm.advance(delay);

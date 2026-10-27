@@ -6,9 +6,11 @@
 // Rhythm: one timer a minute, never two requests of one route less than a
 // minute apart, nothing while hidden. When the Steam client of this computer
 // saves the stats of a game (an achievement unlocked), PlayerVox OverCrow
-// says so (`steam.events`): that game's achievements are read at once, never
-// twice within 5 seconds. Values never disappear: a failed read keeps what
-// was shown and says how old it is.
+// says so (`steam.events`): that game's achievements are read at once on
+// this computer (`steam.achievements.local`), where they are the moment they
+// unlock, whatever the game details' privacy; without them, from Steam,
+// never twice within 5 seconds. Values never disappear: a failed read keeps
+// what was shown and says how old it is.
 import {
   account,
   formatNumber,
@@ -24,6 +26,7 @@ import {
   t,
   timers,
   type JsonValue,
+  type SteamLocalAchievements,
   type Subscription,
   type Timer,
 } from "@overcrow/sdk";
@@ -699,6 +702,115 @@ const schemaKey = (appid: number, l: string): string => `${appid}:${l}`;
  */
 const active = { appid: 0, name: "", last: 0, lastName: "" };
 
+/**
+ * The achievements the Steam client of this computer saved for a game of
+ * the followed account (`steam.achievements.local`), by API name, in Unix
+ * seconds (0 without a time): there the moment they unlock, while Steam's
+ * Web API publishes them seconds to minutes later, and whatever the game
+ * details' privacy. `null` when this computer has none (Steam on another
+ * computer, a game never played here).
+ */
+const local = {
+  appid: 0,
+  steamid: "",
+  unlocked: null as Map<string, number> | null,
+  readAt: 0,
+  busy: false,
+  /** Another read was asked meanwhile, and whether of every page. */
+  again: false,
+  againFull: false,
+  /** Refused or unknown (an older PlayerVox OverCrow): never asked again. */
+  off: false,
+  /**
+   * The game and account this computer had nothing of: asked again only at
+   * a save of that game (Steam writes the file then) or for another game.
+   */
+  missing: { appid: 0, steamid: "" },
+};
+
+/** This computer's achievements of `appid`, read for the followed account. */
+function localOf(appid: number): Map<string, number> | null {
+  return local.appid === appid && local.steamid === model.steamid ? local.unlocked : null;
+}
+
+/** Unlocked by Steam's answer or on this computer; Steam's time first. */
+function merged(api: Map<string, number> | null, here: Map<string, number> | null): Map<string, number> | null {
+  if (here === null) return api;
+  const all = new Map(here);
+  for (const [id, at] of api ?? []) all.set(id, at);
+  return all;
+}
+
+/**
+ * Reads this computer's achievements of `appid`: every page the first time
+ * (thousands of achievements, a page after another), the first page after
+ * a save (the newest come first). One read at a time; hidden, none.
+ * `inRead`: asked by a read of Steam, which shows the result itself.
+ */
+async function readLocal(appid: number, full: boolean, inRead = false): Promise<void> {
+  if (local.off || appid === 0 || model.steamid === "" || !host.visible) return;
+  if (inRead && local.missing.appid === appid && local.missing.steamid === model.steamid) return;
+  if (local.busy) {
+    local.again = true;
+    local.againFull ||= full;
+    return;
+  }
+  local.busy = true;
+  const steamid = model.steamid;
+  const known = localOf(appid);
+  try {
+    const found = new Map<string, number>();
+    const add = (page: SteamLocalAchievements): void => {
+      for (const item of page.achievements) found.set(item.name, item.unlockedAt === null ? 0 : Math.floor(item.unlockedAt / 1000));
+    };
+    const first = await steam.achievements.local({ steamid, appid });
+    add(first);
+    if (first.total > found.size) {
+      if (full || known === null) {
+        while (found.size < first.total) {
+          await pause();
+          const next = await steam.achievements.local({ steamid, appid, offset: found.size });
+          if (next.achievements.length === 0) break;
+          add(next);
+        }
+      } else {
+        for (const [id, at] of known) if (!found.has(id)) found.set(id, at);
+      }
+    }
+    // Another game or profile meanwhile: this answer is not its.
+    if (steamid !== model.steamid || appid !== model.appid) return;
+    const now = Date.now();
+    markNew(merged(model.unlocked, known), merged(model.unlocked, found) ?? found, now);
+    local.appid = appid;
+    local.steamid = steamid;
+    local.unlocked = found;
+    local.readAt = now;
+    local.missing = { appid: 0, steamid: "" };
+    if (state.phase === "game") render();
+    // Found here for the first time (Steam said the details hidden): read
+    // again, to show the game (never twice within 5 seconds).
+    else if (known === null && !inRead) {
+      events.summary = true;
+      events.player = true;
+      if (!armFloor()) void refresh();
+    }
+  } catch (error) {
+    const code = (error as { code?: string }).code ?? "";
+    if (code === "unsupported" || code === "permission_denied") local.off = true;
+    // Nothing on this computer: Steam's Web API alone, as before.
+    if (local.appid === appid) local.unlocked = null;
+    local.missing = { appid, steamid };
+  } finally {
+    local.busy = false;
+  }
+  if (local.again) {
+    const again = local.againFull;
+    local.again = false;
+    local.againFull = false;
+    void readLocal(model.appid, again);
+  }
+}
+
 /** Whether the game details of the account are proven public, and stored. */
 function setPublicDetails(proven: boolean): void {
   if (model.publicDetails === proven) return;
@@ -748,16 +860,23 @@ function listen(): void {
     // Refused or unknown (an older PlayerVox OverCrow): the minute.
     if (!update.ok) return;
     let saved = false;
+    let here = false;
     for (const event of update.value.events) {
       if (event.seq <= events.lastSeq) continue;
       const missed = event.seq > events.lastSeq + 1;
       events.lastSeq = event.seq;
       const appid = whole(object(event.data)?.["appid"]) ?? 0;
       if (missed || appid !== model.appid) events.summary = true;
-      if (missed || appid === model.appid) events.player = true;
+      if (missed || appid === model.appid) {
+        // The game shown: read on this computer at once. Steam's Web API
+        // only when this computer has nothing of it (yet).
+        here = true;
+        if (missed || localOf(model.appid) === null) events.player = true;
+      }
       saved = true;
     }
-    if (!saved) return;
+    if (here) void readLocal(model.appid, false);
+    if (!saved || !(events.summary || events.player)) return;
     events.savedAt = Date.now();
     events.look = 0;
     events.lookTimer?.cancel();
@@ -956,7 +1075,9 @@ async function read(): Promise<void> {
   const fresh = checked !== null && checked.steamid === model.steamid && now - checked.at < MINUTE - TICK_SLACK;
   const waiting = now < model.retryAt - TICK_SLACK;
   if (!fresh && (waiting || !(canCall("summary", now) || asked("summary", now)))) {
-    // A save of the game shown: its achievements alone.
+    // This computer's achievements of the game shown, whatever Steam's
+    // minute; then, for a save, Steam's.
+    if (state.phase === "game") void readLocal(model.appid, false, true);
     if (!waiting && asked("player", now)) await lookAgain(now);
     return;
   }
@@ -1031,6 +1152,8 @@ async function read(): Promise<void> {
     return;
   }
   if (appid !== model.appid) switchGame(appid);
+  // This computer's achievements first: the newest, whatever Steam says.
+  await readLocal(appid, localOf(appid) === null, true);
 
   const lang = language();
   // A large list (thousands of achievements) takes a while to read in
@@ -1136,6 +1259,14 @@ async function playerStep(appid: number, now: number, stopped: boolean, schema: 
   // offline): hidden details, unless they are proven public.
   const fromRecent = !model.playing && !model.fromHost;
   if (refused === "hidden" && fromRecent) setPublicDetails(false);
+  // The host's game, whose achievements this computer has: shown from
+  // here, whatever Steam hides (the player's own, on their own screen).
+  if (refused !== null && !fromRecent && localOf(appid) !== null) {
+    model.readPlayer = now;
+    model.readable = true;
+    reveal();
+    return "done";
+  }
   if (refused === "hidden" && (fromRecent || (!model.named && !model.publicDetails))) {
     model.readPlayer = now;
     return "hidden";
@@ -1152,7 +1283,8 @@ async function playerStep(appid: number, now: number, stopped: boolean, schema: 
     const found = [...read.unlocked.keys()].some((id) => before?.has(id) !== true);
     // A save's read plans the next look; any read that finds something ends them.
     if (save || found) looked(found);
-    markNew(read.unlocked, now);
+    const here = localOf(appid);
+    markNew(merged(model.unlocked, here), merged(read.unlocked, here) ?? read.unlocked, now);
     model.unlocked = read.unlocked;
     if (schema === null) {
       model.playerTotal = read.total;
@@ -1338,13 +1470,16 @@ function switchGame(appid: number): void {
   state.picking = false;
 }
 
-/** Achievements unlocked since the last read of the same game are new. */
-function markNew(unlocked: Map<string, number>, now: number): void {
-  const before = model.unlocked;
+/**
+ * Achievements unlocked since the last read of the same game, Steam's or
+ * this computer's, are new: `before` is what was known (`null` for a first
+ * read), `unlocked` what is now.
+ */
+function markNew(before: Map<string, number> | null, unlocked: Map<string, number>, now: number): void {
   if (before === null) return;
   // Unlocked after the previous read (a margin for clocks): an unlock made
   // while the widget was closed, or on another computer, is not new.
-  const since = (model.readPlayer || state.readAt) - 2 * MINUTE;
+  const since = (Math.max(model.readPlayer, local.appid === model.appid ? local.readAt : 0) || state.readAt) - 2 * MINUTE;
   const fresh = { ...state.fresh };
   let any = false;
   for (const [id, at] of unlocked) {
@@ -1379,7 +1514,7 @@ function render(): void {
   if (appid === 0) return;
   const schema = model.schemas.get(schemaKey(appid, language())) ?? model.schemas.get(schemaKey(appid, "english"));
   const list = schema?.list ?? [];
-  const unlocked = model.unlocked ?? new Map<string, number>();
+  const unlocked = merged(model.unlocked, localOf(appid)) ?? new Map<string, number>();
   const rarity = model.rarity.get(appid)?.values ?? new Map<string, number>();
   achList = list.map((entry) => {
     const at = unlocked.get(entry.api);
