@@ -1,6 +1,6 @@
 [package]
 name = "overcrow-widget-cli"
-version = "1.0.0-beta.8"
+version = "1.0.0-beta.9"
 description = "overcrow-widget: the creator CLI of PlayerVox OverCrow widget API v1"
 edition.workspace = true
 license.workspace = true
