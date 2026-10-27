@@ -759,47 +759,12 @@ async function readLocal(appid: number, full: boolean, inRead = false): Promise<
   const steamid = model.steamid;
   const known = localOf(appid);
   try {
-    const found = new Map<string, number>();
-    const add = (page: SteamLocalAchievements): void => {
-      for (const item of page.achievements) found.set(item.name, item.unlockedAt === null ? 0 : Math.floor(item.unlockedAt / 1000));
-    };
-    const first = await steam.achievements.local({ steamid, appid });
-    add(first);
-    if (first.total > found.size) {
-      if (full || known === null) {
-        while (found.size < first.total) {
-          await pause();
-          const next = await steam.achievements.local({ steamid, appid, offset: found.size });
-          if (next.achievements.length === 0) break;
-          add(next);
-        }
-      } else {
-        for (const [id, at] of known) if (!found.has(id)) found.set(id, at);
-      }
-    }
+    const found = await localPages(steamid, appid, full || known === null);
     // Another game or profile meanwhile: this answer is not its.
-    if (steamid !== model.steamid || appid !== model.appid) return;
-    const now = Date.now();
-    markNew(merged(model.unlocked, known), merged(model.unlocked, found) ?? found, now);
-    local.appid = appid;
-    local.steamid = steamid;
-    local.unlocked = found;
-    local.readAt = now;
-    local.missing = { appid: 0, steamid: "" };
-    if (state.phase === "game") render();
-    // Found here for the first time (Steam said the details hidden): read
-    // again, to show the game (never twice within 5 seconds).
-    else if (known === null && !inRead) {
-      events.summary = true;
-      events.player = true;
-      if (!armFloor()) void refresh();
+    if (found !== null && steamid === model.steamid && appid === model.appid) {
+      if (found.partial) for (const [id, at] of known ?? []) if (!found.unlocked.has(id)) found.unlocked.set(id, at);
+      showLocal(appid, steamid, known, found.unlocked, inRead);
     }
-  } catch (error) {
-    const code = (error as { code?: string }).code ?? "";
-    if (code === "unsupported" || code === "permission_denied") local.off = true;
-    // Nothing on this computer: Steam's Web API alone, as before.
-    if (local.appid === appid) local.unlocked = null;
-    local.missing = { appid, steamid };
   } finally {
     local.busy = false;
   }
@@ -808,6 +773,64 @@ async function readLocal(appid: number, full: boolean, inRead = false): Promise<
     local.again = false;
     local.againFull = false;
     void readLocal(model.appid, again);
+  }
+}
+
+/**
+ * This computer's achievements of `appid`: every page, or the first one
+ * (`partial` when there are more). `null` when the host has none to give
+ * (forgotten then, until the game's next save) or the read failed (what is
+ * known stays).
+ */
+async function localPages(
+  steamid: string,
+  appid: number,
+  all: boolean,
+): Promise<{ unlocked: Map<string, number>; partial: boolean } | null> {
+  const unlocked = new Map<string, number>();
+  const add = (page: SteamLocalAchievements): void => {
+    for (const item of page.achievements) unlocked.set(item.name, item.unlockedAt === null ? 0 : Math.floor(item.unlockedAt / 1000));
+  };
+  try {
+    const first = await steam.achievements.local({ steamid, appid });
+    add(first);
+    if (first.total > unlocked.size && !all) return { unlocked, partial: true };
+    while (unlocked.size < first.total) {
+      await pause();
+      const next = await steam.achievements.local({ steamid, appid, offset: unlocked.size });
+      if (next.achievements.length === 0) break;
+      add(next);
+    }
+    return { unlocked, partial: false };
+  } catch (error) {
+    const code = (error as { code?: string }).code ?? "";
+    if (code === "unsupported" || code === "permission_denied") local.off = true;
+    // The host has nothing here: Steam's Web API alone, as before. Any
+    // other failure (busy, a refused timer) keeps what is known.
+    if (code === "unavailable" || local.off) {
+      if (local.appid === appid) local.unlocked = null;
+      local.missing = { appid, steamid };
+    }
+    return null;
+  }
+}
+
+/** Shows what this computer gave: the new ones marked New. */
+function showLocal(appid: number, steamid: string, known: Map<string, number> | null, found: Map<string, number>, inRead: boolean): void {
+  const now = Date.now();
+  markNew(merged(model.unlocked, known), merged(model.unlocked, found) ?? found, now);
+  local.appid = appid;
+  local.steamid = steamid;
+  local.unlocked = found;
+  local.readAt = now;
+  local.missing = { appid: 0, steamid: "" };
+  if (state.phase === "game") render();
+  // Found here for the first time (Steam said the details hidden): read
+  // again, to show the game (never twice within 5 seconds).
+  else if (known === null && !inRead) {
+    events.summary = true;
+    events.player = true;
+    if (!armFloor()) void refresh();
   }
 }
 
@@ -1490,12 +1513,36 @@ function markNew(before: Map<string, number> | null, unlocked: Map<string, numbe
   }
   if (any) {
     state.fresh = fresh;
-    timers.after(NEW_FOR, () => {
-      const at = Date.now();
-      state.fresh = Object.fromEntries(Object.entries(state.fresh).filter(([, until]) => until > at));
-      state.now = at;
-    });
+    armFresh();
   }
+}
+
+/**
+ * One timer takes the New marks away as they end (host timers are few:
+ * `MAX_TIMERS` a widget). Refused, the minute's tick does it.
+ */
+let freshTimer: Timer | null = null;
+function armFresh(): void {
+  if (freshTimer !== null) return;
+  const next = Math.min(...Object.values(state.fresh));
+  if (!Number.isFinite(next)) return;
+  try {
+    freshTimer = timers.after(Math.max(0, next - Date.now()), () => {
+      freshTimer = null;
+      dropEndedMarks();
+      armFresh();
+    });
+  } catch {
+    freshTimer = null;
+  }
+}
+
+function dropEndedMarks(): void {
+  const at = Date.now();
+  if (Object.values(state.fresh).some((until) => until <= at)) {
+    state.fresh = Object.fromEntries(Object.entries(state.fresh).filter(([, until]) => until > at));
+  }
+  state.now = at;
 }
 
 /** Every achievement of the shown game: out of the state (see `Lists`). */
@@ -2034,7 +2081,7 @@ account.subscribe({ id: "steam" }, (update) => {
 });
 
 timers.every(MINUTE, () => {
-  state.now = Date.now();
+  dropEndedMarks();
   void refresh();
 });
 
