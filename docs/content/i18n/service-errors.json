@@ -48,8 +48,8 @@
     "fr": "La cible ne sait pas le faire : un lecteur multimédia qui ne propose pas la commande, par exemple."
   },
   "url_invalid": {
-    "en": "`http.fetch`: the URL is not an absolute HTTPS URL that PlayerVox OverCrow accepts.",
-    "fr": "`http.fetch` : l’URL n’est pas une URL HTTPS absolue que PlayerVox OverCrow accepte."
+    "en": "`http.fetch`: the URL is not an absolute HTTPS URL that PlayerVox OverCrow accepts. `links.open`: the address is not a plain HTTPS page (see Links).",
+    "fr": "`http.fetch` : l’URL n’est pas une URL HTTPS absolue que PlayerVox OverCrow accepte. `links.open` : l’adresse n’est pas une simple page HTTPS (voir Liens)."
   },
   "resolve_failed": {
     "en": "`http.fetch`: the host name could not be resolved.",

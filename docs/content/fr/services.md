@@ -178,7 +178,7 @@ dernière mise à jour.
 | `cancelled` | L’utilisateur a refusé la confirmation, ou a quitté le mode interactif pendant qu’elle était ouverte. |
 | `quota_exceeded` | Un quota est atteint : le stockage, les minuteurs, les notes, les chaînes favorites. |
 | `unsupported` | La cible ne sait pas le faire : un lecteur multimédia qui ne propose pas la commande, par exemple. |
-| `url_invalid` | `http.fetch` : l’URL n’est pas une URL HTTPS absolue que PlayerVox OverCrow accepte. |
+| `url_invalid` | `http.fetch` : l’URL n’est pas une URL HTTPS absolue que PlayerVox OverCrow accepte. `links.open` : l’adresse n’est pas une simple page HTTPS (voir Liens). |
 | `resolve_failed` | `http.fetch` : le nom d’hôte n’a pas pu être résolu. |
 | `address_denied` | `http.fetch` : le nom d’hôte se résout en une adresse locale, privée ou non publique. |
 | `too_many_addresses` | `http.fetch` : le nom d’hôte se résout en plus d’adresses que PlayerVox OverCrow n’en accepte. |
@@ -492,9 +492,24 @@ réponse vaut pour ce site et ce widget, jusqu’à ce que l’utilisateur la
 retire dans le Centre de contrôle. Plusieurs règles d’une même origine
 partagent cette réponse. L’appel échoue avec `cancelled` quand
 l’utilisateur refuse, `permission_denied` pour une adresse qu’aucune règle
-ne permet, `url_invalid` pour une adresse qui n’est pas une simple adresse
-HTTPS (identifiants, chemin avec des segments encodés ou des points, plus
-de 2048 octets) et `busy` tant qu’une confirmation est ouverte.
+ne permet, `url_invalid` pour une adresse qui n’est pas une simple page
+HTTPS et `busy` tant qu’une confirmation est ouverte.
+
+Une simple page HTTPS est ce que vérifie `url_invalid`, avec la raison que
+PlayerVox OverCrow écrit dans son journal quand il en refuse une :
+
+| Raison | L’adresse |
+| --- | --- |
+| `scheme` | n’est pas une adresse `https://` absolue. |
+| `credentials` | contient un nom d’utilisateur ou un mot de passe (`https://nom@site.example/`). |
+| `length` | dépasse 2048 octets, telle qu’écrite ou une fois normalisée. |
+| `path` | a un chemin avec un segment de points ou encodé, ou un caractère autre que ceux ci-dessous. |
+| `character` | contient, une fois normalisée, un caractère autre que les lettres et chiffres ASCII et `-._~:/?=&%+,@!` (donc ni `;`, `*`, `'`, `(`, `)` ni `$`), ou plus d’un `#`. |
+| `host` | nomme un hôte sans point, ou une adresse IP. |
+
+Un lien mène à une page liée au rôle du widget, comme le dit à la revue la
+justification de sa clé (règle de publication 2.5) ; un lien publicitaire
+ou d’affiliation est refusé (section 7).
 
 L’adresse d’une page porte aussi des données. Un widget doté d’une
 capability sensible n’ouvre aucun lien, et un widget doté d’un compte

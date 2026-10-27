@@ -173,7 +173,7 @@ subscription that fails delivers the same error in its last update.
 | `cancelled` | The user declined the confirmation, or left Interactive mode while it was open. |
 | `quota_exceeded` | A quota is full: the storage, the timers, the notes, the favourite channels. |
 | `unsupported` | The target cannot do this: a media player that does not offer the command, for instance. |
-| `url_invalid` | `http.fetch`: the URL is not an absolute HTTPS URL that PlayerVox OverCrow accepts. |
+| `url_invalid` | `http.fetch`: the URL is not an absolute HTTPS URL that PlayerVox OverCrow accepts. `links.open`: the address is not a plain HTTPS page (see Links). |
 | `resolve_failed` | `http.fetch`: the host name could not be resolved. |
 | `address_denied` | `http.fetch`: the host name resolves to a local, private or otherwise non-public address. |
 | `too_many_addresses` | `http.fetch`: the host name resolves to more addresses than PlayerVox OverCrow accepts. |
@@ -475,9 +475,24 @@ widget opens a page of a site; the answer holds for that site and that
 widget, until the user takes it back in the Control Center. Several rules
 of one origin share that answer. The call fails with `cancelled` when the
 user declines, `permission_denied` for an address no rule allows,
-`url_invalid` for one that is not a plain HTTPS address (credentials, a
-path with encoded or dot segments, longer than 2048 bytes) and `busy`
-while a confirmation is open.
+`url_invalid` for one that is not a plain HTTPS page and `busy` while a
+confirmation is open.
+
+A plain HTTPS page is what `url_invalid` checks, and the reason PlayerVox
+OverCrow writes in its log when it refuses one:
+
+| Reason | The address |
+| --- | --- |
+| `scheme` | is not an absolute `https://` address. |
+| `credentials` | holds a user name or a password (`https://name@site.example/`). |
+| `length` | is longer than 2048 bytes, as written or once normalized. |
+| `path` | has a path with a dot or encoded segment, or a character other than the ones below. |
+| `character` | has, once normalized, a character other than ASCII letters, digits and `-._~:/?=&%+,@!` (so no `;`, `*`, `'`, `(`, `)` or `$`), or more than one `#`. |
+| `host` | names a host without a dot, or an IP address. |
+
+A link leads to a page tied to the widget's role, as the justification of
+its key says to the review (publication rule 2.5); an advertising or
+affiliate link is refused (section 7).
 
 The address of a page carries data too. A widget with a sensitive
 capability opens no link, and a widget with an account opens only pages of
