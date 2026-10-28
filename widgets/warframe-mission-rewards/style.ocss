@@ -557,5 +557,19 @@
 /* An error beside what stays known: amber, and wrapped, never cut. */
 .status-text.tone-warning {
   color: var(--color-warning);
+  font-weight: 600;
   white-space: normal;
+}
+
+/* A refusal: the icon on the first line of a wrapped sentence. */
+.status-line {
+  align-items: start;
+}
+
+.status-line .status-icon {
+  margin-top: 1px;
+}
+
+.empty-title.tone-warning {
+  color: var(--color-warning);
 }

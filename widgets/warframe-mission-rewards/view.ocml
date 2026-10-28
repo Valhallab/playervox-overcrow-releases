@@ -93,8 +93,10 @@
     <if test={state.s.empty != null}>
       <box class="empty">
         <icon class={"empty-icon tone-" + state.s.empty.tone} name={state.s.empty.icon}/>
-        <text class="empty-title">{state.s.empty.title}</text>
-        <text class="empty-text">{state.s.empty.text}</text>
+        <text class={"empty-title " + state.s.empty.titleCls}>{state.s.empty.title}</text>
+        <if test={hasText(state.s.empty.text)}>
+          <text class="empty-text">{state.s.empty.text}</text>
+        </if>
       </box>
     </if>
 

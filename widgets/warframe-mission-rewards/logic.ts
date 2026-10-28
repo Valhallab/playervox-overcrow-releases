@@ -100,6 +100,8 @@ export interface Box {
   tone: Tone;
   title: string;
   text: string;
+  /** `tone-warning` when the title itself is the warning (a refusal). */
+  titleCls: string;
 }
 
 /**
@@ -440,7 +442,7 @@ function blank(): Screen {
 }
 
 function waiting(icon: string, tone: Tone, title: string, text: string): Screen {
-  return { ...blank(), empty: { icon, tone, title, text }, line: title, lineIcon: icon, lineTone: tone };
+  return { ...blank(), empty: { icon, tone, title, text, titleCls: "" }, line: title, lineIcon: icon, lineTone: tone };
 }
 
 function nodeName(mission: WarframeMission): string {
@@ -508,6 +510,20 @@ function listed(s: Screen, tables: Tables, letter: Letter | null, earned: number
   s.source = true;
 }
 
+/**
+ * What an end reward gives, in a few words for One line: the words its
+ * items share ("Loki" for Loki's three blueprints), else the rarest item.
+ */
+export function endReward(table: WarframeRewardTable): string {
+  const names = sortItems(table.items, "rarest").map((item) => item.name);
+  const words = names.map((name) => name.split(" "));
+  const first = words[0] ?? [];
+  let n = 0;
+  while (n < first.length && words.every((w) => w[n] === first[n])) n += 1;
+  const shared = first.slice(0, n).join(" ").replace(/[\s\-–—:,(]+$/u, "");
+  return names.length > 1 && shared.length >= 2 ? shared : (names[0] ?? "");
+}
+
 /** "One rotation every 5 min · C at 20 min", by type. */
 function cadenceInfo(typeId: string): string {
   const c = cadence(typeId);
@@ -526,10 +542,10 @@ function loot(s: Screen, mission: WarframeMission, rewardsFeature: string, keepL
     if (rewardsFeature === "undeclared") {
       // Refused: the status line says so.
     } else if (rewardsFeature === "unavailable") {
-      s.empty = { icon: "package-x", tone: "muted", title: t("rewards-off-title"), text: t("rewards-off-text") };
+      s.empty = { icon: "package-x", tone: "muted", title: t("rewards-off-title"), text: t("rewards-off-text"), titleCls: "" };
       line = t("line-rewards-off", { node: s.node });
     } else if (mission.node.name === null) {
-      s.empty = { icon: "package-open", tone: "muted", title: t("unknown-title"), text: t("unknown-text") };
+      s.empty = { icon: "package-open", tone: "muted", title: t("unknown-title"), text: t("unknown-text"), titleCls: "" };
       line = t("line-unknown", { node: s.node });
     } else {
       // A hero says more than "no loot table".
@@ -564,7 +580,7 @@ function before(mission: WarframeMission, input: Input, rewardsFeature: string):
     stacked(s, tables, input);
   } else if (tables.end !== null) {
     s.info = t("info-end-reward");
-    s.line = t("line-end-reward", { node: s.node });
+    s.line = t("line-reward", { node: s.node, reward: endReward(tables.end) });
     listed(s, tables, null, 0, input);
   } else {
     stacked(s, tables, input);
@@ -641,7 +657,7 @@ function live(mission: WarframeMission, progress: WarframeProgress | null, input
     stacked(s, tables, input);
   } else if (tables.end !== null) {
     s.info = t("info-end-reward");
-    s.line = t("line-end-reward", { node: s.node });
+    s.line = t("line-reward", { node: s.node, reward: endReward(tables.end) });
     listed(s, tables, null, 0, input);
   } else {
     // Only caches or extra tables.
@@ -769,7 +785,7 @@ export function buildScreen(input: Input): Screen {
   if (s === null) {
     if (denied !== null) {
       const box = waiting("circle-alert", "warning", t("denied", { feature: t(`feature-${denied}`) }), "");
-      return { ...box, line: t("line-denied") };
+      return { ...box, empty: { ...(box.empty as Box), titleCls: "tone-warning" }, line: t("line-denied") };
     }
     if (unreadable) return waiting("circle-alert", "warning", t("unavailable-title"), t("unavailable-text"));
     return waiting("gift", "muted", t("first-title"), t("first-text"));

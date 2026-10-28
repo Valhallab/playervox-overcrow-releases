@@ -67,7 +67,6 @@
   "line-cadence-waves": "{node} · C at wave 20",
   "line-cadence-rounds": "{node} · C at round 4",
   "line-cadence-excavation": "{node} · C at the 4th excavator",
-  "line-end-reward": "{node} · one reward at the end",
   "line-no-table": "{node} · no loot table",
   "line-unknown": "{node} · loot to come",
   "line-rewards-off": "{node} · loot unavailable",
@@ -87,5 +86,6 @@
   "feature-progress": "progress",
   "feature-rewards": "rewards",
   "line-denied": "Access denied · Control Center",
-  "status-unreadable": "Missions can't be read · restart Warframe"
+  "status-unreadable": "Missions can't be read · restart Warframe",
+  "line-reward": "{node} · {reward}"
 }

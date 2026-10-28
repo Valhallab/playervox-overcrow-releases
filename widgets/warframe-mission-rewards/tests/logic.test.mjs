@@ -189,6 +189,9 @@ test("an end reward without rotation, no table, a new node, loot unavailable", (
   const ass = logic.buildScreen(input(value({ mission: mission({ type: { id: "assassination", name: "Assassination" }, rewards: ps }), progress: progress({ rotation: null }) })));
   assert.equal(ass.info, "No rotation: one reward at the end");
   assert.equal(ass.sections[0].title, "End reward");
+  assert.equal(ass.line, "Mot · Loki Systems Blueprint", "One line names the reward");
+  const loki = { kind: "mission", rotation: null, items: [item("n", "Loki - Neuroptiques (schéma)", 0.3872), item("c", "Loki - Châssis (schéma)", 0.3872), item("s", "Loki - Systèmes (schéma)", 0.2256)] };
+  assert.equal(logic.endReward(loki), "Loki", "the words the items share");
   const ext = logic.buildScreen(input(value({ mission: mission({ type: { id: "extermination", name: "Exterminate" }, rewards: null }), progress: progress({ rotation: null }) })));
   assert.equal(ext.info, "No loot table for this kind of mission.");
   assert.equal(ext.source, false);
@@ -236,6 +239,7 @@ test("the screen at start, refused, unreadable, and the stored last mission", ()
   const denied = logic.buildScreen(input(null, { failure: "permission_denied" }));
   assert.equal(denied.empty.title, "Allow “Warframe: missions” in the Control Center.");
   assert.equal(denied.empty.tone, "warning");
+  assert.equal(denied.empty.titleCls, "tone-warning", "the sentence itself in amber");
   assert.equal(denied.line, "Access denied · Control Center");
   const off = value({});
   off.features.mission = "unavailable";

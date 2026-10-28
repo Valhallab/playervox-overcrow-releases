@@ -67,7 +67,6 @@
   "line-cadence-waves": "{node} · C à la vague 20",
   "line-cadence-rounds": "{node} · C à la manche 4",
   "line-cadence-excavation": "{node} · C au 4ᵉ excavateur",
-  "line-end-reward": "{node} · une récompense à la fin",
   "line-no-table": "{node} · pas de table de butin",
   "line-unknown": "{node} · butin à venir",
   "line-rewards-off": "{node} · butin indisponible",
@@ -87,5 +86,6 @@
   "feature-progress": "progression",
   "feature-rewards": "butin",
   "line-denied": "Accès refusé · Centre de contrôle",
-  "status-unreadable": "Missions non lisibles · relancez Warframe"
+  "status-unreadable": "Missions non lisibles · relancez Warframe",
+  "line-reward": "{node} · {reward}"
 }
