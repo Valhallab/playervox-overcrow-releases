@@ -116,11 +116,11 @@
 .line {
   flex-direction: row;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   min-height: 40px;
   min-width: 0;
   overflow: hidden;
-  padding: 0 12px;
+  padding: 0 10px;
 }
 
 .line-icon {
