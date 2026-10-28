@@ -30,8 +30,8 @@ Every screen has one label over one big number, and the night at Cetus.
 | Tricap | The exact total (`07:15.37`); a new best gets "New best" and its gap to the previous one, otherwise the gap to the best |
 | Eidolon killed | "Tricap missed", the timer frozen at its death, "1 capture of 3 · Gantulyst killed"; the next rows stay at "—": a killed Eidolon gives no shard to summon the next one |
 | Eidolon gone at dawn | "Tricap missed", the timer frozen on the real duration, "2 captures of 3 · Hydrolyst fled at dawn" |
-| Times unreadable | Warframe's Eidolon times cannot be read: the night stays, with "Can’t read your times: restart Warframe." One line: "Night 32:14 · times unreadable" |
-| Game events not allowed | The night from the last cycle seen, with an alert icon and "Allow “Warframe: Eidolons” in the Control Center.": the user grants game events as a whole, so the widget names the feature it lives on. One line: "Not allowed · Control Center". Followed again as soon as the user allows them |
+| Times unreadable | Warframe's Eidolon times cannot be read: the night stays, with "Can’t read your times: restart Warframe." One line: "Night 32:14 · times unreadable", by day "Day 1:39:59 · times unreadable": the phase and the time it has left, short enough for the error beside it |
+| Game events not allowed | The night from the last cycle seen, with an alert icon and "Allow “Warframe: Eidolons” in the Control Center.": the user grants game events as a whole, so the widget names the feature it lives on. One line: "Night 32:14 · Access denied" (by day "Day 1:39:59 · …"), or "Access denied · Control Center" before any Cetus cycle is known; its accessible label is the whole sentence. Followed again as soon as the user allows them |
 
 A finished hunt stays on screen for ten minutes, while the player is on the
 Plains. Wide (420 px and more), Full shows the past hunts beside it: one
@@ -95,8 +95,9 @@ best" after one, "Night in 41:10" otherwise.
   Plains; the bounded history; stored values of another shape.
 - Scenarios, one per state, with reference images in French and English, at
   100 % and 150 %, in Full, One line, wide and the light theme; and
-  `resumed`, `capture-late` and `refused`. `preview` is the marketplace
-  preview.
+  `resumed`, `capture-late`, `refused` and the error lines at their longest
+  (`unavailable-day`, `refused-day`, `refused-unknown`). `preview` is the
+  marketplace preview.
 
 ```sh
 node --test widgets/warframe-eidolon-hunt/tests/*.test.mjs

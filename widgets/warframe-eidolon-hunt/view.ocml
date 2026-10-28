@@ -3,7 +3,7 @@
      hunts beside it. -->
 <box class={rootClass(state.view.layout)}>
   <if test={state.view.layout == "line"}>
-    <box class="line">
+    <box class="line" label={state.view.lineLabel}>
       <icon class="line-icon tone-accent" name={state.view.lineIcon}/>
       <for each={state.view.line} as="segment" key={segment.id}>
         <text class={segment.cls}>{segment.text}</text>

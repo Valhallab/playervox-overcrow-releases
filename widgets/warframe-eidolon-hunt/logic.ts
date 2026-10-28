@@ -150,6 +150,8 @@ export interface Screen {
   line: Segment[];
   lineSub: string;
   lineSubCls: string;
+  /** The accessible name of One line: its text, or the whole sentence of an error. */
+  lineLabel: string;
 }
 
 declare module "@overcrow/sdk" {
@@ -522,6 +524,7 @@ function blank(): Screen {
     line: [],
     lineSub: "",
     lineSubCls: "line-sub",
+    lineLabel: "",
   };
 }
 
@@ -573,6 +576,17 @@ function summary(now: number): string {
   return parts.join("\u00a0\u00b7 ");
 }
 
+/**
+ * One line of an error: the phase and the time it has left, as the header
+ * names the night ("Night 32:14", "Day 1:39:59"), so the error fits beside it.
+ */
+function shortNight(screen: Screen, night: boolean): Segment[] {
+  return [
+    { id: "label", text: t(night ? "line-night" : "line-day"), cls: "line-main" },
+    { id: "value", text: screen.big, cls: "line-big" },
+  ];
+}
+
 /** The calm screen: the night at Cetus, with one line of context. */
 function calm(screen: Screen, now: number): Screen {
   const cycle = cycleAt(model.nightEnd, now);
@@ -596,20 +610,26 @@ function calm(screen: Screen, now: number): Screen {
     screen.hint = t("hint-refused");
     screen.hintCls = "hint tone-warning";
     screen.hintIcon = "circle-alert";
-    screen.line = [{ id: "label", text: t("line-refused"), cls: "line-main" }];
-    screen.lineSub = t("line-refused-fix");
+    // One line keeps the night when it is known, then says what is wrong;
+    // without a value, where to fix it. The whole sentence is its label.
+    if (cycle !== null) {
+      screen.line = shortNight(screen, cycle.night);
+      screen.lineSub = t("line-refused");
+    } else {
+      screen.line = [{ id: "label", text: t("line-refused"), cls: "line-main" }];
+      screen.lineSub = t("line-refused-fix");
+    }
     screen.lineSubCls = "line-sub tone-warning";
+    screen.lineLabel = `${screen.label} ${screen.big}. ${screen.hint}`;
   } else if (model.source === "unreadable") {
     screen.hint = t("hint-unreadable");
     screen.hintCls = "hint tone-warning";
     // The night stays, under its short header label; what is missing follows.
-    if (cycle !== null && cycle.night) {
-      screen.line = [
-        { id: "label", text: t("line-night"), cls: "line-main" },
-        { id: "value", text: screen.big, cls: "line-big" },
-      ];
+    if (cycle !== null) {
+      screen.line = shortNight(screen, cycle.night);
     }
     screen.lineSub = t("line-unreadable");
+    screen.lineLabel = `${screen.label} ${screen.big}. ${screen.hint}`;
     screen.lineSubCls = "line-sub tone-warning";
   } else if (!model.playing) {
     screen.hint = newcomer ? t("hint-first-run") : summary(now) || t("hint-first-run");
@@ -838,6 +858,21 @@ function hunt(screen: Screen, run: Run, now: number): Screen {
 
 /** The screen at `now`, from the model. */
 export function build(now: number): Screen {
+  const screen = withLabel(buildScreen(now));
+  return screen;
+}
+
+/** One line's accessible name: what it shows, unless an error gave the whole sentence. */
+function withLabel(screen: Screen): Screen {
+  if (screen.lineLabel === "") {
+    screen.lineLabel = [...screen.line.map((segment) => segment.text), screen.lineSub]
+      .filter((text) => text !== "")
+      .join(" ");
+  }
+  return screen;
+}
+
+function buildScreen(now: number): Screen {
   const screen = blank();
   if (model.source !== "ok") {
     return calm(screen, now);

@@ -81,7 +81,7 @@ test("Warframe's times unreadable: the night stays, with what to do", async () =
   assert.equal(state.view.hintCls, "hint tone-warning");
   assert.equal(state.view.big, "1:35:00");
   vm.setHost({ options: { layout: "line" } });
-  assert.equal(texts(state.view).line, "Nuit dans 1:35:00 temps illisibles");
+  assert.equal(texts(state.view).line, "Jour 1:35:00 temps illisibles");
   assert.equal(state.view.lineSubCls, "line-sub tone-warning");
   vm.setHost({ options: { layout: "full" } });
 });

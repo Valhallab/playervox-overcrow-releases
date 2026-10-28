@@ -1,0 +1,154 @@
+{
+  "scenarioVersion": 1,
+  "name": "refused-day",
+  "description": "Game events not allowed by day, the night at its farthest: One line keeps the night to come, then “Access denied”.",
+  "host": {
+    "startAt": 1793217600000,
+    "frame": true,
+    "locale": "fr",
+    "background": "#000000",
+    "storage": {
+      "best": {
+        "s": 1793134800000,
+        "total": 452400,
+        "splits": [
+          111320,
+          127170,
+          213910
+        ],
+        "prev": null
+      },
+      "history": [
+        {
+          "s": 1792875600000,
+          "end": 1792876070050,
+          "caps": 3,
+          "total": 470050
+        },
+        {
+          "s": 1793134800000,
+          "end": 1793135252400,
+          "caps": 3,
+          "total": 452400
+        },
+        {
+          "s": 1793135400000,
+          "end": 1793135861100,
+          "caps": 3,
+          "total": 461100
+        },
+        {
+          "s": 1793188800000,
+          "end": 1793189260150,
+          "caps": 3,
+          "total": 460150
+        }
+      ],
+      "cetus": 1793217599000
+    },
+    "grants": [
+      "storage"
+    ]
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "Nuit dans",
+          "1:39:59"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Jour",
+          "1:39:59",
+          "Accès refusé"
+        ]
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "mini-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "mini-en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1500,
+        "size": {
+          "width": 260,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "mini-fr-150",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "expect": {
+        "fault": "none"
+      }
+    }
+  ]
+}
