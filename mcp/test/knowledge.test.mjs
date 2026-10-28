@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
@@ -24,11 +24,16 @@ test("the shipped content: every visible page in both languages, projects, refer
     assert.ok(readDoc(page.slug, "en")?.markdown?.startsWith("# "), page.slug);
     assert.ok(readDoc(page.slug, "fr")?.markdown?.startsWith("# "), page.slug);
   }
+  // Every widget project of widgets/ is shipped as an example.
+  const widgets = readdirSync(join(repository, "widgets")).filter((name) =>
+    existsSync(join(repository, "widgets", name, "view.ocml")),
+  );
   assert.deepEqual(
     projects("examples")
       .filter((p) => p.source === "widgets")
-      .map((p) => p.name).length,
-    15,
+      .map((p) => p.name)
+      .sort(),
+    widgets.sort(),
   );
   assert.ok(projectFile("examples", "warframe-market", "logic.ts")?.includes("CatalogScanner"));
   assert.equal(projectFile("examples", "warframe-market", "../../../package.json"), undefined);
