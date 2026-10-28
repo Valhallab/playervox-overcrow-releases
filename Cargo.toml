@@ -15,7 +15,7 @@ license = "MIT"
 rust-version = "1.98"
 
 [workspace.dependencies]
-base64 = "=0.22.1"
+base64 = "=0.23.1"
 image = { version = "=0.25.10", default-features = false, features = ["png"] }
 libc = "=0.2.186"
 ring = "=0.17.14"
