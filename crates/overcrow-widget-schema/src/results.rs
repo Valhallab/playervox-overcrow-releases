@@ -1002,7 +1002,12 @@ pub const SHAPES: &[NamedShape] = &[
             member(
                 "rewards",
                 Shape::Nullable(&Shape::Named("WarframeRewards")),
-                "What the node can reward, for a widget that follows `warframe.rewards`; `null` otherwise, or for a node without a reward table.",
+                "What the mission can reward, for a widget that follows `warframe.rewards`; `null` otherwise, for a node without a reward table, or for a mission whose table is not public or not known yet.",
+            ),
+            member(
+                "rewardsPending",
+                Shape::Bool,
+                "`true` while `rewards` is `null` for now: which table applies is not known yet (a node of the day's Sortie or Archon Hunt, chosen but not loaded; the world or the drop tables not read yet). `false` otherwise, `rewards` given or not.",
             ),
             member(
                 "earned",
@@ -1284,12 +1289,19 @@ pub const SHAPES: &[NamedShape] = &[
     ),
     named(
         "WarframeRewards",
-        Shape::Record(&[member(
-            "tables",
-            Shape::List(&Shape::Named("WarframeRewardTable")),
-            "The node's tables, at most `MAX_WARFRAME_REWARD_TABLES`. Source: Digital Extremes' drop tables, no guarantees.",
-        )]),
-        "What a node can reward.",
+        Shape::Record(&[
+            member(
+                "source",
+                Shape::Keyword(warframe::REWARD_SOURCES),
+                "Whose tables: `node`, or the tables of their own that replace a node's: `arbitration` (every Arbitration's), `nightmare` (a Nightmare mission's reward, once, the rotation of its planet), `sortie` (a Sortie's, after its third mission).",
+            ),
+            member(
+                "tables",
+                Shape::List(&Shape::Named("WarframeRewardTable")),
+                "The tables, at most `MAX_WARFRAME_REWARD_TABLES`. Source: Digital Extremes' drop tables, no guarantees.",
+            ),
+        ]),
+        "What a mission can reward.",
     ),
     named(
         "WarframeWorldMission",

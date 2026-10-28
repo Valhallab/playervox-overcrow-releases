@@ -116,6 +116,12 @@ pub mod warframe {
     /// caches of a Sabotage, Exterminate or Hive node, an additional one.
     pub const REWARD_TABLE_KINDS: &[&str] = &["mission", "caches", "extra"];
 
+    /// Where a mission's reward tables come from (`rewards.source`): its
+    /// node's, or a table of its own that replaces them: every
+    /// Arbitration's, a Nightmare mission's (once, the rotation of its
+    /// planet), a Sortie's (after its third mission).
+    pub const REWARD_SOURCES: &[&str] = &["node", "arbitration", "sortie", "nightmare"];
+
     /// Where the player is (`location.kind`).
     pub const LOCATION_KINDS: &[&str] = &[
         "orbiter",

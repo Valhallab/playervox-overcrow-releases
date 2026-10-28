@@ -1621,7 +1621,7 @@ Where the player is. `{ kind, place, since }`
 
 #### `WarframeMission`
 
-A Warframe mission. `{ state, node, planet, type, faction, enemyLevel, fissure, modifiers, selectedAt, loadingAt, startedAt, endedAt, result, durationSeconds, rewards, earned, credits }`
+A Warframe mission. `{ state, node, planet, type, faction, enemyLevel, fissure, modifiers, selectedAt, loadingAt, startedAt, endedAt, result, durationSeconds, rewards, rewardsPending, earned, credits }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
@@ -1641,7 +1641,8 @@ A Warframe mission. `{ state, node, planet, type, faction, enemyLevel, fissure, 
 | `endedAt` | integer or `null` | When it ended. |
 | `result` | `succeeded` \| `failed` \| `aborted` or `null` | `succeeded`, `failed` or `aborted`; `null` before the end, or when the game did not say. |
 | `durationSeconds` | number or `null` | From the start of play to the end, in seconds to the millisecond. |
-| `rewards` | `WarframeRewards` or `null` | What the node can reward, for a widget that follows `warframe.rewards`; `null` otherwise, or for a node without a reward table. |
+| `rewards` | `WarframeRewards` or `null` | What the mission can reward, for a widget that follows `warframe.rewards`; `null` otherwise, for a node without a reward table, or for a mission whose table is not public or not known yet. |
+| `rewardsPending` | boolean | `true` while `rewards` is `null` for now: which table applies is not known yet (a node of the day's Sortie or Archon Hunt, chosen but not loaded; the world or the drop tables not read yet). `false` otherwise, `rewards` given or not. |
 | `earned` | `WarframeEarned` or `null` | The rotations earned from the start, for a type with rotations; `null` otherwise or before the start. |
 | `credits` | integer or `null` | The credits its end screen counts; `null` before the end, or when the game does not say (an aborted mission). |
 
@@ -1784,11 +1785,12 @@ One reward table of a node. `{ kind, rotation, items }`
 
 #### `WarframeRewards`
 
-What a node can reward. `{ tables }`
+What a mission can reward. `{ source, tables }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
-| `tables` | list of `WarframeRewardTable` | The node's tables, at most `MAX_WARFRAME_REWARD_TABLES`. Source: Digital Extremes' drop tables, no guarantees. |
+| `source` | `node` \| `arbitration` \| `sortie` \| `nightmare` | Whose tables: `node`, or the tables of their own that replace a node's: `arbitration` (every Arbitration's), `nightmare` (a Nightmare mission's reward, once, the rotation of its planet), `sortie` (a Sortie's, after its third mission). |
+| `tables` | list of `WarframeRewardTable` | The tables, at most `MAX_WARFRAME_REWARD_TABLES`. Source: Digital Extremes' drop tables, no guarantees. |
 
 #### `WarframeWorldMission`
 

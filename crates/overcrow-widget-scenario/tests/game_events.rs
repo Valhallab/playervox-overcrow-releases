@@ -96,6 +96,7 @@ fn a_session_is_played_without_writing_a_line() {
             "result": null,
             "durationSeconds": null,
             "rewards": null,
+            "rewardsPending": false,
             "earned": null,
             "credits": null
         })
@@ -410,4 +411,35 @@ fn the_glossary_and_the_language_play_like_the_rest() {
         .game_event_updates(&declared(&["warframe.mission"]))
         .expect("played");
     assert_eq!(updates[0].value["glossary"]["language"], json!("en"));
+}
+
+#[test]
+fn rewards_are_the_nodes_unless_a_step_says_whose() {
+    let items = json!([{"id": "forma", "name": "Forma", "quantity": 1, "chance": 0.025}]);
+    let steps = json!([
+        {"gameEvents": {"warframe": {"info": {"mission": {
+            "state": "selected", "node": {"id": "SolNode195"},
+            "rewards": {"tables": [{"kind": "mission", "rotation": null, "items": items}]}
+        }}}}},
+        {"gameEvents": {"warframe": {"info": {"mission": {
+            "rewards": {"source": "sortie"}
+        }}}}},
+        {"gameEvents": {"warframe": {"info": {"mission": {
+            "rewards": null, "rewardsPending": true
+        }}}}}
+    ]);
+    let played = read(&scenario(json!({}), steps)).expect("valid");
+    let updates = played
+        .game_event_updates(&declared(&["warframe.mission", "warframe.rewards"]))
+        .expect("played");
+    let mission = |index: usize| updates[index].value["info"]["mission"].clone();
+    assert_eq!(mission(0)["rewards"]["source"], json!("node"));
+    assert_eq!(mission(0)["rewardsPending"], json!(false));
+    assert_eq!(mission(1)["rewards"]["source"], json!("sortie"));
+    assert_eq!(
+        mission(1)["rewards"]["tables"][0]["items"][0]["id"],
+        json!("forma")
+    );
+    assert_eq!(mission(2)["rewards"], Value::Null);
+    assert_eq!(mission(2)["rewardsPending"], json!(true));
 }

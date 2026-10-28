@@ -187,6 +187,7 @@ fn mission(state: &str) -> Value {
         "result": if state == "ended" { json!("succeeded") } else { Value::Null },
         "durationSeconds": if state == "ended" { json!(300.5) } else { Value::Null },
         "rewards": if state == "in_progress" { rewards() } else { Value::Null },
+        "rewardsPending": state == "selected",
         "earned": if state == "selected" { Value::Null } else { earned() },
         "credits": if state == "ended" { json!(34_300) } else { Value::Null }
     })
@@ -218,7 +219,7 @@ fn glossary() -> Value {
 }
 
 fn rewards() -> Value {
-    json!({"tables": [
+    json!({"source": "node", "tables": [
         {"kind": "mission", "rotation": "A", "items": [
             {"id": "orokin_cell", "name": "Cellule Orokin", "quantity": 3, "chance": 0.0769},
             {"id": "zid_an_core", "name": "Zid-An Core", "quantity": 1, "chance": 0.01}
@@ -458,6 +459,7 @@ fn values_out_of_their_words_are_refused() {
         ("/info/progress/rotation", json!("D")),
         ("/info/location/kind", json!("ship")),
         ("/info/mission/rewards/tables/0/kind", json!("bonus")),
+        ("/info/mission/rewards/source", json!("archon_hunt")),
         ("/info/mission/rewards/tables/0/items/0/name", Value::Null),
         ("/info/mission/node/id", Value::Null),
         ("/session/language", json!("xx")),

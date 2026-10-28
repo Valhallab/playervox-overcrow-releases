@@ -579,6 +579,10 @@ fn complete(
             json!(0)
         }),
         Shape::Bool if value.is_none() => Ok(Value::Bool(false)),
+        // Rewards are the node's unless a step says whose.
+        Shape::Keyword(words) if value.is_none() && *words == warframe::REWARD_SOURCES => {
+            Ok(json!("node"))
+        }
         _ => match value {
             None => Err(ScenarioError::new(path, "missing")),
             Some(value) if shape.matches(value) => Ok(value.clone()),
