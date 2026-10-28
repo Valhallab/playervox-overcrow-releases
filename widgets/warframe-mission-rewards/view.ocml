@@ -24,11 +24,16 @@
 
 <box class={rootClass()}>
   <if test={layout() == "line"}>
-    <box class="line">
+    <box class={hasText(state.s.lineAfter) ? "line after" : "line"} label={lineLabel(state.s, state.now)}>
       <icon class={"line-icon tone-" + state.s.lineTone} name={state.s.lineIcon}/>
-      <text class="line-main">{at(state.s.line, state.s, state.now)}</text>
+      <if test={hasText(state.s.line)}>
+        <text class="line-main">{at(state.s.line, state.s, state.now)}</text>
+      </if>
       <if test={hasText(state.s.lineValue)}>
         <text class="line-big">{at(state.s.lineValue, state.s, state.now)}</text>
+      </if>
+      <if test={hasText(state.s.lineAfter)}>
+        <text class="line-main tone-warning">{state.s.lineAfter}</text>
       </if>
     </box>
   </if>

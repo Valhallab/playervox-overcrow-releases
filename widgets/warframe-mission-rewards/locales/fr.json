@@ -87,5 +87,7 @@
   "feature-rewards": "butin",
   "line-denied": "Accès refusé · Centre de contrôle",
   "status-unreadable": "Missions non lisibles · relancez Warframe",
-  "line-reward": "{node} · {reward}"
+  "line-reward": "{node} · {reward}",
+  "line-denied-after": "· Accès refusé",
+  "line-denied-value": "{value} · Accès refusé"
 }

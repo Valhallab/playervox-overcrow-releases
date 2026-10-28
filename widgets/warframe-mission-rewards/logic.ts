@@ -142,6 +142,8 @@ export interface Screen {
   lineValue: string;
   lineIcon: string;
   lineTone: Tone;
+  /** One line: words after the value ("· Access denied"); empty without. */
+  lineAfter: string;
   /** `{ago}` counts from here, Unix ms. */
   agoFrom: number | null;
   /** An error beside what stays known, in amber; empty without one. */
@@ -438,6 +440,7 @@ function blank(): Screen {
     lineTone: "muted",
     agoFrom: null,
     status: "",
+    lineAfter: "",
   };
 }
 
@@ -799,6 +802,15 @@ export function buildScreen(input: Input): Screen {
     s.lineIcon = "circle-alert";
     s.lineTone = "warning";
   }
+  if (denied !== null) {
+    // One line never cuts its text: the value that stays, then the refusal.
+    if (s.lineValue !== "") {
+      s.line = "";
+      s.lineAfter = t("line-denied-after");
+    } else {
+      s.line = t("line-denied-value", { value: s.node || s.line.split(" · ")[0] || "" });
+    }
+  }
   return s;
 }
 
@@ -936,6 +948,11 @@ export function at(text: string, s: Screen, now: number, target: number | null =
   if (text.includes("{time}")) return text.replace("{time}", countdownText((target ?? now) - now));
   if (text.includes("{ago}") && s.agoFrom !== null) return text.replace("{ago}", agoText(now - s.agoFrom));
   return text;
+}
+
+/** One line's accessible label: everything, the refusal's whole sentence included. */
+export function lineLabel(s: Screen, now: number): string {
+  return [at(s.line, s, now), at(s.lineValue, s, now), s.status].filter((x) => x !== "").join(" · ");
 }
 
 export function eyebrowText(s: Screen, now: number): string {

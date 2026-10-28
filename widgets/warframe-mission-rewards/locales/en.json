@@ -87,5 +87,7 @@
   "feature-rewards": "rewards",
   "line-denied": "Access denied · Control Center",
   "status-unreadable": "Missions can't be read · restart Warframe",
-  "line-reward": "{node} · {reward}"
+  "line-reward": "{node} · {reward}",
+  "line-denied-after": "· Access denied",
+  "line-denied-value": "{value} · Access denied"
 }

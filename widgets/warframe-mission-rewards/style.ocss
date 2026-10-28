@@ -573,3 +573,12 @@
 .empty-title.tone-warning {
   color: var(--color-warning);
 }
+
+/* One line with the refusal after the value: all of it on the left. */
+.line.after .line-big {
+  margin-left: 0;
+}
+
+.line-main.tone-warning {
+  color: var(--color-warning);
+}

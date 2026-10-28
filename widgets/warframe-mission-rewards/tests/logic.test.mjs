@@ -256,6 +256,8 @@ test("an error never takes the place of a value still known: it goes beside it",
   assert.equal(lost.heroLabel, "Rotation B in", "the last countdown stays");
   assert.equal(lost.status, "Allow “Warframe: missions” in the Control Center.");
   assert.equal(lost.lineTone, "warning");
+  assert.equal([lost.line, logic.at(lost.lineValue, lost, now), lost.lineAfter].join("|"), "|14:00|· Access denied", "One line: the value, then the refusal");
+  assert.equal(logic.lineLabel(lost, now), "14:00 · Allow “Warframe: missions” in the Control Center.");
   const noLoot = value({ mission: mission({ rewards: null }), progress: progress({ rewards: 2, rotation: "B", nextRewardAt: START + 900_000 }) });
   noLoot.features.rewards = "undeclared";
   const s = logic.buildScreen(input(noLoot, { now }));
@@ -268,6 +270,9 @@ test("an error never takes the place of a value still known: it goes beside it",
   const kept = logic.buildScreen(input(off, { last }));
   assert.equal(kept.info, "4 rotations earned in 20 min 41");
   assert.equal(kept.status, "Missions can't be read · restart Warframe");
+  const refusedLast = logic.buildScreen(input(null, { last, failure: "permission_denied" }));
+  assert.equal(refusedLast.info, "4 rotations earned in 20 min 41");
+  assert.equal(refusedLast.line, "Mot · Access denied");
 });
 
 test("the widget: the countdown ticks on its second, the rotation moves on alone, the last mission is stored", async () => {
