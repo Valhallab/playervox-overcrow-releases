@@ -38,8 +38,11 @@ Plains. Wide (420 px and more), Full shows the past hunts beside it: one
 line per day, the last three days, with their tricaps and the best one,
 green on the day the best was set.
 
-One line: "06:41 +1.78 · Night 32:14" during a hunt, "Tricap 07:15.37 · New
-best" after one, "Night in 41:10" otherwise.
+One line: "06:41 +1.78 · Night 32:14" during a hunt; after it, the same
+with the frozen time, green for a new best ("07:15.37 −17.03 · Night
+18:02"), amber for a missed tricap ("03:54.27 · Night 32:14"), and by day
+"Day 1:39:18"; "Night in 41:10" otherwise. The night never leaves the line,
+and the line's accessible label is the whole result.
 
 ## Permissions
 

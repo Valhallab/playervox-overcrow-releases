@@ -362,6 +362,15 @@
   color: var(--color-success);
 }
 
+/* A frozen time in One line: green for a best, amber for a missed tricap. */
+.line-big.tone-success {
+  color: var(--color-success);
+}
+
+.line-big.tone-warning {
+  color: var(--color-warning);
+}
+
 .history-head {
   flex-direction: row;
   align-items: center;

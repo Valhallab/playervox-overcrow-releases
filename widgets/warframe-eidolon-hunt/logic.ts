@@ -804,9 +804,6 @@ function hunt(screen: Screen, run: Run, now: number): Screen {
   }
   const end = run.end ?? now;
   screen.big = exact(end - run.start);
-  // One line of a result: the result alone, its exact time leaves no room for the night.
-  screen.lineSub = "";
-  screen.lineSubCls = "line-sub";
   if (run.outcome === "tricap") {
     screen.label = t("tricap");
     const best = model.best;
@@ -820,21 +817,13 @@ function hunt(screen: Screen, run: Run, now: number): Screen {
               delta: signed(centis(best.total) - centis(best.prev.total)),
             });
       screen.hintCls = "hint tone-success";
-      screen.line = [
-        { id: "label", text: screen.label, cls: "line-main tone-success" },
-        { id: "value", text: screen.big, cls: "line-big" },
-      ];
-      screen.lineSub = screen.pill;
-      screen.lineSubCls = "line-sub tone-success";
+      const gap = best.prev === null ? null : centis(best.total) - centis(best.prev.total);
+      resultLine(screen, now, "line-big tone-success", gap);
     } else if (best !== null) {
       const diff = centis(end - run.start) - centis(best.total);
       screen.hint = t("hint-vs-best", { time: exact(best.total), delta: signed(diff) });
       screen.hintCls = `hint ${tone(diff)}`;
-      screen.line = [
-        { id: "label", text: screen.label, cls: "line-main" },
-        { id: "value", text: screen.big, cls: "line-big" },
-        { id: "delta", text: signed(diff), cls: `line-delta ${tone(diff)}` },
-      ];
+      resultLine(screen, now, "line-big", diff);
     }
     return screen;
   }
@@ -849,11 +838,28 @@ function hunt(screen: Screen, run: Run, now: number): Screen {
     screen.hint = t("end-dawn", { captures: count });
   }
   screen.hintCls = "hint tone-warning";
-  screen.line = [
-    { id: "label", text: screen.label, cls: "line-main tone-warning" },
-    { id: "value", text: screen.big, cls: "line-big" },
-  ];
+  resultLine(screen, now, "line-big tone-warning", null);
   return screen;
+}
+
+/**
+ * One line of a result, as during the hunt: the frozen time (green for a
+ * best, amber for a missed tricap), its gap to the best, then the night
+ * left, or the day left by day. The label would leave no room for the
+ * night, which never disappears; the whole sentence is the line's label.
+ */
+function resultLine(screen: Screen, now: number, timeCls: string, gap: number | null): void {
+  screen.line = [{ id: "value", text: screen.big, cls: timeCls }];
+  if (gap !== null) {
+    screen.line.push({ id: "delta", text: signed(gap), cls: `line-delta ${tone(gap)}` });
+  }
+  const cycle = cycleAt(model.nightEnd, now);
+  if (cycle !== null && !cycle.night) {
+    screen.lineSub = `${t("line-day")} ${countdown(cycle.endsAt - now)}`;
+    screen.lineSubCls = "line-sub";
+  }
+  const parts = [`${screen.label} ${screen.big}`, screen.pill, screen.hint, screen.lineSub];
+  screen.lineLabel = parts.filter((part) => part !== "").join(". ");
 }
 
 /** The screen at `now`, from the model. */

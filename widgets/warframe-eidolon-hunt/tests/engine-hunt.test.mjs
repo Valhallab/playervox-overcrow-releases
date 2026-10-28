@@ -58,8 +58,11 @@ test("a perfect tricap freezes the exact total and becomes the first best", asyn
     hint: "Your first best",
     chip: "Night 22:20",
     rows: ["Teralyst 01:48.22", "Gantulyst 02:12.05", "Hydrolyst 03:15.10"],
-    line: "Tricap 07:15.37 New best",
+    line: "07:15.37 Night 22:20",
   });
+  // One line: the frozen time in green, then the night; the label says it all.
+  assert.equal(state.view.line[0].cls, "line-big tone-success");
+  assert.equal(state.view.lineLabel, "Tricap 07:15.37. New best. Your first best. Night 22:20");
   assert.equal(state.view.pill, "New best");
   assert.deepEqual(store.get("best"), { s: T, total: 435_370, splits: [108_220, 132_050, 195_100], prev: null });
   assert.deepEqual(store.get("history"), [{ s: T, end: T + 435_370, caps: 3, total: 435_370 }]);
@@ -109,8 +112,9 @@ test("a Gantulyst killed: tricap missed, the timer frozen at its death", async (
   assert.equal(state.view.hint, "1\u00a0capture of\u00a03\u00a0\u00b7 Gantulyst killed");
   assert.equal(state.view.hintCls, "hint tone-warning");
   assert.deepEqual(texts(state.view).rows, ["Teralyst \u22125.12 01:40.00", "Gantulyst killed 02:10.00", "Hydrolyst \u2014"]);
-  // One line: the result alone, without the night.
-  assert.equal(texts(state.view).line, "Tricap missed 03:50.00");
+  // One line: the frozen time in amber, then the night, which never disappears.
+  assert.equal(texts(state.view).line, "03:50.00 Night 9:50");
+  assert.equal(state.view.line[0].cls, "line-big tone-warning");
   await advance(vm, store, SECOND);
   assert.equal(state.view.big, "03:50.00");
   assert.equal(store.get("history").at(-1).end, V + 230_000);
@@ -133,7 +137,8 @@ test("the Hydrolyst gone at dawn: the timer freezes on the real duration", async
   assert.equal(state.view.cycleIcon, "sun");
   assert.equal(state.view.chip, "");
   assert.equal(texts(state.view).rows.at(-1), "Hydrolyst fled " + exactOf(NIGHT_END + 12_000 - (X + 250_000)));
-  assert.equal(texts(state.view).line, "Tricap missed " + exactOf(NIGHT_END + 12_000 - X));
+  // By day, the day left follows the frozen time.
+  assert.equal(texts(state.view).line, exactOf(NIGHT_END + 12_000 - X) + " Day 1:39:20");
   // The killed run ended when the next one began; neither is a best.
   const history = store.get("history");
   assert.deepEqual(history.map((past) => [past.caps, past.total]), [[3, 435_370], [3, 420_000], [1, null], [2, null]]);
