@@ -1,0 +1,334 @@
+// Warframe mission briefing: what the chosen mission is up against and
+// what hurts it, read during the loading screen. It opens when a mission is
+// chosen on the star chart, stays through the loading, folds into one line
+// once the mission starts and waits again after it. Everything comes from
+// two features of Warframe's game events, `warframe.mission` and
+// `warframe.world` (the condition of the day's Sortie); the weaknesses are
+// embedded below. No network, no storage.
+import {
+  gameEvents,
+  host,
+  initState,
+  onHost,
+  option,
+  t,
+  timers,
+  type IconName,
+  type WarframeEvents,
+  type WarframeMission,
+  type WarframeModifier,
+  type WarframeWorld,
+} from "@overcrow/sdk";
+
+// Faction weaknesses of Damage 3.0 (Update 36.0, 2024-06-18; Scaldra and
+// Techrot, Update 38). Source: the official Warframe wiki,
+// https://wiki.warframe.com/w/Damage/Overview_Table (revision of
+// 2026-10-01) and its faction pages, checked on 2026-10-28. "+" is x1.5
+// damage taken, "-" x0.5. Each faction here is weak to two types; only
+// factions with a resistance have `avoid`. Sub-factions are handled in
+// `advice`: Kuva Grineer share the Grineer's weaknesses; Corpus Amalgams
+// (Jupiter) are weak to Magnetic only among the Corpus' two; the Deimos
+// Infested of the Cambion Drift share none with the Infested.
+interface Weakness {
+  readonly use: readonly DamageId[];
+  readonly avoid: readonly DamageId[];
+}
+
+type DamageId =
+  | "impact"
+  | "puncture"
+  | "slash"
+  | "cold"
+  | "electricity"
+  | "heat"
+  | "toxin"
+  | "corrosive"
+  | "gas"
+  | "magnetic"
+  | "radiation"
+  | "viral";
+
+export const WEAKNESSES: Readonly<Record<string, Weakness>> = {
+  grineer: { use: ["impact", "corrosive"], avoid: [] },
+  corpus: { use: ["puncture", "magnetic"], avoid: [] },
+  infested: { use: ["slash", "heat"], avoid: [] },
+  corrupted: { use: ["puncture", "viral"], avoid: ["radiation"] },
+  sentient: { use: ["cold", "radiation"], avoid: ["corrosive"] },
+  narmer: { use: ["slash", "toxin"], avoid: ["magnetic"] },
+  murmur: { use: ["electricity", "radiation"], avoid: ["viral"] },
+  scaldra: { use: ["impact", "corrosive"], avoid: ["gas"] },
+  techrot: { use: ["magnetic", "gas"], avoid: ["cold"] },
+};
+
+/** Each damage type's Lucide icon; its name comes from the locales. */
+const DAMAGE_ICONS: Readonly<Record<DamageId, IconName>> = {
+  impact: "hammer",
+  puncture: "arrow-down-to-dot",
+  slash: "sword",
+  cold: "snowflake",
+  electricity: "zap",
+  heat: "flame",
+  toxin: "droplet",
+  corrosive: "flask-conical",
+  gas: "cloud-fog",
+  magnetic: "magnet",
+  radiation: "radiation",
+  viral: "biohazard",
+};
+
+/** A neutral icon for each modifier; none carries a state colour. */
+const MODIFIER_ICONS: Readonly<Record<WarframeModifier["id"], IconName>> = {
+  steel_path: "flame",
+  arbitration: "scale",
+  sortie: "swords",
+  archon_hunt: "crown",
+  nightmare: "moon",
+  void_storm: "tornado",
+  alert: "bell",
+  lich: "skull",
+};
+
+/** Factions with a dot colour of their own (the others are grey). */
+const FACTION_DOTS = new Set(Object.keys(WEAKNESSES));
+
+export interface Damage {
+  readonly id: DamageId;
+  readonly name: string;
+  readonly icon: IconName;
+  readonly cls: string;
+}
+
+export interface Modifier {
+  readonly id: string;
+  readonly icon: IconName;
+  readonly title: string;
+  readonly text: string;
+}
+
+/** What the view shows, built again at each change. */
+export interface Brief {
+  /** `wait`: one line saying what to do; `full`: the briefing; `strip`: one line in mission. */
+  readonly mode: "wait" | "full" | "strip";
+  readonly waitText: string;
+  readonly waitIcon: IconName;
+  readonly waitTone: "muted" | "warning";
+  /** Node · planet · type. */
+  readonly where: string;
+  readonly level: string;
+  readonly faction: string;
+  readonly dot: string;
+  readonly use: readonly Damage[];
+  readonly avoid: readonly Damage[];
+  readonly mods: readonly Modifier[];
+  /** Said instead of advice when the enemies have none. */
+  readonly note: string;
+}
+
+declare module "@overcrow/sdk" {
+  interface WidgetState {
+    brief: Brief;
+    root: string;
+  }
+}
+
+/** The latest value of the subscription, `null` before the first. */
+let latest: WarframeEvents | null = null;
+/** Why the subscription failed, or `null`. */
+let failure: string | null = null;
+
+const state = initState({ brief: build(null, null), root: "" });
+state.root = rootClass(state.brief);
+
+function refresh(): void {
+  state.brief = build(latest, failure);
+  state.root = rootClass(state.brief);
+}
+
+function subscribe(): void {
+  gameEvents.warframe.subscribe((update) => {
+    if (update.ok) {
+      latest = update.value;
+      failure = null;
+    } else {
+      failure = update.error.code;
+      // A refusal lasts until the user grants it again, which restarts the
+      // widget; anything else is retried.
+      if (failure !== "permission_denied") retryLater();
+    }
+    refresh();
+  });
+}
+
+let retry: { cancel(): void } | null = null;
+function retryLater(): void {
+  retry?.cancel();
+  retry = timers.after(30_000, () => {
+    retry = null;
+    subscribe();
+  });
+}
+
+onHost((changed) => {
+  if (changed.some((key) => key === "locale" || key === "options" || key === "viewport" || key === "theme" || key === "messages")) {
+    refresh();
+  }
+});
+
+subscribe();
+
+function wait(text: string, icon: IconName, tone: Brief["waitTone"] = "muted"): Brief {
+  return {
+    mode: "wait",
+    waitText: text,
+    waitIcon: icon,
+    waitTone: tone,
+    where: "",
+    level: "",
+    faction: "",
+    dot: "",
+    use: [],
+    avoid: [],
+    mods: [],
+    note: "",
+  };
+}
+
+/** The briefing of `value`, or the line that says why there is none. */
+export function build(value: WarframeEvents | null, failed: string | null): Brief {
+  if (failed === "permission_denied") return wait(t("refused"), "circle-alert", "warning");
+  if (failed !== null) return wait(t("unavailable"), "circle-alert", "warning");
+  if (value === null) return wait(t("pick-mission"), "map-pin");
+  if (!value.playing) return wait(t("game-closed"), "power");
+  if (value.features.mission === "unavailable") return wait(t("unavailable"), "circle-alert", "warning");
+  const mission = value.info.mission;
+  if (mission === null || mission.state === "ended" || beforeSession(mission, value.session)) {
+    return wait(t("pick-mission"), "map-pin");
+  }
+  const strip = mission.state === "in_progress" || option("layout", "full") === "line";
+  return briefing(mission, value.info.world, strip ? "strip" : "full");
+}
+
+/** A mission of an earlier launch of Warframe: the host keeps it until the next. */
+function beforeSession(mission: WarframeMission, session: WarframeEvents["session"]): boolean {
+  if (session === null) return false;
+  const at = mission.startedAt ?? mission.loadingAt ?? mission.selectedAt;
+  return at !== null && at < session.startedAt;
+}
+
+function briefing(mission: WarframeMission, world: WarframeWorld | null, mode: "full" | "strip"): Brief {
+  const factionId = mission.faction?.id ?? null;
+  const advice = factionId === null ? null : adviceFor(factionId, mission);
+  const named = factionId === null ? null : (mission.faction?.name ?? knownName(factionId));
+  const use = advice === null ? [] : damages(advice.use);
+  return {
+    mode,
+    waitText: "",
+    waitIcon: "map-pin",
+    waitTone: "muted",
+    where: [mission.node.name, mission.planet?.name, mission.type?.name]
+      .filter((part): part is string => typeof part === "string" && part !== "")
+      .join(" · "),
+    level: levelText(mission.enemyLevel),
+    faction: named ?? t("unknown-enemies"),
+    dot: `dot f-${factionId !== null && FACTION_DOTS.has(factionId) ? factionId : "unknown"}`,
+    use,
+    avoid: advice === null ? [] : damages(advice.avoid),
+    mods: modifiers(mission, world),
+    note: use.length === 0 ? t("no-advice") : "",
+  };
+}
+
+/**
+ * The advice for `factionId` in `mission`, or `null` when the enemies of
+ * the mission have none we are sure of.
+ */
+export function adviceFor(factionId: string, mission: Pick<WarframeMission, "planet" | "type">): Weakness | null {
+  const weakness = WEAKNESSES[factionId];
+  if (weakness === undefined) return null;
+  const planet = mission.planet?.id ?? null;
+  // The Cambion Drift's Infested are the Deimos Infested: weak to Blast
+  // and Gas, resistant to Viral. The star chart's Deimos nodes keep the
+  // Infested of the Orokin Derelicts. Without a sure way to tell a bounty
+  // of the Drift, no advice rather than a wrong one.
+  if (factionId === "infested" && planet === "deimos") {
+    const type = mission.type?.id ?? null;
+    if (type === null || type === "free_roam") return null;
+  }
+  // Jupiter's Corpus include the Amalgams of the Gas City: Magnetic hurts
+  // both, Puncture only the Corpus.
+  if (factionId === "corpus" && planet === "jupiter") return { use: ["magnetic"], avoid: [] };
+  return weakness;
+}
+
+function knownName(factionId: string): string | null {
+  const key = `faction-${factionId}`;
+  const name = t(key);
+  return name === key ? null : name;
+}
+
+function damages(ids: readonly DamageId[]): Damage[] {
+  return ids.map((id) => ({ id, name: t(`damage-${id}`), icon: DAMAGE_ICONS[id], cls: `d-${id}` }));
+}
+
+/** "Lv. 30–40", "Lv. 30", or nothing. */
+export function levelText(level: WarframeMission["enemyLevel"]): string {
+  if (level === null) return "";
+  return level.min === level.max ? t("level", { level: level.min }) : t("level-range", { min: level.min, max: level.max });
+}
+
+/**
+ * One line per modifier, in the mockups' order: the Steel Path, the Void
+ * Fissure, then the others as the game gives them. A line carries a hint
+ * only when it helps.
+ */
+export function modifiers(mission: WarframeMission, world: WarframeWorld | null): Modifier[] {
+  const lines: Modifier[] = [];
+  const steelPath = mission.modifiers.find((each) => each.id === "steel_path");
+  if (steelPath !== undefined) lines.push({ id: "steel_path", icon: "flame", title: steelPath.name, text: "" });
+  if (mission.fissure !== null) {
+    const era = mission.fissure.name;
+    // In a Railjack Void Storm the relics open without Reactant.
+    const storm = mission.modifiers.some((each) => each.id === "void_storm");
+    lines.push({
+      id: "fissure",
+      icon: "hexagon",
+      title: era === null ? t("fissure-plain") : t("fissure", { era }),
+      text: storm ? "" : t("fissure-hint"),
+    });
+  }
+  for (const each of mission.modifiers) {
+    if (each.id === "steel_path") continue;
+    lines.push({ id: each.id, icon: MODIFIER_ICONS[each.id], title: modifierTitle(each), text: modifierText(each, mission, world) });
+  }
+  return lines;
+}
+
+function modifierTitle(modifier: WarframeModifier): string {
+  return modifier.stage === null ? modifier.name : t("stage", { name: modifier.name, stage: modifier.stage });
+}
+
+function modifierText(modifier: WarframeModifier, mission: WarframeMission, world: WarframeWorld | null): string {
+  if (modifier.id === "arbitration") return t("arbitration-hint");
+  if (modifier.id === "sortie") return sortieCondition(modifier, mission, world);
+  return "";
+}
+
+/** The condition of this Sortie mission, from the world of the day; nothing without it. */
+export function sortieCondition(modifier: WarframeModifier, mission: WarframeMission, world: WarframeWorld | null): string {
+  const missions = world?.sortie?.missions ?? [];
+  const staged = modifier.stage === null ? undefined : missions[modifier.stage - 1];
+  const match = staged?.node.id === mission.node.id ? staged : missions.find((each) => each.node.id === mission.node.id);
+  return match?.modifier?.name ?? "";
+}
+
+/** Side by side only when there is something to put on the right. */
+export function rootClass(brief: Brief): string {
+  const wide = brief.mode === "full" && host.viewport.width >= 500 && brief.mods.length > 0 ? " wide" : "";
+  const unknown = brief.mode !== "wait" && brief.use.length === 0 ? " unknown" : "";
+  return `wf briefing ${brief.mode}${wide}${unknown} theme-${host.theme}`;
+}
+
+/** "Impact, Corrosive". */
+export function names(list: readonly Damage[]): string {
+  return list.map((each) => each.name).join(", ");
+}

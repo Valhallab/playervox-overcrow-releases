@@ -1,0 +1,162 @@
+{
+  "scenarioVersion": 1,
+  "name": "techrot",
+  "description": "A mission in Höllvania against the Techrot: Gas among the types to use, Cold to avoid.",
+  "host": {
+    "startAt": 1793199600000
+  },
+  "steps": [
+    {
+      "gameEvents": {
+        "warframe": {
+          "playing": true
+        }
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode854",
+                "name": "Exterminate: Techrot"
+              },
+              "planet": {
+                "id": "hollvania",
+                "name": "Höllvania"
+              },
+              "type": {
+                "id": "extermination",
+                "name": "Extermination"
+              },
+              "faction": {
+                "id": "techrot",
+                "name": "Techrot"
+              },
+              "enemyLevel": {
+                "min": 65,
+                "max": 70
+              },
+              "fissure": null,
+              "modifiers": []
+            }
+          },
+          "event": "mission_selected"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Techrot",
+          "Magnetic",
+          "Gas",
+          "Avoid: Cold"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode854",
+                "name": "Exterminate: Techrot"
+              },
+              "planet": {
+                "id": "hollvania",
+                "name": "Höllvania"
+              },
+              "type": {
+                "id": "extermination",
+                "name": "Extermination"
+              },
+              "faction": {
+                "id": "techrot",
+                "name": "Techrot"
+              },
+              "enemyLevel": {
+                "min": 65,
+                "max": 70
+              },
+              "fissure": null,
+              "modifiers": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "techrot-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode854",
+                "name": "Exterminate: Techrot"
+              },
+              "planet": {
+                "id": "hollvania",
+                "name": "Höllvania"
+              },
+              "type": {
+                "id": "extermination",
+                "name": "Extermination"
+              },
+              "faction": {
+                "id": "techrot",
+                "name": "Techrot"
+              },
+              "enemyLevel": {
+                "min": 65,
+                "max": 70
+              },
+              "fissure": null,
+              "modifiers": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "techrot-en-100",
+        "fault": "none"
+      }
+    }
+  ]
+}

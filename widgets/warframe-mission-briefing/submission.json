@@ -1,0 +1,12 @@
+{
+  "justifications": [
+    {
+      "permission": "gameEvent:warframe.mission",
+      "text": "Shows the briefing of the mission you choose on the star chart: its node, faction, enemy level and modifiers, while it loads, then one line during the mission."
+    },
+    {
+      "permission": "gameEvent:warframe.world",
+      "text": "Reads the day's Sortie to show the condition of the Sortie mission you chose (for example Sniper Only)."
+    }
+  ]
+}

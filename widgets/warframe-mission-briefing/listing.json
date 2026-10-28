@@ -1,0 +1,19 @@
+{
+  "author": "PlayerVox",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/warframe-mission-briefing",
+  "preview": "assets/preview.png",
+  "defaultLocale": "en",
+  "localizations": [
+    {
+      "locale": "en",
+      "name": "Mission Briefing",
+      "description": "While a Warframe mission loads: the enemy faction, the damage types it is weak to and the one to avoid, the enemy level, and what changes the mission (Steel Path, Void Fissure, Sortie condition, Arbitration). Folds into one line once the mission starts. Free and open source. Not affiliated with Digital Extremes."
+    },
+    {
+      "locale": "fr",
+      "name": "Briefing de mission",
+      "description": "Pendant le chargement d’une mission Warframe : la faction ennemie, les dégâts à utiliser et celui à éviter, le niveau des ennemis et ce qui change la mission (Route de l’Acier, Fissure du Néant, condition de Sortie, Arbitrage). Se replie en une ligne en mission. Gratuit et open source. Non affilié à Digital Extremes."
+    }
+  ]
+}

@@ -1,0 +1,263 @@
+{
+  "scenarioVersion": 1,
+  "name": "corrupted",
+  "description": "A Survival on Mot against the Corrupted: Radiation to avoid.",
+  "host": {
+    "startAt": 1793199600000
+  },
+  "steps": [
+    {
+      "gameEvents": {
+        "warframe": {
+          "playing": true
+        }
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode409",
+                "name": "Mot"
+              },
+              "planet": {
+                "id": "void",
+                "name": "Void"
+              },
+              "type": {
+                "id": "survival",
+                "name": "Survival"
+              },
+              "faction": {
+                "id": "corrupted",
+                "name": "Corrupted"
+              },
+              "enemyLevel": {
+                "min": 40,
+                "max": 45
+              },
+              "fissure": null,
+              "modifiers": []
+            }
+          },
+          "event": "mission_selected"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Mot · Void · Survival",
+          "Corrupted",
+          "Puncture",
+          "Viral",
+          "Avoid: Radiation"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode409",
+                "name": "Mot"
+              },
+              "planet": {
+                "id": "void",
+                "name": "Néant"
+              },
+              "type": {
+                "id": "survival",
+                "name": "Survie"
+              },
+              "faction": {
+                "id": "corrupted",
+                "name": "Corrompus"
+              },
+              "enemyLevel": {
+                "min": 40,
+                "max": 45
+              },
+              "fissure": null,
+              "modifiers": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "corrupted-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode409",
+                "name": "Mot"
+              },
+              "planet": {
+                "id": "void",
+                "name": "Void"
+              },
+              "type": {
+                "id": "survival",
+                "name": "Survival"
+              },
+              "faction": {
+                "id": "corrupted",
+                "name": "Corrupted"
+              },
+              "enemyLevel": {
+                "min": 40,
+                "max": 45
+              },
+              "fissure": null,
+              "modifiers": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "corrupted-en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode409",
+                "name": "Mot"
+              },
+              "planet": {
+                "id": "void",
+                "name": "Néant"
+              },
+              "type": {
+                "id": "survival",
+                "name": "Survie"
+              },
+              "faction": {
+                "id": "corrupted",
+                "name": "Corrompus"
+              },
+              "enemyLevel": {
+                "min": 40,
+                "max": 45
+              },
+              "fissure": null,
+              "modifiers": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1500,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "corrupted-fr-150",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode409",
+                "name": "Mot"
+              },
+              "planet": {
+                "id": "void",
+                "name": "Void"
+              },
+              "type": {
+                "id": "survival",
+                "name": "Survival"
+              },
+              "faction": {
+                "id": "corrupted",
+                "name": "Corrupted"
+              },
+              "enemyLevel": {
+                "min": 40,
+                "max": 45
+              },
+              "fissure": null,
+              "modifiers": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1500,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "corrupted-en-150",
+        "fault": "none"
+      }
+    }
+  ]
+}

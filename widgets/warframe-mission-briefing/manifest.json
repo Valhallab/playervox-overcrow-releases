@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.playervox.overcrow.warframe.mission-briefing",
+  "version": "1.0.0",
+  "name": {
+    "en": "Mission Briefing",
+    "fr": "Briefing de mission"
+  },
+  "sizing": {
+    "fit": "height",
+    "preferred": {
+      "width": 300,
+      "height": 240
+    },
+    "min": {
+      "width": 220,
+      "height": 40
+    },
+    "max": {
+      "width": 520,
+      "height": 600
+    }
+  },
+  "permissions": {
+    "gameEvents": ["warframe.mission", "warframe.world"]
+  },
+  "wrapper": {
+    "menu": [
+      {
+        "type": "choice",
+        "id": "layout",
+        "icon": "rows-3",
+        "label": {
+          "en": "Layout",
+          "fr": "Affichage"
+        },
+        "choices": [
+          {
+            "value": "line",
+            "label": {
+              "en": "One line",
+              "fr": "Une ligne"
+            }
+          },
+          {
+            "value": "full",
+            "label": {
+              "en": "Full",
+              "fr": "Complet"
+            }
+          }
+        ],
+        "default": "full"
+      }
+    ]
+  }
+}
