@@ -41,10 +41,14 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
 mod assets;
+mod game_events;
 pub mod report;
 
 use assets::asset_components;
 pub use assets::load_assets;
+pub use game_events::{
+    GameEventUpdate, GameEvents, GameEventsStep, GameStep, feature_of_event, game_service,
+};
 
 /// The scenario format this crate reads.
 pub const SCENARIO_VERSION: u32 = 1;
@@ -650,6 +654,8 @@ pub enum Step {
     Menu(MenuStep),
     /// The next value of a capability subscription.
     Publish(Publish),
+    /// What changes in a game's events (`gameEvents.<game>.subscribe`).
+    GameEvents(GameEventsStep),
     Expect(Box<Expect>),
 }
 
@@ -779,7 +785,9 @@ pub struct Publish {
 }
 
 /// A member that is present, `null` included (`Some(Value::Null)`).
-fn present<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Option<Value>, D::Error> {
+pub(crate) fn present<'de, D: serde::Deserializer<'de>>(
+    deserializer: D,
+) -> Result<Option<Value>, D::Error> {
     Value::deserialize(deserializer).map(Some)
 }
 
@@ -1189,7 +1197,7 @@ pub fn resolve_assets(
     })
 }
 
-fn service_returns(name: &str) -> Option<overcrow_widget_schema::results::Shape> {
+pub(crate) fn service_returns(name: &str) -> Option<overcrow_widget_schema::results::Shape> {
     service(name).map(|service| service.returns)
 }
 
@@ -1198,6 +1206,39 @@ fn json_bytes(value: &Value) -> usize {
 }
 
 impl Scenario {
+    /// The values the fake host of game events publishes, step by step,
+    /// for a manifest that declares `declared` (`warframe.mission`…): the
+    /// virtual time of each step is `host.startAt` plus the `advance` steps
+    /// before it, and a `publish` step of a game's service sets its value.
+    pub fn game_event_updates(
+        &self,
+        declared: &BTreeSet<String>,
+    ) -> Result<Vec<GameEventUpdate>, ScenarioError> {
+        let mut games = GameEvents::new(&self.fixtures, declared);
+        let mut now = self.host.start_at;
+        let mut updates = Vec::new();
+        for (index, step) in self.steps.iter().enumerate() {
+            match step {
+                Step::Advance(advance) => now = now.saturating_add(advance.ms),
+                Step::Publish(Publish {
+                    service,
+                    value: Some(value),
+                    ..
+                }) => games.published(service, value),
+                Step::GameEvents(step) => {
+                    let (service, value) = games.apply(&format!("steps[{index}]"), step, now)?;
+                    updates.push(GameEventUpdate {
+                        step: index,
+                        service,
+                        value,
+                    });
+                }
+                _ => {}
+            }
+        }
+        Ok(updates)
+    }
+
     /// Every check that needs nothing but the scenario.
     pub fn check(&self) -> Checked {
         if !SUPPORTED_SCENARIO_VERSIONS.contains(&self.scenario_version) {
@@ -1456,6 +1497,9 @@ impl Scenario {
                         }
                     }
                 }
+                Step::GameEvents(step) => {
+                    game_events::one_game(&path, step)?;
+                }
                 Step::Expect(expect) => {
                     check_expect(&format!("{path}.expect"), expect)?;
                     if let Some(image) = &expect.image
@@ -1475,6 +1519,13 @@ impl Scenario {
                 format!("at most {MAX_CAPTURES} images"),
             ));
         }
+        // Every value a game's fake host publishes has its service's shape,
+        // whatever the manifest declares.
+        let every: BTreeSet<String> = overcrow_widget_schema::game_events::GAME_EVENT_FEATURES
+            .iter()
+            .map(|feature| feature.name.to_owned())
+            .collect();
+        self.game_event_updates(&every)?;
         Ok(())
     }
 
@@ -1493,6 +1544,20 @@ impl Scenario {
     /// declaration, menu rows and option values that exist, and the
     /// services a fixture answers declared.
     pub fn check_against(&self, manifest: &Manifest) -> Checked {
+        for (index, step) in self.steps.iter().enumerate() {
+            if let Step::GameEvents(step) = step {
+                let path = format!("steps[{index}]");
+                for (here, feature) in game_events::touched_features(&path, step) {
+                    if !manifest.permissions.game_events.contains(&feature) {
+                        return Err(ScenarioError::new(
+                            here,
+                            format!("`{feature}` is not declared by the manifest's `gameEvents`"),
+                        ));
+                    }
+                }
+            }
+        }
+        self.game_event_updates(&manifest.permissions.game_events)?;
         let declared = declared_items(manifest);
         if let Grants::Items(items) = &self.host.grants
             && let Some(item) = items.difference(&declared).next()

@@ -413,3 +413,20 @@ fn the_modifier_words_are_the_listed_modifiers() {
             .collect::<Vec<_>>()
     );
 }
+
+#[test]
+fn each_event_belongs_to_one_feature() {
+    for (events, feature) in [
+        (warframe::MISSION_EVENTS, "mission"),
+        (warframe::PROGRESS_EVENTS, "progress"),
+        (warframe::CYCLE_EVENTS, "eidolons"),
+        (warframe::EIDOLON_EVENTS, "eidolons"),
+        (warframe::SQUAD_EVENTS, "squad"),
+        (warframe::LOCATION_EVENTS, "location"),
+    ] {
+        for event in events {
+            assert_eq!(warframe::feature_of_event(event), Some(feature), "{event}");
+        }
+    }
+    assert_eq!(warframe::feature_of_event("relic_opened"), None);
+}

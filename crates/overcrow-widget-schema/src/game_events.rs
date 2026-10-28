@@ -146,6 +146,22 @@ pub mod warframe {
     pub const SQUAD_EVENTS: &[&str] = &["member_joined", "member_left"];
     pub const LOCATION_EVENTS: &[&str] = &["location_changed"];
 
+    /// The feature an event type belongs to: a widget gets only the events
+    /// of the features it lists.
+    pub fn feature_of_event(event: &str) -> Option<&'static str> {
+        [
+            (MISSION_EVENTS, "mission"),
+            (PROGRESS_EVENTS, "progress"),
+            (CYCLE_EVENTS, "eidolons"),
+            (EIDOLON_EVENTS, "eidolons"),
+            (SQUAD_EVENTS, "squad"),
+            (LOCATION_EVENTS, "location"),
+        ]
+        .into_iter()
+        .find(|(events, _)| events.contains(&event))
+        .map(|(_, feature)| feature)
+    }
+
     /// What changes a mission (`mission.modifiers[].id`).
     pub const MODIFIERS: &[Named] = &[
         named("steel_path", "Steel Path"),
