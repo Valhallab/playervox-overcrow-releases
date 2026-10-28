@@ -1,0 +1,243 @@
+{
+  "scenarioVersion": 1,
+  "name": "moderated",
+  "description": "PlayerVox's moderation removed the review of a published rating, and the user types it again: the publication is refused, the message says to edit it or to post the rating without it, and the draft stays; dark English and light French, 100 % and 150 %, and at the smallest width. The edited review is then published.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "playervox.rating.subscribe": {
+        "state": "ready",
+        "name": "Portal 2",
+        "offline": false,
+        "rating": {
+          "gameplay": 96,
+          "art": 88,
+          "tech": 94,
+          "review": null,
+          "publishedAt": null,
+          "offsetMinutes": null
+        }
+      }
+    },
+    "intents": {
+      "playervox.rating.publish": [
+        {
+          "error": "review_removed_by_moderation"
+        },
+        "accepted"
+      ]
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "93",
+          "Your published rating",
+          "Update my rating"
+        ],
+        "intents": []
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Review, optional"
+        }
+      }
+    },
+    {
+      "text": "Great."
+    },
+    {
+      "expect": {
+        "text": [
+          "Unpublished draft",
+          "Update my rating"
+        ],
+        "noText": [
+          "This review was removed by moderation. Edit it, or post the rating without a review."
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Update my rating"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "This review was removed by moderation. Edit it, or post the rating without a review.",
+          "Unpublished draft",
+          "Update my rating"
+        ],
+        "intents": [
+          {
+            "intent": "playervox.rating.publish",
+            "fields": {
+              "gameplay": 96,
+              "art": 88,
+              "tech": 94,
+              "review": "Great."
+            },
+            "outcome": "review_removed_by_moderation"
+          }
+        ],
+        "image": "moderated-dark-en"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "This review was removed by moderation. Edit it, or post the rating without a review."
+        ],
+        "image": "moderated-dark-en-150"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "theme": "light",
+        "scale": 1000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Cette critique a été retirée par la modération. Modifiez-la, ou publiez la note sans critique.",
+          "Brouillon non publié",
+          "Mettre à jour ma note"
+        ],
+        "image": "moderated-light-fr"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Cette critique a été retirée par la modération. Modifiez-la, ou publiez la note sans critique."
+        ],
+        "image": "moderated-light-fr-150"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 280,
+          "height": 420
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Cette critique a été retirée par la modération. Modifiez-la, ou publiez la note sans critique."
+        ],
+        "image": "moderated-narrow-light-fr"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "This review was removed by moderation. Edit it, or post the rating without a review."
+        ],
+        "image": "moderated-narrow-dark-en"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Review, optional"
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "End",
+        "modifiers": [
+          "ctrl"
+        ]
+      }
+    },
+    {
+      "text": " Twice."
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Update my rating"
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "This review was removed by moderation. Edit it, or post the rating without a review."
+        ],
+        "intents": [
+          {
+            "intent": "playervox.rating.publish",
+            "fields": {
+              "gameplay": 96,
+              "art": 88,
+              "tech": 94,
+              "review": "Great. Twice."
+            },
+            "outcome": "accepted"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Portal 2",
+          "offline": false,
+          "rating": {
+            "gameplay": 96,
+            "art": 88,
+            "tech": 94,
+            "review": "Great. Twice.",
+            "publishedAt": null,
+            "offsetMinutes": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Saved on PlayerVox",
+          "Your published rating"
+        ],
+        "noText": [
+          "This review was removed by moderation. Edit it, or post the rating without a review."
+        ]
+      }
+    }
+  ]
+}

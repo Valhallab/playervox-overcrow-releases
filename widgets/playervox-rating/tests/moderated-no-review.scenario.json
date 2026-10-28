@@ -1,0 +1,150 @@
+{
+  "scenarioVersion": 1,
+  "name": "moderated-no-review",
+  "description": "A first rating whose review PlayerVox's moderation removed before: refused with the moderation message; the review emptied, the rating alone is published.",
+  "host": {
+    "mode": "interactive"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "playervox.rating.subscribe": {
+        "state": "ready",
+        "name": "Half-Life 2",
+        "offline": false,
+        "rating": null
+      }
+    },
+    "intents": {
+      "playervox.rating.publish": [
+        {
+          "error": "review_removed_by_moderation"
+        },
+        "accepted"
+      ]
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Half-Life 2",
+          "Unpublished draft",
+          "Publish my rating"
+        ],
+        "intents": []
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Review, optional"
+        }
+      }
+    },
+    {
+      "text": "Solid port."
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Publish my rating"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "This review was removed by moderation. Edit it, or post the rating without a review.",
+          "Unpublished draft",
+          "Publish my rating"
+        ],
+        "intents": [
+          {
+            "intent": "playervox.rating.publish",
+            "fields": {
+              "gameplay": 50,
+              "art": 50,
+              "tech": 50,
+              "review": "Solid port."
+            },
+            "outcome": "review_removed_by_moderation"
+          }
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Review, optional"
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "A",
+        "modifiers": [
+          "ctrl"
+        ]
+      }
+    },
+    {
+      "key": {
+        "key": "Backspace"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Publish my rating"
+        }
+      }
+    },
+    {
+      "expect": {
+        "noText": [
+          "This review was removed by moderation. Edit it, or post the rating without a review."
+        ],
+        "intents": [
+          {
+            "intent": "playervox.rating.publish",
+            "fields": {
+              "gameplay": 50,
+              "art": 50,
+              "tech": 50
+            },
+            "outcome": "accepted"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "playervox.rating.subscribe",
+        "value": {
+          "state": "ready",
+          "name": "Half-Life 2",
+          "offline": false,
+          "rating": {
+            "gameplay": 50,
+            "art": 50,
+            "tech": 50,
+            "review": null,
+            "publishedAt": null,
+            "offsetMinutes": null
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Saved on PlayerVox",
+          "Your published rating"
+        ],
+        "noText": [
+          "This review was removed by moderation. Edit it, or post the rating without a review."
+        ]
+      }
+    }
+  ]
+}
