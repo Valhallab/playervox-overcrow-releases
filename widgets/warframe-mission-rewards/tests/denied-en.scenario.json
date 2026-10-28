@@ -1,0 +1,113 @@
+{
+  "scenarioVersion": 1,
+  "name": "denied-en",
+  "description": "The game events are not granted.",
+  "host": {
+    "locale": "en",
+    "mode": "interactive",
+    "frame": true,
+    "startAt": 1793217600000,
+    "grants": [
+      "storage"
+    ]
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Allow “Warframe: missions” in the Control Center."
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "denied-en",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 44
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "denied-mini-en",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "compact"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 280,
+          "height": 230
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "denied-compact-en",
+        "fault": "none"
+      }
+    }
+  ]
+}

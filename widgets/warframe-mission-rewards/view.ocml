@@ -1,0 +1,139 @@
+<!-- Warframe mission rewards: the next rotation, and what it can give. -->
+<component name="drops" props="items">
+  <for each={items} as="d" key={d.id}>
+    <box class="drop">
+      <text class="drop-name">{d.name}</text>
+      <if test={hasText(d.qty)}>
+        <text class="drop-qty">{d.qty}</text>
+      </if>
+      <text class="drop-chance">{d.chance}</text>
+    </box>
+  </for>
+</component>
+
+<component name="more" props="sec">
+  <if test={interactive() && (hasText(sec.more) || sec.open)}>
+    <button class="more-btn" label={sec.open ? t("less") : sec.more} on:activate={toggle(sec.id)}>
+      <text class="more">{sec.open ? t("less") : sec.more}</text>
+    </button>
+  </if>
+  <else-if test={hasText(sec.more)}>
+    <text class="more">{sec.more}</text>
+  </else-if>
+</component>
+
+<box class={rootClass()}>
+  <if test={layout() == "line"}>
+    <box class="line">
+      <icon class={"line-icon tone-" + state.s.lineTone} name={state.s.lineIcon}/>
+      <text class="line-main">{at(state.s.line, state.s, state.now)}</text>
+      <if test={hasText(state.s.lineValue)}>
+        <text class="line-big">{at(state.s.lineValue, state.s, state.now)}</text>
+      </if>
+    </box>
+  </if>
+  <else>
+    <box class="head">
+      <box class="eyebrow-row">
+        <icon class={"eyebrow-icon tone-" + state.s.tone} name={state.s.eyebrowIcon}/>
+        <text class={"eyebrow tone-" + state.s.tone}>{eyebrowText(state.s, state.now)}</text>
+        <box class="grow"/>
+        <if test={hasClock(state.s)}>
+          <icon class="clock-icon" name={state.s.clockIcon}/>
+          <text class="clock">{clockValue(state.s, state.now)}</text>
+        </if>
+      </box>
+      <if test={hasText(state.s.node)}>
+        <text class="place"><span>{state.s.node}</span><span class="planet">{hasText(state.s.planet) ? "  " + state.s.planet : ""}</span></text>
+        <if test={hasText(state.s.faction) || state.s.pills.length > 0}>
+          <box class="meta">
+            <if test={hasText(state.s.faction)}>
+              <box class="faction">
+                <box class={state.s.factionCls}/>
+                <text class="meta-text">{state.s.faction}</text>
+              </box>
+            </if>
+            <for each={state.s.pills} as="p" key={p.id}>
+              <box class="pill">
+                <icon class="pill-icon" name={p.icon}/>
+                <text class="pill-text">{p.text}</text>
+              </box>
+            </for>
+          </box>
+        </if>
+      </if>
+    </box>
+
+    <if test={hasText(state.s.heroValue)}>
+      <box class="next">
+        <box class="next-text">
+          <text class="next-label">{state.s.heroLabel}</text>
+          <text class="next-sub">{heroSubText(state.s, state.now)}</text>
+        </box>
+        <text class="next-value">{at(state.s.heroValue, state.s, state.now)}</text>
+      </box>
+    </if>
+    <if test={hasText(state.s.info)}>
+      <text class="info">{state.s.info}</text>
+    </if>
+
+    <if test={state.s.track.length > 0 && layout() != "wide"}>
+      <box class="track">
+        <for each={state.s.track} as="c" key={c.id}>
+          <box class={c.cls}>
+            <if test={c.earned}>
+              <icon class="cell-check" name="check"/>
+            </if>
+            <text class="cell-text">{c.label}</text>
+          </box>
+        </for>
+      </box>
+    </if>
+
+    <if test={state.s.empty != null}>
+      <box class="empty">
+        <icon class={"empty-icon tone-" + state.s.empty.tone} name={state.s.empty.icon}/>
+        <text class="empty-title">{state.s.empty.title}</text>
+        <text class="empty-text">{state.s.empty.text}</text>
+      </box>
+    </if>
+
+    <if test={state.s.cols.length > 0}>
+      <box class="cols">
+        <for each={state.s.cols} as="col" key={col.id}>
+          <box class={colCls(col)}>
+            <box class="col-head">
+              <text class="col-title">{col.title}</text>
+              <if test={col.earned}>
+                <icon class="col-check" name="check"/>
+              </if>
+            </box>
+            <drops items={col.rows}/>
+            <more sec={col}/>
+          </box>
+        </for>
+      </box>
+    </if>
+
+    <for each={state.s.sections} as="sec" key={sec.id}>
+      <box class={sec.cls}>
+        <text class="section-title">{sec.title}</text>
+        <box class="list">
+          <drops items={sec.rows}/>
+          <more sec={sec}/>
+        </box>
+      </box>
+    </for>
+
+    <if test={hasText(state.s.status)}>
+      <box class="status-line">
+        <icon class="status-icon tone-warning" name="circle-alert"/>
+        <text class="status-text tone-warning">{state.s.status}</text>
+      </box>
+    </if>
+
+    <if test={state.s.source}>
+      <text class="source">{t("source")}</text>
+    </if>
+  </else>
+</box>

@@ -1,0 +1,103 @@
+{
+  "scenarioVersion": 1,
+  "name": "game-closed-fr",
+  "description": "Warframe closed: the stored last mission, two hours ago.",
+  "host": {
+    "locale": "fr",
+    "mode": "interactive",
+    "frame": true,
+    "startAt": 1793217600000,
+    "storage": {
+      "last": {
+        "node": "Mot",
+        "planet": "Néant",
+        "faction": "Corrompus",
+        "factionId": "corrupted",
+        "typeId": "survival",
+        "typeName": "Survie",
+        "result": "succeeded",
+        "durationSeconds": 1241.2,
+        "rewards": 4,
+        "endedAt": 1793210100000
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "playing": false
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "4 rotations obtenues en 20 min 41"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "game-closed-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 44
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "game-closed-mini-fr",
+        "fault": "none"
+      }
+    }
+  ]
+}

@@ -1,0 +1,291 @@
+{
+  "scenarioVersion": 1,
+  "name": "no-progress-en",
+  "description": "Excavation: progress not given, the three rotations stacked.",
+  "host": {
+    "locale": "en",
+    "mode": "interactive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode403",
+                "name": "Hieracon"
+              },
+              "planet": {
+                "id": "pluto",
+                "name": "Pluto"
+              },
+              "faction": {
+                "id": "infested",
+                "name": "Infested"
+              },
+              "type": {
+                "id": "excavation",
+                "name": "Excavation"
+              },
+              "rewards": {
+                "tables": [
+                  {
+                    "kind": "mission",
+                    "rotation": "A",
+                    "items": [
+                      {
+                        "id": "endo",
+                        "name": "Endo",
+                        "quantity": 400,
+                        "chance": 0.25
+                      },
+                      {
+                        "id": "credits_cache",
+                        "name": "Credits Cache",
+                        "quantity": 3000,
+                        "chance": 0.75
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "B",
+                    "items": [
+                      {
+                        "id": "flow",
+                        "name": "Flow",
+                        "quantity": 1,
+                        "chance": 0.0667
+                      },
+                      {
+                        "id": "hell_s_chamber",
+                        "name": "Hell's Chamber",
+                        "quantity": 1,
+                        "chance": 0.0667
+                      },
+                      {
+                        "id": "hornet_strike",
+                        "name": "Hornet Strike",
+                        "quantity": 1,
+                        "chance": 0.0667
+                      },
+                      {
+                        "id": "neo_a16_relic",
+                        "name": "Neo A16 Relic",
+                        "quantity": 1,
+                        "chance": 0.0667
+                      },
+                      {
+                        "id": "neo_c10_relic",
+                        "name": "Neo C10 Relic",
+                        "quantity": 1,
+                        "chance": 0.0667
+                      },
+                      {
+                        "id": "neo_c11_relic",
+                        "name": "Neo C11 Relic",
+                        "quantity": 1,
+                        "chance": 0.0667
+                      },
+                      {
+                        "id": "neo_c7_relic",
+                        "name": "Neo C7 Relic",
+                        "quantity": 1,
+                        "chance": 0.0667
+                      },
+                      {
+                        "id": "neo_k10_relic",
+                        "name": "Neo K10 Relic",
+                        "quantity": 1,
+                        "chance": 0.0667
+                      },
+                      {
+                        "id": "neo_v13_relic",
+                        "name": "Neo V13 Relic",
+                        "quantity": 1,
+                        "chance": 0.0667
+                      },
+                      {
+                        "id": "neo_y2_relic",
+                        "name": "Neo Y2 Relic",
+                        "quantity": 1,
+                        "chance": 0.0667
+                      },
+                      {
+                        "id": "serration",
+                        "name": "Serration",
+                        "quantity": 1,
+                        "chance": 0.0667
+                      },
+                      {
+                        "id": "split_chamber",
+                        "name": "Split Chamber",
+                        "quantity": 1,
+                        "chance": 0.0667
+                      },
+                      {
+                        "id": "stabilizer",
+                        "name": "Stabilizer",
+                        "quantity": 1,
+                        "chance": 0.0667
+                      },
+                      {
+                        "id": "steel_fiber",
+                        "name": "Steel Fiber",
+                        "quantity": 1,
+                        "chance": 0.0667
+                      },
+                      {
+                        "id": "stretch",
+                        "name": "Stretch",
+                        "quantity": 1,
+                        "chance": 0.0667
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "C",
+                    "items": [
+                      {
+                        "id": "arrow_mutation",
+                        "name": "Arrow Mutation",
+                        "quantity": 1,
+                        "chance": 0.0376
+                      },
+                      {
+                        "id": "cleanse_infested",
+                        "name": "Cleanse Infested",
+                        "quantity": 1,
+                        "chance": 0.0376
+                      },
+                      {
+                        "id": "pistol_ammo_mutation",
+                        "name": "Pistol Ammo Mutation",
+                        "quantity": 1,
+                        "chance": 0.0376
+                      },
+                      {
+                        "id": "rifle_ammo_mutation",
+                        "name": "Rifle Ammo Mutation",
+                        "quantity": 1,
+                        "chance": 0.0376
+                      },
+                      {
+                        "id": "shotgun_ammo_mutation",
+                        "name": "Shotgun Ammo Mutation",
+                        "quantity": 1,
+                        "chance": 0.0376
+                      },
+                      {
+                        "id": "sniper_ammo_mutation",
+                        "name": "Sniper Ammo Mutation",
+                        "quantity": 1,
+                        "chance": 0.0376
+                      },
+                      {
+                        "id": "axi_a21_relic",
+                        "name": "Axi A21 Relic",
+                        "quantity": 1,
+                        "chance": 0.0968
+                      },
+                      {
+                        "id": "axi_a22_relic",
+                        "name": "Axi A22 Relic",
+                        "quantity": 1,
+                        "chance": 0.0968
+                      },
+                      {
+                        "id": "axi_c12_relic",
+                        "name": "Axi C12 Relic",
+                        "quantity": 1,
+                        "chance": 0.0968
+                      },
+                      {
+                        "id": "axi_c13_relic",
+                        "name": "Axi C13 Relic",
+                        "quantity": 1,
+                        "chance": 0.0968
+                      },
+                      {
+                        "id": "axi_d6_relic",
+                        "name": "Axi D6 Relic",
+                        "quantity": 1,
+                        "chance": 0.0968
+                      },
+                      {
+                        "id": "axi_p10_relic",
+                        "name": "Axi P10 Relic",
+                        "quantity": 1,
+                        "chance": 0.0968
+                      },
+                      {
+                        "id": "axi_s21_relic",
+                        "name": "Axi S21 Relic",
+                        "quantity": 1,
+                        "chance": 0.0968
+                      },
+                      {
+                        "id": "axi_v14_relic",
+                        "name": "Axi V14 Relic",
+                        "quantity": 1,
+                        "chance": 0.0968
+                      }
+                    ]
+                  }
+                ]
+              },
+              "startedAt": 1793217240000
+            }
+          },
+          "event": "mission_started"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "One rotation per excavator · C at the 4th"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "no-progress-en",
+        "fault": "none"
+      }
+    }
+  ]
+}

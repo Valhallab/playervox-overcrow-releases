@@ -1,0 +1,561 @@
+/* Warframe family: the panel, header and type scale shared by the PlayerVox
+   Warframe widgets, as Warframe Market. */
+.wf {
+  flex-direction: column;
+  width: 100%;
+  padding: 10px;
+  gap: var(--space-4);
+}
+
+.row {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.grow {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+/* Header: context eyebrow, then the place, then faction, type and level. */
+.eyebrow-row {
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  min-height: 14px;
+}
+
+.eyebrow {
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.eyebrow-icon {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.tone-accent { color: var(--color-accent); }
+.tone-success { color: var(--color-success); }
+.tone-danger { color: var(--color-danger); }
+.tone-warning { color: var(--color-warning); }
+.tone-muted { color: var(--color-text-muted); }
+
+.clock {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.place {
+  font-size: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.planet {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.meta {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  column-gap: 8px;
+  row-gap: 2px;
+}
+
+.meta-text {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.meta-sep {
+  font-size: var(--font-size-small);
+  color: var(--color-text-subtle);
+}
+
+/* Faction: a coloured dot, always with its name (colour is never alone). */
+.faction {
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.f-grineer { background: #e0895a; }
+.f-corpus { background: #5aa8e8; }
+.f-infested { background: #8fb35a; }
+.f-corrupted { background: #e8d8a8; }
+.f-sentient { background: #b48cf0; }
+.f-murmur { background: #5fc8c8; }
+.f-narmer { background: #d27a9a; }
+.f-unknown { background: #71717a; }
+
+/* Modifier pills: Steel Path, Fissure + era, Arbitration, Sortie… */
+.badges {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pill {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+}
+
+.pill-text {
+  font-size: var(--font-size-caption);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.pill-icon {
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+.e-lith { color: #c79a6b; }
+.e-meso { color: #a9b8c8; }
+.e-neo { color: #d9b85c; }
+.e-axi { color: #e8d9a0; }
+.e-requiem { color: #e07a6f; }
+.e-sp { color: #f08f8f; }
+
+/* Cards and notices. */
+.card {
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 8px 10px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.notice {
+  flex-direction: row;
+  align-items: start;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+}
+
+.notice-icon {
+  font-size: 14px;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+.notice-body {
+  flex-direction: column;
+  gap: 2px;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.notice-title {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.notice-text {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.empty {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
+}
+
+.empty-icon {
+  font-size: 20px;
+  color: var(--color-text-muted);
+}
+
+.empty-title {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.empty-text {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.btn {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 9px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.btn-text {
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-icon {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.status-line {
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+
+.status-icon {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.status-text {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+/* One-line (mini) layout. */
+.line {
+  flex-direction: row;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 12px;
+}
+
+.line-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.line-main {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.line-value {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.line-sub {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.section-title {
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.theme-light .f-corrupted { background: #a8925a; }
+
+/* State colours win over the base colour of these icons. */
+.empty-icon.tone-warning,
+.status-icon.tone-warning { color: var(--color-warning); }
+.empty-icon.tone-danger { color: var(--color-danger); }
+.empty-icon.tone-success { color: var(--color-success); }
+
+/* Mission rewards. */
+.mission.line {
+  padding: 0;
+}
+
+.head {
+  flex-direction: column;
+  gap: 3px;
+}
+
+.clock-icon {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.next {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.next-text {
+  flex-direction: column;
+  gap: 1px;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.next-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.next-sub {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.next-value {
+  font-size: 30px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.info {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+/* The rotation cycle A A B C. */
+.track {
+  flex-direction: row;
+  gap: 4px;
+}
+
+.cell {
+  flex-grow: 1;
+  flex-basis: 0;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 20px;
+  border-radius: 5px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+}
+
+.cell-text {
+  font-size: var(--font-size-small);
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.cell-check {
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+.cell.earned {
+  background: transparent;
+}
+
+.cell.now {
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-accent);
+}
+
+.cell.now .cell-text {
+  color: var(--color-accent);
+}
+
+/* The listed rotation, in full: the frame grows with it. */
+.list {
+  flex-direction: column;
+}
+
+.drop {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 2px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.drop-name {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stack {
+  flex-direction: column;
+}
+
+
+
+.drop-chance {
+  font-size: var(--font-size-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.more {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  padding-top: 4px;
+}
+
+/* Wide: the three rotations side by side; the current one in accent. */
+.cols {
+  flex-direction: row;
+  align-items: start;
+  gap: 14px;
+}
+
+.col {
+  flex-direction: column;
+  flex-grow: 1;
+  flex-basis: 0;
+  min-width: 0;
+  gap: 2px;
+}
+
+.col-head {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--color-border-strong);
+}
+
+.col-title {
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.col-check {
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+.col.now .col-head {
+  border-bottom: 1px solid var(--color-accent);
+}
+
+.col.now .col-title {
+  color: var(--color-accent);
+}
+
+/* One line: the place and what comes, then the number, larger. */
+.line-big {
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.drop-qty {
+  font-size: var(--font-size-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* DE's own warning on the rates, as quiet as a caption. */
+.source {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+/* One table: its title, then its rows. */
+.section {
+  flex-direction: column;
+}
+
+/* The table that pays now stands a little apart from its title. */
+.section.listed {
+  gap: 4px;
+}
+
+/* "+ n more" unfolds the table in Interactive mode, and reads the same. */
+.more-btn {
+  flex-direction: row;
+  align-items: center;
+  align-self: start;
+  padding: 0;
+  background: transparent;
+  border-width: 0;
+  cursor: pointer;
+}
+
+.more-btn:hover .more {
+  color: var(--color-text-secondary);
+}
+
+/* An error beside what stays known: amber, and wrapped, never cut. */
+.status-text.tone-warning {
+  color: var(--color-warning);
+  white-space: normal;
+}

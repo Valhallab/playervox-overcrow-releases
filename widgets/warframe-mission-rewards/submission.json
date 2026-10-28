@@ -1,0 +1,20 @@
+{
+  "justifications": [
+    {
+      "permission": "gameEvent:warframe.mission",
+      "text": "Reads the mission you pick, load and play in Warframe (node, planet, type, faction, Steel Path, Void Fissure, result and duration), to show its loot and a summary at the end."
+    },
+    {
+      "permission": "gameEvent:warframe.progress",
+      "text": "Reads the rewards given, the wave and when the next reward comes, to count down to the next rotation and show the A A B C cycle."
+    },
+    {
+      "permission": "gameEvent:warframe.rewards",
+      "text": "Reads what the mission's node can give, by rotation, with each item's chance, from Digital Extremes' drop tables as PlayerVox OverCrow gives them. The widget makes no request of its own."
+    },
+    {
+      "permission": "storage",
+      "text": "Keeps the last mission (node, type, result, duration and rotations earned) on this computer, to show its summary after the game."
+    }
+  ]
+}

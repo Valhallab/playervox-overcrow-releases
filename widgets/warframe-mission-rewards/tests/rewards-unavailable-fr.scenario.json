@@ -1,0 +1,92 @@
+{
+  "scenarioVersion": 1,
+  "name": "rewards-unavailable-fr",
+  "description": "Rewards unavailable: the rotation without its table.",
+  "host": {
+    "locale": "fr",
+    "mode": "interactive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "features": {
+            "rewards": "unavailable"
+          },
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode405",
+                "name": "Mot"
+              },
+              "planet": {
+                "id": "void",
+                "name": "Néant"
+              },
+              "faction": {
+                "id": "corrupted",
+                "name": "Corrompus"
+              },
+              "type": {
+                "id": "survival",
+                "name": "Survie"
+              },
+              "rewards": null,
+              "startedAt": 1793216808000
+            },
+            "progress": {
+              "rewards": 2,
+              "rotation": "B",
+              "nextRewardAt": 1793217708000
+            }
+          },
+          "event": "mission_started"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Butin indisponible pour l’instant"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "rewards-unavailable-fr",
+        "fault": "none"
+      }
+    }
+  ]
+}

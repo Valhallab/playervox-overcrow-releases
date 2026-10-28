@@ -1,0 +1,383 @@
+{
+  "scenarioVersion": 1,
+  "name": "unfold-fr",
+  "description": "Interactive mode: a click on + n more unfolds the table, Show less folds it.",
+  "host": {
+    "locale": "fr",
+    "mode": "interactive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode195",
+                "name": "Hydron"
+              },
+              "planet": {
+                "id": "sedna",
+                "name": "Sedna"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "type": {
+                "id": "defense",
+                "name": "Défense"
+              },
+              "rewards": {
+                "tables": [
+                  {
+                    "kind": "mission",
+                    "rotation": "A",
+                    "items": [
+                      {
+                        "id": "magazine_warp",
+                        "name": "Mutation de Chargeur",
+                        "quantity": 1,
+                        "chance": 0.1
+                      },
+                      {
+                        "id": "neo_a16_relic",
+                        "name": "Relique Neo A16",
+                        "quantity": 1,
+                        "chance": 0.1
+                      },
+                      {
+                        "id": "neo_c10_relic",
+                        "name": "Relique Neo C10",
+                        "quantity": 1,
+                        "chance": 0.1
+                      },
+                      {
+                        "id": "neo_c11_relic",
+                        "name": "Relique Neo C11",
+                        "quantity": 1,
+                        "chance": 0.1
+                      },
+                      {
+                        "id": "neo_c7_relic",
+                        "name": "Relique Neo C7",
+                        "quantity": 1,
+                        "chance": 0.1
+                      },
+                      {
+                        "id": "neo_k10_relic",
+                        "name": "Relique Neo K10",
+                        "quantity": 1,
+                        "chance": 0.1
+                      },
+                      {
+                        "id": "neo_v13_relic",
+                        "name": "Relique Neo V13",
+                        "quantity": 1,
+                        "chance": 0.1
+                      },
+                      {
+                        "id": "neo_y2_relic",
+                        "name": "Relique Neo Y2",
+                        "quantity": 1,
+                        "chance": 0.1
+                      },
+                      {
+                        "id": "trick_mag",
+                        "name": "Chargeur Trafiqué",
+                        "quantity": 1,
+                        "chance": 0.1
+                      },
+                      {
+                        "id": "vitality",
+                        "name": "Vitalité",
+                        "quantity": 1,
+                        "chance": 0.1
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "B",
+                    "items": [
+                      {
+                        "id": "axi_a21_relic",
+                        "name": "Relique Axi A21",
+                        "quantity": 1,
+                        "chance": 0.0625
+                      },
+                      {
+                        "id": "axi_a22_relic",
+                        "name": "Relique Axi A22",
+                        "quantity": 1,
+                        "chance": 0.0625
+                      },
+                      {
+                        "id": "axi_c12_relic",
+                        "name": "Relique Axi C12",
+                        "quantity": 1,
+                        "chance": 0.0625
+                      },
+                      {
+                        "id": "axi_c13_relic",
+                        "name": "Relique Axi C13",
+                        "quantity": 1,
+                        "chance": 0.0625
+                      },
+                      {
+                        "id": "axi_d6_relic",
+                        "name": "Relique Axi D6",
+                        "quantity": 1,
+                        "chance": 0.0625
+                      },
+                      {
+                        "id": "axi_p10_relic",
+                        "name": "Relique Axi P10",
+                        "quantity": 1,
+                        "chance": 0.0625
+                      },
+                      {
+                        "id": "axi_s21_relic",
+                        "name": "Relique Axi S21",
+                        "quantity": 1,
+                        "chance": 0.0625
+                      },
+                      {
+                        "id": "axi_v14_relic",
+                        "name": "Relique Axi V14",
+                        "quantity": 1,
+                        "chance": 0.0625
+                      },
+                      {
+                        "id": "deep_freeze",
+                        "name": "Froid Pénétrant",
+                        "quantity": 1,
+                        "chance": 0.0625
+                      },
+                      {
+                        "id": "endo",
+                        "name": "Endo",
+                        "quantity": 200,
+                        "chance": 0.0625
+                      },
+                      {
+                        "id": "hell_s_chamber",
+                        "name": "Antre de l'Enfer",
+                        "quantity": 1,
+                        "chance": 0.0625
+                      },
+                      {
+                        "id": "hornet_strike",
+                        "name": "Nuée de Dards",
+                        "quantity": 1,
+                        "chance": 0.0625
+                      },
+                      {
+                        "id": "north_wind",
+                        "name": "Vent du Nord",
+                        "quantity": 1,
+                        "chance": 0.0625
+                      },
+                      {
+                        "id": "reflex_coil",
+                        "name": "Bobine Réflexe",
+                        "quantity": 1,
+                        "chance": 0.0625
+                      },
+                      {
+                        "id": "shocking_touch",
+                        "name": "Toucher Choquant",
+                        "quantity": 1,
+                        "chance": 0.0625
+                      },
+                      {
+                        "id": "streamline",
+                        "name": "Rationalisation",
+                        "quantity": 1,
+                        "chance": 0.0625
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "C",
+                    "items": [
+                      {
+                        "id": "continuity",
+                        "name": "Continuité",
+                        "quantity": 1,
+                        "chance": 0.0226
+                      },
+                      {
+                        "id": "convulsion",
+                        "name": "Convulsion",
+                        "quantity": 1,
+                        "chance": 0.0226
+                      },
+                      {
+                        "id": "endo",
+                        "name": "Endo",
+                        "quantity": 400,
+                        "chance": 0.0226
+                      },
+                      {
+                        "id": "handspring",
+                        "name": "Mains sur Ressorts",
+                        "quantity": 1,
+                        "chance": 0.0226
+                      },
+                      {
+                        "id": "master_thief",
+                        "name": "Maître Voleur",
+                        "quantity": 1,
+                        "chance": 0.0226
+                      },
+                      {
+                        "id": "metal_auger",
+                        "name": "Pointe Métallique",
+                        "quantity": 1,
+                        "chance": 0.0226
+                      },
+                      {
+                        "id": "ravage",
+                        "name": "Ravage",
+                        "quantity": 1,
+                        "chance": 0.0226
+                      },
+                      {
+                        "id": "split_chamber",
+                        "name": "Chambre Divisée",
+                        "quantity": 1,
+                        "chance": 0.0226
+                      },
+                      {
+                        "id": "stretch",
+                        "name": "Allonge",
+                        "quantity": 1,
+                        "chance": 0.0226
+                      },
+                      {
+                        "id": "vital_sense",
+                        "name": "Perception Vitale",
+                        "quantity": 1,
+                        "chance": 0.0226
+                      },
+                      {
+                        "id": "axi_a21_relic",
+                        "name": "Relique Axi A21",
+                        "quantity": 1,
+                        "chance": 0.0968
+                      },
+                      {
+                        "id": "axi_a22_relic",
+                        "name": "Relique Axi A22",
+                        "quantity": 1,
+                        "chance": 0.0968
+                      },
+                      {
+                        "id": "axi_c12_relic",
+                        "name": "Relique Axi C12",
+                        "quantity": 1,
+                        "chance": 0.0968
+                      },
+                      {
+                        "id": "axi_c13_relic",
+                        "name": "Relique Axi C13",
+                        "quantity": 1,
+                        "chance": 0.0968
+                      },
+                      {
+                        "id": "axi_d6_relic",
+                        "name": "Relique Axi D6",
+                        "quantity": 1,
+                        "chance": 0.0968
+                      },
+                      {
+                        "id": "axi_p10_relic",
+                        "name": "Relique Axi P10",
+                        "quantity": 1,
+                        "chance": 0.0968
+                      },
+                      {
+                        "id": "axi_s21_relic",
+                        "name": "Relique Axi S21",
+                        "quantity": 1,
+                        "chance": 0.0968
+                      },
+                      {
+                        "id": "axi_v14_relic",
+                        "name": "Relique Axi V14",
+                        "quantity": 1,
+                        "chance": 0.0968
+                      }
+                    ]
+                  }
+                ]
+              },
+              "startedAt": 1793216400000,
+              "modifiers": [
+                {
+                  "id": "steel_path",
+                  "name": "Route de l’Acier",
+                  "stage": null
+                }
+              ]
+            },
+            "progress": {
+              "wave": 17,
+              "rewards": 3,
+              "rotation": "C",
+              "nextRewardWave": 20
+            }
+          },
+          "event": "wave_started"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "+ 8 autres à 9.68 %"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Afficher moins"
+        ],
+        "noText": [
+          "+ 8 autres à 9.68 %"
+        ],
+        "image": "unfold-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "text": "Afficher moins"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "+ 8 autres à 9.68 %"
+        ],
+        "noText": [
+          "Afficher moins"
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

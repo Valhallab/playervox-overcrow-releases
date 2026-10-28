@@ -1,0 +1,145 @@
+{
+  "scenarioVersion": 1,
+  "name": "caches-fr",
+  "description": "Sabotage: the caches' tables only.",
+  "host": {
+    "locale": "fr",
+    "mode": "interactive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode177",
+                "name": "Kappa"
+              },
+              "planet": {
+                "id": "sedna",
+                "name": "Sedna"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "type": {
+                "id": "sabotage",
+                "name": "Sabotage"
+              },
+              "rewards": {
+                "tables": [
+                  {
+                    "kind": "caches",
+                    "rotation": "A",
+                    "items": [
+                      {
+                        "id": "alloy_plate",
+                        "name": "Alliage",
+                        "quantity": 300,
+                        "chance": 0.5
+                      },
+                      {
+                        "id": "endo",
+                        "name": "Endo",
+                        "quantity": 80,
+                        "chance": 0.5
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "caches",
+                    "rotation": "B",
+                    "items": [
+                      {
+                        "id": "morphics",
+                        "name": "Morphiques",
+                        "quantity": 1,
+                        "chance": 0.25
+                      },
+                      {
+                        "id": "orokin_cell",
+                        "name": "Cellule Orokin",
+                        "quantity": 1,
+                        "chance": 0.25
+                      },
+                      {
+                        "id": "endo",
+                        "name": "Endo",
+                        "quantity": 150,
+                        "chance": 0.5
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "caches",
+                    "rotation": "C",
+                    "items": [
+                      {
+                        "id": "metal_auger",
+                        "name": "Pointe Métallique",
+                        "quantity": 1,
+                        "chance": 0.125
+                      },
+                      {
+                        "id": "neurodes",
+                        "name": "Neurodes",
+                        "quantity": 2,
+                        "chance": 0.375
+                      },
+                      {
+                        "id": "endo",
+                        "name": "Endo",
+                        "quantity": 250,
+                        "chance": 0.5
+                      }
+                    ]
+                  }
+                ]
+              },
+              "startedAt": 1793217400000
+            }
+          },
+          "event": "mission_started"
+        }
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "caches-fr",
+        "fault": "none"
+      }
+    }
+  ]
+}

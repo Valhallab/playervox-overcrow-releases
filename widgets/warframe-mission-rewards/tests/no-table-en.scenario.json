@@ -1,0 +1,84 @@
+{
+  "scenarioVersion": 1,
+  "name": "no-table-en",
+  "description": "Exterminate: no loot table.",
+  "host": {
+    "locale": "en",
+    "mode": "interactive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode26",
+                "name": "Cambria"
+              },
+              "planet": {
+                "id": "earth",
+                "name": "Earth"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "type": {
+                "id": "extermination",
+                "name": "Exterminate"
+              },
+              "rewards": null,
+              "startedAt": 1793217355000
+            }
+          },
+          "event": "mission_started"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "No loot table for this kind of mission."
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "no-table-en",
+        "fault": "none"
+      }
+    }
+  ]
+}

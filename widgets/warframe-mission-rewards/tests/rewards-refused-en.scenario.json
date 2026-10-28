@@ -1,0 +1,92 @@
+{
+  "scenarioVersion": 1,
+  "name": "rewards-refused-en",
+  "description": "The rewards feature refused: the countdown stays, the refusal beside it.",
+  "host": {
+    "locale": "en",
+    "mode": "interactive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "features": {
+            "rewards": "undeclared"
+          },
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode405",
+                "name": "Mot"
+              },
+              "planet": {
+                "id": "void",
+                "name": "Void"
+              },
+              "faction": {
+                "id": "corrupted",
+                "name": "Corrupted"
+              },
+              "type": {
+                "id": "survival",
+                "name": "Survival"
+              },
+              "rewards": null,
+              "startedAt": 1793216808000
+            },
+            "progress": {
+              "rewards": 2,
+              "rotation": "B",
+              "nextRewardAt": 1793217708000
+            }
+          },
+          "event": "mission_started"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Allow “Warframe: rewards” in the Control Center."
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "rewards-refused-en",
+        "fault": "none"
+      }
+    }
+  ]
+}

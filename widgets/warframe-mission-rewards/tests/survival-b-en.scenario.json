@@ -1,0 +1,374 @@
+{
+  "scenarioVersion": 1,
+  "name": "survival-b-en",
+  "description": "Survival, rotation B next: countdown, cycle and table B.",
+  "host": {
+    "locale": "en",
+    "mode": "interactive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode405",
+                "name": "Mot"
+              },
+              "planet": {
+                "id": "void",
+                "name": "Void"
+              },
+              "faction": {
+                "id": "corrupted",
+                "name": "Corrupted"
+              },
+              "type": {
+                "id": "survival",
+                "name": "Survival"
+              },
+              "rewards": {
+                "tables": [
+                  {
+                    "kind": "mission",
+                    "rotation": "A",
+                    "items": [
+                      {
+                        "id": "aya",
+                        "name": "Aya",
+                        "quantity": 1,
+                        "chance": 0.0909
+                      },
+                      {
+                        "id": "neo_a16_relic",
+                        "name": "Neo A16 Relic",
+                        "quantity": 1,
+                        "chance": 0.0909
+                      },
+                      {
+                        "id": "neo_c10_relic",
+                        "name": "Neo C10 Relic",
+                        "quantity": 1,
+                        "chance": 0.0909
+                      },
+                      {
+                        "id": "neo_c7_relic",
+                        "name": "Neo C7 Relic",
+                        "quantity": 1,
+                        "chance": 0.0909
+                      },
+                      {
+                        "id": "neo_v13_relic",
+                        "name": "Neo V13 Relic",
+                        "quantity": 1,
+                        "chance": 0.0909
+                      },
+                      {
+                        "id": "neo_c11_relic",
+                        "name": "Neo C11 Relic",
+                        "quantity": 1,
+                        "chance": 0.1818
+                      },
+                      {
+                        "id": "neo_k10_relic",
+                        "name": "Neo K10 Relic",
+                        "quantity": 1,
+                        "chance": 0.1818
+                      },
+                      {
+                        "id": "neo_y2_relic",
+                        "name": "Neo Y2 Relic",
+                        "quantity": 1,
+                        "chance": 0.1818
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "B",
+                    "items": [
+                      {
+                        "id": "aya",
+                        "name": "Aya",
+                        "quantity": 1,
+                        "chance": 0.125
+                      },
+                      {
+                        "id": "neo_a16_relic",
+                        "name": "Neo A16 Relic",
+                        "quantity": 1,
+                        "chance": 0.125
+                      },
+                      {
+                        "id": "neo_c10_relic",
+                        "name": "Neo C10 Relic",
+                        "quantity": 1,
+                        "chance": 0.125
+                      },
+                      {
+                        "id": "neo_c11_relic",
+                        "name": "Neo C11 Relic",
+                        "quantity": 1,
+                        "chance": 0.125
+                      },
+                      {
+                        "id": "neo_c7_relic",
+                        "name": "Neo C7 Relic",
+                        "quantity": 1,
+                        "chance": 0.125
+                      },
+                      {
+                        "id": "neo_k10_relic",
+                        "name": "Neo K10 Relic",
+                        "quantity": 1,
+                        "chance": 0.125
+                      },
+                      {
+                        "id": "neo_v13_relic",
+                        "name": "Neo V13 Relic",
+                        "quantity": 1,
+                        "chance": 0.125
+                      },
+                      {
+                        "id": "neo_y2_relic",
+                        "name": "Neo Y2 Relic",
+                        "quantity": 1,
+                        "chance": 0.125
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "C",
+                    "items": [
+                      {
+                        "id": "axi_a21_relic",
+                        "name": "Axi A21 Relic",
+                        "quantity": 1,
+                        "chance": 0.0973
+                      },
+                      {
+                        "id": "axi_a22_relic",
+                        "name": "Axi A22 Relic",
+                        "quantity": 1,
+                        "chance": 0.0973
+                      },
+                      {
+                        "id": "axi_c12_relic",
+                        "name": "Axi C12 Relic",
+                        "quantity": 1,
+                        "chance": 0.0973
+                      },
+                      {
+                        "id": "axi_c13_relic",
+                        "name": "Axi C13 Relic",
+                        "quantity": 1,
+                        "chance": 0.0973
+                      },
+                      {
+                        "id": "axi_d6_relic",
+                        "name": "Axi D6 Relic",
+                        "quantity": 1,
+                        "chance": 0.0973
+                      },
+                      {
+                        "id": "axi_p10_relic",
+                        "name": "Axi P10 Relic",
+                        "quantity": 1,
+                        "chance": 0.0973
+                      },
+                      {
+                        "id": "axi_s21_relic",
+                        "name": "Axi S21 Relic",
+                        "quantity": 1,
+                        "chance": 0.0973
+                      },
+                      {
+                        "id": "axi_v14_relic",
+                        "name": "Axi V14 Relic",
+                        "quantity": 1,
+                        "chance": 0.0973
+                      },
+                      {
+                        "id": "aya",
+                        "name": "Aya",
+                        "quantity": 1,
+                        "chance": 0.2211
+                      }
+                    ]
+                  }
+                ]
+              },
+              "selectedAt": 1793216768000,
+              "loadingAt": 1793216783000,
+              "startedAt": 1793216808000
+            },
+            "progress": {
+              "rewards": 2,
+              "rotation": "B",
+              "nextRewardAt": 1793217708000
+            }
+          },
+          "event": "mission_started"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Rotation B in"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "survival-b-en",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "survival-b-150-en",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 44
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "survival-b-mini-en",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "compact"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 280,
+          "height": 230
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "survival-b-compact-en",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 600,
+          "height": 420
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "survival-b-wide-en",
+        "fault": "none"
+      }
+    }
+  ]
+}
