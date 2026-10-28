@@ -1189,7 +1189,37 @@ pub const MAX_GAME_EVENTS: Limit = fixed(
     "MAX_GAME_EVENTS",
     32,
     Unit::Count,
-    "Semantic game events declared by one package.",
+    "Game event features declared by one package.",
+);
+pub const MAX_GAME_EVENT_NAME_BYTES: Limit = fixed(
+    "MAX_GAME_EVENT_NAME_BYTES",
+    128,
+    Unit::Bytes,
+    "A name in game events: a place, a type, a player's name, one line.",
+);
+pub const MAX_WARFRAME_SQUAD: Limit = fixed(
+    "MAX_WARFRAME_SQUAD",
+    8,
+    Unit::Count,
+    "Members of a Warframe squad, the player included.",
+);
+pub const MAX_WARFRAME_HUNTS: Limit = fixed(
+    "MAX_WARFRAME_HUNTS",
+    16,
+    Unit::Count,
+    "Eidolons of one night kept, the latest.",
+);
+pub const MAX_WARFRAME_MODIFIERS: Limit = fixed(
+    "MAX_WARFRAME_MODIFIERS",
+    8,
+    Unit::Count,
+    "Modifiers of one Warframe mission.",
+);
+pub const MAX_WARFRAME_FISSURES: Limit = fixed(
+    "MAX_WARFRAME_FISSURES",
+    64,
+    Unit::Count,
+    "Void Fissures of the world state given, the soonest to end first.",
 );
 
 // Write intents: the current built-in limits, confirmed by the P0.6 audit.
@@ -1506,6 +1536,11 @@ pub const ALL: &[&Limit] = &[
     &MAX_DNS_NAME_BYTES,
     &MAX_OBJECT_ID_BYTES,
     &MAX_GAME_EVENTS,
+    &MAX_GAME_EVENT_NAME_BYTES,
+    &MAX_WARFRAME_SQUAD,
+    &MAX_WARFRAME_HUNTS,
+    &MAX_WARFRAME_MODIFIERS,
+    &MAX_WARFRAME_FISSURES,
     &MAX_NOTES,
     &MAX_NOTE_TITLE_BYTES,
     &MAX_NOTE_BODY_BYTES,

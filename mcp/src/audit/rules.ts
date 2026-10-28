@@ -130,7 +130,7 @@ function unusedAuthority(context: Context): void {
     {
       key: "gameEvents",
       on: Array.isArray(permissions.gameEvents) && (permissions.gameEvents as unknown[]).length > 0,
-      services: ["gameEvents.subscribe"],
+      services: ["gameEvents.warframe.subscribe"],
       name: "gameEvents",
     },
   ];

@@ -149,8 +149,8 @@ export interface PermissionServices {
   readonly "storage": "storage.get" | "storage.set" | "storage.remove" | "storage.keys";
   /** Text clipboard writes on a current Interactive gesture. */
   readonly "clipboardWrite": "clipboard.writeText";
-  /** Named semantic game events `overcrow.game.<name>.v1`, at most `MAX_GAME_EVENTS`. */
-  readonly "gameEvents": "gameEvents.subscribe";
+  /** Features of a game the widget follows, each `<game>.<feature>` (`warframe.mission`), at most `MAX_GAME_EVENTS`. */
+  readonly "gameEvents": "gameEvents.warframe.subscribe";
   /** Host services listed below. */
   readonly "capabilities": never;
 }
@@ -447,14 +447,6 @@ export type HttpHeaders = {
   readonly "expires"?: string;
   readonly "age"?: string;
 };
-
-/** One game event. */
-export interface GameEvent {
-  /** A declared game event. */
-  readonly event: string;
-  /** Host monotonic clock in ms. */
-  readonly at: number;
-}
 
 /** Duration of the active game session. */
 export interface Session {
@@ -839,6 +831,334 @@ export interface SteamLocalAchievements {
   readonly achievements: ReadonlyArray<SteamLocalAchievement>;
 }
 
+/** Something of Warframe, named. */
+export interface WarframeName {
+  /** Our stable ID, in `snake_case`, listed in the game events page. */
+  readonly id: string;
+  /** Its name in the user's language, one line of at most `MAX_GAME_EVENT_NAME_BYTES`; `null` when PlayerVox OverCrow has none yet. */
+  readonly name: string | null;
+}
+
+/** A node of the star chart. */
+export interface WarframeNode {
+  /** The game's own key of the node (`SolNode23`, `ClanNode…`, `SettlementNode…`), as public data such as drop tables and the world state name it. */
+  readonly id: string;
+  /** Its name in the user's language, or `null` when PlayerVox OverCrow has none yet (new content). */
+  readonly name: string | null;
+  /** Its English name, to match public data in English, or `null`. */
+  readonly englishName: string | null;
+}
+
+/** Warframe's game events, for the features the widget lists. */
+export interface WarframeEvents {
+  /** Whether Warframe is the active game in PlayerVox OverCrow. */
+  readonly playing: boolean;
+  /** The Warframe session being followed, or `null` before any; a new launch is a new session. */
+  readonly session: {
+    /** When Warframe was launched, in Unix milliseconds. */
+    readonly startedAt: number;
+  } | null;
+  /** The status of each feature. */
+  readonly features: WarframeFeatures;
+  /** The state of each feature the widget follows. */
+  readonly info: WarframeInfo;
+  /** The latest events of the features the widget follows, oldest first. */
+  readonly events: ReadonlyArray<WarframeEvent>;
+}
+
+/** The status of each Warframe feature. */
+export interface WarframeFeatures {
+  /** `available`, `unavailable` or `undeclared`. */
+  readonly location: "available" | "unavailable" | "undeclared";
+  /** `available`, `unavailable` or `undeclared`. */
+  readonly mission: "available" | "unavailable" | "undeclared";
+  /** `available`, `unavailable` or `undeclared`. */
+  readonly progress: "available" | "unavailable" | "undeclared";
+  /** `available`, `unavailable` or `undeclared`. */
+  readonly squad: "available" | "unavailable" | "undeclared";
+  /** `available`, `unavailable` or `undeclared`. */
+  readonly eidolons: "available" | "unavailable" | "undeclared";
+  /** `available`, `unavailable` or `undeclared`. */
+  readonly world: "available" | "unavailable" | "undeclared";
+}
+
+/** The state of each Warframe feature; `null` for a feature the widget does not follow. */
+export interface WarframeInfo {
+  /** Where the player is; `null` while Warframe is not played. */
+  readonly location: WarframeLocation | null;
+  /** The latest mission of the session. */
+  readonly mission: WarframeMission | null;
+  /** The progress of the latest mission. */
+  readonly progress: WarframeProgress | null;
+  /** The squad. */
+  readonly squad: WarframeSquad | null;
+  /** The night on the Plains of Eidolon. */
+  readonly eidolons: WarframeEidolons | null;
+  /** The world of the day and the week, whether Warframe is played or not. */
+  readonly world: WarframeWorld | null;
+}
+
+/** Where the player is. */
+export interface WarframeLocation {
+  /** What kind of place. */
+  readonly kind: "orbiter" | "relay" | "hub" | "open_world" | "mission" | "dojo" | "other";
+  /** Which one: a hub, a relay or an open world of our places, or the node of a mission; `null` when the game does not say. */
+  readonly place: WarframeName | null;
+  /** When the player arrived, in Unix milliseconds. */
+  readonly since: number;
+}
+
+/** A Warframe mission. */
+export interface WarframeMission {
+  /** `selected` on the star chart, `loading`, `in_progress` or `ended`. */
+  readonly state: "selected" | "loading" | "in_progress" | "ended";
+  /** The node. */
+  readonly node: WarframeNode;
+  /** Its planet or region. */
+  readonly planet: WarframeName | null;
+  /** The mission type; `null` for one we do not know. */
+  readonly type: WarframeName | null;
+  /** The enemy faction. */
+  readonly faction: WarframeName | null;
+  /** The enemy levels of the node. */
+  readonly enemyLevel: {
+    /** Lowest enemy level. */
+    readonly min: number;
+    /** Highest enemy level. */
+    readonly max: number;
+  } | null;
+  /** The era of a Void Fissure mission. */
+  readonly fissure: WarframeName | null;
+  /** What changes the mission, at most `MAX_WARFRAME_MODIFIERS`. */
+  readonly modifiers: ReadonlyArray<WarframeModifier>;
+  /** When it was chosen, in Unix milliseconds. */
+  readonly selectedAt: number | null;
+  /** When it began to load. */
+  readonly loadingAt: number | null;
+  /** When play began. */
+  readonly startedAt: number | null;
+  /** When it ended. */
+  readonly endedAt: number | null;
+  /** `succeeded`, `failed` or `aborted`; `null` before the end, or when the game did not say. */
+  readonly result: "succeeded" | "failed" | "aborted" | null;
+  /** From the start of play to the end, in seconds to the millisecond. */
+  readonly durationSeconds: number | null;
+}
+
+/** What changes a mission. */
+export interface WarframeModifier {
+  /** Our ID of the modifier. */
+  readonly id: "steel_path" | "arbitration" | "sortie" | "archon_hunt" | "nightmare" | "void_storm" | "alert" | "lich";
+  /** Its name in the user's language. */
+  readonly name: string;
+  /** The stage of a Sortie or an Archon Hunt, 1 to 3, when PlayerVox OverCrow can tell it. */
+  readonly stage: number | null;
+}
+
+/** The progress of a mission. */
+export interface WarframeProgress {
+  /** The current wave (Defense, Mirror Defense). */
+  readonly wave: number | null;
+  /** Rounds done (Interception, Disruption). */
+  readonly round: number | null;
+  /** Rotation rewards given so far. */
+  readonly rewards: number;
+  /** The rotation of the next reward, counted A, A, B, C from the rewards given; `null` for a type without rotations or one we cannot count. */
+  readonly rotation: "A" | "B" | "C" | null;
+  /** When the next reward comes, in Unix milliseconds, for a type paid on time (Survival). */
+  readonly nextRewardAt: number | null;
+  /** The wave of the next reward, for a type paid on waves (Defense). */
+  readonly nextRewardWave: number | null;
+}
+
+/** A member of the squad. */
+export interface WarframeSquadMember {
+  /** The player's name, without the platform icon. */
+  readonly name: string;
+  /** Whether it is the user. */
+  readonly you: boolean;
+}
+
+/** The squad. */
+export interface WarframeSquad {
+  /** The members, the user included, at most `MAX_WARFRAME_SQUAD`. */
+  readonly members: ReadonlyArray<WarframeSquadMember>;
+}
+
+/** One Eidolon of the night. */
+export interface WarframeEidolonHunt {
+  /** Which Eidolon, told by the order of the hunt; `null` when it cannot be told. */
+  readonly eidolon: WarframeName | null;
+  /** When it appeared, in Unix milliseconds. */
+  readonly spawnedAt: number;
+  /** Weak points destroyed. */
+  readonly weakpoints: number;
+  /** When it was captured. */
+  readonly capturedAt: number | null;
+  /** When it was killed. */
+  readonly killedAt: number | null;
+  /** When it left at dawn. */
+  readonly fledAt: number | null;
+}
+
+/** The night on the Plains of Eidolon. */
+export interface WarframeEidolons {
+  /** Whether it is night on the Plains, as the player last saw it; `null` before. */
+  readonly night: boolean | null;
+  /** The Eidolons of the night, oldest first, at most `MAX_WARFRAME_HUNTS`. */
+  readonly hunts: ReadonlyArray<WarframeEidolonHunt>;
+}
+
+/** One Warframe event; its type tells which state it carries. */
+export type WarframeEvent = {
+  /** Order of the event in the subscription, from 1. */
+  readonly seq: number;
+  /** When it happened in the game, in Unix milliseconds. */
+  readonly at: number;
+  /** What happened. */
+  readonly type: "mission_selected" | "mission_loading" | "mission_started" | "mission_ended";
+  /** The mission then. */
+  readonly mission: WarframeMission;
+} | {
+  /** Order of the event in the subscription, from 1. */
+  readonly seq: number;
+  /** When it happened in the game, in Unix milliseconds. */
+  readonly at: number;
+  /** What happened. */
+  readonly type: "wave_started" | "reward_given";
+  /** The progress then. */
+  readonly progress: WarframeProgress;
+} | {
+  /** Order of the event in the subscription, from 1. */
+  readonly seq: number;
+  /** When it happened in the game, in Unix milliseconds. */
+  readonly at: number;
+  /** Night or day began on the Plains. */
+  readonly type: "night_started" | "day_started";
+} | {
+  /** Order of the event in the subscription, from 1. */
+  readonly seq: number;
+  /** When it happened in the game, in Unix milliseconds. */
+  readonly at: number;
+  /** What happened. */
+  readonly type: "eidolon_spawned" | "weakpoint_destroyed" | "eidolon_captured" | "eidolon_killed" | "eidolon_fled";
+  /** The Eidolon then. */
+  readonly eidolon: WarframeEidolonHunt;
+} | {
+  /** Order of the event in the subscription, from 1. */
+  readonly seq: number;
+  /** When it happened in the game, in Unix milliseconds. */
+  readonly at: number;
+  /** What happened. */
+  readonly type: "member_joined" | "member_left";
+  /** Who. */
+  readonly member: WarframeSquadMember;
+} | {
+  /** Order of the event in the subscription, from 1. */
+  readonly seq: number;
+  /** When it happened in the game, in Unix milliseconds. */
+  readonly at: number;
+  /** What happened. */
+  readonly type: "location_changed";
+  /** The new place. */
+  readonly location: WarframeLocation;
+};
+
+/** A mission of the Sortie or the Archon Hunt. */
+export interface WarframeWorldMission {
+  /** The node. */
+  readonly node: WarframeNode;
+  /** Its planet or region. */
+  readonly planet: WarframeName | null;
+  /** The mission type. */
+  readonly type: WarframeName | null;
+  /** The condition of a Sortie mission; `null` otherwise. */
+  readonly modifier: WarframeName | null;
+}
+
+/** The cycle of an open world. */
+export interface WarframeCycle {
+  /** Day or night (Cetus), warm or cold (Orb Vallis), Fass or Vome (Cambion Drift). */
+  readonly state: WarframeName;
+  /** When it changes, in Unix milliseconds. */
+  readonly endsAt: number;
+}
+
+/** Warframe's world of the day and the week. */
+export interface WarframeWorld {
+  /** When PlayerVox OverCrow last read it, in Unix milliseconds. */
+  readonly updatedAt: number;
+  /** The Sortie of the day. */
+  readonly sortie: {
+    /** The boss. */
+    readonly boss: WarframeName;
+    /** Its faction. */
+    readonly faction: WarframeName | null;
+    /** When it ends. */
+    readonly endsAt: number;
+    /** Its missions, in order. */
+    readonly missions: ReadonlyArray<WarframeWorldMission>;
+  } | null;
+  /** The Archon Hunt of the week. */
+  readonly archonHunt: {
+    /** The Archon. */
+    readonly boss: WarframeName;
+    /** When it ends. */
+    readonly endsAt: number;
+    /** Its missions, in order. */
+    readonly missions: ReadonlyArray<WarframeWorldMission>;
+  } | null;
+  /** The open Void Fissures, the soonest to close first, at most `MAX_WARFRAME_FISSURES`. */
+  readonly fissures: ReadonlyArray<{
+    /** The node. */
+    readonly node: WarframeNode;
+    /** Its planet or region. */
+    readonly planet: WarframeName | null;
+    /** The mission type. */
+    readonly type: WarframeName | null;
+    /** The era. */
+    readonly era: WarframeName;
+    /** A Steel Path fissure. */
+    readonly steelPath: boolean;
+    /** A Void Storm (Railjack). */
+    readonly voidStorm: boolean;
+    /** When it closes. */
+    readonly endsAt: number;
+  }>;
+  /** The open worlds' cycles; `null` for one PlayerVox OverCrow cannot tell. */
+  readonly cycles: {
+    /** Day and night at Cetus and on the Plains. */
+    readonly cetus: WarframeCycle | null;
+    /** Warm and cold in the Orb Vallis. */
+    readonly vallis: WarframeCycle | null;
+    /** Fass and Vome in the Cambion Drift. */
+    readonly cambion: WarframeCycle | null;
+  };
+  /** The next resets. */
+  readonly resets: {
+    /** The next daily reset, 00:00 UTC, in Unix milliseconds. */
+    readonly daily: number;
+    /** The next weekly reset, Monday 00:00 UTC. */
+    readonly weekly: number;
+  };
+  /** Baro Ki'Teer's next visit, or the current one. */
+  readonly voidTrader: {
+    /** When he arrives. */
+    readonly arrivesAt: number;
+    /** When he leaves. */
+    readonly leavesAt: number;
+    /** Where he comes. */
+    readonly relay: WarframeName | null;
+  } | null;
+  /** The Circuit's rewards of the week, when the world state gives them. */
+  readonly circuit: {
+    /** The rewards of the week. */
+    readonly normal: ReadonlyArray<WarframeName>;
+    /** The Steel Path rewards of the week. */
+    readonly steelPath: ReadonlyArray<WarframeName>;
+  } | null;
+}
+
 // Services.
 
 /** Every service name. */
@@ -905,8 +1225,8 @@ export interface ServiceParamsMap {
     /** Absolute `https` address of a page a link rule allows. */
     readonly url: string;
   };
-  /** Parameters of `gameEvents.subscribe`. */
-  readonly "gameEvents.subscribe": Record<string, never>;
+  /** Parameters of `gameEvents.warframe.subscribe`. */
+  readonly "gameEvents.warframe.subscribe": Record<string, never>;
   /** Parameters of `session.subscribe`. */
   readonly "session.subscribe": Record<string, never>;
   /** Parameters of `game.subscribe`. */
@@ -1060,8 +1380,8 @@ export interface ServiceResultMap {
   readonly "clipboard.writeText": null;
   /** `links.open`: `null` once the host handed the address to the browser. The host shows the address and, the first time for its origin, asks the user, who may later take that back in the Control Center; `cancelled` when the user declines; `permission_denied` for an address no rule allows; `url_invalid` for one that is not a plain HTTPS address (credentials, a path with encoded or dot segments, beyond `MAX_LINK_URL_BYTES`); `busy` while a confirmation is open; `unavailable` when no browser could open it. */
   readonly "links.open": null;
-  /** `gameEvents.subscribe`: `{ event, at }` for each declared event. */
-  readonly "gameEvents.subscribe": GameEvent;
+  /** `gameEvents.warframe.subscribe`: `{ playing, session, features, info, events }` at once, then at each change of what the widget follows; `permission_denied` when `gameEvents` lists no `warframe.*` feature. `playing` says whether Warframe is the active game; `session` is the launch of Warframe, which changes at each launch; `features` gives each feature's status; `info` the state of each feature the widget follows, ready to show (`null` for the others and while nothing is known); `events` repeats the latest `SERVICE_EVENT_WINDOW` events of those features, oldest first, each `{ seq, at, type }` and the state its type names: updates are coalesced, so take only those whose `seq` is above the last one seen. At most one subscription per widget at a time: another fails with `busy`. */
+  readonly "gameEvents.warframe.subscribe": WarframeEvents;
   /** `session.subscribe`: `{ elapsedMs, at }` counted from the start of the game process, or `null` without an active game. */
   readonly "session.subscribe": Session | null;
   /** `game.subscribe`: `{ steamAppId, name }` of the active game, or `null` without one: `steamAppId` is the game's Steam app ID, `null` for a game outside the Steam store (a game added by hand, a non-Steam shortcut), and `name` the game's name in the user's game list, `null` when the host has none. */
@@ -1160,7 +1480,7 @@ export type CallServiceName =
 
 /** Services that send updates until cancelled. */
 export type SubscribeServiceName =
-  | "gameEvents.subscribe"
+  | "gameEvents.warframe.subscribe"
   | "session.subscribe"
   | "game.subscribe"
   | "telemetry.subscribe"

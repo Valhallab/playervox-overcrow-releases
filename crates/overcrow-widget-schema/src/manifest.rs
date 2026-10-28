@@ -12,6 +12,7 @@ use serde_json::{Map, Value};
 
 use crate::accounts::{Account, validate_account_routes, validate_accounts};
 use crate::catalog_v2::{FEATURE_ACTIVE_GAME, FEATURE_NETWORK_FILE_PARAM};
+use crate::game_events::game_event_feature;
 use crate::json::{has_exact_fields, integer_in, parse_strict};
 use crate::limits::{
     MAX_ACCOUNTS, MAX_DNS_LABEL_BYTES, MAX_DNS_NAME_BYTES, MAX_ENUM_VALUE_BYTES, MAX_ENUM_VALUES,
@@ -168,7 +169,7 @@ pub const PERMISSION_FIELDS: &[Field] = &[
     Field::optional(
         "gameEvents",
         ValueType::ListOf("game event", &MAX_GAME_EVENTS),
-        "Distinct `overcrow.game.<name>.v1` event names.",
+        "Distinct game event features, each `<game>.<feature>`: `warframe.location`, `warframe.mission`, `warframe.progress`, `warframe.squad`, `warframe.eidolons`, `warframe.world`.",
     ),
     Field::optional(
         "capabilities",
@@ -292,9 +293,10 @@ impl Manifest {
     /// `closesMenu`, `twitch-events` for a Twitch declaration that lists
     /// `events` (`steam-events` for Steam's), `steam-local-achievements`
     /// for a Steam declaration that lists `local` `achievements`,
-    /// `open-links` for `permissions.links`, and `active-game` for
-    /// `game.read` or the PlayerVox score beside a way out); empty for
-    /// a manifest without any.
+    /// `open-links` for `permissions.links`, `active-game` for
+    /// `game.read` or the PlayerVox score beside a way out, and
+    /// `game-events-warframe` for a `warframe.*` game event); empty for a
+    /// manifest without any.
     pub fn features(&self) -> BTreeSet<&'static str> {
         let mut features: BTreeSet<&'static str> = self
             .accounts
@@ -335,6 +337,13 @@ impl Manifest {
         {
             features.insert(FEATURE_ACTIVE_GAME);
         }
+        features.extend(
+            permissions
+                .game_events
+                .iter()
+                .filter_map(|name| game_event_feature(name))
+                .map(|feature| feature.catalog_feature),
+        );
         features
     }
 
@@ -587,7 +596,7 @@ fn validate_permissions(permissions: &Value) -> Result<(Permissions, Vec<Account
     let mut game_events = BTreeSet::new();
     for event in events {
         let event = event.as_str().ok_or(ManifestError::Shape)?;
-        if !valid_game_event(event) || !game_events.insert(event.to_owned()) {
+        if game_event_feature(event).is_none() || !game_events.insert(event.to_owned()) {
             return Err(ManifestError::GameEvent);
         }
     }
@@ -888,23 +897,4 @@ pub(crate) fn valid_literal_segment(value: &str) -> bool {
         && value
             .bytes()
             .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'_' | b'-' | b'~'))
-}
-
-/// `overcrow.game.<segments>.v1`, the grammar of the Web runtime.
-fn valid_game_event(value: &str) -> bool {
-    let Some(name) = value
-        .strip_prefix("overcrow.game.")
-        .and_then(|value| value.strip_suffix(".v1"))
-    else {
-        return false;
-    };
-    !name.is_empty()
-        && name.split('.').all(|segment| {
-            !segment.is_empty()
-                && !segment.starts_with('-')
-                && !segment.ends_with('-')
-                && segment
-                    .bytes()
-                    .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'-')
-        })
 }

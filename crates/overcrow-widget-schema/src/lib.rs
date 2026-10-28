@@ -13,6 +13,7 @@ pub mod catalog;
 pub mod catalog_v2;
 pub mod compiled_view;
 pub mod confusable_letters;
+pub mod game_events;
 pub mod icons;
 pub mod identifiers;
 pub mod integrated;

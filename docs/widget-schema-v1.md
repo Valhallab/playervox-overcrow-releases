@@ -200,7 +200,12 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MAX_DNS_LABEL_BYTES` | 63 bytes | fixed | One dot-separated label of a network origin host or of a widget ID. |
 | `MAX_DNS_NAME_BYTES` | 253 bytes | fixed | Host name of one network origin. |
 | `MAX_OBJECT_ID_BYTES` | 128 bytes | fixed | Opaque object ID or cursor exchanged with a capability service. |
-| `MAX_GAME_EVENTS` | 32 | fixed | Semantic game events declared by one package. |
+| `MAX_GAME_EVENTS` | 32 | fixed | Game event features declared by one package. |
+| `MAX_GAME_EVENT_NAME_BYTES` | 128 bytes | fixed | A name in game events: a place, a type, a player's name, one line. |
+| `MAX_WARFRAME_SQUAD` | 8 | fixed | Members of a Warframe squad, the player included. |
+| `MAX_WARFRAME_HUNTS` | 16 | fixed | Eidolons of one night kept, the latest. |
+| `MAX_WARFRAME_MODIFIERS` | 8 | fixed | Modifiers of one Warframe mission. |
+| `MAX_WARFRAME_FISSURES` | 64 | fixed | Void Fissures of the world state given, the soonest to end first. |
 | `MAX_NOTES` | 8 | fixed | Notes in the user's notes document; `notes.create` fails beyond it. |
 | `MAX_NOTE_TITLE_BYTES` | 96 bytes | fixed | Note title, non-empty after trimming. |
 | `MAX_NOTE_BODY_BYTES` | 8 KiB | fixed | Note body. |
@@ -744,7 +749,7 @@ Keys are the permissions of [Permissions](#permissions); a sensitive capability 
 | `links` | list of `LinkRule` ≤ `MAX_LINK_RULES` | no | Web pages the widget may open in the user's browser with `links.open`, after a click: distinct rules, none covering another of its origin. Not with a sensitive capability; with an account, only on the account's service. Needs the catalog feature `open-links`. |
 | `storage` | boolean | no | Host key-value storage; default `false`. |
 | `clipboardWrite` | boolean | no | Clipboard text writes; default `false`. |
-| `gameEvents` | list of `game event` ≤ `MAX_GAME_EVENTS` | no | Distinct `overcrow.game.<name>.v1` event names. |
+| `gameEvents` | list of `game event` ≤ `MAX_GAME_EVENTS` | no | Distinct game event features, each `<game>.<feature>`: `warframe.location`, `warframe.mission`, `warframe.progress`, `warframe.squad`, `warframe.eidolons`, `warframe.world`. |
 | `capabilities` | `capability names` | no | Distinct capabilities of the schema. |
 
 ## Wrapper menu
@@ -843,7 +848,7 @@ Declaring a permission or capability grants nothing: activation requires consent
 | `links` | manifest rejected | Web pages of declared sites opened in the user's browser on a click, at most `MAX_LINK_RULES` rules; the host shows each address and asks the user once per site. |
 | `storage` | process-lifetime data only | Host-managed key-value storage partitioned by widget ID, within `STORAGE_QUOTA_BYTES`. |
 | `clipboardWrite` | manifest rejected | Text clipboard writes on a current Interactive gesture. |
-| `gameEvents` | allowed | Named semantic game events `overcrow.game.<name>.v1`, at most `MAX_GAME_EVENTS`. |
+| `gameEvents` | allowed | Features of a game the widget follows, each `<game>.<feature>` (`warframe.mission`), at most `MAX_GAME_EVENTS`. |
 | `capabilities` | allowed | Host services listed below. |
 
 ### Network rules
@@ -1017,7 +1022,7 @@ Authority is checked by the host at every call, immediately before acting. Gestu
 | `http.fetch` | permission `network` | call | no | no | `url`: text ≤ `MAX_REQUEST_URL_BYTES`; `method`: `GET` \| `POST` \| `PUT` \| `PATCH` \| `DELETE`; `contentType?`: `application/json` \| `text/plain`; `as`: `json` \| `text` \| `bytes` \| `image` | `{ status, contentType, headers }` with the body as raw payload ≤ the rule's `maxResponseBytes` (`MAX_HTTP_RESPONSE_BYTES` when absent), or `{ status, asset, headers }` from a body ≤ `MAX_HTTP_RESPONSE_BYTES`; `headers` holds the response's headers of `RESPONSE_HEADERS` only; on a rule that names an account, `not_connected` while it is not connected and `account_refused` when the service refused its secret | `HttpResponse` | fixed |
 | `clipboard.writeText` | permission `clipboardWrite` | call | yes | no | `text`: text ≤ `MAX_CLIPBOARD_BYTES` | `null` | `null` | fixed |
 | `links.open` | permission `links` | call | yes | yes | `url`: text ≤ `MAX_LINK_URL_BYTES` | `null` once the host handed the address to the browser. The host shows the address and, the first time for its origin, asks the user, who may later take that back in the Control Center; `cancelled` when the user declines; `permission_denied` for an address no rule allows; `url_invalid` for one that is not a plain HTTPS address (credentials, a path with encoded or dot segments, beyond `MAX_LINK_URL_BYTES`); `busy` while a confirmation is open; `unavailable` when no browser could open it | `null` | fixed |
-| `gameEvents.subscribe` | permission `gameEvents` | subscribe | no | no | none | `{ event, at }` for each declared event | `GameEvent` | fixed |
+| `gameEvents.warframe.subscribe` | permission `gameEvents` | subscribe | no | no | none | `{ playing, session, features, info, events }` at once, then at each change of what the widget follows; `permission_denied` when `gameEvents` lists no `warframe.*` feature. `playing` says whether Warframe is the active game; `session` is the launch of Warframe, which changes at each launch; `features` gives each feature's status; `info` the state of each feature the widget follows, ready to show (`null` for the others and while nothing is known); `events` repeats the latest `SERVICE_EVENT_WINDOW` events of those features, oldest first, each `{ seq, at, type }` and the state its type names: updates are coalesced, so take only those whose `seq` is above the last one seen. At most one subscription per widget at a time: another fails with `busy` | `WarframeEvents` | fixed |
 | `session.subscribe` | capability `session.read` | subscribe | no | no | none | `{ elapsedMs, at }` counted from the start of the game process, or `null` without an active game | `Session` or `null` | fixed |
 | `game.subscribe` | capability `game.read` | subscribe | no | no | none | `{ steamAppId, name }` of the active game, or `null` without one: `steamAppId` is the game's Steam app ID, `null` for a game outside the Steam store (a game added by hand, a non-Steam shortcut), and `name` the game's name in the user's game list, `null` when the host has none | `Game` or `null` | fixed |
 | `telemetry.subscribe` | capability `telemetry.read` | subscribe | no | no | none | `{ cpu, ram, cpuTemperature, gpuTemperature, sources }`, or `null` without an active game: `cpu` is the game's share of the whole machine in % (0–100), `ram` its resident bytes, temperatures are °C or `null`, `sources` `{ cpuTemperature, gpuTemperature }` says whether the host has each sensor | `Telemetry` or `null` | fixed |
@@ -1100,15 +1105,6 @@ Headers of an `http.fetch` response, by lowercase name: only those of `RESPONSE_
 | `cache-control` | text | Present when the response has it. |
 | `expires` | text | Present when the response has it. |
 | `age` | text | Present when the response has it. |
-
-#### `GameEvent`
-
-One game event. `{ event, at }`
-
-| Member | Shape | Meaning |
-| --- | --- | --- |
-| `event` | text | A declared game event. |
-| `at` | integer | Host monotonic clock in ms. |
 
 #### `Session`
 
@@ -1446,6 +1442,256 @@ The unlocked achievements of a game, read on this computer for the account the w
 | `appid` | integer | The game asked for. |
 | `total` | integer | How many achievements of the game the files hold as unlocked. |
 | `achievements` | list of `SteamLocalAchievement` | A page of them, newest first (`null` times last, then by name). |
+
+#### `WarframeName`
+
+Something of Warframe, named. `{ id, name }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `id` | text | Our stable ID, in `snake_case`, listed in the game events page. |
+| `name` | text or `null` | Its name in the user's language, one line of at most `MAX_GAME_EVENT_NAME_BYTES`; `null` when PlayerVox OverCrow has none yet. |
+
+#### `WarframeNode`
+
+A node of the star chart. `{ id, name, englishName }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `id` | text | The game's own key of the node (`SolNode23`, `ClanNode…`, `SettlementNode…`), as public data such as drop tables and the world state name it. |
+| `name` | text or `null` | Its name in the user's language, or `null` when PlayerVox OverCrow has none yet (new content). |
+| `englishName` | text or `null` | Its English name, to match public data in English, or `null`. |
+
+#### `WarframeEvents`
+
+Warframe's game events, for the features the widget lists. `{ playing, session, features, info, events }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `playing` | boolean | Whether Warframe is the active game in PlayerVox OverCrow. |
+| `session` | `{ startedAt }` or `null` | The Warframe session being followed, or `null` before any; a new launch is a new session. |
+| `session.startedAt` | integer | When Warframe was launched, in Unix milliseconds. |
+| `features` | `WarframeFeatures` | The status of each feature. |
+| `info` | `WarframeInfo` | The state of each feature the widget follows. |
+| `events` | list of `WarframeEvent` | The latest events of the features the widget follows, oldest first. |
+
+#### `WarframeFeatures`
+
+The status of each Warframe feature. `{ location, mission, progress, squad, eidolons, world }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `location` | `available` \| `unavailable` \| `undeclared` | `available`, `unavailable` or `undeclared`. |
+| `mission` | `available` \| `unavailable` \| `undeclared` | `available`, `unavailable` or `undeclared`. |
+| `progress` | `available` \| `unavailable` \| `undeclared` | `available`, `unavailable` or `undeclared`. |
+| `squad` | `available` \| `unavailable` \| `undeclared` | `available`, `unavailable` or `undeclared`. |
+| `eidolons` | `available` \| `unavailable` \| `undeclared` | `available`, `unavailable` or `undeclared`. |
+| `world` | `available` \| `unavailable` \| `undeclared` | `available`, `unavailable` or `undeclared`. |
+
+#### `WarframeInfo`
+
+The state of each Warframe feature; `null` for a feature the widget does not follow. `{ location, mission, progress, squad, eidolons, world }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `location` | `WarframeLocation` or `null` | Where the player is; `null` while Warframe is not played. |
+| `mission` | `WarframeMission` or `null` | The latest mission of the session. |
+| `progress` | `WarframeProgress` or `null` | The progress of the latest mission. |
+| `squad` | `WarframeSquad` or `null` | The squad. |
+| `eidolons` | `WarframeEidolons` or `null` | The night on the Plains of Eidolon. |
+| `world` | `WarframeWorld` or `null` | The world of the day and the week, whether Warframe is played or not. |
+
+#### `WarframeLocation`
+
+Where the player is. `{ kind, place, since }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `kind` | `orbiter` \| `relay` \| `hub` \| `open_world` \| `mission` \| `dojo` \| `other` | What kind of place. |
+| `place` | `WarframeName` or `null` | Which one: a hub, a relay or an open world of our places, or the node of a mission; `null` when the game does not say. |
+| `since` | integer | When the player arrived, in Unix milliseconds. |
+
+#### `WarframeMission`
+
+A Warframe mission. `{ state, node, planet, type, faction, enemyLevel, fissure, modifiers, selectedAt, loadingAt, startedAt, endedAt, result, durationSeconds }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `state` | `selected` \| `loading` \| `in_progress` \| `ended` | `selected` on the star chart, `loading`, `in_progress` or `ended`. |
+| `node` | `WarframeNode` | The node. |
+| `planet` | `WarframeName` or `null` | Its planet or region. |
+| `type` | `WarframeName` or `null` | The mission type; `null` for one we do not know. |
+| `faction` | `WarframeName` or `null` | The enemy faction. |
+| `enemyLevel` | `{ min, max }` or `null` | The enemy levels of the node. |
+| `enemyLevel.min` | integer | Lowest enemy level. |
+| `enemyLevel.max` | integer | Highest enemy level. |
+| `fissure` | `WarframeName` or `null` | The era of a Void Fissure mission. |
+| `modifiers` | list of `WarframeModifier` | What changes the mission, at most `MAX_WARFRAME_MODIFIERS`. |
+| `selectedAt` | integer or `null` | When it was chosen, in Unix milliseconds. |
+| `loadingAt` | integer or `null` | When it began to load. |
+| `startedAt` | integer or `null` | When play began. |
+| `endedAt` | integer or `null` | When it ended. |
+| `result` | `succeeded` \| `failed` \| `aborted` or `null` | `succeeded`, `failed` or `aborted`; `null` before the end, or when the game did not say. |
+| `durationSeconds` | number or `null` | From the start of play to the end, in seconds to the millisecond. |
+
+#### `WarframeModifier`
+
+What changes a mission. `{ id, name, stage }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `id` | `steel_path` \| `arbitration` \| `sortie` \| `archon_hunt` \| `nightmare` \| `void_storm` \| `alert` \| `lich` | Our ID of the modifier. |
+| `name` | text | Its name in the user's language. |
+| `stage` | integer or `null` | The stage of a Sortie or an Archon Hunt, 1 to 3, when PlayerVox OverCrow can tell it. |
+
+#### `WarframeProgress`
+
+The progress of a mission. `{ wave, round, rewards, rotation, nextRewardAt, nextRewardWave }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `wave` | integer or `null` | The current wave (Defense, Mirror Defense). |
+| `round` | integer or `null` | Rounds done (Interception, Disruption). |
+| `rewards` | integer | Rotation rewards given so far. |
+| `rotation` | `A` \| `B` \| `C` or `null` | The rotation of the next reward, counted A, A, B, C from the rewards given; `null` for a type without rotations or one we cannot count. |
+| `nextRewardAt` | integer or `null` | When the next reward comes, in Unix milliseconds, for a type paid on time (Survival). |
+| `nextRewardWave` | integer or `null` | The wave of the next reward, for a type paid on waves (Defense). |
+
+#### `WarframeSquadMember`
+
+A member of the squad. `{ name, you }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `name` | text | The player's name, without the platform icon. |
+| `you` | boolean | Whether it is the user. |
+
+#### `WarframeSquad`
+
+The squad. `{ members }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `members` | list of `WarframeSquadMember` | The members, the user included, at most `MAX_WARFRAME_SQUAD`. |
+
+#### `WarframeEidolonHunt`
+
+One Eidolon of the night. `{ eidolon, spawnedAt, weakpoints, capturedAt, killedAt, fledAt }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `eidolon` | `WarframeName` or `null` | Which Eidolon, told by the order of the hunt; `null` when it cannot be told. |
+| `spawnedAt` | integer | When it appeared, in Unix milliseconds. |
+| `weakpoints` | integer | Weak points destroyed. |
+| `capturedAt` | integer or `null` | When it was captured. |
+| `killedAt` | integer or `null` | When it was killed. |
+| `fledAt` | integer or `null` | When it left at dawn. |
+
+#### `WarframeEidolons`
+
+The night on the Plains of Eidolon. `{ night, hunts }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `night` | boolean or `null` | Whether it is night on the Plains, as the player last saw it; `null` before. |
+| `hunts` | list of `WarframeEidolonHunt` | The Eidolons of the night, oldest first, at most `MAX_WARFRAME_HUNTS`. |
+
+#### `WarframeEvent`
+
+One Warframe event; its type tells which state it carries. `{ seq, at, type, mission }` or `{ seq, at, type, progress }` or `{ seq, at, type }` or `{ seq, at, type, eidolon }` or `{ seq, at, type, member }` or `{ seq, at, type, location }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `seq` | integer | Order of the event in the subscription, from 1. |
+| `at` | integer | When it happened in the game, in Unix milliseconds. |
+| `type` | `mission_selected` \| `mission_loading` \| `mission_started` \| `mission_ended` | What happened. |
+| `mission` | `WarframeMission` | The mission then. |
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `seq` | integer | Order of the event in the subscription, from 1. |
+| `at` | integer | When it happened in the game, in Unix milliseconds. |
+| `type` | `wave_started` \| `reward_given` | What happened. |
+| `progress` | `WarframeProgress` | The progress then. |
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `seq` | integer | Order of the event in the subscription, from 1. |
+| `at` | integer | When it happened in the game, in Unix milliseconds. |
+| `type` | `night_started` \| `day_started` | Night or day began on the Plains. |
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `seq` | integer | Order of the event in the subscription, from 1. |
+| `at` | integer | When it happened in the game, in Unix milliseconds. |
+| `type` | `eidolon_spawned` \| `weakpoint_destroyed` \| `eidolon_captured` \| `eidolon_killed` \| `eidolon_fled` | What happened. |
+| `eidolon` | `WarframeEidolonHunt` | The Eidolon then. |
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `seq` | integer | Order of the event in the subscription, from 1. |
+| `at` | integer | When it happened in the game, in Unix milliseconds. |
+| `type` | `member_joined` \| `member_left` | What happened. |
+| `member` | `WarframeSquadMember` | Who. |
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `seq` | integer | Order of the event in the subscription, from 1. |
+| `at` | integer | When it happened in the game, in Unix milliseconds. |
+| `type` | `location_changed` | What happened. |
+| `location` | `WarframeLocation` | The new place. |
+
+#### `WarframeWorldMission`
+
+A mission of the Sortie or the Archon Hunt. `{ node, planet, type, modifier }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `node` | `WarframeNode` | The node. |
+| `planet` | `WarframeName` or `null` | Its planet or region. |
+| `type` | `WarframeName` or `null` | The mission type. |
+| `modifier` | `WarframeName` or `null` | The condition of a Sortie mission; `null` otherwise. |
+
+#### `WarframeCycle`
+
+The cycle of an open world. `{ state, endsAt }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `state` | `WarframeName` | Day or night (Cetus), warm or cold (Orb Vallis), Fass or Vome (Cambion Drift). |
+| `endsAt` | integer | When it changes, in Unix milliseconds. |
+
+#### `WarframeWorld`
+
+Warframe's world of the day and the week. `{ updatedAt, sortie, archonHunt, fissures, cycles, resets, voidTrader, circuit }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `updatedAt` | integer | When PlayerVox OverCrow last read it, in Unix milliseconds. |
+| `sortie` | `{ boss, faction, endsAt, missions }` or `null` | The Sortie of the day. |
+| `sortie.boss` | `WarframeName` | The boss. |
+| `sortie.faction` | `WarframeName` or `null` | Its faction. |
+| `sortie.endsAt` | integer | When it ends. |
+| `sortie.missions` | list of `WarframeWorldMission` | Its missions, in order. |
+| `archonHunt` | `{ boss, endsAt, missions }` or `null` | The Archon Hunt of the week. |
+| `archonHunt.boss` | `WarframeName` | The Archon. |
+| `archonHunt.endsAt` | integer | When it ends. |
+| `archonHunt.missions` | list of `WarframeWorldMission` | Its missions, in order. |
+| `fissures` | list of `{ node, planet, type, era, steelPath, voidStorm, endsAt }` | The open Void Fissures, the soonest to close first, at most `MAX_WARFRAME_FISSURES`. |
+| `cycles` | `{ cetus, vallis, cambion }` | The open worlds' cycles; `null` for one PlayerVox OverCrow cannot tell. |
+| `cycles.cetus` | `WarframeCycle` or `null` | Day and night at Cetus and on the Plains. |
+| `cycles.vallis` | `WarframeCycle` or `null` | Warm and cold in the Orb Vallis. |
+| `cycles.cambion` | `WarframeCycle` or `null` | Fass and Vome in the Cambion Drift. |
+| `resets` | `{ daily, weekly }` | The next resets. |
+| `resets.daily` | integer | The next daily reset, 00:00 UTC, in Unix milliseconds. |
+| `resets.weekly` | integer | The next weekly reset, Monday 00:00 UTC. |
+| `voidTrader` | `{ arrivesAt, leavesAt, relay }` or `null` | Baro Ki'Teer's next visit, or the current one. |
+| `voidTrader.arrivesAt` | integer | When he arrives. |
+| `voidTrader.leavesAt` | integer | When he leaves. |
+| `voidTrader.relay` | `WarframeName` or `null` | Where he comes. |
+| `circuit` | `{ normal, steelPath }` or `null` | The Circuit's rewards of the week, when the world state gives them. |
+| `circuit.normal` | list of `WarframeName` | The rewards of the week. |
+| `circuit.steelPath` | list of `WarframeName` | The Steel Path rewards of the week. |
 
 Service error codes: `invalid_request`, `permission_denied`, `gesture_required`, `not_connected`, `account_refused`, `review_removed_by_moderation`, `stale_context`, `unavailable`, `busy`, `cancelled`, `quota_exceeded`, `unsupported`, `url_invalid`, `resolve_failed`, `address_denied`, `too_many_addresses`, `peer_mismatch`, `redirect_denied`, `encoding_denied`, `content_type_denied`, `response_metadata_limit`, `request_body_limit`, `response_body_limit`, `image_invalid`, `timeout`, `transport_failed`.
 

@@ -190,14 +190,14 @@ mod tests {
             "network": [route("/v1/timers", json!({}))],
             "storage": true,
             "clipboardWrite": true,
-            "gameEvents": ["overcrow.game.match.started.v1"],
+            "gameEvents": ["warframe.mission"],
             "links": [{"origin": "https://nova.gg", "pathPrefix": "/timers/"}, {"origin": "https://help.nova.gg"}],
         })));
         assert_eq!(
             keys.keys().collect::<Vec<_>>(),
             [
                 "clipboardWrite",
-                "gameEvent:overcrow.game.match.started.v1",
+                "gameEvent:warframe.mission",
                 "link:https://help.nova.gg/",
                 "link:https://nova.gg/timers/",
                 "network:GET https://api.nova.gg/v1/timers",

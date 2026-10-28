@@ -24,7 +24,7 @@
   },
   "permissions": {
     "gameEvents": [
-      "overcrow.game.match"
+      "overcrow.game.match.v1"
     ]
   }
 }

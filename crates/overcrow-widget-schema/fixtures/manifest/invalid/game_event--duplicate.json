@@ -24,8 +24,8 @@
   },
   "permissions": {
     "gameEvents": [
-      "overcrow.game.kill.v1",
-      "overcrow.game.kill.v1"
+      "warframe.mission",
+      "warframe.mission"
     ]
   }
 }

@@ -272,17 +272,17 @@ pub const SERVICES: &[Service] = &[
     ))
     .returning(Shape::Null),
     Service {
-        name: "gameEvents.subscribe",
+        name: "gameEvents.warframe.subscribe",
         requires: Requirement::Permission("gameEvents"),
         kind: ServiceKind::Subscribe,
         gesture: false,
         confirm: false,
         params: NONE,
-        result: "`{ event, at }` for each declared event",
+        result: "`{ playing, session, features, info, events }` at once, then at each change of what the widget follows; `permission_denied` when `gameEvents` lists no `warframe.*` feature. `playing` says whether Warframe is the active game; `session` is the launch of Warframe, which changes at each launch; `features` gives each feature's status; `info` the state of each feature the widget follows, ready to show (`null` for the others and while nothing is known); `events` repeats the latest `SERVICE_EVENT_WINDOW` events of those features, oldest first, each `{ seq, at, type }` and the state its type names: updates are coalesced, so take only those whose `seq` is above the last one seen. At most one subscription per widget at a time: another fails with `busy`",
         returns: Shape::Json,
         status: Status::Fixed,
     }
-    .returning(Shape::Named("GameEvent")),
+    .returning(Shape::Named("WarframeEvents")),
     subscribe(
         "session.subscribe",
         "session.read",
