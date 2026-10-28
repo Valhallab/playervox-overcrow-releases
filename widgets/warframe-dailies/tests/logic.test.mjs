@@ -227,5 +227,9 @@ test("refused game events: tick by hand", () => {
   vm.fail(SERVICE, "permission_denied");
   assert.equal(model().hint, "Allow \u201cWarframe: missions\u201d in the Control Center.");
   assert.notEqual(model().left, "", "the count stays beside the refusal");
-  assert.deepEqual([model().lineValue, model().lineValueCls], ["Access denied · Control Center", "line-reset tone-warning"]);
+  assert.deepEqual([model().lineValue, model().lineValueCls], ["Access denied", "line-reset tone-warning"]);
+  assert.match(model().lineLabel, /to do · Access denied\. Allow “Warframe: missions” in the Control Center\.$/);
+  // Without a value: where to fix it, in the line itself.
+  vm.setHost({ options: { "track-sortie": false, "track-archon": false, "track-netracells": false, "track-circuit": false, "track-nightwave": false } });
+  assert.deepEqual([model().line, model().lineValue, model().lineCls], ["Access denied · Control Center", "", "line-main tone-warning"]);
 });

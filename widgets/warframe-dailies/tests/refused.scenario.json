@@ -106,6 +106,9 @@
       "expect": {
         "text": [
           "4 à faire",
+          "Accès refusé"
+        ],
+        "noText": [
           "Accès refusé · Centre de contrôle"
         ],
         "image": "fr-100-mini"
@@ -118,7 +121,63 @@
     },
     {
       "expect": {
+        "text": [
+          "4 to do",
+          "Access denied"
+        ],
         "image": "en-100-mini",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "track-sortie",
+        "value": false
+      }
+    },
+    {
+      "menu": {
+        "id": "track-archon",
+        "value": false
+      }
+    },
+    {
+      "menu": {
+        "id": "track-netracells",
+        "value": false
+      }
+    },
+    {
+      "menu": {
+        "id": "track-circuit",
+        "value": false
+      }
+    },
+    {
+      "menu": {
+        "id": "track-nightwave",
+        "value": false
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Access denied · Control Center"
+        ],
+        "image": "en-100-mini-none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Accès refusé · Centre de contrôle"
+        ],
+        "image": "fr-100-mini-none",
         "fault": "none"
       }
     }

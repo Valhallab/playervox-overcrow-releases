@@ -37,7 +37,7 @@
 
 <box class={rootClass()}>
   <if test={layout() == "line"}>
-    <box class="line">
+    <box class="line" label={state.model.lineLabel}>
       <icon class="line-icon tone-accent" name="calendar-check"/>
       <text class={state.model.lineCls}>{state.model.line}</text>
       <if test={hasText(state.model.lineValue)}>

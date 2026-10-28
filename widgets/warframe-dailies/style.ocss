@@ -149,7 +149,8 @@
 /* State colours win over the base colour of these icons. */
 .empty-icon.tone-warning,
 .status-icon.tone-warning,
-.line-reset.tone-warning { color: var(--color-warning); }
+.line-reset.tone-warning,
+.line .line-main.tone-warning { color: var(--color-warning); }
 
 .empty-icon.tone-danger { color: var(--color-danger); }
 

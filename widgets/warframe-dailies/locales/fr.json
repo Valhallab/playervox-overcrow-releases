@@ -60,5 +60,6 @@
   "month-10": "oct.",
   "month-11": "nov.",
   "month-12": "déc.",
-  "line-refused": "Accès refusé · Centre de contrôle"
+  "line-refused": "Accès refusé",
+  "line-refused-full": "Accès refusé · Centre de contrôle"
 }

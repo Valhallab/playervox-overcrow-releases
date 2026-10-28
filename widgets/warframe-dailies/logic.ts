@@ -245,6 +245,8 @@ export interface Model {
   lineValue: string;
   lineValueCls: string;
   lineCls: string;
+  /** The accessible label of the one line: its text, or the whole refusal. */
+  lineLabel: string;
   empty: boolean;
 }
 
@@ -434,6 +436,11 @@ export function buildModel(inputs: Inputs): Model {
   // Refused: the count stays, the way to fix it comes beside it, in amber.
   const refused = inputs.source === "refused";
 
+  // One line, refused: beside a value, only "Access denied"; without one,
+  // where to fix it. The whole sentence stays in the label and in Full.
+  const line = rows.length === 0 ? (refused ? t("line-refused-full") : t("empty-title")) : fresh !== undefined ? t(`fresh-${fresh.id}`) : count;
+  const lineValue = rows.length === 0 ? "" : refused ? t("line-refused") : fresh !== undefined ? count : nextReset;
+
   return {
     left: rows.length === 0 ? "" : count,
     leftCls: left === 0 ? "left all" : "left",
@@ -444,10 +451,12 @@ export function buildModel(inputs: Inputs): Model {
     hintIcon,
     hintTone,
     status,
-    line: rows.length === 0 ? t("empty-title") : fresh !== undefined ? t(`fresh-${fresh.id}`) : count,
-    lineValue: refused ? t("line-refused") : rows.length === 0 ? "" : fresh !== undefined ? count : nextReset,
+    line,
+    lineValue,
     lineValueCls: refused ? "line-reset tone-warning" : "line-reset",
-    lineCls: rows.length > 0 && success ? "line-main tone-success" : "line-main",
+    lineCls:
+      rows.length === 0 && refused ? "line-main tone-warning" : rows.length > 0 && success ? "line-main tone-success" : "line-main",
+    lineLabel: refused ? `${lineValue === "" ? line : `${line} · ${lineValue}`}. ${t("hint-refused")}` : lineValue === "" ? line : `${line} · ${lineValue}`,
     empty: rows.length === 0,
   };
 }
