@@ -112,6 +112,8 @@ export interface Brief {
   readonly waitText: string;
   readonly waitIcon: IconName;
   readonly waitTone: "muted" | "warning";
+  /** The whole sentence, for screen readers, when the line is short. */
+  readonly waitLabel: string;
   /** Node · planet · type. */
   readonly where: string;
   readonly level: string;
@@ -176,12 +178,13 @@ onHost((changed) => {
 
 subscribe();
 
-function wait(text: string, icon: IconName, tone: Brief["waitTone"] = "muted"): Brief {
+function wait(text: string, icon: IconName, tone: Brief["waitTone"] = "muted", label = text): Brief {
   return {
     mode: "wait",
     waitText: text,
     waitIcon: icon,
     waitTone: tone,
+    waitLabel: label,
     where: "",
     level: "",
     faction: "",
@@ -195,20 +198,36 @@ function wait(text: string, icon: IconName, tone: Brief["waitTone"] = "muted"): 
 
 /** The briefing of `value`, or the line that says why there is none. */
 export function build(value: WarframeEvents | null, failed: string | null): Brief {
-  // Game events are one grant: the line names the first feature declared.
+  // Game events are one grant: the sentence names the first feature
+  // declared. In One line, the family's short form, never cut: the value
+  // still shown (the faction of the briefed mission), or where to go.
   if (failed === "permission_denied") {
-    return wait(t(option("layout", "full") === "line" ? "refused-line" : "refused"), "lock", "warning");
+    if (option("layout", "full") !== "line") return wait(t("refused"), "lock", "warning");
+    const shown = value === null ? null : briefed(value);
+    const text = shown === null ? t("refused-line") : t("refused-value", { value: factionName(shown) });
+    return wait(text, "lock", "warning", t("refused"));
   }
   if (failed !== null) return wait(t("unavailable"), "circle-alert", "warning");
   if (value === null) return wait(t("pick-mission"), "map-pin");
   if (!value.playing) return wait(t("game-closed"), "power");
   if (value.features.mission === "unavailable") return wait(t("unavailable"), "circle-alert", "warning");
-  const mission = value.info.mission;
-  if (mission === null || mission.state === "ended" || beforeSession(mission, value.session)) {
-    return wait(t("pick-mission"), "map-pin");
-  }
+  const mission = briefed(value);
+  if (mission === null) return wait(t("pick-mission"), "map-pin");
   const strip = mission.state === "in_progress" || option("layout", "full") === "line";
   return briefing(mission, value.info.world, strip ? "strip" : "full");
+}
+
+/** The mission to brief: chosen, loading or in progress, of this launch of Warframe. */
+function briefed(value: WarframeEvents): WarframeMission | null {
+  const mission = value.info.mission;
+  if (!value.playing || mission === null || mission.state === "ended" || beforeSession(mission, value.session)) return null;
+  return mission;
+}
+
+/** The faction's name, ours when the host has none, or "Unknown enemies". */
+function factionName(mission: WarframeMission): string {
+  const id = mission.faction?.id ?? null;
+  return (id === null ? null : (mission.faction?.name ?? knownName(id))) ?? t("unknown-enemies");
 }
 
 /** A mission of an earlier launch of Warframe: the host keeps it until the next. */
@@ -221,16 +240,16 @@ function beforeSession(mission: WarframeMission, session: WarframeEvents["sessio
 function briefing(mission: WarframeMission, world: WarframeWorld | null, mode: "full" | "strip"): Brief {
   const factionId = mission.faction?.id ?? null;
   const advice = factionId === null ? null : adviceFor(factionId, mission);
-  const named = factionId === null ? null : (mission.faction?.name ?? knownName(factionId));
   const use = advice === null ? [] : damages(advice.use);
   return {
     mode,
     waitText: "",
     waitIcon: "map-pin",
     waitTone: "muted",
+    waitLabel: "",
     where: whereText(mission),
     level: levelText(mission.enemyLevel),
-    faction: named ?? t("unknown-enemies"),
+    faction: factionName(mission),
     dot: `dot f-${factionId !== null && FACTION_DOTS.has(factionId) ? factionId : "unknown"}`,
     use,
     avoid: advice === null ? [] : damages(advice.avoid),

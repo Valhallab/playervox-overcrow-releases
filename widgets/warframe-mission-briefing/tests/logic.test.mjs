@@ -266,9 +266,19 @@ test("state: a failure says the mission is not found and subscribes again 30 s l
   vm.fail(SERVICE, "permission_denied");
   // A refusal is the user's choice, not a failure: a lock, not the alert of "not found".
   assert.deepEqual([state.brief.waitText, state.brief.waitIcon], ["Allow “Warframe: missions” in the Control Center.", "lock"]);
-  // In One line, the family's short form.
+  assert.equal(state.brief.waitLabel, "Allow “Warframe: missions” in the Control Center.");
+  // In One line, the family's short form, never cut: the value still shown
+  // (the faction of the briefed mission), or where to go without one. The
+  // whole sentence stays the accessible label.
   vm.setHost({ options: { layout: "line" } });
-  assert.deepEqual([state.brief.waitText, state.brief.waitIcon], ["Access denied · Control Center", "lock"]);
+  assert.deepEqual(
+    [state.brief.waitText, state.brief.waitIcon, state.brief.waitLabel],
+    ["Grineer · Access denied", "lock", "Allow “Warframe: missions” in the Control Center."],
+  );
+  const none = logic.build(null, "permission_denied");
+  assert.deepEqual([none.waitText, none.waitLabel], ["Access denied · Control Center", "Allow “Warframe: missions” in the Control Center."]);
+  const ended = logic.build(value({ mission: mission({ state: "ended" }) }), "permission_denied");
+  assert.equal(ended.waitText, "Access denied · Control Center");
   vm.setHost({ options: { layout: "full" } });
   vm.advance(60_000);
   assert.equal(vm.subscriptions.filter((each) => each.service === SERVICE).length, before + 1);

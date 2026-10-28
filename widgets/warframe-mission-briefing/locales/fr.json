@@ -4,6 +4,7 @@
   "unavailable": "Mission introuvable pour l’instant.",
   "refused": "Autorisez « Warframe : missions » dans le Centre de contrôle.",
   "refused-line": "Accès refusé · Centre de contrôle",
+  "refused-value": "{value} · Accès refusé",
   "use": "Utilisez",
   "avoid": "Évitez : {list}",
   "level": "niv. {level}",

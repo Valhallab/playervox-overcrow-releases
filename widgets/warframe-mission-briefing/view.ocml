@@ -5,7 +5,7 @@
   <if test={state.brief.mode == "wait"}>
     <box class="line">
       <icon class={"line-icon tone-" + state.brief.waitTone} name={state.brief.waitIcon}/>
-      <text class="wait-text">{state.brief.waitText}</text>
+      <text class="wait-text" label={state.brief.waitLabel}>{state.brief.waitText}</text>
     </box>
   </if>
   <else-if test={state.brief.mode == "strip"}>
