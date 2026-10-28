@@ -266,6 +266,10 @@ test("state: a failure says the mission is not found and subscribes again 30 s l
   vm.fail(SERVICE, "permission_denied");
   // A refusal is the user's choice, not a failure: a lock, not the alert of "not found".
   assert.deepEqual([state.brief.waitText, state.brief.waitIcon], ["Allow “Warframe: missions” in the Control Center.", "lock"]);
+  // In One line, the family's short form.
+  vm.setHost({ options: { layout: "line" } });
+  assert.deepEqual([state.brief.waitText, state.brief.waitIcon], ["Access denied · Control Center", "lock"]);
+  vm.setHost({ options: { layout: "full" } });
   vm.advance(60_000);
   assert.equal(vm.subscriptions.filter((each) => each.service === SERVICE).length, before + 1);
 });

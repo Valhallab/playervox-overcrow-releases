@@ -22,7 +22,7 @@ Digital Extremes and shows no logo of theirs.
 | No advice | An unknown faction ("Unknown enemies") or one without weaknesses: the faction muted and "No advice yet for these enemies." |
 | Warframe closed | "Run Warframe to see the briefing." |
 | Mission data unavailable | "Mission not found yet." in amber; a failed subscription is retried 30 s later |
-| Refused | "Allow “Warframe: missions” in the Control Center." |
+| Refused | A lock and "Allow “Warframe: missions” in the Control Center." (game events are one grant: the first feature declared is named); in One line, "Access denied · Control Center" |
 
 Names (nodes, planets, mission types, factions, modifiers, Sortie
 conditions) come from PlayerVox OverCrow in the user's language; a name it
