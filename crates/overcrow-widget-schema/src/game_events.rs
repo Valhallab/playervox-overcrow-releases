@@ -296,6 +296,89 @@ pub mod warframe {
         named("vome", "Vome"),
     ];
 
+    /// The conditions of a Sortie mission (`modifier.id` of the world).
+    pub const SORTIE_MODIFIERS: &[Named] = &[
+        named("energy_reduction", "Energy Reduction"),
+        named("augmented_armor", "Augmented Enemy Armor"),
+        named("enhanced_shields", "Enhanced Enemy Shields"),
+        named("eximus_stronghold", "Eximus Stronghold"),
+        named("impact_enhancement", "Enemy Physical Enhancement: Impact"),
+        named(
+            "puncture_enhancement",
+            "Enemy Physical Enhancement: Puncture",
+        ),
+        named("slash_enhancement", "Enemy Physical Enhancement: Slash"),
+        named("heat_enhancement", "Enemy Elemental Enhancement: Heat"),
+        named("cold_enhancement", "Enemy Elemental Enhancement: Cold"),
+        named(
+            "electricity_enhancement",
+            "Enemy Elemental Enhancement: Electricity",
+        ),
+        named("toxin_enhancement", "Enemy Elemental Enhancement: Toxin"),
+        named("blast_enhancement", "Enemy Elemental Enhancement: Blast"),
+        named(
+            "corrosive_enhancement",
+            "Enemy Elemental Enhancement: Corrosive",
+        ),
+        named("gas_enhancement", "Enemy Elemental Enhancement: Gas"),
+        named(
+            "magnetic_enhancement",
+            "Enemy Elemental Enhancement: Magnetic",
+        ),
+        named(
+            "radiation_enhancement",
+            "Enemy Elemental Enhancement: Radiation",
+        ),
+        named("viral_enhancement", "Enemy Elemental Enhancement: Viral"),
+        named(
+            "radiation_pockets",
+            "Environmental Hazard: Radiation Pockets",
+        ),
+        named(
+            "electromagnetic_anomalies",
+            "Environmental Hazard: Electromagnetic Anomalies",
+        ),
+        named("dense_fog", "Environmental Effect: Dense Fog"),
+        named("fire", "Environmental Hazard: Fire"),
+        named(
+            "cryogenic_leakage",
+            "Environmental Effect: Cryogenic Leakage",
+        ),
+        named("extreme_cold", "Environmental Effect: Extreme Cold"),
+        named("pistol_only", "Weapon Restriction: Pistol Only"),
+        named("shotgun_only", "Weapon Restriction: Shotgun Only"),
+        named("sniper_only", "Weapon Restriction: Sniper Only"),
+        named(
+            "assault_rifle_only",
+            "Weapon Restriction: Assault Rifle Only",
+        ),
+        named("melee_only", "Weapon Restriction: Melee Only"),
+        named("bow_only", "Weapon Restriction: Bow Only"),
+    ];
+
+    /// The bosses of the Sortie and the Archons of the Archon Hunt (`boss.id`).
+    pub const BOSSES: &[Named] = &[
+        named("captain_vor", "Captain Vor"),
+        named("vay_hek", "Councilor Vay Hek"),
+        named("sargas_ruk", "General Sargas Ruk"),
+        named("kela_de_thaym", "Kela De Thaym"),
+        named("lech_kril", "Lieutenant Lech Kril"),
+        named("tyl_regor", "Tyl Regor"),
+        named("alad_v", "Alad V"),
+        named("ambulas", "Ambulas"),
+        named("hyena_pack", "Hyena Pack"),
+        named("jackal", "Jackal"),
+        named("nef_anyo", "Nef Anyo"),
+        named("raptors", "The Raptors"),
+        named("phorid", "Phorid"),
+        named("lephantis", "Lephantis"),
+        named("mutalist_alad_v", "Mutalist Alad V"),
+        named("corrupted_vor", "Corrupted Vor"),
+        named("archon_amar", "Archon Amar"),
+        named("archon_nira", "Archon Nira"),
+        named("archon_boreal", "Archon Boreal"),
+    ];
+
     /// Modifier IDs only, the words of `WarframeModifier.id`.
     pub const MODIFIER_IDS: &[&str] = &[
         "steel_path",

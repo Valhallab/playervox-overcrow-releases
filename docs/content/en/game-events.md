@@ -252,6 +252,7 @@ progress of the Circuit, relics, Nightwave or what Baro Ki'Teer sells. For
 those missions, the mission itself is given, and `progress` keeps `null`
 counters and a `null` `rotation`.
 
+- The Orb Vallis cycle, for now: `cycles.vallis` is `null`.
 ### Names and IDs
 
 - `name` is in the app's language, English or French, and changes with it;
@@ -263,8 +264,8 @@ counters and a `null` `rotation`.
 - A node keeps the game's own key, such as `SolNode195`: the key that
   public data such as drop tables and the world state use. Its
   `englishName` gives its English name, to match public data in English.
-- Bosses, Sortie conditions and the Circuit's rewards have stable IDs too,
-  not listed here: show their `name`.
+- The Circuit's rewards have IDs too: their English name in `snake_case`;
+  show their `name`.
 
 #### Planets and regions
 
@@ -407,6 +408,64 @@ Hubs, relays and open worlds: `location.place` and `voidTrader.relay`.
 | `void_storm` | Void Storm |
 | `alert` | Alert |
 | `lich` | Kuva Lich |
+
+#### Sortie conditions
+
+| ID | English name |
+| --- | --- |
+| `energy_reduction` | Energy Reduction |
+| `augmented_armor` | Augmented Enemy Armor |
+| `enhanced_shields` | Enhanced Enemy Shields |
+| `eximus_stronghold` | Eximus Stronghold |
+| `impact_enhancement` | Enemy Physical Enhancement: Impact |
+| `puncture_enhancement` | Enemy Physical Enhancement: Puncture |
+| `slash_enhancement` | Enemy Physical Enhancement: Slash |
+| `heat_enhancement` | Enemy Elemental Enhancement: Heat |
+| `cold_enhancement` | Enemy Elemental Enhancement: Cold |
+| `electricity_enhancement` | Enemy Elemental Enhancement: Electricity |
+| `toxin_enhancement` | Enemy Elemental Enhancement: Toxin |
+| `blast_enhancement` | Enemy Elemental Enhancement: Blast |
+| `corrosive_enhancement` | Enemy Elemental Enhancement: Corrosive |
+| `gas_enhancement` | Enemy Elemental Enhancement: Gas |
+| `magnetic_enhancement` | Enemy Elemental Enhancement: Magnetic |
+| `radiation_enhancement` | Enemy Elemental Enhancement: Radiation |
+| `viral_enhancement` | Enemy Elemental Enhancement: Viral |
+| `radiation_pockets` | Environmental Hazard: Radiation Pockets |
+| `electromagnetic_anomalies` | Environmental Hazard: Electromagnetic Anomalies |
+| `dense_fog` | Environmental Effect: Dense Fog |
+| `fire` | Environmental Hazard: Fire |
+| `cryogenic_leakage` | Environmental Effect: Cryogenic Leakage |
+| `extreme_cold` | Environmental Effect: Extreme Cold |
+| `pistol_only` | Weapon Restriction: Pistol Only |
+| `shotgun_only` | Weapon Restriction: Shotgun Only |
+| `sniper_only` | Weapon Restriction: Sniper Only |
+| `assault_rifle_only` | Weapon Restriction: Assault Rifle Only |
+| `melee_only` | Weapon Restriction: Melee Only |
+| `bow_only` | Weapon Restriction: Bow Only |
+
+#### Bosses
+
+| ID | English name |
+| --- | --- |
+| `captain_vor` | Captain Vor |
+| `vay_hek` | Councilor Vay Hek |
+| `sargas_ruk` | General Sargas Ruk |
+| `kela_de_thaym` | Kela De Thaym |
+| `lech_kril` | Lieutenant Lech Kril |
+| `tyl_regor` | Tyl Regor |
+| `alad_v` | Alad V |
+| `ambulas` | Ambulas |
+| `hyena_pack` | Hyena Pack |
+| `jackal` | Jackal |
+| `nef_anyo` | Nef Anyo |
+| `raptors` | The Raptors |
+| `phorid` | Phorid |
+| `lephantis` | Lephantis |
+| `mutalist_alad_v` | Mutalist Alad V |
+| `corrupted_vor` | Corrupted Vor |
+| `archon_amar` | Archon Amar |
+| `archon_nira` | Archon Nira |
+| `archon_boreal` | Archon Boreal |
 
 ## Privacy
 

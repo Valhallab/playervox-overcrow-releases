@@ -220,7 +220,7 @@ fn world() -> Value {
     json!({
         "updatedAt": 1_793_000_000_000_u64,
         "sortie": {
-            "boss": named("vor", "Captain Vor"),
+            "boss": named("captain_vor", "Captain Vor"),
             "faction": named("grineer", "Grineer"),
             "endsAt": 1_793_050_000_000_u64,
             "missions": [world_mission.clone(), world_mission.clone(), world_mission.clone()]
@@ -372,6 +372,8 @@ fn our_ids_are_stable_snake_case_and_distinct() {
         (warframe::EIDOLONS, "eidolons"),
         (warframe::CYCLE_STATES, "cycle states"),
         (warframe::MODIFIERS, "modifiers"),
+        (warframe::SORTIE_MODIFIERS, "sortie modifiers"),
+        (warframe::BOSSES, "bosses"),
     ] {
         let mut seen = BTreeSet::new();
         assert!(!list.is_empty(), "{name}");
