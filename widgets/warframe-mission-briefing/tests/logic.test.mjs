@@ -268,3 +268,19 @@ test("state: a failure says the mission is not found and subscribes again 30 s l
   vm.advance(60_000);
   assert.equal(vm.subscriptions.filter((each) => each.service === SERVICE).length, before + 1);
 });
+
+test("where: node, planet and type; a node named after its mission does not repeat the type", () => {
+  const where = (node, planet, type) => logic.whereText({ node: named("SolNode0", node), planet: planet && named("p", planet), type: type && named("t", type) });
+  assert.equal(where("Hydron", "Sedna", "Defense"), "Hydron · Sedna · Defense");
+  // Höllvania's nodes, as Digital Extremes names them (Public Export, EN and FR).
+  assert.equal(where("Exterminate: Techrot", "Höllvania", "Extermination"), "Exterminate: Techrot · Höllvania");
+  assert.equal(where("Extermination: Techrot", "Höllvanie", "Extermination"), "Extermination: Techrot · Höllvanie");
+  assert.equal(where("Assassinat: Char H-09", "Höllvanie", "Assassinat"), "Assassinat: Char H-09 · Höllvanie");
+  assert.equal(where("Legacyte Harvest", "Höllvania", "Legacyte Harvest"), "Legacyte Harvest · Höllvania");
+  assert.equal(where("Hell-Scrub: Techrot", "Höllvania", "Survival"), "Hell-Scrub: Techrot · Höllvania · Survival");
+  assert.equal(where("Place du Solstice", "Höllvanie", "Défense"), "Place du Solstice · Höllvanie · Défense");
+  // Short words must match whole: "Mot" is no "Motel".
+  assert.equal(where("Mot", "Void", "Mobile Defense"), "Mot · Void · Mobile Defense");
+  assert.equal(where(null, null, "Defense"), "Defense");
+  assert.equal(where(null, "Deimos", "Netracell"), "Deimos · Netracell");
+});

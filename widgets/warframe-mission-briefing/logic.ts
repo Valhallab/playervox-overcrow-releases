@@ -225,9 +225,7 @@ function briefing(mission: WarframeMission, world: WarframeWorld | null, mode: "
     waitText: "",
     waitIcon: "map-pin",
     waitTone: "muted",
-    where: [mission.node.name, mission.planet?.name, mission.type?.name]
-      .filter((part): part is string => typeof part === "string" && part !== "")
-      .join(" · "),
+    where: whereText(mission),
     level: levelText(mission.enemyLevel),
     faction: named ?? t("unknown-enemies"),
     dot: `dot f-${factionId !== null && FACTION_DOTS.has(factionId) ? factionId : "unknown"}`,
@@ -236,6 +234,41 @@ function briefing(mission: WarframeMission, world: WarframeWorld | null, mode: "
     mods: modifiers(mission, world),
     note: use.length === 0 ? t("no-advice") : "",
   };
+}
+
+/**
+ * "Hydron · Sedna · Defense". Some nodes are named after their mission
+ * (Höllvania's "Exterminate: Techrot"): their type is not said twice.
+ */
+export function whereText(mission: Pick<WarframeMission, "node" | "planet" | "type">): string {
+  const node = mission.node.name;
+  const type = mission.type?.name ?? null;
+  const parts = [node, mission.planet?.name ?? null, type !== null && node !== null && coversType(node, type) ? null : type];
+  return parts.filter((part): part is string => part !== null && part !== "").join(" · ");
+}
+
+/** Whether every word of `type` begins like a word of `node` (6 letters, or the whole shorter word), accents aside. */
+function coversType(node: string, type: string): boolean {
+  const nodeWords = words(node);
+  const typeWords = words(type);
+  return (
+    typeWords.length > 0 &&
+    typeWords.every((word) =>
+      nodeWords.some((other) => {
+        const length = Math.min(6, word.length, other.length);
+        return word.slice(0, length) === other.slice(0, length) && (length === 6 || word === other);
+      }),
+    )
+  );
+}
+
+function words(text: string): string[] {
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter((word) => word !== "");
 }
 
 /**
