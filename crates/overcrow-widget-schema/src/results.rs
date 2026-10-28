@@ -731,11 +731,6 @@ pub const SHAPES: &[NamedShape] = &[
                 NULLABLE_TEXT,
                 "Its name in the user's language, or `null` when PlayerVox OverCrow has none yet (new content).",
             ),
-            member(
-                "englishName",
-                NULLABLE_TEXT,
-                "Its English name, to match public data in English, or `null`.",
-            ),
         ]),
         "A node of the star chart.",
     ),
@@ -783,6 +778,7 @@ pub const SHAPES: &[NamedShape] = &[
             member("squad", FEATURE_STATUS, FEATURE_STATUS_SUMMARY),
             member("eidolons", FEATURE_STATUS, FEATURE_STATUS_SUMMARY),
             member("world", FEATURE_STATUS, FEATURE_STATUS_SUMMARY),
+            member("rewards", FEATURE_STATUS, FEATURE_STATUS_SUMMARY),
         ]),
         "The status of each Warframe feature.",
     ),
@@ -902,6 +898,11 @@ pub const SHAPES: &[NamedShape] = &[
                 "durationSeconds",
                 NULLABLE_NUMBER,
                 "From the start of play to the end, in seconds to the millisecond.",
+            ),
+            member(
+                "rewards",
+                Shape::Nullable(&Shape::Named("WarframeRewards")),
+                "What the node can reward, for a widget that follows `warframe.rewards`; `null` otherwise, or for a node without a reward table.",
             ),
         ]),
         "A Warframe mission.",
@@ -1092,6 +1093,58 @@ pub const SHAPES: &[NamedShape] = &[
             ]),
         ]),
         "One Warframe event; its type tells which state it carries.",
+    ),
+    named(
+        "WarframeReward",
+        Shape::Record(&[
+            member(
+                "id",
+                Shape::Text,
+                "Our ID: the item's English name in `snake_case` (`orokin_cell`).",
+            ),
+            member(
+                "name",
+                Shape::Text,
+                "Its name in the user's language, or in English when PlayerVox OverCrow has no translation yet; never empty.",
+            ),
+            member("quantity", Shape::Integer, "How many at once."),
+            member(
+                "chance",
+                Shape::Number,
+                "The chance, from 0 to 1; the same item's entries of a table added together.",
+            ),
+        ]),
+        "An item a node can reward.",
+    ),
+    named(
+        "WarframeRewardTable",
+        Shape::Record(&[
+            member(
+                "kind",
+                Shape::Keyword(warframe::REWARD_TABLE_KINDS),
+                "`mission`, `caches` or `extra`.",
+            ),
+            member(
+                "rotation",
+                Shape::Nullable(&Shape::Keyword(warframe::ROTATIONS)),
+                "The rotation, or `null` for a table without rotations.",
+            ),
+            member(
+                "items",
+                Shape::List(&Shape::Named("WarframeReward")),
+                "The items, the most likely first, at most `MAX_WARFRAME_REWARD_ITEMS`.",
+            ),
+        ]),
+        "One reward table of a node.",
+    ),
+    named(
+        "WarframeRewards",
+        Shape::Record(&[member(
+            "tables",
+            Shape::List(&Shape::Named("WarframeRewardTable")),
+            "The node's tables, at most `MAX_WARFRAME_REWARD_TABLES`. Source: Digital Extremes' drop tables, no guarantees.",
+        )]),
+        "What a node can reward.",
     ),
     named(
         "WarframeWorldMission",

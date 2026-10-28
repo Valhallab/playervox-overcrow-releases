@@ -12,7 +12,8 @@ widget's sources and the embedded SDK.
 - `permissions.gameEvents` lists the features of a game a widget follows,
   each `<game>.<feature>`: `warframe.location`, `warframe.mission`,
   `warframe.progress`, `warframe.squad`, `warframe.eidolons`,
-  `warframe.world`. `check` and `admit` refuse any other name, the former
+  `warframe.world`, `warframe.rewards`. `check` and `admit` refuse any
+  other name, the former
   `overcrow.game.<name>.v1` included (`manifest.game_event`), and name the
   ones they accept. A manifest that lists one needs the catalog feature
   `game-events-warframe`; the headless runtime this CLI pins must know

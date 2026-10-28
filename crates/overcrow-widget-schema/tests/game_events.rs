@@ -13,7 +13,8 @@ use overcrow_widget_schema::game_events::{
 };
 use overcrow_widget_schema::limits::{
     ALL, MAX_GAME_EVENT_NAME_BYTES, MAX_WARFRAME_FISSURES, MAX_WARFRAME_HUNTS,
-    MAX_WARFRAME_MODIFIERS, MAX_WARFRAME_SQUAD,
+    MAX_WARFRAME_MODIFIERS, MAX_WARFRAME_REWARD_ITEMS, MAX_WARFRAME_REWARD_TABLES,
+    MAX_WARFRAME_SQUAD,
 };
 use overcrow_widget_schema::manifest::{Manifest, validate_manifest};
 use overcrow_widget_schema::results::{Shape, shape};
@@ -46,7 +47,7 @@ fn matches(name: &str, value: &Value) -> bool {
 }
 
 #[test]
-fn warframe_has_six_features() {
+fn warframe_has_seven_features() {
     let table: Vec<_> = GAME_EVENT_FEATURES
         .iter()
         .map(|feature| {
@@ -72,7 +73,7 @@ fn warframe_has_six_features() {
     assert_eq!(
         warframe::FEATURES,
         [
-            "location", "mission", "progress", "squad", "eidolons", "world"
+            "location", "mission", "progress", "squad", "eidolons", "world", "rewards"
         ]
     );
     assert_eq!(table.len(), expected.len());
@@ -138,7 +139,7 @@ fn game_events_are_not_sensitive() {
         "storage": true
     })))
     .expect("game events beside every way out");
-    assert_eq!(manifest.permissions.game_events.len(), 6);
+    assert_eq!(manifest.permissions.game_events.len(), 7);
     assert!(!manifest.permissions.has_sensitive_capability());
 }
 
@@ -162,7 +163,7 @@ fn warframe_events_come_by_one_subscription() {
 }
 
 fn node() -> Value {
-    json!({"id": "SolNode195", "name": "Hydron", "englishName": "Hydron"})
+    json!({"id": "SolNode195", "name": "Hydron"})
 }
 
 fn named(id: &str, name: &str) -> Value {
@@ -184,8 +185,19 @@ fn mission(state: &str) -> Value {
         "startedAt": 1_793_000_030_000_u64,
         "endedAt": if state == "ended" { json!(1_793_000_330_500_u64) } else { Value::Null },
         "result": if state == "ended" { json!("succeeded") } else { Value::Null },
-        "durationSeconds": if state == "ended" { json!(300.5) } else { Value::Null }
+        "durationSeconds": if state == "ended" { json!(300.5) } else { Value::Null },
+        "rewards": if state == "in_progress" { rewards() } else { Value::Null }
     })
+}
+
+fn rewards() -> Value {
+    json!({"tables": [
+        {"kind": "mission", "rotation": "A", "items": [
+            {"id": "orokin_cell", "name": "Cellule Orokin", "quantity": 3, "chance": 0.0769},
+            {"id": "zid_an_core", "name": "Zid-An Core", "quantity": 1, "chance": 0.01}
+        ]},
+        {"kind": "caches", "rotation": null, "items": []}
+    ]})
 }
 
 fn progress() -> Value {
@@ -264,7 +276,8 @@ fn full() -> Value {
             "progress": "available",
             "squad": "unavailable",
             "eidolons": "undeclared",
-            "world": "available"
+            "world": "available",
+            "rewards": "available"
         },
         "info": {
             "location": {"kind": "mission", "place": named("SolNode195", "Hydron"), "since": 1_793_000_030_000_u64},
@@ -295,7 +308,8 @@ fn a_full_value_has_the_shape() {
         "session": null,
         "features": {
             "location": "undeclared", "mission": "available", "progress": "undeclared",
-            "squad": "undeclared", "eidolons": "undeclared", "world": "undeclared"
+            "squad": "undeclared", "eidolons": "undeclared", "world": "undeclared",
+            "rewards": "undeclared"
         },
         "info": {
             "location": null, "mission": null, "progress": null,
@@ -335,12 +349,21 @@ fn values_out_of_their_words_are_refused() {
         ("/info/mission/modifiers/0/id", json!("hard_mode")),
         ("/info/progress/rotation", json!("D")),
         ("/info/location/kind", json!("ship")),
+        ("/info/mission/rewards/tables/0/kind", json!("bonus")),
+        ("/info/mission/rewards/tables/0/items/0/name", Value::Null),
         ("/info/mission/node/id", Value::Null),
     ] {
         let mut value_of = full();
         *value_of.pointer_mut(path).expect(path) = value;
         assert!(!matches("WarframeEvents", &value_of), "{path}");
     }
+}
+
+#[test]
+fn a_node_is_its_key_and_its_name() {
+    let mut value = full();
+    value["info"]["mission"]["node"]["englishName"] = json!("Hydron");
+    assert!(!matches("WarframeEvents", &value));
 }
 
 #[test]
@@ -351,6 +374,8 @@ fn the_bounds_are_listed() {
         (&MAX_WARFRAME_HUNTS, 16),
         (&MAX_WARFRAME_MODIFIERS, 8),
         (&MAX_WARFRAME_FISSURES, 64),
+        (&MAX_WARFRAME_REWARD_TABLES, 9),
+        (&MAX_WARFRAME_REWARD_ITEMS, 64),
     ] {
         assert_eq!(limit.value, value, "{}", limit.key);
         assert!(

@@ -845,8 +845,6 @@ export interface WarframeNode {
   readonly id: string;
   /** Its name in the user's language, or `null` when PlayerVox OverCrow has none yet (new content). */
   readonly name: string | null;
-  /** Its English name, to match public data in English, or `null`. */
-  readonly englishName: string | null;
 }
 
 /** Warframe's game events, for the features the widget lists. */
@@ -880,6 +878,8 @@ export interface WarframeFeatures {
   readonly eidolons: "available" | "unavailable" | "undeclared";
   /** `available`, `unavailable` or `undeclared`. */
   readonly world: "available" | "unavailable" | "undeclared";
+  /** `available`, `unavailable` or `undeclared`. */
+  readonly rewards: "available" | "unavailable" | "undeclared";
 }
 
 /** The state of each Warframe feature; `null` for a feature the widget does not follow. */
@@ -943,6 +943,8 @@ export interface WarframeMission {
   readonly result: "succeeded" | "failed" | "aborted" | null;
   /** From the start of play to the end, in seconds to the millisecond. */
   readonly durationSeconds: number | null;
+  /** What the node can reward, for a widget that follows `warframe.rewards`; `null` otherwise, or for a node without a reward table. */
+  readonly rewards: WarframeRewards | null;
 }
 
 /** What changes a mission. */
@@ -1063,6 +1065,34 @@ export type WarframeEvent = {
   /** The new place. */
   readonly location: WarframeLocation;
 };
+
+/** An item a node can reward. */
+export interface WarframeReward {
+  /** Our ID: the item's English name in `snake_case` (`orokin_cell`). */
+  readonly id: string;
+  /** Its name in the user's language, or in English when PlayerVox OverCrow has no translation yet; never empty. */
+  readonly name: string;
+  /** How many at once. */
+  readonly quantity: number;
+  /** The chance, from 0 to 1; the same item's entries of a table added together. */
+  readonly chance: number;
+}
+
+/** One reward table of a node. */
+export interface WarframeRewardTable {
+  /** `mission`, `caches` or `extra`. */
+  readonly kind: "mission" | "caches" | "extra";
+  /** The rotation, or `null` for a table without rotations. */
+  readonly rotation: "A" | "B" | "C" | null;
+  /** The items, the most likely first, at most `MAX_WARFRAME_REWARD_ITEMS`. */
+  readonly items: ReadonlyArray<WarframeReward>;
+}
+
+/** What a node can reward. */
+export interface WarframeRewards {
+  /** The node's tables, at most `MAX_WARFRAME_REWARD_TABLES`. Source: Digital Extremes' drop tables, no guarantees. */
+  readonly tables: ReadonlyArray<WarframeRewardTable>;
+}
 
 /** A mission of the Sortie or the Archon Hunt. */
 export interface WarframeWorldMission {

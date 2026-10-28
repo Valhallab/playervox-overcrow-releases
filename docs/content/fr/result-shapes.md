@@ -436,13 +436,12 @@ Un élément de Warframe, nommé. `{ id, name }`
 
 ### `WarframeNode`
 
-Un nœud de la carte stellaire. `{ id, name, englishName }`
+Un nœud de la carte stellaire. `{ id, name }`
 
 | Membre | Forme | Signification |
 | --- | --- | --- |
 | `id` | texte | La clé du nœud propre au jeu (`SolNode195`, `ClanNode…`, `SettlementNode…`), telle que la nomment les données publiques comme les tables de butin et l’état du monde. |
 | `name` | texte ou `null` | Son nom dans la langue de l’utilisateur, ou `null` quand PlayerVox OverCrow n’en a pas encore (nouveau contenu). |
-| `englishName` | texte ou `null` | Son nom anglais, pour le croiser avec des données publiques en anglais, ou `null`. |
 
 ### `WarframeEvents`
 
@@ -459,7 +458,7 @@ Les événements de jeu de Warframe, pour les fonctionnalités que le widget lis
 
 ### `WarframeFeatures`
 
-Le statut de chaque fonctionnalité Warframe. `{ location, mission, progress, squad, eidolons, world }`
+Le statut de chaque fonctionnalité Warframe. `{ location, mission, progress, squad, eidolons, world, rewards }`
 
 | Membre | Forme | Signification |
 | --- | --- | --- |
@@ -469,6 +468,7 @@ Le statut de chaque fonctionnalité Warframe. `{ location, mission, progress, sq
 | `squad` | `available` \| `unavailable` \| `undeclared` | `available`, `unavailable` ou `undeclared`. |
 | `eidolons` | `available` \| `unavailable` \| `undeclared` | `available`, `unavailable` ou `undeclared`. |
 | `world` | `available` \| `unavailable` \| `undeclared` | `available`, `unavailable` ou `undeclared`. |
+| `rewards` | `available` \| `unavailable` \| `undeclared` | `available`, `unavailable` ou `undeclared`. |
 
 ### `WarframeInfo`
 
@@ -495,7 +495,7 @@ Où est le joueur. `{ kind, place, since }`
 
 ### `WarframeMission`
 
-Une mission Warframe. `{ state, node, planet, type, faction, enemyLevel, fissure, modifiers, selectedAt, loadingAt, startedAt, endedAt, result, durationSeconds }`
+Une mission Warframe. `{ state, node, planet, type, faction, enemyLevel, fissure, modifiers, selectedAt, loadingAt, startedAt, endedAt, result, durationSeconds, rewards }`
 
 | Membre | Forme | Signification |
 | --- | --- | --- |
@@ -515,6 +515,7 @@ Une mission Warframe. `{ state, node, planet, type, faction, enemyLevel, fissure
 | `endedAt` | entier ou `null` | Quand elle s’est terminée. |
 | `result` | `succeeded` \| `failed` \| `aborted` ou `null` | `succeeded`, `failed` ou `aborted` ; `null` avant la fin, ou quand le jeu ne l’a pas dit. |
 | `durationSeconds` | nombre ou `null` | Du début de la partie à la fin, en secondes, à la milliseconde près. |
+| `rewards` | [`WarframeRewards`](#warframerewards) ou `null` | Ce que le nœud peut rapporter, pour un widget qui suit `warframe.rewards` ; `null` sinon, ou pour un nœud sans table de butin. |
 
 ### `WarframeModifier`
 
@@ -622,6 +623,35 @@ Un événement Warframe ; son type dit quel état il porte. `{ seq, at, type, mi
 | `at` | entier | Quand c’est arrivé dans le jeu, en millisecondes Unix. |
 | `type` | `location_changed` | Ce qui est arrivé. |
 | `location` | [`WarframeLocation`](#warframelocation) | Le nouveau lieu. |
+
+### `WarframeReward`
+
+Un objet qu’un nœud peut rapporter. `{ id, name, quantity, chance }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `id` | texte | Notre ID : le nom anglais de l’objet en `snake_case` (`orokin_cell`). |
+| `name` | texte | Son nom dans la langue de l’utilisateur, ou en anglais quand PlayerVox OverCrow n’a pas encore sa traduction ; jamais vide. |
+| `quantity` | entier | Combien d’un coup. |
+| `chance` | nombre | La chance, de 0 à 1 ; les entrées d’un même objet d’une table additionnées. |
+
+### `WarframeRewardTable`
+
+Une table de butin d’un nœud. `{ kind, rotation, items }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `kind` | `mission` \| `caches` \| `extra` | `mission`, `caches` ou `extra`. |
+| `rotation` | `A` \| `B` \| `C` ou `null` | La rotation, ou `null` pour une table sans rotation. |
+| `items` | liste de [`WarframeReward`](#warframereward) | Les objets, du plus probable au moins probable, 64 au plus. |
+
+### `WarframeRewards`
+
+Ce qu’un nœud peut rapporter. `{ tables }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `tables` | liste de [`WarframeRewardTable`](#warframerewardtable) | Les tables du nœud, 9 au plus. Source : les tables de butin de Digital Extremes, sans garantie. |
 
 ### `WarframeWorldMission`
 

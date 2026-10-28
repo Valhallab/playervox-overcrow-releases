@@ -1215,6 +1215,18 @@ pub const MAX_WARFRAME_MODIFIERS: Limit = fixed(
     Unit::Count,
     "Modifiers of one Warframe mission.",
 );
+pub const MAX_WARFRAME_REWARD_TABLES: Limit = fixed(
+    "MAX_WARFRAME_REWARD_TABLES",
+    9,
+    Unit::Count,
+    "Reward tables of one node: its own, caches and extra, by rotation.",
+);
+pub const MAX_WARFRAME_REWARD_ITEMS: Limit = fixed(
+    "MAX_WARFRAME_REWARD_ITEMS",
+    64,
+    Unit::Count,
+    "Items of one reward table, the most likely kept.",
+);
 pub const MAX_WARFRAME_FISSURES: Limit = fixed(
     "MAX_WARFRAME_FISSURES",
     64,
@@ -1541,6 +1553,8 @@ pub const ALL: &[&Limit] = &[
     &MAX_WARFRAME_HUNTS,
     &MAX_WARFRAME_MODIFIERS,
     &MAX_WARFRAME_FISSURES,
+    &MAX_WARFRAME_REWARD_TABLES,
+    &MAX_WARFRAME_REWARD_ITEMS,
     &MAX_NOTES,
     &MAX_NOTE_TITLE_BYTES,
     &MAX_NOTE_BODY_BYTES,

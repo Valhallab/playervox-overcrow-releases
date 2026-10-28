@@ -72,6 +72,11 @@ pub const GAME_EVENT_FEATURES: &[GameEventFeature] = &[
         "world",
         "The world of the day and the week: Sortie, Archon Hunt, Void Fissures, the cycles of the open worlds, Baro Ki'Teer and the resets.",
     ),
+    warframe(
+        "warframe.rewards",
+        "rewards",
+        "What the node of the mission can reward, by table and rotation, with each item's chance, from Digital Extremes' drop tables.",
+    ),
 ];
 
 /// The feature named `name`, if a manifest may list it.
@@ -104,8 +109,12 @@ pub mod warframe {
 
     /// The features, in the order of `info` and `features`.
     pub const FEATURES: &[&str] = &[
-        "location", "mission", "progress", "squad", "eidolons", "world",
+        "location", "mission", "progress", "squad", "eidolons", "world", "rewards",
     ];
+
+    /// The tables of a node's rewards (`kind`): the mission's own, the
+    /// caches of a Sabotage, Exterminate or Hive node, an additional one.
+    pub const REWARD_TABLE_KINDS: &[&str] = &["mission", "caches", "extra"];
 
     /// Where the player is (`location.kind`).
     pub const LOCATION_KINDS: &[&str] = &[

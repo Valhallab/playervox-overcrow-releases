@@ -231,6 +231,8 @@ que la logique peut lire sont aussi des constantes du SDK : voir
 | `MAX_WARFRAME_HUNTS` | 16 | Eidolons d’une nuit gardés, les plus récents. |
 | `MAX_WARFRAME_MODIFIERS` | 8 | Modificateurs d’une mission Warframe. |
 | `MAX_WARFRAME_FISSURES` | 64 | Fissures du Néant de l’état du monde données, les plus proches de leur fin d’abord. |
+| `MAX_WARFRAME_REWARD_TABLES` | 9 | Tables de butin d’un nœud : la sienne, les caches et la table en plus, par rotation. |
+| `MAX_WARFRAME_REWARD_ITEMS` | 64 | Objets d’une table de butin, les plus probables gardés. |
 
 ### Notes, avis et chat
 

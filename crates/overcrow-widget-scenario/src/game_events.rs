@@ -556,6 +556,19 @@ pub(crate) fn touched_features(path: &str, step: &GameEventsStep) -> Vec<(String
     for key in change.info.keys().filter(|key| known(key)) {
         touched.push((format!("{here}.info.{key}"), format!("{game}.{key}")));
     }
+    // A mission's rewards belong to their own feature.
+    if game == "warframe"
+        && change
+            .info
+            .get("mission")
+            .and_then(|mission| mission.get("rewards"))
+            .is_some_and(|rewards| !rewards.is_null())
+    {
+        touched.push((
+            format!("{here}.info.mission.rewards"),
+            "warframe.rewards".to_owned(),
+        ));
+    }
     for (key, status) in &change.features {
         if known(key) && *status != "undeclared" {
             touched.push((format!("{here}.features.{key}"), format!("{game}.{key}")));

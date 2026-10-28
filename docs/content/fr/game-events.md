@@ -117,6 +117,7 @@ la mission, la progression, l’Eidolon, le membre ou le lieu, tel qu’il
 | `warframe.squad` | Les pseudos du joueur et de son escouade. |
 | `warframe.eidolons` | La nuit et le jour sur les Plaines d’Eidolon, et chaque Eidolon de la nuit : apparition, points faibles, capture, mort ou fuite, à la milliseconde. |
 | `warframe.world` | Le monde du jour et de la semaine : la Sortie, la Chasse d’Archonte, les Fissures du Néant, les cycles des mondes ouverts, Baro Ki’Teer et les réinitialisations. |
+| `warframe.rewards` | Ce que le nœud de la mission peut rapporter, par table et par rotation, avec la chance de chaque objet (`info.mission.rewards`). |
 
 ### Quand les données arrivent
 
@@ -140,7 +141,7 @@ la mission, la progression, l’Eidolon, le membre ou le lieu, tel qu’il
 ### `info`
 
 Les éléments nommés sont `{ id, name }` : notre ID stable, et le nom dans
-la langue de l’utilisateur. Un nœud est `{ id, name, englishName }` ; voir
+la langue de l’utilisateur. Un nœud est `{ id, name }` ; voir
 [Noms et ID](#noms-et-id).
 
 #### `info.location`
@@ -158,7 +159,7 @@ La dernière mission de la session.
 | Membre | Signification |
 | --- | --- |
 | `state` | `selected` (choisie sur la carte stellaire), `loading`, `in_progress` ou `ended`. |
-| `node` | Le nœud : `{ id, name, englishName }`. |
+| `node` | Le nœud : `{ id, name }`. |
 | `planet` | Sa [planète ou sa région](#planètes-et-régions). |
 | `type` | Le [type de mission](#types-de-mission) ; `null` pour un type absent de la liste. |
 | `faction` | La [faction](#factions) ennemie. |
@@ -168,6 +169,7 @@ La dernière mission de la session.
 | `selectedAt`, `loadingAt`, `startedAt`, `endedAt` | Quand elle a été choisie, a commencé à charger, a commencé et s’est terminée, en millisecondes Unix ; `null` jusque-là. |
 | `result` | `succeeded`, `failed` ou `aborted` ; `null` avant la fin, ou quand Warframe ne l’a pas dit. |
 | `durationSeconds` | Du début de la partie à la fin, en secondes, à la milliseconde près. |
+| `rewards` | Ce que le nœud peut rapporter, pour un widget qui suit `warframe.rewards` ([butin](#butin-warframerewards)) ; `null` sinon. |
 
 #### `info.progress`
 
@@ -220,6 +222,35 @@ Chaque chasse :
 Les missions de la Sortie et de la Chasse d’Archonte sont
 `{ node, planet, type, modifier }`, dans l’ordre : `modifier` est la
 condition d’une mission de Sortie, `null` dans la Chasse d’Archonte.
+
+### Butin (`warframe.rewards`)
+
+Avec `warframe.rewards`, `info.mission.rewards` liste ce que le nœud de la
+mission choisie ou en cours peut rapporter, par table et par rotation, ou
+vaut `null` pour un nœud sans table de butin (Extermination, mondes
+ouverts, événements, Circuit) :
+
+```text
+{ tables: { kind: "mission" | "caches" | "extra";
+            rotation: "A" | "B" | "C" | null;
+            items: { id: string; name: string; quantity: number; chance: number }[] }[] }
+```
+
+- `kind` : `mission`, la table de la mission ; `caches`, les caches d'un
+  nœud de Sabotage, d'Extermination ou de Ruche ; `extra`, une table de
+  plus du nœud.
+- `rotation` : `null` pour une table sans rotation.
+- `items`, du plus probable au moins probable, 64 au plus par table :
+  `id`, le nom anglais en `snake_case`, stable d'une langue à l'autre ;
+  `name`, à afficher tel quel, dans la langue de l'utilisateur, ou en
+  anglais quand PlayerVox OverCrow n'a pas encore la traduction ;
+  `quantity`, le nombre donné d'un coup ; `chance`, de 0 à 1, les entrées
+  d'un même objet d'une table additionnées.
+- **Source** : les tables de butin officielles de Digital Extremes
+  (warframe.com/droptables), lues par PlayerVox OverCrow sur le PC du
+  joueur à chaque mise à jour du jeu, tant qu'un widget qui suit
+  `warframe.rewards` est ouvert. Affichez la source avec les taux :
+  **« Taux de butin : Digital Extremes, sans garantie. »**
 
 ### Types d’événements
 
@@ -274,9 +305,7 @@ elle-même est donnée, et `progress` garde des compteurs `null` et une
   les donnent tous, avec leur nom anglais.
 - Un nœud garde la clé propre au jeu, comme `SolNode195` : la clé
   qu’utilisent les données publiques comme les tables de butin et l’état
-  du monde. Son `englishName` donne son nom anglais, pour le croiser avec
-  des données publiques en anglais.
-- Les récompenses du Circuit ont aussi des ID : leur nom anglais en
+  du monde. - Les récompenses du Circuit ont aussi des ID : leur nom anglais en
   `snake_case` ; affichez leur `name`.
 
 #### Planètes et régions
@@ -502,7 +531,7 @@ charge, la vague 5 commence, puis la mission réussit.
     { "gameEvents": { "warframe": {
       "info": { "mission": {
         "state": "loading",
-        "node": { "id": "SolNode195", "name": "Hydron", "englishName": "Hydron" },
+        "node": { "id": "SolNode195", "name": "Hydron" },
         "planet": { "id": "sedna", "name": "Sedna" },
         "type": { "id": "defense", "name": "Defense" },
         "faction": { "id": "grineer", "name": "Grineer" }

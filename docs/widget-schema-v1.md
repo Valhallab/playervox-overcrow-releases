@@ -206,6 +206,8 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MAX_WARFRAME_HUNTS` | 16 | fixed | Eidolons of one night kept, the latest. |
 | `MAX_WARFRAME_MODIFIERS` | 8 | fixed | Modifiers of one Warframe mission. |
 | `MAX_WARFRAME_FISSURES` | 64 | fixed | Void Fissures of the world state given, the soonest to end first. |
+| `MAX_WARFRAME_REWARD_TABLES` | 9 | fixed | Reward tables of one node: its own, caches and extra, by rotation. |
+| `MAX_WARFRAME_REWARD_ITEMS` | 64 | fixed | Items of one reward table, the most likely kept. |
 | `MAX_NOTES` | 8 | fixed | Notes in the user's notes document; `notes.create` fails beyond it. |
 | `MAX_NOTE_TITLE_BYTES` | 96 bytes | fixed | Note title, non-empty after trimming. |
 | `MAX_NOTE_BODY_BYTES` | 8 KiB | fixed | Note body. |
@@ -1454,13 +1456,12 @@ Something of Warframe, named. `{ id, name }`
 
 #### `WarframeNode`
 
-A node of the star chart. `{ id, name, englishName }`
+A node of the star chart. `{ id, name }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
 | `id` | text | The game's own key of the node (`SolNode195`, `ClanNode…`, `SettlementNode…`), as public data such as drop tables and the world state name it. |
 | `name` | text or `null` | Its name in the user's language, or `null` when PlayerVox OverCrow has none yet (new content). |
-| `englishName` | text or `null` | Its English name, to match public data in English, or `null`. |
 
 #### `WarframeEvents`
 
@@ -1477,7 +1478,7 @@ Warframe's game events, for the features the widget lists. `{ playing, session, 
 
 #### `WarframeFeatures`
 
-The status of each Warframe feature. `{ location, mission, progress, squad, eidolons, world }`
+The status of each Warframe feature. `{ location, mission, progress, squad, eidolons, world, rewards }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
@@ -1487,6 +1488,7 @@ The status of each Warframe feature. `{ location, mission, progress, squad, eido
 | `squad` | `available` \| `unavailable` \| `undeclared` | `available`, `unavailable` or `undeclared`. |
 | `eidolons` | `available` \| `unavailable` \| `undeclared` | `available`, `unavailable` or `undeclared`. |
 | `world` | `available` \| `unavailable` \| `undeclared` | `available`, `unavailable` or `undeclared`. |
+| `rewards` | `available` \| `unavailable` \| `undeclared` | `available`, `unavailable` or `undeclared`. |
 
 #### `WarframeInfo`
 
@@ -1513,7 +1515,7 @@ Where the player is. `{ kind, place, since }`
 
 #### `WarframeMission`
 
-A Warframe mission. `{ state, node, planet, type, faction, enemyLevel, fissure, modifiers, selectedAt, loadingAt, startedAt, endedAt, result, durationSeconds }`
+A Warframe mission. `{ state, node, planet, type, faction, enemyLevel, fissure, modifiers, selectedAt, loadingAt, startedAt, endedAt, result, durationSeconds, rewards }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
@@ -1533,6 +1535,7 @@ A Warframe mission. `{ state, node, planet, type, faction, enemyLevel, fissure, 
 | `endedAt` | integer or `null` | When it ended. |
 | `result` | `succeeded` \| `failed` \| `aborted` or `null` | `succeeded`, `failed` or `aborted`; `null` before the end, or when the game did not say. |
 | `durationSeconds` | number or `null` | From the start of play to the end, in seconds to the millisecond. |
+| `rewards` | `WarframeRewards` or `null` | What the node can reward, for a widget that follows `warframe.rewards`; `null` otherwise, or for a node without a reward table. |
 
 #### `WarframeModifier`
 
@@ -1640,6 +1643,35 @@ One Warframe event; its type tells which state it carries. `{ seq, at, type, mis
 | `at` | integer | When it happened in the game, in Unix milliseconds. |
 | `type` | `location_changed` | What happened. |
 | `location` | `WarframeLocation` | The new place. |
+
+#### `WarframeReward`
+
+An item a node can reward. `{ id, name, quantity, chance }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `id` | text | Our ID: the item's English name in `snake_case` (`orokin_cell`). |
+| `name` | text | Its name in the user's language, or in English when PlayerVox OverCrow has no translation yet; never empty. |
+| `quantity` | integer | How many at once. |
+| `chance` | number | The chance, from 0 to 1; the same item's entries of a table added together. |
+
+#### `WarframeRewardTable`
+
+One reward table of a node. `{ kind, rotation, items }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `kind` | `mission` \| `caches` \| `extra` | `mission`, `caches` or `extra`. |
+| `rotation` | `A` \| `B` \| `C` or `null` | The rotation, or `null` for a table without rotations. |
+| `items` | list of `WarframeReward` | The items, the most likely first, at most `MAX_WARFRAME_REWARD_ITEMS`. |
+
+#### `WarframeRewards`
+
+What a node can reward. `{ tables }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `tables` | list of `WarframeRewardTable` | The node's tables, at most `MAX_WARFRAME_REWARD_TABLES`. Source: Digital Extremes' drop tables, no guarantees. |
 
 #### `WarframeWorldMission`
 

@@ -112,6 +112,7 @@ that moment.
 | `warframe.squad` | The names of the player and of their squad. |
 | `warframe.eidolons` | Night and day on the Plains of Eidolon, and each Eidolon of the night: spawn, weak points, capture, kill or escape, to the millisecond. |
 | `warframe.world` | The world of the day and the week: the Sortie, the Archon Hunt, the Void Fissures, the cycles of the open worlds, Baro Ki'Teer and the resets. |
+| `warframe.rewards` | What the node of the mission can reward, by table and rotation, with each item's chance (`info.mission.rewards`). |
 
 ### When the data comes
 
@@ -133,7 +134,7 @@ that moment.
 ### `info`
 
 Named things are `{ id, name }`: our stable ID, and the name in the user's
-language. A node is `{ id, name, englishName }`; see
+language. A node is `{ id, name }`; see
 [Names and IDs](#names-and-ids).
 
 #### `info.location`
@@ -151,7 +152,7 @@ The latest mission of the session.
 | Member | Meaning |
 | --- | --- |
 | `state` | `selected` (chosen on the star chart), `loading`, `in_progress` or `ended`. |
-| `node` | The node: `{ id, name, englishName }`. |
+| `node` | The node: `{ id, name }`. |
 | `planet` | Its [planet or region](#planets-and-regions). |
 | `type` | The [mission type](#mission-types); `null` for a type not in the list. |
 | `faction` | The enemy [faction](#factions). |
@@ -161,6 +162,7 @@ The latest mission of the session.
 | `selectedAt`, `loadingAt`, `startedAt`, `endedAt` | When it was chosen, began to load, began and ended, in Unix milliseconds; `null` until then. |
 | `result` | `succeeded`, `failed` or `aborted`; `null` before the end, or when Warframe did not say. |
 | `durationSeconds` | From the start of play to the end, in seconds, to the millisecond. |
+| `rewards` | What the node can reward, for a widget that follows `warframe.rewards` ([rewards](#rewards-warframerewards)); `null` otherwise. |
 
 #### `info.progress`
 
@@ -214,6 +216,35 @@ The missions of the Sortie and of the Archon Hunt are
 `{ node, planet, type, modifier }`, in order: `modifier` is the condition of
 a Sortie mission, `null` in the Archon Hunt.
 
+### Rewards (`warframe.rewards`)
+
+With `warframe.rewards`, `info.mission.rewards` lists what the node of the
+chosen or current mission can reward, by table and rotation, or is `null`
+for a node without a reward table (Exterminate, open worlds, events, the
+Circuit):
+
+```text
+{ tables: { kind: "mission" | "caches" | "extra";
+            rotation: "A" | "B" | "C" | null;
+            items: { id: string; name: string; quantity: number; chance: number }[] }[] }
+```
+
+- `kind`: `mission` is the mission's own table; `caches` the caches of a
+  Sabotage, Exterminate or Hive node; `extra` an additional table of the
+  node.
+- `rotation`: `null` for a table without rotations.
+- `items`, most likely first, at most 64 per table: `id` is the English
+  name in `snake_case` (`orokin_cell`, `axi_a1_relic_radiant`), stable
+  across languages; `name` is shown as is, in the user's language, or in
+  English when PlayerVox OverCrow has no translation yet; `quantity` the
+  number given at once; `chance` from 0 to 1, the same item's entries of a
+  table added together.
+- **Source**: Digital Extremes' official drop tables
+  (warframe.com/droptables), read by PlayerVox OverCrow on the player's
+  computer at each game update, while a widget that follows
+  `warframe.rewards` runs. Show the source with the rates: **"Drop rates:
+  Digital Extremes, no guarantees."**
+
 ### Event types
 
 | Type | Feature | Carries |
@@ -262,8 +293,7 @@ counters and a `null` `rotation`.
 - Our IDs are `snake_case` and never change. The lists below give them all,
   with their English names.
 - A node keeps the game's own key, such as `SolNode195`: the key that
-  public data such as drop tables and the world state use. Its
-  `englishName` gives its English name, to match public data in English.
+  public data such as the world state uses.
 - The Circuit's rewards have IDs too: their English name in `snake_case`;
   show their `name`.
 
@@ -489,7 +519,7 @@ wave 5 starts, then the mission succeeds.
     { "gameEvents": { "warframe": {
       "info": { "mission": {
         "state": "loading",
-        "node": { "id": "SolNode195", "name": "Hydron", "englishName": "Hydron" },
+        "node": { "id": "SolNode195", "name": "Hydron" },
         "planet": { "id": "sedna", "name": "Sedna" },
         "type": { "id": "defense", "name": "Defense" },
         "faction": { "id": "grineer", "name": "Grineer" }

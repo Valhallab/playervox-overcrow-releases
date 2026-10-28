@@ -74,14 +74,15 @@ fn a_session_is_played_without_writing_a_line() {
         first["features"],
         json!({
             "location": "undeclared", "mission": "available", "progress": "available",
-            "squad": "undeclared", "eidolons": "undeclared", "world": "undeclared"
+            "squad": "undeclared", "eidolons": "undeclared", "world": "undeclared",
+            "rewards": "undeclared"
         })
     );
     assert_eq!(
         first["info"]["mission"],
         json!({
             "state": "loading",
-            "node": {"id": "SolNode195", "name": "Hydron", "englishName": null},
+            "node": {"id": "SolNode195", "name": "Hydron"},
             "planet": null,
             "type": {"id": "defense", "name": "Defense"},
             "faction": null,
@@ -93,7 +94,8 @@ fn a_session_is_played_without_writing_a_line() {
             "startedAt": null,
             "endedAt": null,
             "result": null,
-            "durationSeconds": null
+            "durationSeconds": null,
+            "rewards": null
         })
     );
     assert_eq!(first["info"]["progress"], Value::Null);
@@ -153,6 +155,23 @@ fn the_steps_are_checked_against_the_manifest() {
         .check_against(&manifest(json!(["warframe.mission"])))
         .expect_err("progress is not declared");
     assert_eq!(error.path, "steps[2].gameEvents.warframe.info.progress");
+    let rewards = read(&scenario_of(json!({"info": {"mission": {
+        "state": "selected", "node": {"id": "SolNode195"},
+        "rewards": {"tables": [{"kind": "mission", "rotation": "A", "items": [
+            {"id": "orokin_cell", "name": "Orokin Cell", "quantity": 1, "chance": 0.25}
+        ]}]}
+    }}})))
+    .expect("valid alone");
+    rewards
+        .check_against(&manifest(json!(["warframe.mission", "warframe.rewards"])))
+        .expect("rewards declared");
+    let error = rewards
+        .check_against(&manifest(json!(["warframe.mission"])))
+        .expect_err("rewards are not declared");
+    assert_eq!(
+        error.path,
+        "steps[0].gameEvents.warframe.info.mission.rewards"
+    );
     let squad = read(&scenario_of(json!({"event": {"type": "member_joined",
         "member": {"name": "Ember", "you": false}}})))
     .expect("valid alone");
@@ -235,7 +254,7 @@ fn a_fixture_gives_the_first_value_and_a_step_changes_the_rest() {
         "session": null,
         "features": {
             "location": "undeclared", "mission": "available", "progress": "undeclared",
-            "squad": "available", "eidolons": "undeclared", "world": "undeclared"
+            "squad": "available", "eidolons": "undeclared", "world": "undeclared", "rewards": "undeclared"
         },
         "info": {"location": null, "mission": null, "progress": null,
                  "squad": {"members": [{"name": "Nova", "you": true}]}, "eidolons": null, "world": null},

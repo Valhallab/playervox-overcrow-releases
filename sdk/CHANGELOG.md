@@ -15,7 +15,8 @@ game events, Warframe first:
 - `gameEvents.warframe.subscribe(listener)`, for a widget whose
   `permissions.gameEvents` lists Warframe features (`warframe.location`,
   `warframe.mission`, `warframe.progress`, `warframe.squad`,
-  `warframe.eidolons`, `warframe.world`): whether Warframe is played, the
+  `warframe.eidolons`, `warframe.world`, `warframe.rewards`): whether
+  Warframe is played, the
   status of each feature, its state ready to show (names in the user's
   language beside stable IDs, times in Unix milliseconds, durations in
   seconds) and the latest events, each typed by its `type`. The

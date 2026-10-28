@@ -7,7 +7,7 @@
     { "gameEvents": { "warframe": {
       "info": { "mission": {
         "state": "loading",
-        "node": { "id": "SolNode195", "name": "Hydron", "englishName": "Hydron" },
+        "node": { "id": "SolNode195", "name": "Hydron" },
         "planet": { "id": "sedna", "name": "Sedna" },
         "type": { "id": "defense", "name": "Defense" },
         "faction": { "id": "grineer", "name": "Grineer" }

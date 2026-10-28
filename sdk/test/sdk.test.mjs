@@ -140,7 +140,7 @@ test("Warframe events come by one subscription, typed by event", () => {
   const [, entry] = [...vm.subscriptions].at(-1);
   assert.equal(entry.service, "gameEvents.warframe.subscribe");
   assert.equal(typeof overcrow.gameEvents.subscribe, "undefined");
-  const mission = { state: "ended", node: { id: "SolNode23", name: "Hydron", englishName: "Hydron" } };
+  const mission = { state: "ended", node: { id: "SolNode195", name: "Hydron" } };
   const value = {
     playing: true,
     session: { startedAt: 1793000000000 },
