@@ -46,12 +46,11 @@
 .f-sentient { background: #b48cf0; }
 .f-murmur { background: #5fc8c8; }
 .f-narmer { background: #d27a9a; }
-.f-scaldra { background: #9aa7c8; }
-.f-techrot { background: #d9c25a; }
+.f-scaldra { background: #d147c6; }
+.f-techrot { background: #6669e6; }
 .f-unknown { background: #71717a; }
 
 .theme-light .f-corrupted { background: #a8925a; }
-.theme-light .f-techrot { background: #9a8420; }
 
 .enemy {
   flex-direction: column;
