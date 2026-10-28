@@ -7,13 +7,6 @@
   },
   "steps": [
     {
-      "gameEvents": {
-        "warframe": {
-          "playing": true
-        }
-      }
-    },
-    {
       "publish": {
         "service": "gameEvents.warframe.subscribe",
         "error": "unavailable"

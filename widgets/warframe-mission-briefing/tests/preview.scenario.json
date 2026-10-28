@@ -15,13 +15,6 @@
     {
       "gameEvents": {
         "warframe": {
-          "playing": true
-        }
-      }
-    },
-    {
-      "gameEvents": {
-        "warframe": {
           "info": {
             "mission": {
               "state": "selected",

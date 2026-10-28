@@ -1,18 +1,11 @@
 {
   "scenarioVersion": 1,
   "name": "techrot",
-  "description": "A mission in Höllvania against the Techrot: Gas among the types to use, Cold to avoid.",
+  "description": "An Extermination in Höllvania against the Techrot: the node, named after its mission, does not repeat the type; Gas among the types to use, Cold to avoid.",
   "host": {
     "startAt": 1793199600000
   },
   "steps": [
-    {
-      "gameEvents": {
-        "warframe": {
-          "playing": true
-        }
-      }
-    },
     {
       "gameEvents": {
         "warframe": {
@@ -50,6 +43,7 @@
     {
       "expect": {
         "text": [
+          "Exterminate: Techrot · Höllvania",
           "Techrot",
           "Magnetic",
           "Gas",
@@ -66,11 +60,11 @@
               "state": "selected",
               "node": {
                 "id": "SolNode854",
-                "name": "Exterminate: Techrot"
+                "name": "Extermination: Techrot"
               },
               "planet": {
                 "id": "hollvania",
-                "name": "Höllvania"
+                "name": "Höllvanie"
               },
               "type": {
                 "id": "extermination",
@@ -155,6 +149,56 @@
     {
       "expect": {
         "image": "techrot-en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode854",
+                "name": "Extermination: Techrot"
+              },
+              "planet": {
+                "id": "hollvania",
+                "name": "Höllvanie"
+              },
+              "type": {
+                "id": "extermination",
+                "name": "Extermination"
+              },
+              "faction": {
+                "id": "techrot",
+                "name": "Techrot"
+              },
+              "enemyLevel": {
+                "min": 65,
+                "max": 70
+              },
+              "fissure": null,
+              "modifiers": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "techrot-light-fr-100",
         "fault": "none"
       }
     }

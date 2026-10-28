@@ -7,13 +7,6 @@
   },
   "steps": [
     {
-      "gameEvents": {
-        "warframe": {
-          "playing": true
-        }
-      }
-    },
-    {
       "expect": {
         "state": "running",
         "text": [

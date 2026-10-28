@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "refused",
-  "description": "Game events refused in the Control Center: the line says which permission to allow.",
+  "description": "Game events refused in the Control Center: the line says which permission to allow; the family's short form in One line.",
   "host": {
     "startAt": 1793199600000,
     "grants": []
@@ -47,6 +47,53 @@
     {
       "expect": {
         "image": "refused-en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Access denied · Control Center"
+        ]
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "refused-mini-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "refused-mini-en-100",
         "fault": "none"
       }
     }

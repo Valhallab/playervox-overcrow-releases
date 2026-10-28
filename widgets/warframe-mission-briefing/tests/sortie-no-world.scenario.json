@@ -9,13 +9,6 @@
     {
       "gameEvents": {
         "warframe": {
-          "playing": true
-        }
-      }
-    },
-    {
-      "gameEvents": {
-        "warframe": {
           "features": {
             "world": "unavailable"
           },

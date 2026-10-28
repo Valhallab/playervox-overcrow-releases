@@ -9,13 +9,6 @@
     {
       "gameEvents": {
         "warframe": {
-          "playing": true
-        }
-      }
-    },
-    {
-      "gameEvents": {
-        "warframe": {
           "info": {
             "world": {
               "updatedAt": 1793199540000,

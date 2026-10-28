@@ -9,13 +9,6 @@
     {
       "gameEvents": {
         "warframe": {
-          "playing": true
-        }
-      }
-    },
-    {
-      "gameEvents": {
-        "warframe": {
           "info": {
             "mission": {
               "state": "selected",
@@ -256,6 +249,56 @@
     {
       "expect": {
         "image": "corrupted-en-150",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode409",
+                "name": "Mot"
+              },
+              "planet": {
+                "id": "void",
+                "name": "Néant"
+              },
+              "type": {
+                "id": "survival",
+                "name": "Survie"
+              },
+              "faction": {
+                "id": "corrupted",
+                "name": "Corrompus"
+              },
+              "enemyLevel": {
+                "min": 40,
+                "max": 45
+              },
+              "fissure": null,
+              "modifiers": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "corrupted-light-fr-100",
         "fault": "none"
       }
     }
