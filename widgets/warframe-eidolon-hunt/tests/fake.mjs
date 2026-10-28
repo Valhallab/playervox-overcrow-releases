@@ -17,6 +17,13 @@ export const messages = (locale) =>
 const PLAINS = { kind: "open_world", place: { id: "plains_of_eidolon", name: "Plains of Eidolon" } };
 const CETUS = { kind: "hub", place: { id: "cetus", name: "Cetus" } };
 
+/** The game's terms as the fake host sends them, in English (this widget's part). */
+export const GLOSSARY = {
+  language: "en",
+  eidolon: { teralyst: "Teralyst", gantulyst: "Gantulyst", hydrolyst: "Hydrolyst" },
+  place: { cetus: "Cetus", plains_of_eidolon: "Plains of Eidolon", necralisk: "Necralisk" },
+};
+
 /** One Eidolon of the night. */
 export function eidolon(id, spawnedAt, { captured = null, killed = null, fled = null, weakpoints = 3 } = {}) {
   return {
@@ -44,7 +51,8 @@ export function value({
   const place = at === "plains" ? PLAINS : at === "cetus" ? CETUS : null;
   return {
     playing,
-    session: session === null ? null : { startedAt: session },
+    session: session === null ? null : { startedAt: session, language: "en" },
+    glossary: GLOSSARY,
     features: {
       location: "available",
       mission: "undeclared",

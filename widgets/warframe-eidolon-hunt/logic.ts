@@ -30,6 +30,7 @@ import {
   type WarframeCycle,
   type WarframeEidolonHunt,
   type WarframeEvents,
+  type WarframeGlossary,
 } from "@overcrow/sdk";
 
 // --- Time ------------------------------------------------------------------
@@ -449,7 +450,29 @@ function tone(diffCentis: number): string {
 
 /** Named by position: a tricap is always Teralyst, Gantulyst, Hydrolyst. */
 function eidolonName(position: number): string {
-  return t(EIDOLONS[position] ?? "teralyst");
+  return gameName("eidolon", EIDOLONS[position] ?? "teralyst");
+}
+
+/** The game's terms this widget names, from the glossary of the subscription. */
+type Glossary = Pick<WarframeGlossary, "eidolon"> & { readonly place: Pick<WarframeGlossary["place"], "cetus" | "plains_of_eidolon"> };
+
+/**
+ * The game's English names, as PlayerVox OverCrow falls back to them, until
+ * the first value brings the game's own (a refusal brings none).
+ */
+const ENGLISH: Glossary = {
+  eidolon: { teralyst: "Teralyst", gantulyst: "Gantulyst", hydrolyst: "Hydrolyst" },
+  place: { cetus: "Cetus", plains_of_eidolon: "Plains of Eidolon" },
+};
+
+let glossary: Glossary = ENGLISH;
+
+/**
+ * The name of a term of the game by its ID, in the game's language. The
+ * one place that names them: no name of the game is in the locales.
+ */
+function gameName<K extends keyof Glossary>(kind: K, id: keyof Glossary[K]): string {
+  return glossary[kind][id] as string;
 }
 
 function capturesText(count: number): string {
@@ -594,7 +617,7 @@ function calm(screen: Screen, now: number): Screen {
   screen.cycleIcon = icon;
   screen.lineIcon = icon;
   if (cycle === null) {
-    screen.label = t("cycle-unknown");
+    screen.label = t("cycle-unknown", { place: gameName("place", "cetus") });
     screen.big = "—";
   } else {
     screen.label = t(cycle.night ? "night-left" : "night-in");
@@ -634,7 +657,7 @@ function calm(screen: Screen, now: number): Screen {
   } else if (!model.playing) {
     screen.hint = newcomer ? t("hint-first-run") : summary(now) || t("hint-first-run");
   } else if (model.onPlains === false) {
-    screen.hint = newcomer ? t("hint-first-run") : t("hint-away");
+    screen.hint = newcomer ? t("hint-first-run") : t("hint-away", { place: gameName("place", "plains_of_eidolon") });
   } else {
     screen.hint = t("hint-start");
   }
@@ -999,6 +1022,7 @@ let lastSession = -1;
 /** One value of `gameEvents.warframe.subscribe`. */
 export function receive(value: WarframeEvents): void {
   const now = Date.now();
+  glossary = value.glossary;
   const session = value.session?.startedAt ?? 0;
   if (session !== lastSession) {
     // A new subscription or launch numbers its events from 1 again.

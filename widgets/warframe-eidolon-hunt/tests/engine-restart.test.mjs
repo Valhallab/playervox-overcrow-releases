@@ -6,7 +6,7 @@ import { test } from "node:test";
 import { installRuntime } from "@overcrow/sdk/testing";
 
 import { loadLogic } from "./load-logic.mjs";
-import { MINUTE, NIGHT_END, SECOND, START, advance, eidolon, fakeStorage, messages, send, settle, texts, value } from "./fake.mjs";
+import { GLOSSARY, MINUTE, NIGHT_END, SECOND, START, advance, eidolon, fakeStorage, messages, send, settle, texts, value } from "./fake.mjs";
 
 const T = START;
 const DAY = 24 * 60 * MINUTE;
@@ -55,6 +55,29 @@ test("Warframe restarted: the hunt of the stored Teralyst goes on", async () => 
   assert.equal(store.get("night").legs.length, 2, "the junk leg is dropped");
 });
 
+test("a game in French: the Eidolons in the game's words, the widget's texts in the app's", async () => {
+  const french = {
+    ...GLOSSARY,
+    language: "fr",
+    eidolon: { teralyst: "Teralyste", gantulyst: "Gantulyste", hydrolyst: "Hydrolyste" },
+  };
+  const hunts = [eidolon(null, T + 150_000, { captured: T + 240_270 })];
+  await send(vm, store, { ...value({ session: T + 2 * MINUTE, hunts }), glossary: french });
+  assert.deepEqual(texts(state.view).rows, ["Teralyste −1.78 01:48.22", "Gantulyste −7.95 02:12.05", "Hydrolyste en cours"]);
+  assert.equal(state.view.hint, "9.73 s d’avance après Gantulyste");
+  await send(vm, store, value({ session: T + 2 * MINUTE, hunts }));
+  assert.equal(state.view.hint, "9.73 s d’avance après Gantulyst");
+});
+
+test("names: no name of the game in the locales", () => {
+  for (const locale of ["en", "fr"]) {
+    for (const [key, text] of Object.entries(messages(locale))) {
+      assert.doesNotMatch(key, /^eidolon-/, key);
+      assert.doesNotMatch(text, /Teralyst|Gantulyst|Hydrolyst|Cetus|Plains|Plaines/, `${locale} ${key}`);
+    }
+  }
+});
+
 test("the next night, away from Cetus' cycle, is computed from the stored anchor", async () => {
   // Warframe closes; three cycles later, the world is not read any more.
   await send(vm, store, value({ playing: false, hunts: [] }));
@@ -88,7 +111,7 @@ test("Warframe's times unreadable: the night stays, with what to do", async () =
 
 test("away from the Plains, the night and where you are", async () => {
   await send(vm, store, value({ at: "cetus", cetus: undefined }));
-  assert.equal(state.view.hint, "Hors des Plaines");
+  assert.equal(state.view.hint, "Loin de : Plains of Eidolon");
   assert.equal(state.view.big, "1:35:00");
 });
 

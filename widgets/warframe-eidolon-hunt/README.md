@@ -67,7 +67,9 @@ and the line's accessible label is the whole result.
   tricap is over, the frozen total is exact to the hundredth.
 - **Which Eidolon.** PlayerVox OverCrow names each Eidolon from the order of
   the hunt; when it cannot tell (`eidolon: null`), the widget names it by
-  its position in the tricap. Splits and gaps are compared with the best
+  its position in the tricap. Names of the game (Eidolons, Cetus, the
+  Plains) come from PlayerVox OverCrow's glossary, in the game's language;
+  the widget's own texts are in the user's. Splits and gaps are compared with the best
   tricap position by position, and a new best with the one it beats.
 - **Runs.** A Teralyst starts a tricap; a Gantulyst or a Hydrolyst continues
   the tricap whose previous Eidolon was captured. A tricap ends when the
