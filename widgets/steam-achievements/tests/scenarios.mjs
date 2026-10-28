@@ -976,7 +976,17 @@ const atStart = (game, players, { details = "public" } = {}) => [
   ...images(game),
 ];
 
+// The scenarios whose answers of this computer change during the run start
+// hidden and show at their first step: the host's game, the account and the
+// stored profile have all reached the widget by then, so its first read is
+// the only one before the step, whatever order they came in. Shown at once,
+// a read that the profile's restore asks can follow the first one and read
+// this computer again before the step expects the first answer.
+const HIDDEN_AT_START = { visible: false };
+const SHOW = { host: { visible: true } };
+
 scenario("local-unlock-now", "Status Invisible: Endless Night unlocks; Steam on this computer has it at once while Steam's Web API does not yet: shown at once, New, no Web API read; the Web API still lags at the next minute (shown all the same), then confirms it.", {
+  host: HIDDEN_AT_START,
   subscriptions: { [GAME]: hostGame(ASHEN), ...LIVE.subscriptions },
   http: [
     ...atStart(ASHEN, [...repeat(2, () => fixture(urls.player(ASHEN), player(ASHEN))), fixture(urls.player(ASHEN), player(ASHEN, { A13: 0 }))]),
@@ -984,6 +994,7 @@ scenario("local-unlock-now", "Status Invisible: Endless Night unlocks; Steam on 
   ],
   calls: { [LOCAL]: [localPage(ASHEN), ...repeat(4, () => localPage(ASHEN, { A13: 0 }))] },
   steps: [
+    SHOW,
     { expect: { state: "running", text: ["Ashen Crown", "Playing now", "12 / 40"], fault: "none" } },
     { advance: { ms: 5_000 } },
     saved(1, ASHEN, START + 5_000),
@@ -1018,10 +1029,12 @@ scenario("local-details-hidden", "Game details Friends Only and status Invisible
 });
 
 scenario("local-steam-offline", "Steam's offline mode: Steam on this computer saves Endless Night, which Steam's Web API will not have until Steam is back online; shown at once, and still shown at the next minutes' reads.", {
+  host: HIDDEN_AT_START,
   subscriptions: { [GAME]: hostGame(ASHEN), ...LIVE.subscriptions },
   http: [...atStart(ASHEN, repeat(3, () => fixture(urls.player(ASHEN), player(ASHEN)))), ...repeat(2, () => fixture(urls.summary, summary({ playing: null })))],
   calls: { [LOCAL]: [localPage(ASHEN), ...repeat(6, () => localPage(ASHEN, { A13: 0 }))] },
   steps: [
+    SHOW,
     { expect: { state: "running", text: ["Ashen Crown", "12 / 40"], fault: "none" } },
     { advance: { ms: 5_000 } },
     saved(1, ASHEN, START + 5_000),

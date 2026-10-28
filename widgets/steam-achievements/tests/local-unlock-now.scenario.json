@@ -9,7 +9,8 @@
         "steamid": "76561198000000000",
         "input": "https://steamcommunity.com/profiles/76561198000000000"
       }
-    }
+    },
+    "visible": false
   },
   "fixtures": {
     "calls": {
@@ -678,6 +679,11 @@
     }
   },
   "steps": [
+    {
+      "host": {
+        "visible": true
+      }
+    },
     {
       "expect": {
         "state": "running",
