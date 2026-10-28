@@ -1,0 +1,374 @@
+/* Warframe family: the panel, header and type scale of the PlayerVox
+   Warframe widgets, as Warframe Market. */
+
+.wf {
+  flex-direction: column;
+  width: 100%;
+  padding: 10px;
+  gap: var(--space-4);
+}
+
+.grow {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+/* Header: an eyebrow with its icon, and one short value on the right. */
+
+.eyebrow-row {
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  min-height: 14px;
+}
+
+.eyebrow {
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.eyebrow-icon {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.tone-accent {
+  color: var(--color-accent);
+}
+
+.tone-success {
+  color: var(--color-success);
+}
+
+.tone-warning {
+  color: var(--color-warning);
+}
+
+.tone-muted {
+  color: var(--color-text-muted);
+}
+
+.meta-sep {
+  font-size: var(--font-size-small);
+  color: var(--color-text-subtle);
+}
+
+/* Pill: the new best. */
+
+.pill {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+}
+
+.pill-text {
+  font-size: var(--font-size-caption);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.pill-icon {
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+/* One-line (mini) layout. */
+
+.line {
+  width: 100%;
+  min-width: 0;
+  flex-direction: row;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 12px;
+}
+
+.line-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.line-main {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.line-sub {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.section-title {
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* Eidolon hunt: the running timer is the one thing to read. */
+
+.eidolon.wide {
+  flex-direction: row;
+  align-items: start;
+  gap: 12px;
+}
+
+.eidolon.line {
+  padding: 0;
+}
+
+.hunt-col {
+  flex-direction: column;
+  gap: var(--space-4);
+  flex-grow: 1;
+  flex-basis: 0;
+  min-width: 0;
+}
+
+.night {
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.hero {
+  flex-direction: column;
+  gap: 1px;
+}
+
+.hero-head {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.hero-time {
+  font-size: 32px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 38px;
+  color: var(--color-text);
+}
+
+.hint {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+/* A hint that says what is missing: an alert icon before it. */
+.hint-row {
+  flex-direction: row;
+  align-items: start;
+  gap: 5px;
+}
+
+.hint-row .hint {
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.hint-icon {
+  font-size: 12px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  color: var(--color-warning);
+}
+
+.splits {
+  flex-direction: column;
+}
+
+.split {
+  flex-direction: row;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.split-icon {
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.split-name {
+  font-size: 12px;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.split.now .split-name {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.split.later .split-name {
+  color: var(--color-text-muted);
+}
+
+.split-time {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 52px;
+  text-align: end;
+}
+
+.split-time.soft {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.delta {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.pill.record {
+  border: 1px solid var(--color-success);
+}
+
+.history {
+  flex-direction: column;
+  width: 170px;
+  flex-shrink: 0;
+  gap: 2px;
+  padding-left: 12px;
+  border-left: 1px solid var(--color-border);
+}
+
+.past {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.past-text {
+  flex-direction: column;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.past-when {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.past-caps {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+.past-best {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.line-big {
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.night.ending,
+.line-sub.tone-warning {
+  color: var(--color-warning);
+}
+
+/* State colours win over the base colour of these texts. */
+
+.delta.tone-success,
+.hint.tone-success,
+.line-sub.tone-success {
+  color: var(--color-success);
+}
+
+.delta.tone-warning,
+.hint.tone-warning {
+  color: var(--color-warning);
+}
+
+.hint.tone-success,
+.hint.tone-warning {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.line-delta {
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.line-delta.tone-warning,
+.line-main.tone-warning {
+  color: var(--color-warning);
+}
+
+.line-delta.tone-success,
+.line-main.tone-success {
+  color: var(--color-success);
+}
+
+.history-head {
+  flex-direction: row;
+  align-items: center;
+  min-height: 14px;
+}
+
+.line-sub.tone-warning {
+  color: var(--color-warning);
+  font-weight: 600;
+}

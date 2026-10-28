@@ -1,0 +1,160 @@
+{
+  "scenarioVersion": 1,
+  "name": "first-run",
+  "description": "First start, Warframe closed, by day at Cetus: the night to come and what the widget will show.",
+  "host": {
+    "startAt": 1793217600000,
+    "frame": true,
+    "locale": "fr",
+    "background": "#000000"
+  },
+  "steps": [
+    {
+      "gameEvents": {
+        "warframe": {
+          "playing": true,
+          "session": {
+            "startedAt": 1793215200000
+          }
+        }
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "playing": false,
+          "info": {
+            "world": {
+              "cycles": {
+                "cetus": {
+                  "state": {
+                    "id": "day",
+                    "name": "Day"
+                  },
+                  "endsAt": 1793220070000
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Nuit dans",
+          "41:10",
+          "Vos temps s’affichent pendant la chasse, quelques secondes après chaque capture."
+        ]
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 260
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 260
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1500,
+        "size": {
+          "width": 260,
+          "height": 260
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fr-150",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1500,
+        "size": {
+          "width": 260,
+          "height": 260
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "en-150",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "mini-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "expect": {
+        "fault": "none"
+      }
+    }
+  ]
+}

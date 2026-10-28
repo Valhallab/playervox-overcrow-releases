@@ -1,0 +1,209 @@
+{
+  "scenarioVersion": 1,
+  "name": "night-waiting",
+  "description": "On the Plains at night, before the first Eidolon: the night left.",
+  "host": {
+    "startAt": 1793217600000,
+    "frame": true,
+    "locale": "fr",
+    "background": "#000000",
+    "storage": {
+      "best": {
+        "s": 1793134800000,
+        "total": 452400,
+        "splits": [
+          111320,
+          127170,
+          213910
+        ],
+        "prev": null
+      },
+      "history": [
+        {
+          "s": 1792875600000,
+          "end": 1792876070050,
+          "caps": 3,
+          "total": 470050
+        },
+        {
+          "s": 1793134800000,
+          "end": 1793135252400,
+          "caps": 3,
+          "total": 452400
+        },
+        {
+          "s": 1793135400000,
+          "end": 1793135861100,
+          "caps": 3,
+          "total": 461100
+        },
+        {
+          "s": 1793188800000,
+          "end": 1793189260150,
+          "caps": 3,
+          "total": 460150
+        }
+      ]
+    }
+  },
+  "steps": [
+    {
+      "gameEvents": {
+        "warframe": {
+          "playing": true,
+          "session": {
+            "startedAt": 1793215200000
+          }
+        }
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "location": {
+              "kind": "open_world",
+              "place": {
+                "id": "plains_of_eidolon",
+                "name": "Plains of Eidolon"
+              },
+              "since": 1793216400000
+            },
+            "eidolons": {
+              "night": true,
+              "hunts": []
+            },
+            "world": {
+              "cycles": {
+                "cetus": {
+                  "state": {
+                    "id": "night",
+                    "name": "Night"
+                  },
+                  "endsAt": 1793220552000
+                }
+              }
+            }
+          },
+          "event": "night_started"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Nuit restante",
+          "49:12"
+        ]
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 260
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 260
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1500,
+        "size": {
+          "width": 260,
+          "height": 260
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fr-150",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1500,
+        "size": {
+          "width": 260,
+          "height": 260
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "en-150",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "mini-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "expect": {
+        "fault": "none"
+      }
+    }
+  ]
+}

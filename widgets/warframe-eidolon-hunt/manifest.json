@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.playervox.overcrow.warframe.eidolon-hunt",
+  "version": "1.0.0",
+  "name": {
+    "en": "Eidolon Hunt",
+    "fr": "Chasse aux Eidolons"
+  },
+  "sizing": {
+    "fit": "height",
+    "preferred": {
+      "width": 260,
+      "height": 220
+    },
+    "min": {
+      "width": 220,
+      "height": 40
+    },
+    "max": {
+      "width": 560,
+      "height": 600
+    }
+  },
+  "permissions": {
+    "gameEvents": [
+      "warframe.eidolons",
+      "warframe.location",
+      "warframe.world"
+    ],
+    "storage": true
+  },
+  "wrapper": {
+    "menu": [
+      {
+        "type": "choice",
+        "id": "layout",
+        "icon": "layout-list",
+        "label": {
+          "en": "Layout",
+          "fr": "Affichage"
+        },
+        "choices": [
+          {
+            "value": "line",
+            "label": {
+              "en": "One line",
+              "fr": "Une ligne"
+            }
+          },
+          {
+            "value": "full",
+            "label": {
+              "en": "Full",
+              "fr": "Complet"
+            }
+          }
+        ],
+        "default": "full"
+      }
+    ]
+  }
+}

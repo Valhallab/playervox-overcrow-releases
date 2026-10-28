@@ -1,0 +1,281 @@
+{
+  "scenarioVersion": 1,
+  "name": "tricap-record",
+  "description": "A perfect tricap, 17.03 s under the best: exact to the hundredth, a new best.",
+  "host": {
+    "startAt": 1793217600000,
+    "frame": true,
+    "locale": "fr",
+    "background": "#000000",
+    "storage": {
+      "best": {
+        "s": 1793134800000,
+        "total": 452400,
+        "splits": [
+          111320,
+          127170,
+          213910
+        ],
+        "prev": null
+      },
+      "history": [
+        {
+          "s": 1792875600000,
+          "end": 1792876070050,
+          "caps": 3,
+          "total": 470050
+        },
+        {
+          "s": 1793134800000,
+          "end": 1793135252400,
+          "caps": 3,
+          "total": 452400
+        },
+        {
+          "s": 1793135400000,
+          "end": 1793135861100,
+          "caps": 3,
+          "total": 461100
+        },
+        {
+          "s": 1793188800000,
+          "end": 1793189260150,
+          "caps": 3,
+          "total": 460150
+        }
+      ]
+    }
+  },
+  "steps": [
+    {
+      "gameEvents": {
+        "warframe": {
+          "playing": true,
+          "session": {
+            "startedAt": 1793215200000
+          }
+        }
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "location": {
+              "kind": "open_world",
+              "place": {
+                "id": "plains_of_eidolon",
+                "name": "Plains of Eidolon"
+              },
+              "since": 1793216400000
+            },
+            "eidolons": {
+              "night": true,
+              "hunts": [
+                {
+                  "eidolon": {
+                    "id": "teralyst",
+                    "name": "Teralyst"
+                  },
+                  "spawnedAt": 1793217140000,
+                  "weakpoints": 3,
+                  "capturedAt": 1793217248220,
+                  "killedAt": null,
+                  "fledAt": null
+                },
+                {
+                  "eidolon": {
+                    "id": "gantulyst",
+                    "name": "Gantulyst"
+                  },
+                  "spawnedAt": 1793217278220,
+                  "weakpoints": 3,
+                  "capturedAt": 1793217380270,
+                  "killedAt": null,
+                  "fledAt": null
+                },
+                {
+                  "eidolon": {
+                    "id": "hydrolyst",
+                    "name": "Hydrolyst"
+                  },
+                  "spawnedAt": 1793217440000,
+                  "weakpoints": 3,
+                  "capturedAt": 1793217575370,
+                  "killedAt": null,
+                  "fledAt": null
+                }
+              ]
+            },
+            "world": {
+              "cycles": {
+                "cetus": {
+                  "state": {
+                    "id": "night",
+                    "name": "Night"
+                  },
+                  "endsAt": 1793218682000
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Tricap",
+          "07:15.37",
+          "Nouveau record",
+          "Record précédent 07:32.40 · −17.03 s",
+          "03:15.10",
+          "−18.81",
+          "Nuit 18:02"
+        ]
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 260
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 260
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1500,
+        "size": {
+          "width": 260,
+          "height": 260
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fr-150",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1500,
+        "size": {
+          "width": 260,
+          "height": 260
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "en-150",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "mini-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 480,
+          "height": 260
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "wide-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 480,
+          "height": 260
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "wide-en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "expect": {
+        "fault": "none"
+      }
+    }
+  ]
+}
