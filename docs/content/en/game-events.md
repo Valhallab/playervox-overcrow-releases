@@ -352,7 +352,7 @@ counters and a `null` `rotation`.
 | `disruption` | Disruption |
 | `void_flood` | Void Flood |
 | `void_cascade` | Void Cascade |
-| `orphix` | Orphix |
+| `void_armageddon` | Void Armageddon |
 | `netracell` | Netracell |
 | `alchemy` | Alchemy |
 | `circuit` | The Circuit |
@@ -445,7 +445,7 @@ Hubs, relays and open worlds: `location.place` and `voidTrader.relay`.
 | --- | --- |
 | `energy_reduction` | Energy Reduction |
 | `augmented_armor` | Augmented Enemy Armor |
-| `enhanced_shields` | Enhanced Enemy Shields |
+| `augmented_shields` | Augmented Enemy Shields |
 | `eximus_stronghold` | Eximus Stronghold |
 | `impact_enhancement` | Enemy Physical Enhancement: Impact |
 | `puncture_enhancement` | Enemy Physical Enhancement: Puncture |
@@ -460,18 +460,18 @@ Hubs, relays and open worlds: `location.place` and `voidTrader.relay`.
 | `magnetic_enhancement` | Enemy Elemental Enhancement: Magnetic |
 | `radiation_enhancement` | Enemy Elemental Enhancement: Radiation |
 | `viral_enhancement` | Enemy Elemental Enhancement: Viral |
-| `radiation_pockets` | Environmental Hazard: Radiation Pockets |
-| `electromagnetic_anomalies` | Environmental Hazard: Electromagnetic Anomalies |
-| `dense_fog` | Environmental Effect: Dense Fog |
-| `fire` | Environmental Hazard: Fire |
-| `cryogenic_leakage` | Environmental Effect: Cryogenic Leakage |
-| `extreme_cold` | Environmental Effect: Extreme Cold |
-| `pistol_only` | Weapon Restriction: Pistol Only |
-| `shotgun_only` | Weapon Restriction: Shotgun Only |
-| `sniper_only` | Weapon Restriction: Sniper Only |
-| `assault_rifle_only` | Weapon Restriction: Assault Rifle Only |
-| `melee_only` | Weapon Restriction: Melee Only |
-| `bow_only` | Weapon Restriction: Bow Only |
+| `radiation_hazard` | Radiation Hazard |
+| `electromagnetic_anomalies` | Electromagnetic Anomalies |
+| `dense_fog` | Dense Fog |
+| `fire` | Fire |
+| `cryogenic_leakage` | Cryogenic Leakage |
+| `extreme_cold` | Extreme Cold |
+| `secondary_only` | Secondary Only |
+| `shotgun_only` | Shotgun Only |
+| `sniper_only` | Sniper Only |
+| `assault_rifle_only` | Assault Rifle Only |
+| `melee_only` | Melee Only |
+| `bow_only` | Bow Only |
 
 #### Bosses
 
@@ -485,10 +485,10 @@ Hubs, relays and open worlds: `location.place` and `voidTrader.relay`.
 | `tyl_regor` | Tyl Regor |
 | `alad_v` | Alad V |
 | `ambulas` | Ambulas |
-| `hyena_pack` | Hyena Pack |
+| `hyena_pack` | The Hyena Pack |
 | `jackal` | Jackal |
 | `nef_anyo` | Nef Anyo |
-| `raptors` | The Raptors |
+| `raptor` | The Raptor |
 | `phorid` | Phorid |
 | `lephantis` | Lephantis |
 | `mutalist_alad_v` | Mutalist Alad V |
