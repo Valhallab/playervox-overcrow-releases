@@ -1,0 +1,89 @@
+<!-- Warframe dailies and weeklies: what is left, and when it resets. -->
+<component name="group" props="g baro here">
+  <box class="group">
+    <box class="group-head">
+      <text class="section-title">{g.title}</text>
+      <box class="grow"/>
+      <text class="reset">{g.reset}</text>
+    </box>
+    <for each={g.rows} as="r" key={r.id}>
+      <button class={r.rowCls} label={r.label} on:activate={check(r.id)}>
+        <icon class={r.iconCls} name={r.icon}/>
+        <box class="item-text">
+          <text class="item-name">{r.name}</text>
+          <if test={hasText(r.sub)}>
+            <text class="item-sub">{r.sub}</text>
+          </if>
+        </box>
+        <if test={r.byHand}>
+          <icon class="hand" name="hand" label={t("by-hand")} tooltip={t("by-hand")}/>
+        </if>
+        <else-if test={hasText(r.value) && r.valueCls != "row-value"}>
+          <box class="hand-slot"/>
+        </else-if>
+        <if test={hasText(r.value)}>
+          <text class={r.valueCls}>{r.value}</text>
+        </if>
+      </button>
+    </for>
+    <if test={hasText(baro)}>
+      <box class="foot">
+        <icon class={here ? "foot-icon here" : "foot-icon"} name="store"/>
+        <text class={here ? "foot-text here" : "foot-text"}>{baro}</text>
+      </box>
+    </if>
+  </box>
+</component>
+
+<box class={rootClass()}>
+  <if test={layout() == "line"}>
+    <box class="line">
+      <icon class="line-icon tone-accent" name="calendar-check"/>
+      <text class={state.model.lineCls}>{state.model.line}</text>
+      <if test={hasText(state.model.lineValue)}>
+        <text class="meta-sep">·</text>
+        <text class={state.model.lineValueCls}>{state.model.lineValue}</text>
+      </if>
+    </box>
+  </if>
+  <else>
+    <box class="eyebrow-row">
+      <icon class="eyebrow-icon tone-accent" name="calendar-check"/>
+      <text class="eyebrow tone-accent">{t("eyebrow")}</text>
+      <box class="grow"/>
+      <text class={state.model.leftCls}>{state.model.left}</text>
+    </box>
+    <if test={hasText(state.model.hint)}>
+      <box class="hint-box">
+        <icon class={"notice-icon tone-" + state.model.hintTone} name={state.model.hintIcon}/>
+        <text class="notice-text">{state.model.hint}</text>
+      </box>
+    </if>
+    <if test={state.model.empty}>
+      <box class="empty">
+        <icon class="empty-icon" name="list-checks"/>
+        <text class="empty-title">{t("empty-title")}</text>
+        <text class="empty-text">{t("empty-text")}</text>
+      </box>
+    </if>
+    <else>
+      <box class="groups">
+        <for each={state.model.groups} as="g" key={g.id}>
+          <group g={g} baro={baroIn(state.model, g.id)} here={state.model.baroHere}/>
+        </for>
+      </box>
+    </else>
+    <if test={layout() != "wide" && hasText(state.model.baro)}>
+      <box class="foot">
+        <icon class={state.model.baroHere ? "foot-icon here" : "foot-icon"} name="store"/>
+        <text class={state.model.baroHere ? "foot-text here" : "foot-text"}>{state.model.baro}</text>
+      </box>
+    </if>
+    <if test={hasText(state.model.status)}>
+      <box class="status-line">
+        <icon class="status-icon" name="wifi-off"/>
+        <text class="status-text">{state.model.status}</text>
+      </box>
+    </if>
+  </else>
+</box>

@@ -1,0 +1,367 @@
+{
+  "scenarioVersion": 1,
+  "name": "restart",
+  "description": "After a restart, the host repeats the session's events with their times: the stages kept are not ticked twice.",
+  "host": {
+    "startAt": 1793268000000,
+    "zone": {
+      "offsetMinutes": 60
+    },
+    "mode": "passive",
+    "storage": {
+      "ticks": {
+        "v": 1,
+        "lastAt": 1793265600000,
+        "intro": true,
+        "dayEnd": 1793289600000,
+        "weekEnd": 1793577600000,
+        "activities": {
+          "sortie": {
+            "parts": [
+              1793261100000,
+              1793265600000,
+              0
+            ],
+            "done": null
+          },
+          "archon": {
+            "parts": [
+              0,
+              0,
+              0
+            ],
+            "done": null
+          },
+          "netracells": {
+            "parts": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "done": null
+          },
+          "circuit": {
+            "parts": [],
+            "done": null
+          },
+          "nightwave": {
+            "parts": [],
+            "done": null
+          }
+        }
+      }
+    }
+  },
+  "fixtures": {
+    "subscriptions": {
+      "gameEvents.warframe.subscribe": {
+        "playing": true,
+        "session": {
+          "startedAt": 1793257500000
+        },
+        "features": {
+          "location": "undeclared",
+          "mission": "available",
+          "progress": "undeclared",
+          "squad": "undeclared",
+          "eidolons": "undeclared",
+          "world": "available",
+          "rewards": "undeclared"
+        },
+        "info": {
+          "location": null,
+          "mission": {
+            "state": "ended",
+            "node": {
+              "id": "SolNode11",
+              "name": null
+            },
+            "planet": null,
+            "type": {
+              "id": "disruption",
+              "name": "Disruption"
+            },
+            "faction": null,
+            "enemyLevel": null,
+            "fissure": null,
+            "modifiers": [
+              {
+                "id": "sortie",
+                "name": "Sortie",
+                "stage": 2
+              }
+            ],
+            "selectedAt": null,
+            "loadingAt": null,
+            "startedAt": 1793265000000,
+            "endedAt": 1793265600000,
+            "result": "succeeded",
+            "durationSeconds": 600,
+            "rewards": null
+          },
+          "progress": null,
+          "squad": null,
+          "eidolons": null,
+          "world": {
+            "updatedAt": 1793268000000,
+            "sortie": {
+              "boss": {
+                "id": "captain_vor",
+                "name": "Captain Vor"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "endsAt": 1793289600000,
+              "missions": [
+                {
+                  "node": {
+                    "id": "SolNode10",
+                    "name": null
+                  },
+                  "planet": null,
+                  "type": {
+                    "id": "rescue",
+                    "name": "Rescue"
+                  },
+                  "modifier": null
+                },
+                {
+                  "node": {
+                    "id": "SolNode11",
+                    "name": null
+                  },
+                  "planet": null,
+                  "type": {
+                    "id": "disruption",
+                    "name": "Disruption"
+                  },
+                  "modifier": null
+                },
+                {
+                  "node": {
+                    "id": "SolNode12",
+                    "name": null
+                  },
+                  "planet": null,
+                  "type": {
+                    "id": "mobile_defense",
+                    "name": "Mobile Defense"
+                  },
+                  "modifier": null
+                }
+              ]
+            },
+            "archonHunt": {
+              "boss": {
+                "id": "nira",
+                "name": "Nira"
+              },
+              "endsAt": 1793577600000,
+              "missions": [
+                {
+                  "node": {
+                    "id": "SolNode20",
+                    "name": null
+                  },
+                  "planet": null,
+                  "type": {
+                    "id": "rescue",
+                    "name": "Rescue"
+                  },
+                  "modifier": null
+                },
+                {
+                  "node": {
+                    "id": "SolNode21",
+                    "name": null
+                  },
+                  "planet": null,
+                  "type": {
+                    "id": "survival",
+                    "name": "Survival"
+                  },
+                  "modifier": null
+                },
+                {
+                  "node": {
+                    "id": "SolNode22",
+                    "name": null
+                  },
+                  "planet": null,
+                  "type": {
+                    "id": "assassination",
+                    "name": "Assassination"
+                  },
+                  "modifier": null
+                }
+              ]
+            },
+            "fissures": [],
+            "cycles": {
+              "cetus": null,
+              "vallis": null,
+              "cambion": null
+            },
+            "resets": {
+              "daily": 1793318400000,
+              "weekly": 1793577600000
+            },
+            "voidTrader": {
+              "arrivesAt": 1793365200000,
+              "leavesAt": 1793538000000,
+              "relay": {
+                "id": "larunda_relay",
+                "name": "Larunda Relay"
+              }
+            },
+            "circuit": {
+              "normal": [
+                {
+                  "id": "excalibur",
+                  "name": "Excalibur"
+                },
+                {
+                  "id": "trinity",
+                  "name": "Trinity"
+                },
+                {
+                  "id": "ember",
+                  "name": "Ember"
+                }
+              ],
+              "steelPath": []
+            }
+          }
+        },
+        "events": [
+          {
+            "seq": 1,
+            "at": 1793261100000,
+            "type": "mission_ended",
+            "mission": {
+              "state": "ended",
+              "node": {
+                "id": "SolNode10",
+                "name": null
+              },
+              "planet": null,
+              "type": {
+                "id": "rescue",
+                "name": "Rescue"
+              },
+              "faction": null,
+              "enemyLevel": null,
+              "fissure": null,
+              "modifiers": [
+                {
+                  "id": "sortie",
+                  "name": "Sortie",
+                  "stage": 1
+                }
+              ],
+              "selectedAt": null,
+              "loadingAt": null,
+              "startedAt": 1793260500000,
+              "endedAt": 1793261100000,
+              "result": "succeeded",
+              "durationSeconds": 600,
+              "rewards": null
+            }
+          },
+          {
+            "seq": 2,
+            "at": 1793265600000,
+            "type": "mission_ended",
+            "mission": {
+              "state": "ended",
+              "node": {
+                "id": "SolNode11",
+                "name": null
+              },
+              "planet": null,
+              "type": {
+                "id": "disruption",
+                "name": "Disruption"
+              },
+              "faction": null,
+              "enemyLevel": null,
+              "fissure": null,
+              "modifiers": [
+                {
+                  "id": "sortie",
+                  "name": "Sortie",
+                  "stage": 2
+                }
+              ],
+              "selectedAt": null,
+              "loadingAt": null,
+              "startedAt": 1793265000000,
+              "endedAt": 1793265600000,
+              "result": "succeeded",
+              "durationSeconds": 600,
+              "rewards": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "text": [
+          "2/3",
+          "Remaining: Mobile Defense"
+        ],
+        "noText": [
+          "just now"
+        ]
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "ended",
+              "node": {
+                "id": "SolNode12",
+                "name": null
+              },
+              "type": {
+                "id": "mobile_defense",
+                "name": "Mobile Defense"
+              },
+              "modifiers": [
+                {
+                  "id": "sortie",
+                  "name": "Sortie",
+                  "stage": 3
+                }
+              ],
+              "result": "succeeded"
+            }
+          },
+          "event": "mission_ended"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "just now"
+        ],
+        "noText": [
+          "2/3"
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

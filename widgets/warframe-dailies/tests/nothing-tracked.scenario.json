@@ -1,0 +1,243 @@
+{
+  "scenarioVersion": 1,
+  "name": "nothing-tracked",
+  "description": "Every activity turned off in the menu: say where to turn them on.",
+  "host": {
+    "startAt": 1793268000000,
+    "zone": {
+      "offsetMinutes": 60
+    },
+    "mode": "passive"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "playing": false
+        }
+      }
+    },
+    {
+      "menu": {
+        "id": "track-sortie",
+        "value": false
+      }
+    },
+    {
+      "menu": {
+        "id": "track-archon",
+        "value": false
+      }
+    },
+    {
+      "menu": {
+        "id": "track-netracells",
+        "value": false
+      }
+    },
+    {
+      "menu": {
+        "id": "track-circuit",
+        "value": false
+      }
+    },
+    {
+      "menu": {
+        "id": "track-nightwave",
+        "value": false
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "No activity tracked",
+          "Pick some in the widget’s menu."
+        ],
+        "noText": [
+          "0 to do"
+        ],
+        "image": "en-100"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "world": {
+              "updatedAt": 1793268000000,
+              "sortie": {
+                "boss": {
+                  "id": "captain_vor",
+                  "name": "Capitaine Vor"
+                },
+                "faction": {
+                  "id": "grineer",
+                  "name": "Grineer"
+                },
+                "endsAt": 1793289600000,
+                "missions": [
+                  {
+                    "node": {
+                      "id": "SolNode10",
+                      "name": null
+                    },
+                    "planet": null,
+                    "type": {
+                      "id": "rescue",
+                      "name": "Sauvetage"
+                    },
+                    "modifier": null
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode11",
+                      "name": null
+                    },
+                    "planet": null,
+                    "type": {
+                      "id": "disruption",
+                      "name": "Perturbation"
+                    },
+                    "modifier": null
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode12",
+                      "name": null
+                    },
+                    "planet": null,
+                    "type": {
+                      "id": "mobile_defense",
+                      "name": "Défense mobile"
+                    },
+                    "modifier": null
+                  }
+                ]
+              },
+              "archonHunt": {
+                "boss": {
+                  "id": "nira",
+                  "name": "Nira"
+                },
+                "endsAt": 1793577600000,
+                "missions": [
+                  {
+                    "node": {
+                      "id": "SolNode20",
+                      "name": null
+                    },
+                    "planet": null,
+                    "type": {
+                      "id": "rescue",
+                      "name": "Sauvetage"
+                    },
+                    "modifier": null
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode21",
+                      "name": null
+                    },
+                    "planet": null,
+                    "type": {
+                      "id": "survival",
+                      "name": "Survie"
+                    },
+                    "modifier": null
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode22",
+                      "name": null
+                    },
+                    "planet": null,
+                    "type": {
+                      "id": "assassination",
+                      "name": "Assassinat"
+                    },
+                    "modifier": null
+                  }
+                ]
+              },
+              "fissures": [],
+              "cycles": {
+                "cetus": null,
+                "vallis": null,
+                "cambion": null
+              },
+              "resets": {
+                "daily": 1793318400000,
+                "weekly": 1793577600000
+              },
+              "voidTrader": {
+                "arrivesAt": 1793365200000,
+                "leavesAt": 1793538000000,
+                "relay": {
+                  "id": "larunda_relay",
+                  "name": "Relais Larunda"
+                }
+              },
+              "circuit": {
+                "normal": [
+                  {
+                    "id": "excalibur",
+                    "name": "Excalibur"
+                  },
+                  {
+                    "id": "trinity",
+                    "name": "Trinity"
+                  },
+                  {
+                    "id": "ember",
+                    "name": "Ember"
+                  }
+                ],
+                "steelPath": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 260,
+          "height": 40
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Aucune activité suivie"
+        ],
+        "image": "fr-100-mini",
+        "fault": "none"
+      }
+    }
+  ]
+}

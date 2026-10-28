@@ -1,0 +1,126 @@
+{
+  "scenarioVersion": 1,
+  "name": "refused",
+  "description": "The player refused game events: the list is checked by hand.",
+  "host": {
+    "startAt": 1793268000000,
+    "zone": {
+      "offsetMinutes": 60
+    },
+    "mode": "passive",
+    "grants": [
+      "storage"
+    ],
+    "storage": {
+      "ticks": {
+        "v": 1,
+        "lastAt": 0,
+        "intro": true,
+        "dayEnd": 1793289600000,
+        "weekEnd": 1793577600000,
+        "activities": {
+          "sortie": {
+            "parts": [
+              0,
+              0,
+              0
+            ],
+            "done": null
+          },
+          "archon": {
+            "parts": [
+              0,
+              0,
+              0
+            ],
+            "done": null
+          },
+          "netracells": {
+            "parts": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "done": null
+          },
+          "circuit": {
+            "parts": [],
+            "done": {
+              "at": 1793219700000,
+              "hand": true
+            }
+          },
+          "nightwave": {
+            "parts": [],
+            "done": null
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "text": [
+          "Allow “Warframe: missions” in the Control Center.",
+          "4 to do",
+          "Wed 21:35"
+        ]
+      }
+    },
+    {
+      "expect": {
+        "image": "en-100"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "expect": {
+        "image": "fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 260,
+          "height": 40
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "4 à faire",
+          "Accès refusé · Centre de contrôle"
+        ],
+        "image": "fr-100-mini"
+      }
+    },
+    {
+      "host": {
+        "locale": "en"
+      }
+    },
+    {
+      "expect": {
+        "image": "en-100-mini",
+        "fault": "none"
+      }
+    }
+  ]
+}

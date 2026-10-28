@@ -1,0 +1,16 @@
+{
+  "justifications": [
+    {
+      "permission": "gameEvent:warframe.mission",
+      "text": "Ticks a Sortie stage, an Archon Hunt stage or a Netracell when the player finishes such a mission with success, so that the list stays current without a click."
+    },
+    {
+      "permission": "gameEvent:warframe.world",
+      "text": "Shows the Sortie and Archon Hunt missions, the Circuit's rewards of the week, Baro Ki'Teer's visit and when each list resets, even with the game closed."
+    },
+    {
+      "permission": "storage",
+      "text": "Keeps what the player ticked this day and this week, with when and how (by a mission or by hand), so that the list survives a restart and resets only at Warframe's resets."
+    }
+  ]
+}

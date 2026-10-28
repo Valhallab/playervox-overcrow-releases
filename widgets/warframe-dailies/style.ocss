@@ -1,0 +1,374 @@
+/* Warframe dailies and weeklies. The first rules are the panel, header and
+   type scale the PlayerVox Warframe widgets share. */
+.wf {
+  flex-direction: column;
+  width: 100%;
+  padding: 10px;
+  gap: var(--space-4);
+}
+
+.grow {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+/* Header: the context in capitals, then one short value on the right. */
+.eyebrow-row {
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  min-height: 14px;
+}
+
+.eyebrow {
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.eyebrow-icon {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.tone-accent { color: var(--color-accent); }
+
+.tone-success { color: var(--color-success); }
+
+.tone-danger { color: var(--color-danger); }
+
+.tone-warning { color: var(--color-warning); }
+
+.tone-muted { color: var(--color-text-muted); }
+
+.meta-sep {
+  font-size: var(--font-size-small);
+  color: var(--color-text-subtle);
+}
+
+.notice-icon {
+  font-size: 14px;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+.notice-text {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.empty {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
+}
+
+.empty-icon {
+  font-size: 20px;
+  color: var(--color-text-muted);
+}
+
+.empty-title {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.empty-text {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.status-line {
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+
+.status-icon {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.status-text {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+/* One-line (mini) layout. */
+.line {
+  flex-direction: row;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 12px;
+}
+
+.line-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.line-main {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.section-title {
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* State colours win over the base colour of these icons. */
+.empty-icon.tone-warning,
+.status-icon.tone-warning,
+.line-reset.tone-warning { color: var(--color-warning); }
+
+.empty-icon.tone-danger { color: var(--color-danger); }
+
+.empty-icon.tone-success { color: var(--color-success); }
+
+.checklist.line {
+  padding: 0;
+}
+
+.left {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.left.all {
+  color: var(--color-success);
+}
+
+.hint-box {
+  flex-direction: row;
+  align-items: start;
+  gap: 7px;
+}
+
+.hint-box .notice-icon {
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.hint-box .notice-text {
+  flex-shrink: 1;
+  min-width: 0;
+  font-size: 12px;
+}
+
+.groups {
+  flex-direction: column;
+  gap: 12px;
+}
+
+.wide .groups {
+  flex-direction: row;
+  align-items: start;
+  gap: 16px;
+}
+
+.wide .group {
+  flex-grow: 1;
+  flex-basis: 0;
+  min-width: 0;
+}
+
+.group {
+  flex-direction: column;
+}
+
+.group-head {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* The reset is a number that counts: as readable as the rows. */
+.reset {
+  font-size: 12px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.item {
+  flex-direction: row;
+  align-items: start;
+  gap: 8px;
+  padding: 5px 0;
+  cursor: pointer;
+}
+
+.item:hover,
+.item:focus {
+  background: var(--color-surface-hover);
+}
+
+/* Just checked by a finished mission: "just now" in green, no motion. */
+.item.fresh .item-name {
+  color: var(--color-text-secondary);
+}
+
+.check-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.check-icon.todo {
+  color: var(--color-text-muted);
+}
+
+.check-icon.part {
+  color: var(--color-text-secondary);
+}
+
+.check-icon.done {
+  color: var(--color-success);
+}
+
+.item-text {
+  flex-direction: column;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.item-name {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item.done .item-name {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.item-sub {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.row-value {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.row-value.when {
+  margin-top: 2px;
+  font-size: var(--font-size-small);
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.row-value.when.tone-success {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.hand {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+/* Baro is not a task: one quiet line under the lists. */
+.foot {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--color-border);
+}
+
+.foot-icon {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.foot-text {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.line-reset {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+/* Keeps the times in one column whether a hand shows or not. */
+.hand-slot {
+  width: 11px;
+  flex-shrink: 0;
+}
+
+.foot-icon.here {
+  color: var(--color-text-secondary);
+}
+
+.foot-text.here {
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.foot-icon,
+.status-icon {
+  width: 12px;
+}
+
+.group .foot {
+  margin-top: 8px;
+}
+
+.line .line-main {
+  font-weight: 700;
+}
