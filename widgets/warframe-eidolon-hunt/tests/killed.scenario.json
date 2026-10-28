@@ -126,18 +126,6 @@
       }
     },
     {
-      "advance": {
-        "ms": 5000
-      }
-    },
-    {
-      "expect": {
-        "text": [
-          "03:54.27"
-        ]
-      }
-    },
-    {
       "menu": {
         "id": "layout",
         "value": "full"
@@ -238,6 +226,18 @@
       "menu": {
         "id": "layout",
         "value": "full"
+      }
+    },
+    {
+      "advance": {
+        "ms": 5000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "03:54.27"
+        ]
       }
     },
     {

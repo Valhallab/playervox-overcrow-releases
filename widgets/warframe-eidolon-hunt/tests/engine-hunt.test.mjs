@@ -109,7 +109,8 @@ test("a Gantulyst killed: tricap missed, the timer frozen at its death", async (
   assert.equal(state.view.hint, "1\u00a0capture of\u00a03\u00a0\u00b7 Gantulyst killed");
   assert.equal(state.view.hintCls, "hint tone-warning");
   assert.deepEqual(texts(state.view).rows, ["Teralyst \u22125.12 01:40.00", "Gantulyst killed 02:10.00", "Hydrolyst \u2014"]);
-  assert.equal(texts(state.view).line, "Tricap missed 03:50.00 Night 9:50");
+  // One line: the result alone, without the night.
+  assert.equal(texts(state.view).line, "Tricap missed 03:50.00");
   await advance(vm, store, SECOND);
   assert.equal(state.view.big, "03:50.00");
   assert.equal(store.get("history").at(-1).end, V + 230_000);

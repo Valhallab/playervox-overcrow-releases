@@ -784,6 +784,9 @@ function hunt(screen: Screen, run: Run, now: number): Screen {
   }
   const end = run.end ?? now;
   screen.big = exact(end - run.start);
+  // One line of a result: the result alone, its exact time leaves no room for the night.
+  screen.lineSub = "";
+  screen.lineSubCls = "line-sub";
   if (run.outcome === "tricap") {
     screen.label = t("tricap");
     const best = model.best;
