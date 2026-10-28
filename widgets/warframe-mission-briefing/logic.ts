@@ -196,6 +196,12 @@ function wait(text: string, icon: IconName, tone: Brief["waitTone"] = "muted", l
   };
 }
 
+/** A waiting line whose sentence would not fit One line: its short form there, the sentence as its label. */
+function waitShort(key: string, icon: IconName): Brief {
+  const sentence = t(key);
+  return option("layout", "full") === "line" ? wait(t(`${key}-line`), icon, "muted", sentence) : wait(sentence, icon);
+}
+
 /** The briefing of `value`, or the line that says why there is none. */
 export function build(value: WarframeEvents | null, failed: string | null): Brief {
   // Game events are one grant: the sentence names the first feature
@@ -208,11 +214,11 @@ export function build(value: WarframeEvents | null, failed: string | null): Brie
     return wait(text, "lock", "warning", t("refused"));
   }
   if (failed !== null) return wait(t("unavailable"), "circle-alert", "warning");
-  if (value === null) return wait(t("pick-mission"), "map-pin");
-  if (!value.playing) return wait(t("game-closed"), "power");
+  if (value === null) return waitShort("pick-mission", "map-pin");
+  if (!value.playing) return waitShort("game-closed", "power");
   if (value.features.mission === "unavailable") return wait(t("unavailable"), "circle-alert", "warning");
   const mission = briefed(value);
-  if (mission === null) return wait(t("pick-mission"), "map-pin");
+  if (mission === null) return waitShort("pick-mission", "map-pin");
   const strip = mission.state === "in_progress" || option("layout", "full") === "line";
   return briefing(mission, value.info.world, strip ? "strip" : "full");
 }

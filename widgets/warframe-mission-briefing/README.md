@@ -18,11 +18,11 @@ Digital Extremes and shows no logo of theirs.
 | No mission | "Pick a mission to see the briefing." (first run, in the orbiter, after a mission) |
 | Mission chosen, loading | Node · planet · type on a muted line; the faction (a coloured dot and its name) with the enemy level on the right; "Use" and the faction's two weaknesses as chips with their damage icon; "Avoid: …" with an amber icon for a faction that resists a type. Below a rule, one line per modifier: Steel Path, the Void Fissure and its era ("Collect 10 Reactant from Corrupted enemies", except in a Void Storm), the Sortie and its stage ("Sortie 2/3") with the day's condition, Arbitration ("Drones first · no self-revive"), Archon Hunt, Nightmare, Void Storm, Alert, Kuva Lich |
 | Wide (500 px and more, with modifiers) | The modifiers in a column on the right |
-| In mission | One line: "Grineer · **Impact, Corrosive**" |
+| In mission | One line: "Grineer · **Impact, Corrosive**". The damage types are never cut: below the default width the faction's name yields first (its whole name stays its accessible label) |
 | No advice | An unknown faction ("Unknown enemies") or one without weaknesses: the faction muted and "No advice yet for these enemies." |
 | Warframe closed | "Run Warframe to see the briefing." |
 | Mission data unavailable | "Mission not found yet." in amber; a failed subscription is retried 30 s later |
-| Refused | A lock and "Allow “Warframe: missions” in the Control Center." (game events are one grant: the first feature declared is named); in One line, "Access denied · Control Center" |
+| Refused | A lock and "Allow “Warframe: missions” in the Control Center." (game events are one grant: the first feature declared is named); in One line, "Grineer · Access denied" while a briefed faction is shown, otherwise "Access denied · Control Center" |
 
 Names (nodes, planets, mission types, factions, modifiers, Sortie
 conditions) come from PlayerVox OverCrow in the user's language; a name it
@@ -69,7 +69,7 @@ No network, no storage: everything comes from PlayerVox OverCrow.
 
 | Row | Values |
 | --- | --- |
-| Layout | Full (default): the briefing while the mission is chosen and loads, one line during it. One line: the line all along |
+| Layout | Full (default): the briefing while the mission is chosen and loads, one line during it. One line: the line all along, and the waiting lines in short ("Pick a mission", "Run Warframe"; the whole sentence stays their accessible label) |
 
 ## How it works
 

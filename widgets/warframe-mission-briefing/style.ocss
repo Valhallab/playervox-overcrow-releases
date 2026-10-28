@@ -266,11 +266,17 @@
   min-width: 0;
 }
 
+/* The damage types are never cut: below the default width, the faction
+   yields first. */
 .strip-faction {
   font-size: 12px;
   font-weight: 400;
   color: var(--color-text-secondary);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .unknown .strip-faction {
@@ -288,8 +294,5 @@
   font-weight: 700;
   color: var(--color-text);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex-shrink: 1;
-  min-width: 0;
+  flex-shrink: 0;
 }

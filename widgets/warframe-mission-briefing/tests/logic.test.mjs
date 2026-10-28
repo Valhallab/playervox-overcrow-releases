@@ -299,3 +299,15 @@ test("where: node, planet and type; a node named after its mission does not repe
   assert.equal(where(null, null, "Defense"), "Defense");
   assert.equal(where(null, "Deimos", "Netracell"), "Deimos · Netracell");
 });
+
+test("state: One line keeps its waiting lines short, the whole sentence as their label", () => {
+  vm.setHost({ options: { layout: "line" } });
+  const pick = logic.build(value(), null);
+  assert.deepEqual([pick.waitText, pick.waitLabel], ["Pick a mission", "Pick a mission to see the briefing."]);
+  const closed = logic.build(value({ playing: false }), null);
+  assert.deepEqual([closed.waitText, closed.waitLabel], ["Run Warframe", "Run Warframe to see the briefing."]);
+  const missing = logic.build(value({ feats: features("unavailable") }), null);
+  assert.deepEqual([missing.waitText, missing.waitLabel], ["Mission not found yet.", "Mission not found yet."]);
+  vm.setHost({ options: { layout: "full" } });
+  assert.equal(logic.build(value(), null).waitText, "Pick a mission to see the briefing.");
+});

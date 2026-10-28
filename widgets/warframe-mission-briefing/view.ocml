@@ -11,7 +11,7 @@
   <else-if test={state.brief.mode == "strip"}>
     <box class="line">
       <box class={state.brief.dot}/>
-      <text class="strip-faction">{state.brief.faction}</text>
+      <text class="strip-faction" label={state.brief.faction}>{state.brief.faction}</text>
       <if test={state.brief.use.length > 0}>
         <text class="meta-sep">·</text>
         <text class="strip-name">{names(state.brief.use)}</text>

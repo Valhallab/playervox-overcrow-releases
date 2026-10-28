@@ -1,6 +1,8 @@
 {
   "pick-mission": "Choisissez une mission pour voir le briefing.",
+  "pick-mission-line": "Choisissez une mission",
   "game-closed": "Lancez Warframe pour voir le briefing.",
+  "game-closed-line": "Lancez Warframe",
   "unavailable": "Mission introuvable pour l’instant.",
   "refused": "Autorisez « Warframe : missions » dans le Centre de contrôle.",
   "refused-line": "Accès refusé · Centre de contrôle",

@@ -1,6 +1,8 @@
 {
   "pick-mission": "Pick a mission to see the briefing.",
+  "pick-mission-line": "Pick a mission",
   "game-closed": "Run Warframe to see the briefing.",
+  "game-closed-line": "Run Warframe",
   "unavailable": "Mission not found yet.",
   "refused": "Allow “Warframe: missions” in the Control Center.",
   "refused-line": "Access denied · Control Center",
