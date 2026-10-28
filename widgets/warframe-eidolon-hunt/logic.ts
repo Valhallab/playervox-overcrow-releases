@@ -298,6 +298,7 @@ export function settle(runs: Run[], now: number, anchor: number | null, dayAt: n
   runs.forEach((run, index) => {
     const legs = run.legs.filter((leg): leg is Leg => leg !== null);
     const last = run.legs[POSITIONS - 1] ?? null;
+    const latest = run.legs[lastPosition(run)] ?? null;
     const fled = legs.find((leg) => leg.f !== null);
     const lastEnd = legs.reduce((end, leg) => Math.max(end, legEnd(leg) ?? leg.s), run.start);
     if (run.legs.every((leg) => leg !== null && leg.c !== null)) {
@@ -306,11 +307,15 @@ export function settle(runs: Run[], now: number, anchor: number | null, dayAt: n
     } else if (fled !== undefined) {
       run.outcome = "fled";
       run.end = fled.f;
-    } else if (last !== null && (last.c !== null || last.k !== null)) {
-      // The Hydrolyst captured or killed ends it; an Eidolon killed before
-      // already made it a missed tricap.
+    } else if (latest !== null && latest.k !== null) {
+      // A killed Eidolon gives no shard to summon the next one: the attempt
+      // ends at its death. Should the next one appear anyway, it goes on.
       run.outcome = "killed";
-      run.end = last.c ?? last.k;
+      run.end = latest.k;
+    } else if (last !== null && last.c !== null) {
+      // The Hydrolyst captured after an Eidolon killed: a missed tricap.
+      run.outcome = "killed";
+      run.end = last.c;
     } else {
       const dawn = runNightEnd(run, anchor, dayAt);
       const waiting = legs.some((leg) => legEnd(leg) === null);

@@ -28,7 +28,7 @@ Every screen has one label over one big number, and the night at Cetus.
 | Hunt in progress | The time since the first Eidolon appeared (`06:41`), then the gap to the best after the last capture, in words: "1.78 s behind your best after Gantulyst" in amber, "3.10 s ahead…" in green; then one row per Eidolon: its exact time and its gap, "running" for the one being hunted. The header says "Night 32:14" |
 | Dawn near | The header turns amber: "Dawn 2:48", in the last five minutes |
 | Tricap | The exact total (`07:15.37`); a new best gets "New best" and its gap to the previous one, otherwise the gap to the best |
-| Eidolon killed | "Tricap missed", "Gantulyst killed · the hunt goes on": the timer keeps running |
+| Eidolon killed | "Tricap missed", the timer frozen at its death, "1 capture of 3 · Gantulyst killed"; the next rows stay at "—": a killed Eidolon gives no shard to summon the next one |
 | Eidolon gone at dawn | "Tricap missed", the timer frozen on the real duration, "2 captures of 3 · Hydrolyst fled at dawn" |
 | Times unreadable | Warframe's Eidolon times cannot be read: the night stays, with "Can’t read your times: restart Warframe." One line: "Night 32:14 · times unreadable" |
 | Game events not allowed | The night from the last cycle seen, with an alert icon and "Allow “Warframe: Eidolons” in the Control Center.": the user grants game events as a whole, so the widget names the feature it lives on. One line: "Not allowed · Control Center". Followed again as soon as the user allows them |
@@ -67,9 +67,11 @@ best" after one, "Night in 41:10" otherwise.
   its position in the tricap. Splits and gaps are compared with the best
   tricap position by position, and a new best with the one it beats.
 - **Runs.** A Teralyst starts a tricap; a Gantulyst or a Hydrolyst continues
-  the tricap whose previous Eidolon was captured or killed. A tricap ends
-  when the Hydrolyst is captured or killed, when an Eidolon leaves at dawn,
-  or when the night ends.
+  the tricap whose previous Eidolon was captured. A tricap ends when the
+  Hydrolyst is captured, when an Eidolon is killed (the next one needs the
+  shards of a capture), when an Eidolon leaves at dawn, or when the night
+  ends. Should an Eidolon appear after a kill all the same, the tricap goes
+  on, missed.
 - **The night.** The end of the night comes from the world's Cetus cycle
   (150 minutes: 100 of day, 50 of night). The widget keeps the last one it
   saw and counts the cycles from it, so the night left shows even offline.

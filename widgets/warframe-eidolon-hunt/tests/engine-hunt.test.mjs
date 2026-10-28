@@ -100,17 +100,19 @@ test("a faster tricap is the new best, against the previous one", async () => {
 
 const V = U + 8 * MINUTE;
 
-test("a Gantulyst killed: tricap missed, the timer goes on", async () => {
+test("a Gantulyst killed: tricap missed, the timer frozen at its death", async () => {
   const third = [eidolon("teralyst", V, { captured: V + 100_000 }), eidolon("gantulyst", V + 150_000, { killed: V + 230_000 })];
   vm.advance(V + 250 * SECOND - vm.now);
   await send(vm, store, value({ hunts: [...first, ...second, ...third] }));
   assert.equal(state.view.label, "Tricap missed");
-  assert.equal(state.view.big, "04:10");
-  assert.equal(state.view.hint, "Gantulyst killed · the hunt goes on");
-  assert.deepEqual(texts(state.view).rows, ["Teralyst \u22125.12 01:40.00", "Gantulyst killed 02:10.00", "Hydrolyst running"]);
-  assert.equal(texts(state.view).line, "Tricap missed 04:10 Night 9:50");
+  assert.equal(state.view.big, "03:50.00");
+  assert.equal(state.view.hint, "1\u00a0capture of\u00a03\u00a0\u00b7 Gantulyst killed");
+  assert.equal(state.view.hintCls, "hint tone-warning");
+  assert.deepEqual(texts(state.view).rows, ["Teralyst \u22125.12 01:40.00", "Gantulyst killed 02:10.00", "Hydrolyst \u2014"]);
+  assert.equal(texts(state.view).line, "Tricap missed 03:50.00 Night 9:50");
   await advance(vm, store, SECOND);
-  assert.equal(state.view.big, "04:11");
+  assert.equal(state.view.big, "03:50.00");
+  assert.equal(store.get("history").at(-1).end, V + 230_000);
 });
 
 test("the Hydrolyst gone at dawn: the timer freezes on the real duration", async () => {

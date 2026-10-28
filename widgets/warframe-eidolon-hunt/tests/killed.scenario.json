@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "killed",
-  "description": "The Gantulyst killed: the tricap is missed, the timer goes on.",
+  "description": "The Gantulyst killed: no shard to summon the Hydrolyst, so the tricap is missed and the timer freezes at its death.",
   "host": {
     "startAt": 1793217600000,
     "frame": true,
@@ -115,10 +115,25 @@
       "expect": {
         "text": [
           "Tricap manqué",
-          "07:03",
-          "Gantulyst tué · la chasse continue",
+          "03:54.27",
+          "1 capture sur 3 · Gantulyst tué",
           "tué",
           "02:06.05"
+        ],
+        "noText": [
+          "en cours"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 5000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "03:54.27"
         ]
       }
     },
