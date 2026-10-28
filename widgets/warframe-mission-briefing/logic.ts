@@ -195,7 +195,7 @@ function wait(text: string, icon: IconName, tone: Brief["waitTone"] = "muted"): 
 
 /** The briefing of `value`, or the line that says why there is none. */
 export function build(value: WarframeEvents | null, failed: string | null): Brief {
-  if (failed === "permission_denied") return wait(t("refused"), "circle-alert", "warning");
+  if (failed === "permission_denied") return wait(t("refused"), "lock", "warning");
   if (failed !== null) return wait(t("unavailable"), "circle-alert", "warning");
   if (value === null) return wait(t("pick-mission"), "map-pin");
   if (!value.playing) return wait(t("game-closed"), "power");
