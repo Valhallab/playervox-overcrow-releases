@@ -57,6 +57,33 @@
   gap: 6px;
 }
 
+/* Over an ended mission's briefing: the family's eyebrow, muted, so that
+   it is not read as the mission under way. */
+.eyebrow-row {
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+
+.eyebrow {
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.eyebrow-icon {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
 .where {
   font-size: var(--font-size-small);
   color: var(--color-text-muted);

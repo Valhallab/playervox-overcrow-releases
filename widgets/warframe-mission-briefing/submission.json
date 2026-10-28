@@ -2,7 +2,7 @@
   "justifications": [
     {
       "permission": "gameEvent:warframe.mission",
-      "text": "Shows the briefing of the mission you choose on the star chart: its node, faction, enemy level and modifiers, while it loads, then one line during the mission."
+      "text": "Shows the briefing of the mission you choose on the star chart: its node, faction, enemy level and modifiers, from the choice of the node to the end of the mission."
     },
     {
       "permission": "gameEvent:warframe.world",

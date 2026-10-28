@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "unknown",
-  "description": "Enemies without advice: an unknown faction on a node without a name, the Infested of the Cambion Drift, also in one line; the Infested of a Deimos star chart node keep theirs.",
+  "description": "Enemies without advice: an unknown faction on a node without a name, the Infested of the Cambion Drift, still without advice once the mission starts; the Infested of a Deimos star chart node keep theirs.",
   "host": {
     "startAt": 1793199600000
   },
@@ -370,11 +370,12 @@
     {
       "expect": {
         "text": [
-          "Infested"
+          "Infested",
+          "No advice yet for these enemies."
         ],
         "noText": [
-          "No advice yet for these enemies.",
-          "·"
+          "Slash",
+          "Heat"
         ]
       }
     }

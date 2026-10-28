@@ -49,10 +49,61 @@ function mission(changes = {}) {
   };
 }
 
-function value({ playing = true, session = { startedAt: START - 60_000 }, mission: m = null, world = null, feats = features() } = {}) {
+// The game's terms as the fake host sends them, in English.
+const GLOSSARY = {
+  language: "en",
+  damage: {
+    impact: "Impact",
+    puncture: "Puncture",
+    slash: "Slash",
+    heat: "Heat",
+    cold: "Cold",
+    electricity: "Electricity",
+    toxin: "Toxin",
+    blast: "Blast",
+    corrosive: "Corrosive",
+    gas: "Gas",
+    magnetic: "Magnetic",
+    radiation: "Radiation",
+    viral: "Viral",
+  },
+  era: { lith: "Lith", meso: "Meso", neo: "Neo", axi: "Axi", requiem: "Requiem", omnia: "Omnia" },
+  fissure: {
+    lith: "Lith Fissure",
+    meso: "Meso Fissure",
+    neo: "Neo Fissure",
+    axi: "Axi Fissure",
+    requiem: "Requiem Fissure",
+    omnia: "Omnia Fissure",
+  },
+  activity: { void_fissure: "Void Fissure" },
+  faction: {
+    grineer: "Grineer",
+    corpus: "Corpus",
+    infested: "Infested",
+    corrupted: "Corrupted",
+    sentient: "Sentient",
+    narmer: "Narmer",
+    murmur: "The Murmur",
+    scaldra: "Scaldra",
+    techrot: "Techrot",
+    tenno: "Tenno",
+  },
+  term: { reactant: "Reactant", relic: "Relic", credits: "Credits" },
+};
+
+function value({
+  playing = true,
+  session = { startedAt: START - 60_000, language: "en" },
+  mission: m = null,
+  world = null,
+  feats = features(),
+  glossary = GLOSSARY,
+} = {}) {
   return {
     playing,
     session,
+    glossary,
     features: feats,
     info: { location: null, mission: m, progress: null, squad: null, eidolons: null, world },
     events: [],
@@ -60,6 +111,9 @@ function value({ playing = true, session = { startedAt: START - 60_000 }, missio
 }
 
 const ids = (list) => list.map((each) => each.id);
+
+// The functions called alone read the glossary of the latest value built.
+logic.build(value(), null);
 
 // The weaknesses of the official wiki's overview table (Damage 3.0),
 // written out again so that a slip in the widget's table shows here.
@@ -80,17 +134,34 @@ test("weaknesses: each faction's types, as the wiki gives them", () => {
   });
 });
 
-test("weaknesses: every type has a name in both languages and none is both used and avoided", () => {
-  const fr = read("../locales/fr.json");
+test("weaknesses: every type and faction is the glossary's, none is both used and avoided", () => {
   for (const [faction, { use, avoid }] of Object.entries(logic.WEAKNESSES)) {
-    for (const id of [...use, ...avoid]) {
-      assert.ok(MESSAGES[`damage-${id}`], `${faction}: damage-${id} (en)`);
-      assert.ok(fr[`damage-${id}`], `${faction}: damage-${id} (fr)`);
-    }
+    for (const id of [...use, ...avoid]) assert.ok(Object.hasOwn(GLOSSARY.damage, id), `${faction}: ${id}`);
     assert.deepEqual(use.filter((id) => avoid.includes(id)), [], faction);
-    assert.ok(MESSAGES[`faction-${faction}`] && fr[`faction-${faction}`], `faction-${faction}`);
+    assert.ok(Object.hasOwn(GLOSSARY.faction, faction), faction);
   }
-  assert.deepEqual(Object.keys(MESSAGES).sort(), Object.keys(fr).sort());
+  assert.deepEqual(Object.keys(MESSAGES).sort(), Object.keys(read("../locales/fr.json")).sort());
+});
+
+test("names: every name of the game comes from the glossary, none from the locales", () => {
+  const fr = read("../locales/fr.json");
+  for (const key of Object.keys(MESSAGES)) assert.doesNotMatch(key, /^(damage|faction|fissure|eidolon|activity)-/, key);
+  for (const text of [...Object.values(MESSAGES), ...Object.values(fr)]) {
+    assert.doesNotMatch(text, /Grineer|Corpus|Corrupted|Corrompus|Reactant|Réactif|Impact|Fissure/, text);
+  }
+  // A game in French: its terms, whatever the app's language.
+  const french = {
+    ...GLOSSARY,
+    language: "fr",
+    damage: { ...GLOSSARY.damage, impact: "Impact", corrosive: "Corrosif" },
+    fissure: { ...GLOSSARY.fissure, neo: "Fissure Neo" },
+    faction: { ...GLOSSARY.faction, grineer: "Grineer", corrupted: "Corrompus" },
+    term: { ...GLOSSARY.term, reactant: "Réactif" },
+  };
+  const brief = logic.build(value({ glossary: french, mission: mission({ faction: named("grineer", null), fissure: named("neo", "Neo") }) }), null);
+  assert.deepEqual(logic.names(brief.use), "Impact, Corrosif");
+  assert.deepEqual([brief.faction, brief.mods[0].title, brief.mods[0].text], ["Grineer", "Fissure Neo", "Collect 10 Réactif from Corrompus enemies"]);
+  logic.build(value(), null);
 });
 
 test("advice: none for a faction without weaknesses or unknown", () => {
@@ -139,9 +210,9 @@ test("modifiers: the Steel Path first, then the Fissure, then the others in the 
   );
 });
 
-test("modifiers: no Reactant hint in a Void Storm; a Fissure without an era name stays generic", () => {
+test("modifiers: no Reactant hint in a Void Storm; a Fissure of an era the glossary lacks stays generic", () => {
   const lines = logic.modifiers(
-    mission({ fissure: named("omnia", null), modifiers: [{ id: "void_storm", name: "Void Storm", stage: null }] }),
+    mission({ fissure: named("someday", null), modifiers: [{ id: "void_storm", name: "Void Storm", stage: null }] }),
     null,
   );
   assert.deepEqual(lines[0], { id: "fissure", icon: "hexagon", title: "Void Fissure", text: "" });
@@ -188,7 +259,7 @@ test("sortie: the title carries the stage when it is known", () => {
   assert.equal(plain.title, "Sortie");
 });
 
-test("state: waits for a mission, briefs it when chosen and loading, folds it in mission, waits after", () => {
+test("state: waits for a mission, briefs it in full when chosen, loading and in mission, keeps it after", () => {
   assert.equal(state.brief.mode, "wait");
   vm.push(SERVICE, value());
   assert.deepEqual([state.brief.mode, state.brief.waitText], ["wait", "Pick a mission to see the briefing."]);
@@ -204,11 +275,29 @@ test("state: waits for a mission, briefs it when chosen and loading, folds it in
 
   vm.push(SERVICE, value({ mission: mission({ state: "loading", loadingAt: START }) }));
   assert.equal(state.brief.mode, "full");
+  assert.equal(state.brief.eyebrow, "");
+  // In mission the briefing stays whole: only the Layout option folds it.
+  vm.push(SERVICE, value({ mission: mission({ state: "in_progress", loadingAt: START, startedAt: START }) }));
+  assert.equal(state.brief.mode, "full");
+  assert.equal(state.brief.eyebrow, "");
+  assert.equal(logic.names(state.brief.use), "Impact, Corrosive");
+  assert.equal(state.root, "wf briefing full theme-dark");
+  // After it, the last briefing stays until the next node is chosen, marked as past.
+  vm.push(SERVICE, value({ mission: mission({ state: "ended", result: "succeeded", startedAt: START, endedAt: START }) }));
+  assert.deepEqual([state.brief.mode, state.brief.eyebrow, state.brief.faction], ["full", "Last mission", "Grineer"]);
+  assert.deepEqual(ids(state.brief.use), ["impact", "corrosive"]);
+  vm.push(SERVICE, value({ mission: mission({ node: named("SolNode26", "Lith"), planet: named("earth", "Earth") }) }));
+  assert.deepEqual([state.brief.mode, state.brief.eyebrow, state.brief.where], ["full", "", "Lith · Earth · Defense"]);
+});
+
+test("state: One line folds the briefing in mission too, and waits after it", () => {
+  vm.setHost({ options: { layout: "line" } });
   vm.push(SERVICE, value({ mission: mission({ state: "in_progress", loadingAt: START, startedAt: START }) }));
   assert.equal(state.brief.mode, "strip");
-  assert.equal(logic.names(state.brief.use), "Impact, Corrosive");
-  vm.push(SERVICE, value({ mission: mission({ state: "ended", result: "succeeded" }) }));
-  assert.deepEqual([state.brief.mode, state.brief.waitText], ["wait", "Pick a mission to see the briefing."]);
+  vm.push(SERVICE, value({ mission: mission({ state: "ended", result: "aborted", startedAt: START, endedAt: START }) }));
+  assert.deepEqual([state.brief.mode, state.brief.waitText], ["wait", "Pick a mission"]);
+  vm.setHost({ options: { layout: "full" } });
+  assert.deepEqual([state.brief.mode, state.brief.eyebrow], ["full", "Last mission"]);
 });
 
 test("state: Warframe closed, the mission data unavailable", () => {
@@ -225,7 +314,7 @@ test("state: a mission of an earlier launch is not briefed", () => {
   assert.equal(state.brief.mode, "full");
 });
 
-test("state: an unknown faction or none says there is no advice; names fall back to ours, then to the ID's absence", () => {
+test("state: an unknown faction or none says there is no advice; names fall back to the glossary's, then to the ID's absence", () => {
   vm.push(SERVICE, value({ mission: mission({ faction: null, node: named("SolNode999", null), planet: null }) }));
   assert.deepEqual(
     [state.brief.where, state.brief.faction, state.brief.dot, state.brief.note],

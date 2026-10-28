@@ -1,6 +1,6 @@
 <!-- The briefing of the chosen Warframe mission: the faction, the damage
      types it is weak to and the one to avoid, then what changes the
-     mission. One line while waiting and during the mission. -->
+     mission. One line while waiting, and in the One line layout. -->
 <box class={state.root}>
   <if test={state.brief.mode == "wait"}>
     <box class="line">
@@ -20,6 +20,12 @@
   </else-if>
   <else>
     <box class="enemy">
+      <if test={state.brief.eyebrow != ""}>
+        <box class="eyebrow-row">
+          <icon class="eyebrow-icon" name="rotate-ccw"/>
+          <text class="eyebrow">{state.brief.eyebrow}</text>
+        </box>
+      </if>
       <if test={state.brief.where != ""}>
         <text class="where">{state.brief.where}</text>
       </if>

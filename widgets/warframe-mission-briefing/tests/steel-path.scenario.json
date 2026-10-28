@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "steel-path",
-  "description": "A Steel Path Disruption on Apollo, in a Neo Void Fissure: the Steel Path line, then the Fissure's Reactant hint; one line during the mission.",
+  "description": "A Steel Path Disruption on Apollo, in a Neo Void Fissure: the Steel Path line, then the Fissure's Reactant hint; all of it during the mission, one line only in the One line layout.",
   "host": {
     "startAt": 1793199600000
   },
@@ -519,11 +519,12 @@
       "expect": {
         "text": [
           "Corpus",
-          "Puncture, Magnetic"
+          "Puncture",
+          "Magnetic",
+          "Steel Path",
+          "Neo Fissure"
         ],
-        "noText": [
-          "Steel Path"
-        ]
+        "fault": "none"
       }
     },
     {
@@ -760,6 +761,12 @@
       "expect": {
         "image": "in-mission-sp-en-150",
         "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
       }
     },
     {

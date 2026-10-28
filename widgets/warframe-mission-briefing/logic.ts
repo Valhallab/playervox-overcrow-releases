@@ -1,7 +1,8 @@
 // Warframe mission briefing: what the chosen mission is up against and
 // what hurts it, read during the loading screen. It opens when a mission is
-// chosen on the star chart, stays through the loading, folds into one line
-// once the mission starts and waits again after it. Everything comes from
+// chosen on the star chart and stays whole through the loading and the
+// mission; after it, the last briefing stays, marked as past, until the next
+// node is chosen. Only the Layout option folds it into one line. Everything comes from
 // two features of Warframe's game events, `warframe.mission` and
 // `warframe.world` (the condition of the day's Sortie); the weaknesses are
 // embedded below. No network, no storage.
@@ -15,6 +16,7 @@ import {
   timers,
   type IconName,
   type WarframeEvents,
+  type WarframeGlossary,
   type WarframeMission,
   type WarframeModifier,
   type WarframeWorld,
@@ -60,7 +62,7 @@ export const WEAKNESSES: Readonly<Record<string, Weakness>> = {
   techrot: { use: ["magnetic", "gas"], avoid: ["cold"] },
 };
 
-/** Each damage type's Lucide icon; its name comes from the locales. */
+/** Each damage type's Lucide icon; its name comes from the game's glossary. */
 const DAMAGE_ICONS: Readonly<Record<DamageId, IconName>> = {
   impact: "hammer",
   puncture: "arrow-down-to-dot",
@@ -107,13 +109,15 @@ export interface Modifier {
 
 /** What the view shows, built again at each change. */
 export interface Brief {
-  /** `wait`: one line saying what to do; `full`: the briefing; `strip`: one line in mission. */
+  /** `wait`: one line saying what to do; `full`: the briefing; `strip`: the briefing in One line. */
   readonly mode: "wait" | "full" | "strip";
   readonly waitText: string;
   readonly waitIcon: IconName;
   readonly waitTone: "muted" | "warning";
   /** The whole sentence, for screen readers, when the line is short. */
   readonly waitLabel: string;
+  /** "Last mission" over the briefing of an ended mission; empty otherwise. */
+  readonly eyebrow: string;
   /** Node · planet · type. */
   readonly where: string;
   readonly level: string;
@@ -132,6 +136,9 @@ declare module "@overcrow/sdk" {
     root: string;
   }
 }
+
+/** The game's terms in the game's language, from the value being built; `null` before the first. */
+let glossary: WarframeGlossary | null = null;
 
 /** The latest value of the subscription, `null` before the first. */
 let latest: WarframeEvents | null = null;
@@ -185,6 +192,7 @@ function wait(text: string, icon: IconName, tone: Brief["waitTone"] = "muted", l
     waitIcon: icon,
     waitTone: tone,
     waitLabel: label,
+    eyebrow: "",
     where: "",
     level: "",
     faction: "",
@@ -204,6 +212,7 @@ function waitShort(key: string, icon: IconName): Brief {
 
 /** The briefing of `value`, or the line that says why there is none. */
 export function build(value: WarframeEvents | null, failed: string | null): Brief {
+  glossary = value?.glossary ?? glossary;
   // Game events are one grant: the sentence names the first feature
   // declared. In One line, the family's short form, never cut: the value
   // still shown (the faction of the briefed mission), or where to go.
@@ -217,23 +226,31 @@ export function build(value: WarframeEvents | null, failed: string | null): Brie
   if (value === null) return waitShort("pick-mission", "map-pin");
   if (!value.playing) return waitShort("game-closed", "power");
   if (value.features.mission === "unavailable") return wait(t("unavailable"), "circle-alert", "warning");
-  const mission = briefed(value);
+  // Full keeps an ended mission's briefing, so that the panel never folds
+  // by itself; One line has no room to mark it as past and waits instead.
+  const strip = option("layout", "full") === "line";
+  const mission = strip ? briefed(value) : briefed(value) ?? lastBriefed(value);
   if (mission === null) return waitShort("pick-mission", "map-pin");
-  const strip = mission.state === "in_progress" || option("layout", "full") === "line";
   return briefing(mission, value.info.world, strip ? "strip" : "full");
 }
 
 /** The mission to brief: chosen, loading or in progress, of this launch of Warframe. */
 function briefed(value: WarframeEvents): WarframeMission | null {
+  const mission = lastBriefed(value);
+  return mission === null || mission.state === "ended" ? null : mission;
+}
+
+/** The latest mission of this launch of Warframe, ended or not. */
+function lastBriefed(value: WarframeEvents): WarframeMission | null {
   const mission = value.info.mission;
-  if (!value.playing || mission === null || mission.state === "ended" || beforeSession(mission, value.session)) return null;
+  if (!value.playing || mission === null || beforeSession(mission, value.session)) return null;
   return mission;
 }
 
 /** The faction's name, ours when the host has none, or "Unknown enemies". */
 function factionName(mission: WarframeMission): string {
   const id = mission.faction?.id ?? null;
-  return (id === null ? null : (mission.faction?.name ?? knownName(id))) ?? t("unknown-enemies");
+  return (id === null ? null : (mission.faction?.name ?? gameName("faction", id))) ?? t("unknown-enemies");
 }
 
 /** A mission of an earlier launch of Warframe: the host keeps it until the next. */
@@ -253,6 +270,7 @@ function briefing(mission: WarframeMission, world: WarframeWorld | null, mode: "
     waitIcon: "map-pin",
     waitTone: "muted",
     waitLabel: "",
+    eyebrow: mission.state === "ended" ? t("last-mission") : "",
     where: whereText(mission),
     level: levelText(mission.enemyLevel),
     faction: factionName(mission),
@@ -321,14 +339,22 @@ export function adviceFor(factionId: string, mission: Pick<WarframeMission, "pla
   return weakness;
 }
 
-function knownName(factionId: string): string | null {
-  const key = `faction-${factionId}`;
-  const name = t(key);
-  return name === key ? null : name;
+/**
+ * The name of a term of the game by its ID, in the game's language, from
+ * the glossary PlayerVox OverCrow sends; `null` for an ID it does not
+ * know. The one place that names them: no name of the game is ours.
+ */
+function gameName(kind: "damage" | "faction" | "fissure", id: string): string | null {
+  const names: Readonly<Record<string, string>> | undefined = glossary?.[kind];
+  return names !== undefined && Object.hasOwn(names, id) ? (names[id] ?? null) : null;
 }
 
 function damages(ids: readonly DamageId[]): Damage[] {
-  return ids.map((id) => ({ id, name: t(`damage-${id}`), icon: DAMAGE_ICONS[id], cls: `d-${id}` }));
+  // A type without a name is left out, never shown by its ID.
+  return ids.flatMap((id) => {
+    const name = gameName("damage", id);
+    return name === null ? [] : [{ id, name, icon: DAMAGE_ICONS[id], cls: `d-${id}` }];
+  });
 }
 
 /** "Lv. 30–40", "Lv. 30", or nothing. */
@@ -347,14 +373,15 @@ export function modifiers(mission: WarframeMission, world: WarframeWorld | null)
   const steelPath = mission.modifiers.find((each) => each.id === "steel_path");
   if (steelPath !== undefined) lines.push({ id: "steel_path", icon: "flame", title: steelPath.name, text: "" });
   if (mission.fissure !== null) {
-    const era = mission.fissure.name;
     // In a Railjack Void Storm the relics open without Reactant.
     const storm = mission.modifiers.some((each) => each.id === "void_storm");
+    const reactant = glossary?.term.reactant ?? null;
+    const corrupted = gameName("faction", "corrupted");
     lines.push({
       id: "fissure",
       icon: "hexagon",
-      title: era === null ? t("fissure-plain") : t("fissure", { era }),
-      text: storm ? "" : t("fissure-hint"),
+      title: gameName("fissure", mission.fissure.id) ?? glossary?.activity.void_fissure ?? "",
+      text: storm || reactant === null || corrupted === null ? "" : t("reactant-hint", { reactant, corrupted }),
     });
   }
   for (const each of mission.modifiers) {
