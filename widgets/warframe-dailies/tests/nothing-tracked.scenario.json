@@ -24,6 +24,146 @@
       }
     },
     {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "world": {
+              "updatedAt": 1793268000000,
+              "sortie": {
+                "boss": {
+                  "id": "captain_vor",
+                  "name": "Captain Vor"
+                },
+                "faction": {
+                  "id": "grineer",
+                  "name": "Grineer"
+                },
+                "endsAt": 1793289600000,
+                "missions": [
+                  {
+                    "node": {
+                      "id": "SolNode10",
+                      "name": null
+                    },
+                    "planet": null,
+                    "type": {
+                      "id": "rescue",
+                      "name": "Rescue"
+                    },
+                    "modifier": null
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode11",
+                      "name": null
+                    },
+                    "planet": null,
+                    "type": {
+                      "id": "disruption",
+                      "name": "Disruption"
+                    },
+                    "modifier": null
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode12",
+                      "name": null
+                    },
+                    "planet": null,
+                    "type": {
+                      "id": "mobile_defense",
+                      "name": "Mobile Defense"
+                    },
+                    "modifier": null
+                  }
+                ]
+              },
+              "archonHunt": {
+                "boss": {
+                  "id": "nira",
+                  "name": "Nira"
+                },
+                "endsAt": 1793577600000,
+                "missions": [
+                  {
+                    "node": {
+                      "id": "SolNode20",
+                      "name": null
+                    },
+                    "planet": null,
+                    "type": {
+                      "id": "rescue",
+                      "name": "Rescue"
+                    },
+                    "modifier": null
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode21",
+                      "name": null
+                    },
+                    "planet": null,
+                    "type": {
+                      "id": "survival",
+                      "name": "Survival"
+                    },
+                    "modifier": null
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode22",
+                      "name": null
+                    },
+                    "planet": null,
+                    "type": {
+                      "id": "assassination",
+                      "name": "Assassination"
+                    },
+                    "modifier": null
+                  }
+                ]
+              },
+              "fissures": [],
+              "cycles": {
+                "cetus": null,
+                "vallis": null,
+                "cambion": null
+              },
+              "resets": {
+                "daily": 1793318400000,
+                "weekly": 1793577600000
+              },
+              "voidTrader": {
+                "arrivesAt": 1793365200000,
+                "leavesAt": 1793538000000,
+                "relay": {
+                  "id": "larunda_relay",
+                  "name": "Larunda Relay"
+                }
+              },
+              "circuit": {
+                "normal": [
+                  {
+                    "id": "excalibur",
+                    "name": "Excalibur"
+                  },
+                  {
+                    "id": "trinity",
+                    "name": "Trinity"
+                  },
+                  {
+                    "id": "ember",
+                    "name": "Ember"
+                  }
+                ],
+                "steelPath": []
+              }
+            }
+          }
+        }
+      }
+    },
+    {
       "menu": {
         "id": "track-sortie",
         "value": false
@@ -233,7 +373,7 @@
     {
       "expect": {
         "text": [
-          "Aucune activité suivie"
+          "Aucune activité · Menu du widget"
         ],
         "image": "fr-100-mini",
         "fault": "none"

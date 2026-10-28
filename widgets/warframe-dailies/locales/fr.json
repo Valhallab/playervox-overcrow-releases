@@ -61,5 +61,6 @@
   "month-11": "nov.",
   "month-12": "déc.",
   "line-refused": "Accès refusé",
-  "line-refused-full": "Accès refusé · Centre de contrôle"
+  "line-refused-full": "Accès refusé · Centre de contrôle",
+  "line-empty": "Aucune activité · Menu du widget"
 }

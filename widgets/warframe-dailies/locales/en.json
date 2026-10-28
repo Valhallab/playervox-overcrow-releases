@@ -61,5 +61,6 @@
   "month-11": "Nov",
   "month-12": "Dec",
   "line-refused": "Access denied",
-  "line-refused-full": "Access denied · Control Center"
+  "line-refused-full": "Access denied · Control Center",
+  "line-empty": "No activity · Widget menu"
 }

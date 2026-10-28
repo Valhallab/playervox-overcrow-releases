@@ -150,7 +150,7 @@ test("the tracked activities of the menu decide the list and the count", () => {
   assert.equal(logic.layout(), "line");
   vm.setHost({ options: { "track-sortie": false, "track-archon": false, "track-netracells": false, "track-circuit": false, "track-nightwave": false } });
   assert.equal(model().empty, true);
-  assert.equal(model().line, "No activity tracked");
+  assert.equal(model().line, "No activity · Widget menu");
   vm.setHost({ options: {} });
   assert.equal(model().empty, false);
   assert.equal(logic.layout(), "standard");

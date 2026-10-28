@@ -81,7 +81,7 @@
     </if>
     <if test={hasText(state.model.status)}>
       <box class="status-line">
-        <icon class="status-icon" name="wifi-off"/>
+        <icon class="status-icon tone-warning" name="wifi-off"/>
         <text class="status-text">{state.model.status}</text>
       </box>
     </if>

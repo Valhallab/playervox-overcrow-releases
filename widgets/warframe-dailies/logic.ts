@@ -438,7 +438,7 @@ export function buildModel(inputs: Inputs): Model {
 
   // One line, refused: beside a value, only "Access denied"; without one,
   // where to fix it. The whole sentence stays in the label and in Full.
-  const line = rows.length === 0 ? (refused ? t("line-refused-full") : t("empty-title")) : fresh !== undefined ? t(`fresh-${fresh.id}`) : count;
+  const line = rows.length === 0 ? (refused ? t("line-refused-full") : t("line-empty")) : fresh !== undefined ? t(`fresh-${fresh.id}`) : count;
   const lineValue = rows.length === 0 ? "" : refused ? t("line-refused") : fresh !== undefined ? count : nextReset;
 
   return {
