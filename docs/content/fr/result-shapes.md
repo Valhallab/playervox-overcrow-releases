@@ -525,7 +525,7 @@ Ce qui modifie une mission. `{ id, name, stage }`
 | --- | --- | --- |
 | `id` | `steel_path` \| `arbitration` \| `sortie` \| `archon_hunt` \| `nightmare` \| `void_storm` \| `alert` \| `lich` | Notre ID du modificateur. |
 | `name` | texte | Son nom dans la langue de l’utilisateur. |
-| `stage` | entier ou `null` | L’étape d’une Sortie ou d’une Chasse d’Archonte, de 1 à 3, quand PlayerVox OverCrow peut la connaître. |
+| `stage` | entier ou `null` | L’étape d’une Sortie ou d’une Chasse aux Archontes, de 1 à 3, quand PlayerVox OverCrow peut la connaître. |
 
 ### `WarframeProgress`
 
@@ -655,7 +655,7 @@ Ce qu’un nœud peut rapporter. `{ tables }`
 
 ### `WarframeWorldMission`
 
-Une mission de la Sortie ou de la Chasse d’Archonte. `{ node, planet, type, modifier }`
+Une mission de la Sortie ou de la Chasse aux Archontes. `{ node, planet, type, modifier }`
 
 | Membre | Forme | Signification |
 | --- | --- | --- |
@@ -670,7 +670,7 @@ Le cycle d’un monde ouvert. `{ state, endsAt }`
 
 | Membre | Forme | Signification |
 | --- | --- | --- |
-| `state` | [`WarframeName`](#warframename) | Jour ou nuit (Cetus), chaud ou froid (Vallée Orbis), Fass ou Vome (Gouffre de Cambion). |
+| `state` | [`WarframeName`](#warframename) | Jour ou nuit (Cetus), chaud ou froid (Vallée Orbis), Fass ou Vome (Puy de Cambion). |
 | `endsAt` | entier | Quand il change, en millisecondes Unix. |
 
 ### `WarframeWorld`
@@ -685,7 +685,7 @@ Le monde de Warframe du jour et de la semaine. `{ updatedAt, sortie, archonHunt,
 | `sortie.faction` | [`WarframeName`](#warframename) ou `null` | Sa faction. |
 | `sortie.endsAt` | entier | Quand elle se termine. |
 | `sortie.missions` | liste de [`WarframeWorldMission`](#warframeworldmission) | Ses missions, dans l’ordre. |
-| `archonHunt` | `{ boss, endsAt, missions }` ou `null` | La Chasse d’Archonte de la semaine. |
+| `archonHunt` | `{ boss, endsAt, missions }` ou `null` | La Chasse aux Archontes de la semaine. |
 | `archonHunt.boss` | [`WarframeName`](#warframename) | L’Archonte. |
 | `archonHunt.endsAt` | entier | Quand elle se termine. |
 | `archonHunt.missions` | liste de [`WarframeWorldMission`](#warframeworldmission) | Ses missions, dans l’ordre. |
@@ -693,7 +693,7 @@ Le monde de Warframe du jour et de la semaine. `{ updatedAt, sortie, archonHunt,
 | `cycles` | `{ cetus, vallis, cambion }` | Les cycles des mondes ouverts ; `null` pour un cycle que PlayerVox OverCrow ne peut pas connaître. |
 | `cycles.cetus` | [`WarframeCycle`](#warframecycle) ou `null` | Le jour et la nuit à Cetus et sur les Plaines. |
 | `cycles.vallis` | [`WarframeCycle`](#warframecycle) ou `null` | Le chaud et le froid dans la Vallée Orbis. |
-| `cycles.cambion` | [`WarframeCycle`](#warframecycle) ou `null` | Fass et Vome dans le Gouffre de Cambion. |
+| `cycles.cambion` | [`WarframeCycle`](#warframecycle) ou `null` | Fass et Vome dans le Puy de Cambion. |
 | `resets` | `{ daily, weekly }` | Les prochaines réinitialisations. |
 | `resets.daily` | entier | La prochaine réinitialisation quotidienne, 00:00 UTC, en millisecondes Unix. |
 | `resets.weekly` | entier | La prochaine réinitialisation hebdomadaire, lundi 00:00 UTC. |

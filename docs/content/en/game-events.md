@@ -68,7 +68,7 @@ new one at each change of what the widget follows.
 | --- | --- |
 | `playing` | `true` while Warframe is the active game in PlayerVox OverCrow. |
 | `session` | `{ startedAt }`: when Warframe was launched, in Unix milliseconds; `null` before any launch. Each launch is a new session. |
-| `features` | The status of each feature: `location`, `mission`, `progress`, `squad`, `eidolons` and `world`. |
+| `features` | The status of each feature: `location`, `mission`, `progress`, `squad`, `eidolons`, `world` and `rewards`. |
 | `info` | The state of each feature the widget follows, ready to show. `null` for the others, and while nothing is known yet. |
 | `events` | The latest 16 events of those features, oldest first. |
 
@@ -123,6 +123,9 @@ that moment.
 - `world` comes from Warframe's public world state. PlayerVox OverCrow
   reads it every 5 minutes while a widget that follows it runs, whether
   Warframe is played or not. `updatedAt` says when it was read.
+- `rewards` comes from Digital Extremes' official drop tables, read once a
+  day and at each game update while a widget that follows it runs. It
+  follows the node of `info.mission`.
 - Warframe tells PlayerVox OverCrow what happens a few seconds late: about
   10 seconds, sometimes 15 to 25. The times stay exact to the millisecond;
   only the update comes later. Count down from the times, such as
@@ -233,6 +236,9 @@ Circuit):
   Sabotage, Exterminate or Hive node; `extra` an additional table of the
   node.
 - `rotation`: `null` for a table without rotations.
+- In a Void Fissure mission, the node's rewards are still given and the
+  relic opens on top: `rewards` stays the node's tables, even when
+  `fissure` is not `null`. What a relic gives is not listed.
 - `items`, **the rarest first**: from the lowest `chance` to the highest,
   equal chances by English name, the same order in every language. A
   table keeps its 64 rarest items at most. `id` is the English
@@ -244,8 +250,9 @@ Circuit):
 - **Source**: Digital Extremes' official drop tables
   (warframe.com/droptables), read by PlayerVox OverCrow on the player's
   computer once a day and at each game update, while a widget that follows
-  `warframe.rewards` runs. Show the source with the rates: **"Drop rates:
-  Digital Extremes, no guarantees."**
+  `warframe.rewards` runs. Show the source with the rates, in these
+  words: **"Rates: Digital Extremes, no guarantees"** (in French: **« Taux :
+  Digital Extremes, sans garantie »**).
 
 ### Event types
 
@@ -286,6 +293,7 @@ those missions, the mission itself is given, and `progress` keeps `null`
 counters and a `null` `rotation`.
 
 - The Orb Vallis cycle, for now: `cycles.vallis` is `null`.
+
 ### Names and IDs
 
 - `name` is in the app's language, English or French, and changes with it;

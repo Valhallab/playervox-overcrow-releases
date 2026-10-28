@@ -70,7 +70,7 @@ puis une nouvelle à chaque changement de ce que le widget suit.
 | --- | --- |
 | `playing` | `true` tant que Warframe est le jeu actif dans PlayerVox OverCrow. |
 | `session` | `{ startedAt }` : quand Warframe a été lancé, en millisecondes Unix ; `null` avant tout lancement. Chaque lancement est une nouvelle session. |
-| `features` | Le statut de chaque fonctionnalité : `location`, `mission`, `progress`, `squad`, `eidolons` et `world`. |
+| `features` | Le statut de chaque fonctionnalité : `location`, `mission`, `progress`, `squad`, `eidolons`, `world` et `rewards`. |
 | `info` | L’état de chaque fonctionnalité que le widget suit, prêt à afficher. `null` pour les autres, et tant que rien n’est encore connu. |
 | `events` | Les 16 derniers événements de ces fonctionnalités, du plus ancien au plus récent. |
 
@@ -116,7 +116,7 @@ la mission, la progression, l’Eidolon, le membre ou le lieu, tel qu’il
 | `warframe.progress` | La progression de la mission : vague, manches, récompenses reçues, rotation de la prochaine récompense et moment où elle vient. |
 | `warframe.squad` | Les pseudos du joueur et de son escouade. |
 | `warframe.eidolons` | La nuit et le jour sur les Plaines d’Eidolon, et chaque Eidolon de la nuit : apparition, points faibles, capture, mort ou fuite, à la milliseconde. |
-| `warframe.world` | Le monde du jour et de la semaine : la Sortie, la Chasse d’Archonte, les Fissures du Néant, les cycles des mondes ouverts, Baro Ki’Teer et les réinitialisations. |
+| `warframe.world` | Le monde du jour et de la semaine : la Sortie, la Chasse aux Archontes, les Fissures du Néant, les cycles des mondes ouverts, Baro Ki’Teer et les réinitialisations. |
 | `warframe.rewards` | Ce que le nœud de la mission peut rapporter, par table et par rotation, avec la chance de chaque objet (`info.mission.rewards`). |
 
 ### Quand les données arrivent
@@ -129,6 +129,9 @@ la mission, la progression, l’Eidolon, le membre ou le lieu, tel qu’il
 - `world` vient de l’état du monde public de Warframe. PlayerVox OverCrow
   le lit toutes les 5 minutes tant qu’un widget qui le suit tourne, que
   Warframe soit joué ou non. `updatedAt` dit quand il a été lu.
+- `rewards` vient des tables de butin officielles de Digital Extremes,
+  lues une fois par jour et à chaque mise à jour du jeu tant qu’un widget
+  qui le suit tourne. Il suit le nœud de `info.mission`.
 - Warframe dit à PlayerVox OverCrow ce qui se passe avec quelques secondes
   de retard : 10 secondes environ, parfois 15 à 25. Les heures restent
   exactes à la milliseconde ; seule la mise à jour arrive plus tard.
@@ -165,7 +168,7 @@ La dernière mission de la session.
 | `faction` | La [faction](#factions) ennemie. |
 | `enemyLevel` | `{ min, max }` : les niveaux des ennemis du nœud, ou `null`. |
 | `fissure` | L’[ère](#ères-des-fissures-du-néant) d’une mission de Fissure du Néant, ou `null`. |
-| `modifiers` | Ce qui modifie la mission, au plus 8, chacun `{ id, name, stage }` ([modificateurs](#modificateurs)). `stage` vaut 1 à 3 pour une mission de Sortie ou de Chasse d’Archonte, quand il est connu. |
+| `modifiers` | Ce qui modifie la mission, au plus 8, chacun `{ id, name, stage }` ([modificateurs](#modificateurs)). `stage` vaut 1 à 3 pour une mission de Sortie ou de Chasse aux Archontes, quand il est connu. |
 | `selectedAt`, `loadingAt`, `startedAt`, `endedAt` | Quand elle a été choisie, a commencé à charger, a commencé et s’est terminée, en millisecondes Unix ; `null` jusque-là. |
 | `result` | `succeeded`, `failed` ou `aborted` ; `null` avant la fin, ou quand Warframe ne l’a pas dit. |
 | `durationSeconds` | Du début de la partie à la fin, en secondes, à la milliseconde près. |
@@ -212,16 +215,16 @@ Chaque chasse :
 | --- | --- |
 | `updatedAt` | Quand PlayerVox OverCrow l’a lu pour la dernière fois, en millisecondes Unix. |
 | `sortie` | La Sortie du jour, `{ boss, faction, endsAt, missions }`, ou `null`. |
-| `archonHunt` | La Chasse d’Archonte de la semaine, `{ boss, endsAt, missions }`, ou `null`. |
+| `archonHunt` | La Chasse aux Archontes de la semaine, `{ boss, endsAt, missions }`, ou `null`. |
 | `fissures` | Les Fissures du Néant ouvertes, les plus proches de leur fermeture d’abord, au plus 64, chacune `{ node, planet, type, era, steelPath, voidStorm, endsAt }`. `voidStorm` est une Tempête du Néant (Railjack). |
-| `cycles` | `{ cetus, vallis, cambion }`, chacun `{ state, endsAt }` : le jour ou la nuit à Cetus et sur les Plaines, le chaud ou le froid dans la Vallée Orbis, Fass ou Vome dans le Gouffre de Cambion ([états des cycles](#états-des-cycles)) ; `null` pour un cycle que PlayerVox OverCrow ne peut pas connaître. |
+| `cycles` | `{ cetus, vallis, cambion }`, chacun `{ state, endsAt }` : le jour ou la nuit à Cetus et sur les Plaines, le chaud ou le froid dans la Vallée Orbis, Fass ou Vome dans le Puy de Cambion ([états des cycles](#états-des-cycles)) ; `null` pour un cycle que PlayerVox OverCrow ne peut pas connaître. |
 | `resets` | `{ daily, weekly }` : la prochaine réinitialisation quotidienne (00:00 UTC) et hebdomadaire (lundi 00:00 UTC), en millisecondes Unix. |
 | `voidTrader` | La prochaine visite de Baro Ki’Teer, ou celle en cours, `{ arrivesAt, leavesAt, relay }`, ou `null`. Ce qu’il vend n’est pas donné. |
 | `circuit` | Les récompenses du Circuit de la semaine, `{ normal, steelPath }`, quand l’état du monde les donne ; `null` sinon. |
 
-Les missions de la Sortie et de la Chasse d’Archonte sont
+Les missions de la Sortie et de la Chasse aux Archontes sont
 `{ node, planet, type, modifier }`, dans l’ordre : `modifier` est la
-condition d’une mission de Sortie, `null` dans la Chasse d’Archonte.
+condition d’une mission de Sortie, `null` dans la Chasse aux Archontes.
 
 ### Butin (`warframe.rewards`)
 
@@ -240,6 +243,10 @@ ouverts, événements, Circuit) :
   nœud de Sabotage, d'Extermination ou de Ruche ; `extra`, une table de
   plus du nœud.
 - `rotation` : `null` pour une table sans rotation.
+- Dans une mission de Fissure du Néant, le butin du nœud reste donné et la
+  relique s'ouvre en plus : `rewards` reste les tables du nœud, même
+  quand `fissure` n'est pas `null`. Ce que donne une relique n'est pas
+  listé.
 - `items`, **le plus rare d'abord** : de la `chance` la plus faible à la
   plus forte, à chance égale par nom anglais, le même ordre dans toutes
   les langues. Une table garde au plus ses 64 objets les plus rares.
@@ -252,8 +259,9 @@ ouverts, événements, Circuit) :
   (warframe.com/droptables), lues par PlayerVox OverCrow sur le PC du
   joueur une fois par jour et à chaque mise à jour du jeu, tant qu'un
   widget qui suit `warframe.rewards` est ouvert. Affichez la source avec
-  les taux :
-  **« Taux de butin : Digital Extremes, sans garantie. »**
+  les taux, avec ces mots : **« Taux : Digital Extremes, sans
+  garantie »** (en anglais : **"Rates: Digital Extremes, no
+  guarantees"**).
 
 ### Types d’événements
 
@@ -280,9 +288,9 @@ calcule :
   5 minutes, d’après l’horloge de la mission. `nextRewardWave` en Défense :
   toutes les 5 vagues.
 - **La durée** d’une mission, du début de la partie à la fin.
-- **Quel Eidolon.** Teralyst, Gantulyst ou Hydrolyst, déduit de l’ordre de
+- **Quel Eidolon.** Teralyste, Gantulyste ou Hydrolyste, déduit de l’ordre de
   la chasse ; `null` quand l’ordre ne permet pas de le savoir.
-- **L’étape d’une mission de Sortie ou de Chasse d’Archonte**, seulement
+- **L’étape d’une mission de Sortie ou de Chasse aux Archontes**, seulement
   pour un widget qui suit aussi `warframe.world` ; sinon `stage` vaut
   `null`.
 - **Les réinitialisations**, à 00:00 UTC chaque jour et le lundi.
@@ -291,12 +299,13 @@ calcule :
 
 PlayerVox OverCrow ne donne pas les excavatrices d’une Excavation, les
 compteurs d’ennemis tués, la progression des missions de Capture, de
-Défense mobile et d’Espionnage, la progression du Circuit, les reliques,
+Défense Mobile et d’Espionnage, la progression du Circuit, les reliques,
 Nightwave ni ce que vend Baro Ki’Teer. Pour ces missions, la mission
 elle-même est donnée, et `progress` garde des compteurs `null` et une
 `rotation` `null`.
 
 - Le cycle de la Vallée Orbis, pour l’instant : `cycles.vallis` vaut `null`.
+
 ### Noms et ID
 
 - `name` est dans la langue de l’application, anglais ou français, et
