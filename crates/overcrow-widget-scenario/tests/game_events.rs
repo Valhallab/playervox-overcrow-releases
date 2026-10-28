@@ -7,7 +7,7 @@
 
 use std::collections::BTreeSet;
 
-use overcrow_widget_scenario::{DEFAULT_START_AT, parse};
+use overcrow_widget_scenario::{DEFAULT_START_AT, GameEvents, parse};
 use overcrow_widget_schema::manifest::validate_manifest;
 use serde_json::{Value, json};
 
@@ -281,4 +281,43 @@ fn a_fixture_gives_the_first_value_and_a_step_changes_the_rest() {
     assert_eq!(value["features"]["squad"], json!("unavailable"));
     assert_eq!(value["events"][1]["seq"], json!(5));
     assert_eq!(value["events"][1]["type"], json!("member_left"));
+}
+
+#[test]
+fn a_game_the_manifest_lists_starts_with_a_first_value() {
+    // Without a fixture, the fake host's first value: playing, nothing
+    // known, the listed features available and the others undeclared.
+    let steps = json!([{"expect": {"state": "running"}}]);
+    let bare = read(&scenario(json!({}), steps.clone())).expect("valid");
+    let events = GameEvents::new(&bare.fixtures, &declared(&["warframe.mission"]));
+    let starts = events.start_values();
+    assert_eq!(starts.len(), 1);
+    let (service, value) = &starts[0];
+    assert_eq!(*service, "gameEvents.warframe.subscribe");
+    assert_eq!(value["playing"], json!(true));
+    assert_eq!(value["session"], Value::Null);
+    assert_eq!(value["features"]["mission"], json!("available"));
+    assert_eq!(value["features"]["squad"], json!("undeclared"));
+    assert_eq!(value["info"]["mission"], Value::Null);
+    assert_eq!(value["events"], json!([]));
+    let shape = overcrow_widget_schema::results::shape("WarframeEvents").expect("shape");
+    assert!(shape.shape.matches(value), "{value}");
+    // No feature of the game listed: no value.
+    assert!(
+        GameEvents::new(&bare.fixtures, &declared(&[]))
+            .start_values()
+            .is_empty()
+    );
+    // A fixture gives the first value itself.
+    let first = value.clone();
+    let fixed = read(&scenario(
+        json!({"subscriptions": {"gameEvents.warframe.subscribe": first}}),
+        steps,
+    ))
+    .expect("valid");
+    assert!(
+        GameEvents::new(&fixed.fixtures, &declared(&["warframe.mission"]))
+            .start_values()
+            .is_empty()
+    );
 }

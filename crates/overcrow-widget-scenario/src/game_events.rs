@@ -113,6 +113,24 @@ impl GameEvents {
         }
     }
 
+    /// The first value of each game's service the manifest lists a feature
+    /// of, for the games no fixture gives one: what the fake host sends at
+    /// once when the widget subscribes.
+    pub fn start_values(&self) -> Vec<(&'static str, Value)> {
+        overcrow_widget_schema::services::SERVICES
+            .iter()
+            .filter_map(|service| {
+                let game = game_of_service(service.name)?;
+                let listed = self.declared.iter().any(|name| {
+                    name.strip_prefix(game)
+                        .is_some_and(|feature| feature.starts_with('.'))
+                });
+                (listed && !self.initial.contains_key(service.name))
+                    .then(|| (service.name, self.default_value(game, service.name)))
+            })
+            .collect()
+    }
+
     /// A `publish` step of a game's service sets its whole value.
     pub fn published(&mut self, service: &str, value: &Value) {
         if let Some(game) = game_of_service(service) {
