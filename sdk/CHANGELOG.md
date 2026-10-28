@@ -9,7 +9,7 @@ runtime surface 0.1, which OverCrow keeps for widget API v1.
 
 ## 1.3.0
 
-Not released yet. Ships with the release of PlayerVox OverCrow that opens
+Ships with PlayerVox OverCrow 0.9.0-beta.1, the first release that opens
 links for widgets:
 
 - `links.open({ url })` (`links`): opens a page of a site the manifest
