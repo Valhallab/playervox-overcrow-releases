@@ -2,7 +2,7 @@
 //! (`gameEvents.warframe.subscribe`). A `gameEvents` step names one game
 //! and says what changes, in the words of the service: `playing`,
 //! `session`, a feature's status, `info` members merged into the current
-//! state, and one event. The fake host keeps the whole value, completes
+//! state, words of the glossary, and one event. The fake host keeps the whole value, completes
 //! what the step leaves out (an absent nullable member is `null`, a list
 //! `[]`, a count `0`, a time the step's time), numbers the event, and
 //! publishes the value once it has the service's shape.
@@ -42,6 +42,9 @@ pub struct GameStep {
     /// merges into the current object, any other value replaces it.
     #[serde(default, skip_serializing_if = "Map::is_empty")]
     pub info: Map<String, Value>,
+    /// Words of the glossary, merged the same way (English at first).
+    #[serde(default, skip_serializing_if = "Map::is_empty")]
+    pub glossary: Map<String, Value>,
     /// An event: its type, or `{ type, at?, <state> }` with the state its
     /// type carries; without it, the state is the matching `info` member.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -182,6 +185,7 @@ impl GameEvents {
         json!({
             "playing": true,
             "session": null,
+            "glossary": warframe::english_glossary(),
             "features": features,
             "info": info,
             "events": []
@@ -189,7 +193,22 @@ impl GameEvents {
     }
 }
 
+/// A game's fixture value written without the glossary has the English
+/// one, as the fake host's own first value.
+pub(crate) fn complete_fixtures(fixtures: &mut Fixtures) {
+    for (service, value) in &mut fixtures.subscriptions {
+        if game_of_service(service) == Some("warframe")
+            && let Some(object) = value.as_object_mut()
+        {
+            object
+                .entry("glossary")
+                .or_insert_with(warframe::english_glossary);
+        }
+    }
+}
+
 fn game_from(value: &Value) -> Game {
+    let value = value.clone();
     let seq = value["events"]
         .as_array()
         .into_iter()
@@ -197,10 +216,7 @@ fn game_from(value: &Value) -> Game {
         .filter_map(|event| event["seq"].as_u64())
         .max()
         .unwrap_or(0);
-    Game {
-        value: value.clone(),
-        seq,
-    }
+    Game { value, seq }
 }
 
 /// The single game a step names, among those with a service.
@@ -288,6 +304,20 @@ fn change_game(
             ));
         }
         object["features"][feature] = status.clone();
+    }
+    if !change.glossary.is_empty() {
+        let merged = merge(
+            object.get("glossary").unwrap_or(&Value::Null),
+            &Value::Object(change.glossary.clone()),
+        );
+        let glossary = complete(
+            &member_shape(service, "glossary"),
+            Some(&merged),
+            "glossary",
+            &format!("{here}.glossary"),
+            now_ms,
+        )?;
+        object.insert("glossary".to_owned(), glossary);
     }
     if !change.info.is_empty() {
         let info_members = members(service, "info");

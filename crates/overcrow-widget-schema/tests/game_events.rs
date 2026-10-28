@@ -12,7 +12,7 @@ use overcrow_widget_schema::game_events::{
     FEATURE_GAME_EVENTS_WARFRAME, GAME_EVENT_FEATURES, game_event_feature, warframe,
 };
 use overcrow_widget_schema::limits::{
-    ALL, MAX_GAME_EVENT_NAME_BYTES, MAX_WARFRAME_FISSURES, MAX_WARFRAME_HUNTS,
+    ALL, MAX_GAME_EVENT_NAME_BYTES, MAX_WARFRAME_EARNED, MAX_WARFRAME_FISSURES, MAX_WARFRAME_HUNTS,
     MAX_WARFRAME_MODIFIERS, MAX_WARFRAME_REWARD_ITEMS, MAX_WARFRAME_REWARD_TABLES,
     MAX_WARFRAME_SQUAD,
 };
@@ -186,7 +186,34 @@ fn mission(state: &str) -> Value {
         "endedAt": if state == "ended" { json!(1_793_000_330_500_u64) } else { Value::Null },
         "result": if state == "ended" { json!("succeeded") } else { Value::Null },
         "durationSeconds": if state == "ended" { json!(300.5) } else { Value::Null },
-        "rewards": if state == "in_progress" { rewards() } else { Value::Null }
+        "rewards": if state == "in_progress" { rewards() } else { Value::Null },
+        "earned": if state == "selected" { Value::Null } else { earned() },
+        "credits": if state == "ended" { json!(34_300) } else { Value::Null }
+    })
+}
+
+fn earned() -> Value {
+    json!({"rotations": ["A", "A", "B", "C", "A"], "totals": {"A": 3, "B": 1, "C": 1}})
+}
+
+/// The glossary in English, every word of its lists.
+fn glossary() -> Value {
+    let words = |list: &[overcrow_widget_schema::game_events::Named]| {
+        list.iter()
+            .map(|word| (word.id.to_owned(), json!(word.english)))
+            .collect::<serde_json::Map<_, _>>()
+    };
+    json!({
+        "language": "en",
+        "damage": words(warframe::DAMAGE_TYPES),
+        "era": words(warframe::ERAS),
+        "fissure": words(warframe::FISSURES),
+        "activity": words(warframe::ACTIVITIES),
+        "place": words(warframe::PLACES),
+        "eidolon": words(warframe::EIDOLONS),
+        "faction": words(warframe::FACTIONS),
+        "cycle": words(warframe::CYCLE_STATES),
+        "term": words(warframe::TERMS)
     })
 }
 
@@ -203,11 +230,15 @@ fn rewards() -> Value {
 fn progress() -> Value {
     json!({
         "wave": 5,
+        "waveEnemies": {"total": 19, "left": 7},
         "round": null,
         "rewards": 1,
         "rotation": "A",
+        "earned": {"rotations": ["A"], "totals": {"A": 1, "B": 0, "C": 0}},
+        "cycle": {"number": 1, "rotations": ["A", "A", "B", "C"], "earned": 1},
+        "clock": null,
         "nextRewardAt": null,
-        "nextRewardWave": 10
+        "nextRewardWave": 6
     })
 }
 
@@ -269,7 +300,8 @@ fn world() -> Value {
 fn full() -> Value {
     json!({
         "playing": true,
-        "session": {"startedAt": 1_792_999_000_000_u64},
+        "session": {"startedAt": 1_792_999_000_000_u64, "language": "fr"},
+        "glossary": glossary(),
         "features": {
             "location": "available",
             "mission": "available",
@@ -306,6 +338,7 @@ fn a_full_value_has_the_shape() {
     let empty = json!({
         "playing": false,
         "session": null,
+        "glossary": glossary(),
         "features": {
             "location": "undeclared", "mission": "available", "progress": "undeclared",
             "squad": "undeclared", "eidolons": "undeclared", "world": "undeclared",
@@ -318,6 +351,81 @@ fn a_full_value_has_the_shape() {
         "events": []
     });
     assert!(matches("WarframeEvents", &empty));
+    // A session whose language is not read yet; a Survival before its clock.
+    let mut value = full();
+    value["session"]["language"] = Value::Null;
+    value["info"]["progress"]["clock"] = json!("waiting");
+    value["info"]["progress"]["waveEnemies"] = json!({"total": 15, "left": null});
+    value["info"]["progress"]["cycle"] = Value::Null;
+    assert!(matches("WarframeEvents", &value));
+    // The glossary is never absent.
+    let mut value = full();
+    value.as_object_mut().unwrap().remove("glossary");
+    assert!(!matches("WarframeEvents", &value));
+}
+
+#[test]
+fn the_glossary_has_every_word_of_its_lists() {
+    let Some(Shape::Record(members)) = shape("WarframeGlossary").map(|named| named.shape) else {
+        panic!("a record");
+    };
+    let groups: Vec<_> = members.iter().map(|member| member.name).collect();
+    assert_eq!(
+        groups,
+        [
+            "language", "damage", "era", "fissure", "activity", "place", "eidolon", "faction",
+            "cycle", "term"
+        ]
+    );
+    for (group, list) in [
+        ("damage", warframe::DAMAGE_TYPES),
+        ("era", warframe::ERAS),
+        ("fissure", warframe::FISSURES),
+        ("activity", warframe::ACTIVITIES),
+        ("place", warframe::PLACES),
+        ("eidolon", warframe::EIDOLONS),
+        ("faction", warframe::FACTIONS),
+        ("cycle", warframe::CYCLE_STATES),
+        ("term", warframe::TERMS),
+    ] {
+        let member = members
+            .iter()
+            .find(|member| member.name == group)
+            .expect(group);
+        let Shape::Record(words) = member.shape else {
+            panic!("{group}: a record");
+        };
+        assert_eq!(
+            words.iter().map(|word| word.name).collect::<Vec<_>>(),
+            list.iter().map(|word| word.id).collect::<Vec<_>>(),
+            "{group}"
+        );
+        assert!(
+            words.iter().all(|word| word.shape == Shape::Text),
+            "{group}"
+        );
+        // A word missing, or one more, is refused.
+        let mut value = glossary();
+        value[group].as_object_mut().unwrap().remove(list[0].id);
+        assert!(!matches("WarframeGlossary", &value), "{group}");
+        let mut value = glossary();
+        value[group]["extra"] = json!("Extra");
+        assert!(!matches("WarframeGlossary", &value), "{group}");
+    }
+    assert_eq!(warframe::DAMAGE_TYPES.len(), 13);
+    assert_eq!(
+        warframe::FISSURES
+            .iter()
+            .map(|fissure| fissure.id)
+            .collect::<Vec<_>>(),
+        warframe::ERAS.iter().map(|era| era.id).collect::<Vec<_>>()
+    );
+    assert_eq!(warframe::LANGUAGES.len(), 15);
+    assert!(
+        warframe::GLOSSARY_LANGUAGES
+            .iter()
+            .all(|language| warframe::LANGUAGES.contains(language))
+    );
 }
 
 #[test]
@@ -352,6 +460,14 @@ fn values_out_of_their_words_are_refused() {
         ("/info/mission/rewards/tables/0/kind", json!("bonus")),
         ("/info/mission/rewards/tables/0/items/0/name", Value::Null),
         ("/info/mission/node/id", Value::Null),
+        ("/session/language", json!("xx")),
+        ("/glossary/language", json!("de")),
+        ("/info/progress/clock", json!("paused")),
+        ("/info/progress/earned/rotations/0", json!("D")),
+        ("/info/progress/earned/totals/A", json!(1.5)),
+        ("/info/progress/cycle/rotations/0", json!("E")),
+        ("/info/progress/waveEnemies/total", Value::Null),
+        ("/info/mission/credits", json!("34300")),
     ] {
         let mut value_of = full();
         *value_of.pointer_mut(path).expect(path) = value;
@@ -376,6 +492,7 @@ fn the_bounds_are_listed() {
         (&MAX_WARFRAME_FISSURES, 64),
         (&MAX_WARFRAME_REWARD_TABLES, 9),
         (&MAX_WARFRAME_REWARD_ITEMS, 64),
+        (&MAX_WARFRAME_EARNED, 64),
     ] {
         assert_eq!(limit.value, value, "{}", limit.key);
         assert!(
@@ -399,6 +516,10 @@ fn our_ids_are_stable_snake_case_and_distinct() {
         (warframe::MODIFIERS, "modifiers"),
         (warframe::SORTIE_MODIFIERS, "sortie modifiers"),
         (warframe::BOSSES, "bosses"),
+        (warframe::DAMAGE_TYPES, "damage types"),
+        (warframe::FISSURES, "fissures"),
+        (warframe::ACTIVITIES, "activities"),
+        (warframe::TERMS, "terms"),
     ] {
         let mut seen = BTreeSet::new();
         assert!(!list.is_empty(), "{name}");

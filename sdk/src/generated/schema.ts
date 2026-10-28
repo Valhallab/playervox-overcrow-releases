@@ -835,7 +835,7 @@ export interface SteamLocalAchievements {
 export interface WarframeName {
   /** Our stable ID, in `snake_case`, listed in the game events page. */
   readonly id: string;
-  /** Its name in the user's language, one line of at most `MAX_GAME_EVENT_NAME_BYTES`; `null` when PlayerVox OverCrow has none yet. */
+  /** Its name in the game's language, one line of at most `MAX_GAME_EVENT_NAME_BYTES`; `null` when PlayerVox OverCrow has none yet. */
   readonly name: string | null;
 }
 
@@ -843,7 +843,7 @@ export interface WarframeName {
 export interface WarframeNode {
   /** The game's own key of the node (`SolNode195`, `ClanNode…`, `SettlementNode…`), as public data such as drop tables and the world state name it. */
   readonly id: string;
-  /** Its name in the user's language, or `null` when PlayerVox OverCrow has none yet (new content). */
+  /** Its name in the game's language, or `null` when PlayerVox OverCrow has none yet (new content). */
   readonly name: string | null;
 }
 
@@ -855,13 +855,213 @@ export interface WarframeEvents {
   readonly session: {
     /** When Warframe was launched, in Unix milliseconds. */
     readonly startedAt: number;
+    /** The game's language (`en`, `fr`, `de`…); `null` until the game says it. */
+    readonly language: "de" | "en" | "es" | "fr" | "it" | "ja" | "ko" | "pl" | "pt" | "ru" | "tc" | "th" | "tr" | "uk" | "zh" | null;
   } | null;
+  /** Words of the game in the game's language, whatever the features the widget follows. */
+  readonly glossary: WarframeGlossary;
   /** The status of each feature. */
   readonly features: WarframeFeatures;
   /** The state of each feature the widget follows. */
   readonly info: WarframeInfo;
   /** The latest events of the features the widget follows, oldest first. */
   readonly events: ReadonlyArray<WarframeEvent>;
+}
+
+/** Words of the game a widget shows on their own, in the game's language, so that it never writes one itself. */
+export interface WarframeGlossary {
+  /** The language of these words: the game's when PlayerVox OverCrow has them in it, English otherwise. */
+  readonly language: "en" | "fr";
+  /** The damage types, by our ID. */
+  readonly damage: {
+    /** Its name in the language of `glossary.language`. */
+    readonly impact: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly puncture: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly slash: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly heat: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly cold: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly electricity: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly toxin: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly blast: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly corrosive: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly gas: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly magnetic: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly radiation: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly viral: string;
+  };
+  /** The Void Fissure eras. */
+  readonly era: {
+    /** Its name in the language of `glossary.language`. */
+    readonly lith: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly meso: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly neo: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly axi: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly requiem: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly omnia: string;
+  };
+  /** A Void Fissure of each era, by the era's ID. */
+  readonly fissure: {
+    /** Its name in the language of `glossary.language`. */
+    readonly lith: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly meso: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly neo: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly axi: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly requiem: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly omnia: string;
+  };
+  /** Activities of the game. */
+  readonly activity: {
+    /** Its name in the language of `glossary.language`. */
+    readonly sortie: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly archon_hunt: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly netracells: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly circuit: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly nightwave: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly baro_ki_teer: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly void_fissure: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly arbitration: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly steel_path: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly void_storm: string;
+  };
+  /** The places that are not a node. */
+  readonly place: {
+    /** Its name in the language of `glossary.language`. */
+    readonly drifter_camp: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly larunda_relay: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly vesper_relay: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly strata_relay: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly kronia_relay: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly orcus_relay: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly cetus: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly fortuna: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly necralisk: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly sanctum_anatomica: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly chrysalith: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly hollvania_central_mall: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly maroos_bazaar: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly iron_wake: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly plains_of_eidolon: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly orb_vallis: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly cambion_drift: string;
+  };
+  /** The Eidolons. */
+  readonly eidolon: {
+    /** Its name in the language of `glossary.language`. */
+    readonly teralyst: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly gantulyst: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly hydrolyst: string;
+  };
+  /** The factions. */
+  readonly faction: {
+    /** Its name in the language of `glossary.language`. */
+    readonly grineer: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly corpus: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly infested: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly corrupted: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly sentient: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly narmer: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly murmur: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly scaldra: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly techrot: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly tenno: string;
+  };
+  /** The states of the open worlds' cycles. */
+  readonly cycle: {
+    /** Its name in the language of `glossary.language`. */
+    readonly day: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly night: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly warm: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly cold: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly fass: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly vome: string;
+  };
+  /** Other words of the game. */
+  readonly term: {
+    /** Its name in the language of `glossary.language`. */
+    readonly reactant: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly relic: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly credits: string;
+  };
+}
+
+/** The rotations a mission earned. */
+export interface WarframeEarned {
+  /** The rotations earned, in order, the latest `MAX_WARFRAME_EARNED`. */
+  readonly rotations: ReadonlyArray<"A" | "B" | "C">;
+  /** How many of each, all of them. */
+  readonly totals: {
+    /** Rotations A earned. */
+    readonly A: number;
+    /** Rotations B earned. */
+    readonly B: number;
+    /** Rotations C earned. */
+    readonly C: number;
+  };
 }
 
 /** The status of each Warframe feature. */
@@ -945,6 +1145,10 @@ export interface WarframeMission {
   readonly durationSeconds: number | null;
   /** What the node can reward, for a widget that follows `warframe.rewards`; `null` otherwise, or for a node without a reward table. */
   readonly rewards: WarframeRewards | null;
+  /** The rotations earned from the start, for a type with rotations; `null` otherwise or before the start. */
+  readonly earned: WarframeEarned | null;
+  /** The credits its end screen counts; `null` before the end, or when the game does not say (an aborted mission). */
+  readonly credits: number | null;
 }
 
 /** What changes a mission. */
@@ -961,15 +1165,35 @@ export interface WarframeModifier {
 export interface WarframeProgress {
   /** The current wave (Defense, Mirror Defense). */
   readonly wave: number | null;
+  /** The enemies of the current Defense wave; `null` before the first. */
+  readonly waveEnemies: {
+    /** The enemies the wave announced. */
+    readonly total: number;
+    /** Those left, as the game counts them once all have spawned; 0 once the wave is cleared; `null` before. */
+    readonly left: number | null;
+  } | null;
   /** Rounds done (Interception, Disruption). */
   readonly round: number | null;
   /** Rotation rewards given so far. */
   readonly rewards: number;
-  /** The rotation of the next reward, counted A, A, B, C from the rewards given; `null` for a type without rotations or one we cannot count. */
+  /** The rotation of the next reward; `null` for a type without rotations or one we cannot count. */
   readonly rotation: "A" | "B" | "C" | null;
-  /** When the next reward comes, in Unix milliseconds, for a type paid on time (Survival). */
+  /** The rotations given so far. */
+  readonly earned: WarframeEarned;
+  /** The round of rotations of the next reward; `null` for a Disruption and a type without rotations. */
+  readonly cycle: {
+    /** 1 for the first round. */
+    readonly number: number;
+    /** Its rotations, in order: `A`, `A`, `B`, `C`; an Arbitration's first `A`, `A`, `B`, `B`, then `C`, `C`, `C`, `C`. */
+    readonly rotations: ReadonlyArray<"A" | "B" | "C">;
+    /** How many of them were given. */
+    readonly earned: number;
+  } | null;
+  /** For a type paid on time (Survival): `waiting` until its clock starts, then `running`; `null` otherwise. */
+  readonly clock: "waiting" | "running" | null;
+  /** When the next reward comes, in Unix milliseconds, for a type paid on time (Survival) once its clock runs. */
   readonly nextRewardAt: number | null;
-  /** The wave of the next reward, for a type paid on waves (Defense). */
+  /** The wave of the next reward, for a type paid on waves (Defense: every 3; Mirror Defense: every 2). */
   readonly nextRewardWave: number | null;
 }
 
