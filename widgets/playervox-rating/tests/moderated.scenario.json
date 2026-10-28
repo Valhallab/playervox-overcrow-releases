@@ -115,7 +115,7 @@
     {
       "expect": {
         "text": [
-          "Cette critique a été retirée par la modération. Modifiez-la, ou publiez la note sans critique.",
+          "Cet avis a été retiré par la modération. Modifiez‑le, ou publiez la note sans avis.",
           "Brouillon non publié",
           "Mettre à jour ma note"
         ],
@@ -130,7 +130,7 @@
     {
       "expect": {
         "text": [
-          "Cette critique a été retirée par la modération. Modifiez-la, ou publiez la note sans critique."
+          "Cet avis a été retiré par la modération. Modifiez‑le, ou publiez la note sans avis."
         ],
         "image": "moderated-light-fr-150"
       }
@@ -147,7 +147,7 @@
     {
       "expect": {
         "text": [
-          "Cette critique a été retirée par la modération. Modifiez-la, ou publiez la note sans critique."
+          "Cet avis a été retiré par la modération. Modifiez‑le, ou publiez la note sans avis."
         ],
         "image": "moderated-narrow-light-fr"
       }

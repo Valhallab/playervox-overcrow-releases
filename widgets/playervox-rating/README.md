@@ -132,6 +132,8 @@ no form.
   | `form` | the form filled by OverCrow, rated and not rated yet, both themes and languages, 150 %, 280 px wide |
   | `publish-keyboard` | Tab, an arrow key, Enter on the button, then Ctrl+Enter in the review: what OverCrow sends, Saved |
   | `publish-pointer` | a first rating with the pointer, then Saving with no answer, `unavailable`, `busy`, `timeout`, `stale_context` and `not_connected` |
+  | `moderated` | a review the moderation removed, typed again: the refusal's message and the kept draft, both themes and languages, 150 %, 280 px wide; then the edited review published |
+  | `moderated-no-review` | the same refusal on a first rating, then the rating alone once the review is emptied |
   | `offline` | the last rating, OverCrow's notice, a form that takes no input, then online again |
   | `account` | OverCrow's account panel signed out, pending and expired, in both modes; no input reaches the widget |
   | `draft` | the draft through Passive mode and a rating published elsewhere; an untouched form follows; another game |

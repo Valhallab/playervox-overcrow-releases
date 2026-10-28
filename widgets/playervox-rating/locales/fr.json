@@ -31,6 +31,6 @@
   "error-busy": "Une opération est en cours. Réessayez dans un instant.",
   "error-stale": "Le compte ou le jeu a changé. Vérifiez vos modifications avant d’enregistrer.",
   "error-forbidden": "Cette action n’est pas disponible pour votre compte.",
-  "error-moderated": "Cette critique a été retirée par la modération. Modifiez-la, ou publiez la note sans critique.",
+  "error-moderated": "Cet avis a été retiré par la modération. Modifiez‑le, ou publiez la note sans avis.",
   "error-unavailable": "PlayerVox est indisponible pour ce jeu pour le moment."
 }
