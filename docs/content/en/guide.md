@@ -27,7 +27,7 @@ cd my-counter
 npm install
 ```
 
-`npm install` brings TypeScript and `@overcrow/sdk` 1.3.0, named in the
+`npm install` brings TypeScript and `@overcrow/sdk` 1.4.0, named in the
 project's `package.json`.
 
 The templates are `blank`, `counter`, `list` and `chart`. The ID defaults to

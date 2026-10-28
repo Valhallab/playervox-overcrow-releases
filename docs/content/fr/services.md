@@ -267,7 +267,7 @@ Les tableaux ci-dessous indiquent, pour chaque service, quand l’appeler.
 | `links` | Pages web de sites déclarés, ouvertes dans le navigateur de l’utilisateur sur un clic, au plus 8 règles ; l’hôte montre chaque adresse et demande l’accord de l’utilisateur une fois par site. | manifeste refusé |
 | `storage` | Stockage clé-valeur tenu par l’hôte, cloisonné par ID de widget, dans la limite de 256 Kio. | données conservées le temps du processus seulement |
 | `clipboardWrite` | Écriture de texte dans le presse-papiers, pendant une action de l’utilisateur en mode interactif. | manifeste refusé |
-| `gameEvents` | Événements de jeu sémantiques nommés `overcrow.game.<name>.v1`, au plus 32. | admis |
+| `gameEvents` | Fonctionnalités d’un jeu que le widget suit, chacune `<game>.<feature>` (`warframe.mission`), au plus 32. | admis |
 | `capabilities` | Services de l’hôte listés avec les capabilities. | admis |
 <!-- /generated:permission-list -->
 
@@ -281,7 +281,7 @@ Les tableaux ci-dessous indiquent, pour chaque service, quand l’appeler.
 | `storage` | `storage.remove` | À tout moment |
 | `storage` | `storage.keys` | À tout moment |
 | `clipboardWrite` | `clipboard.writeText` | Seulement pendant une action de l’utilisateur |
-| `gameEvents` | `gameEvents.subscribe` | À tout moment |
+| `gameEvents` | `gameEvents.warframe.subscribe` | À tout moment |
 
 « Seulement pendant une action de l’utilisateur » est expliqué dans [Les appels qui demandent une action de l’utilisateur](services.md#les-appels-qui-demandent-une-action-de-lutilisateur).
 <!-- /generated:permissions -->
@@ -524,10 +524,12 @@ d’autres sites n’en fait jamais partie.
 
 ### Événements de jeu
 
-`gameEvents` liste les événements de jeu nommés que le widget veut
-recevoir, chacun de la forme `overcrow.game.<name>.v1`.
-`gameEvents.subscribe(listener)` livre ensuite `{ event, at }` chaque fois
-que l’un d’eux se produit.
+`gameEvents` liste les fonctionnalités d’un jeu que le widget suit,
+chacune `<game>.<feature>`, comme `warframe.mission`. Le service du jeu,
+`gameEvents.warframe.subscribe(listener)`, donne ensuite leur état et leurs
+derniers événements. Les événements de jeu ne sont pas sensibles. La page
+des [événements de jeu](game-events.md) dit le reste : les fonctionnalités
+de Warframe, ce que donne chacune et comment les tester.
 
 ## Capabilities
 

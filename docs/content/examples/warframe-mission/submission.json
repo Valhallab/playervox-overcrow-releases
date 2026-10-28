@@ -1,0 +1,17 @@
+{
+  "releaseNotes": {
+    "en": "First version: your current Warframe mission, its wave and rotation.",
+    "fr": "Première version : votre mission Warframe en cours, sa vague et sa rotation."
+  },
+  "justifications": [
+    {
+      "permission": "gameEvent:warframe.mission",
+      "text": "Shows the node and type of the current mission, and how the last one ended."
+    },
+    {
+      "permission": "gameEvent:warframe.progress",
+      "text": "Shows the current wave and the rotation of the next reward."
+    }
+  ],
+  "reviewMessage": "Test in Warframe with any Defense or Survival mission; the widget has no network and stores nothing."
+}

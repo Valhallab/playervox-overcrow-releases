@@ -97,6 +97,7 @@ pub const FEATURE_NETWORK_FILE_PARAM: &str = "network-file-param";
 /// manifest.
 pub const FEATURE_ACTIVE_GAME: &str = "active-game";
 
+pub use crate::game_events::FEATURE_GAME_EVENTS_WARFRAME;
 pub use crate::links::FEATURE_OPEN_LINKS;
 pub use crate::wrapper::FEATURE_MENU_CLOSES;
 
@@ -115,6 +116,7 @@ pub const KNOWN_FEATURES: &[&str] = &[
     FEATURE_STEAM_EVENTS,
     FEATURE_ACTIVE_GAME,
     FEATURE_STEAM_LOCAL_ACHIEVEMENTS,
+    FEATURE_GAME_EVENTS_WARFRAME,
 ];
 
 pub const ENVELOPE_FIELDS: &[Field] = &[
@@ -1916,7 +1918,8 @@ mod tests {
                 "open-links",
                 "steam-events",
                 "active-game",
-                "steam-local-achievements"
+                "steam-local-achievements",
+                "game-events-warframe"
             ]
         );
         let mut payload = valid();

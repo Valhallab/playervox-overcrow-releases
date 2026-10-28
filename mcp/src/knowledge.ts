@@ -170,7 +170,8 @@ const PERMISSION_ADVICE: Record<string, string> = {
     "Declare only the sites the widget opens, each with the narrowest pathPrefix that covers its pages (\"/my/edit/\" rather than the whole site). Open a page only in the handler of a user action (on:activate of a button), with a button that says where it leads: OverCrow refuses it otherwise (gesture_required), shows the address and asks the user the first time for each site. Never put the user's data in the address. A widget with a sensitive capability opens no link; a widget with an account opens only its service's sites.",
   clipboardWrite:
     "Write only in the handler of a user action (on:activate of a button), only the text the user asked to copy, and never on a timer or a data update: OverCrow refuses it otherwise (gesture_required).",
-  gameEvents: "Subscribe only to the events the widget shows.",
+  gameEvents:
+    "List only the game features the widget shows (`warframe.mission`…); each one shows to the player before install.",
   capabilities:
     "Each capability needs the user's consent. A sensitive capability cannot be combined with network, links or clipboardWrite (OverCrow refuses the manifest): the data it reads cannot leave the computer.",
 };

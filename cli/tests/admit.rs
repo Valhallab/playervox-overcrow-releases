@@ -378,7 +378,7 @@ fn the_review_lists_every_requested_authority() {
             "storage": true,
             "clipboardWrite": true,
             "links": [{"origin": "https://example.com", "pathPrefix": "/help/"}],
-            "gameEvents": ["overcrow.game.match.started.v1"],
+            "gameEvents": ["warframe.mission"],
             "capabilities": ["fps.read"]
         });
     });

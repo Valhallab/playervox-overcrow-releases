@@ -1,0 +1,10 @@
+{
+  "unavailable": "Warframe missions are unavailable",
+  "no-mission": "No mission yet",
+  "wave": "Wave {wave}",
+  "rotation": "Rotation {rotation}",
+  "last-succeeded": "Last mission succeeded",
+  "last-failed": "Last mission failed",
+  "last-aborted": "Last mission aborted",
+  "last-ended": "Last mission ended"
+}

@@ -45,12 +45,15 @@ export const game: GameServices = /* @__PURE__ */ group("game", ["subscribe"]);
 
 /** The `gameEvents.*` services. */
 export interface GameEventsServices {
-  /** `gameEvents.subscribe`. Requires the `gameEvents` permission. Updates: `{ event, at }` for each declared event. */
-  subscribe(listener: Listener<R["gameEvents.subscribe"]>): Subscription;
+  /** The `gameEvents.warframe.*` services. */
+  readonly warframe: {
+    /** `gameEvents.warframe.subscribe`. Requires the `gameEvents` permission. Updates: `{ playing, session, features, info, events }` at once, then at each change of what the widget follows; `permission_denied` when `gameEvents` lists no `warframe.*` feature. `playing` says whether Warframe is the active game; `session` is the launch of Warframe, which changes at each launch; `features` gives each feature's status; `info` the state of each feature the widget follows, ready to show (`null` for the others and while nothing is known); `events` repeats the latest `SERVICE_EVENT_WINDOW` events of those features, oldest first, each `{ seq, at, type }` and the state its type names: updates are coalesced, so take only those whose `seq` is above the last one seen. At most one subscription per widget at a time: another fails with `busy`. */
+    subscribe(listener: Listener<R["gameEvents.warframe.subscribe"]>): Subscription;
+  };
 }
 
 /** The `gameEvents.*` services. */
-export const gameEvents: GameEventsServices = /* @__PURE__ */ group("gameEvents", ["subscribe"]);
+export const gameEvents: GameEventsServices = /* @__PURE__ */ group("gameEvents", ["warframe.subscribe"]);
 
 /** The `journal.*` services. */
 export interface JournalServices {

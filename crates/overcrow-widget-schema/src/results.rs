@@ -9,6 +9,7 @@
 
 use serde_json::{Map, Value};
 
+use crate::game_events::warframe;
 use crate::limits::MAX_HTTP_HEADER_VALUE_BYTES;
 use crate::services::SERVICE_ERRORS;
 
@@ -75,6 +76,18 @@ const NULLABLE_NUMBER: Shape = Shape::Nullable(&Shape::Number);
 const NULLABLE_INTEGER: Shape = Shape::Nullable(&Shape::Integer);
 const HOST_CLOCK: &str = "Host monotonic clock in ms at which `elapsedMs` was measured.";
 const OFFSET: &str = "UTC offset in minutes to show the timestamp with.";
+const FEATURE_STATUS: Shape = Shape::Keyword(crate::game_events::FEATURE_STATUSES);
+const FEATURE_STATUS_SUMMARY: &str = "`available`, `unavailable` or `undeclared`.";
+const SEQ: Member = member(
+    "seq",
+    Shape::Integer,
+    "Order of the event in the subscription, from 1.",
+);
+const AT: Member = member(
+    "at",
+    Shape::Integer,
+    "When it happened in the game, in Unix milliseconds.",
+);
 
 /// Grades of a PlayerVox score; `--` without a valid score.
 pub const GRADES: &[&str] = &["S+", "S", "A", "B", "C", "D", "F", "--"];
@@ -125,14 +138,6 @@ pub const SHAPES: &[NamedShape] = &[
         "HttpHeaders",
         Shape::Fields(RESPONSE_HEADERS, &Shape::Text),
         "Headers of an `http.fetch` response, by lowercase name: only those of `RESPONSE_HEADERS` the response has, each printable ASCII of at most `MAX_HTTP_HEADER_VALUE_BYTES`; a repeated header is joined by `, `. Any other header never reaches the widget.",
-    ),
-    named(
-        "GameEvent",
-        Shape::Record(&[
-            member("event", Shape::Text, "A declared game event."),
-            member("at", Shape::Integer, "Host monotonic clock in ms."),
-        ]),
-        "One game event.",
     ),
     named(
         "Session",
@@ -696,6 +701,617 @@ pub const SHAPES: &[NamedShape] = &[
             ),
         ]),
         "The unlocked achievements of a game, read on this computer for the account the widget names.",
+    ),
+    named(
+        "WarframeName",
+        Shape::Record(&[
+            member(
+                "id",
+                Shape::Text,
+                "Our stable ID, in `snake_case`, listed in the game events page.",
+            ),
+            member(
+                "name",
+                NULLABLE_TEXT,
+                "Its name in the user's language, one line of at most `MAX_GAME_EVENT_NAME_BYTES`; `null` when PlayerVox OverCrow has none yet.",
+            ),
+        ]),
+        "Something of Warframe, named.",
+    ),
+    named(
+        "WarframeNode",
+        Shape::Record(&[
+            member(
+                "id",
+                Shape::Text,
+                "The game's own key of the node (`SolNode195`, `ClanNode…`, `SettlementNode…`), as public data such as drop tables and the world state name it.",
+            ),
+            member(
+                "name",
+                NULLABLE_TEXT,
+                "Its name in the user's language, or `null` when PlayerVox OverCrow has none yet (new content).",
+            ),
+        ]),
+        "A node of the star chart.",
+    ),
+    named(
+        "WarframeEvents",
+        Shape::Record(&[
+            member(
+                "playing",
+                Shape::Bool,
+                "Whether Warframe is the active game in PlayerVox OverCrow.",
+            ),
+            member(
+                "session",
+                Shape::Nullable(&Shape::Record(&[member(
+                    "startedAt",
+                    Shape::Integer,
+                    "When Warframe was launched, in Unix milliseconds.",
+                )])),
+                "The Warframe session being followed, or `null` before any; a new launch is a new session.",
+            ),
+            member(
+                "features",
+                Shape::Named("WarframeFeatures"),
+                "The status of each feature.",
+            ),
+            member(
+                "info",
+                Shape::Named("WarframeInfo"),
+                "The state of each feature the widget follows.",
+            ),
+            member(
+                "events",
+                Shape::List(&Shape::Named("WarframeEvent")),
+                "The latest events of the features the widget follows, oldest first.",
+            ),
+        ]),
+        "Warframe's game events, for the features the widget lists.",
+    ),
+    named(
+        "WarframeFeatures",
+        Shape::Record(&[
+            member("location", FEATURE_STATUS, FEATURE_STATUS_SUMMARY),
+            member("mission", FEATURE_STATUS, FEATURE_STATUS_SUMMARY),
+            member("progress", FEATURE_STATUS, FEATURE_STATUS_SUMMARY),
+            member("squad", FEATURE_STATUS, FEATURE_STATUS_SUMMARY),
+            member("eidolons", FEATURE_STATUS, FEATURE_STATUS_SUMMARY),
+            member("world", FEATURE_STATUS, FEATURE_STATUS_SUMMARY),
+            member("rewards", FEATURE_STATUS, FEATURE_STATUS_SUMMARY),
+        ]),
+        "The status of each Warframe feature.",
+    ),
+    named(
+        "WarframeInfo",
+        Shape::Record(&[
+            member(
+                "location",
+                Shape::Nullable(&Shape::Named("WarframeLocation")),
+                "Where the player is; `null` while Warframe is not played.",
+            ),
+            member(
+                "mission",
+                Shape::Nullable(&Shape::Named("WarframeMission")),
+                "The latest mission of the session.",
+            ),
+            member(
+                "progress",
+                Shape::Nullable(&Shape::Named("WarframeProgress")),
+                "The progress of the latest mission.",
+            ),
+            member(
+                "squad",
+                Shape::Nullable(&Shape::Named("WarframeSquad")),
+                "The squad.",
+            ),
+            member(
+                "eidolons",
+                Shape::Nullable(&Shape::Named("WarframeEidolons")),
+                "The night on the Plains of Eidolon.",
+            ),
+            member(
+                "world",
+                Shape::Nullable(&Shape::Named("WarframeWorld")),
+                "The world of the day and the week, whether Warframe is played or not.",
+            ),
+        ]),
+        "The state of each Warframe feature; `null` for a feature the widget does not follow.",
+    ),
+    named(
+        "WarframeLocation",
+        Shape::Record(&[
+            member(
+                "kind",
+                Shape::Keyword(warframe::LOCATION_KINDS),
+                "What kind of place.",
+            ),
+            member(
+                "place",
+                Shape::Nullable(&Shape::Named("WarframeName")),
+                "Which one: a hub, a relay or an open world of our places, or the node of a mission; `null` when the game does not say.",
+            ),
+            member(
+                "since",
+                Shape::Integer,
+                "When the player arrived, in Unix milliseconds.",
+            ),
+        ]),
+        "Where the player is.",
+    ),
+    named(
+        "WarframeMission",
+        Shape::Record(&[
+            member(
+                "state",
+                Shape::Keyword(warframe::MISSION_STATES),
+                "`selected` on the star chart, `loading`, `in_progress` or `ended`.",
+            ),
+            member("node", Shape::Named("WarframeNode"), "The node."),
+            member(
+                "planet",
+                Shape::Nullable(&Shape::Named("WarframeName")),
+                "Its planet or region.",
+            ),
+            member(
+                "type",
+                Shape::Nullable(&Shape::Named("WarframeName")),
+                "The mission type; `null` for one we do not know.",
+            ),
+            member(
+                "faction",
+                Shape::Nullable(&Shape::Named("WarframeName")),
+                "The enemy faction.",
+            ),
+            member(
+                "enemyLevel",
+                Shape::Nullable(&Shape::Record(&[
+                    member("min", Shape::Integer, "Lowest enemy level."),
+                    member("max", Shape::Integer, "Highest enemy level."),
+                ])),
+                "The enemy levels of the node.",
+            ),
+            member(
+                "fissure",
+                Shape::Nullable(&Shape::Named("WarframeName")),
+                "The era of a Void Fissure mission.",
+            ),
+            member(
+                "modifiers",
+                Shape::List(&Shape::Named("WarframeModifier")),
+                "What changes the mission, at most `MAX_WARFRAME_MODIFIERS`.",
+            ),
+            member(
+                "selectedAt",
+                NULLABLE_INTEGER,
+                "When it was chosen, in Unix milliseconds.",
+            ),
+            member("loadingAt", NULLABLE_INTEGER, "When it began to load."),
+            member("startedAt", NULLABLE_INTEGER, "When play began."),
+            member("endedAt", NULLABLE_INTEGER, "When it ended."),
+            member(
+                "result",
+                Shape::Nullable(&Shape::Keyword(warframe::RESULTS)),
+                "`succeeded`, `failed` or `aborted`; `null` before the end, or when the game did not say.",
+            ),
+            member(
+                "durationSeconds",
+                NULLABLE_NUMBER,
+                "From the start of play to the end, in seconds to the millisecond.",
+            ),
+            member(
+                "rewards",
+                Shape::Nullable(&Shape::Named("WarframeRewards")),
+                "What the node can reward, for a widget that follows `warframe.rewards`; `null` otherwise, or for a node without a reward table.",
+            ),
+        ]),
+        "A Warframe mission.",
+    ),
+    named(
+        "WarframeModifier",
+        Shape::Record(&[
+            member(
+                "id",
+                Shape::Keyword(warframe::MODIFIER_IDS),
+                "Our ID of the modifier.",
+            ),
+            member("name", Shape::Text, "Its name in the user's language."),
+            member(
+                "stage",
+                NULLABLE_INTEGER,
+                "The stage of a Sortie or an Archon Hunt, 1 to 3, when PlayerVox OverCrow can tell it.",
+            ),
+        ]),
+        "What changes a mission.",
+    ),
+    named(
+        "WarframeProgress",
+        Shape::Record(&[
+            member(
+                "wave",
+                NULLABLE_INTEGER,
+                "The current wave (Defense, Mirror Defense).",
+            ),
+            member(
+                "round",
+                NULLABLE_INTEGER,
+                "Rounds done (Interception, Disruption).",
+            ),
+            member("rewards", Shape::Integer, "Rotation rewards given so far."),
+            member(
+                "rotation",
+                Shape::Nullable(&Shape::Keyword(warframe::ROTATIONS)),
+                "The rotation of the next reward, counted A, A, B, C from the rewards given; `null` for a type without rotations or one we cannot count.",
+            ),
+            member(
+                "nextRewardAt",
+                NULLABLE_INTEGER,
+                "When the next reward comes, in Unix milliseconds, for a type paid on time (Survival).",
+            ),
+            member(
+                "nextRewardWave",
+                NULLABLE_INTEGER,
+                "The wave of the next reward, for a type paid on waves (Defense).",
+            ),
+        ]),
+        "The progress of a mission.",
+    ),
+    named(
+        "WarframeSquadMember",
+        Shape::Record(&[
+            member(
+                "name",
+                Shape::Text,
+                "The player's name, without the platform icon.",
+            ),
+            member("you", Shape::Bool, "Whether it is the user."),
+        ]),
+        "A member of the squad.",
+    ),
+    named(
+        "WarframeSquad",
+        Shape::Record(&[member(
+            "members",
+            Shape::List(&Shape::Named("WarframeSquadMember")),
+            "The members, the user included, at most `MAX_WARFRAME_SQUAD`.",
+        )]),
+        "The squad.",
+    ),
+    named(
+        "WarframeEidolonHunt",
+        Shape::Record(&[
+            member(
+                "eidolon",
+                Shape::Nullable(&Shape::Named("WarframeName")),
+                "Which Eidolon, told by the order of the hunt; `null` when it cannot be told.",
+            ),
+            member(
+                "spawnedAt",
+                Shape::Integer,
+                "When it appeared, in Unix milliseconds.",
+            ),
+            member("weakpoints", Shape::Integer, "Weak points destroyed."),
+            member("capturedAt", NULLABLE_INTEGER, "When it was captured."),
+            member("killedAt", NULLABLE_INTEGER, "When it was killed."),
+            member("fledAt", NULLABLE_INTEGER, "When it left at dawn."),
+        ]),
+        "One Eidolon of the night.",
+    ),
+    named(
+        "WarframeEidolons",
+        Shape::Record(&[
+            member(
+                "night",
+                Shape::Nullable(&Shape::Bool),
+                "Whether it is night on the Plains, as the player last saw it; `null` before.",
+            ),
+            member(
+                "hunts",
+                Shape::List(&Shape::Named("WarframeEidolonHunt")),
+                "The Eidolons of the night, oldest first, at most `MAX_WARFRAME_HUNTS`.",
+            ),
+        ]),
+        "The night on the Plains of Eidolon.",
+    ),
+    named(
+        "WarframeEvent",
+        Shape::OneOf(&[
+            Shape::Record(&[
+                SEQ,
+                AT,
+                member(
+                    "type",
+                    Shape::Keyword(warframe::MISSION_EVENTS),
+                    "What happened.",
+                ),
+                member(
+                    "mission",
+                    Shape::Named("WarframeMission"),
+                    "The mission then.",
+                ),
+            ]),
+            Shape::Record(&[
+                SEQ,
+                AT,
+                member(
+                    "type",
+                    Shape::Keyword(warframe::PROGRESS_EVENTS),
+                    "What happened.",
+                ),
+                member(
+                    "progress",
+                    Shape::Named("WarframeProgress"),
+                    "The progress then.",
+                ),
+            ]),
+            Shape::Record(&[
+                SEQ,
+                AT,
+                member(
+                    "type",
+                    Shape::Keyword(warframe::CYCLE_EVENTS),
+                    "Night or day began on the Plains.",
+                ),
+            ]),
+            Shape::Record(&[
+                SEQ,
+                AT,
+                member(
+                    "type",
+                    Shape::Keyword(warframe::EIDOLON_EVENTS),
+                    "What happened.",
+                ),
+                member(
+                    "eidolon",
+                    Shape::Named("WarframeEidolonHunt"),
+                    "The Eidolon then.",
+                ),
+            ]),
+            Shape::Record(&[
+                SEQ,
+                AT,
+                member(
+                    "type",
+                    Shape::Keyword(warframe::SQUAD_EVENTS),
+                    "What happened.",
+                ),
+                member("member", Shape::Named("WarframeSquadMember"), "Who."),
+            ]),
+            Shape::Record(&[
+                SEQ,
+                AT,
+                member(
+                    "type",
+                    Shape::Keyword(warframe::LOCATION_EVENTS),
+                    "What happened.",
+                ),
+                member(
+                    "location",
+                    Shape::Named("WarframeLocation"),
+                    "The new place.",
+                ),
+            ]),
+        ]),
+        "One Warframe event; its type tells which state it carries.",
+    ),
+    named(
+        "WarframeReward",
+        Shape::Record(&[
+            member(
+                "id",
+                Shape::Text,
+                "Our ID: the item's English name in `snake_case` (`orokin_cell`).",
+            ),
+            member(
+                "name",
+                Shape::Text,
+                "Its name in the user's language, or in English when PlayerVox OverCrow has no translation yet; never empty.",
+            ),
+            member("quantity", Shape::Integer, "How many at once."),
+            member(
+                "chance",
+                Shape::Number,
+                "The chance, from 0 to 1; the same item's entries of a table added together.",
+            ),
+        ]),
+        "An item a node can reward.",
+    ),
+    named(
+        "WarframeRewardTable",
+        Shape::Record(&[
+            member(
+                "kind",
+                Shape::Keyword(warframe::REWARD_TABLE_KINDS),
+                "`mission`, `caches` or `extra`.",
+            ),
+            member(
+                "rotation",
+                Shape::Nullable(&Shape::Keyword(warframe::ROTATIONS)),
+                "The rotation, or `null` for a table without rotations.",
+            ),
+            member(
+                "items",
+                Shape::List(&Shape::Named("WarframeReward")),
+                "The items, the rarest first (equal chances by English name), at most `MAX_WARFRAME_REWARD_ITEMS`.",
+            ),
+        ]),
+        "One reward table of a node.",
+    ),
+    named(
+        "WarframeRewards",
+        Shape::Record(&[member(
+            "tables",
+            Shape::List(&Shape::Named("WarframeRewardTable")),
+            "The node's tables, at most `MAX_WARFRAME_REWARD_TABLES`. Source: Digital Extremes' drop tables, no guarantees.",
+        )]),
+        "What a node can reward.",
+    ),
+    named(
+        "WarframeWorldMission",
+        Shape::Record(&[
+            member("node", Shape::Named("WarframeNode"), "The node."),
+            member(
+                "planet",
+                Shape::Nullable(&Shape::Named("WarframeName")),
+                "Its planet or region.",
+            ),
+            member(
+                "type",
+                Shape::Nullable(&Shape::Named("WarframeName")),
+                "The mission type.",
+            ),
+            member(
+                "modifier",
+                Shape::Nullable(&Shape::Named("WarframeName")),
+                "The condition of a Sortie mission; `null` otherwise.",
+            ),
+        ]),
+        "A mission of the Sortie or the Archon Hunt.",
+    ),
+    named(
+        "WarframeCycle",
+        Shape::Record(&[
+            member(
+                "state",
+                Shape::Named("WarframeName"),
+                "Day or night (Cetus), warm or cold (Orb Vallis), Fass or Vome (Cambion Drift).",
+            ),
+            member(
+                "endsAt",
+                Shape::Integer,
+                "When it changes, in Unix milliseconds.",
+            ),
+        ]),
+        "The cycle of an open world.",
+    ),
+    named(
+        "WarframeWorld",
+        Shape::Record(&[
+            member(
+                "updatedAt",
+                Shape::Integer,
+                "When PlayerVox OverCrow last read it, in Unix milliseconds.",
+            ),
+            member(
+                "sortie",
+                Shape::Nullable(&Shape::Record(&[
+                    member("boss", Shape::Named("WarframeName"), "The boss."),
+                    member(
+                        "faction",
+                        Shape::Nullable(&Shape::Named("WarframeName")),
+                        "Its faction.",
+                    ),
+                    member("endsAt", Shape::Integer, "When it ends."),
+                    member(
+                        "missions",
+                        Shape::List(&Shape::Named("WarframeWorldMission")),
+                        "Its missions, in order.",
+                    ),
+                ])),
+                "The Sortie of the day.",
+            ),
+            member(
+                "archonHunt",
+                Shape::Nullable(&Shape::Record(&[
+                    member("boss", Shape::Named("WarframeName"), "The Archon."),
+                    member("endsAt", Shape::Integer, "When it ends."),
+                    member(
+                        "missions",
+                        Shape::List(&Shape::Named("WarframeWorldMission")),
+                        "Its missions, in order.",
+                    ),
+                ])),
+                "The Archon Hunt of the week.",
+            ),
+            member(
+                "fissures",
+                Shape::List(&Shape::Record(&[
+                    member("node", Shape::Named("WarframeNode"), "The node."),
+                    member(
+                        "planet",
+                        Shape::Nullable(&Shape::Named("WarframeName")),
+                        "Its planet or region.",
+                    ),
+                    member(
+                        "type",
+                        Shape::Nullable(&Shape::Named("WarframeName")),
+                        "The mission type.",
+                    ),
+                    member("era", Shape::Named("WarframeName"), "The era."),
+                    member("steelPath", Shape::Bool, "A Steel Path fissure."),
+                    member("voidStorm", Shape::Bool, "A Void Storm (Railjack)."),
+                    member("endsAt", Shape::Integer, "When it closes."),
+                ])),
+                "The open Void Fissures, the soonest to close first, at most `MAX_WARFRAME_FISSURES`.",
+            ),
+            member(
+                "cycles",
+                Shape::Record(&[
+                    member(
+                        "cetus",
+                        Shape::Nullable(&Shape::Named("WarframeCycle")),
+                        "Day and night at Cetus and on the Plains.",
+                    ),
+                    member(
+                        "vallis",
+                        Shape::Nullable(&Shape::Named("WarframeCycle")),
+                        "Warm and cold in the Orb Vallis.",
+                    ),
+                    member(
+                        "cambion",
+                        Shape::Nullable(&Shape::Named("WarframeCycle")),
+                        "Fass and Vome in the Cambion Drift.",
+                    ),
+                ]),
+                "The open worlds' cycles; `null` for one PlayerVox OverCrow cannot tell.",
+            ),
+            member(
+                "resets",
+                Shape::Record(&[
+                    member(
+                        "daily",
+                        Shape::Integer,
+                        "The next daily reset, 00:00 UTC, in Unix milliseconds.",
+                    ),
+                    member(
+                        "weekly",
+                        Shape::Integer,
+                        "The next weekly reset, Monday 00:00 UTC.",
+                    ),
+                ]),
+                "The next resets.",
+            ),
+            member(
+                "voidTrader",
+                Shape::Nullable(&Shape::Record(&[
+                    member("arrivesAt", Shape::Integer, "When he arrives."),
+                    member("leavesAt", Shape::Integer, "When he leaves."),
+                    member(
+                        "relay",
+                        Shape::Nullable(&Shape::Named("WarframeName")),
+                        "Where he comes.",
+                    ),
+                ])),
+                "Baro Ki'Teer's next visit, or the current one.",
+            ),
+            member(
+                "circuit",
+                Shape::Nullable(&Shape::Record(&[
+                    member(
+                        "normal",
+                        Shape::List(&Shape::Named("WarframeName")),
+                        "The rewards of the week.",
+                    ),
+                    member(
+                        "steelPath",
+                        Shape::List(&Shape::Named("WarframeName")),
+                        "The Steel Path rewards of the week.",
+                    ),
+                ])),
+                "The Circuit's rewards of the week, when the world state gives them.",
+            ),
+        ]),
+        "Warframe's world of the day and the week.",
     ),
 ];
 

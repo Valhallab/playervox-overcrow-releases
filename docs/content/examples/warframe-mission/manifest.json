@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "nova.warframe-mission",
+  "version": "1.0.0",
+  "name": { "en": "Mission companion", "fr": "Compagnon de mission" },
+  "sizing": {
+    "fit": "none",
+    "preferred": { "width": 240, "height": 120 },
+    "min": { "width": 180, "height": 96 },
+    "max": { "width": 480, "height": 320 }
+  },
+  "permissions": {
+    "gameEvents": ["warframe.mission", "warframe.progress"]
+  }
+}

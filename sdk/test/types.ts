@@ -122,6 +122,23 @@ export async function checks(): Promise<void> {
   const moderated: overcrow.ServiceErrorCode = "review_removed_by_moderation";
   void moderated;
 
+  overcrow.gameEvents.warframe.subscribe((update) => {
+    if (!update.ok) return;
+    const ready: "available" | "unavailable" | "undeclared" = update.value.features.mission;
+    const node: string | null = update.value.info.mission?.node.name ?? null;
+    for (const event of update.value.events) {
+      if (event.type === "mission_ended") {
+        const result: "succeeded" | "failed" | "aborted" | null = event.mission.result;
+        void result;
+      }
+      // @ts-expect-error a progress event carries no mission
+      if (event.type === "wave_started") void event.mission;
+    }
+    void [ready, node];
+  });
+  // @ts-expect-error the former generic game events are gone
+  overcrow.gameEvents.subscribe(() => {});
+
   const seconds: boolean = overcrow.option("seconds", true);
   overcrow.timers.atEach("minute", () => {}).cancel();
   const label: string = overcrow.formatNumber(1234.5) + overcrow.t("key", { n: 1 });

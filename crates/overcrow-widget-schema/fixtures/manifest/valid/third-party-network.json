@@ -56,9 +56,6 @@
       }
     ],
     "storage": true,
-    "gameEvents": [
-      "overcrow.game.match.started.v1"
-    ],
     "capabilities": [
       "telemetry.read",
       "fps.read"

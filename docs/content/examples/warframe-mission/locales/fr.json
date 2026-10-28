@@ -1,0 +1,10 @@
+{
+  "unavailable": "Les missions Warframe sont indisponibles",
+  "no-mission": "Aucune mission pour l’instant",
+  "wave": "Vague {wave}",
+  "rotation": "Rotation {rotation}",
+  "last-succeeded": "Dernière mission réussie",
+  "last-failed": "Dernière mission échouée",
+  "last-aborted": "Dernière mission abandonnée",
+  "last-ended": "Dernière mission terminée"
+}

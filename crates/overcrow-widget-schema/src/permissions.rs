@@ -49,7 +49,7 @@ pub const PERMISSIONS: &[Permission] = &[
     },
     Permission {
         name: "gameEvents",
-        summary: "Named semantic game events `overcrow.game.<name>.v1`, at most `MAX_GAME_EVENTS`.",
+        summary: "Features of a game the widget follows, each `<game>.<feature>` (`warframe.mission`), at most `MAX_GAME_EVENTS`.",
         with_sensitive: SensitiveRule::Allowed,
     },
     Permission {

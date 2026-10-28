@@ -10,7 +10,7 @@ const settle = () => new Promise((resolve) => setImmediate(resolve));
 const lastCall = () => vm.calls[vm.calls.length - 1];
 
 test("the version and the runtime surface are exported", () => {
-  assert.equal(overcrow.SDK_VERSION, "1.3.0");
+  assert.equal(overcrow.SDK_VERSION, "1.4.0");
   assert.equal(overcrow.RUNTIME_SURFACE, "0.1");
 });
 
@@ -132,6 +132,24 @@ test("the active game comes by subscription", () => {
     { ok: true, value, final: false },
     { ok: true, value: null, final: false },
   ]);
+});
+
+test("Warframe events come by one subscription, typed by event", () => {
+  const updates = [];
+  overcrow.gameEvents.warframe.subscribe((update) => updates.push(update));
+  const [, entry] = [...vm.subscriptions].at(-1);
+  assert.equal(entry.service, "gameEvents.warframe.subscribe");
+  assert.equal(typeof overcrow.gameEvents.subscribe, "undefined");
+  const mission = { state: "ended", node: { id: "SolNode195", name: "Hydron" } };
+  const value = {
+    playing: true,
+    session: { startedAt: 1793000000000 },
+    features: { mission: "available" },
+    info: { mission },
+    events: [{ seq: 1, at: 1793000300500, type: "mission_ended", mission }],
+  };
+  entry.update({ value, final: false });
+  assert.deepEqual(updates[0], { ok: true, value, final: false });
 });
 
 test("local Steam achievements are read by call for the account the widget names", async () => {

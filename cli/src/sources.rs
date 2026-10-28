@@ -195,11 +195,17 @@ pub fn manifest_diagnostic(error: ManifestError, source: &str) -> Diagnostic {
             "a `permissions.network` rule is invalid".into(),
             Some("each rule is an HTTPS origin with methods and path prefixes; see the Permissions section of docs/widget-schema-v1.md".into()),
         ),
-        ManifestError::GameEvent => (
-            "permissions.gameEvents",
-            "`permissions.gameEvents` names an unknown or repeated game event".into(),
-            None,
-        ),
+        ManifestError::GameEvent => {
+            let names: Vec<&str> = overcrow_widget_schema::game_events::GAME_EVENT_FEATURES
+                .iter()
+                .map(|feature| feature.name)
+                .collect();
+            (
+                "permissions.gameEvents",
+                "`permissions.gameEvents` names an unknown or repeated game event feature".into(),
+                Some(format!("each entry is one of: {}", names.join(", "))),
+            )
+        }
         ManifestError::Capability => {
             let names: Vec<&str> = overcrow_widget_schema::permissions::CAPABILITIES
                 .iter()

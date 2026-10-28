@@ -73,7 +73,7 @@ que la logique peut lire sont aussi des constantes du SDK : voir
 | `MAX_WIDGET_EDGE_PX` | 4096 px | Largeur ou hauteur du cadre d’un widget. |
 | `MIN_CONTENT_SCALE` | 500 ‰ | Plus petite échelle du contenu (50 %). |
 | `MAX_CONTENT_SCALE` | 1750 ‰ | Plus grande échelle du contenu (175 %). |
-| `MAX_GAME_EVENTS` | 32 | Événements de jeu sémantiques déclarés par un paquet. |
+| `MAX_GAME_EVENTS` | 32 | Fonctionnalités d’événements de jeu déclarées par un paquet. |
 | `MAX_MENU_ROWS` | 16 | Lignes du widget dans `wrapper.menu`, lignes de groupe et leurs enfants compris. |
 | `MAX_MENU_DEPTH` | 1 | Niveaux de sous-menu : un `group` ne peut pas contenir un autre `group`. |
 | `MAX_MENU_LABEL_CHARS` | 80 caractères | Un libellé de ligne ou de choix, en anglais ou en français. |
@@ -226,6 +226,13 @@ que la logique peut lire sont aussi des constantes du SDK : voir
 | `MAX_STORAGE_VALUE_BYTES` | 64 Kio | Taille, en JSON sérialisé, d’une valeur stockée. |
 | `MAX_CLIPBOARD_BYTES` | 16 Kio | Texte d’une écriture dans le presse-papiers. |
 | `MAX_OBJECT_ID_BYTES` | 128 octets | ID opaque d’un objet, ou curseur, échangé avec un service. |
+| `MAX_GAME_EVENT_NAME_BYTES` | 128 octets | Un nom dans les événements de jeu : un lieu, un type, un pseudo de joueur, sur une ligne. |
+| `MAX_WARFRAME_SQUAD` | 8 | Membres d’une escouade Warframe, joueur compris. |
+| `MAX_WARFRAME_HUNTS` | 16 | Eidolons d’une nuit gardés, les plus récents. |
+| `MAX_WARFRAME_MODIFIERS` | 8 | Modificateurs d’une mission Warframe. |
+| `MAX_WARFRAME_FISSURES` | 64 | Fissures du Néant de l’état du monde données, les plus proches de leur fin d’abord. |
+| `MAX_WARFRAME_REWARD_TABLES` | 9 | Tables de butin d’un nœud : la sienne, les caches et la table en plus, par rotation. |
+| `MAX_WARFRAME_REWARD_ITEMS` | 64 | Objets d’une table de butin, les plus rares gardés. |
 
 ### Notes, avis et chat
 
