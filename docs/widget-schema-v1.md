@@ -1458,7 +1458,7 @@ A node of the star chart. `{ id, name, englishName }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
-| `id` | text | The game's own key of the node (`SolNode23`, `ClanNode…`, `SettlementNode…`), as public data such as drop tables and the world state name it. |
+| `id` | text | The game's own key of the node (`SolNode195`, `ClanNode…`, `SettlementNode…`), as public data such as drop tables and the world state name it. |
 | `name` | text or `null` | Its name in the user's language, or `null` when PlayerVox OverCrow has none yet (new content). |
 | `englishName` | text or `null` | Its English name, to match public data in English, or `null`. |
 

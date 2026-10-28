@@ -32,7 +32,7 @@ fn session() -> Value {
             {"gameEvents": {"warframe": {
                 "info": {"mission": {
                     "state": "loading",
-                    "node": {"id": "SolNode23", "name": "Hydron"},
+                    "node": {"id": "SolNode195", "name": "Hydron"},
                     "type": {"id": "defense", "name": "Defense"}
                 }},
                 "event": "mission_loading"
@@ -81,7 +81,7 @@ fn a_session_is_played_without_writing_a_line() {
         first["info"]["mission"],
         json!({
             "state": "loading",
-            "node": {"id": "SolNode23", "name": "Hydron", "englishName": null},
+            "node": {"id": "SolNode195", "name": "Hydron", "englishName": null},
             "planet": null,
             "type": {"id": "defense", "name": "Defense"},
             "faction": null,
@@ -105,7 +105,7 @@ fn a_session_is_played_without_writing_a_line() {
 
     let wave = &updates[1].value;
     assert_eq!(wave["info"]["mission"]["state"], json!("in_progress"));
-    assert_eq!(wave["info"]["mission"]["node"]["id"], json!("SolNode23"));
+    assert_eq!(wave["info"]["mission"]["node"]["id"], json!("SolNode195"));
     assert_eq!(
         wave["info"]["progress"],
         json!({"wave": 5, "round": null, "rewards": 0, "rotation": null,
@@ -174,11 +174,11 @@ fn incomplete_or_unknown_steps_are_refused_with_their_path() {
             "steps[0].gameEvents.warframe.info.mission.node.id",
         ),
         (
-            json!({"info": {"mission": {"node": {"id": "SolNode23"}}}}),
+            json!({"info": {"mission": {"node": {"id": "SolNode195"}}}}),
             "steps[0].gameEvents.warframe.info.mission.state",
         ),
         (
-            json!({"info": {"mission": {"state": "paused", "node": {"id": "SolNode23"}}}}),
+            json!({"info": {"mission": {"state": "paused", "node": {"id": "SolNode195"}}}}),
             "steps[0].gameEvents.warframe.info.mission.state",
         ),
         (

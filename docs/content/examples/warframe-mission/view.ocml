@@ -1,0 +1,23 @@
+<!-- The current Warframe mission: its node and type, the wave and the
+     rotation of the next reward, then how the last mission ended. -->
+<box class="mission">
+  <if test={!state.ready}>
+    <text class="muted">{t("unavailable")}</text>
+  </if>
+  <else-if test={state.node === ""}>
+    <text class="muted">{t("no-mission")}</text>
+  </else-if>
+  <else>
+    <text class="node">{state.node}</text>
+    <text class="muted">{state.type}</text>
+    <if test={state.wave !== null || state.rotation !== null}>
+      <box class="progress">
+        <text>{waveText(state.wave)}</text>
+        <text>{rotationText(state.rotation)}</text>
+      </box>
+    </if>
+  </else>
+  <if test={state.lastResult !== null}>
+    <text class={resultClass(state.lastResult)}>{resultText(state.lastResult)}</text>
+  </if>
+</box>

@@ -162,7 +162,7 @@ fn warframe_events_come_by_one_subscription() {
 }
 
 fn node() -> Value {
-    json!({"id": "SolNode23", "name": "Hydron", "englishName": "Hydron"})
+    json!({"id": "SolNode195", "name": "Hydron", "englishName": "Hydron"})
 }
 
 fn named(id: &str, name: &str) -> Value {
@@ -267,7 +267,7 @@ fn full() -> Value {
             "world": "available"
         },
         "info": {
-            "location": {"kind": "mission", "place": named("SolNode23", "Hydron"), "since": 1_793_000_030_000_u64},
+            "location": {"kind": "mission", "place": named("SolNode195", "Hydron"), "since": 1_793_000_030_000_u64},
             "mission": mission("in_progress"),
             "progress": progress(),
             "squad": {"members": [{"name": "Nova", "you": true}]},

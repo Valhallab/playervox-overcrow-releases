@@ -33,7 +33,7 @@ is "Increase", then checks the new text and image.
 
 `@overcrow/sdk/testing` comes with the SDK: `npm install` in a project made
 by `overcrow-widget init`, otherwise
-`npm install --save-dev --save-exact @overcrow/sdk@1.3.0`.
+`npm install --save-dev --save-exact @overcrow/sdk@1.4.0`.
 
 `installRuntime()` puts a stand-in for PlayerVox OverCrow in place before
 the logic is imported: service calls return promises that your test settles,
@@ -295,6 +295,7 @@ image handle, the fixture writes `"fixture:<name>"`.
 | `{ "menu": { "id": "row", "value": … } }` | A row of the options menu: the value of a toggle, slider or choice, none for an action. |
 | `{ "publish": { "service": "fps.subscribe", "value": … } }` | The next value of a subscription. |
 | `{ "publish": { "service": "media.subscribe", "error": "unavailable" } }` | Ends the subscription with this failure. |
+| `{ "gameEvents": { "warframe": { "info": …, "event": … } } }` | What a game tells: `info` members merged into the current state, then an event. |
 | `{ "expect": { … } }` | What must hold once the previous steps settled. |
 
 A pointer target is `{ "at": [x, y] }` (logical pixels of the content),
@@ -304,6 +305,13 @@ Interactive mode only. A click is a user action; a menu row never is.
 
 Each step settles before the next: the widget has answered everything it
 was sent and nothing is in flight. There is no real waiting.
+
+A `gameEvents` step plays a game's [events](game-events.md) without the
+game. It names one game and says what changes, in the words of its service:
+`playing`, `session`, `features`, `info` and `event`. The scenario completes
+the rest, numbers the event and sends the whole value to the widget. A step
+may only touch the features the manifest lists. See
+[testing game events](game-events.md#testing).
 
 ### `expect`
 

@@ -88,15 +88,6 @@ En-têtes d’une réponse de `http.fetch`, par nom en minuscules : seulement ce
 | `expires` | texte | Présent quand la réponse le contient. |
 | `age` | texte | Présent quand la réponse le contient. |
 
-### `GameEvent`
-
-Un événement de jeu. `{ event, at }`
-
-| Membre | Forme | Signification |
-| --- | --- | --- |
-| `event` | texte | Un événement de jeu déclaré. |
-| `at` | entier | Horloge monotone de l’hôte, en ms. |
-
 ### `Session`
 
 Durée de la session du jeu actif. `{ elapsedMs, at }`
@@ -433,4 +424,254 @@ Les succès débloqués d’un jeu, lus sur cet ordinateur pour le compte que le
 | `appid` | entier | Le jeu demandé. |
 | `total` | entier | Combien de succès du jeu les fichiers tiennent pour débloqués. |
 | `achievements` | liste de [`SteamLocalAchievement`](#steamlocalachievement) | Une page de ceux-ci, du plus récent au plus ancien (dates `null` en dernier, puis par nom). |
+
+### `WarframeName`
+
+Un élément de Warframe, nommé. `{ id, name }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `id` | texte | Notre ID stable, en `snake_case`, listé dans la page des événements de jeu. |
+| `name` | texte ou `null` | Son nom dans la langue de l’utilisateur, une ligne d’au plus 128 octets ; `null` quand PlayerVox OverCrow n’en a pas encore. |
+
+### `WarframeNode`
+
+Un nœud de la carte stellaire. `{ id, name, englishName }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `id` | texte | La clé du nœud propre au jeu (`SolNode195`, `ClanNode…`, `SettlementNode…`), telle que la nomment les données publiques comme les tables de butin et l’état du monde. |
+| `name` | texte ou `null` | Son nom dans la langue de l’utilisateur, ou `null` quand PlayerVox OverCrow n’en a pas encore (nouveau contenu). |
+| `englishName` | texte ou `null` | Son nom anglais, pour le croiser avec des données publiques en anglais, ou `null`. |
+
+### `WarframeEvents`
+
+Les événements de jeu de Warframe, pour les fonctionnalités que le widget liste. `{ playing, session, features, info, events }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `playing` | booléen | Si Warframe est le jeu actif dans PlayerVox OverCrow. |
+| `session` | `{ startedAt }` ou `null` | La session Warframe suivie, ou `null` avant la première ; chaque lancement est une nouvelle session. |
+| `session.startedAt` | entier | Quand Warframe a été lancé, en millisecondes Unix. |
+| `features` | [`WarframeFeatures`](#warframefeatures) | Le statut de chaque fonctionnalité. |
+| `info` | [`WarframeInfo`](#warframeinfo) | L’état de chaque fonctionnalité que le widget suit. |
+| `events` | liste de [`WarframeEvent`](#warframeevent) | Les derniers événements des fonctionnalités que le widget suit, du plus ancien au plus récent. |
+
+### `WarframeFeatures`
+
+Le statut de chaque fonctionnalité Warframe. `{ location, mission, progress, squad, eidolons, world }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `location` | `available` \| `unavailable` \| `undeclared` | `available`, `unavailable` ou `undeclared`. |
+| `mission` | `available` \| `unavailable` \| `undeclared` | `available`, `unavailable` ou `undeclared`. |
+| `progress` | `available` \| `unavailable` \| `undeclared` | `available`, `unavailable` ou `undeclared`. |
+| `squad` | `available` \| `unavailable` \| `undeclared` | `available`, `unavailable` ou `undeclared`. |
+| `eidolons` | `available` \| `unavailable` \| `undeclared` | `available`, `unavailable` ou `undeclared`. |
+| `world` | `available` \| `unavailable` \| `undeclared` | `available`, `unavailable` ou `undeclared`. |
+
+### `WarframeInfo`
+
+L’état de chaque fonctionnalité Warframe ; `null` pour une fonctionnalité que le widget ne suit pas. `{ location, mission, progress, squad, eidolons, world }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `location` | [`WarframeLocation`](#warframelocation) ou `null` | Où est le joueur ; `null` tant que Warframe n’est pas joué. |
+| `mission` | [`WarframeMission`](#warframemission) ou `null` | La dernière mission de la session. |
+| `progress` | [`WarframeProgress`](#warframeprogress) ou `null` | La progression de la dernière mission. |
+| `squad` | [`WarframeSquad`](#warframesquad) ou `null` | L’escouade. |
+| `eidolons` | [`WarframeEidolons`](#warframeeidolons) ou `null` | La nuit sur les Plaines d’Eidolon. |
+| `world` | [`WarframeWorld`](#warframeworld) ou `null` | Le monde du jour et de la semaine, que Warframe soit joué ou non. |
+
+### `WarframeLocation`
+
+Où est le joueur. `{ kind, place, since }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `kind` | `orbiter` \| `relay` \| `hub` \| `open_world` \| `mission` \| `dojo` \| `other` | Le genre de lieu. |
+| `place` | [`WarframeName`](#warframename) ou `null` | Lequel : une ville, un relais ou un monde ouvert de nos lieux, ou le nœud d’une mission ; `null` quand le jeu ne le dit pas. |
+| `since` | entier | Quand le joueur est arrivé, en millisecondes Unix. |
+
+### `WarframeMission`
+
+Une mission Warframe. `{ state, node, planet, type, faction, enemyLevel, fissure, modifiers, selectedAt, loadingAt, startedAt, endedAt, result, durationSeconds }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `state` | `selected` \| `loading` \| `in_progress` \| `ended` | `selected` sur la carte stellaire, `loading`, `in_progress` ou `ended`. |
+| `node` | [`WarframeNode`](#warframenode) | Le nœud. |
+| `planet` | [`WarframeName`](#warframename) ou `null` | Sa planète ou sa région. |
+| `type` | [`WarframeName`](#warframename) ou `null` | Le type de mission ; `null` pour un type que nous ne connaissons pas. |
+| `faction` | [`WarframeName`](#warframename) ou `null` | La faction ennemie. |
+| `enemyLevel` | `{ min, max }` ou `null` | Les niveaux des ennemis du nœud. |
+| `enemyLevel.min` | entier | Niveau d’ennemi le plus bas. |
+| `enemyLevel.max` | entier | Niveau d’ennemi le plus haut. |
+| `fissure` | [`WarframeName`](#warframename) ou `null` | L’ère d’une mission de Fissure du Néant. |
+| `modifiers` | liste de [`WarframeModifier`](#warframemodifier) | Ce qui modifie la mission, au plus 8. |
+| `selectedAt` | entier ou `null` | Quand elle a été choisie, en millisecondes Unix. |
+| `loadingAt` | entier ou `null` | Quand son chargement a commencé. |
+| `startedAt` | entier ou `null` | Quand la partie a commencé. |
+| `endedAt` | entier ou `null` | Quand elle s’est terminée. |
+| `result` | `succeeded` \| `failed` \| `aborted` ou `null` | `succeeded`, `failed` ou `aborted` ; `null` avant la fin, ou quand le jeu ne l’a pas dit. |
+| `durationSeconds` | nombre ou `null` | Du début de la partie à la fin, en secondes, à la milliseconde près. |
+
+### `WarframeModifier`
+
+Ce qui modifie une mission. `{ id, name, stage }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `id` | `steel_path` \| `arbitration` \| `sortie` \| `archon_hunt` \| `nightmare` \| `void_storm` \| `alert` \| `lich` | Notre ID du modificateur. |
+| `name` | texte | Son nom dans la langue de l’utilisateur. |
+| `stage` | entier ou `null` | L’étape d’une Sortie ou d’une Chasse d’Archonte, de 1 à 3, quand PlayerVox OverCrow peut la connaître. |
+
+### `WarframeProgress`
+
+La progression d’une mission. `{ wave, round, rewards, rotation, nextRewardAt, nextRewardWave }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `wave` | entier ou `null` | La vague en cours (Défense, Défense miroir). |
+| `round` | entier ou `null` | Manches terminées (Interception, Perturbation). |
+| `rewards` | entier | Récompenses de rotation reçues jusqu’ici. |
+| `rotation` | `A` \| `B` \| `C` ou `null` | La rotation de la prochaine récompense, comptée A, A, B, C d’après les récompenses reçues ; `null` pour un type sans rotations ou que nous ne savons pas compter. |
+| `nextRewardAt` | entier ou `null` | Quand vient la prochaine récompense, en millisecondes Unix, pour un type payé au temps (Survie). |
+| `nextRewardWave` | entier ou `null` | La vague de la prochaine récompense, pour un type payé aux vagues (Défense). |
+
+### `WarframeSquadMember`
+
+Un membre de l’escouade. `{ name, you }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `name` | texte | Le pseudo du joueur, sans l’icône de plateforme. |
+| `you` | booléen | Si c’est l’utilisateur. |
+
+### `WarframeSquad`
+
+L’escouade. `{ members }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `members` | liste de [`WarframeSquadMember`](#warframesquadmember) | Les membres, utilisateur compris, au plus 8. |
+
+### `WarframeEidolonHunt`
+
+Un Eidolon de la nuit. `{ eidolon, spawnedAt, weakpoints, capturedAt, killedAt, fledAt }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `eidolon` | [`WarframeName`](#warframename) ou `null` | Quel Eidolon, déduit de l’ordre de la chasse ; `null` quand on ne peut pas le savoir. |
+| `spawnedAt` | entier | Quand il est apparu, en millisecondes Unix. |
+| `weakpoints` | entier | Points faibles détruits. |
+| `capturedAt` | entier ou `null` | Quand il a été capturé. |
+| `killedAt` | entier ou `null` | Quand il a été tué. |
+| `fledAt` | entier ou `null` | Quand il est parti à l’aube. |
+
+### `WarframeEidolons`
+
+La nuit sur les Plaines d’Eidolon. `{ night, hunts }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `night` | booléen ou `null` | S’il fait nuit sur les Plaines, tel que le joueur l’a vu en dernier ; `null` avant. |
+| `hunts` | liste de [`WarframeEidolonHunt`](#warframeeidolonhunt) | Les Eidolons de la nuit, du plus ancien au plus récent, au plus 16. |
+
+### `WarframeEvent`
+
+Un événement Warframe ; son type dit quel état il porte. `{ seq, at, type, mission }` ou `{ seq, at, type, progress }` ou `{ seq, at, type }` ou `{ seq, at, type, eidolon }` ou `{ seq, at, type, member }` ou `{ seq, at, type, location }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `seq` | entier | Rang de l’événement dans l’abonnement, à partir de 1. |
+| `at` | entier | Quand c’est arrivé dans le jeu, en millisecondes Unix. |
+| `type` | `mission_selected` \| `mission_loading` \| `mission_started` \| `mission_ended` | Ce qui est arrivé. |
+| `mission` | [`WarframeMission`](#warframemission) | La mission à ce moment. |
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `seq` | entier | Rang de l’événement dans l’abonnement, à partir de 1. |
+| `at` | entier | Quand c’est arrivé dans le jeu, en millisecondes Unix. |
+| `type` | `wave_started` \| `reward_given` | Ce qui est arrivé. |
+| `progress` | [`WarframeProgress`](#warframeprogress) | La progression à ce moment. |
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `seq` | entier | Rang de l’événement dans l’abonnement, à partir de 1. |
+| `at` | entier | Quand c’est arrivé dans le jeu, en millisecondes Unix. |
+| `type` | `night_started` \| `day_started` | La nuit ou le jour a commencé sur les Plaines. |
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `seq` | entier | Rang de l’événement dans l’abonnement, à partir de 1. |
+| `at` | entier | Quand c’est arrivé dans le jeu, en millisecondes Unix. |
+| `type` | `eidolon_spawned` \| `weakpoint_destroyed` \| `eidolon_captured` \| `eidolon_killed` \| `eidolon_fled` | Ce qui est arrivé. |
+| `eidolon` | [`WarframeEidolonHunt`](#warframeeidolonhunt) | L’Eidolon à ce moment. |
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `seq` | entier | Rang de l’événement dans l’abonnement, à partir de 1. |
+| `at` | entier | Quand c’est arrivé dans le jeu, en millisecondes Unix. |
+| `type` | `member_joined` \| `member_left` | Ce qui est arrivé. |
+| `member` | [`WarframeSquadMember`](#warframesquadmember) | Qui. |
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `seq` | entier | Rang de l’événement dans l’abonnement, à partir de 1. |
+| `at` | entier | Quand c’est arrivé dans le jeu, en millisecondes Unix. |
+| `type` | `location_changed` | Ce qui est arrivé. |
+| `location` | [`WarframeLocation`](#warframelocation) | Le nouveau lieu. |
+
+### `WarframeWorldMission`
+
+Une mission de la Sortie ou de la Chasse d’Archonte. `{ node, planet, type, modifier }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `node` | [`WarframeNode`](#warframenode) | Le nœud. |
+| `planet` | [`WarframeName`](#warframename) ou `null` | Sa planète ou sa région. |
+| `type` | [`WarframeName`](#warframename) ou `null` | Le type de mission. |
+| `modifier` | [`WarframeName`](#warframename) ou `null` | La condition d’une mission de Sortie ; `null` sinon. |
+
+### `WarframeCycle`
+
+Le cycle d’un monde ouvert. `{ state, endsAt }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `state` | [`WarframeName`](#warframename) | Jour ou nuit (Cetus), chaud ou froid (Vallée Orbis), Fass ou Vome (Gouffre de Cambion). |
+| `endsAt` | entier | Quand il change, en millisecondes Unix. |
+
+### `WarframeWorld`
+
+Le monde de Warframe du jour et de la semaine. `{ updatedAt, sortie, archonHunt, fissures, cycles, resets, voidTrader, circuit }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `updatedAt` | entier | Quand PlayerVox OverCrow l’a lu pour la dernière fois, en millisecondes Unix. |
+| `sortie` | `{ boss, faction, endsAt, missions }` ou `null` | La Sortie du jour. |
+| `sortie.boss` | [`WarframeName`](#warframename) | Le boss. |
+| `sortie.faction` | [`WarframeName`](#warframename) ou `null` | Sa faction. |
+| `sortie.endsAt` | entier | Quand elle se termine. |
+| `sortie.missions` | liste de [`WarframeWorldMission`](#warframeworldmission) | Ses missions, dans l’ordre. |
+| `archonHunt` | `{ boss, endsAt, missions }` ou `null` | La Chasse d’Archonte de la semaine. |
+| `archonHunt.boss` | [`WarframeName`](#warframename) | L’Archonte. |
+| `archonHunt.endsAt` | entier | Quand elle se termine. |
+| `archonHunt.missions` | liste de [`WarframeWorldMission`](#warframeworldmission) | Ses missions, dans l’ordre. |
+| `fissures` | liste de `{ node, planet, type, era, steelPath, voidStorm, endsAt }` | Les Fissures du Néant ouvertes, les plus proches de leur fermeture d’abord, au plus 64. |
+| `cycles` | `{ cetus, vallis, cambion }` | Les cycles des mondes ouverts ; `null` pour un cycle que PlayerVox OverCrow ne peut pas connaître. |
+| `cycles.cetus` | [`WarframeCycle`](#warframecycle) ou `null` | Le jour et la nuit à Cetus et sur les Plaines. |
+| `cycles.vallis` | [`WarframeCycle`](#warframecycle) ou `null` | Le chaud et le froid dans la Vallée Orbis. |
+| `cycles.cambion` | [`WarframeCycle`](#warframecycle) ou `null` | Fass et Vome dans le Gouffre de Cambion. |
+| `resets` | `{ daily, weekly }` | Les prochaines réinitialisations. |
+| `resets.daily` | entier | La prochaine réinitialisation quotidienne, 00:00 UTC, en millisecondes Unix. |
+| `resets.weekly` | entier | La prochaine réinitialisation hebdomadaire, lundi 00:00 UTC. |
+| `voidTrader` | `{ arrivesAt, leavesAt, relay }` ou `null` | La prochaine visite de Baro Ki’Teer, ou celle en cours. |
+| `voidTrader.arrivesAt` | entier | Quand il arrive. |
+| `voidTrader.leavesAt` | entier | Quand il repart. |
+| `voidTrader.relay` | [`WarframeName`](#warframename) ou `null` | Où il vient. |
+| `circuit` | `{ normal, steelPath }` ou `null` | Les récompenses du Circuit de la semaine, quand l’état du monde les donne. |
+| `circuit.normal` | liste de [`WarframeName`](#warframename) | Les récompenses de la semaine. |
+| `circuit.steelPath` | liste de [`WarframeName`](#warframename) | Les récompenses de la Route de l’Acier de la semaine. |
 <!-- /generated:result-shapes -->

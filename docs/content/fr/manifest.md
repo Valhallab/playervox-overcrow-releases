@@ -182,7 +182,7 @@ qu’elle autorise.
 | `links` | liste de `LinkRule` ≤ 8 | non | Pages web que le widget peut ouvrir dans le navigateur de l’utilisateur avec `links.open`, après un clic : des règles distinctes, aucune ne couvrant une autre de son origine. Pas avec une capability sensible ; avec un compte, seulement sur le service du compte. Demande la fonctionnalité de catalogue `open-links`. |
 | `storage` | booléen | non | Stockage clé-valeur tenu par l’hôte ; `false` par défaut. |
 | `clipboardWrite` | booléen | non | Écriture de texte dans le presse-papiers ; `false` par défaut. |
-| `gameEvents` | liste de `game event` ≤ 32 | non | Noms d’événements `overcrow.game.<name>.v1`, distincts. |
+| `gameEvents` | liste de `game event` ≤ 32 | non | Fonctionnalités d’événements de jeu distinctes, chacune `<game>.<feature>` : `warframe.location`, `warframe.mission`, `warframe.progress`, `warframe.squad`, `warframe.eidolons`, `warframe.world`. |
 | `capabilities` | `capability names` | non | Capabilities du schéma, distinctes. |
 <!-- /generated:manifest-permissions -->
 
@@ -196,7 +196,9 @@ qu’elle autorise.
 Une règle réseau est un objet à part entière ; ses champs sont décrits avec
 les [règles réseau](services.md#règles-réseau).
 Un compte est décrit dans [les comptes tiers](accounts.md#référence) et
-[les services intégrés](integrated-services.md#référence).
+[les services intégrés](integrated-services.md#référence), et les
+fonctionnalités de `gameEvents` dans
+[les événements de jeu](game-events.md#déclarer-les-fonctionnalités).
 
 ## Le menu d’options
 

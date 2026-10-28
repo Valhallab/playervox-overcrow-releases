@@ -35,7 +35,7 @@ image.
 
 `@overcrow/sdk/testing` est fourni avec le SDK : `npm install` dans un
 projet créé par `overcrow-widget init`, sinon
-`npm install --save-dev --save-exact @overcrow/sdk@1.3.0`.
+`npm install --save-dev --save-exact @overcrow/sdk@1.4.0`.
 
 `installRuntime()` met en place une doublure de PlayerVox OverCrow avant
 l’import de la logique : les appels de service renvoient des promesses que
@@ -304,6 +304,7 @@ d’image, la fixture écrit `"fixture:<name>"`.
 | `{ "menu": { "id": "row", "value": … } }` | Une ligne du menu d’options : la valeur d’une bascule, d’un curseur ou d’un choix, aucune pour une action. |
 | `{ "publish": { "service": "fps.subscribe", "value": … } }` | La prochaine valeur d’un abonnement. |
 | `{ "publish": { "service": "media.subscribe", "error": "unavailable" } }` | Termine l’abonnement par cet échec. |
+| `{ "gameEvents": { "warframe": { "info": …, "event": … } } }` | Ce que dit un jeu : des membres d’`info` fusionnés dans l’état courant, puis un événement. |
 | `{ "expect": { … } }` | Ce qui doit être vrai une fois les étapes précédentes stabilisées. |
 
 Une cible de pointeur est `{ "at": [x, y] }` (pixels logiques du contenu),
@@ -314,6 +315,13 @@ ligne de menu n’en est jamais une.
 
 Chaque étape se stabilise avant la suivante : le widget a répondu à tout ce
 qu’il a reçu et plus rien n’est en cours. Il n’y a aucune attente réelle.
+
+Une étape `gameEvents` rejoue les [événements d’un jeu](game-events.md)
+sans le jeu. Elle nomme un jeu et dit ce qui change, avec les mots de son
+service : `playing`, `session`, `features`, `info` et `event`. Le scénario
+complète le reste, numérote l’événement et envoie la valeur complète au
+widget. Une étape ne peut toucher que les fonctionnalités que liste le
+manifeste. Voir [tester les événements de jeu](game-events.md#tests).
 
 ### `expect`
 

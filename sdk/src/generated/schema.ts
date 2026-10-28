@@ -841,7 +841,7 @@ export interface WarframeName {
 
 /** A node of the star chart. */
 export interface WarframeNode {
-  /** The game's own key of the node (`SolNode23`, `ClanNode…`, `SettlementNode…`), as public data such as drop tables and the world state name it. */
+  /** The game's own key of the node (`SolNode195`, `ClanNode…`, `SettlementNode…`), as public data such as drop tables and the world state name it. */
   readonly id: string;
   /** Its name in the user's language, or `null` when PlayerVox OverCrow has none yet (new content). */
   readonly name: string | null;

@@ -257,7 +257,7 @@ The tables below say, for each service, when it can be called.
 | `links` | Web pages of declared sites opened in the user's browser on a click, at most 8 rules; the host shows each address and asks the user once per site. | manifest rejected |
 | `storage` | Host-managed key-value storage partitioned by widget ID, within 256 KiB. | process-lifetime data only |
 | `clipboardWrite` | Text clipboard writes, during a user action in Interactive mode. | manifest rejected |
-| `gameEvents` | Named semantic game events `overcrow.game.<name>.v1`, at most 32. | allowed |
+| `gameEvents` | Features of a game the widget follows, each `<game>.<feature>` (`warframe.mission`), at most 32. | allowed |
 | `capabilities` | Host services listed with the capabilities. | allowed |
 <!-- /generated:permission-list -->
 
@@ -271,7 +271,7 @@ The tables below say, for each service, when it can be called.
 | `storage` | `storage.remove` | At any time |
 | `storage` | `storage.keys` | At any time |
 | `clipboardWrite` | `clipboard.writeText` | Only during a user action |
-| `gameEvents` | `gameEvents.subscribe` | At any time |
+| `gameEvents` | `gameEvents.warframe.subscribe` | At any time |
 
 “Only during a user action” is explained in [Calls that need a user action](services.md#calls-that-need-a-user-action).
 <!-- /generated:permissions -->
@@ -506,9 +506,12 @@ sites is never among them.
 
 ### Game events
 
-`gameEvents` lists the named game events the widget wants, each of the form
-`overcrow.game.<name>.v1`. `gameEvents.subscribe(listener)` then delivers
-`{ event, at }` for each one that happens.
+`gameEvents` lists the features of a game the widget follows, each
+`<game>.<feature>`, such as `warframe.mission`. The game's service,
+`gameEvents.warframe.subscribe(listener)`, then gives their state and their
+latest events. Game events are not sensitive. The
+[game events](game-events.md) page has the rest: the features of Warframe,
+what each one gives, and how to test them.
 
 ## Capabilities
 

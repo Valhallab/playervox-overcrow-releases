@@ -104,14 +104,14 @@ mise à jour.
 - **Résultat** : `null` une fois que l’hôte a confié l’adresse au navigateur. L’hôte montre l’adresse et, la première fois pour son origine, demande l’accord de l’utilisateur, qui peut le retirer plus tard dans le Centre de contrôle ; `cancelled` quand l’utilisateur refuse ; `permission_denied` pour une adresse qu’aucune règle ne permet ; `url_invalid` pour une adresse qui n’est pas une simple adresse HTTPS (identifiants, chemin avec des segments encodés ou des points, au-delà de 2 Kio) ; `busy` tant qu’une confirmation est ouverte ; `unavailable` quand aucun navigateur n’a pu l’ouvrir
 - **Forme** : `null`
 
-### `gameEvents.subscribe`
+### `gameEvents.warframe.subscribe`
 
 - **Nature** : abonnement
 - **Exige** : permission `gameEvents`
 - **Quand l’appeler** : À tout moment
 - **Paramètres** : aucune
-- **Chaque mise à jour** : `{ event, at }` pour chaque événement déclaré
-- **Forme** : [`GameEvent`](result-shapes.md#gameevent)
+- **Chaque mise à jour** : `{ playing, session, features, info, events }` aussitôt, puis à chaque changement de ce que le widget suit ; `permission_denied` quand `gameEvents` ne liste aucune fonctionnalité `warframe.*`. `playing` dit si Warframe est le jeu actif ; `session` est le lancement de Warframe, qui change à chaque lancement ; `features` donne le statut de chaque fonctionnalité ; `info` l’état de chaque fonctionnalité que le widget suit, prêt à afficher (`null` pour les autres et tant que rien n’est connu) ; `events` répète les 16 derniers événements de ces fonctionnalités, du plus ancien au plus récent, chacun `{ seq, at, type }` avec l’état que nomme son type : les mises à jour sont fusionnées, ne prenez donc que ceux dont le `seq` dépasse le dernier vu. Un seul abonnement par widget à la fois : un autre échoue avec `busy`
+- **Forme** : [`WarframeEvents`](result-shapes.md#warframeevents)
 
 ### `session.subscribe`
 

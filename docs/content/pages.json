@@ -64,6 +64,12 @@
       "label": { "en": "Integrated services", "fr": "Services intégrés" }
     },
     {
+      "slug": "game-events",
+      "file": "game-events.md",
+      "group": "build",
+      "label": { "en": "Game events", "fr": "Événements de jeu" }
+    },
+    {
       "slug": "forms",
       "file": "forms.md",
       "group": "build",

@@ -7,7 +7,7 @@
 //! seconds. Game events are not sensitive.
 //!
 //! Warframe is the first game. Its IDs are ours, in `snake_case`, and never
-//! change, except a node's, which is the game's own key (`SolNode23`): the
+//! change, except a node's, which is the game's own key (`SolNode195`): the
 //! one public data such as drop tables and the world state use.
 
 /// A game's feature a widget may follow.

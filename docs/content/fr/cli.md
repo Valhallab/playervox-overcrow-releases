@@ -84,7 +84,7 @@ du SDK que l’outil embarque : lancez `npm install` dans le projet. Dans un
 autre projet, installez le SDK avec :
 
 ```sh
-npm install --save-dev --save-exact @overcrow/sdk@1.3.0
+npm install --save-dev --save-exact @overcrow/sdk@1.4.0
 ```
 
 Gardez la version que l’outil embarque (`overcrow-widget --version`).
@@ -384,7 +384,7 @@ Chaque permission a une clé stable, la même dans l’espace créateurs :
 | `storage` | Le stockage. |
 | `clipboardWrite` | Les écritures dans le presse-papiers. |
 | `capability:<name>` | Une capability. |
-| `gameEvent:<name>` | Un événement de jeu. |
+| `gameEvent:<name>` | Une fonctionnalité des [événements de jeu](game-events.md) : `gameEvent:warframe.mission`. |
 | `link:https://help.nova.gg/runs/` | Un site que le widget peut ouvrir : origine et préfixe de chemin. |
 | `account:<id>` | Le [compte tiers](accounts.md) `<id>`, ou le [service intégré](integrated-services.md) que le widget nomme (`account:steam`), avec sa déclaration, hors `events` et `local`. |
 

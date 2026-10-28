@@ -47,13 +47,20 @@ through PlayerVox OverCrow's broker), `links` (pages of declared sites,
 opened in the user's browser on a click, after PlayerVox OverCrow showed the
 address and, the first time for each site, the user agreed), `storage` (a
 key-value store for this widget only), `clipboardWrite` (writing text,
-during a user action) and `gameEvents` (named game events).
+during a user action) and `gameEvents` (the features of a game the widget
+follows, such as Warframe missions).
 
 Capabilities give access to data and actions of PlayerVox OverCrow and of
 the user's accounts. A **sensitive** capability reveals personal data: a
 widget that declares one cannot also declare `network`,
 `links` or `clipboardWrite`, and its storage lasts only as long as its process, so
 the data cannot leave the machine through the widget.
+
+Game events are not sensitive, the names of the player and of their squad
+included. A widget may follow them and also declare the network, links, the
+clipboard or an account, so it may send what it receives to its server. The
+Control Center shows the player each feature the widget follows before it is
+installed. See [game events](game-events.md#privacy).
 
 Account connections belong to PlayerVox OverCrow: the PlayerVox account,
 the integrated services (Steam, Twitch) and the third-party account a widget

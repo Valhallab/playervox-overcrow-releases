@@ -102,14 +102,14 @@ update.
 - **Result**: `null` once the host handed the address to the browser. The host shows the address and, the first time for its origin, asks the user, who may later take that back in the Control Center; `cancelled` when the user declines; `permission_denied` for an address no rule allows; `url_invalid` for one that is not a plain HTTPS address (credentials, a path with encoded or dot segments, beyond 2 KiB); `busy` while a confirmation is open; `unavailable` when no browser could open it
 - **Shape**: `null`
 
-### `gameEvents.subscribe`
+### `gameEvents.warframe.subscribe`
 
 - **Kind**: subscription
 - **Requires**: permission `gameEvents`
 - **When it can be called**: At any time
 - **Parameters**: none
-- **Each update**: `{ event, at }` for each declared event
-- **Shape**: [`GameEvent`](result-shapes.md#gameevent)
+- **Each update**: `{ playing, session, features, info, events }` at once, then at each change of what the widget follows; `permission_denied` when `gameEvents` lists no `warframe.*` feature. `playing` says whether Warframe is the active game; `session` is the launch of Warframe, which changes at each launch; `features` gives each feature's status; `info` the state of each feature the widget follows, ready to show (`null` for the others and while nothing is known); `events` repeats the latest 16 events of those features, oldest first, each `{ seq, at, type }` and the state its type names: updates are coalesced, so take only those whose `seq` is above the last one seen. At most one subscription per widget at a time: another fails with `busy`
+- **Shape**: [`WarframeEvents`](result-shapes.md#warframeevents)
 
 ### `session.subscribe`
 

@@ -177,7 +177,7 @@ it allows.
 | `links` | list of `LinkRule` ≤ 8 | no | Web pages the widget may open in the user's browser with `links.open`, after a click: distinct rules, none covering another of its origin. Not with a sensitive capability; with an account, only on the account's service. Needs the catalog feature `open-links`. |
 | `storage` | boolean | no | Host key-value storage; default `false`. |
 | `clipboardWrite` | boolean | no | Clipboard text writes; default `false`. |
-| `gameEvents` | list of `game event` ≤ 32 | no | Distinct `overcrow.game.<name>.v1` event names. |
+| `gameEvents` | list of `game event` ≤ 32 | no | Distinct game event features, each `<game>.<feature>`: `warframe.location`, `warframe.mission`, `warframe.progress`, `warframe.squad`, `warframe.eidolons`, `warframe.world`. |
 | `capabilities` | `capability names` | no | Distinct capabilities of the schema. |
 <!-- /generated:manifest-permissions -->
 
@@ -191,7 +191,8 @@ it allows.
 A network rule is an object of its own; its fields are described with
 [network rules](services.md#network-rules).
 An account is described in [third-party accounts](accounts.md#reference)
-and [integrated services](integrated-services.md#reference).
+and [integrated services](integrated-services.md#reference), and the
+features of `gameEvents` in [game events](game-events.md#declare-the-features).
 
 ## The options menu
 

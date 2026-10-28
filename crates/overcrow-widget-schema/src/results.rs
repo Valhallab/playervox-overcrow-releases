@@ -724,7 +724,7 @@ pub const SHAPES: &[NamedShape] = &[
             member(
                 "id",
                 Shape::Text,
-                "The game's own key of the node (`SolNode23`, `ClanNode…`, `SettlementNode…`), as public data such as drop tables and the world state name it.",
+                "The game's own key of the node (`SolNode195`, `ClanNode…`, `SettlementNode…`), as public data such as drop tables and the world state name it.",
             ),
             member(
                 "name",

@@ -10,7 +10,7 @@ The SDK is on npm, and the command below adds it to a project. A project
 made by `overcrow-widget init` already lists it: run `npm install` there.
 
 ```sh
-npm install --save-dev --save-exact @overcrow/sdk@1.3.0
+npm install --save-dev --save-exact @overcrow/sdk@1.4.0
 ```
 
 <!-- source: widgets/clock/logic.ts -->
@@ -36,7 +36,7 @@ that leaves the VM.
 
 | Export | Kind | Summary |
 | --- | --- | --- |
-| `SDK_VERSION` | constant | `"1.3.0"`. |
+| `SDK_VERSION` | constant | `"1.4.0"`. |
 | `RUNTIME_SURFACE` | constant | `"0.1"`, the version of the VM's built-in interface that this SDK needs. |
 
 ## State and view
@@ -108,7 +108,7 @@ permission or capability, its parameters and the user action at each call.
 | `http` | namespace | `fetch(url, { as, method?, body?, contentType? })`, whose answer gives `status`, the readable `headers` and the body. Permission `network`. |
 | `clipboard` | namespace | `writeText({ text })`, during a user action. Permission `clipboardWrite`. |
 | `links` | namespace | `open({ url })`, during a user action: a page of a declared site in the user's browser. Permission `links`. |
-| `gameEvents` | namespace | `subscribe(listener)`. Permission `gameEvents`. |
+| `gameEvents` | namespace | `warframe.subscribe(listener)`: the [game events](game-events.md) of Warframe the manifest lists in `gameEvents`. |
 | `session` | namespace | `subscribe(listener)`. Capability `session.read`. |
 | `game` | namespace | `subscribe(listener)`. Capability `game.read`. |
 | `telemetry` | namespace | `subscribe(listener)`. Capability `telemetry.read`. |
@@ -262,7 +262,7 @@ what PlayerVox OverCrow accepts.
 | `ServiceName`, `CallServiceName`, `SubscribeServiceName`, `GestureServiceName` | The service names: all of them, those that answer once, the subscriptions, and those that need a user action. |
 | `ServiceParamsMap`, `ServiceResultMap` | The parameters and the result of each service. |
 | `ServiceErrorCode`, `ServiceErrorPayload` | The [error codes](services.md#errors), and the `{ code }` value that carries one. |
-| `Session`, `Game`, `Telemetry`, `Fps`, `Stopwatch`, `Media`, `Notes`, `Note`, `NoteItem`, `CreatedNote`, `Score`, `Rating`, `RatingState`, `Review`, `ReviewsState`, `ReviewsPage`, `JournalState`, `JournalPage`, `JournalSession`, `TwitchChat`, `ChatMessage`, `ChatFragment`, `TwitchEvents`, `TwitchEvent`, `SteamEvents`, `SteamEvent`, `SteamLocalAchievements`, `SteamLocalAchievement`, `AccountStatus`, `GameEvent`, `HttpResponse`, `HttpHeaders` | The [result shapes](result-shapes.md). |
+| `Session`, `Game`, `Telemetry`, `Fps`, `Stopwatch`, `Media`, `Notes`, `Note`, `NoteItem`, `CreatedNote`, `Score`, `Rating`, `RatingState`, `Review`, `ReviewsState`, `ReviewsPage`, `JournalState`, `JournalPage`, `JournalSession`, `TwitchChat`, `ChatMessage`, `ChatFragment`, `TwitchEvents`, `TwitchEvent`, `SteamEvents`, `SteamEvent`, `SteamLocalAchievements`, `SteamLocalAchievement`, `AccountStatus`, `WarframeEvents`, `WarframeEvent`, `WarframeFeatures`, `WarframeInfo`, `WarframeLocation`, `WarframeMission`, `WarframeModifier`, `WarframeProgress`, `WarframeSquad`, `WarframeSquadMember`, `WarframeEidolons`, `WarframeEidolonHunt`, `WarframeWorld`, `WarframeWorldMission`, `WarframeCycle`, `WarframeName`, `WarframeNode`, `HttpResponse`, `HttpHeaders` | The [result shapes](result-shapes.md). |
 | `Permission`, `Capability`, `SensitiveCapability`, `CapabilityServices`, `PermissionServices` | The permissions and capabilities of the manifest, and the services each one allows. |
 | `AccountGrant` | The grant of a third-party account, `account:<id>`: `hasGrant` takes it, `host.grants` lists it. |
 | `Locale`, `Theme`, `Mode`, `Region`, `NumberFormat`, `DateOrder` | The values of `host`. |

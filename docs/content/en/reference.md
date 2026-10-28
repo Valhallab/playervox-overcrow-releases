@@ -15,6 +15,7 @@ together; the pages below are the ones to keep open while you write.
 | How do I format times, dates and numbers? | [Time, dates and numbers](sdk.md#time-dates-and-numbers) |
 | What does each permission and capability allow? | [Services and permissions](services.md) |
 | How does a widget use the player's account on another service? | [Third-party accounts](accounts.md), [integrated services](integrated-services.md) |
+| What can a widget know of a game, such as a Warframe mission? | [Game events](game-events.md) |
 | What are the parameters and the result of a service? | [Service reference](service-reference.md), [result shapes](result-shapes.md) |
 | What does an error code mean? | [Errors](services.md#errors) |
 | Which fields does a write intent take? | [The intents](forms.md#the-intents) |
@@ -42,7 +43,7 @@ together; the pages below are the ones to keep open while you write.
 ## Versions
 
 These pages describe widget API v1 (`"apiVersion": 1` in the manifest) and
-`@overcrow/sdk` 1.3.
+`@overcrow/sdk` 1.4.
 
 ## Specifications for implementers
 

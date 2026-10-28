@@ -1,0 +1,30 @@
+{
+  "scenarioVersion": 1,
+  "name": "mission",
+  "description": "A Defense mission on Hydron: it loads, wave 5 starts, then the mission succeeds. Each gameEvents step says what Warframe tells, in the words of gameEvents.warframe.subscribe (https://overcrow.playervox.com/docs/en/game-events/).",
+  "steps": [
+    { "expect": { "state": "running", "text": ["No mission yet"] } },
+    { "gameEvents": { "warframe": {
+      "info": { "mission": {
+        "state": "loading",
+        "node": { "id": "SolNode195", "name": "Hydron", "englishName": "Hydron" },
+        "planet": { "id": "sedna", "name": "Sedna" },
+        "type": { "id": "defense", "name": "Defense" },
+        "faction": { "id": "grineer", "name": "Grineer" }
+      } },
+      "event": "mission_loading"
+    } } },
+    { "expect": { "text": ["Hydron", "Defense"] } },
+    { "advance": { "ms": 30000 } },
+    { "gameEvents": { "warframe": {
+      "info": { "mission": { "state": "in_progress" }, "progress": { "wave": 5, "rotation": "A", "nextRewardWave": 5 } },
+      "event": "wave_started"
+    } } },
+    { "expect": { "text": ["Wave 5", "Rotation A"] } },
+    { "gameEvents": { "warframe": {
+      "info": { "mission": { "state": "ended", "result": "succeeded", "durationSeconds": 312.5 } },
+      "event": "mission_ended"
+    } } },
+    { "expect": { "text": ["Last mission succeeded"], "fault": "none" } }
+  ]
+}

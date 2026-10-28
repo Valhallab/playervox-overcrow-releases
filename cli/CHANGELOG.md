@@ -7,6 +7,23 @@ change between betas; 1.0.0 will freeze them under semantic versioning.
 The CLI's version enters no package: a package depends only on the
 widget's sources and the embedded SDK.
 
+## Unreleased
+
+- `permissions.gameEvents` lists the features of a game a widget follows,
+  each `<game>.<feature>`: `warframe.location`, `warframe.mission`,
+  `warframe.progress`, `warframe.squad`, `warframe.eidolons`,
+  `warframe.world`. `check` and `admit` refuse any other name, the former
+  `overcrow.game.<name>.v1` included (`manifest.game_event`), and name the
+  ones they accept. A manifest that lists one needs the catalog feature
+  `game-events-warframe`; the headless runtime this CLI pins must know
+  `gameEvents.warframe.subscribe` to run a widget that calls it.
+- A test scenario's `gameEvents` step replays a game's events: what
+  changes in `info`, a feature's status, and one event, numbered and
+  timed by the scenario. Each value is checked against the service's
+  shape, and against the features the manifest lists.
+- It embeds `@overcrow/sdk` 1.4.0: `gameEvents.warframe.subscribe` and its
+  types; `gameEvents.subscribe` is gone.
+
 ## 1.0.0-beta.9
 
 Released in the creator tools ZIPs of PlayerVox OverCrow 0.9.0-beta.1's

@@ -7,6 +7,24 @@ version it was built with, so a new SDK never changes a published widget.
 An incompatible change would be 2.0.0. Every 1.x release needs the VM's
 runtime surface 0.1, which OverCrow keeps for widget API v1.
 
+## 1.4.0
+
+Not released yet. Ships with the release of PlayerVox OverCrow that brings
+game events, Warframe first:
+
+- `gameEvents.warframe.subscribe(listener)`, for a widget whose
+  `permissions.gameEvents` lists Warframe features (`warframe.location`,
+  `warframe.mission`, `warframe.progress`, `warframe.squad`,
+  `warframe.eidolons`, `warframe.world`): whether Warframe is played, the
+  status of each feature, its state ready to show (names in the user's
+  language beside stable IDs, times in Unix milliseconds, durations in
+  seconds) and the latest events, each typed by its `type`. The
+  `WarframeEvents`, `WarframeEvent` and related types.
+- `gameEvents.subscribe` and the `GameEvent` type are removed, and
+  `gameEvents` no longer takes `overcrow.game.<name>.v1` names. No release
+  of PlayerVox OverCrow ever sent such an event, so no widget could rely on
+  them: this is the one exception to the rule above.
+
 ## 1.3.0
 
 Ships with PlayerVox OverCrow 0.9.0-beta.1, the first release that opens

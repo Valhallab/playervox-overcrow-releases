@@ -17,6 +17,7 @@ ensemble ; celles qui suivent sont à garder ouvertes pendant que vous
 | Comment formater les heures, les dates et les nombres ? | [Heure, dates et nombres](sdk.md#heure-dates-et-nombres) |
 | Qu’autorise chaque permission et chaque capability ? | [Services et permissions](services.md) |
 | Comment un widget utilise-t-il le compte du joueur sur un autre service ? | [Comptes tiers](accounts.md), [services intégrés](integrated-services.md) |
+| Que peut savoir un widget d’un jeu, comme une mission Warframe ? | [Événements de jeu](game-events.md) |
 | Quels sont les paramètres et le résultat d’un service ? | [Référence des services](service-reference.md), [formes de résultat](result-shapes.md) |
 | Que signifie un code d’erreur ? | [Erreurs](services.md#erreurs) |
 | Quels champs un intent d’écriture prend-il ? | [Les intents](forms.md#les-intents) |
@@ -46,7 +47,7 @@ ensemble ; celles qui suivent sont à garder ouvertes pendant que vous
 ## Versions
 
 Ces pages décrivent l’API widget v1 (`"apiVersion": 1` dans le manifeste)
-et `@overcrow/sdk` 1.3.
+et `@overcrow/sdk` 1.4.
 
 ## Spécifications pour les implémenteurs
 

@@ -53,8 +53,8 @@ sites déclarés, ouvertes dans le navigateur de l’utilisateur sur un clic,
 après que PlayerVox OverCrow a montré l’adresse et, la première fois pour
 chaque site, que l’utilisateur a accepté), `storage` (un stockage
 clé-valeur pour ce seul widget), `clipboardWrite` (l’écriture de texte,
-pendant une action de l’utilisateur) et `gameEvents` (des événements de jeu
-nommés).
+pendant une action de l’utilisateur) et `gameEvents` (les fonctionnalités
+d’un jeu que le widget suit, comme les missions Warframe).
 
 Les capabilities donnent accès à des données et à des actions de
 PlayerVox OverCrow et des comptes de l’utilisateur. Une capability
@@ -63,6 +63,13 @@ qui en déclare une ne peut pas déclarer aussi `network`, `links` ni
 `clipboardWrite`,
 et son stockage ne dure que le temps de son processus, pour que ces données
 ne puissent pas quitter la machine par le widget.
+
+Les événements de jeu ne sont pas sensibles, pseudos du joueur et de son
+escouade compris. Un widget peut les suivre et déclarer aussi le réseau, des
+liens, le presse-papiers ou un compte, et donc envoyer ce qu’il reçoit à son
+serveur. Le Centre de contrôle montre au joueur chaque fonctionnalité que
+suit le widget avant son installation. Voir
+[les événements de jeu](game-events.md#confidentialité).
 
 Les connexions aux comptes appartiennent à PlayerVox OverCrow : le compte
 PlayerVox, les services intégrés (Steam, Twitch) et le compte tiers qu’un

@@ -1,0 +1,31 @@
+.mission {
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+}
+
+.node {
+  font-weight: 600;
+}
+
+.muted,
+.result {
+  color: var(--color-text-muted);
+}
+
+.progress {
+  gap: var(--space-4);
+  font-variant-numeric: tabular-nums;
+}
+
+.result.succeeded {
+  color: var(--color-success);
+}
+
+.result.failed {
+  color: var(--color-danger);
+}
+
+.result.aborted {
+  color: var(--color-warning);
+}

@@ -71,7 +71,7 @@ see [limit constants](sdk.md#limit-constants).
 | `MAX_WIDGET_EDGE_PX` | 4096 px | Width or height of a widget's frame. |
 | `MIN_CONTENT_SCALE` | 500 ‰ | Smallest content scale (50 %). |
 | `MAX_CONTENT_SCALE` | 1750 ‰ | Largest content scale (175 %). |
-| `MAX_GAME_EVENTS` | 32 | Semantic game events declared by one package. |
+| `MAX_GAME_EVENTS` | 32 | Game event features declared by one package. |
 | `MAX_MENU_ROWS` | 16 | Widget rows in `wrapper.menu`, group rows and their children included. |
 | `MAX_MENU_DEPTH` | 1 | Submenu levels: a `group` cannot contain another `group`. |
 | `MAX_MENU_LABEL_CHARS` | 80 characters | One English or French label of a row or choice. |
@@ -224,6 +224,11 @@ see [limit constants](sdk.md#limit-constants).
 | `MAX_STORAGE_VALUE_BYTES` | 64 KiB | Serialized JSON size of one storage value. |
 | `MAX_CLIPBOARD_BYTES` | 16 KiB | Text of one clipboard write. |
 | `MAX_OBJECT_ID_BYTES` | 128 bytes | Opaque object ID or cursor exchanged with a capability service. |
+| `MAX_GAME_EVENT_NAME_BYTES` | 128 bytes | A name in game events: a place, a type, a player's name, one line. |
+| `MAX_WARFRAME_SQUAD` | 8 | Members of a Warframe squad, the player included. |
+| `MAX_WARFRAME_HUNTS` | 16 | Eidolons of one night kept, the latest. |
+| `MAX_WARFRAME_MODIFIERS` | 8 | Modifiers of one Warframe mission. |
+| `MAX_WARFRAME_FISSURES` | 64 | Void Fissures of the world state given, the soonest to end first. |
 
 ### Notes, reviews and chat
 

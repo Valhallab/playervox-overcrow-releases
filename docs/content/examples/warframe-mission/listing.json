@@ -1,0 +1,10 @@
+{
+  "author": "Nova",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/example/warframe-mission-widget",
+  "defaultLocale": "en",
+  "localizations": [
+    { "locale": "en", "name": "Mission companion", "description": "Your current Warframe mission: the node, the mission type, the wave, the rotation of the next reward and how your last mission ended." },
+    { "locale": "fr", "name": "Compagnon de mission", "description": "Votre mission Warframe en cours : le nœud, le type de mission, la vague, la rotation de la prochaine récompense et l’issue de votre dernière mission." }
+  ]
+}
