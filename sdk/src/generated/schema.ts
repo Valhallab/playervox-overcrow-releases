@@ -1084,7 +1084,7 @@ export interface WarframeRewardTable {
   readonly kind: "mission" | "caches" | "extra";
   /** The rotation, or `null` for a table without rotations. */
   readonly rotation: "A" | "B" | "C" | null;
-  /** The items, the most likely first, at most `MAX_WARFRAME_REWARD_ITEMS`. */
+  /** The items, the rarest first (equal chances by English name), at most `MAX_WARFRAME_REWARD_ITEMS`. */
   readonly items: ReadonlyArray<WarframeReward>;
 }
 

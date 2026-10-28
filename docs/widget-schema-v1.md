@@ -207,7 +207,7 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MAX_WARFRAME_MODIFIERS` | 8 | fixed | Modifiers of one Warframe mission. |
 | `MAX_WARFRAME_FISSURES` | 64 | fixed | Void Fissures of the world state given, the soonest to end first. |
 | `MAX_WARFRAME_REWARD_TABLES` | 9 | fixed | Reward tables of one node: its own, caches and extra, by rotation. |
-| `MAX_WARFRAME_REWARD_ITEMS` | 64 | fixed | Items of one reward table, the most likely kept. |
+| `MAX_WARFRAME_REWARD_ITEMS` | 64 | fixed | Items of one reward table, the rarest kept. |
 | `MAX_NOTES` | 8 | fixed | Notes in the user's notes document; `notes.create` fails beyond it. |
 | `MAX_NOTE_TITLE_BYTES` | 96 bytes | fixed | Note title, non-empty after trimming. |
 | `MAX_NOTE_BODY_BYTES` | 8 KiB | fixed | Note body. |
@@ -1663,7 +1663,7 @@ One reward table of a node. `{ kind, rotation, items }`
 | --- | --- | --- |
 | `kind` | `mission` \| `caches` \| `extra` | `mission`, `caches` or `extra`. |
 | `rotation` | `A` \| `B` \| `C` or `null` | The rotation, or `null` for a table without rotations. |
-| `items` | list of `WarframeReward` | The items, the most likely first, at most `MAX_WARFRAME_REWARD_ITEMS`. |
+| `items` | list of `WarframeReward` | The items, the rarest first (equal chances by English name), at most `MAX_WARFRAME_REWARD_ITEMS`. |
 
 #### `WarframeRewards`
 

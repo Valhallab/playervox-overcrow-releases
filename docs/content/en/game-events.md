@@ -233,7 +233,9 @@ Circuit):
   Sabotage, Exterminate or Hive node; `extra` an additional table of the
   node.
 - `rotation`: `null` for a table without rotations.
-- `items`, most likely first, at most 64 per table: `id` is the English
+- `items`, **the rarest first**: from the lowest `chance` to the highest,
+  equal chances by English name, the same order in every language. A
+  table keeps its 64 rarest items at most. `id` is the English
   name in `snake_case` (`orokin_cell`, `axi_a1_relic_radiant`), stable
   across languages; `name` is shown as is, in the user's language, or in
   English when PlayerVox OverCrow has no translation yet; `quantity` the
@@ -241,7 +243,7 @@ Circuit):
   table added together.
 - **Source**: Digital Extremes' official drop tables
   (warframe.com/droptables), read by PlayerVox OverCrow on the player's
-  computer at each game update, while a widget that follows
+  computer once a day and at each game update, while a widget that follows
   `warframe.rewards` runs. Show the source with the rates: **"Drop rates:
   Digital Extremes, no guarantees."**
 

@@ -230,7 +230,7 @@ see [limit constants](sdk.md#limit-constants).
 | `MAX_WARFRAME_MODIFIERS` | 8 | Modifiers of one Warframe mission. |
 | `MAX_WARFRAME_FISSURES` | 64 | Void Fissures of the world state given, the soonest to end first. |
 | `MAX_WARFRAME_REWARD_TABLES` | 9 | Reward tables of one node: its own, caches and extra, by rotation. |
-| `MAX_WARFRAME_REWARD_ITEMS` | 64 | Items of one reward table, the most likely kept. |
+| `MAX_WARFRAME_REWARD_ITEMS` | 64 | Items of one reward table, the rarest kept. |
 
 ### Notes, reviews and chat
 

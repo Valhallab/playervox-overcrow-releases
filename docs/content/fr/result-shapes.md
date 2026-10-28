@@ -643,7 +643,7 @@ Une table de butin d’un nœud. `{ kind, rotation, items }`
 | --- | --- | --- |
 | `kind` | `mission` \| `caches` \| `extra` | `mission`, `caches` ou `extra`. |
 | `rotation` | `A` \| `B` \| `C` ou `null` | La rotation, ou `null` pour une table sans rotation. |
-| `items` | liste de [`WarframeReward`](#warframereward) | Les objets, du plus probable au moins probable, 64 au plus. |
+| `items` | liste de [`WarframeReward`](#warframereward) | Les objets, du plus rare au plus probable (à chance égale, par nom anglais), 64 au plus. |
 
 ### `WarframeRewards`
 

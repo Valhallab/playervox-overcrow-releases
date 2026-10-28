@@ -1225,7 +1225,7 @@ pub const MAX_WARFRAME_REWARD_ITEMS: Limit = fixed(
     "MAX_WARFRAME_REWARD_ITEMS",
     64,
     Unit::Count,
-    "Items of one reward table, the most likely kept.",
+    "Items of one reward table, the rarest kept.",
 );
 pub const MAX_WARFRAME_FISSURES: Limit = fixed(
     "MAX_WARFRAME_FISSURES",

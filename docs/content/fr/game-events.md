@@ -240,7 +240,9 @@ ouverts, événements, Circuit) :
   nœud de Sabotage, d'Extermination ou de Ruche ; `extra`, une table de
   plus du nœud.
 - `rotation` : `null` pour une table sans rotation.
-- `items`, du plus probable au moins probable, 64 au plus par table :
+- `items`, **le plus rare d'abord** : de la `chance` la plus faible à la
+  plus forte, à chance égale par nom anglais, le même ordre dans toutes
+  les langues. Une table garde au plus ses 64 objets les plus rares.
   `id`, le nom anglais en `snake_case`, stable d'une langue à l'autre ;
   `name`, à afficher tel quel, dans la langue de l'utilisateur, ou en
   anglais quand PlayerVox OverCrow n'a pas encore la traduction ;
@@ -248,8 +250,9 @@ ouverts, événements, Circuit) :
   d'un même objet d'une table additionnées.
 - **Source** : les tables de butin officielles de Digital Extremes
   (warframe.com/droptables), lues par PlayerVox OverCrow sur le PC du
-  joueur à chaque mise à jour du jeu, tant qu'un widget qui suit
-  `warframe.rewards` est ouvert. Affichez la source avec les taux :
+  joueur une fois par jour et à chaque mise à jour du jeu, tant qu'un
+  widget qui suit `warframe.rewards` est ouvert. Affichez la source avec
+  les taux :
   **« Taux de butin : Digital Extremes, sans garantie. »**
 
 ### Types d’événements

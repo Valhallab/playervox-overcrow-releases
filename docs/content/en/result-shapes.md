@@ -641,7 +641,7 @@ One reward table of a node. `{ kind, rotation, items }`
 | --- | --- | --- |
 | `kind` | `mission` \| `caches` \| `extra` | `mission`, `caches` or `extra`. |
 | `rotation` | `A` \| `B` \| `C` or `null` | The rotation, or `null` for a table without rotations. |
-| `items` | list of [`WarframeReward`](#warframereward) | The items, the most likely first, at most 64. |
+| `items` | list of [`WarframeReward`](#warframereward) | The items, the rarest first (equal chances by English name), at most 64. |
 
 ### `WarframeRewards`
 

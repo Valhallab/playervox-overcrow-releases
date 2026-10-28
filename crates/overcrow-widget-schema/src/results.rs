@@ -1132,7 +1132,7 @@ pub const SHAPES: &[NamedShape] = &[
             member(
                 "items",
                 Shape::List(&Shape::Named("WarframeReward")),
-                "The items, the most likely first, at most `MAX_WARFRAME_REWARD_ITEMS`.",
+                "The items, the rarest first (equal chances by English name), at most `MAX_WARFRAME_REWARD_ITEMS`.",
             ),
         ]),
         "One reward table of a node.",
