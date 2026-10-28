@@ -15,6 +15,7 @@ import {
   timers,
   type JsonValue,
   type WarframeEvents,
+  type WarframeGlossary,
   type WarframeMission,
   type WarframeWorld,
   type WarframeWorldMission,
@@ -333,9 +334,52 @@ function subOf(id: ActivityId, activity: Activity, world: WarframeWorld | null, 
   }
 }
 
+/** The game's activities this widget names, from the glossary of the subscription. */
+type Glossary = { readonly activity: Pick<WarframeGlossary["activity"], "sortie" | "archon_hunt" | "netracells" | "circuit" | "nightwave" | "baro_ki_teer"> };
+
+/**
+ * The game's English names, as PlayerVox OverCrow falls back to them, until
+ * the first value brings the game's own (a refusal brings none).
+ */
+const ENGLISH: Glossary = {
+  activity: {
+    sortie: "Sortie",
+    archon_hunt: "Archon Hunt",
+    netracells: "Netracells",
+    circuit: "The Circuit",
+    nightwave: "Nightwave",
+    baro_ki_teer: "Baro Ki'Teer",
+  },
+};
+
+let glossary: Glossary = ENGLISH;
+
+/** Our IDs of the activities, in the glossary's words. */
+const GLOSSARY_IDS: Readonly<Record<ActivityId, keyof Glossary["activity"]>> = {
+  sortie: "sortie",
+  archon: "archon_hunt",
+  netracells: "netracells",
+  circuit: "circuit",
+  nightwave: "nightwave",
+};
+
+/**
+ * The name of a term of the game by its ID, in the game's language. The
+ * one place that names them: no name of the game is in the locales.
+ */
+function gameName(kind: "activity", id: keyof Glossary["activity"]): string {
+  return glossary[kind][id];
+}
+
+/** An activity's name; the Circuit's rows are its normal one. */
+function activityName(id: ActivityId): string {
+  const name = gameName("activity", GLOSSARY_IDS[id]);
+  return id === "circuit" ? t("circuit-normal", { name }) : name;
+}
+
 function rowOf(id: ActivityId, inputs: Inputs): Row {
   const activity = inputs.ticks.activities[id];
-  const name = t(`activity-${id}`);
+  const name = activityName(id);
   const sub = subOf(id, activity, inputs.world, inputs.now);
   const base = { id, name, sub, byHand: false };
   if (activity.done !== null) {
@@ -374,15 +418,19 @@ function baroOf(inputs: Inputs): { text: string; here: boolean } {
   const trader = inputs.world?.voidTrader ?? null;
   if (!inputs.baro || trader === null || inputs.now >= trader.leavesAt) return { text: "", here: false };
   const relay = trader.relay?.name ?? null;
+  const name = gameName("activity", "baro_ki_teer");
   if (inputs.now >= trader.arrivesAt) {
     const leaves = dayAndTime(trader.leavesAt, inputs.now);
     return {
-      text: relay === null ? t("baro-here", { leaves }) : t("baro-here-at", { relay, leaves }),
+      text: relay === null ? t("baro-here", { name, leaves }) : t("baro-here-at", { name, relay, leaves }),
       here: true,
     };
   }
   const arrives = dayAndTime(trader.arrivesAt, inputs.now);
-  return { text: relay === null ? t("baro-arrives", { arrives }) : t("baro-arrives-at", { arrives, relay }), here: false };
+  return {
+    text: relay === null ? t("baro-arrives", { name, arrives }) : t("baro-arrives-at", { name, arrives, relay }),
+    here: false,
+  };
 }
 
 /** What the view shows, from the ticks, the world and the options. */
@@ -412,7 +460,8 @@ export function buildModel(inputs: Inputs): Model {
   } else if (inputs.source === "unavailable") {
     [hint, hintIcon, hintTone] = [t("hint-unavailable"), "circle-alert", "warning"];
   } else if (!ticks.intro && rows.length > 0) {
-    [hint, hintIcon] = [t("hint-first-run"), "info"];
+    const names = { sortie: activityName("sortie"), archon: activityName("archon"), netracells: activityName("netracells") };
+    [hint, hintIcon] = [t("hint-first-run", names), "info"];
   }
 
   let status = "";
@@ -431,14 +480,17 @@ export function buildModel(inputs: Inputs): Model {
   const nextReset =
     firstReset === undefined
       ? ""
-      : t(firstReset.id === "day" ? "line-reset-sortie" : "line-reset-week", { in: inTime((firstReset.id === "day" ? ticks.dayEnd : ticks.weekEnd) - now) });
+      : t(firstReset.id === "day" ? "line-reset-sortie" : "line-reset-week", {
+          name: activityName("sortie"),
+          in: inTime((firstReset.id === "day" ? ticks.dayEnd : ticks.weekEnd) - now),
+        });
   const success = fresh !== undefined || left === 0;
   // Refused: the count stays, the way to fix it comes beside it, in amber.
   const refused = inputs.source === "refused";
 
   // One line, refused: beside a value, only "Access denied"; without one,
   // where to fix it. The whole sentence stays in the label and in Full.
-  const line = rows.length === 0 ? (refused ? t("line-refused-full") : t("line-empty")) : fresh !== undefined ? t(`fresh-${fresh.id}`) : count;
+  const line = rows.length === 0 ? (refused ? t("line-refused-full") : t("line-empty")) : fresh !== undefined ? t("fresh", { name: fresh.name }) : count;
   const lineValue = rows.length === 0 ? "" : refused ? t("line-refused") : fresh !== undefined ? count : nextReset;
 
   return {
@@ -494,6 +546,7 @@ function save(): void {
 
 /** Handles a value of the game's events: the world, then the missions not handled yet. */
 export function receive(value: WarframeEvents): void {
+  glossary = value.glossary;
   world = value.info.world ?? world;
   worldStatus = value.features.world;
   source = value.features.mission === "available" ? "available" : "unavailable";

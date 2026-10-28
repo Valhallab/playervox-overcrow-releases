@@ -7,7 +7,7 @@ import { test } from "node:test";
 import { installRuntime } from "@overcrow/sdk/testing";
 
 import { loadLogic } from "./load-logic.mjs";
-import { DAY, HOUR, NOW, SORTIE_END, WEEK_END, ended, sortie, value, world } from "./fixtures.mjs";
+import { DAY, GLOSSARY, HOUR, NOW, SORTIE_END, WEEK_END, ended, sortie, value, world } from "./fixtures.mjs";
 
 const MESSAGES = JSON.parse(readFileSync(new URL("../locales/fr.json", import.meta.url), "utf8"));
 const vm = installRuntime({
@@ -64,7 +64,7 @@ test("after a restart, the events already handled are not ticked again", async (
 test("French wording of the resets, the Archon without a name and Baro", async () => {
   assert.equal(state.model.groups[0].reset, "reset dans 6 h");
   assert.equal(state.model.groups[1].reset, "reset dans 3 j 14 h");
-  assert.equal(state.model.baro, "Baro Ki’Teer arrive ven. 14:00 · Larunda Relay");
+  assert.equal(state.model.baro, "Baro Ki'Teer arrive ven. 14:00 · Larunda Relay");
   const nameless = world(NOW);
   nameless.archonHunt.boss = { id: "boreal", name: null };
   vm.push("gameEvents.warframe.subscribe", value({ worldValue: nameless }));
@@ -72,6 +72,37 @@ test("French wording of the resets, the Archon without a name and Baro", async (
   assert.equal(row("archon").sub, "Rescue, Survival, Assassination");
   assert.equal(logic.inTime(42 * 60_000), "42 min");
   assert.equal(logic.inTime(48 * HOUR), "2 j");
+});
+
+test("a game in English, the app in French: the game's names, the widget's French", async () => {
+  vm.push("gameEvents.warframe.subscribe", value());
+  await flush();
+  assert.deepEqual(state.model.groups.flatMap((group) => group.rows.map((each) => each.name)), [
+    "Sortie",
+    "Archon Hunt",
+    "Netracells",
+    "The Circuit (normal)",
+    "Nightwave",
+  ]);
+  const french = {
+    ...GLOSSARY,
+    language: "fr",
+    activity: { ...GLOSSARY.activity, archon_hunt: "Chasse aux Archontes", nightwave: "Onde nocturne" },
+  };
+  vm.push("gameEvents.warframe.subscribe", value({ glossary: french }));
+  await flush();
+  assert.equal(row("archon").name, "Chasse aux Archontes");
+  assert.equal(row("nightwave").name, "Onde nocturne");
+});
+
+test("names: no name of the game in the locales", () => {
+  for (const locale of ["en", "fr"]) {
+    const messages = JSON.parse(readFileSync(new URL(`../locales/${locale}.json`, import.meta.url), "utf8"));
+    for (const [key, text] of Object.entries(messages)) {
+      assert.doesNotMatch(key, /^(activity|fresh)-/, key);
+      assert.doesNotMatch(text, /Sortie|Archon|Netracells|Circuit|Nightwave|Baro/, `${locale} ${key}`);
+    }
+  }
 });
 
 test("the resets without the world", () => {

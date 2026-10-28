@@ -56,7 +56,7 @@ test("first run: everything to do, the hint, the world and the resets", async ()
   assert.equal(row("netracells").value, "0/5");
   assert.deepEqual([row("circuit").sub, row("circuit").value], ["Excalibur, Trinity, Ember", ""]);
   assert.equal(row("nightwave").sub, "This week\u2019s challenges");
-  assert.equal(model().baro, "Baro Ki\u2019Teer arrives Fri 14:00 · Larunda Relay");
+  assert.equal(model().baro, "Baro Ki'Teer arrives Fri 14:00 · Larunda Relay");
   assert.equal(model().baroHere, false);
   assert.equal(model().status, "");
   assert.deepEqual([model().line, model().lineValue], ["5 to do", "Sortie resets in 6h"]);
@@ -113,7 +113,7 @@ test("Netracells count to five, then done", async () => {
 test("the Circuit by hand: a click ticks it with the hand, a second unticks it", async () => {
   logic.check("circuit");
   assert.deepEqual([row("circuit").icon, row("circuit").byHand, row("circuit").sub], ["circle-check", true, ""]);
-  assert.equal(row("circuit").label, `Normal Circuit: checked by hand, ${row("circuit").value}`);
+  assert.equal(row("circuit").label, `The Circuit (normal): checked by hand, ${row("circuit").value}`);
   assert.equal(saved().activities.circuit.done.hand, true);
   logic.check("circuit");
   assert.deepEqual([row("circuit").icon, row("circuit").byHand], ["circle", false]);
@@ -214,10 +214,10 @@ test("Baro Ki'Teer at the relay, then gone", async () => {
   vm.push(SERVICE, value({ worldValue: world(vm.now, { voidTrader: trader }) }));
   await flush();
   assert.equal(model().baroHere, true);
-  assert.match(model().baro, /^Baro Ki’Teer at Larunda Relay · leaves \w{3} \d\d:\d\d$/);
+  assert.match(model().baro, /^Baro Ki'Teer at Larunda Relay · leaves \w{3} \d\d:\d\d$/);
   vm.push(SERVICE, value({ worldValue: world(vm.now, { voidTrader: { ...trader, relay: null, arrivesAt: vm.now + 9 * DAY, leavesAt: vm.now + 11 * DAY } }) }));
   await flush();
-  assert.match(model().baro, /^Baro Ki’Teer arrives \w{3}, \w{3} \d+, \d\d:\d\d$/);
+  assert.match(model().baro, /^Baro Ki'Teer arrives \w{3}, \w{3} \d+, \d\d:\d\d$/);
   vm.push(SERVICE, value({ worldValue: world(vm.now, { voidTrader: null }) }));
   await flush();
   assert.equal(model().baro, "");

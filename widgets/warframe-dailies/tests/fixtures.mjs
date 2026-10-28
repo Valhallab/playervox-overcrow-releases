@@ -64,11 +64,29 @@ const FEATURES = {
   rewards: "undeclared",
 };
 
+/** The game's terms as the fake host sends them, in English (this widget's part). */
+export const GLOSSARY = {
+  language: "en",
+  activity: {
+    sortie: "Sortie",
+    archon_hunt: "Archon Hunt",
+    netracells: "Netracells",
+    circuit: "The Circuit",
+    nightwave: "Nightwave",
+    baro_ki_teer: "Baro Ki'Teer",
+    void_fissure: "Void Fissure",
+    arbitration: "Arbitration",
+    steel_path: "Steel Path",
+    void_storm: "Void Storm",
+  },
+};
+
 /** A whole subscription value. */
-export function value({ worldValue = world(), events = [], features = {} } = {}) {
+export function value({ worldValue = world(), events = [], features = {}, glossary = GLOSSARY } = {}) {
   return {
     playing: true,
-    session: { startedAt: NOW - HOUR },
+    session: { startedAt: NOW - HOUR, language: glossary.language },
+    glossary,
     features: { ...FEATURES, ...features },
     info: { location: null, mission: null, progress: null, squad: null, eidolons: null, world: worldValue },
     events,

@@ -17,7 +17,7 @@ Digital Extremes.
 | --- | --- |
 | Header | "Dailies & weeklies", and on the right how many tracked activities are left ("3 to do"), or "All done" in green |
 | Today | The Sortie, with its reset ("resets in 6h"): its three mission types, then "Remaining: …" and "1/3" once a stage is done |
-| This week | The Archon Hunt (its Archon and mission types, "0/3"), Netracells ("3/5"), the Normal Circuit (the week's Warframes) and Nightwave ("This week's challenges"), with the week's reset ("resets in 3d 14h") |
+| This week | The Archon Hunt (its Archon and mission types, "0/3"), Netracells ("3/5"), the normal Circuit (the week's Warframes) and Nightwave ("This week's challenges"), with the week's reset ("resets in 3d 14h") |
 | Done | A green check and the time it was done ("09:12" today, "Tue 21:42" before); a click adds a small hand before the time. Right after a mission, "just now" in green for five minutes, without animation |
 | Baro Ki'Teer | One quiet line under the lists: "Baro Ki'Teer arrives Fri 14:00 · Larunda Relay", brighter while he is there ("… at Larunda Relay · leaves Sun 14:00") |
 | First run | "Sortie, Archon Hunt and Netracells tick automatically with the overlay open. A click ticks the rest." until the first tick |
@@ -26,9 +26,10 @@ Digital Extremes.
 | Nothing tracked | "No activity tracked", and where to choose some |
 
 Times are local, 24-hour; durations never read as a time of day ("6h",
-"3d 14h", "42 min"). The interface is in English and French; the names of
-missions, Archons, relays and Warframes come from PlayerVox OverCrow, in
-the user's language.
+"3d 14h", "42 min"). The interface is in English and French, the user's
+language; the game's names (activities, missions, Archons, relays, Baro
+Ki'Teer) come from PlayerVox OverCrow in the game's language, the
+activities from its glossary.
 
 **Layouts.** "Full" (default) is 300 points wide; from 560 points, the two
 lists sit side by side, Baro under today's. "One line" says "3 to do ·
