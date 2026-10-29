@@ -634,6 +634,8 @@ function cadenceLine(node: string, typeId: string): string {
 function loot(s: Screen, mission: WarframeMission, rewardsFeature: string, keepLine = false): Tables | null {
   if (mission.rewards === null) {
     let line = s.line;
+    // One line of "known on loading" or "no table" shows the panel's icon.
+    let icon = "";
     if (rewardsFeature === "undeclared") {
       // Refused: the status line says so.
     } else if (rewardsFeature === "unavailable") {
@@ -647,12 +649,20 @@ function loot(s: Screen, mission: WarframeMission, rewardsFeature: string, keepL
       // told apart at loading.
       s.empty = { icon: "hourglass", tone: "muted", title: t("loot-later-title"), text: "", titleCls: "muted" };
       line = t("line-loot-later", { node: s.node });
+      icon = "hourglass";
     } else {
       // No published table: Archon Hunt, Alert, Netracell, or a type without one.
       s.empty = { icon: "package-x", tone: "muted", title: t("loot-none-title"), text: "", titleCls: "" };
       line = t("line-loot-none", { node: s.node });
+      icon = "package-x";
     }
-    if (!keepLine) s.line = line;
+    if (!keepLine) {
+      s.line = line;
+      if (icon !== "") {
+        s.lineIcon = icon;
+        s.lineTone = "muted";
+      }
+    }
     return null;
   }
   const tables = sortTables(mission.rewards.tables);

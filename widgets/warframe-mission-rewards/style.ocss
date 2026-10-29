@@ -658,9 +658,10 @@
   color: var(--color-text-secondary);
 }
 
-/* Empty lines that keep the height of the longest rotation. */
+/* Empty lines that keep the height of the longest rotation: their rule,
+   faint, reads as a free place rather than a hole. */
 .drop.filler {
-  border-bottom: 1px solid transparent;
+  opacity: 0.45;
 }
 
 /* Survival before the hack: an hourglass, never a frozen countdown. */

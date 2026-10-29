@@ -309,6 +309,8 @@ test("no loot: known on loading, or no published table; a new node; loot unavail
   assert.equal(archon.empty.icon, "package-x");
   assert.equal(archon.empty.title, "No published loot table for this mission");
   assert.equal(archon.line, "Iliad · no table");
+  assert.deepEqual([archon.lineIcon, archon.lineTone], ["package-x", "muted"], "One line shows the panel's crossed-out box");
+  assert.deepEqual([pending.lineIcon, pending.lineTone], ["hourglass", "muted"], "and the hourglass while it waits");
   assert.deepEqual(archon.pills.map((x) => x.text), ["Archon Hunt"]);
   const ext = logic.buildScreen(input(value({ mission: mission({ type: { id: "extermination", name: "Exterminate" }, state: "selected", startedAt: null, rewards: null }), progress: null })));
   assert.equal(ext.empty.title, "No published loot table for this mission", "an ordinary Exterminate, from its pick");
