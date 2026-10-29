@@ -299,7 +299,14 @@ function dayAndTime(at: number, now: number): string {
   return t("date-time", { ...params, date: local.day, month: t(`month-${local.month}`) });
 }
 
-const names = (list: readonly (string | null)[]): string => list.filter((name) => name !== null && name !== "").join(", ");
+/** A name of the game that never breaks inside: a line wraps between names, not in one. */
+const whole = (name: string): string => name.replaceAll(" ", "\u00a0");
+
+const names = (list: readonly (string | null)[]): string =>
+  list
+    .filter((name): name is string => name !== null && name !== "")
+    .map(whole)
+    .join(", ");
 
 const typeNames = (missions: readonly WarframeWorldMission[], keep: (index: number) => boolean): string =>
   names(missions.filter((_, index) => keep(index)).map((mission) => mission.type?.name ?? mission.node.name));
@@ -323,7 +330,7 @@ function subOf(id: ActivityId, activity: Activity, world: WarframeWorld | null, 
       }
       const list = typeNames(missions, () => true);
       const boss = id === "archon" ? current(world?.archonHunt, now)?.boss.name ?? null : null;
-      return boss !== null && list !== "" ? t("boss-list", { boss, list }) : list;
+      return boss !== null && list !== "" ? t("boss-list", { boss: whole(boss), list }) : list;
     }
     case "circuit":
       return names(world?.circuit?.normal.map((reward) => reward.name) ?? []);
@@ -417,7 +424,8 @@ function rowOf(id: ActivityId, inputs: Inputs): Row {
 function baroOf(inputs: Inputs): { text: string; here: boolean } {
   const trader = inputs.world?.voidTrader ?? null;
   if (!inputs.baro || trader === null || inputs.now >= trader.leavesAt) return { text: "", here: false };
-  const relay = trader.relay?.name ?? null;
+  const relayName = trader.relay?.name ?? null;
+  const relay = relayName === null ? null : whole(relayName);
   const name = gameName("activity", "baro_ki_teer");
   if (inputs.now >= trader.arrivesAt) {
     const leaves = dayAndTime(trader.leavesAt, inputs.now);

@@ -50,13 +50,13 @@ test("first run: everything to do, the hint, the world and the resets", async ()
   assert.equal(group("week").reset, "resets in 3d\u00a014h");
   assert.deepEqual(
     [row("sortie").value, row("sortie").sub, row("sortie").icon],
-    ["0/3", "Rescue, Disruption, Mobile Defense", "circle"],
+    ["0/3", "Rescue, Disruption, Mobile\u00a0Defense", "circle"],
   );
   assert.equal(row("archon").sub, "Nira · Rescue, Survival, Assassination");
   assert.equal(row("netracells").value, "0/5");
   assert.deepEqual([row("circuit").sub, row("circuit").value], ["Excalibur, Trinity, Ember", ""]);
   assert.equal(row("nightwave").sub, "This week\u2019s challenges");
-  assert.equal(model().baro, "Baro Ki'Teer arrives Fri 14:00 · Larunda Relay");
+  assert.equal(model().baro, "Baro Ki'Teer arrives Fri 14:00 · Larunda\u00a0Relay");
   assert.equal(model().baroHere, false);
   assert.equal(model().status, "");
   assert.deepEqual([model().line, model().lineValue], ["5 to do", "Sortie resets in 6h"]);
@@ -66,12 +66,12 @@ test("a Sortie in three stages: by its stage, by its node, then done", async () 
   vm.advance(20 * 60_000);
   await push([next(vm.now - 15_000, { modifiers: [sortie(1)] })]);
   assert.deepEqual([row("sortie").value, row("sortie").icon], ["1/3", "circle-dashed"]);
-  assert.equal(row("sortie").sub, "Remaining: Disruption, Mobile Defense");
+  assert.equal(row("sortie").sub, "Remaining: Disruption, Mobile\u00a0Defense");
   assert.equal(model().hint, "", "the first tick ends the first-run hint");
   // No stage from the host: the node's rank in the Sortie tells it.
   vm.advance(20 * 60_000);
   await push([next(vm.now - 12_000, { node: "SolNode2", type: "disruption", modifiers: [sortie(null)] })]);
-  assert.deepEqual([row("sortie").value, row("sortie").sub], ["2/3", "Remaining: Mobile Defense"]);
+  assert.deepEqual([row("sortie").value, row("sortie").sub], ["2/3", "Remaining: Mobile\u00a0Defense"]);
   vm.advance(20 * 60_000);
   const at = vm.now - 20_000;
   await push([next(at, { node: "SolNode3", type: "mobile_defense", modifiers: [sortie(3)] })]);
@@ -214,7 +214,7 @@ test("Baro Ki'Teer at the relay, then gone", async () => {
   vm.push(SERVICE, value({ worldValue: world(vm.now, { voidTrader: trader }) }));
   await flush();
   assert.equal(model().baroHere, true);
-  assert.match(model().baro, /^Baro Ki'Teer at Larunda Relay · leaves \w{3} \d\d:\d\d$/);
+  assert.match(model().baro, /^Baro Ki'Teer at Larunda\u00a0Relay · leaves \w{3} \d\d:\d\d$/);
   vm.push(SERVICE, value({ worldValue: world(vm.now, { voidTrader: { ...trader, relay: null, arrivesAt: vm.now + 9 * DAY, leavesAt: vm.now + 11 * DAY } }) }));
   await flush();
   assert.match(model().baro, /^Baro Ki'Teer arrives \w{3}, \w{3} \d+, \d\d:\d\d$/);

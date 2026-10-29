@@ -52,7 +52,7 @@ test("after a restart, the events already handled are not ticked again", async (
   );
   await flush();
   assert.equal(row("sortie").value, "2/3");
-  assert.equal(row("sortie").sub, "Reste : Mobile Defense");
+  assert.equal(row("sortie").sub, "Reste : Mobile\u00a0Defense");
   assert.deepEqual([row("circuit").byHand, row("circuit").value], [true, "mer. 11:00"]);
   assert.equal(state.model.left, "4 à faire");
   assert.equal(state.model.hint, "");
@@ -64,7 +64,7 @@ test("after a restart, the events already handled are not ticked again", async (
 test("French wording of the resets, the Archon without a name and Baro", async () => {
   assert.equal(state.model.groups[0].reset, "reset dans 6 h");
   assert.equal(state.model.groups[1].reset, "reset dans 3 j 14 h");
-  assert.equal(state.model.baro, "Baro Ki'Teer arrive ven. 14:00 · Larunda Relay");
+  assert.equal(state.model.baro, "Baro Ki'Teer arrive ven. 14:00 · Larunda\u00a0Relay");
   const nameless = world(NOW);
   nameless.archonHunt.boss = { id: "boreal", name: null };
   vm.push("gameEvents.warframe.subscribe", value({ worldValue: nameless }));
@@ -93,6 +93,14 @@ test("a game in English, the app in French: the game's names, the widget's Frenc
   await flush();
   assert.equal(row("archon").name, "Chasse aux Archontes");
   assert.equal(row("nightwave").name, "Onde nocturne");
+});
+
+test("a name of the game never breaks inside: its spaces are no-break spaces", async () => {
+  vm.push("gameEvents.warframe.subscribe", value());
+  await flush();
+  assert.match(state.model.baro, /Larunda\u00a0Relay$/);
+  assert.match(row("sortie").sub, /Mobile\u00a0Defense/);
+  assert.match(row("archon").sub, /Rescue, Survival, Assassination$/, "the list still breaks after its commas");
 });
 
 test("names: no name of the game in the locales", () => {
