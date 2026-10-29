@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "survival-cycle2-en",
-  "description": "Survival, second cycle: the Cs already earned.",
+  "description": "Survival, second cycle: the table of a rotation already earned says so.",
   "host": {
     "locale": "en",
     "mode": "interactive",
@@ -208,26 +208,55 @@
                   }
                 ]
               },
-              "selectedAt": 1793215095000,
-              "loadingAt": 1793215110000,
-              "startedAt": 1793215135000
+              "selectedAt": 1793215823000,
+              "loadingAt": 1793215838000,
+              "startedAt": 1793215863000,
+              "modifiers": [],
+              "earned": null,
+              "credits": null,
+              "rewardsPending": false
             },
             "progress": {
-              "rewards": 8,
+              "wave": null,
+              "waveEnemies": null,
+              "round": null,
+              "rewards": 5,
               "rotation": "A",
-              "nextRewardAt": 1793217835000
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C",
+                  "A"
+                ],
+                "totals": {
+                  "A": 3,
+                  "B": 1,
+                  "C": 1
+                }
+              },
+              "cycle": {
+                "number": 2,
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "earned": 1
+              },
+              "clock": "running",
+              "nextRewardAt": 1793217708000,
+              "nextRewardWave": null
             }
           },
-          "event": "mission_started"
+          "event": "mission_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "en"
+          }
         }
-      }
-    },
-    {
-      "expect": {
-        "text": [
-          "2 C so far · next C at 60 min"
-        ],
-        "fault": "none"
       }
     },
     {

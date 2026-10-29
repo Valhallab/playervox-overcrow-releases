@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "defense-en",
-  "description": "Defense at wave 12: waves until B, this one included.",
+  "description": "Defense at wave 8: rotation B at the end of wave 9, 14 enemies left.",
   "host": {
     "locale": "en",
     "mode": "interactive",
@@ -322,25 +322,53 @@
                   }
                 ]
               },
-              "startedAt": 1793216400000
+              "startedAt": 1793217190000,
+              "modifiers": [],
+              "earned": null,
+              "credits": null,
+              "rewardsPending": false
             },
             "progress": {
-              "wave": 12,
+              "wave": 8,
+              "waveEnemies": {
+                "total": 32,
+                "left": 14
+              },
+              "round": null,
               "rewards": 2,
               "rotation": "B",
-              "nextRewardWave": 15
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A"
+                ],
+                "totals": {
+                  "A": 2,
+                  "B": 0,
+                  "C": 0
+                }
+              },
+              "cycle": {
+                "number": 1,
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "earned": 2
+              },
+              "clock": null,
+              "nextRewardAt": null,
+              "nextRewardWave": 9
             }
           },
-          "event": "wave_started"
+          "event": "wave_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "en"
+          }
         }
-      }
-    },
-    {
-      "expect": {
-        "text": [
-          "This one included · B after wave 15"
-        ],
-        "fault": "none"
       }
     },
     {
@@ -396,6 +424,90 @@
     {
       "expect": {
         "image": "defense-mini-en",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "compact"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 280,
+          "height": 230
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "defense-compact-en",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 600,
+          "height": 420
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "defense-wide-en",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "defense-150-en",
         "fault": "none"
       }
     }

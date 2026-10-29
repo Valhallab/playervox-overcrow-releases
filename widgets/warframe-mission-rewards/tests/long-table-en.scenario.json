@@ -322,23 +322,59 @@
                   }
                 ]
               },
-              "startedAt": 1793216400000,
+              "startedAt": 1793217000000,
               "modifiers": [
                 {
                   "id": "steel_path",
                   "name": "Steel Path",
                   "stage": null
                 }
-              ]
+              ],
+              "earned": null,
+              "credits": null,
+              "rewardsPending": false
             },
             "progress": {
-              "wave": 17,
+              "wave": 11,
+              "waveEnemies": {
+                "total": 40,
+                "left": 22
+              },
+              "round": null,
               "rewards": 3,
               "rotation": "C",
-              "nextRewardWave": 20
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A",
+                  "B"
+                ],
+                "totals": {
+                  "A": 2,
+                  "B": 1,
+                  "C": 0
+                }
+              },
+              "cycle": {
+                "number": 1,
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "earned": 3
+              },
+              "clock": null,
+              "nextRewardAt": null,
+              "nextRewardWave": 12
             }
           },
-          "event": "wave_started"
+          "event": "wave_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "en"
+          }
         }
       }
     },

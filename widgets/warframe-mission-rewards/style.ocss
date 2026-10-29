@@ -582,3 +582,135 @@
 .line-main.tone-warning {
   color: var(--color-warning);
 }
+
+/* Rotations earned: filled in green, the colour of what is done. The next
+   one is only outlined in the accent. */
+.cell.earned {
+  background: var(--color-success);
+  border: 1px solid var(--color-success);
+}
+
+.cell.earned .cell-text,
+.cell.earned .cell-check {
+  color: #052e16;
+}
+
+.theme-light .cell.earned .cell-text,
+.theme-light .cell.earned .cell-check {
+  color: #ffffff;
+}
+
+.cell.now {
+  background: transparent;
+  border: 1px solid var(--color-accent);
+}
+
+.track-label {
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: center;
+  padding-right: 2px;
+}
+
+.section-head {
+  flex-direction: row;
+  align-items: center;
+  gap: 3px;
+}
+
+.got-icon,
+.col-check.col-check {
+  font-size: 10px;
+  color: var(--color-success);
+}
+
+.got-text,
+.col-got {
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-success);
+  white-space: nowrap;
+}
+
+/* The hero keeps its height whatever it holds. */
+.next {
+  min-height: 34px;
+}
+
+/* The recap: one line of facts, the rotations earned in green. */
+.facts {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+}
+
+.facts-got {
+  font-weight: 600;
+  color: var(--color-success);
+}
+
+.facts-got.lost {
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+/* Empty lines that keep the height of the longest rotation. */
+.drop.filler {
+  border-bottom: 1px solid transparent;
+}
+
+/* Survival before the hack: an hourglass, never a frozen countdown. */
+.next-icon {
+  font-size: 22px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+/* Defense: "Rotation B at the end of wave 9" on one line, the wave large. */
+.next-inline {
+  flex-direction: column;
+  gap: 1px;
+}
+
+.next-line .next-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.next-big {
+  font-size: 30px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
+.next-big.word {
+  font-size: 18px;
+}
+
+.next-big.accent {
+  color: var(--color-accent);
+}
+
+/* The same height with a number or "this wave": never a jump. */
+.next-row {
+  flex-direction: column;
+  justify-content: end;
+  min-height: 41px;
+}
+
+.facts-box {
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* A state that only waits: muted, not a warning. */
+.empty-title.muted {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}

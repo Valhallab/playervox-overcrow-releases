@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "game-closed-fr",
-  "description": "Warframe closed: the stored last mission, two hours ago.",
+  "description": "Warframe closed: the stored recap, two hours ago.",
   "host": {
     "locale": "fr",
     "mode": "interactive",
@@ -16,9 +16,18 @@
         "typeId": "survival",
         "typeName": "Survie",
         "result": "succeeded",
-        "durationSeconds": 1241.2,
-        "rewards": 4,
-        "endedAt": 1793210100000
+        "durationSeconds": 3734.4,
+        "rewards": 12,
+        "endedAt": 1793210100000,
+        "got": {
+          "A": 6,
+          "B": 3,
+          "C": 3
+        },
+        "credits": 128450,
+        "creditsName": "Crédits",
+        "waves": null,
+        "pills": []
       }
     }
   },
@@ -31,16 +40,20 @@
     {
       "gameEvents": {
         "warframe": {
-          "playing": false
+          "playing": false,
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "fr"
+          },
+          "glossary": {
+            "language": "fr",
+            "term": {
+              "reactant": "Réactif",
+              "relic": "Relique",
+              "credits": "Crédits"
+            }
+          }
         }
-      }
-    },
-    {
-      "expect": {
-        "text": [
-          "4 rotations obtenues en 20 min 41"
-        ],
-        "fault": "none"
       }
     },
     {

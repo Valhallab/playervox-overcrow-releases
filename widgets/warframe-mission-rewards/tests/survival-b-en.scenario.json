@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "survival-b-en",
-  "description": "Survival, rotation B next: countdown, cycle and table B.",
+  "description": "Survival, rotation B next: countdown, earned cells and table B.",
   "host": {
     "locale": "en",
     "mode": "interactive",
@@ -208,17 +208,51 @@
                   }
                 ]
               },
-              "selectedAt": 1793216768000,
-              "loadingAt": 1793216783000,
-              "startedAt": 1793216808000
+              "selectedAt": 1793216723000,
+              "loadingAt": 1793216738000,
+              "startedAt": 1793216763000,
+              "modifiers": [],
+              "earned": null,
+              "credits": null,
+              "rewardsPending": false
             },
             "progress": {
+              "wave": null,
+              "waveEnemies": null,
+              "round": null,
               "rewards": 2,
               "rotation": "B",
-              "nextRewardAt": 1793217708000
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A"
+                ],
+                "totals": {
+                  "A": 2,
+                  "B": 0,
+                  "C": 0
+                }
+              },
+              "cycle": {
+                "number": 1,
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "earned": 2
+              },
+              "clock": "running",
+              "nextRewardAt": 1793217708000,
+              "nextRewardWave": null
             }
           },
-          "event": "mission_started"
+          "event": "mission_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "en"
+          }
         }
       }
     },
@@ -367,6 +401,34 @@
     {
       "expect": {
         "image": "survival-b-wide-en",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "survival-b-lighttheme-en",
         "fault": "none"
       }
     }

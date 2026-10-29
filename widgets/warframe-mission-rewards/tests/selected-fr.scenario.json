@@ -208,10 +208,26 @@
                   }
                 ]
               },
-              "selectedAt": 1793217595000
+              "selectedAt": 1793217595000,
+              "modifiers": [],
+              "earned": null,
+              "credits": null,
+              "rewardsPending": false
             }
           },
-          "event": "mission_selected"
+          "event": "mission_selected",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "fr"
+          },
+          "glossary": {
+            "language": "fr",
+            "term": {
+              "reactant": "Réactif",
+              "relic": "Relique",
+              "credits": "Crédits"
+            }
+          }
         }
       }
     },

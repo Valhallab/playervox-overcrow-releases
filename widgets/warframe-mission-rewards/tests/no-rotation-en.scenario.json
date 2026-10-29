@@ -64,19 +64,38 @@
                   }
                 ]
               },
-              "startedAt": 1793217449000
+              "startedAt": 1793217449000,
+              "modifiers": [],
+              "earned": null,
+              "credits": null,
+              "rewardsPending": false
+            },
+            "progress": {
+              "wave": null,
+              "waveEnemies": null,
+              "round": null,
+              "rewards": 0,
+              "rotation": null,
+              "earned": {
+                "rotations": [],
+                "totals": {
+                  "A": 0,
+                  "B": 0,
+                  "C": 0
+                }
+              },
+              "cycle": null,
+              "clock": null,
+              "nextRewardAt": null,
+              "nextRewardWave": null
             }
           },
-          "event": "mission_started"
+          "event": "mission_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "en"
+          }
         }
-      }
-    },
-    {
-      "expect": {
-        "text": [
-          "End reward"
-        ],
-        "fault": "none"
       }
     },
     {

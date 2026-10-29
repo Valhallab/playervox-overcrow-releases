@@ -208,10 +208,18 @@
                   }
                 ]
               },
-              "selectedAt": 1793217595000
+              "selectedAt": 1793217595000,
+              "modifiers": [],
+              "earned": null,
+              "credits": null,
+              "rewardsPending": false
             }
           },
-          "event": "mission_loading"
+          "event": "mission_loading",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "en"
+          }
         }
       }
     },

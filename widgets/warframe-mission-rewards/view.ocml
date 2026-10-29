@@ -69,29 +69,56 @@
       </if>
     </box>
 
-    <if test={hasText(state.s.heroValue)}>
+    <if test={state.s.heroInline}>
+      <box class="next-inline">
+        <box class="next-row">
+          <text class="next-line"><span class="next-label">{state.s.heroLabel}</span><span class={state.s.heroCls}>{state.s.heroValue}</span></text>
+        </box>
+        <text class="next-sub">{heroSubText(state.s, state.now)}</text>
+      </box>
+    </if>
+    <else-if test={hasText(state.s.heroValue) || hasText(state.s.heroIcon)}>
       <box class="next">
         <box class="next-text">
           <text class="next-label">{state.s.heroLabel}</text>
           <text class="next-sub">{heroSubText(state.s, state.now)}</text>
         </box>
-        <text class="next-value">{at(state.s.heroValue, state.s, state.now)}</text>
+        <if test={hasText(state.s.heroIcon)}>
+          <icon class="next-icon" name={state.s.heroIcon}/>
+        </if>
+        <else>
+          <text class={state.s.heroCls}>{at(state.s.heroValue, state.s, state.now)}</text>
+        </else>
       </box>
-    </if>
+    </else-if>
     <if test={hasText(state.s.info)}>
       <text class="info">{state.s.info}</text>
     </if>
 
-    <if test={state.s.track.length > 0 && layout() != "wide"}>
+    <if test={state.s.track.length > 0}>
       <box class="track">
+        <if test={hasText(state.s.trackLabel)}>
+          <text class="track-label">{state.s.trackLabel}</text>
+        </if>
         <for each={state.s.track} as="c" key={c.id}>
           <box class={c.cls}>
-            <if test={c.earned}>
-              <icon class="cell-check" name="check"/>
+            <if test={hasText(c.icon)}>
+              <icon class="cell-check" name={c.icon}/>
             </if>
             <text class="cell-text">{c.label}</text>
           </box>
         </for>
+      </box>
+    </if>
+
+    <if test={hasText(state.s.factsGot)}>
+      <box class="facts-box">
+      <if test={hasText(state.s.factsTop)}>
+        <text class="facts">{state.s.factsTop}</text>
+      </if>
+      <if test={hasText(state.s.factsGot)}>
+        <text class="facts"><span>{state.s.factsLead}</span><span class={state.s.factsCls}>{state.s.factsGot}</span><span>{state.s.factsTail}</span></text>
+      </if>
       </box>
     </if>
 
@@ -113,6 +140,7 @@
               <text class="col-title">{col.title}</text>
               <if test={col.earned}>
                 <icon class="col-check" name="check"/>
+                <text class="col-got">{col.got}</text>
               </if>
             </box>
             <drops items={col.rows}/>
@@ -124,10 +152,23 @@
 
     <for each={state.s.sections} as="sec" key={sec.id}>
       <box class={sec.cls}>
-        <text class="section-title">{sec.title}</text>
+        <box class="section-head">
+          <text class="section-title">{sec.title}</text>
+          <if test={hasText(sec.got)}>
+            <box class="grow"/>
+            <icon class="got-icon" name="check"/>
+            <text class="got-text">{sec.got}</text>
+          </if>
+        </box>
         <box class="list">
           <drops items={sec.rows}/>
+          <for each={sec.fill} as="f" key={f}>
+            <box class="drop filler"><text class="drop-name">&#160;</text></box>
+          </for>
           <more sec={sec}/>
+          <if test={sec.fillMore}>
+            <text class="more">&#160;</text>
+          </if>
         </box>
       </box>
     </for>

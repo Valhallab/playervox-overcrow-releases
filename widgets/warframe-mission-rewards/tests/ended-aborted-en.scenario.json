@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "ended-aborted-en",
-  "description": "Mission aborted: rewards lost.",
+  "description": "Mission aborted: the rotations lost.",
   "host": {
     "locale": "en",
     "mode": "interactive",
@@ -208,15 +208,49 @@
                   }
                 ]
               },
-              "startedAt": 1793216780000
+              "startedAt": 1793216700000,
+              "modifiers": [],
+              "earned": null,
+              "credits": null,
+              "rewardsPending": false
             },
             "progress": {
+              "wave": null,
+              "waveEnemies": null,
+              "round": null,
               "rewards": 2,
-              "rotation": "A",
-              "nextRewardAt": 1793217680000
+              "rotation": "B",
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A"
+                ],
+                "totals": {
+                  "A": 2,
+                  "B": 0,
+                  "C": 0
+                }
+              },
+              "cycle": {
+                "number": 1,
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "earned": 2
+              },
+              "clock": "running",
+              "nextRewardAt": null,
+              "nextRewardWave": null
             }
           },
-          "event": "mission_started"
+          "event": "mission_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "en"
+          }
         }
       }
     },
@@ -227,8 +261,51 @@
             "mission": {
               "state": "ended",
               "result": "aborted",
-              "endedAt": 1793217570000,
-              "durationSeconds": 790.0
+              "endedAt": 1793217580000,
+              "durationSeconds": 880.0,
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A"
+                ],
+                "totals": {
+                  "A": 2,
+                  "B": 0,
+                  "C": 0
+                }
+              },
+              "credits": null
+            },
+            "progress": {
+              "wave": null,
+              "waveEnemies": null,
+              "round": null,
+              "rewards": 2,
+              "rotation": "B",
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A"
+                ],
+                "totals": {
+                  "A": 2,
+                  "B": 0,
+                  "C": 0
+                }
+              },
+              "cycle": {
+                "number": 1,
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "earned": 2
+              },
+              "clock": "running",
+              "nextRewardAt": null,
+              "nextRewardWave": null
             }
           },
           "event": "mission_ended"
@@ -238,7 +315,7 @@
     {
       "expect": {
         "text": [
-          "Left without extracting: rewards lost."
+          "Rotations lost: A ×2"
         ],
         "fault": "none"
       }

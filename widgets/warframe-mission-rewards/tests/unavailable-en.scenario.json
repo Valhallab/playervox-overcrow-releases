@@ -20,6 +20,10 @@
           "playing": true,
           "features": {
             "mission": "unavailable"
+          },
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "en"
           }
         }
       }

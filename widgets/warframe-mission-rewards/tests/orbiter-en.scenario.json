@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "orbiter-en",
-  "description": "Playing, no mission yet this session: the stored last mission.",
+  "description": "Playing, no mission yet this session: the stored recap.",
   "host": {
     "locale": "en",
     "mode": "interactive",
@@ -16,9 +16,18 @@
         "typeId": "survival",
         "typeName": "Survival",
         "result": "succeeded",
-        "durationSeconds": 1241.2,
-        "rewards": 4,
-        "endedAt": 1793216400000
+        "durationSeconds": 3734.4,
+        "rewards": 12,
+        "endedAt": 1793216400000,
+        "got": {
+          "A": 6,
+          "B": 3,
+          "C": 3
+        },
+        "credits": 128450,
+        "creditsName": "Credits",
+        "waves": null,
+        "pills": []
       }
     }
   },
@@ -26,6 +35,17 @@
     {
       "expect": {
         "state": "running"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "playing": true,
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "en"
+          }
+        }
       }
     },
     {

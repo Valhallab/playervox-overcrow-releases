@@ -2,11 +2,11 @@
   "justifications": [
     {
       "permission": "gameEvent:warframe.mission",
-      "text": "Reads the mission you pick, load and play in Warframe (node, planet, type, faction, Steel Path, Void Fissure, result and duration), to show its loot and a summary at the end."
+      "text": "Reads the mission you pick, load and play in Warframe (node, planet, type, faction, its variants, result, duration, the rotations earned and the credits), to show its loot and a one-line recap at the end."
     },
     {
       "permission": "gameEvent:warframe.progress",
-      "text": "Reads the rewards given, the wave and when the next reward comes, to count down to the next rotation and show the A A B C cycle."
+      "text": "Reads the rewards given and their cycle, the wave and its enemies, and when the next reward comes, to count down to the next rotation and show the rotations earned."
     },
     {
       "permission": "gameEvent:warframe.rewards",
@@ -14,7 +14,7 @@
     },
     {
       "permission": "storage",
-      "text": "Keeps the last mission (node, type, result, duration and rotations earned) on this computer, to show its summary after the game."
+      "text": "Keeps the last mission's recap (node, type, result, duration, rotations earned, credits) on this computer, to show it after the game."
     }
   ]
 }

@@ -2,12 +2,14 @@
 // when the next rotation comes. Everything comes from PlayerVox OverCrow's
 // Warframe game events (`warframe.mission`, `warframe.progress`,
 // `warframe.rewards`); the widget keeps only the last mission in its
-// storage, for the summary shown after the game. No network.
+// storage, for the recap shown after the game. No network. Names from the
+// game come as the game writes them; the widget's own words follow the app.
 //
-// Warframe tells what happens about 10 s late (sometimes 26 s): the widget
+// Warframe tells what happens a little late (a second or more): the widget
 // never waits for `reward_given`. It counts down to `nextRewardAt`, and
 // when that moment passes it moves on to the next rotation by itself; the
-// late update then says what the widget already shows.
+// late update then says what the widget already shows. The game never says
+// which item a rotation gave: the widget shows the rotations, not items.
 import {
   formatNumber,
   gameEvents,
@@ -27,8 +29,9 @@ import {
 
 /** Survival pays a rotation every 5 minutes of mission. */
 export const ROTATION_MS = 300_000;
-/** Defense pays a rotation every 5 waves. */
-export const ROTATION_WAVES = 5;
+/** Defense pays a rotation every 3 waves (Mirror Defense every 2): the
+ * host's next wave tells which; this is the step when it cannot. */
+export const ROTATION_WAVES = 3;
 /** Rows of a table before "+ n more", by layout. */
 export const ROWS_LIST = 10;
 export const ROWS_COMPACT = 2;
@@ -39,8 +42,7 @@ export const WIDE_FROM = 580;
 /** The storage key of the last mission. */
 export const LAST_KEY = "last";
 
-const CYCLE = ["A", "A", "B", "C"] as const;
-type Letter = (typeof CYCLE)[number];
+type Letter = "A" | "B" | "C";
 type Tone = "accent" | "success" | "danger" | "warning" | "muted";
 type Result = NonNullable<WarframeMission["result"]>;
 export type Layout = "line" | "compact" | "standard" | "wide";
@@ -58,6 +60,15 @@ export type LastMission = {
   durationSeconds: number | null;
   rewards: number;
   endedAt: number;
+  /** Rotations earned, by letter. */
+  got: Partial<Record<Letter, number>>;
+  credits: number | null;
+  /** The game's word for credits, in the game's language. */
+  creditsName: string;
+  /** The waves of a Defense; `null` for another type. */
+  waves: number | null;
+  /** Steel Path, Arbitration, Sortie…, as in the mission's header. */
+  pills: Pill[];
 };
 
 export interface Row {
@@ -80,6 +91,12 @@ export interface Section {
   now: boolean;
   /** Wide: a rotation already earned in this cycle, with a check. */
   earned: boolean;
+  /** "×3": how many times this rotation was earned; empty when never. */
+  got: string;
+  /** Empty lines that keep the height of the longest rotation. */
+  fill: string[];
+  /** An empty "+ n more" line, when another rotation has one. */
+  fillMore: boolean;
 }
 
 export interface Cell {
@@ -87,13 +104,16 @@ export interface Cell {
   label: string;
   cls: string;
   earned: boolean;
+  /** `check` when earned, empty otherwise. */
+  icon: string;
 }
 
-export interface Pill {
+/** A modifier's chip; a type, so that the stored last mission is JSON. */
+export type Pill = {
   id: string;
   text: string;
   icon: string;
-}
+};
 
 export interface Box {
   icon: string;
@@ -127,7 +147,23 @@ export interface Screen {
   /** The hero's number; `{time}` counts down to `heroAt`. */
   heroValue: string;
   heroAt: number | null;
+  /** The hero value's class: `next-value`; in Defense `next-big`, and
+   * `next-big word accent` for "this wave". */
+  heroCls: string;
+  /** Defense: the label and its number on one line. */
+  heroInline: boolean;
+  /** An icon in place of the number: the countdown has not started. */
+  heroIcon: string;
   heroSub: string;
+  /** "Cycle 2" before the cells from the second cycle on. */
+  trackLabel: string;
+  /** The recap's one line of facts: duration, rotations (in green), credits. */
+  factsLead: string;
+  /** A Defense's first line of facts: duration · waves. */
+  factsTop: string;
+  factsGot: string;
+  factsCls: string;
+  factsTail: string;
   subAt: number | null;
   /** A plain line instead of a hero: before the mission, after it. */
   info: string;
@@ -231,21 +267,34 @@ export function rateText(chance: number): string {
 
 // --------------------------------------------------------------- rotations
 
+type Cycle = NonNullable<WarframeProgress["cycle"]>;
+
 /** Where a mission stands, the rewards Warframe has not told yet included. */
 export interface Projection {
   /** Rewards given, those whose moment passed included. */
   rewards: number;
-  /** The place of the next reward in A A B C. */
-  pos: number;
   letter: Letter;
+  /** The cycle of the next reward: its number, its rotations, how many are earned. */
+  cycle: Cycle;
+  /** How many times each rotation was earned. */
+  totals: Record<Letter, number>;
   /** Survival: when the next reward comes, Unix ms. */
   nextAt: number | null;
   /** Defense: the wave of the next reward. */
   nextWave: number | null;
+  /** Survival before its clock starts (the panel is not hacked yet). */
+  waiting: boolean;
 }
 
-function letterAt(pos: number): Letter {
-  return CYCLE[((pos % 4) + 4) % 4] ?? "A";
+/** The cycle after this one: A A B C again; Arbitrations go on with C C C C. */
+function nextCycle(c: Cycle): Cycle {
+  const arbitration = c.rotations.join("") === "AABB" || c.rotations.join("") === "CCCC";
+  return { number: c.number + 1, rotations: arbitration ? ["C", "C", "C", "C"] : [...c.rotations], earned: 0 };
+}
+
+/** Moves on by one reward. */
+function step(c: Cycle): Cycle {
+  return c.earned + 1 >= c.rotations.length ? nextCycle(c) : { ...c, earned: c.earned + 1 };
 }
 
 /**
@@ -256,40 +305,47 @@ function letterAt(pos: number): Letter {
  * the progress does not count rotations.
  */
 export function project(progress: WarframeProgress | null, now: number): Projection | null {
-  if (progress === null || progress.rotation === null) return null;
-  const base = Math.max(0, progress.rewards);
+  const p = progress;
+  if (p === null || p.rotation === null || p.cycle === null) return null;
   let late = 0;
   let nextAt: number | null = null;
   let nextWave: number | null = null;
-  if (progress.nextRewardAt !== null) {
-    if (now >= progress.nextRewardAt) {
-      late = Math.floor((now - progress.nextRewardAt) / ROTATION_MS) + 1;
-    }
-    nextAt = progress.nextRewardAt + late * ROTATION_MS;
-  } else if (progress.nextRewardWave !== null) {
-    const wave = progress.wave ?? 0;
-    if (wave > progress.nextRewardWave) {
-      late = Math.ceil((wave - progress.nextRewardWave) / ROTATION_WAVES);
-    }
-    nextWave = progress.nextRewardWave + late * ROTATION_WAVES;
+  if (p.nextRewardAt !== null) {
+    if (now >= p.nextRewardAt) late = Math.floor((now - p.nextRewardAt) / ROTATION_MS) + 1;
+    nextAt = p.nextRewardAt + late * ROTATION_MS;
+  } else if (p.nextRewardWave !== null) {
+    const wave = p.wave ?? 0;
+    // The host's waves are 3, 6, 9… (Mirror Defense 2, 4, 6…): its step.
+    const every = Math.round(p.nextRewardWave / (Math.max(0, p.rewards) + 1)) || ROTATION_WAVES;
+    if (wave > p.nextRewardWave) late = Math.ceil((wave - p.nextRewardWave) / every);
+    nextWave = p.nextRewardWave + late * every;
   }
-  const rewards = base + late;
-  // The host counts A A B C from the rewards given, as we do; if it ever
-  // names another letter, its letter wins.
-  let pos = rewards % 4;
-  if (late === 0 && letterAt(pos) !== progress.rotation) {
-    pos = progress.rotation === "A" ? 0 : progress.rotation === "B" ? 2 : 3;
+  let cycle = p.cycle;
+  const totals = { ...p.earned.totals };
+  for (let i = 0; i < late; i += 1) {
+    const l = cycle.rotations[cycle.earned] ?? "A";
+    totals[l] += 1;
+    cycle = step(cycle);
   }
-  return { rewards, pos, letter: letterAt(pos), nextAt, nextWave };
+  return {
+    rewards: Math.max(0, p.rewards) + late,
+    letter: cycle.rotations[cycle.earned] ?? "A",
+    cycle,
+    totals,
+    nextAt,
+    nextWave,
+    waiting: p.clock === "waiting",
+  };
 }
 
-/** The cycle A A B C: earned cells checked, the next one in accent. */
-export function track(pos: number, earned: number, current: boolean): Cell[] {
-  return CYCLE.map((label, i) => ({
+/** The cycle's cells: earned ones in green, the next one outlined. */
+export function track(c: Cycle, current: boolean): Cell[] {
+  return c.rotations.map((label, i) => ({
     id: `${i}`,
     label,
-    cls: `cell${i < earned ? " earned" : ""}${current && i === pos ? " now" : ""}`,
-    earned: i < earned,
+    cls: `cell${i < c.earned ? " earned" : ""}${current && i === c.earned ? " now" : ""}`,
+    earned: i < c.earned,
+    icon: i < c.earned ? "check" : "",
   }));
 }
 
@@ -346,6 +402,9 @@ export function section(
     open: unfolded,
     now: false,
     earned: false,
+    got: "",
+    fill: [],
+    fillMore: false,
   };
 }
 
@@ -357,10 +416,14 @@ interface Tables {
   end: WarframeRewardTable | null;
   /** Caches and extra tables. */
   others: WarframeRewardTable[];
+  /** Where the tables come from: `node`, `arbitration`, `sortie`, `nightmare`. */
+  source: string;
+  /** The modifier's name in the game's language ("Arbitration"). */
+  sourceName: string;
 }
 
 function sortTables(tables: readonly WarframeRewardTable[]): Tables {
-  const out: Tables = { rotations: {}, end: null, others: [] };
+  const out: Tables = { rotations: {}, end: null, others: [], source: "node", sourceName: "" };
   for (const table of tables) {
     if (table.items.length === 0) continue;
     if (table.kind !== "mission") out.others.push(table);
@@ -426,7 +489,16 @@ function blank(): Screen {
     heroLabel: "",
     heroValue: "",
     heroAt: null,
+    heroCls: "next-value",
+    heroInline: false,
+    heroIcon: "",
     heroSub: "",
+    trackLabel: "",
+    factsLead: "",
+    factsTop: "",
+    factsGot: "",
+    factsCls: "facts-got",
+    factsTail: "",
     subAt: null,
     info: "",
     track: [],
@@ -466,6 +538,11 @@ function header(mission: WarframeMission): Screen {
   s.factionCls = `dot f-${FACTIONS.has(fid) ? fid : "unknown"}`;
   for (const modifier of mission.modifiers) {
     if (modifier.id === "steel_path") s.pills.push({ id: "sp", text: modifier.name, icon: "flame" });
+    if (modifier.id === "arbitration") s.pills.push({ id: "ar", text: modifier.name, icon: "scale" });
+    if (modifier.id === "sortie") s.pills.push({ id: "so", text: modifier.stage === null ? modifier.name : `${modifier.name} ${modifier.stage}/3`, icon: "swords" });
+    if (modifier.id === "nightmare") s.pills.push({ id: "nm", text: modifier.name, icon: "moon" });
+    if (modifier.id === "archon_hunt") s.pills.push({ id: "ah", text: modifier.name, icon: "crown" });
+    if (modifier.id === "alert") s.pills.push({ id: "al", text: modifier.name, icon: "siren" });
   }
   if (mission.fissure !== null) {
     s.pills.push({ id: "fi", text: t("fissure", { era: mission.fissure.name ?? mission.fissure.id }), icon: "hexagon" });
@@ -489,7 +566,7 @@ function stacked(s: Screen, tables: Tables, input: Input): void {
 }
 
 /** The one table that pays: listed in full (capped), or the wide columns. */
-function listed(s: Screen, tables: Tables, letter: Letter | null, earned: number, input: Input): void {
+function listed(s: Screen, tables: Tables, letter: Letter | null, got: Partial<Record<Letter, number>>, input: Input): void {
   const compact = input.layout === "compact";
   const cap = compact ? ROWS_COMPACT : ROWS_LIST;
   if (letter === null) {
@@ -501,12 +578,27 @@ function listed(s: Screen, tables: Tables, letter: Letter | null, earned: number
       .map((l) => ({
         ...section(`col:${l}`, t("stack-rotation", { r: l }), tables.rotations[l] as WarframeRewardTable, ROWS_LIST, input.order, input.open),
         now: l === letter,
-        earned: l !== letter && CYCLE.some((c, i) => c === l && i < earned),
+        earned: (got[l] ?? 0) > 0,
+        got: (got[l] ?? 0) > 0 ? `×${got[l]}` : "",
       }));
   } else {
     const table = tables.rotations[letter];
     if (table === undefined) return stacked(s, tables, input);
-    s.sections = [section(`list:${letter}`, t("list-rotation", { r: letter }), table, cap, input.order, input.open)];
+    const n = got[letter] ?? 0;
+    const title = tables.source === "arbitration" ? t("list-arbitration", { name: tables.sourceName, r: letter }) : t("list-rotation", { r: letter });
+    const sec = section(`list:${letter}`, title, table, cap, input.order, input.open);
+    // The same height for every rotation of the node: the widget never
+    // changes size by itself when the next rotation comes.
+    const rows = (x: WarframeRewardTable) => (x.items.length <= cap + 1 ? x.items.length : cap);
+    const all = Object.values(tables.rotations) as WarframeRewardTable[];
+    const most = sec.open ? sec.rows.length : Math.max(...all.map(rows));
+    const anyMore = all.some((x) => x.items.length > cap + 1);
+    s.sections = [{
+      ...sec,
+      got: n > 0 ? t("got-already", { r: letter, n }) : "",
+      fill: Array.from({ length: Math.max(0, most - sec.rows.length) }, (_, i) => `f${i}`),
+      fillMore: anyMore && !sec.open && sec.more === "",
+    }];
   }
   if (!compact) s.sections.push(...otherSections(tables, letter, cap, input, "list"));
   for (const sec of s.sections) sec.cls = "section listed";
@@ -550,15 +642,40 @@ function loot(s: Screen, mission: WarframeMission, rewardsFeature: string, keepL
     } else if (mission.node.name === null) {
       s.empty = { icon: "package-open", tone: "muted", title: t("unknown-title"), text: t("unknown-text"), titleCls: "" };
       line = t("line-unknown", { node: s.node });
+    } else if (mission.rewardsPending) {
+      // Not known yet: a node of today's Sortie or Archon Hunt is only
+      // told apart at loading.
+      s.empty = { icon: "hourglass", tone: "muted", title: t("loot-later-title"), text: "", titleCls: "muted" };
+      line = t("line-loot-later", { node: s.node });
     } else {
-      // A hero says more than "no loot table".
-      if (s.heroValue === "" && s.info === "") s.info = t("info-no-table");
-      line = t("line-no-table", { node: s.node });
+      // No published table: Archon Hunt, Alert, Netracell, or a type without one.
+      s.empty = { icon: "package-x", tone: "muted", title: t("loot-none-title"), text: "", titleCls: "" };
+      line = t("line-loot-none", { node: s.node });
     }
     if (!keepLine) s.line = line;
     return null;
   }
-  return sortTables(mission.rewards.tables);
+  const tables = sortTables(mission.rewards.tables);
+  tables.source = mission.rewards.source;
+  tables.sourceName = mission.modifiers.find((m) => m.id === tables.source)?.name ?? "";
+  return tables;
+}
+
+/**
+ * A Sortie's reward (after its third mission) or a Nightmare mod (once):
+ * one table, no rotations to count. `false` for a node's own tables.
+ */
+function oneTable(s: Screen, tables: Tables, input: Input): boolean {
+  if (tables.source !== "sortie" && tables.source !== "nightmare") return false;
+  const table = tables.end ?? Object.values(tables.rotations)[0];
+  if (table === undefined) return false;
+  const cap = input.layout === "compact" ? ROWS_COMPACT : ROWS_LIST;
+  const title = t(`list-${tables.source}`, { name: tables.sourceName });
+  s.sections = [{ ...section("one", title, table, cap, input.order, input.open), cls: "section listed" }];
+  if (tables.source === "sortie") s.info = t("info-sortie");
+  s.line = t(`line-${tables.source}`, { node: s.node, name: tables.sourceName });
+  s.source = true;
+  return true;
 }
 
 function before(mission: WarframeMission, input: Input, rewardsFeature: string): Screen {
@@ -577,6 +694,7 @@ function before(mission: WarframeMission, input: Input, rewardsFeature: string):
     if (mission.node.name === null && s.empty !== null) s.info = cadenceInfo(typeId);
     return s;
   }
+  if (oneTable(s, tables, input)) return s;
   if (hasRotations(tables)) {
     s.info = cadenceInfo(typeId);
     if (cadence(typeId) !== null) s.line = cadenceLine(s.node, typeId);
@@ -584,7 +702,7 @@ function before(mission: WarframeMission, input: Input, rewardsFeature: string):
   } else if (tables.end !== null) {
     s.info = t("info-end-reward");
     s.line = t("line-reward", { node: s.node, reward: endReward(tables.end) });
-    listed(s, tables, null, 0, input);
+    listed(s, tables, null, {}, input);
   } else {
     stacked(s, tables, input);
   }
@@ -600,40 +718,63 @@ function live(mission: WarframeMission, progress: WarframeProgress | null, input
   s.lineIcon = s.eyebrowIcon;
   s.lineTone = "accent";
   s.clockFrom = mission.startedAt;
+  const special = mission.rewards !== null ? loot(blank(), mission, rewardsFeature) : null;
+  if (special !== null && oneTable(s, special, input)) return s;
   const p = project(progress, input.now);
   const fissure = mission.fissure !== null ? ` · ${t("fissure-reactant")}` : "";
 
   if (p !== null) {
-    const earned = p.pos;
-    s.track = track(p.pos, earned, true);
-    if (p.nextAt !== null) {
-      // The mission clock: the next reward is due at 5 min × (rewards + 1).
-      s.clockFrom = p.nextAt - ROTATION_MS * (p.rewards + 1);
+    // Arbitrations pay C for ever after their first A A B B: the cells
+    // then say what was earned, and the C to come.
+    const allC = p.cycle.rotations.every((l) => l === "C");
+    if (allC) {
+      s.track = (["A", "B", "C"] as const)
+        .filter((l) => p.totals[l] > 0)
+        .map((l) => ({ id: l, label: `${l} ×${p.totals[l]}`, cls: "cell earned", earned: true, icon: "check" }));
+      s.track.push({ id: "next", label: "C", cls: "cell now", earned: false, icon: "" });
+      s.trackLabel = "";
+    } else {
+      s.track = track(p.cycle, !p.waiting);
+      s.trackLabel = t("cycle", { n: p.cycle.number });
+    }
+    if (p.waiting) {
+      // Survival before the panel is hacked: its countdown has not started.
+      s.heroLabel = t("hero-waiting");
+      s.heroIcon = "hourglass";
+      s.heroSub = t("sub-waiting", { r: p.letter });
+      s.line = t("line-waiting", { node: s.node });
+    } else if (p.nextAt !== null) {
       s.heroLabel = t("hero-time", { r: p.letter });
       s.heroValue = "{time}";
       s.heroAt = p.nextAt;
-      const cDone = Math.floor(p.rewards / 4);
-      if (p.letter === "C") {
-        s.heroSub = t("sub-then-a", { min: 5 * (p.rewards + 2) });
-      } else if (cDone === 0) {
-        s.heroSub = t("sub-c-in");
-        s.subAt = p.nextAt + ROTATION_MS * (3 - p.pos);
-      } else {
-        s.heroSub = t("sub-c-count", { count: cDone, min: 5 * (p.rewards + (3 - p.pos) + 1) });
-      }
+      const after = step(p.cycle);
+      s.heroSub = t("sub-then", { r: after.rotations[after.earned] ?? "A" });
+      s.subAt = p.nextAt + ROTATION_MS;
       s.heroSub += fissure;
       s.line = t("line-time", { node: s.node, r: p.letter });
       s.lineValue = "{time}";
     } else if (p.nextWave !== null && progress?.wave != null) {
-      const waves = Math.max(1, p.nextWave - progress.wave + 1);
-      s.clockFrom = null;
-      s.clock = t("clock-wave", { wave: progress.wave });
-      s.clockIcon = "shield";
-      s.heroLabel = t("hero-waves", { r: p.letter });
-      s.heroValue = `${waves}`;
-      s.heroSub = t("sub-waves", { r: p.letter, wave: p.nextWave }) + fissure;
-      s.line = t("line-time", { node: s.node, r: p.letter });
-      s.lineValue = t(waves === 1 ? "waves-1" : "waves-n", { n: waves });
+      // Defense: the waves until the reward, counted as the game shows
+      // them; the header has the game's wave.
+      const wave = progress.wave;
+      const left = progress.waveEnemies?.left ?? null;
+      const done = left === 0;
+      const waves = Math.max(1, p.nextWave - wave + (done ? 0 : 1));
+      // The header keeps the mission clock; the wave goes with its enemies.
+      s.heroSub = (done
+        ? t("sub-wave-done", { wave })
+        : left !== null
+          ? t(left === 1 ? "sub-wave-left-1" : "sub-wave-left", { wave, n: left })
+          : t("sub-wave-now", { wave })) + fissure;
+      // The owner's own words, on one line: "Rotation B at the end of
+      // wave 9", the wave large; "this wave" when it pays.
+      s.heroInline = true;
+      const pays = waves === 1 && !done;
+      s.heroLabel = t(pays ? "hero-wave-this" : "hero-wave-end", { r: p.letter });
+      s.heroValue = pays ? t("this-wave") : `${p.nextWave}`;
+      s.heroCls = pays ? "next-big word accent" : "next-big";
+      s.line = t(pays ? "line-reward-at" : "line-wave", { node: s.node, r: p.letter });
+      s.lineValue = pays ? t("this-wave") : `${p.nextWave}`;
     } else if (progress?.round != null) {
       s.info = t("info-round", { r: p.letter, round: progress.round + 1 });
       s.line = t("line-round", { node: s.node, r: p.letter, round: progress.round + 1 });
@@ -641,10 +782,11 @@ function live(mission: WarframeMission, progress: WarframeProgress | null, input
       s.info = t("info-next", { r: p.letter });
       s.line = t("line-next", { node: s.node, r: p.letter });
     }
+    const earned = p.totals;
     const tables = loot(s, mission, rewardsFeature, true);
     if (tables !== null) {
       if (hasRotations(tables)) listed(s, tables, p.letter, earned, input);
-      else if (tables.end !== null) listed(s, tables, null, 0, input);
+      else if (tables.end !== null) listed(s, tables, null, {}, input);
     }
     return s;
   }
@@ -661,7 +803,7 @@ function live(mission: WarframeMission, progress: WarframeProgress | null, input
   } else if (tables.end !== null) {
     s.info = t("info-end-reward");
     s.line = t("line-reward", { node: s.node, reward: endReward(tables.end) });
-    listed(s, tables, null, 0, input);
+    listed(s, tables, null, {}, input);
   } else {
     // Only caches or extra tables.
     stacked(s, tables, input);
@@ -673,7 +815,8 @@ const RESULT_TONE: Readonly<Record<Result, Tone>> = { succeeded: "success", fail
 const RESULT_ICON: Readonly<Record<Result, string>> = { succeeded: "circle-check", failed: "circle-x", aborted: "log-out" };
 
 /** The last mission from what Warframe last told. */
-export function lastFrom(mission: WarframeMission, progress: WarframeProgress | null, fallbackAt: number): LastMission {
+export function lastFrom(mission: WarframeMission, progress: WarframeProgress | null, fallbackAt: number, creditsName = ""): LastMission {
+  const got: Partial<Record<Letter, number>> = { ...(mission.earned?.totals ?? {}) };
   return {
     node: nodeName(mission),
     planet: mission.planet?.name ?? "",
@@ -685,24 +828,32 @@ export function lastFrom(mission: WarframeMission, progress: WarframeProgress | 
     durationSeconds: mission.durationSeconds,
     rewards: progress?.rewards ?? 0,
     endedAt: mission.endedAt ?? fallbackAt,
+    got,
+    credits: mission.credits === null ? null : Math.round(mission.credits),
+    creditsName,
+    waves: mission.type?.id === "defense" ? (progress?.wave ?? null) : null,
+    pills: header(mission).pills,
   };
 }
 
-function rotationsText(n: number): string {
-  return n === 1 ? t("rotations-1") : t("rotations-n", { count: n });
+/** "A ×6 · B ×3 · C ×3". */
+function gotText(got: Partial<Record<Letter, number>>): string {
+  return (["A", "B", "C"] as const).filter((l) => (got[l] ?? 0) > 0).map((l) => `${l} ×${got[l]}`).join(" · ");
 }
 
 /**
- * After the mission: a summary without tables, since the real loot is on
- * the game's end screen. `fresh` right after it in this session; otherwise
- * "last mission" while playing, or "2 h ago" with the game closed.
+ * After the mission: the recap. The rotations earned (the game does not
+ * say which item), how long, the credits, and what those rotations could
+ * give. `fresh` right after it in this session; otherwise "last mission"
+ * while playing, or "2 h ago" with the game closed.
  */
-function after(last: LastMission, how: "fresh" | "last" | "closed"): Screen {
+function after(last: LastMission, how: "fresh" | "last" | "closed", input: Input): Screen {
   const s = blank();
   s.node = last.node;
   s.planet = last.planet;
   s.faction = last.faction;
   s.factionCls = `dot f-${FACTIONS.has(last.factionId) ? last.factionId : "unknown"}`;
+  s.pills = last.pills;
   const result = last.result;
   const lost = result === "failed" || result === "aborted";
   const word = t(`res-${result ?? "ended"}`);
@@ -714,33 +865,45 @@ function after(last: LastMission, how: "fresh" | "last" | "closed"): Screen {
     s.eyebrow = t("state-last", { type: last.typeName });
     s.eyebrowIcon = "rocket";
   } else {
-    s.eyebrow = last.typeName;
-    s.eyebrowIcon = "clock-3";
+    s.eyebrow = result === null ? last.typeName : t("state-result", { type: last.typeName, result: word });
+    s.eyebrowIcon = result === null ? "clock-3" : RESULT_ICON[result];
+    s.tone = result === null ? "muted" : RESULT_TONE[result];
     s.agoFrom = last.endedAt;
   }
   s.lineIcon = s.eyebrowIcon;
   s.lineTone = how === "fresh" ? s.tone : "muted";
   const d = last.durationSeconds;
-  if (result === "failed") {
+  const got = last.got ?? {};
+  const total = Object.values(got).reduce((a, n) => a + (n ?? 0), 0);
+  // The game never says which item was won: one line of facts, no tables.
+  // Duration · (waves ·) rotations · credits; what was lost when it was.
+  const lead: string[] = [];
+  if (d !== null) lead.push(clockText(d * 1000));
+  const waves = last.waves;
+  if (waves !== null && !lost) lead.push(t(waves === 1 ? "facts-wave" : "facts-waves", { n: waves }));
+  if (total > 0) {
+    // A Defense has one fact more: its duration and waves go on a line of
+    // their own rather than wrap in the middle of a group.
+    if (waves !== null && !lost) s.factsTop = lead.join(" · ");
+    else s.factsLead = lead.length > 0 ? `${lead.join(" · ")} · ` : "";
+    s.factsGot = lost ? t("facts-lost", { got: gotText(got) }) : gotText(got);
+    s.factsCls = lost ? "facts-got lost" : "facts-got";
+    s.factsTail = !lost && last.credits !== null ? ` · ${t("facts-credits", { n: formatNumber(last.credits), credits: last.creditsName })}` : "";
+  } else if (result === "failed") {
     s.info = d === null ? t("summary-failed-nod") : t("summary-failed", { duration: minutesText(d) });
   } else if (result === "aborted") {
     s.info = t("summary-aborted");
-  } else if (last.rewards > 0) {
-    const key = last.rewards === 1 ? "summary-rotation-1" : "summary-rotations";
-    s.info = d === null ? rotationsText(last.rewards) : t(key, { count: last.rewards, duration: durationText(d) });
   } else if (d !== null) {
     s.info = t(result === "succeeded" ? "summary-succeeded" : "summary-ended", { duration: durationText(d) });
-  }
-  if (!lost && last.rewards > 0) {
-    const inCycle = last.rewards - 4 * Math.floor((last.rewards - 1) / 4);
-    s.track = track(-1, inCycle, false);
+    if (last.credits !== null) s.info += ` · ${t("facts-credits", { n: formatNumber(last.credits), credits: last.creditsName })}`;
   }
   const parts = [last.node];
   if (how === "closed") {
-    parts.push(!lost && last.rewards > 0 ? rotationsText(last.rewards) : word, "{ago}");
+    parts.push(!lost && total > 0 ? gotText(got) : word, "{ago}");
+  } else if (!lost && total > 0) {
+    parts.push(gotText(got));
   } else {
     parts.push(word);
-    if (!lost && last.rewards > 0) parts.push(rotationsText(last.rewards));
   }
   s.line = parts.join(" · ");
   return s;
@@ -758,6 +921,11 @@ export function refused(input: Input): (typeof DECLARED)[number] | null {
   return DECLARED.find((f) => features[f] === "undeclared") ?? null;
 }
 
+/** The game's word for credits, in the game's language. */
+function creditsName(value: WarframeEvents | null): string {
+  return value?.glossary.term.credits ?? "";
+}
+
 /** What is known, or `null` when nothing is. */
 function known(input: Input): Screen | null {
   const value = input.value;
@@ -765,13 +933,13 @@ function known(input: Input): Screen | null {
   const progress = value?.info.progress ?? null;
   const playing = value?.playing ?? false;
   const rewardsFeature = value?.features.rewards ?? "available";
-  if (mission !== null && !playing) return after(lastFrom(mission, progress, input.now), "closed");
+  if (mission !== null && !playing) return after(lastFrom(mission, progress, input.now, creditsName(value)), "closed", input);
   if (mission !== null) {
-    if (mission.state === "ended") return after(lastFrom(mission, progress, input.now), "fresh");
+    if (mission.state === "ended") return after(lastFrom(mission, progress, input.now, creditsName(value)), "fresh", input);
     if (mission.state === "in_progress") return live(mission, progress, input, rewardsFeature);
     return before(mission, input, rewardsFeature);
   }
-  if (input.last !== null) return after(input.last, playing && input.failure === null ? "last" : "closed");
+  if (input.last !== null) return after(input.last, playing && input.failure === null ? "last" : "closed", input);
   return null;
 }
 
@@ -827,15 +995,22 @@ export function lootOrder(): Order {
   return option("order", "rarest") === "likely" ? "likely" : "rarest";
 }
 
-function isLast(v: unknown): v is LastMission {
+/** A stored last mission of this version's shape; an older one is ignored. */
+export function isLast(v: unknown): v is LastMission {
   if (typeof v !== "object" || v === null) return false;
   const o = v as Record<string, unknown>;
   const str = (k: string) => typeof o[k] === "string";
-  const num = (k: string) => typeof o[k] === "number" && Number.isFinite(o[k]);
+  const num = (x: unknown) => typeof x === "number" && Number.isFinite(x);
+  const got = o.got as Record<string, unknown> | null;
+  const pills = o.pills;
   return (
-    str("node") && str("planet") && str("faction") && str("factionId") && str("typeId") && str("typeName") &&
+    str("node") && str("planet") && str("faction") && str("factionId") && str("typeId") && str("typeName") && str("creditsName") &&
     (o.result === null || o.result === "succeeded" || o.result === "failed" || o.result === "aborted") &&
-    (o.durationSeconds === null || num("durationSeconds")) && num("rewards") && num("endedAt")
+    (o.durationSeconds === null || num(o.durationSeconds)) && num(o.rewards) && num(o.endedAt) &&
+    (o.credits === null || num(o.credits)) && (o.waves === null || num(o.waves)) &&
+    typeof got === "object" && got !== null && Object.entries(got).every(([k, n]) => (k === "A" || k === "B" || k === "C") && num(n)) &&
+    Array.isArray(pills) && pills.length <= 8 &&
+    pills.every((x) => typeof x === "object" && x !== null && ["id", "text", "icon"].every((k) => typeof (x as Record<string, unknown>)[k] === "string"))
   );
 }
 

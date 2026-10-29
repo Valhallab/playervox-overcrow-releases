@@ -8,12 +8,12 @@
     {
       "locale": "en",
       "name": "Warframe mission rewards",
-      "description": "What your Warframe mission can give, and when: the next rotation's countdown or waves, the A A B C cycle and its loot, rarest first. Before the mission, the three rotations of the node. After it, a short summary. Rates: Digital Extremes, no guarantees. PlayerVox is not affiliated with Digital Extremes."
+      "description": "What your Warframe mission can give, and when: the next rotation's countdown, or the wave that pays in Defense, the A A B C cycle with the rotations earned, and its loot, rarest first. Before the mission, the three rotations of the node. After it, a one-line recap. Rates: Digital Extremes, no guarantees. PlayerVox is not affiliated with Digital Extremes."
     },
     {
       "locale": "fr",
       "name": "Récompenses de mission Warframe",
-      "description": "Ce que votre mission Warframe peut rapporter, et quand : compte à rebours ou vagues jusqu’à la prochaine rotation, cycle A A B C et son butin, les plus rares d’abord. Avant la mission, les trois rotations du nœud. Après, un court résumé. Taux : Digital Extremes, sans garantie. PlayerVox n’est pas affilié à Digital Extremes."
+      "description": "Ce que votre mission Warframe peut rapporter, et quand : compte à rebours de la prochaine rotation, ou vague qui paie en Défense, cycle A A B C avec les rotations obtenues, et son butin, les plus rares d’abord. Avant la mission, les trois rotations du nœud. Après, un récap d’une ligne. Taux : Digital Extremes, sans garantie. PlayerVox n’est pas affilié à Digital Extremes."
     }
   ]
 }

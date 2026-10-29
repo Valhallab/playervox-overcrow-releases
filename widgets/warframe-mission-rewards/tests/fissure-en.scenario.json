@@ -208,21 +208,55 @@
                   }
                 ]
               },
-              "selectedAt": 1793216768000,
-              "loadingAt": 1793216783000,
-              "startedAt": 1793216808000,
+              "selectedAt": 1793216723000,
+              "loadingAt": 1793216738000,
+              "startedAt": 1793216763000,
+              "modifiers": [],
+              "earned": null,
+              "credits": null,
+              "rewardsPending": false,
               "fissure": {
                 "id": "axi",
                 "name": "Axi"
               }
             },
             "progress": {
+              "wave": null,
+              "waveEnemies": null,
+              "round": null,
               "rewards": 2,
               "rotation": "B",
-              "nextRewardAt": 1793217708000
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A"
+                ],
+                "totals": {
+                  "A": 2,
+                  "B": 0,
+                  "C": 0
+                }
+              },
+              "cycle": {
+                "number": 1,
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "earned": 2
+              },
+              "clock": "running",
+              "nextRewardAt": 1793217708000,
+              "nextRewardWave": null
             }
           },
-          "event": "mission_started"
+          "event": "mission_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "en"
+          }
         }
       }
     },

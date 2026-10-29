@@ -1,0 +1,357 @@
+{
+  "scenarioVersion": 1,
+  "name": "survival-waiting-fr",
+  "description": "Survival before the panel is hacked: no countdown yet.",
+  "host": {
+    "locale": "fr",
+    "mode": "interactive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode405",
+                "name": "Mot"
+              },
+              "planet": {
+                "id": "void",
+                "name": "Néant"
+              },
+              "faction": {
+                "id": "corrupted",
+                "name": "Corrompus"
+              },
+              "type": {
+                "id": "survival",
+                "name": "Survie"
+              },
+              "rewards": {
+                "tables": [
+                  {
+                    "kind": "mission",
+                    "rotation": "A",
+                    "items": [
+                      {
+                        "id": "aya",
+                        "name": "Aya",
+                        "quantity": 1,
+                        "chance": 0.0909
+                      },
+                      {
+                        "id": "neo_a16_relic",
+                        "name": "Relique Neo A16",
+                        "quantity": 1,
+                        "chance": 0.0909
+                      },
+                      {
+                        "id": "neo_c10_relic",
+                        "name": "Relique Neo C10",
+                        "quantity": 1,
+                        "chance": 0.0909
+                      },
+                      {
+                        "id": "neo_c7_relic",
+                        "name": "Relique Neo C7",
+                        "quantity": 1,
+                        "chance": 0.0909
+                      },
+                      {
+                        "id": "neo_v13_relic",
+                        "name": "Relique Neo V13",
+                        "quantity": 1,
+                        "chance": 0.0909
+                      },
+                      {
+                        "id": "neo_c11_relic",
+                        "name": "Relique Neo C11",
+                        "quantity": 1,
+                        "chance": 0.1818
+                      },
+                      {
+                        "id": "neo_k10_relic",
+                        "name": "Relique Neo K10",
+                        "quantity": 1,
+                        "chance": 0.1818
+                      },
+                      {
+                        "id": "neo_y2_relic",
+                        "name": "Relique Neo Y2",
+                        "quantity": 1,
+                        "chance": 0.1818
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "B",
+                    "items": [
+                      {
+                        "id": "aya",
+                        "name": "Aya",
+                        "quantity": 1,
+                        "chance": 0.125
+                      },
+                      {
+                        "id": "neo_a16_relic",
+                        "name": "Relique Neo A16",
+                        "quantity": 1,
+                        "chance": 0.125
+                      },
+                      {
+                        "id": "neo_c10_relic",
+                        "name": "Relique Neo C10",
+                        "quantity": 1,
+                        "chance": 0.125
+                      },
+                      {
+                        "id": "neo_c11_relic",
+                        "name": "Relique Neo C11",
+                        "quantity": 1,
+                        "chance": 0.125
+                      },
+                      {
+                        "id": "neo_c7_relic",
+                        "name": "Relique Neo C7",
+                        "quantity": 1,
+                        "chance": 0.125
+                      },
+                      {
+                        "id": "neo_k10_relic",
+                        "name": "Relique Neo K10",
+                        "quantity": 1,
+                        "chance": 0.125
+                      },
+                      {
+                        "id": "neo_v13_relic",
+                        "name": "Relique Neo V13",
+                        "quantity": 1,
+                        "chance": 0.125
+                      },
+                      {
+                        "id": "neo_y2_relic",
+                        "name": "Relique Neo Y2",
+                        "quantity": 1,
+                        "chance": 0.125
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "C",
+                    "items": [
+                      {
+                        "id": "axi_a21_relic",
+                        "name": "Relique Axi A21",
+                        "quantity": 1,
+                        "chance": 0.0973
+                      },
+                      {
+                        "id": "axi_a22_relic",
+                        "name": "Relique Axi A22",
+                        "quantity": 1,
+                        "chance": 0.0973
+                      },
+                      {
+                        "id": "axi_c12_relic",
+                        "name": "Relique Axi C12",
+                        "quantity": 1,
+                        "chance": 0.0973
+                      },
+                      {
+                        "id": "axi_c13_relic",
+                        "name": "Relique Axi C13",
+                        "quantity": 1,
+                        "chance": 0.0973
+                      },
+                      {
+                        "id": "axi_d6_relic",
+                        "name": "Relique Axi D6",
+                        "quantity": 1,
+                        "chance": 0.0973
+                      },
+                      {
+                        "id": "axi_p10_relic",
+                        "name": "Relique Axi P10",
+                        "quantity": 1,
+                        "chance": 0.0973
+                      },
+                      {
+                        "id": "axi_s21_relic",
+                        "name": "Relique Axi S21",
+                        "quantity": 1,
+                        "chance": 0.0973
+                      },
+                      {
+                        "id": "axi_v14_relic",
+                        "name": "Relique Axi V14",
+                        "quantity": 1,
+                        "chance": 0.0973
+                      },
+                      {
+                        "id": "aya",
+                        "name": "Aya",
+                        "quantity": 1,
+                        "chance": 0.2211
+                      }
+                    ]
+                  }
+                ]
+              },
+              "selectedAt": 1793217549000,
+              "loadingAt": 1793217564000,
+              "startedAt": 1793217589000,
+              "modifiers": [],
+              "earned": null,
+              "credits": null,
+              "rewardsPending": false
+            },
+            "progress": {
+              "wave": null,
+              "waveEnemies": null,
+              "round": null,
+              "rewards": 0,
+              "rotation": "A",
+              "earned": {
+                "rotations": [],
+                "totals": {
+                  "A": 0,
+                  "B": 0,
+                  "C": 0
+                }
+              },
+              "cycle": {
+                "number": 1,
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "earned": 0
+              },
+              "clock": "waiting",
+              "nextRewardAt": null,
+              "nextRewardWave": null
+            }
+          },
+          "event": "mission_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "fr"
+          },
+          "glossary": {
+            "language": "fr",
+            "term": {
+              "reactant": "Réactif",
+              "relic": "Relique",
+              "credits": "Crédits"
+            }
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Attente du piratage"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "survival-waiting-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 44
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "survival-waiting-mini-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "compact"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 280,
+          "height": 230
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "survival-waiting-compact-fr",
+        "fault": "none"
+      }
+    }
+  ]
+}

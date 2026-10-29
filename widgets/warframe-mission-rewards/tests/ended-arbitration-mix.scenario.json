@@ -1,0 +1,425 @@
+{
+  "scenarioVersion": 1,
+  "name": "ended-arbitration-mix",
+  "description": "An Arbitration succeeded: A, B, then C.",
+  "host": {
+    "locale": "fr",
+    "mode": "interactive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode168",
+                "name": "Zabala"
+              },
+              "planet": {
+                "id": "eris",
+                "name": "Eris"
+              },
+              "faction": {
+                "id": "infested",
+                "name": "Infested"
+              },
+              "type": {
+                "id": "survival",
+                "name": "Survival"
+              },
+              "rewards": {
+                "source": "arbitration",
+                "tables": [
+                  {
+                    "kind": "mission",
+                    "rotation": "A",
+                    "items": [
+                      {
+                        "id": "ayatan_valana_sculpture",
+                        "name": "Ayatan Valana Sculpture",
+                        "quantity": 1,
+                        "chance": 0.09
+                      },
+                      {
+                        "id": "ayatan_sah_sculpture",
+                        "name": "Ayatan Sah Sculpture",
+                        "quantity": 1,
+                        "chance": 0.09
+                      },
+                      {
+                        "id": "ayatan_ayr_sculpture",
+                        "name": "Ayatan Ayr Sculpture",
+                        "quantity": 1,
+                        "chance": 0.09
+                      },
+                      {
+                        "id": "vitus_essence",
+                        "name": "Vitus Essence",
+                        "quantity": 3,
+                        "chance": 0.07
+                      },
+                      {
+                        "id": "arcane_pistoleer",
+                        "name": "Arcane Pistoleer",
+                        "quantity": 1,
+                        "chance": 0.05
+                      },
+                      {
+                        "id": "arcane_tanker",
+                        "name": "Arcane Tanker",
+                        "quantity": 1,
+                        "chance": 0.05
+                      },
+                      {
+                        "id": "arcane_bodyguard",
+                        "name": "Arcane Bodyguard",
+                        "quantity": 1,
+                        "chance": 0.05
+                      },
+                      {
+                        "id": "combat_discipline",
+                        "name": "Combat Discipline",
+                        "quantity": 1,
+                        "chance": 0.02
+                      },
+                      {
+                        "id": "adaptation",
+                        "name": "Adaptation",
+                        "quantity": 1,
+                        "chance": 0.02
+                      },
+                      {
+                        "id": "aerodynamic",
+                        "name": "Aerodynamic",
+                        "quantity": 1,
+                        "chance": 0.02
+                      },
+                      {
+                        "id": "omni_forma_blueprint",
+                        "name": "Omni Forma Blueprint",
+                        "quantity": 1,
+                        "chance": 0.01
+                      },
+                      {
+                        "id": "endo",
+                        "name": "Endo",
+                        "quantity": 900,
+                        "chance": 0.44
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "B",
+                    "items": [
+                      {
+                        "id": "ayatan_vaya_sculpture",
+                        "name": "Ayatan Vaya Sculpture",
+                        "quantity": 1,
+                        "chance": 0.12
+                      },
+                      {
+                        "id": "ayatan_piv_sculpture",
+                        "name": "Ayatan Piv Sculpture",
+                        "quantity": 1,
+                        "chance": 0.12
+                      },
+                      {
+                        "id": "vitus_essence",
+                        "name": "Vitus Essence",
+                        "quantity": 3,
+                        "chance": 0.07
+                      },
+                      {
+                        "id": "arcane_bodyguard",
+                        "name": "Arcane Bodyguard",
+                        "quantity": 1,
+                        "chance": 0.05
+                      },
+                      {
+                        "id": "arcane_blade_charger",
+                        "name": "Arcane Blade Charger",
+                        "quantity": 1,
+                        "chance": 0.05
+                      },
+                      {
+                        "id": "arcane_primary_charger",
+                        "name": "Arcane Primary Charger",
+                        "quantity": 1,
+                        "chance": 0.05
+                      },
+                      {
+                        "id": "combat_discipline",
+                        "name": "Combat Discipline",
+                        "quantity": 1,
+                        "chance": 0.025
+                      },
+                      {
+                        "id": "adaptation",
+                        "name": "Adaptation",
+                        "quantity": 1,
+                        "chance": 0.025
+                      },
+                      {
+                        "id": "shepherd",
+                        "name": "Shepherd",
+                        "quantity": 1,
+                        "chance": 0.025
+                      },
+                      {
+                        "id": "omni_forma_blueprint",
+                        "name": "Omni Forma Blueprint",
+                        "quantity": 1,
+                        "chance": 0.02
+                      },
+                      {
+                        "id": "endo",
+                        "name": "Endo",
+                        "quantity": 1200,
+                        "chance": 0.445
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "C",
+                    "items": [
+                      {
+                        "id": "ayatan_orta_sculpture",
+                        "name": "Ayatan Orta Sculpture",
+                        "quantity": 1,
+                        "chance": 0.2
+                      },
+                      {
+                        "id": "vitus_essence",
+                        "name": "Vitus Essence",
+                        "quantity": 3,
+                        "chance": 0.1
+                      },
+                      {
+                        "id": "arcane_pistoleer",
+                        "name": "Arcane Pistoleer",
+                        "quantity": 1,
+                        "chance": 0.05
+                      },
+                      {
+                        "id": "arcane_tanker",
+                        "name": "Arcane Tanker",
+                        "quantity": 1,
+                        "chance": 0.05
+                      },
+                      {
+                        "id": "arcane_blade_charger",
+                        "name": "Arcane Blade Charger",
+                        "quantity": 1,
+                        "chance": 0.05
+                      },
+                      {
+                        "id": "arcane_primary_charger",
+                        "name": "Arcane Primary Charger",
+                        "quantity": 1,
+                        "chance": 0.05
+                      },
+                      {
+                        "id": "combat_discipline",
+                        "name": "Combat Discipline",
+                        "quantity": 1,
+                        "chance": 0.035
+                      },
+                      {
+                        "id": "melee_guidance",
+                        "name": "Melee Guidance",
+                        "quantity": 1,
+                        "chance": 0.035
+                      },
+                      {
+                        "id": "swift_momentum",
+                        "name": "Swift Momentum",
+                        "quantity": 1,
+                        "chance": 0.035
+                      },
+                      {
+                        "id": "omni_forma_blueprint",
+                        "name": "Omni Forma Blueprint",
+                        "quantity": 1,
+                        "chance": 0.045
+                      },
+                      {
+                        "id": "endo",
+                        "name": "Endo",
+                        "quantity": 1500,
+                        "chance": 0.35
+                      }
+                    ]
+                  }
+                ]
+              },
+              "modifiers": [
+                {
+                  "id": "arbitration",
+                  "name": "Arbitration",
+                  "stage": null
+                }
+              ],
+              "rewardsPending": false,
+              "earned": null,
+              "credits": null,
+              "selectedAt": 1793217200000,
+              "loadingAt": 1793217220000,
+              "startedAt": 1793215131400
+            },
+            "progress": {
+              "wave": null,
+              "waveEnemies": null,
+              "round": null,
+              "rewards": 8,
+              "rotation": "C",
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "B",
+                  "C",
+                  "C",
+                  "C",
+                  "C"
+                ],
+                "totals": {
+                  "A": 2,
+                  "B": 2,
+                  "C": 4
+                }
+              },
+              "cycle": {
+                "number": 3,
+                "rotations": [
+                  "C",
+                  "C",
+                  "C",
+                  "C"
+                ],
+                "earned": 0
+              },
+              "clock": "running",
+              "nextRewardAt": null,
+              "nextRewardWave": null
+            }
+          },
+          "event": "mission_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "en"
+          }
+        }
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "ended",
+              "result": "succeeded",
+              "endedAt": 1793217580000,
+              "durationSeconds": 2448.6,
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "B",
+                  "C",
+                  "C",
+                  "C",
+                  "C"
+                ],
+                "totals": {
+                  "A": 2,
+                  "B": 2,
+                  "C": 4
+                }
+              },
+              "credits": 96300
+            },
+            "progress": {
+              "wave": null,
+              "waveEnemies": null,
+              "round": null,
+              "rewards": 8,
+              "rotation": "C",
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "B",
+                  "C",
+                  "C",
+                  "C",
+                  "C"
+                ],
+                "totals": {
+                  "A": 2,
+                  "B": 2,
+                  "C": 4
+                }
+              },
+              "cycle": {
+                "number": 3,
+                "rotations": [
+                  "C",
+                  "C",
+                  "C",
+                  "C"
+                ],
+                "earned": 0
+              },
+              "clock": "running",
+              "nextRewardAt": null,
+              "nextRewardWave": null
+            }
+          },
+          "event": "mission_ended"
+        }
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "ended-arbitration-mix",
+        "fault": "none"
+      }
+    }
+  ]
+}

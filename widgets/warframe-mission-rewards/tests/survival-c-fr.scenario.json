@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "survival-c-fr",
-  "description": "Survival, rotation C next: then A at 25 min.",
+  "description": "Survival, rotation C next: then A.",
   "host": {
     "locale": "fr",
     "mode": "interactive",
@@ -208,26 +208,61 @@
                   }
                 ]
               },
-              "selectedAt": 1793216498000,
-              "loadingAt": 1793216513000,
-              "startedAt": 1793216538000
+              "selectedAt": 1793216453000,
+              "loadingAt": 1793216468000,
+              "startedAt": 1793216493000,
+              "modifiers": [],
+              "earned": null,
+              "credits": null,
+              "rewardsPending": false
             },
             "progress": {
+              "wave": null,
+              "waveEnemies": null,
+              "round": null,
               "rewards": 3,
               "rotation": "C",
-              "nextRewardAt": 1793217738000
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A",
+                  "B"
+                ],
+                "totals": {
+                  "A": 2,
+                  "B": 1,
+                  "C": 0
+                }
+              },
+              "cycle": {
+                "number": 1,
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "earned": 3
+              },
+              "clock": "running",
+              "nextRewardAt": 1793217738000,
+              "nextRewardWave": null
             }
           },
-          "event": "mission_started"
+          "event": "mission_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "fr"
+          },
+          "glossary": {
+            "language": "fr",
+            "term": {
+              "reactant": "Réactif",
+              "relic": "Relique",
+              "credits": "Crédits"
+            }
+          }
         }
-      }
-    },
-    {
-      "expect": {
-        "text": [
-          "Puis A à 25 min"
-        ],
-        "fault": "none"
       }
     },
     {

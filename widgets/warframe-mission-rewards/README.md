@@ -19,21 +19,35 @@ Digital Extremes.
 | State | Shows |
 | --- | --- |
 | No mission yet | "Pick a mission" |
-| Mission picked, loading | The node, then the three rotations A, B and C stacked, three rows each, and when C comes ("One rotation every 5 min · C at 20 min") |
-| Survival | "Rotation B in **1:48**" and "C in 6:48"; then "Then A at 25 min" before a C, "2 C so far · next C at 60 min" in later cycles. The mission clock in the header |
-| Defense | "Waves until B **4**", "This one included · B after wave 15"; the wave in the header |
-| Interception, Disruption | "Rotation B at the end of round 3" |
-| Progress not given (Excavation, Spy, Capture, Mobile Defense) | The three rotations stacked, with when C comes for Excavation, "Progress not tracked" otherwise: no rotation is made up |
+| Mission picked, loading | The node, then the three rotations A, B and C stacked, three rows each, and when C comes ("One rotation every 5 min · C at 20 min", "One rotation every 3 waves · C at wave 12") |
+| Survival before the panel is hacked | "Waiting for the hack", "Rotation A 5 min after the hack": no countdown before the game starts its own |
+| Survival | "Rotation B in **1:48**", then "Then C in 6:48". The mission clock in the header |
+| Defense | "Rotation B at the end of wave **9**" on one line, "Now: wave 8 · 14 enemies left" under it; "at the end of **this wave**" on the wave that pays |
+| Interception | "Rotation B at the end of round 3" |
+| Progress not given (Excavation, Spy, Capture, Mobile Defense, Disruption) | The three rotations stacked, with when C comes for Excavation, "Progress not tracked" otherwise: no rotation is made up |
 | One reward at the end (Assassination) | "No rotation: one reward at the end" and that table |
-| No loot table (Exterminate) | "No loot table for this kind of mission." |
+| Arbitration | Its own table: "Arbitration · rotation C"; A, A, B, B, then C for ever |
+| Sortie | One table, "Sortie reward", and "One, after the 3rd mission" |
+| Nightmare | One table, "Nightmare mod, once" |
+| Loot not known yet | "Loot known on loading" (a node of today's Sortie or Archon Hunt, picked) |
+| No loot table | "No published loot table for this mission" (Exterminate, Archon Hunt, Alert) |
 | New node | "Loot not published yet" |
 | Void Fissure | The node's table, as in any mission, and "10 reactant per relic" |
-| Mission ended | A summary without tables: "4 rotations earned in 20 min 41" and the cycle checked; "Rewards lost 13 min into the mission." after a failure, "Left without extracting" after an abort |
-| After the game | The last mission, kept in storage: "Survival · 2 h ago" with the game closed, "last mission" in the next session |
+| Mission ended | The recap, one line of facts: the duration, the waves of a Defense, the rotations earned ("A ×6 · B ×3 · C ×3", in green) and the credits. After a failure or an abort: "Rotations lost: A ×2" |
+| After the game | The last recap, kept in storage: "Survival · succeeded · 2 h ago" with the game closed, "last mission" in the next session |
 | Errors | Missions not allowed, missions that can't be read, loot unavailable for now |
 
-The cycle A A B C is a row of cells: a check for each rotation earned, the
-next one in the accent colour.
+The cycle A A B C is a row of cells, numbered from the second cycle on
+("Cycle 2"): the rotations earned filled in green with a check, the next
+one outlined in the accent colour. The table of a rotation already earned
+says so ("A earned ×3"). Warframe never says which item a rotation gave:
+the widget shows the rotations, never an item. Names from the game (node,
+type, items, "Credits") come in the game's language; the widget's own
+words follow the app's.
+
+Within a mission, the widget never changes size by itself: the table
+keeps the height of the node's longest rotation, the countdown its place.
+Only the Layout menu changes it.
 
 ### Tables
 
@@ -51,22 +65,22 @@ next one in the accent colour.
 
 ### Timing
 
-Warframe tells what happens about 10 seconds late, sometimes 26. The
-widget never waits for it: it counts down to `nextRewardAt`, and when that
-moment passes it moves on to the next rotation by itself; the late update
-then says what it already shows. In Defense, a wave already past the
-reward's wave counts as paid. One host timer ticks on the second the
-countdown changes, or on the minute for "2 h ago"; none while the widget
-is hidden.
+Warframe tells what happens a little late. The widget never waits for it:
+it counts down to `nextRewardAt`, and when that moment passes it moves on
+to the next rotation by itself; the late update then says what it already
+shows. In Defense, a wave already past the reward's wave counts as paid
+(every 3 waves, every 2 in Mirror Defense, as the host's next wave says).
+One host timer ticks on the second the countdown changes, or on the
+minute for "2 h ago"; none while the widget is hidden.
 
 ## Permissions
 
 | Permission | Why |
 | --- | --- |
-| `gameEvents` `warframe.mission` | The mission picked, loading, in progress or ended |
-| `gameEvents` `warframe.progress` | The rewards given, the wave or round, when the next reward comes |
+| `gameEvents` `warframe.mission` | The mission picked, loading, in progress or ended; at the end, the rotations earned and the credits |
+| `gameEvents` `warframe.progress` | The rewards given and their cycle, the wave and its enemies, the round, when the next reward comes |
 | `gameEvents` `warframe.rewards` | The node's tables, by rotation, with each item's chance |
-| `storage` | The last mission, in one key (`last`) of a few hundred bytes |
+| `storage` | The last recap, in one key (`last`) of a few hundred bytes |
 
 No network.
 
@@ -80,9 +94,11 @@ No network.
 ## Tests
 
 - `npm test`: the logic (`tests/logic.test.mjs`), on `@overcrow/sdk/testing`:
-  the rotation at every boundary (5:00 sharp, wave 5, a reward told 26 s
-  late, a relaunched mission, an aborted one), both orders, "+ n more".
-- `overcrow-widget test`: one scenario per state and language, each a
-  sequence of `gameEvents` steps, with reference images in English and
-  French; Full at 100 %, and a few at 150 %, One line, Compact, wide and
-  in the most likely order.
+  the rotation at every boundary (5:00 sharp, a wave already past, a
+  reward told 26 s late), endless cycles (an hour of Survival, 24 waves of
+  Defense, an Arbitration), the wait for the hack, the loot's sources, the
+  recap, both orders, "+ n more".
+- `overcrow-widget test`: one scenario per state, in English, in French,
+  and with the app in French and the game in English; a real Survival and
+  a real Defense step by step. Full at 100 %, and a few at 150 %, One
+  line, Compact, wide, light theme and in the most likely order.

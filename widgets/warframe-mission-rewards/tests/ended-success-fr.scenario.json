@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "ended-success-fr",
-  "description": "Mission succeeded: a summary without tables.",
+  "description": "A one-hour Survival succeeded: one line of facts.",
   "host": {
     "locale": "fr",
     "mode": "interactive",
@@ -208,15 +208,67 @@
                   }
                 ]
               },
-              "startedAt": 1793216328800
+              "startedAt": 1793213845600,
+              "modifiers": [],
+              "earned": null,
+              "credits": null,
+              "rewardsPending": false
             },
             "progress": {
-              "rewards": 4,
+              "wave": null,
+              "waveEnemies": null,
+              "round": null,
+              "rewards": 12,
               "rotation": "A",
-              "nextRewardAt": 1793217828800
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C",
+                  "A",
+                  "A",
+                  "B",
+                  "C",
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "totals": {
+                  "A": 6,
+                  "B": 3,
+                  "C": 3
+                }
+              },
+              "cycle": {
+                "number": 4,
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "earned": 0
+              },
+              "clock": "running",
+              "nextRewardAt": null,
+              "nextRewardWave": null
             }
           },
-          "event": "mission_started"
+          "event": "mission_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "fr"
+          },
+          "glossary": {
+            "language": "fr",
+            "term": {
+              "reactant": "Réactif",
+              "relic": "Relique",
+              "credits": "Crédits"
+            }
+          }
         }
       }
     },
@@ -227,8 +279,71 @@
             "mission": {
               "state": "ended",
               "result": "succeeded",
-              "endedAt": 1793217570000,
-              "durationSeconds": 1241.2
+              "endedAt": 1793217580000,
+              "durationSeconds": 3734.4,
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C",
+                  "A",
+                  "A",
+                  "B",
+                  "C",
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "totals": {
+                  "A": 6,
+                  "B": 3,
+                  "C": 3
+                }
+              },
+              "credits": 128450
+            },
+            "progress": {
+              "wave": null,
+              "waveEnemies": null,
+              "round": null,
+              "rewards": 12,
+              "rotation": "A",
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C",
+                  "A",
+                  "A",
+                  "B",
+                  "C",
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "totals": {
+                  "A": 6,
+                  "B": 3,
+                  "C": 3
+                }
+              },
+              "cycle": {
+                "number": 4,
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "earned": 0
+              },
+              "clock": "running",
+              "nextRewardAt": null,
+              "nextRewardWave": null
             }
           },
           "event": "mission_ended"
@@ -260,6 +375,118 @@
     {
       "expect": {
         "image": "ended-success-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 44
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "ended-success-mini-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "compact"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 280,
+          "height": 230
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "ended-success-compact-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 600,
+          "height": 420
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "ended-success-wide-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1500,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "ended-success-150-fr",
         "fault": "none"
       }
     }

@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "no-table-en",
-  "description": "Exterminate: no loot table.",
+  "description": "Exterminate: no published loot table.",
   "host": {
     "locale": "en",
     "mode": "interactive",
@@ -34,20 +34,47 @@
               },
               "type": {
                 "id": "extermination",
-                "name": "Exterminate"
+                "name": "Extermination"
               },
               "rewards": null,
-              "startedAt": 1793217355000
+              "startedAt": 1793217355000,
+              "modifiers": [],
+              "earned": null,
+              "credits": null,
+              "rewardsPending": false
+            },
+            "progress": {
+              "wave": null,
+              "waveEnemies": null,
+              "round": null,
+              "rewards": 0,
+              "rotation": null,
+              "earned": {
+                "rotations": [],
+                "totals": {
+                  "A": 0,
+                  "B": 0,
+                  "C": 0
+                }
+              },
+              "cycle": null,
+              "clock": null,
+              "nextRewardAt": null,
+              "nextRewardWave": null
             }
           },
-          "event": "mission_started"
+          "event": "mission_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "en"
+          }
         }
       }
     },
     {
       "expect": {
         "text": [
-          "No loot table for this kind of mission."
+          "No published loot table for this mission"
         ],
         "fault": "none"
       }
