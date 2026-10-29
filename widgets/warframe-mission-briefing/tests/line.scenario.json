@@ -224,7 +224,7 @@
               },
               "type": {
                 "id": "defense",
-                "name": "Défense"
+                "name": "Defense"
               },
               "faction": {
                 "id": "grineer",
@@ -328,7 +328,7 @@
               },
               "faction": {
                 "id": "murmur",
-                "name": "Le Murmure"
+                "name": "The Murmur"
               },
               "enemyLevel": null,
               "fissure": null,
@@ -422,7 +422,7 @@
               },
               "faction": {
                 "id": "murmur",
-                "name": "Le Murmure"
+                "name": "The Murmur"
               },
               "enemyLevel": null,
               "fissure": null,

@@ -9,9 +9,6 @@
     {
       "gameEvents": {
         "warframe": {
-          "features": {
-            "world": "unavailable"
-          },
           "info": {
             "mission": {
               "state": "selected",
@@ -75,11 +72,11 @@
               },
               "planet": {
                 "id": "saturn",
-                "name": "Saturne"
+                "name": "Saturn"
               },
               "type": {
                 "id": "disruption",
-                "name": "Perturbation"
+                "name": "Disruption"
               },
               "faction": {
                 "id": "grineer",
@@ -187,11 +184,11 @@
               },
               "planet": {
                 "id": "saturn",
-                "name": "Saturne"
+                "name": "Saturn"
               },
               "type": {
                 "id": "disruption",
-                "name": "Perturbation"
+                "name": "Disruption"
               },
               "faction": {
                 "id": "grineer",

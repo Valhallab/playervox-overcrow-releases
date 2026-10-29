@@ -139,7 +139,7 @@
               "sortie": {
                 "boss": {
                   "id": "sargas_ruk",
-                  "name": "Général Sargas Ruk"
+                  "name": "General Sargas Ruk"
                 },
                 "faction": {
                   "id": "grineer",
@@ -154,7 +154,7 @@
                     },
                     "planet": {
                       "id": "saturn",
-                      "name": "Saturne"
+                      "name": "Saturn"
                     },
                     "type": {
                       "id": "extermination",
@@ -162,7 +162,7 @@
                     },
                     "modifier": {
                       "id": "augmented_armor",
-                      "name": "Armure ennemie augmentée"
+                      "name": "Augmented Enemy Armor"
                     }
                   },
                   {
@@ -172,15 +172,15 @@
                     },
                     "planet": {
                       "id": "saturn",
-                      "name": "Saturne"
+                      "name": "Saturn"
                     },
                     "type": {
                       "id": "disruption",
-                      "name": "Perturbation"
+                      "name": "Disruption"
                     },
                     "modifier": {
                       "id": "sniper_only",
-                      "name": "Fusils de précision uniquement"
+                      "name": "Sniper Only"
                     }
                   },
                   {
@@ -190,15 +190,15 @@
                     },
                     "planet": {
                       "id": "saturn",
-                      "name": "Saturne"
+                      "name": "Saturn"
                     },
                     "type": {
                       "id": "assassination",
-                      "name": "Assassinat"
+                      "name": "Assassination"
                     },
                     "modifier": {
                       "id": "eximus_stronghold",
-                      "name": "Forteresse Eximus"
+                      "name": "Eximus Stronghold"
                     }
                   }
                 ]
@@ -216,11 +216,11 @@
               },
               "planet": {
                 "id": "saturn",
-                "name": "Saturne"
+                "name": "Saturn"
               },
               "type": {
                 "id": "disruption",
-                "name": "Perturbation"
+                "name": "Disruption"
               },
               "faction": {
                 "id": "grineer",
@@ -399,7 +399,7 @@
               "sortie": {
                 "boss": {
                   "id": "sargas_ruk",
-                  "name": "Général Sargas Ruk"
+                  "name": "General Sargas Ruk"
                 },
                 "faction": {
                   "id": "grineer",
@@ -414,7 +414,7 @@
                     },
                     "planet": {
                       "id": "saturn",
-                      "name": "Saturne"
+                      "name": "Saturn"
                     },
                     "type": {
                       "id": "extermination",
@@ -422,7 +422,7 @@
                     },
                     "modifier": {
                       "id": "augmented_armor",
-                      "name": "Armure ennemie augmentée"
+                      "name": "Augmented Enemy Armor"
                     }
                   },
                   {
@@ -432,15 +432,15 @@
                     },
                     "planet": {
                       "id": "saturn",
-                      "name": "Saturne"
+                      "name": "Saturn"
                     },
                     "type": {
                       "id": "disruption",
-                      "name": "Perturbation"
+                      "name": "Disruption"
                     },
                     "modifier": {
                       "id": "sniper_only",
-                      "name": "Fusils de précision uniquement"
+                      "name": "Sniper Only"
                     }
                   },
                   {
@@ -450,15 +450,15 @@
                     },
                     "planet": {
                       "id": "saturn",
-                      "name": "Saturne"
+                      "name": "Saturn"
                     },
                     "type": {
                       "id": "assassination",
-                      "name": "Assassinat"
+                      "name": "Assassination"
                     },
                     "modifier": {
                       "id": "eximus_stronghold",
-                      "name": "Forteresse Eximus"
+                      "name": "Eximus Stronghold"
                     }
                   }
                 ]
@@ -476,11 +476,11 @@
               },
               "planet": {
                 "id": "saturn",
-                "name": "Saturne"
+                "name": "Saturn"
               },
               "type": {
                 "id": "disruption",
-                "name": "Perturbation"
+                "name": "Disruption"
               },
               "faction": {
                 "id": "grineer",
@@ -659,7 +659,7 @@
               "sortie": {
                 "boss": {
                   "id": "sargas_ruk",
-                  "name": "Général Sargas Ruk"
+                  "name": "General Sargas Ruk"
                 },
                 "faction": {
                   "id": "grineer",
@@ -674,7 +674,7 @@
                     },
                     "planet": {
                       "id": "saturn",
-                      "name": "Saturne"
+                      "name": "Saturn"
                     },
                     "type": {
                       "id": "extermination",
@@ -682,7 +682,7 @@
                     },
                     "modifier": {
                       "id": "augmented_armor",
-                      "name": "Armure ennemie augmentée"
+                      "name": "Augmented Enemy Armor"
                     }
                   },
                   {
@@ -692,15 +692,15 @@
                     },
                     "planet": {
                       "id": "saturn",
-                      "name": "Saturne"
+                      "name": "Saturn"
                     },
                     "type": {
                       "id": "disruption",
-                      "name": "Perturbation"
+                      "name": "Disruption"
                     },
                     "modifier": {
                       "id": "sniper_only",
-                      "name": "Fusils de précision uniquement"
+                      "name": "Sniper Only"
                     }
                   },
                   {
@@ -710,15 +710,15 @@
                     },
                     "planet": {
                       "id": "saturn",
-                      "name": "Saturne"
+                      "name": "Saturn"
                     },
                     "type": {
                       "id": "assassination",
-                      "name": "Assassinat"
+                      "name": "Assassination"
                     },
                     "modifier": {
                       "id": "eximus_stronghold",
-                      "name": "Forteresse Eximus"
+                      "name": "Eximus Stronghold"
                     }
                   }
                 ]
@@ -736,11 +736,11 @@
               },
               "planet": {
                 "id": "saturn",
-                "name": "Saturne"
+                "name": "Saturn"
               },
               "type": {
                 "id": "disruption",
-                "name": "Perturbation"
+                "name": "Disruption"
               },
               "faction": {
                 "id": "grineer",

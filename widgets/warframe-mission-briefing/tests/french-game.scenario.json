@@ -1,0 +1,154 @@
+{
+  "scenarioVersion": 1,
+  "name": "french-game",
+  "description": "Warframe in French: the game's names (damage types, the Fissure, Reactant, the Corrupted) come in the game's language whatever the app's; the widget's own words follow the app.",
+  "host": {
+    "startAt": 1793199600000
+  },
+  "steps": [
+    {
+      "gameEvents": {
+        "warframe": {
+          "glossary": {
+            "language": "fr",
+            "damage": {
+              "impact": "Impact",
+              "puncture": "Perforation",
+              "slash": "Tranchant",
+              "heat": "Feu",
+              "cold": "Glace",
+              "electricity": "Électrique",
+              "toxin": "Poison",
+              "blast": "Explosion",
+              "corrosive": "Corrosif",
+              "gas": "Gaz",
+              "magnetic": "Magnétique",
+              "radiation": "Radiation",
+              "viral": "Viral"
+            },
+            "fissure": {
+              "lith": "Fissure Lith",
+              "meso": "Fissure Meso",
+              "neo": "Fissure Neo",
+              "axi": "Fissure Axi",
+              "requiem": "Fissure Requiem",
+              "omnia": "Fissure Omnia"
+            },
+            "activity": {
+              "void_fissure": "Fissure du Néant"
+            },
+            "faction": {
+              "corpus": "Corpus",
+              "corrupted": "Corrompus",
+              "grineer": "Grineer"
+            },
+            "term": {
+              "reactant": "Réactif"
+            }
+          },
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode308",
+                "name": "Apollo"
+              },
+              "planet": {
+                "id": "lua",
+                "name": "Lua"
+              },
+              "type": {
+                "id": "disruption",
+                "name": "Perturbation"
+              },
+              "faction": {
+                "id": "corpus",
+                "name": "Corpus"
+              },
+              "enemyLevel": {
+                "min": 135,
+                "max": 140
+              },
+              "fissure": {
+                "id": "neo",
+                "name": "Neo"
+              },
+              "modifiers": [
+                {
+                  "id": "steel_path",
+                  "name": "Route de l’Acier",
+                  "stage": null
+                }
+              ]
+            }
+          },
+          "event": "mission_selected"
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Apollo · Lua · Perturbation",
+          "Corpus",
+          "Perforation",
+          "Magnétique",
+          "Route de l’Acier",
+          "Fissure Neo",
+          "Réactif ×10 sur les Corrompus"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "expect": {
+        "image": "french-game-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Perforation",
+          "Magnétique",
+          "Fissure Neo",
+          "Collect 10 Réactif from Corrompus enemies",
+          "Use"
+        ],
+        "noText": [
+          "Puncture",
+          "Neo Fissure"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "expect": {
+        "image": "french-game-en-100",
+        "fault": "none"
+      }
+    }
+  ]
+}

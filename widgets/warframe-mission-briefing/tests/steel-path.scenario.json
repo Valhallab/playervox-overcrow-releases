@@ -78,7 +78,7 @@
               },
               "type": {
                 "id": "disruption",
-                "name": "Perturbation"
+                "name": "Disruption"
               },
               "faction": {
                 "id": "corpus",
@@ -95,7 +95,7 @@
               "modifiers": [
                 {
                   "id": "steel_path",
-                  "name": "Route de l’Acier",
+                  "name": "Steel Path",
                   "stage": null
                 }
               ]
@@ -196,7 +196,7 @@
               },
               "type": {
                 "id": "disruption",
-                "name": "Perturbation"
+                "name": "Disruption"
               },
               "faction": {
                 "id": "corpus",
@@ -213,7 +213,7 @@
               "modifiers": [
                 {
                   "id": "steel_path",
-                  "name": "Route de l’Acier",
+                  "name": "Steel Path",
                   "stage": null
                 }
               ]
@@ -314,7 +314,7 @@
               },
               "type": {
                 "id": "disruption",
-                "name": "Perturbation"
+                "name": "Disruption"
               },
               "faction": {
                 "id": "corpus",
@@ -331,7 +331,7 @@
               "modifiers": [
                 {
                   "id": "steel_path",
-                  "name": "Route de l’Acier",
+                  "name": "Steel Path",
                   "stage": null
                 }
               ]
@@ -432,7 +432,7 @@
               },
               "type": {
                 "id": "disruption",
-                "name": "Perturbation"
+                "name": "Disruption"
               },
               "faction": {
                 "id": "corpus",
@@ -449,7 +449,7 @@
               "modifiers": [
                 {
                   "id": "steel_path",
-                  "name": "Route de l’Acier",
+                  "name": "Steel Path",
                   "stage": null
                 }
               ]
@@ -543,7 +543,7 @@
               },
               "type": {
                 "id": "disruption",
-                "name": "Perturbation"
+                "name": "Disruption"
               },
               "faction": {
                 "id": "corpus",
@@ -560,7 +560,7 @@
               "modifiers": [
                 {
                   "id": "steel_path",
-                  "name": "Route de l’Acier",
+                  "name": "Steel Path",
                   "stage": null
                 }
               ]
@@ -661,7 +661,7 @@
               },
               "type": {
                 "id": "disruption",
-                "name": "Perturbation"
+                "name": "Disruption"
               },
               "faction": {
                 "id": "corpus",
@@ -678,7 +678,7 @@
               "modifiers": [
                 {
                   "id": "steel_path",
-                  "name": "Route de l’Acier",
+                  "name": "Steel Path",
                   "stage": null
                 }
               ]
@@ -785,7 +785,7 @@
               },
               "type": {
                 "id": "disruption",
-                "name": "Perturbation"
+                "name": "Disruption"
               },
               "faction": {
                 "id": "corpus",
@@ -802,7 +802,7 @@
               "modifiers": [
                 {
                   "id": "steel_path",
-                  "name": "Route de l’Acier",
+                  "name": "Steel Path",
                   "stage": null
                 }
               ]

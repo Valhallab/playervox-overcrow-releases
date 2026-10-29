@@ -67,11 +67,11 @@
               },
               "planet": {
                 "id": "ceres",
-                "name": "Cérès"
+                "name": "Ceres"
               },
               "type": {
                 "id": "defense",
-                "name": "Défense"
+                "name": "Defense"
               },
               "faction": {
                 "id": "grineer",
@@ -85,7 +85,7 @@
               "modifiers": [
                 {
                   "id": "arbitration",
-                  "name": "Arbitrage",
+                  "name": "Arbitration",
                   "stage": null
                 }
               ]
@@ -179,11 +179,11 @@
               },
               "planet": {
                 "id": "ceres",
-                "name": "Cérès"
+                "name": "Ceres"
               },
               "type": {
                 "id": "defense",
-                "name": "Défense"
+                "name": "Defense"
               },
               "faction": {
                 "id": "grineer",
@@ -197,7 +197,7 @@
               "modifiers": [
                 {
                   "id": "arbitration",
-                  "name": "Arbitrage",
+                  "name": "Arbitration",
                   "stage": null
                 }
               ]
@@ -291,11 +291,11 @@
               },
               "planet": {
                 "id": "ceres",
-                "name": "Cérès"
+                "name": "Ceres"
               },
               "type": {
                 "id": "defense",
-                "name": "Défense"
+                "name": "Defense"
               },
               "faction": {
                 "id": "grineer",
@@ -309,7 +309,7 @@
               "modifiers": [
                 {
                   "id": "arbitration",
-                  "name": "Arbitrage",
+                  "name": "Arbitration",
                   "stage": null
                 }
               ]

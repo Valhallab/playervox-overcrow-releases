@@ -60,11 +60,11 @@
               "state": "selected",
               "node": {
                 "id": "SolNode854",
-                "name": "Extermination: Techrot"
+                "name": "Exterminate: Techrot"
               },
               "planet": {
                 "id": "hollvania",
-                "name": "Höllvanie"
+                "name": "Höllvania"
               },
               "type": {
                 "id": "extermination",
@@ -160,11 +160,11 @@
               "state": "selected",
               "node": {
                 "id": "SolNode854",
-                "name": "Extermination: Techrot"
+                "name": "Exterminate: Techrot"
               },
               "planet": {
                 "id": "hollvania",
-                "name": "Höllvanie"
+                "name": "Höllvania"
               },
               "type": {
                 "id": "extermination",

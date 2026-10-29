@@ -61,7 +61,7 @@
               "planet": null,
               "type": {
                 "id": "defense",
-                "name": "Défense"
+                "name": "Defense"
               },
               "faction": null,
               "enemyLevel": {
@@ -149,7 +149,7 @@
               "planet": null,
               "type": {
                 "id": "defense",
-                "name": "Défense"
+                "name": "Defense"
               },
               "faction": null,
               "enemyLevel": {

@@ -60,15 +60,15 @@
               "state": "selected",
               "node": {
                 "id": "SolNode858",
-                "name": "Place du Solstice"
+                "name": "Solstice Square"
               },
               "planet": {
                 "id": "hollvania",
-                "name": "Höllvanie"
+                "name": "Höllvania"
               },
               "type": {
                 "id": "defense",
-                "name": "Défense"
+                "name": "Defense"
               },
               "faction": {
                 "id": "scaldra",
@@ -160,15 +160,15 @@
               "state": "selected",
               "node": {
                 "id": "SolNode858",
-                "name": "Place du Solstice"
+                "name": "Solstice Square"
               },
               "planet": {
                 "id": "hollvania",
-                "name": "Höllvanie"
+                "name": "Höllvania"
               },
               "type": {
                 "id": "defense",
-                "name": "Défense"
+                "name": "Defense"
               },
               "faction": {
                 "id": "scaldra",

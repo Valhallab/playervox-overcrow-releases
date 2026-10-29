@@ -64,15 +64,15 @@
               },
               "planet": {
                 "id": "void",
-                "name": "Néant"
+                "name": "Void"
               },
               "type": {
                 "id": "survival",
-                "name": "Survie"
+                "name": "Survival"
               },
               "faction": {
                 "id": "corrupted",
-                "name": "Corrompus"
+                "name": "Corrupted"
               },
               "enemyLevel": {
                 "min": 40,
@@ -164,15 +164,15 @@
               },
               "planet": {
                 "id": "void",
-                "name": "Néant"
+                "name": "Void"
               },
               "type": {
                 "id": "survival",
-                "name": "Survie"
+                "name": "Survival"
               },
               "faction": {
                 "id": "corrupted",
-                "name": "Corrompus"
+                "name": "Corrupted"
               },
               "enemyLevel": {
                 "min": 40,
@@ -264,15 +264,15 @@
               },
               "planet": {
                 "id": "void",
-                "name": "Néant"
+                "name": "Void"
               },
               "type": {
                 "id": "survival",
-                "name": "Survie"
+                "name": "Survival"
               },
               "faction": {
                 "id": "corrupted",
-                "name": "Corrompus"
+                "name": "Corrupted"
               },
               "enemyLevel": {
                 "min": 40,
