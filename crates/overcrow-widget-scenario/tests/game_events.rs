@@ -378,8 +378,7 @@ fn the_glossary_and_the_language_play_like_the_rest() {
                     .game_event_updates(&declared(&["warframe.mission"]))
                     .map(|_| scenario)
             })
-            .err()
-            .expect("refused");
+            .expect_err("refused");
         assert!(
             error.path.ends_with(path),
             "{} {}",
