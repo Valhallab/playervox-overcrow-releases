@@ -99,8 +99,9 @@ ensuite les rapports de l’overlay.
 <!-- /generated:failure-categories -->
 
 **Journaux** : chaque `log.debug`, `log.info`, `log.warn` et `log.error` de
-la logique, avec son niveau. Une ligne de journal est coupée à
-512 caractères. Les caractères de contrôle, les séquences d’échappement du
+la logique, avec son niveau. Une ligne de journal montre les
+512 premiers caractères de son texte, puis `…` (le widget coupe un texte à
+4 Kio ; `--format json` le donne entier). Les caractères de contrôle, les séquences d’échappement du
 terminal et les contrôles bidirectionnels sont affichés échappés
 (`\u{1b}`), jamais interprétés : le texte d’un widget ne peut pas prendre le
 contrôle de votre terminal.
@@ -115,7 +116,7 @@ messages de l’overlay (`state`, `log`, `event`…) au fil de leur arrivée.
 | --- | --- |
 | `doctor.development_off` | Aucun overlay en cours d’exécution n’autorise les installations de développement : [activez le canal](#lactiver). |
 | `doctor.overcrow_missing` | OverCrow n’est pas installé. |
-| `doctor.channel_busy`, `too_many_sessions` | Quatre sessions `dev` sont déjà connectées à cet overlay. |
+| `doctor.channel_busy`, `too_many_sessions` | Quatre sessions `dev` sont déjà connectées à cet overlay, le maximum : arrêtez-en une (Ctrl+C dans son terminal), puis réessayez. |
 | `doctor.protocol_version`, `unsupported_protocol` | L’overlay et l’outil ne parlent pas la même version du canal : mettez à jour le plus ancien des deux. |
 | `doctor.channel_untrusted` | Ce qui répond à l’adresse du canal n’est pas votre propre overlay. |
 | `busy` | Une autre installation ou un autre retrait est en cours : `dev` réessaie. |

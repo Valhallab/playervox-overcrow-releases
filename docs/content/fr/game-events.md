@@ -3,8 +3,8 @@
 Un widget PlayerVox OverCrow peut suivre ce qui se passe dans un jeu : la
 mission où se trouve le joueur, la vague, l’escouade, les Eidolons de la
 nuit. Le widget liste dans son manifeste les fonctionnalités qu’il veut, et
-PlayerVox OverCrow lui donne leur état, prêt à afficher : des noms dans la
-langue de l’utilisateur à côté d’ID stables, des heures en millisecondes
+PlayerVox OverCrow lui donne leur état, prêt à afficher : les noms du jeu
+dans la langue du jeu à côté d’ID stables, des heures en millisecondes
 Unix, des durées en secondes. Warframe est le premier jeu.
 
 <!-- source: docs/content/examples/warframe-mission/logic.ts -->
@@ -69,7 +69,8 @@ puis une nouvelle à chaque changement de ce que le widget suit.
 | Membre | Signification |
 | --- | --- |
 | `playing` | `true` tant que Warframe est le jeu actif dans PlayerVox OverCrow. |
-| `session` | `{ startedAt }` : quand Warframe a été lancé, en millisecondes Unix ; `null` avant tout lancement. Chaque lancement est une nouvelle session. |
+| `session` | `{ startedAt, language }` : quand Warframe a été lancé, en millisecondes Unix, et la langue du jeu (`en`, `fr`, `de`… ; `null` tant que le jeu ne l’a pas dite) ; `null` avant tout lancement. Chaque lancement est une nouvelle session. |
+| `glossary` | Des mots du jeu, dans la langue du jeu, toujours donnés : voir [Glossaire](#glossaire). |
 | `features` | Le statut de chaque fonctionnalité : `location`, `mission`, `progress`, `squad`, `eidolons`, `world` et `rewards`. |
 | `info` | L’état de chaque fonctionnalité que le widget suit, prêt à afficher. `null` pour les autres, et tant que rien n’est encore connu. |
 | `events` | Les 16 derniers événements de ces fonctionnalités, du plus ancien au plus récent. |
@@ -112,12 +113,12 @@ la mission, la progression, l’Eidolon, le membre ou le lieu, tel qu’il
 | Fonctionnalité | Ce que reçoit le widget |
 | --- | --- |
 | `warframe.location` | Où est le joueur : vaisseau, relais, ville, monde ouvert, mission ou dojo. |
-| `warframe.mission` | La mission choisie, en chargement, en cours ou terminée : nœud, planète, type, faction, niveaux des ennemis, ère de Fissure du Néant, modificateurs, résultat et durée. |
-| `warframe.progress` | La progression de la mission : vague, manches, récompenses reçues, rotation de la prochaine récompense et moment où elle vient. |
+| `warframe.mission` | La mission choisie, en chargement, en cours ou terminée : nœud, planète, type, faction, niveaux des ennemis, ère de Fissure du Néant, modificateurs, résultat, durée, et à la fin les rotations obtenues et les crédits. |
+| `warframe.progress` | La progression de la mission : vague et ses ennemis, manches, rotations obtenues, rotation de la prochaine récompense et moment où elle vient. |
 | `warframe.squad` | Les pseudos du joueur et de son escouade. |
 | `warframe.eidolons` | La nuit et le jour sur les Plaines d’Eidolon, et chaque Eidolon de la nuit : apparition, points faibles, capture, mort ou fuite, à la milliseconde. |
 | `warframe.world` | Le monde du jour et de la semaine : la Sortie, la Chasse aux Archontes, les Fissures du Néant, les cycles des mondes ouverts, Baro Ki’Teer et les réinitialisations. |
-| `warframe.rewards` | Ce que le nœud de la mission peut rapporter, par table et par rotation, avec la chance de chaque objet (`info.mission.rewards`). |
+| `warframe.rewards` | Ce que la mission peut rapporter, par table et par rotation, avec la chance de chaque objet (`info.mission.rewards`). |
 
 ### Quand les données arrivent
 
@@ -131,12 +132,18 @@ la mission, la progression, l’Eidolon, le membre ou le lieu, tel qu’il
   Warframe soit joué ou non. `updatedAt` dit quand il a été lu.
 - `rewards` vient des tables de butin officielles de Digital Extremes,
   lues une fois par jour et à chaque mise à jour du jeu tant qu’un widget
-  qui le suit tourne. Il suit le nœud de `info.mission`.
-- Warframe dit à PlayerVox OverCrow ce qui se passe avec quelques secondes
-  de retard : 10 secondes environ, parfois 15 à 25. Les heures restent
-  exactes à la milliseconde ; seule la mise à jour arrive plus tard.
-  Comptez à partir des heures, comme `nextRewardAt`, pas du moment où
-  arrive une mise à jour.
+  qui le suit tourne. Il suit la mission de `info.mission`. Pour
+  distinguer une mission de Sortie d’une mission de Chasse aux Archontes,
+  PlayerVox OverCrow lit alors aussi l’état du monde ; seul un widget qui
+  suit `warframe.world` le reçoit.
+- Warframe écrit ce qui se passe avec un retard. Mesuré sous Linux
+  (Proton) : la plupart des événements arrivent au widget une seconde
+  environ après les faits ; le jeu retient parfois ses lignes, et une
+  mission choisie ou le début d’une Défense peuvent arriver 5 à 50 secondes
+  plus tard, une récompense jusqu’à 15 secondes environ. Pas encore mesuré
+  sous Windows. Les heures restent exactes à la milliseconde ; seule la
+  mise à jour arrive plus tard. Comptez à partir des heures, comme
+  `nextRewardAt`, pas du moment où arrive une mise à jour.
 - Quand PlayerVox OverCrow démarre pendant une session de Warframe, il
   rattrape la session depuis son début : `info` aussitôt, et les derniers
   événements avec leurs heures réelles.
@@ -144,7 +151,7 @@ la mission, la progression, l’Eidolon, le membre ou le lieu, tel qu’il
 ### `info`
 
 Les éléments nommés sont `{ id, name }` : notre ID stable, et le nom dans
-la langue de l’utilisateur. Un nœud est `{ id, name }` ; voir
+la langue du jeu. Un nœud est `{ id, name }` ; voir
 [Noms et ID](#noms-et-id).
 
 #### `info.location`
@@ -166,13 +173,22 @@ La dernière mission de la session.
 | `planet` | Sa [planète ou sa région](#planètes-et-régions). |
 | `type` | Le [type de mission](#types-de-mission) ; `null` pour un type absent de la liste. |
 | `faction` | La [faction](#factions) ennemie. |
-| `enemyLevel` | `{ min, max }` : les niveaux des ennemis du nœud, ou `null`. |
+| `enemyLevel` | `{ min, max }` : les niveaux des ennemis. À la sélection, ceux du nœud (plus 100 sur la Route de l’Acier) ; ceux d’une mission Cauchemar, d’Arbitrage, d’Alerte ou de Liche Kuva valent `null` jusqu’au chargement, puis ceux du jeu. |
 | `fissure` | L’[ère](#ères-des-fissures-du-néant) d’une mission de Fissure du Néant, ou `null`. |
-| `modifiers` | Ce qui modifie la mission, au plus 8, chacun `{ id, name, stage }` ([modificateurs](#modificateurs)). `stage` vaut 1 à 3 pour une mission de Sortie ou de Chasse aux Archontes, quand il est connu. |
+| `modifiers` | Ce qui modifie la mission, au plus 8, chacun `{ id, name, stage }` ([modificateurs](#modificateurs)), dès qu’elle est choisie. `stage` vaut 1 à 3 pour une mission de Sortie ou de Chasse aux Archontes, quand il est connu. |
 | `selectedAt`, `loadingAt`, `startedAt`, `endedAt` | Quand elle a été choisie, a commencé à charger, a commencé et s’est terminée, en millisecondes Unix ; `null` jusque-là. |
 | `result` | `succeeded`, `failed` ou `aborted` ; `null` avant la fin, ou quand Warframe ne l’a pas dit. |
 | `durationSeconds` | Du début de la partie à la fin, en secondes, à la milliseconde près. |
-| `rewards` | Ce que le nœud peut rapporter, pour un widget qui suit `warframe.rewards` ([butin](#butin-warframerewards)) ; `null` sinon. |
+| `earned` | Les rotations obtenues, `{ rotations, totals }` comme dans [`info.progress`](#infoprogress), pour un type à rotations ; `null` sinon. Gardées après la fin, pour un récapitulatif. |
+| `credits` | Les crédits que compte l’écran de fin ; `null` avant la fin, ou quand le jeu ne le dit pas (mission abandonnée). |
+| `rewards` | Ce que la mission peut rapporter, pour un widget qui suit `warframe.rewards` ([butin](#butin-warframerewards)) ; `null` sinon. |
+| `rewardsPending` | `true` tant que `rewards` vaut `null` pour le moment : la table qui s’applique n’est pas encore connue. `false` sinon. |
+
+`mission_ended` arrive avec les crédits de l’écran de fin, écrits un
+instant après la fin : au plus 10 secondes de jeu plus tard, et sans eux
+pour une mission abandonnée. Son `at` est la fin elle-même. Warframe
+n’écrit pas quel objet une récompense a donné : affichez les rotations
+obtenues et les tables d’où elles viennent.
 
 #### `info.progress`
 
@@ -181,10 +197,14 @@ La progression de la dernière mission.
 | Membre | Signification |
 | --- | --- |
 | `wave` | La vague en cours (Défense, Défense miroir), ou `null`. |
+| `waveEnemies` | `{ total, left }` : les ennemis de la vague de Défense en cours. `total` comme la vague l’annonce ; `left` comme le jeu les compte, une fois tous apparus puis toutes les 10 secondes environ, `0` une fois la vague nettoyée, `null` avant. `null` avant la première vague. |
 | `round` | Les manches terminées (Interception, Perturbation), ou `null`. |
 | `rewards` | Les récompenses de rotation reçues jusqu’ici. |
 | `rotation` | `A`, `B` ou `C` : la rotation de la prochaine récompense ; `null` pour un type sans rotations ou que PlayerVox OverCrow ne sait pas compter. |
-| `nextRewardAt` | Quand vient la prochaine récompense, en millisecondes Unix, pour un type payé au temps (Survie) ; `null` sinon. |
+| `earned` | `{ rotations, totals }` : les rotations reçues, dans l’ordre (les 64 dernières), et combien de chacune, toutes comptées, `{ A, B, C }`. |
+| `cycle` | `{ number, rotations, earned }` : le tour de rotations de la prochaine récompense, 1 pour le premier, ses rotations dans l’ordre et combien ont été reçues ; `null` pour une Perturbation et un type sans rotations. Voir [Rotations](#rotations). |
+| `clock` | Pour un type payé au temps (Survie) : `waiting` tant que son horloge n’est pas partie, puis `running` ; `null` sinon. |
+| `nextRewardAt` | Quand vient la prochaine récompense, en millisecondes Unix, pour un type payé au temps (Survie) une fois son horloge partie ; `null` sinon. |
 | `nextRewardWave` | La vague de la prochaine récompense, pour un type payé aux vagues (Défense) ; `null` sinon. |
 
 #### `info.squad`
@@ -228,16 +248,34 @@ condition d’une mission de Sortie, `null` dans la Chasse aux Archontes.
 
 ### Butin (`warframe.rewards`)
 
-Avec `warframe.rewards`, `info.mission.rewards` liste ce que le nœud de la
-mission choisie ou en cours peut rapporter, par table et par rotation, ou
-vaut `null` pour un nœud sans table de butin (Extermination, mondes
-ouverts, événements, Circuit) :
+Avec `warframe.rewards`, `info.mission.rewards` liste ce que la mission
+choisie ou en cours peut rapporter, par table et par rotation, jamais
+d’après une table qui n’est pas la sienne :
 
 ```text
-{ tables: { kind: "mission" | "caches" | "extra";
+{ source: "node" | "arbitration" | "nightmare" | "sortie";
+  tables: { kind: "mission" | "caches" | "extra";
             rotation: "A" | "B" | "C" | null;
             items: { id: string; name: string; quantity: number; chance: number }[] }[] }
 ```
+
+- `source` dit à qui sont les tables, et le titre à leur donner :
+
+  | `source` | Tables | Titre conseillé |
+  | --- | --- | --- |
+  | `node` | Celles du nœud. | « Rotation A »… ou « Récompense de fin » |
+  | `arbitration` | Celles de tous les Arbitrages, A, B et C, à la place de celles du nœud. | « Butin d’Arbitrage » |
+  | `nightmare` | La récompense d’une mission Cauchemar : la rotation de sa planète (les trois pour un Sauvetage, selon les objectifs), donnée une fois par mission. | « Mod Cauchemar, une fois » |
+  | `sortie` | La récompense de la Sortie, sans rotation, donnée après sa troisième mission. | « Récompense de la Sortie, après la 3e mission » |
+
+- `null`, avec `rewardsPending` à `false` : pas de table pour cette
+  mission : un nœud qui n’en a pas (Extermination, mondes ouverts,
+  événements, Circuit), une Chasse aux Archontes, une Cellule de Netra ou
+  une Alerte (Digital Extremes n’en publie pas).
+- `null`, avec `rewardsPending` à `true` : pas encore connu. Un nœud de la
+  Sortie ou de la Chasse aux Archontes du jour, choisi, se départage au
+  chargement ; sans l’état du monde ou les tables de butin encore lus, il
+  les attend.
 
 - `kind` : `mission`, la table de la mission ; `caches`, les caches d'un
   nœud de Sabotage, d'Extermination ou de Ruche ; `extra`, une table de
@@ -251,7 +289,7 @@ ouverts, événements, Circuit) :
   plus forte, à chance égale par nom anglais, le même ordre dans toutes
   les langues. Une table garde au plus ses 64 objets les plus rares.
   `id`, le nom anglais en `snake_case`, stable d'une langue à l'autre ;
-  `name`, à afficher tel quel, dans la langue de l'utilisateur, ou en
+  `name`, à afficher tel quel, dans la langue du jeu, ou en
   anglais quand PlayerVox OverCrow n'a pas encore la traduction ;
   `quantity`, le nombre donné d'un coup ; `chance`, de 0 à 1, les entrées
   d'un même objet d'une table additionnées.
@@ -281,12 +319,15 @@ ouverts, événements, Circuit) :
 Warframe ne dit pas tout ce qu’affiche un widget. PlayerVox OverCrow
 calcule :
 
-- **Les rotations.** Comptées A, A, B, C, puis de nouveau, d’après les
-  récompenses reçues, dans les missions où PlayerVox OverCrow les voit,
-  comme la Survie, la Défense, l’Interception et la Perturbation.
+- **Les rotations**, d’après les récompenses reçues, dans les missions où
+  PlayerVox OverCrow les voit ; voir [Rotations](#rotations).
 - **La prochaine récompense.** `nextRewardAt` en Survie : toutes les
-  5 minutes, d’après l’horloge de la mission. `nextRewardWave` en Défense :
-  toutes les 5 vagues.
+  5 minutes de l’horloge de la mission, qui part une fois le panneau
+  d’alarme piraté : jusque-là `clock` vaut `waiting` et `nextRewardAt`
+  `null`. L’horloge part 3,6 secondes après l’état sans fin du jeu (mesuré
+  sur une Survie), puis chaque récompense la recale sur celle du jeu.
+  `nextRewardWave` en Défense : toutes les 3 vagues ; en Défense miroir,
+  toutes les 2.
 - **La durée** d’une mission, du début de la partie à la fin.
 - **Quel Eidolon.** Teralyste, Gantulyste ou Hydrolyste, déduit de l’ordre de
   la chasse ; `null` quand l’ordre ne permet pas de le savoir.
@@ -295,30 +336,97 @@ calcule :
   `null`.
 - **Les réinitialisations**, à 00:00 UTC chaque jour et le lundi.
 
+### Rotations
+
+| Mode | Une récompense | Rotations |
+| --- | --- | --- |
+| Survie | toutes les 5 minutes | A, A, B, C, puis de nouveau |
+| Défense | toutes les 3 vagues | A, A, B, C, puis de nouveau |
+| Défense miroir | toutes les 2 vagues | A, A, B, C, puis de nouveau |
+| Interception | à chaque manche | A, A, B, C, puis de nouveau |
+| Cascade du Néant | tous les 4 Exolizers | A, A, B, C, puis de nouveau |
+| Perturbation | à chaque manche | selon la manche et les conduits défendus (ci-dessous) |
+| Arbitrage (Survie, Défense, Interception) | comme ci-dessus | A, A, B, B, puis C sans fin |
+
+Les Arbitrages, avec les mots du wiki officiel : « After the first four
+rotations (AABB), the Arbitration will continue on the C rotation
+endlessly. » `cycle` les montre comme un premier tour A, A, B, B, puis des
+tours C, C, C, C.
+
+Perturbation, conduits défendus dans la manche :
+
+| Manche | 1 | 2 | 3 | 4 |
+| --- | --- | --- | --- | --- |
+| 1 | A | A | A | B |
+| 2 | A | A | B | B |
+| 3 | A | B | B | C |
+| 4 et suivantes | B | B | C | C |
+
+En Perturbation, `rotation` est ce que paierait la manche en cours avec
+les conduits défendus jusqu’ici (au moins un). Source : les pages Mission
+Rewards et Arbitrations du wiki officiel.
+
 ### Ce qui n’est pas donné
 
 PlayerVox OverCrow ne donne pas les excavatrices d’une Excavation, les
 compteurs d’ennemis tués, la progression des missions de Capture, de
 Défense Mobile et d’Espionnage, la progression du Circuit, les reliques,
-Nightwave ni ce que vend Baro Ki’Teer. Pour ces missions, la mission
-elle-même est donnée, et `progress` garde des compteurs `null` et une
-`rotation` `null`.
+Nightwave, ce que vend Baro Ki’Teer, ni quel objet une récompense a donné
+(Warframe ne l’écrit pas). Pour ces missions, la mission elle-même est
+donnée, et `progress` garde des compteurs `null` et une `rotation`
+`null`.
 
 - Le cycle de la Vallée Orbis, pour l’instant : `cycles.vallis` vaut `null`.
 
 ### Noms et ID
 
-- `name` est dans la langue de l’application, anglais ou français, et
-  change avec elle ; les ID ne changent pas. Un nom tient sur une ligne,
-  128 octets au plus.
+- Ce qui vient du jeu est nommé dans **la langue du jeu**
+  (`session.language`), quelle que soit celle de l’application : nœuds,
+  planètes et objets dans les 15 langues de Warframe (d’après l’export
+  public de Digital Extremes), nos autres noms et le glossaire en anglais
+  et en français, en anglais pour les autres langues du jeu. Avant qu’une
+  session la dise, la dernière langue du jeu, puis celle de
+  l’application. Les ID ne changent jamais ; quand la langue du jeu
+  change, les mêmes ID arrivent avec les nouveaux noms. Un nom tient sur
+  une ligne, 128 octets au plus.
+- Les textes propres au widget restent dans la langue de l’application :
+  seuls les mots du jeu suivent le jeu. N’écrivez jamais vous-même un mot
+  du jeu : prenez-le dans les données ou dans le [glossaire](#glossaire).
 - Un nom que PlayerVox OverCrow ne connaît pas encore, comme un nouveau
   contenu, vaut `null` avec son ID : affichez l’ID, ou rien.
 - Nos ID sont en `snake_case` et ne changent jamais. Les listes ci-dessous
   les donnent tous, avec leur nom anglais.
 - Un nœud garde la clé propre au jeu, comme `SolNode195` : la clé
   qu’utilisent les données publiques comme les tables de butin et l’état
-  du monde. - Les récompenses du Circuit ont aussi des ID : leur nom anglais en
+  du monde.
+- Les récompenses du Circuit ont aussi des ID : leur nom anglais en
   `snake_case` ; affichez leur `name`.
+
+#### Glossaire
+
+`glossary` donne les mots du jeu qu’un widget affiche seuls, dans la
+langue du jeu, quelles que soient les fonctionnalités que suit le widget :
+`glossary.damage.corrosive`, `glossary.activity.archon_hunt`,
+`glossary.term.reactant`. `glossary.language` est la langue de ces mots :
+`fr` ou `en` (l’anglais pour les autres langues du jeu). Ses groupes :
+
+| Groupe | ID |
+| --- | --- |
+| `damage` | `impact`, `puncture`, `slash`, `heat`, `cold`, `electricity`, `toxin`, `blast`, `corrosive`, `gas`, `magnetic`, `radiation`, `viral` |
+| `era` | les [ères des Fissures du Néant](#ères-des-fissures-du-néant) |
+| `fissure` | une Fissure du Néant de chaque ère, par l’ID de l’ère : `lith` est « Lith Fissure » |
+| `activity` | `sortie`, `archon_hunt`, `netracells`, `circuit`, `nightwave`, `baro_ki_teer`, `void_fissure`, `arbitration`, `steel_path`, `void_storm` |
+| `place` | les [lieux](#lieux) |
+| `eidolon` | les [Eidolons](#eidolons) |
+| `faction` | les [factions](#factions) |
+| `cycle` | les [états des cycles](#états-des-cycles) |
+| `term` | `reactant`, `relic`, `credits` |
+
+Noms anglais : les types de dégâts comme leurs ID (Impact, Puncture,
+Slash, Heat, Cold, Electricity, Toxin, Blast, Corrosive, Gas, Magnetic,
+Radiation, Viral) ; les activités Sortie, Archon Hunt, Netracells, The
+Circuit, Nightwave, Baro Ki'Teer, Void Fissure, Arbitration, The Steel
+Path, Void Storm ; les termes Reactant, Relic, Credits.
 
 #### Planètes et régions
 
@@ -426,6 +534,9 @@ Villes, relais et mondes ouverts : `location.place` et `voidTrader.relay`.
 | `necralisk` | Necralisk |
 | `sanctum_anatomica` | Sanctum Anatomica |
 | `chrysalith` | Chrysalith |
+| `hollvania_central_mall` | Höllvania Central Mall |
+| `maroos_bazaar` | Maroo's Bazaar |
+| `iron_wake` | Iron Wake |
 | `plains_of_eidolon` | Plains of Eidolon |
 | `orb_vallis` | Orb Vallis |
 | `cambion_drift` | Cambion Drift |
@@ -553,7 +664,7 @@ charge, la vague 5 commence, puis la mission réussit.
     { "expect": { "text": ["Hydron", "Defense"] } },
     { "advance": { "ms": 30000 } },
     { "gameEvents": { "warframe": {
-      "info": { "mission": { "state": "in_progress" }, "progress": { "wave": 5, "rotation": "A", "nextRewardWave": 5 } },
+      "info": { "mission": { "state": "in_progress" }, "progress": { "wave": 5, "rewards": 1, "rotation": "A", "nextRewardWave": 6 } },
       "event": "wave_started"
     } } },
     { "expect": { "text": ["Wave 5", "Rotation A"] } },
@@ -566,7 +677,8 @@ charge, la vague 5 commence, puis la mission réussit.
 ```
 
 - Une étape nomme un jeu, ici `warframe`, et ce qui change : `playing`,
-  `session`, `features` (un statut par fonctionnalité), `info` et `event`.
+  `session`, `features` (un statut par fonctionnalité), `info`, `glossary`
+  et `event`.
 - Les membres d’`info` se fusionnent dans l’état courant :
   `{ "state": "ended" }` garde le nœud donné avant.
 - `event` est un type, ou `{ "type": …, "at": …, <state> }`. Sans son
@@ -576,9 +688,14 @@ charge, la vague 5 commence, puis la mission réussit.
   l’heure de l’étape pour une heure), numérote les événements et garde les
   16 derniers, comme le fait PlayerVox OverCrow.
 - Avant la première étape, Warframe est joué, les fonctionnalités que liste le
-  manifeste sont `available`, les autres `undeclared`, et rien n’est connu.
-  `fixtures.subscriptions` peut donner à la place une première valeur
-  complète, et une étape `publish` une valeur suivante complète.
+  manifeste sont `available`, les autres `undeclared`, rien n’est connu, et
+  le glossaire est en anglais. `fixtures.subscriptions` peut donner à la
+  place une première valeur complète (sans `glossary`, elle reçoit
+  l’anglais), et une étape `publish` une valeur suivante complète.
+- `glossary` se fusionne comme `info` :
+  `{ "language": "fr", "damage": { "corrosive": "Corrosif" } }` ne change
+  que ces mots. Le `rewards` d’une étape est celui du nœud, sauf s’il
+  donne `source`.
 - Chaque étape est vérifiée à la lecture du scénario : une valeur qui n’a pas
   la forme du service est une erreur avec le chemin du premier membre
   fautif, et une étape ne peut toucher que les fonctionnalités que liste le

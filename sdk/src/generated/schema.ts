@@ -1157,7 +1157,7 @@ export interface WarframeMission {
 export interface WarframeModifier {
   /** Our ID of the modifier. */
   readonly id: "steel_path" | "arbitration" | "sortie" | "archon_hunt" | "nightmare" | "void_storm" | "alert" | "lich";
-  /** Its name in the user's language. */
+  /** Its name in the game's language. */
   readonly name: string;
   /** The stage of a Sortie or an Archon Hunt, 1 to 3, when PlayerVox OverCrow can tell it. */
   readonly stage: number | null;
@@ -1296,7 +1296,7 @@ export type WarframeEvent = {
 export interface WarframeReward {
   /** Our ID: the item's English name in `snake_case` (`orokin_cell`). */
   readonly id: string;
-  /** Its name in the user's language, or in English when PlayerVox OverCrow has no translation yet; never empty. */
+  /** Its name in the game's language, or in English when PlayerVox OverCrow has no translation yet; never empty. */
   readonly name: string;
   /** How many at once. */
   readonly quantity: number;

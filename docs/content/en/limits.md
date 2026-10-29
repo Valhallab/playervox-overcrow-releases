@@ -231,6 +231,7 @@ see [limit constants](sdk.md#limit-constants).
 | `MAX_WARFRAME_FISSURES` | 64 | Void Fissures of the world state given, the soonest to end first. |
 | `MAX_WARFRAME_REWARD_TABLES` | 9 | Reward tables of one node: its own, caches and extra, by rotation. |
 | `MAX_WARFRAME_REWARD_ITEMS` | 64 | Items of one reward table, the rarest kept. |
+| `MAX_WARFRAME_EARNED` | 64 | Rotations a mission earned listed, the latest; its totals count them all. |
 
 ### Notes, reviews and chat
 

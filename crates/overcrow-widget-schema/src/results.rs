@@ -1030,7 +1030,7 @@ pub const SHAPES: &[NamedShape] = &[
                 Shape::Keyword(warframe::MODIFIER_IDS),
                 "Our ID of the modifier.",
             ),
-            member("name", Shape::Text, "Its name in the user's language."),
+            member("name", Shape::Text, "Its name in the game's language."),
             member(
                 "stage",
                 NULLABLE_INTEGER,
@@ -1255,7 +1255,7 @@ pub const SHAPES: &[NamedShape] = &[
             member(
                 "name",
                 Shape::Text,
-                "Its name in the user's language, or in English when PlayerVox OverCrow has no translation yet; never empty.",
+                "Its name in the game's language, or in English when PlayerVox OverCrow has no translation yet; never empty.",
             ),
             member("quantity", Shape::Integer, "How many at once."),
             member(

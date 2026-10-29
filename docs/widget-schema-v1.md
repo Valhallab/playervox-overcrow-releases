@@ -1653,7 +1653,7 @@ What changes a mission. `{ id, name, stage }`
 | Member | Shape | Meaning |
 | --- | --- | --- |
 | `id` | `steel_path` \| `arbitration` \| `sortie` \| `archon_hunt` \| `nightmare` \| `void_storm` \| `alert` \| `lich` | Our ID of the modifier. |
-| `name` | text | Its name in the user's language. |
+| `name` | text | Its name in the game's language. |
 | `stage` | integer or `null` | The stage of a Sortie or an Archon Hunt, 1 to 3, when PlayerVox OverCrow can tell it. |
 
 #### `WarframeProgress`
@@ -1769,7 +1769,7 @@ An item a node can reward. `{ id, name, quantity, chance }`
 | Member | Shape | Meaning |
 | --- | --- | --- |
 | `id` | text | Our ID: the item's English name in `snake_case` (`orokin_cell`). |
-| `name` | text | Its name in the user's language, or in English when PlayerVox OverCrow has no translation yet; never empty. |
+| `name` | text | Its name in the game's language, or in English when PlayerVox OverCrow has no translation yet; never empty. |
 | `quantity` | integer | How many at once. |
 | `chance` | number | The chance, from 0 to 1; the same item's entries of a table added together. |
 

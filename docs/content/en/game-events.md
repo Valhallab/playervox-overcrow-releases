@@ -3,9 +3,9 @@
 A PlayerVox OverCrow widget can follow what happens in a game: the mission
 the player is in, the wave, the squad, the Eidolons of the night. The
 widget lists the features it wants in its manifest, and PlayerVox OverCrow
-gives it their state, ready to show: names in the user's language beside
-stable IDs, times in Unix milliseconds, durations in seconds. Warframe is
-the first game.
+gives it their state, ready to show: the game's names in the game's
+language beside stable IDs, times in Unix milliseconds, durations in
+seconds. Warframe is the first game.
 
 <!-- source: docs/content/examples/warframe-mission/logic.ts -->
 ```ts
@@ -67,7 +67,8 @@ new one at each change of what the widget follows.
 | Member | Meaning |
 | --- | --- |
 | `playing` | `true` while Warframe is the active game in PlayerVox OverCrow. |
-| `session` | `{ startedAt }`: when Warframe was launched, in Unix milliseconds; `null` before any launch. Each launch is a new session. |
+| `session` | `{ startedAt, language }`: when Warframe was launched, in Unix milliseconds, and the game's language (`en`, `fr`, `de`…; `null` until the game says it); `null` before any launch. Each launch is a new session. |
+| `glossary` | Words of the game, in the game's language, always given: see [Glossary](#glossary). |
 | `features` | The status of each feature: `location`, `mission`, `progress`, `squad`, `eidolons`, `world` and `rewards`. |
 | `info` | The state of each feature the widget follows, ready to show. `null` for the others, and while nothing is known yet. |
 | `events` | The latest 16 events of those features, oldest first. |
@@ -107,12 +108,12 @@ that moment.
 | Feature | What the widget gets |
 | --- | --- |
 | `warframe.location` | Where the player is: orbiter, relay, hub, open world, mission or dojo. |
-| `warframe.mission` | The mission chosen, loading, in progress or ended: node, planet, type, faction, enemy levels, Void Fissure era, modifiers, result and duration. |
-| `warframe.progress` | The progress of the mission: wave, rounds, rewards given, the rotation of the next reward and when it comes. |
+| `warframe.mission` | The mission chosen, loading, in progress or ended: node, planet, type, faction, enemy levels, Void Fissure era, modifiers, result, duration, and at the end the rotations earned and the credits. |
+| `warframe.progress` | The progress of the mission: wave and its enemies, rounds, the rotations earned, the rotation of the next reward and when it comes. |
 | `warframe.squad` | The names of the player and of their squad. |
 | `warframe.eidolons` | Night and day on the Plains of Eidolon, and each Eidolon of the night: spawn, weak points, capture, kill or escape, to the millisecond. |
 | `warframe.world` | The world of the day and the week: the Sortie, the Archon Hunt, the Void Fissures, the cycles of the open worlds, Baro Ki'Teer and the resets. |
-| `warframe.rewards` | What the node of the mission can reward, by table and rotation, with each item's chance (`info.mission.rewards`). |
+| `warframe.rewards` | What the mission can reward, by table and rotation, with each item's chance (`info.mission.rewards`). |
 
 ### When the data comes
 
@@ -125,9 +126,14 @@ that moment.
   Warframe is played or not. `updatedAt` says when it was read.
 - `rewards` comes from Digital Extremes' official drop tables, read once a
   day and at each game update while a widget that follows it runs. It
-  follows the node of `info.mission`.
-- Warframe tells PlayerVox OverCrow what happens a few seconds late: about
-  10 seconds, sometimes 15 to 25. The times stay exact to the millisecond;
+  follows the mission of `info.mission`. To tell a Sortie's mission from
+  an Archon Hunt's, PlayerVox OverCrow also reads the world state then;
+  only a widget that follows `warframe.world` gets it.
+- Warframe writes what happens with a delay. Measured on Linux (Proton):
+  most events reach the widget about a second after they happen; the game
+  sometimes holds lines back, and a chosen mission or the start of a
+  Defense can come 5 to 50 seconds late, a reward up to about 15 seconds.
+  Not measured on Windows yet. The times stay exact to the millisecond;
   only the update comes later. Count down from the times, such as
   `nextRewardAt`, not from the moment an update arrives.
 - When PlayerVox OverCrow starts during a Warframe session, it catches up
@@ -136,7 +142,7 @@ that moment.
 
 ### `info`
 
-Named things are `{ id, name }`: our stable ID, and the name in the user's
+Named things are `{ id, name }`: our stable ID, and the name in the game's
 language. A node is `{ id, name }`; see
 [Names and IDs](#names-and-ids).
 
@@ -159,13 +165,22 @@ The latest mission of the session.
 | `planet` | Its [planet or region](#planets-and-regions). |
 | `type` | The [mission type](#mission-types); `null` for a type not in the list. |
 | `faction` | The enemy [faction](#factions). |
-| `enemyLevel` | `{ min, max }`: the enemy levels of the node, or `null`. |
+| `enemyLevel` | `{ min, max }`: the enemy levels. Chosen, the node's (on the Steel Path, plus 100); a Nightmare, Arbitration, Alert or Kuva Lich mission's are `null` until it loads, then the game's. |
 | `fissure` | The [era](#void-fissure-eras) of a Void Fissure mission, or `null`. |
-| `modifiers` | What changes the mission, at most 8, each `{ id, name, stage }` ([modifiers](#modifiers)). `stage` is 1 to 3 for a Sortie or an Archon Hunt mission, when known. |
+| `modifiers` | What changes the mission, at most 8, each `{ id, name, stage }` ([modifiers](#modifiers)), from the moment it is chosen. `stage` is 1 to 3 for a Sortie or an Archon Hunt mission, when known. |
 | `selectedAt`, `loadingAt`, `startedAt`, `endedAt` | When it was chosen, began to load, began and ended, in Unix milliseconds; `null` until then. |
 | `result` | `succeeded`, `failed` or `aborted`; `null` before the end, or when Warframe did not say. |
 | `durationSeconds` | From the start of play to the end, in seconds, to the millisecond. |
-| `rewards` | What the node can reward, for a widget that follows `warframe.rewards` ([rewards](#rewards-warframerewards)); `null` otherwise. |
+| `earned` | The rotations earned, `{ rotations, totals }` as in [`info.progress`](#infoprogress), for a type with rotations; `null` otherwise. Kept after the end, for a recap. |
+| `credits` | The credits the end screen counts; `null` before the end, or when the game does not say (an aborted mission). |
+| `rewards` | What the mission can reward, for a widget that follows `warframe.rewards` ([rewards](#rewards-warframerewards)); `null` otherwise. |
+| `rewardsPending` | `true` while `rewards` is `null` for now: which table applies is not known yet. `false` otherwise. |
+
+`mission_ended` comes with the credits of the end screen, written a moment
+after the end: at most 10 seconds of the game later, and without them for
+an aborted mission. Its `at` is the end itself. Warframe does not write
+which item a reward gave: show the rotations earned and the tables they
+come from.
 
 #### `info.progress`
 
@@ -174,10 +189,14 @@ The progress of the latest mission.
 | Member | Meaning |
 | --- | --- |
 | `wave` | The current wave (Defense, Mirror Defense), or `null`. |
+| `waveEnemies` | `{ total, left }`: the enemies of the current Defense wave. `total` as the wave announces it; `left` as the game counts them, once all have spawned and then every 10 seconds or so, `0` once the wave is cleared, `null` before. `null` before the first wave. |
 | `round` | Rounds done (Interception, Disruption), or `null`. |
 | `rewards` | Rotation rewards given so far. |
 | `rotation` | `A`, `B` or `C`: the rotation of the next reward; `null` for a type without rotations or one PlayerVox OverCrow cannot count. |
-| `nextRewardAt` | When the next reward comes, in Unix milliseconds, for a type paid on time (Survival); `null` otherwise. |
+| `earned` | `{ rotations, totals }`: the rotations given, in order (the latest 64), and how many of each, all of them, `{ A, B, C }`. |
+| `cycle` | `{ number, rotations, earned }`: the round of rotations of the next reward, 1 for the first, its rotations in order and how many were given; `null` for a Disruption and a type without rotations. See [Rotations](#rotations). |
+| `clock` | For a type paid on time (Survival): `waiting` until its clock starts, then `running`; `null` otherwise. |
+| `nextRewardAt` | When the next reward comes, in Unix milliseconds, for a type paid on time (Survival) once its clock runs; `null` otherwise. |
 | `nextRewardWave` | The wave of the next reward, for a type paid on waves (Defense); `null` otherwise. |
 
 #### `info.squad`
@@ -221,16 +240,32 @@ a Sortie mission, `null` in the Archon Hunt.
 
 ### Rewards (`warframe.rewards`)
 
-With `warframe.rewards`, `info.mission.rewards` lists what the node of the
-chosen or current mission can reward, by table and rotation, or is `null`
-for a node without a reward table (Exterminate, open worlds, events, the
-Circuit):
+With `warframe.rewards`, `info.mission.rewards` lists what the chosen or
+current mission can reward, by table and rotation, never from a table
+that is not its own:
 
 ```text
-{ tables: { kind: "mission" | "caches" | "extra";
+{ source: "node" | "arbitration" | "nightmare" | "sortie";
+  tables: { kind: "mission" | "caches" | "extra";
             rotation: "A" | "B" | "C" | null;
             items: { id: string; name: string; quantity: number; chance: number }[] }[] }
 ```
+
+- `source` says whose tables, and the title to give them:
+
+  | `source` | Tables | Suggested title |
+  | --- | --- | --- |
+  | `node` | The node's own. | "Rotation A" … or "End reward" |
+  | `arbitration` | Every Arbitration's, A, B and C, in place of the node's. | "Arbitration rewards" |
+  | `nightmare` | A Nightmare mission's reward: the rotation of its planet (all three for a Rescue, by objectives done), given once per mission. | "Nightmare mod, once" |
+  | `sortie` | The Sortie's reward, without rotation, given after its third mission. | "Sortie reward, after the 3rd mission" |
+
+- `null`, with `rewardsPending` `false`: no table for this mission: a node
+  without one (Exterminate, open worlds, events, the Circuit), an Archon
+  Hunt, a Netracell or an Alert (Digital Extremes publishes none).
+- `null`, with `rewardsPending` `true`: not known yet. A node of the day's
+  Sortie or Archon Hunt, chosen, is told apart when it loads; without the
+  world state or the drop tables read yet, it waits for them.
 
 - `kind`: `mission` is the mission's own table; `caches` the caches of a
   Sabotage, Exterminate or Hive node; `extra` an additional table of the
@@ -243,7 +278,7 @@ Circuit):
   equal chances by English name, the same order in every language. A
   table keeps its 64 rarest items at most. `id` is the English
   name in `snake_case` (`orokin_cell`, `axi_a1_relic_radiant`), stable
-  across languages; `name` is shown as is, in the user's language, or in
+  across languages; `name` is shown as is, in the game's language, or in
   English when PlayerVox OverCrow has no translation yet; `quantity` the
   number given at once; `chance` from 0 to 1, the same item's entries of a
   table added together.
@@ -272,11 +307,14 @@ Circuit):
 Warframe does not tell everything a widget shows. PlayerVox OverCrow
 calculates:
 
-- **Rotations.** Counted A, A, B, C, then again, from the rewards given, in
-  the missions where PlayerVox OverCrow sees them, such as Survival,
-  Defense, Interception and Disruption.
-- **The next reward.** `nextRewardAt` in Survival: every 5 minutes, from
-  the mission clock. `nextRewardWave` in Defense: every 5 waves.
+- **Rotations**, from the rewards given, in the missions where PlayerVox
+  OverCrow sees them; see [Rotations](#rotations).
+- **The next reward.** `nextRewardAt` in Survival: every 5 minutes of the
+  mission's clock, which starts once the alarm panel is hacked: until
+  then `clock` is `waiting` and `nextRewardAt` `null`. The clock starts
+  3.6 seconds after the game's endless state (measured on one Survival),
+  then each reward sets it again from the game's own clock.
+  `nextRewardWave` in Defense: every 3 waves; in Mirror Defense, every 2.
 - **The duration** of a mission, from the start of play to the end.
 - **Which Eidolon.** Teralyst, Gantulyst or Hydrolyst, told by the order
   of the hunt; `null` when the order cannot tell.
@@ -284,20 +322,60 @@ calculates:
   that also follows `warframe.world`; otherwise `stage` is `null`.
 - **The resets**, at 00:00 UTC each day and on Monday.
 
+### Rotations
+
+| Mode | A reward | Rotations |
+| --- | --- | --- |
+| Survival | every 5 minutes | A, A, B, C, then again |
+| Defense | every 3 waves | A, A, B, C, then again |
+| Mirror Defense | every 2 waves | A, A, B, C, then again |
+| Interception | each round | A, A, B, C, then again |
+| Void Cascade | every 4 Exolizers | A, A, B, C, then again |
+| Disruption | each round | by round and conduits defended (below) |
+| Arbitration (Survival, Defense, Interception) | as above | A, A, B, B, then C to the end |
+
+Arbitrations, in the words of the official wiki: "After the first four
+rotations (AABB), the Arbitration will continue on the C rotation
+endlessly." `cycle` shows them as a first round A, A, B, B, then rounds
+C, C, C, C.
+
+Disruption, conduits defended in the round:
+
+| Round | 1 | 2 | 3 | 4 |
+| --- | --- | --- | --- | --- |
+| 1 | A | A | A | B |
+| 2 | A | A | B | B |
+| 3 | A | B | B | C |
+| 4 and after | B | B | C | C |
+
+In a Disruption, `rotation` is what the current round pays with the
+conduits defended so far (one at least). Source: the official wiki's
+Mission Rewards and Arbitrations pages.
+
 ### What is not given
 
 PlayerVox OverCrow does not give the excavators of an Excavation, kill
 counts, the progress of Capture, Mobile Defense and Spy missions, the
-progress of the Circuit, relics, Nightwave or what Baro Ki'Teer sells. For
-those missions, the mission itself is given, and `progress` keeps `null`
-counters and a `null` `rotation`.
+progress of the Circuit, relics, Nightwave, what Baro Ki'Teer sells, or
+which item a reward gave (Warframe does not write it). For those missions,
+the mission itself is given, and `progress` keeps `null` counters and a
+`null` `rotation`.
 
 - The Orb Vallis cycle, for now: `cycles.vallis` is `null`.
 
 ### Names and IDs
 
-- `name` is in the app's language, English or French, and changes with it;
-  the IDs do not. A name is one line, at most 128 bytes.
+- What comes from the game is named in **the game's language**
+  (`session.language`), whatever the app's: nodes, planets and items in
+  Warframe's 15 languages (from Digital Extremes' public export), our
+  other names and the glossary in English and French, in English for the
+  game's other languages. Before a session says it, the last language the
+  game used, then the app's. The IDs never change; when the game's
+  language changes, the same IDs come with the new names. A name is one
+  line, at most 128 bytes.
+- The widget's own texts stay in the app's language: only the game's
+  words follow the game. Never write a game's word yourself: take it from
+  the data or from the [glossary](#glossary).
 - A name PlayerVox OverCrow does not know yet, such as new content, is
   `null` with its ID: show the ID, or nothing.
 - Our IDs are `snake_case` and never change. The lists below give them all,
@@ -306,6 +384,32 @@ counters and a `null` `rotation`.
   public data such as the world state uses.
 - The Circuit's rewards have IDs too: their English name in `snake_case`;
   show their `name`.
+
+#### Glossary
+
+`glossary` gives the words of the game a widget shows on their own, in
+the game's language, whatever the features the widget follows:
+`glossary.damage.corrosive`, `glossary.activity.archon_hunt`,
+`glossary.term.reactant`. `glossary.language` is the language of these
+words: `fr` or `en` (English for the game's other languages). Its groups:
+
+| Group | IDs |
+| --- | --- |
+| `damage` | `impact`, `puncture`, `slash`, `heat`, `cold`, `electricity`, `toxin`, `blast`, `corrosive`, `gas`, `magnetic`, `radiation`, `viral` |
+| `era` | the [Void Fissure eras](#void-fissure-eras) |
+| `fissure` | a Void Fissure of each era, by the era's ID: `lith` is "Lith Fissure" |
+| `activity` | `sortie`, `archon_hunt`, `netracells`, `circuit`, `nightwave`, `baro_ki_teer`, `void_fissure`, `arbitration`, `steel_path`, `void_storm` |
+| `place` | the [places](#places) |
+| `eidolon` | the [Eidolons](#eidolons) |
+| `faction` | the [factions](#factions) |
+| `cycle` | the [cycle states](#cycle-states) |
+| `term` | `reactant`, `relic`, `credits` |
+
+English names: damage types as their IDs (Impact, Puncture, Slash, Heat,
+Cold, Electricity, Toxin, Blast, Corrosive, Gas, Magnetic, Radiation,
+Viral); activities Sortie, Archon Hunt, Netracells, The Circuit,
+Nightwave, Baro Ki'Teer, Void Fissure, Arbitration, The Steel Path, Void
+Storm; terms Reactant, Relic, Credits.
 
 #### Planets and regions
 
@@ -413,6 +517,9 @@ Hubs, relays and open worlds: `location.place` and `voidTrader.relay`.
 | `necralisk` | Necralisk |
 | `sanctum_anatomica` | Sanctum Anatomica |
 | `chrysalith` | Chrysalith |
+| `hollvania_central_mall` | Höllvania Central Mall |
+| `maroos_bazaar` | Maroo's Bazaar |
+| `iron_wake` | Iron Wake |
 | `plains_of_eidolon` | Plains of Eidolon |
 | `orb_vallis` | Orb Vallis |
 | `cambion_drift` | Cambion Drift |
@@ -539,7 +646,7 @@ wave 5 starts, then the mission succeeds.
     { "expect": { "text": ["Hydron", "Defense"] } },
     { "advance": { "ms": 30000 } },
     { "gameEvents": { "warframe": {
-      "info": { "mission": { "state": "in_progress" }, "progress": { "wave": 5, "rotation": "A", "nextRewardWave": 5 } },
+      "info": { "mission": { "state": "in_progress" }, "progress": { "wave": 5, "rewards": 1, "rotation": "A", "nextRewardWave": 6 } },
       "event": "wave_started"
     } } },
     { "expect": { "text": ["Wave 5", "Rotation A"] } },
@@ -552,7 +659,8 @@ wave 5 starts, then the mission succeeds.
 ```
 
 - A step names one game, here `warframe`, and what changes: `playing`,
-  `session`, `features` (a status by feature), `info` and `event`.
+  `session`, `features` (a status by feature), `info`, `glossary` and
+  `event`.
 - `info` members merge into the current state: `{ "state": "ended" }`
   keeps the node given before.
 - `event` is a type, or `{ "type": …, "at": …, <state> }`. Without its
@@ -562,9 +670,13 @@ wave 5 starts, then the mission succeeds.
   `false`, or the step's time for a time), numbers the events and keeps
   the latest 16, as PlayerVox OverCrow does.
 - Before the first step, Warframe is played, the features the manifest
-  lists are `available`, the others `undeclared`, and nothing is known.
-  `fixtures.subscriptions` may give a whole first value instead, and a
+  lists are `available`, the others `undeclared`, nothing is known, and
+  the glossary is in English. `fixtures.subscriptions` may give a whole
+  first value instead (without `glossary`, it gets the English one), and a
   `publish` step a whole next one.
+- `glossary` merges like `info`: `{ "language": "fr", "damage": { "corrosive": "Corrosif" } }`
+  changes those words only. A step's `rewards` are the node's unless it
+  gives `source`.
 - Each step is checked when the scenario is read: a value without the
   service's shape is an error with the path of the first wrong member, and
   a step may only touch the features the manifest lists.

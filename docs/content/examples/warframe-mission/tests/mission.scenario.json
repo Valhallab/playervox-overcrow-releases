@@ -17,7 +17,7 @@
     { "expect": { "text": ["Hydron", "Defense"] } },
     { "advance": { "ms": 30000 } },
     { "gameEvents": { "warframe": {
-      "info": { "mission": { "state": "in_progress" }, "progress": { "wave": 5, "rotation": "A", "nextRewardWave": 5 } },
+      "info": { "mission": { "state": "in_progress" }, "progress": { "wave": 5, "rewards": 1, "rotation": "A", "nextRewardWave": 6 } },
       "event": "wave_started"
     } } },
     { "expect": { "text": ["Wave 5", "Rotation A"] } },

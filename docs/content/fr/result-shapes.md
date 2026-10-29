@@ -432,7 +432,7 @@ Un élément de Warframe, nommé. `{ id, name }`
 | Membre | Forme | Signification |
 | --- | --- | --- |
 | `id` | texte | Notre ID stable, en `snake_case`, listé dans la page des événements de jeu. |
-| `name` | texte ou `null` | Son nom dans la langue de l’utilisateur, une ligne d’au plus 128 octets ; `null` quand PlayerVox OverCrow n’en a pas encore. |
+| `name` | texte ou `null` | Son nom dans la langue du jeu, une ligne d’au plus 128 octets ; `null` quand PlayerVox OverCrow n’en a pas encore. |
 
 ### `WarframeNode`
 
@@ -441,20 +441,125 @@ Un nœud de la carte stellaire. `{ id, name }`
 | Membre | Forme | Signification |
 | --- | --- | --- |
 | `id` | texte | La clé du nœud propre au jeu (`SolNode195`, `ClanNode…`, `SettlementNode…`), telle que la nomment les données publiques comme les tables de butin et l’état du monde. |
-| `name` | texte ou `null` | Son nom dans la langue de l’utilisateur, ou `null` quand PlayerVox OverCrow n’en a pas encore (nouveau contenu). |
+| `name` | texte ou `null` | Son nom dans la langue du jeu, ou `null` quand PlayerVox OverCrow n’en a pas encore (nouveau contenu). |
 
 ### `WarframeEvents`
 
-Les événements de jeu de Warframe, pour les fonctionnalités que le widget liste. `{ playing, session, features, info, events }`
+Les événements de jeu de Warframe, pour les fonctionnalités que le widget liste. `{ playing, session, glossary, features, info, events }`
 
 | Membre | Forme | Signification |
 | --- | --- | --- |
 | `playing` | booléen | Si Warframe est le jeu actif dans PlayerVox OverCrow. |
-| `session` | `{ startedAt }` ou `null` | La session Warframe suivie, ou `null` avant la première ; chaque lancement est une nouvelle session. |
+| `session` | `{ startedAt, language }` ou `null` | La session Warframe suivie, ou `null` avant la première ; chaque lancement est une nouvelle session. |
 | `session.startedAt` | entier | Quand Warframe a été lancé, en millisecondes Unix. |
+| `session.language` | `de` \| `en` \| `es` \| `fr` \| `it` \| `ja` \| `ko` \| `pl` \| `pt` \| `ru` \| `tc` \| `th` \| `tr` \| `uk` \| `zh` ou `null` | La langue du jeu (`en`, `fr`, `de`…) ; `null` tant que le jeu ne l’a pas dite. |
+| `glossary` | [`WarframeGlossary`](#warframeglossary) | Des mots du jeu dans la langue du jeu, quelles que soient les fonctionnalités que suit le widget. |
 | `features` | [`WarframeFeatures`](#warframefeatures) | Le statut de chaque fonctionnalité. |
 | `info` | [`WarframeInfo`](#warframeinfo) | L’état de chaque fonctionnalité que le widget suit. |
 | `events` | liste de [`WarframeEvent`](#warframeevent) | Les derniers événements des fonctionnalités que le widget suit, du plus ancien au plus récent. |
+
+### `WarframeGlossary`
+
+Les mots du jeu qu’un widget affiche seuls, dans la langue du jeu, pour qu’il n’en écrive jamais lui-même. `{ language, damage, era, fissure, activity, place, eidolon, faction, cycle, term }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `language` | `en` \| `fr` | La langue de ces mots : celle du jeu quand PlayerVox OverCrow les a dans celle-ci, l’anglais sinon. |
+| `damage` | `{ impact, puncture, slash, heat, cold, electricity, toxin, blast, corrosive, gas, magnetic, radiation, viral }` | Les types de dégâts, par notre ID. |
+| `damage.impact` | texte | Son nom dans la langue de `glossary.language`. |
+| `damage.puncture` | texte | Son nom dans la langue de `glossary.language`. |
+| `damage.slash` | texte | Son nom dans la langue de `glossary.language`. |
+| `damage.heat` | texte | Son nom dans la langue de `glossary.language`. |
+| `damage.cold` | texte | Son nom dans la langue de `glossary.language`. |
+| `damage.electricity` | texte | Son nom dans la langue de `glossary.language`. |
+| `damage.toxin` | texte | Son nom dans la langue de `glossary.language`. |
+| `damage.blast` | texte | Son nom dans la langue de `glossary.language`. |
+| `damage.corrosive` | texte | Son nom dans la langue de `glossary.language`. |
+| `damage.gas` | texte | Son nom dans la langue de `glossary.language`. |
+| `damage.magnetic` | texte | Son nom dans la langue de `glossary.language`. |
+| `damage.radiation` | texte | Son nom dans la langue de `glossary.language`. |
+| `damage.viral` | texte | Son nom dans la langue de `glossary.language`. |
+| `era` | `{ lith, meso, neo, axi, requiem, omnia }` | Les ères des Fissures du Néant. |
+| `era.lith` | texte | Son nom dans la langue de `glossary.language`. |
+| `era.meso` | texte | Son nom dans la langue de `glossary.language`. |
+| `era.neo` | texte | Son nom dans la langue de `glossary.language`. |
+| `era.axi` | texte | Son nom dans la langue de `glossary.language`. |
+| `era.requiem` | texte | Son nom dans la langue de `glossary.language`. |
+| `era.omnia` | texte | Son nom dans la langue de `glossary.language`. |
+| `fissure` | `{ lith, meso, neo, axi, requiem, omnia }` | Une Fissure du Néant de chaque ère, par l’ID de l’ère. |
+| `fissure.lith` | texte | Son nom dans la langue de `glossary.language`. |
+| `fissure.meso` | texte | Son nom dans la langue de `glossary.language`. |
+| `fissure.neo` | texte | Son nom dans la langue de `glossary.language`. |
+| `fissure.axi` | texte | Son nom dans la langue de `glossary.language`. |
+| `fissure.requiem` | texte | Son nom dans la langue de `glossary.language`. |
+| `fissure.omnia` | texte | Son nom dans la langue de `glossary.language`. |
+| `activity` | `{ sortie, archon_hunt, netracells, circuit, nightwave, baro_ki_teer, void_fissure, arbitration, steel_path, void_storm }` | Des activités du jeu. |
+| `activity.sortie` | texte | Son nom dans la langue de `glossary.language`. |
+| `activity.archon_hunt` | texte | Son nom dans la langue de `glossary.language`. |
+| `activity.netracells` | texte | Son nom dans la langue de `glossary.language`. |
+| `activity.circuit` | texte | Son nom dans la langue de `glossary.language`. |
+| `activity.nightwave` | texte | Son nom dans la langue de `glossary.language`. |
+| `activity.baro_ki_teer` | texte | Son nom dans la langue de `glossary.language`. |
+| `activity.void_fissure` | texte | Son nom dans la langue de `glossary.language`. |
+| `activity.arbitration` | texte | Son nom dans la langue de `glossary.language`. |
+| `activity.steel_path` | texte | Son nom dans la langue de `glossary.language`. |
+| `activity.void_storm` | texte | Son nom dans la langue de `glossary.language`. |
+| `place` | `{ drifter_camp, larunda_relay, vesper_relay, strata_relay, kronia_relay, orcus_relay, cetus, fortuna, necralisk, sanctum_anatomica, chrysalith, hollvania_central_mall, maroos_bazaar, iron_wake, plains_of_eidolon, orb_vallis, cambion_drift }` | Les lieux qui ne sont pas un nœud. |
+| `place.drifter_camp` | texte | Son nom dans la langue de `glossary.language`. |
+| `place.larunda_relay` | texte | Son nom dans la langue de `glossary.language`. |
+| `place.vesper_relay` | texte | Son nom dans la langue de `glossary.language`. |
+| `place.strata_relay` | texte | Son nom dans la langue de `glossary.language`. |
+| `place.kronia_relay` | texte | Son nom dans la langue de `glossary.language`. |
+| `place.orcus_relay` | texte | Son nom dans la langue de `glossary.language`. |
+| `place.cetus` | texte | Son nom dans la langue de `glossary.language`. |
+| `place.fortuna` | texte | Son nom dans la langue de `glossary.language`. |
+| `place.necralisk` | texte | Son nom dans la langue de `glossary.language`. |
+| `place.sanctum_anatomica` | texte | Son nom dans la langue de `glossary.language`. |
+| `place.chrysalith` | texte | Son nom dans la langue de `glossary.language`. |
+| `place.hollvania_central_mall` | texte | Son nom dans la langue de `glossary.language`. |
+| `place.maroos_bazaar` | texte | Son nom dans la langue de `glossary.language`. |
+| `place.iron_wake` | texte | Son nom dans la langue de `glossary.language`. |
+| `place.plains_of_eidolon` | texte | Son nom dans la langue de `glossary.language`. |
+| `place.orb_vallis` | texte | Son nom dans la langue de `glossary.language`. |
+| `place.cambion_drift` | texte | Son nom dans la langue de `glossary.language`. |
+| `eidolon` | `{ teralyst, gantulyst, hydrolyst }` | Les Eidolons. |
+| `eidolon.teralyst` | texte | Son nom dans la langue de `glossary.language`. |
+| `eidolon.gantulyst` | texte | Son nom dans la langue de `glossary.language`. |
+| `eidolon.hydrolyst` | texte | Son nom dans la langue de `glossary.language`. |
+| `faction` | `{ grineer, corpus, infested, corrupted, sentient, narmer, murmur, scaldra, techrot, tenno }` | Les factions. |
+| `faction.grineer` | texte | Son nom dans la langue de `glossary.language`. |
+| `faction.corpus` | texte | Son nom dans la langue de `glossary.language`. |
+| `faction.infested` | texte | Son nom dans la langue de `glossary.language`. |
+| `faction.corrupted` | texte | Son nom dans la langue de `glossary.language`. |
+| `faction.sentient` | texte | Son nom dans la langue de `glossary.language`. |
+| `faction.narmer` | texte | Son nom dans la langue de `glossary.language`. |
+| `faction.murmur` | texte | Son nom dans la langue de `glossary.language`. |
+| `faction.scaldra` | texte | Son nom dans la langue de `glossary.language`. |
+| `faction.techrot` | texte | Son nom dans la langue de `glossary.language`. |
+| `faction.tenno` | texte | Son nom dans la langue de `glossary.language`. |
+| `cycle` | `{ day, night, warm, cold, fass, vome }` | Les états des cycles des mondes ouverts. |
+| `cycle.day` | texte | Son nom dans la langue de `glossary.language`. |
+| `cycle.night` | texte | Son nom dans la langue de `glossary.language`. |
+| `cycle.warm` | texte | Son nom dans la langue de `glossary.language`. |
+| `cycle.cold` | texte | Son nom dans la langue de `glossary.language`. |
+| `cycle.fass` | texte | Son nom dans la langue de `glossary.language`. |
+| `cycle.vome` | texte | Son nom dans la langue de `glossary.language`. |
+| `term` | `{ reactant, relic, credits }` | D’autres mots du jeu. |
+| `term.reactant` | texte | Son nom dans la langue de `glossary.language`. |
+| `term.relic` | texte | Son nom dans la langue de `glossary.language`. |
+| `term.credits` | texte | Son nom dans la langue de `glossary.language`. |
+
+### `WarframeEarned`
+
+Les rotations obtenues par une mission. `{ rotations, totals }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `rotations` | liste de `A` \| `B` \| `C` | Les rotations obtenues, dans l’ordre, les 64 dernières. |
+| `totals` | `{ A, B, C }` | Combien de chacune, toutes comptées. |
+| `totals.A` | entier | Rotations A obtenues. |
+| `totals.B` | entier | Rotations B obtenues. |
+| `totals.C` | entier | Rotations C obtenues. |
 
 ### `WarframeFeatures`
 
@@ -495,7 +600,7 @@ Où est le joueur. `{ kind, place, since }`
 
 ### `WarframeMission`
 
-Une mission Warframe. `{ state, node, planet, type, faction, enemyLevel, fissure, modifiers, selectedAt, loadingAt, startedAt, endedAt, result, durationSeconds, rewards }`
+Une mission Warframe. `{ state, node, planet, type, faction, enemyLevel, fissure, modifiers, selectedAt, loadingAt, startedAt, endedAt, result, durationSeconds, rewards, rewardsPending, earned, credits }`
 
 | Membre | Forme | Signification |
 | --- | --- | --- |
@@ -515,7 +620,10 @@ Une mission Warframe. `{ state, node, planet, type, faction, enemyLevel, fissure
 | `endedAt` | entier ou `null` | Quand elle s’est terminée. |
 | `result` | `succeeded` \| `failed` \| `aborted` ou `null` | `succeeded`, `failed` ou `aborted` ; `null` avant la fin, ou quand le jeu ne l’a pas dit. |
 | `durationSeconds` | nombre ou `null` | Du début de la partie à la fin, en secondes, à la milliseconde près. |
-| `rewards` | [`WarframeRewards`](#warframerewards) ou `null` | Ce que le nœud peut rapporter, pour un widget qui suit `warframe.rewards` ; `null` sinon, ou pour un nœud sans table de butin. |
+| `rewards` | [`WarframeRewards`](#warframerewards) ou `null` | Ce que la mission peut rapporter, pour un widget qui suit `warframe.rewards` ; `null` sinon, pour un nœud sans table de butin, ou pour une mission dont la table n’est pas publique ou pas encore connue. |
+| `rewardsPending` | booléen | `true` tant que `rewards` vaut `null` pour le moment : la table qui s’applique n’est pas encore connue (un nœud de la Sortie ou de la Chasse aux Archontes du jour, choisi mais pas chargé ; l’état du monde ou les tables de butin pas encore lus). `false` sinon, `rewards` donné ou non. |
+| `earned` | [`WarframeEarned`](#warframeearned) ou `null` | Les rotations obtenues depuis le début, pour un type à rotations ; `null` sinon ou avant le début. |
+| `credits` | entier ou `null` | Les crédits que compte son écran de fin ; `null` avant la fin, ou quand le jeu ne le dit pas (une mission abandonnée). |
 
 ### `WarframeModifier`
 
@@ -524,21 +632,30 @@ Ce qui modifie une mission. `{ id, name, stage }`
 | Membre | Forme | Signification |
 | --- | --- | --- |
 | `id` | `steel_path` \| `arbitration` \| `sortie` \| `archon_hunt` \| `nightmare` \| `void_storm` \| `alert` \| `lich` | Notre ID du modificateur. |
-| `name` | texte | Son nom dans la langue de l’utilisateur. |
+| `name` | texte | Son nom dans la langue du jeu. |
 | `stage` | entier ou `null` | L’étape d’une Sortie ou d’une Chasse aux Archontes, de 1 à 3, quand PlayerVox OverCrow peut la connaître. |
 
 ### `WarframeProgress`
 
-La progression d’une mission. `{ wave, round, rewards, rotation, nextRewardAt, nextRewardWave }`
+La progression d’une mission. `{ wave, waveEnemies, round, rewards, rotation, earned, cycle, clock, nextRewardAt, nextRewardWave }`
 
 | Membre | Forme | Signification |
 | --- | --- | --- |
 | `wave` | entier ou `null` | La vague en cours (Défense, Défense miroir). |
+| `waveEnemies` | `{ total, left }` ou `null` | Les ennemis de la vague de Défense en cours ; `null` avant la première. |
+| `waveEnemies.total` | entier | Les ennemis qu’a annoncés la vague. |
+| `waveEnemies.left` | entier ou `null` | Ceux qui restent, comme le jeu les compte une fois tous apparus ; 0 une fois la vague nettoyée ; `null` avant. |
 | `round` | entier ou `null` | Manches terminées (Interception, Perturbation). |
 | `rewards` | entier | Récompenses de rotation reçues jusqu’ici. |
-| `rotation` | `A` \| `B` \| `C` ou `null` | La rotation de la prochaine récompense, comptée A, A, B, C d’après les récompenses reçues ; `null` pour un type sans rotations ou que nous ne savons pas compter. |
-| `nextRewardAt` | entier ou `null` | Quand vient la prochaine récompense, en millisecondes Unix, pour un type payé au temps (Survie). |
-| `nextRewardWave` | entier ou `null` | La vague de la prochaine récompense, pour un type payé aux vagues (Défense). |
+| `rotation` | `A` \| `B` \| `C` ou `null` | La rotation de la prochaine récompense ; `null` pour un type sans rotations ou que nous ne savons pas compter. |
+| `earned` | [`WarframeEarned`](#warframeearned) | Les rotations reçues jusqu’ici. |
+| `cycle` | `{ number, rotations, earned }` ou `null` | Le tour de rotations de la prochaine récompense ; `null` pour une Perturbation et un type sans rotations. |
+| `cycle.number` | entier | 1 pour le premier tour. |
+| `cycle.rotations` | liste de `A` \| `B` \| `C` | Ses rotations, dans l’ordre : `A`, `A`, `B`, `C` ; celles d’un Arbitrage d’abord `A`, `A`, `B`, `B`, puis `C`, `C`, `C`, `C`. |
+| `cycle.earned` | entier | Combien ont été reçues. |
+| `clock` | `waiting` \| `running` ou `null` | Pour un type payé au temps (Survie) : `waiting` tant que son horloge n’est pas partie, puis `running` ; `null` sinon. |
+| `nextRewardAt` | entier ou `null` | Quand vient la prochaine récompense, en millisecondes Unix, pour un type payé au temps (Survie) une fois son horloge partie. |
+| `nextRewardWave` | entier ou `null` | La vague de la prochaine récompense, pour un type payé aux vagues (Défense : toutes les 3 ; Défense miroir : toutes les 2). |
 
 ### `WarframeSquadMember`
 
@@ -631,7 +748,7 @@ Un objet qu’un nœud peut rapporter. `{ id, name, quantity, chance }`
 | Membre | Forme | Signification |
 | --- | --- | --- |
 | `id` | texte | Notre ID : le nom anglais de l’objet en `snake_case` (`orokin_cell`). |
-| `name` | texte | Son nom dans la langue de l’utilisateur, ou en anglais quand PlayerVox OverCrow n’a pas encore sa traduction ; jamais vide. |
+| `name` | texte | Son nom dans la langue du jeu, ou en anglais quand PlayerVox OverCrow n’a pas encore sa traduction ; jamais vide. |
 | `quantity` | entier | Combien d’un coup. |
 | `chance` | nombre | La chance, de 0 à 1 ; les entrées d’un même objet d’une table additionnées. |
 
@@ -647,11 +764,12 @@ Une table de butin d’un nœud. `{ kind, rotation, items }`
 
 ### `WarframeRewards`
 
-Ce qu’un nœud peut rapporter. `{ tables }`
+Ce qu’une mission peut rapporter. `{ source, tables }`
 
 | Membre | Forme | Signification |
 | --- | --- | --- |
-| `tables` | liste de [`WarframeRewardTable`](#warframerewardtable) | Les tables du nœud, 9 au plus. Source : les tables de butin de Digital Extremes, sans garantie. |
+| `source` | `node` \| `arbitration` \| `sortie` \| `nightmare` | À qui sont les tables : `node`, ou les tables propres qui remplacent celles d’un nœud : `arbitration` (celles de tous les Arbitrages), `nightmare` (la récompense d’une mission Cauchemar, une fois, la rotation de sa planète), `sortie` (celle d’une Sortie, après sa troisième mission). |
+| `tables` | liste de [`WarframeRewardTable`](#warframerewardtable) | Les tables, au plus 9. Source : les tables de butin de Digital Extremes, sans garantie. |
 
 ### `WarframeWorldMission`
 

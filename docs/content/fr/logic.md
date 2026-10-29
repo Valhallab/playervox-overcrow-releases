@@ -424,6 +424,11 @@ sortie apparaît dans le terminal de `overcrow-widget dev` et nulle part
 ailleurs : les journaux d’un widget installé sont ignorés. Ne journalisez
 jamais de données de l’utilisateur.
 
+Un texte est coupé à 4 Kio, et le terminal en montre les 512 premiers
+caractères, puis `…` ; `dev --format json` le donne entier. Journalisez le
+résumé d’une grande valeur (ses comptes, les membres que vous vérifiez),
+pas la valeur elle-même.
+
 <!-- source: docs/content/examples/countdown/logic.ts -->
 ```ts
   log.info(`round ${state.rounds} finished`);
