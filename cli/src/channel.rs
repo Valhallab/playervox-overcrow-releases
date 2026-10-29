@@ -7,8 +7,12 @@ use std::io::{self, Write as _};
 use std::time::{Duration, Instant};
 
 use overcrow_widget_devchannel::{
-    ClientMessage, FrameError, Platform, ServerMessage, write_client_frame,
+    ClientMessage, FrameError, MAX_SESSIONS, Platform, ServerMessage, refusal, write_client_frame,
 };
+
+/// After a hello that met a closed channel, how long a refusal the overlay
+/// wrote first is waited for.
+const REFUSAL_WAIT: Duration = Duration::from_millis(500);
 
 /// Why the CLI could not talk to an overlay.
 #[derive(Debug)]
@@ -21,6 +25,8 @@ pub enum ConnectError {
     Incompatible(Vec<u32>),
     /// The overlay refused the session (`too_many_sessions`…).
     Refused(String),
+    /// The overlay closed the channel before the hello, without a word.
+    Closed(io::Error),
     Io(io::Error),
 }
 
@@ -38,7 +44,18 @@ impl std::fmt::Display for ConnectError {
                 "the overlay speaks development channel version(s) {versions:?}, this CLI speaks {}",
                 overcrow_widget_devchannel::PROTOCOL_VERSION
             ),
+            Self::Refused(code) if code == refusal::TOO_MANY_SESSIONS => write!(
+                formatter,
+                "{MAX_SESSIONS} widgets are already in development on this overlay, the most it runs at once: stop one (Ctrl+C in its terminal), then try again"
+            ),
+            Self::Refused(code) if code == "busy" => formatter.write_str(
+                "the overlay's development channel is busy: stop a widget in development (Ctrl+C in its terminal) or wait a moment, then try again",
+            ),
             Self::Refused(code) => write!(formatter, "the overlay refused the session ({code})"),
+            Self::Closed(error) => write!(
+                formatter,
+                "the overlay closed the development channel at once ({error}): it may be quitting; run `overcrow-widget doctor`"
+            ),
             Self::Io(error) => write!(formatter, "the development channel failed: {error}"),
         }
     }
@@ -60,23 +77,43 @@ pub struct Client {
 impl Client {
     /// Connects to this user's overlay and says hello.
     pub fn connect() -> Result<Self, ConnectError> {
-        let mut stream = transport::connect()?;
-        write_client_frame(
+        Self::handshake(transport::connect()?)
+    }
+
+    /// Says hello and reads the answer. An overlay may refuse a session and
+    /// close before its hello (too many sessions): its refusal still waits
+    /// in the channel, and says why.
+    fn handshake(mut stream: transport::Stream) -> Result<Self, ConnectError> {
+        let written = write_client_frame(
             &mut stream,
             &ClientMessage::Hello {
                 protocol: overcrow_widget_devchannel::PROTOCOL_VERSION,
                 client: format!("overcrow-widget {}", env!("CARGO_PKG_VERSION")),
             },
             None,
-        )
-        .map_err(ConnectError::Io)?;
-        let welcome = stream
-            .receive(overcrow_widget_devchannel::HELLO_TIMEOUT * 2)
-            .map_err(|error| ConnectError::Io(frame_error(error)))?;
-        match welcome {
-            Some(ServerMessage::Welcome {
-                overlay, platform, ..
-            }) => Ok(Self {
+        );
+        let timeout = if written.is_ok() {
+            overcrow_widget_devchannel::HELLO_TIMEOUT * 2
+        } else {
+            REFUSAL_WAIT
+        };
+        let answer = stream.receive(timeout);
+        match (answer, written) {
+            (
+                Ok(Some(ServerMessage::Refused {
+                    supported: Some(versions),
+                    ..
+                })),
+                _,
+            ) => Err(ConnectError::Incompatible(versions)),
+            (Ok(Some(ServerMessage::Refused { code, .. })), _) => Err(ConnectError::Refused(code)),
+            (_, Err(error)) => Err(ConnectError::Closed(error)),
+            (
+                Ok(Some(ServerMessage::Welcome {
+                    overlay, platform, ..
+                })),
+                Ok(()),
+            ) => Ok(Self {
                 stream,
                 overlay: Overlay {
                     name: overlay,
@@ -84,12 +121,8 @@ impl Client {
                 },
                 next_request: 1,
             }),
-            Some(ServerMessage::Refused {
-                supported: Some(versions),
-                ..
-            }) => Err(ConnectError::Incompatible(versions)),
-            Some(ServerMessage::Refused { code, .. }) => Err(ConnectError::Refused(code)),
-            _ => Err(ConnectError::Untrusted("no welcome")),
+            (Err(error), Ok(())) => Err(ConnectError::Io(frame_error(error))),
+            (Ok(_), Ok(())) => Err(ConnectError::Untrusted("no welcome")),
         }
     }
 
@@ -151,6 +184,14 @@ mod transport {
     use super::{ConnectError, wait};
 
     pub struct Stream(UnixStream);
+
+    #[cfg(test)]
+    impl Stream {
+        /// One end of a pair, as a test's overlay.
+        pub fn of(stream: UnixStream) -> Self {
+            Self(stream)
+        }
+    }
 
     fn euid() -> u32 {
         // SAFETY: `geteuid` has no preconditions and cannot fail.
@@ -605,5 +646,62 @@ mod transport {
         fn flush(&mut self) -> io::Result<()> {
             Ok(())
         }
+    }
+}
+
+#[cfg(all(test, unix))]
+mod tests {
+    use std::io::Write as _;
+    use std::os::unix::net::UnixStream;
+
+    use overcrow_widget_devchannel::{ServerMessage, encode_server_message, refusal};
+
+    use super::{Client, ConnectError, transport};
+
+    fn refuse_and_close(code: &str) -> UnixStream {
+        let (client, mut overlay) = UnixStream::pair().expect("pair");
+        let frame = encode_server_message(&ServerMessage::Refused {
+            code: code.to_owned(),
+            supported: None,
+        })
+        .expect("frame");
+        overlay.write_all(&frame).expect("refusal");
+        drop(overlay);
+        client
+    }
+
+    #[test]
+    fn a_refusal_written_before_the_hello_says_why() {
+        // The overlay refused and closed before the hello: the hello meets
+        // a closed channel, the refusal waits in it.
+        let stream = refuse_and_close(refusal::TOO_MANY_SESSIONS);
+        let error = Client::handshake(transport::Stream::of(stream))
+            .err()
+            .expect("refused");
+        assert!(
+            matches!(&error, ConnectError::Refused(code) if code == refusal::TOO_MANY_SESSIONS),
+            "{error:?}"
+        );
+        let text = error.to_string();
+        assert!(
+            text.starts_with("4 widgets are already in development on this overlay"),
+            "{text}"
+        );
+        assert!(text.contains("stop one (Ctrl+C in its terminal)"), "{text}");
+        assert!(!text.contains("Broken pipe"), "{text}");
+    }
+
+    #[test]
+    fn a_channel_closed_without_a_word_says_so() {
+        let (client, overlay) = UnixStream::pair().expect("pair");
+        drop(overlay);
+        let error = Client::handshake(transport::Stream::of(client))
+            .err()
+            .expect("closed");
+        assert!(matches!(error, ConnectError::Closed(_)), "{error:?}");
+        assert!(
+            error.to_string().contains("run `overcrow-widget doctor`"),
+            "{error}"
+        );
     }
 }
