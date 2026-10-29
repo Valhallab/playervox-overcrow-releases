@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "elsewhere",
-  "description": "In Cetus by night: the night left, away from the Plains.",
+  "description": "In Cetus by night: the night left, away from the Plains; the same at the Necralisk, a hub now named.",
   "host": {
     "startAt": 1793217600000,
     "frame": true,
@@ -211,6 +211,42 @@
       "menu": {
         "id": "layout",
         "value": "full"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "location": {
+              "kind": "hub",
+              "place": {
+                "id": "necralisk",
+                "name": "Necralisk"
+              },
+              "since": 1793217400000
+            }
+          },
+          "event": "location_changed"
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 260
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Nuit restante",
+          "Loin de : Plains of Eidolon"
+        ]
       }
     },
     {
