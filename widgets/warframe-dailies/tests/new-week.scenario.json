@@ -92,7 +92,7 @@
               "sortie": {
                 "boss": {
                   "id": "captain_vor",
-                  "name": "Capitaine Vor"
+                  "name": "Captain Vor"
                 },
                 "faction": {
                   "id": "grineer",
@@ -108,7 +108,7 @@
                     "planet": null,
                     "type": {
                       "id": "survival",
-                      "name": "Survie"
+                      "name": "Survival"
                     },
                     "modifier": null
                   },
@@ -132,7 +132,7 @@
                     "planet": null,
                     "type": {
                       "id": "defense",
-                      "name": "Défense"
+                      "name": "Defense"
                     },
                     "modifier": null
                   }
@@ -165,7 +165,7 @@
                     "planet": null,
                     "type": {
                       "id": "extermination",
-                      "name": "Extermination"
+                      "name": "Exterminate"
                     },
                     "modifier": null
                   },
@@ -177,7 +177,7 @@
                     "planet": null,
                     "type": {
                       "id": "assassination",
-                      "name": "Assassinat"
+                      "name": "Assassination"
                     },
                     "modifier": null
                   }
@@ -198,7 +198,7 @@
                 "leavesAt": 1794747600000,
                 "relay": {
                   "id": "larunda_relay",
-                  "name": "Relais Larunda"
+                  "name": "Larunda Relay"
                 }
               },
               "circuit": {
@@ -406,7 +406,7 @@
               "sortie": {
                 "boss": {
                   "id": "captain_vor",
-                  "name": "Capitaine Vor"
+                  "name": "Captain Vor"
                 },
                 "faction": {
                   "id": "grineer",
@@ -422,7 +422,7 @@
                     "planet": null,
                     "type": {
                       "id": "survival",
-                      "name": "Survie"
+                      "name": "Survival"
                     },
                     "modifier": null
                   },
@@ -446,7 +446,7 @@
                     "planet": null,
                     "type": {
                       "id": "defense",
-                      "name": "Défense"
+                      "name": "Defense"
                     },
                     "modifier": null
                   }
@@ -479,7 +479,7 @@
                     "planet": null,
                     "type": {
                       "id": "extermination",
-                      "name": "Extermination"
+                      "name": "Exterminate"
                     },
                     "modifier": null
                   },
@@ -491,7 +491,7 @@
                     "planet": null,
                     "type": {
                       "id": "assassination",
-                      "name": "Assassinat"
+                      "name": "Assassination"
                     },
                     "modifier": null
                   }
@@ -512,7 +512,7 @@
                 "leavesAt": 1794747600000,
                 "relay": {
                   "id": "larunda_relay",
-                  "name": "Relais Larunda"
+                  "name": "Larunda Relay"
                 }
               },
               "circuit": {
@@ -720,7 +720,7 @@
               "sortie": {
                 "boss": {
                   "id": "captain_vor",
-                  "name": "Capitaine Vor"
+                  "name": "Captain Vor"
                 },
                 "faction": {
                   "id": "grineer",
@@ -736,7 +736,7 @@
                     "planet": null,
                     "type": {
                       "id": "survival",
-                      "name": "Survie"
+                      "name": "Survival"
                     },
                     "modifier": null
                   },
@@ -760,7 +760,7 @@
                     "planet": null,
                     "type": {
                       "id": "defense",
-                      "name": "Défense"
+                      "name": "Defense"
                     },
                     "modifier": null
                   }
@@ -793,7 +793,7 @@
                     "planet": null,
                     "type": {
                       "id": "extermination",
-                      "name": "Extermination"
+                      "name": "Exterminate"
                     },
                     "modifier": null
                   },
@@ -805,7 +805,7 @@
                     "planet": null,
                     "type": {
                       "id": "assassination",
-                      "name": "Assassinat"
+                      "name": "Assassination"
                     },
                     "modifier": null
                   }
@@ -826,7 +826,7 @@
                 "leavesAt": 1794747600000,
                 "relay": {
                   "id": "larunda_relay",
-                  "name": "Relais Larunda"
+                  "name": "Larunda Relay"
                 }
               },
               "circuit": {

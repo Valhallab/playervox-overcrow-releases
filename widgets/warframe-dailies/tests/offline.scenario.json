@@ -83,7 +83,7 @@
               "sortie": {
                 "boss": {
                   "id": "captain_vor",
-                  "name": "Capitaine Vor"
+                  "name": "Captain Vor"
                 },
                 "faction": {
                   "id": "grineer",
@@ -99,7 +99,7 @@
                     "planet": null,
                     "type": {
                       "id": "rescue",
-                      "name": "Sauvetage"
+                      "name": "Rescue"
                     },
                     "modifier": null
                   },
@@ -111,7 +111,7 @@
                     "planet": null,
                     "type": {
                       "id": "disruption",
-                      "name": "Perturbation"
+                      "name": "Disruption"
                     },
                     "modifier": null
                   },
@@ -123,7 +123,7 @@
                     "planet": null,
                     "type": {
                       "id": "mobile_defense",
-                      "name": "Défense mobile"
+                      "name": "Mobile Defense"
                     },
                     "modifier": null
                   }
@@ -144,7 +144,7 @@
                     "planet": null,
                     "type": {
                       "id": "rescue",
-                      "name": "Sauvetage"
+                      "name": "Rescue"
                     },
                     "modifier": null
                   },
@@ -156,7 +156,7 @@
                     "planet": null,
                     "type": {
                       "id": "survival",
-                      "name": "Survie"
+                      "name": "Survival"
                     },
                     "modifier": null
                   },
@@ -168,7 +168,7 @@
                     "planet": null,
                     "type": {
                       "id": "assassination",
-                      "name": "Assassinat"
+                      "name": "Assassination"
                     },
                     "modifier": null
                   }
@@ -189,7 +189,7 @@
                 "leavesAt": 1793538000000,
                 "relay": {
                   "id": "larunda_relay",
-                  "name": "Relais Larunda"
+                  "name": "Larunda Relay"
                 }
               },
               "circuit": {
@@ -397,7 +397,7 @@
               "sortie": {
                 "boss": {
                   "id": "captain_vor",
-                  "name": "Capitaine Vor"
+                  "name": "Captain Vor"
                 },
                 "faction": {
                   "id": "grineer",
@@ -413,7 +413,7 @@
                     "planet": null,
                     "type": {
                       "id": "rescue",
-                      "name": "Sauvetage"
+                      "name": "Rescue"
                     },
                     "modifier": null
                   },
@@ -425,7 +425,7 @@
                     "planet": null,
                     "type": {
                       "id": "disruption",
-                      "name": "Perturbation"
+                      "name": "Disruption"
                     },
                     "modifier": null
                   },
@@ -437,7 +437,7 @@
                     "planet": null,
                     "type": {
                       "id": "mobile_defense",
-                      "name": "Défense mobile"
+                      "name": "Mobile Defense"
                     },
                     "modifier": null
                   }
@@ -458,7 +458,7 @@
                     "planet": null,
                     "type": {
                       "id": "rescue",
-                      "name": "Sauvetage"
+                      "name": "Rescue"
                     },
                     "modifier": null
                   },
@@ -470,7 +470,7 @@
                     "planet": null,
                     "type": {
                       "id": "survival",
-                      "name": "Survie"
+                      "name": "Survival"
                     },
                     "modifier": null
                   },
@@ -482,7 +482,7 @@
                     "planet": null,
                     "type": {
                       "id": "assassination",
-                      "name": "Assassinat"
+                      "name": "Assassination"
                     },
                     "modifier": null
                   }
@@ -503,7 +503,7 @@
                 "leavesAt": 1793538000000,
                 "relay": {
                   "id": "larunda_relay",
-                  "name": "Relais Larunda"
+                  "name": "Larunda Relay"
                 }
               },
               "circuit": {

@@ -59,7 +59,8 @@
       "gameEvents.warframe.subscribe": {
         "playing": true,
         "session": {
-          "startedAt": 1793257500000
+          "startedAt": 1793257500000,
+          "language": "en"
         },
         "features": {
           "location": "undeclared",
@@ -99,7 +100,10 @@
             "endedAt": 1793265600000,
             "result": "succeeded",
             "durationSeconds": 600,
-            "rewards": null
+            "rewards": null,
+            "earned": null,
+            "credits": null,
+            "rewardsPending": false
           },
           "progress": null,
           "squad": null,
@@ -269,7 +273,10 @@
               "endedAt": 1793261100000,
               "result": "succeeded",
               "durationSeconds": 600,
-              "rewards": null
+              "rewards": null,
+              "earned": null,
+              "credits": null,
+              "rewardsPending": false
             }
           },
           {
@@ -303,7 +310,10 @@
               "endedAt": 1793265600000,
               "result": "succeeded",
               "durationSeconds": 600,
-              "rewards": null
+              "rewards": null,
+              "earned": null,
+              "credits": null,
+              "rewardsPending": false
             }
           }
         ]
@@ -317,7 +327,7 @@
         "fault": "none",
         "text": [
           "2/3",
-          "Remaining: Mobile Defense"
+          "Remaining: Mobile Defense"
         ],
         "noText": [
           "just now"
