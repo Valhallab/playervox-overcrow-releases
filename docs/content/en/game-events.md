@@ -248,7 +248,8 @@ that is not its own:
 { source: "node" | "arbitration" | "nightmare" | "sortie";
   tables: { kind: "mission" | "caches" | "extra";
             rotation: "A" | "B" | "C" | null;
-            items: { id: string; name: string; quantity: number; chance: number }[] }[] }
+            items: { id: string; name: string; quantity: number; chance: number;
+                     icon: string | null; iconPending: boolean; category: string }[] }[] }
 ```
 
 - `source` says whose tables, and the title to give them:
@@ -282,12 +283,25 @@ that is not its own:
   English when PlayerVox OverCrow has no translation yet; `quantity` the
   number given at once; `chance` from 0 to 1, the same item's entries of a
   table added together.
+- `icon`: the item's image from Digital Extremes' public export, an
+  `asset:` handle of a 48 px square (show it with an
+  [`image`](elements.md#image), at 24 px for instance). `iconPending` is
+  `true` while it may still come: keep its place empty, so that nothing
+  moves when it arrives. With `icon` `null` and `iconPending` `false`, no
+  image will come (the item has none, or the source cannot be reached):
+  show your own icon of its `category` (`relic`, `mod`, `resource`,
+  `blueprint`, `warframe_part`, `weapon_part`, `arcane`, `currency`,
+  `other`). An image may still arrive later; `iconPending` never comes
+  back to `true`.
 - **Source**: Digital Extremes' official drop tables
   (warframe.com/droptables), read by PlayerVox OverCrow on the player's
   computer once a day and at each game update, while a widget that follows
   `warframe.rewards` runs. Show the source with the rates, in these
   words: **"Rates: Digital Extremes, no guarantees"** (in French: **« Taux :
   Digital Extremes, sans garantie »**).
+- **Images**: Digital Extremes' public export (content.warframe.com),
+  downloaded by PlayerVox OverCrow on the player's computer, once for each
+  item a widget shows, and kept there. Nothing is shipped in a widget.
 
 ### Event types
 
@@ -404,6 +418,16 @@ words: `fr` or `en` (English for the game's other languages). Its groups:
 | `faction` | the [factions](#factions) |
 | `cycle` | the [cycle states](#cycle-states) |
 | `term` | `reactant`, `relic`, `credits` |
+| `icons` | `damage`: each damage type's symbol, by the same IDs |
+
+`glossary.icons.damage.<id>` is the symbol of a damage type from the
+official Warframe wiki (wiki.warframe.com), an `asset:` handle of a 72 px
+square whose symbol is the middle 64 px: show it at 22 px for a 20 px
+symbol. The pale ones (`impact`, `puncture`, `slash`, `radiation`) have a
+soft dark halo that keeps them readable on a light background. It is
+`null` until PlayerVox OverCrow has it (downloaded once on the player's
+computer, read again every 30 days), or while the wiki cannot be
+reached: show your own icon in its place.
 
 English names: damage types as their IDs (Impact, Puncture, Slash, Heat,
 Cold, Electricity, Toxin, Blast, Corrosive, Gas, Magnetic, Radiation,
@@ -622,6 +646,11 @@ may send what it receives to its server. The player sees each feature
 before installing the widget, and its privacy policy says what it sends.
 See [security](security.md#permissions-and-consent).
 
+The game's images come from Digital Extremes (item images) and the
+official Warframe wiki (damage symbols): PlayerVox OverCrow downloads them
+itself on the player's computer, without any identifier, and keeps them
+there. A widget only receives handles to them.
+
 ## Testing
 
 In a [scenario](testing.md#scenarios), a `gameEvents` step says what the
@@ -677,6 +706,11 @@ wave 5 starts, then the mission succeeds.
 - `glossary` merges like `info`: `{ "language": "fr", "damage": { "corrosive": "Corrosif" } }`
   changes those words only. A step's `rewards` are the node's unless it
   gives `source`.
+- Images are the scenario's own, drawn for the test: declare them in
+  `assets` and name them `fixture:<name>` where a handle goes, as
+  `"icon": "fixture:relic"` or
+  `{ "icons": { "damage": { "impact": "fixture:impact" } } }` in
+  `glossary`. Never put the game's images in a widget.
 - Each step is checked when the scenario is read: a value without the
   service's shape is an error with the path of the first wrong member, and
   a step may only touch the features the manifest lists.

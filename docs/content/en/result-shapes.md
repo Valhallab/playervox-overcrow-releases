@@ -458,7 +458,7 @@ Warframe's game events, for the features the widget lists. `{ playing, session, 
 
 ### `WarframeGlossary`
 
-Words of the game a widget shows on their own, in the game's language, so that it never writes one itself. `{ language, damage, era, fissure, activity, place, eidolon, faction, cycle, term }`
+Words of the game a widget shows on their own, in the game's language, so that it never writes one itself. `{ language, damage, era, fissure, activity, place, eidolon, faction, cycle, term, icons }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
@@ -546,6 +546,28 @@ Words of the game a widget shows on their own, in the game's language, so that i
 | `term.reactant` | text | Its name in the language of `glossary.language`. |
 | `term.relic` | text | Its name in the language of `glossary.language`. |
 | `term.credits` | text | Its name in the language of `glossary.language`. |
+| `icons` | [`WarframeGlossaryIcons`](#warframeglossaryicons) | The game's symbols, as images. |
+
+### `WarframeGlossaryIcons`
+
+The game's symbols, downloaded once by PlayerVox OverCrow on the player's computer; each `null` until then, or while the source cannot be reached. `{ damage }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `damage` | `{ impact, puncture, slash, heat, cold, electricity, toxin, blast, corrosive, gas, magnetic, radiation, viral }` | The damage types' symbols, by our ID: the official Warframe wiki's, 72 px square, the symbol 64 px in the middle; the pale ones (`impact`, `puncture`, `slash`, `radiation`) with a soft dark halo that keeps them readable on a light background. |
+| `damage.impact` | `asset:` handle or `null` | `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. |
+| `damage.puncture` | `asset:` handle or `null` | `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. |
+| `damage.slash` | `asset:` handle or `null` | `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. |
+| `damage.heat` | `asset:` handle or `null` | `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. |
+| `damage.cold` | `asset:` handle or `null` | `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. |
+| `damage.electricity` | `asset:` handle or `null` | `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. |
+| `damage.toxin` | `asset:` handle or `null` | `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. |
+| `damage.blast` | `asset:` handle or `null` | `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. |
+| `damage.corrosive` | `asset:` handle or `null` | `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. |
+| `damage.gas` | `asset:` handle or `null` | `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. |
+| `damage.magnetic` | `asset:` handle or `null` | `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. |
+| `damage.radiation` | `asset:` handle or `null` | `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. |
+| `damage.viral` | `asset:` handle or `null` | `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. |
 
 ### `WarframeEarned`
 
@@ -741,7 +763,7 @@ One Warframe event; its type tells which state it carries. `{ seq, at, type, mis
 
 ### `WarframeReward`
 
-An item a node can reward. `{ id, name, quantity, chance }`
+An item a node can reward. `{ id, name, quantity, chance, icon, iconPending, category }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
@@ -749,6 +771,9 @@ An item a node can reward. `{ id, name, quantity, chance }`
 | `name` | text | Its name in the game's language, or in English when PlayerVox OverCrow has no translation yet; never empty. |
 | `quantity` | integer | How many at once. |
 | `chance` | number | The chance, from 0 to 1; the same item's entries of a table added together. |
+| `icon` | `asset:` handle or `null` | `asset:` handle of the item's image, from Digital Extremes' public export, 48 px square; `null` while it downloads (`iconPending`) or when there is none. |
+| `iconPending` | boolean | `true` while `icon` is `null` for now: the image may still come. `false` otherwise: `icon` given, or no image to come (the item has none, or the source cannot be reached); `icon` may still arrive later, never `iconPending` again. |
+| `category` | `relic` \| `mod` \| `resource` \| `blueprint` \| `warframe_part` \| `weapon_part` \| `arcane` \| `currency` \| `other` | What kind of item: `relic`, `mod`, `resource`, `blueprint`, `warframe_part`, `weapon_part`, `arcane`, `currency` or `other`. |
 
 ### `WarframeRewardTable`
 

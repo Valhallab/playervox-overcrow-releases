@@ -103,7 +103,22 @@ const fn words<const N: usize>(list: &'static [crate::game_events::Named]) -> [M
     members
 }
 
+const SYMBOL: &str = "`asset:` handle of its symbol, `null` while PlayerVox OverCrow has none.";
+
+/// One nullable image member per entry of `list`, by its ID.
+const fn symbols<const N: usize>(list: &'static [crate::game_events::Named]) -> [Member; N] {
+    assert!(list.len() == N);
+    let mut members = [member("", Shape::Nullable(&Shape::Asset), SYMBOL); N];
+    let mut index = 0;
+    while index < N {
+        members[index] = member(list[index].id, Shape::Nullable(&Shape::Asset), SYMBOL);
+        index += 1;
+    }
+    members
+}
+
 const DAMAGE_WORDS: [Member; 13] = words(warframe::DAMAGE_TYPES);
+const DAMAGE_SYMBOLS: [Member; 13] = symbols(warframe::DAMAGE_TYPES);
 const ERA_WORDS: [Member; 6] = words(warframe::ERAS);
 const FISSURE_WORDS: [Member; 6] = words(warframe::FISSURES);
 const ACTIVITY_WORDS: [Member; 10] = words(warframe::ACTIVITIES);
@@ -846,8 +861,22 @@ pub const SHAPES: &[NamedShape] = &[
                 Shape::Record(&TERM_WORDS),
                 "Other words of the game.",
             ),
+            member(
+                "icons",
+                Shape::Named("WarframeGlossaryIcons"),
+                "The game's symbols, as images.",
+            ),
         ]),
         "Words of the game a widget shows on their own, in the game's language, so that it never writes one itself.",
+    ),
+    named(
+        "WarframeGlossaryIcons",
+        Shape::Record(&[member(
+            "damage",
+            Shape::Record(&DAMAGE_SYMBOLS),
+            "The damage types' symbols, by our ID: the official Warframe wiki's, 72 px square, the symbol 64 px in the middle; the pale ones (`impact`, `puncture`, `slash`, `radiation`) with a soft dark halo that keeps them readable on a light background.",
+        )]),
+        "The game's symbols, downloaded once by PlayerVox OverCrow on the player's computer; each `null` until then, or while the source cannot be reached.",
     ),
     named(
         "WarframeEarned",
@@ -1262,6 +1291,21 @@ pub const SHAPES: &[NamedShape] = &[
                 "chance",
                 Shape::Number,
                 "The chance, from 0 to 1; the same item's entries of a table added together.",
+            ),
+            member(
+                "icon",
+                Shape::Nullable(&Shape::Asset),
+                "`asset:` handle of the item's image, from Digital Extremes' public export, 48 px square; `null` while it downloads (`iconPending`) or when there is none.",
+            ),
+            member(
+                "iconPending",
+                Shape::Bool,
+                "`true` while `icon` is `null` for now: the image may still come. `false` otherwise: `icon` given, or no image to come (the item has none, or the source cannot be reached); `icon` may still arrive later, never `iconPending` again.",
+            ),
+            member(
+                "category",
+                Shape::Keyword(warframe::REWARD_CATEGORIES),
+                "What kind of item: `relic`, `mod`, `resource`, `blueprint`, `warframe_part`, `weapon_part`, `arcane`, `currency` or `other`.",
             ),
         ]),
         "An item a node can reward.",

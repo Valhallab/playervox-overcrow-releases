@@ -24,7 +24,12 @@ game events, Warframe first:
   `WarframeEarned` and related types: the game's language and a glossary
   of its words, the rotations a mission earned and the round of the
   next one, a Survival's clock, the current Defense wave's enemies, the
-  credits of a mission's end, and whose tables its rewards are.
+  credits of a mission's end, and whose tables its rewards are. The
+  game's images, downloaded by PlayerVox OverCrow on the player's
+  computer: each reward's `icon` (`asset:` handle, from Digital Extremes'
+  public export), `iconPending` and `category`, and the damage types'
+  symbols of the official wiki in `glossary.icons.damage`
+  (`WarframeGlossaryIcons`).
 - `gameEvents.subscribe` and the `GameEvent` type are removed, and
   `gameEvents` no longer takes `overcrow.game.<name>.v1` names. No release
   of PlayerVox OverCrow ever sent such an event, so no widget could rely on

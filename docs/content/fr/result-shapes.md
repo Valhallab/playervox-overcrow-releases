@@ -460,7 +460,7 @@ Les événements de jeu de Warframe, pour les fonctionnalités que le widget lis
 
 ### `WarframeGlossary`
 
-Les mots du jeu qu’un widget affiche seuls, dans la langue du jeu, pour qu’il n’en écrive jamais lui-même. `{ language, damage, era, fissure, activity, place, eidolon, faction, cycle, term }`
+Les mots du jeu qu’un widget affiche seuls, dans la langue du jeu, pour qu’il n’en écrive jamais lui-même. `{ language, damage, era, fissure, activity, place, eidolon, faction, cycle, term, icons }`
 
 | Membre | Forme | Signification |
 | --- | --- | --- |
@@ -548,6 +548,28 @@ Les mots du jeu qu’un widget affiche seuls, dans la langue du jeu, pour qu’i
 | `term.reactant` | texte | Son nom dans la langue de `glossary.language`. |
 | `term.relic` | texte | Son nom dans la langue de `glossary.language`. |
 | `term.credits` | texte | Son nom dans la langue de `glossary.language`. |
+| `icons` | [`WarframeGlossaryIcons`](#warframeglossaryicons) | Les symboles du jeu, en images. |
+
+### `WarframeGlossaryIcons`
+
+Les symboles du jeu, téléchargés une fois par PlayerVox OverCrow sur le PC du joueur ; chacun `null` jusque-là, ou tant que la source ne répond pas. `{ damage }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `damage` | `{ impact, puncture, slash, heat, cold, electricity, toxin, blast, corrosive, gas, magnetic, radiation, viral }` | Les symboles des types de dégâts, par notre ID : ceux du wiki officiel de Warframe, en carré de 72 px, le symbole de 64 px au milieu ; les pâles (`impact`, `puncture`, `slash`, `radiation`) avec un halo sombre très doux qui les garde lisibles sur un fond clair. |
+| `damage.impact` | identifiant `asset:` ou `null` | Poignée `asset:` de son symbole, `null` tant que PlayerVox OverCrow n’en a pas. |
+| `damage.puncture` | identifiant `asset:` ou `null` | Poignée `asset:` de son symbole, `null` tant que PlayerVox OverCrow n’en a pas. |
+| `damage.slash` | identifiant `asset:` ou `null` | Poignée `asset:` de son symbole, `null` tant que PlayerVox OverCrow n’en a pas. |
+| `damage.heat` | identifiant `asset:` ou `null` | Poignée `asset:` de son symbole, `null` tant que PlayerVox OverCrow n’en a pas. |
+| `damage.cold` | identifiant `asset:` ou `null` | Poignée `asset:` de son symbole, `null` tant que PlayerVox OverCrow n’en a pas. |
+| `damage.electricity` | identifiant `asset:` ou `null` | Poignée `asset:` de son symbole, `null` tant que PlayerVox OverCrow n’en a pas. |
+| `damage.toxin` | identifiant `asset:` ou `null` | Poignée `asset:` de son symbole, `null` tant que PlayerVox OverCrow n’en a pas. |
+| `damage.blast` | identifiant `asset:` ou `null` | Poignée `asset:` de son symbole, `null` tant que PlayerVox OverCrow n’en a pas. |
+| `damage.corrosive` | identifiant `asset:` ou `null` | Poignée `asset:` de son symbole, `null` tant que PlayerVox OverCrow n’en a pas. |
+| `damage.gas` | identifiant `asset:` ou `null` | Poignée `asset:` de son symbole, `null` tant que PlayerVox OverCrow n’en a pas. |
+| `damage.magnetic` | identifiant `asset:` ou `null` | Poignée `asset:` de son symbole, `null` tant que PlayerVox OverCrow n’en a pas. |
+| `damage.radiation` | identifiant `asset:` ou `null` | Poignée `asset:` de son symbole, `null` tant que PlayerVox OverCrow n’en a pas. |
+| `damage.viral` | identifiant `asset:` ou `null` | Poignée `asset:` de son symbole, `null` tant que PlayerVox OverCrow n’en a pas. |
 
 ### `WarframeEarned`
 
@@ -743,7 +765,7 @@ Un événement Warframe ; son type dit quel état il porte. `{ seq, at, type, mi
 
 ### `WarframeReward`
 
-Un objet qu’un nœud peut rapporter. `{ id, name, quantity, chance }`
+Un objet qu’un nœud peut rapporter. `{ id, name, quantity, chance, icon, iconPending, category }`
 
 | Membre | Forme | Signification |
 | --- | --- | --- |
@@ -751,6 +773,9 @@ Un objet qu’un nœud peut rapporter. `{ id, name, quantity, chance }`
 | `name` | texte | Son nom dans la langue du jeu, ou en anglais quand PlayerVox OverCrow n’a pas encore sa traduction ; jamais vide. |
 | `quantity` | entier | Combien d’un coup. |
 | `chance` | nombre | La chance, de 0 à 1 ; les entrées d’un même objet d’une table additionnées. |
+| `icon` | identifiant `asset:` ou `null` | Poignée `asset:` de l’image de l’objet, tirée du Public Export de Digital Extremes, en carré de 48 px ; `null` pendant son téléchargement (`iconPending`) ou s’il n’y en a pas. |
+| `iconPending` | booléen | `true` tant que `icon` est `null` pour l’instant : l’image peut encore venir. `false` sinon : `icon` donnée, ou aucune image à venir (l’objet n’en a pas, ou la source ne répond pas) ; `icon` peut encore arriver plus tard, jamais `iconPending` de nouveau. |
+| `category` | `relic` \| `mod` \| `resource` \| `blueprint` \| `warframe_part` \| `weapon_part` \| `arcane` \| `currency` \| `other` | Le genre d’objet : `relic`, `mod`, `resource`, `blueprint`, `warframe_part`, `weapon_part`, `arcane`, `currency` ou `other`. |
 
 ### `WarframeRewardTable`
 
