@@ -199,7 +199,8 @@
       "expect": {
         "text": [
           "Grineer",
-          "Impact, Corrosive"
+          "Impact",
+          "Corrosive"
         ],
         "noText": [
           "Use",
@@ -527,7 +528,8 @@
       "expect": {
         "text": [
           "The Murmur",
-          "Electricity, Radiation"
+          "Electricity",
+          "Radiation"
         ]
       }
     },

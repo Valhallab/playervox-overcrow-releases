@@ -1,0 +1,176 @@
+{
+  "scenarioVersion": 1,
+  "name": "deimos",
+  "description": "Deimos' Infested, the Cambion Drift's and a Deimos node's: Blast and Gas, Viral to avoid; our icons until the game's symbols come.",
+  "host": {
+    "startAt": 1793199600000
+  },
+  "assets": {
+    "blast": "tests/assets/symbol-blast.png",
+    "gas": "tests/assets/symbol-gas.png"
+  },
+  "steps": [
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode229",
+                "name": "Cambion Drift"
+              },
+              "planet": {
+                "id": "deimos",
+                "name": "Deimos"
+              },
+              "type": {
+                "id": "free_roam",
+                "name": "Free Roam"
+              },
+              "faction": {
+                "id": "infested",
+                "name": "Infested"
+              },
+              "enemyLevel": {
+                "min": 15,
+                "max": 30
+              },
+              "fissure": null,
+              "modifiers": []
+            }
+          },
+          "event": "mission_selected"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Infested",
+          "Blast",
+          "Gas",
+          "Avoid: Viral"
+        ],
+        "noText": [
+          "Slash",
+          "Heat"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "deimos-fallback-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "glossary": {
+            "icons": {
+              "damage": {
+                "blast": "fixture:blast",
+                "gas": "fixture:gas"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "deimos-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "deimos-light-en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode706",
+                "name": "Horend"
+              },
+              "planet": {
+                "id": "deimos",
+                "name": "Deimos"
+              },
+              "type": {
+                "id": "defense",
+                "name": "Defense"
+              },
+              "faction": {
+                "id": "infested",
+                "name": "Infested"
+              },
+              "enemyLevel": {
+                "min": 10,
+                "max": 15
+              },
+              "fissure": null,
+              "modifiers": []
+            }
+          },
+          "event": "mission_selected"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Horend · Deimos · Defense",
+          "Blast",
+          "Gas",
+          "Avoid: Viral"
+        ],
+        "noText": [
+          "Slash"
+        ],
+        "fault": "none"
+      }
+    }
+  ]
+}

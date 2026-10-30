@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "unknown",
-  "description": "Enemies without advice: an unknown faction on a node without a name, the Infested of the Cambion Drift, still without advice once the mission starts; the Infested of a Deimos star chart node keep theirs.",
+  "description": "Enemies without advice: an unknown faction on a node without a name. Deimos' Infested, the Cambion Drift's as a Deimos node's, get theirs: Blast and Gas, Viral to avoid, before and once the mission starts.",
   "host": {
     "startAt": 1793199600000
   },
@@ -270,11 +270,14 @@
       "expect": {
         "text": [
           "Infested",
-          "No advice yet for these enemies."
+          "Blast",
+          "Gas",
+          "Avoid: Viral"
         ],
         "noText": [
           "Slash",
-          "Heat"
+          "Heat",
+          "No advice yet for these enemies."
         ]
       }
     },
@@ -316,10 +319,13 @@
       "expect": {
         "text": [
           "Infested",
-          "Slash",
-          "Heat"
+          "Blast",
+          "Gas",
+          "Avoid: Viral"
         ],
         "noText": [
+          "Slash",
+          "Heat",
           "No advice yet for these enemies."
         ]
       }
@@ -371,11 +377,14 @@
       "expect": {
         "text": [
           "Infested",
-          "No advice yet for these enemies."
+          "Blast",
+          "Gas",
+          "Avoid: Viral"
         ],
         "noText": [
           "Slash",
-          "Heat"
+          "Heat",
+          "No advice yet for these enemies."
         ]
       }
     }

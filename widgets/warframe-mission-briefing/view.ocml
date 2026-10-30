@@ -1,6 +1,18 @@
 <!-- The briefing of the chosen Warframe mission: the faction, the damage
      types it is weak to and the one to avoid, then what changes the
      mission. One line while waiting, and in the One line layout. -->
+<!-- A damage type's symbol: the game's, or our icon in the same place. -->
+<component name="symbol" props="d size">
+  <box class={"sym sym-" + size}>
+    <if test={d.src != ""}>
+      <image class="sym-img" src={d.src}/>
+    </if>
+    <else>
+      <icon class={"sym-icon " + d.cls} name={d.icon}/>
+    </else>
+  </box>
+</component>
+
 <box class={state.root}>
   <if test={state.brief.mode == "wait"}>
     <box class="line">
@@ -14,7 +26,13 @@
       <text class="strip-faction" label={state.brief.faction}>{state.brief.faction}</text>
       <if test={state.brief.use.length > 0}>
         <text class="meta-sep">·</text>
-        <text class="strip-name">{names(state.brief.use)}</text>
+        <text class="strip-name strip-joined">{names(state.brief.use)}</text>
+        <for each={state.brief.use} as="d" key={d.id}>
+          <box class="strip-dmg">
+            <symbol d={d} size={"s"}/>
+            <text class="strip-name">{d.name}</text>
+          </box>
+        </for>
       </if>
     </box>
   </else-if>
@@ -32,20 +50,22 @@
       <box class="faction-big">
         <box class={state.brief.dot}/>
         <text class="faction-name">{state.brief.faction}</text>
-        <box class="grow"/>
         <if test={state.brief.level != ""}>
+          <text class="level-sep">·</text>
           <text class="level">{state.brief.level}</text>
         </if>
       </box>
       <if test={state.brief.use.length > 0}>
         <box class="use-row">
           <text class="use-label">{t("use")}</text>
-          <for each={state.brief.use} as="d" key={d.id}>
-            <box class="chip">
-              <icon class={"chip-icon " + d.cls} name={d.icon}/>
-              <text class="chip-text">{d.name}</text>
-            </box>
-          </for>
+          <box class="chips">
+            <for each={state.brief.use} as="d" key={d.id}>
+              <box class="chip">
+                <symbol d={d} size={"m"}/>
+                <text class="chip-text">{d.name}</text>
+              </box>
+            </for>
+          </box>
         </box>
       </if>
       <if test={state.brief.avoid.length > 0}>

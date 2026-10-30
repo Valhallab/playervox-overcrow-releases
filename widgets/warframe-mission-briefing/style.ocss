@@ -22,12 +22,6 @@
   row-gap: 10px;
 }
 
-.grow {
-  flex-grow: 1;
-  flex-shrink: 1;
-  min-width: 0;
-}
-
 .tone-warning { color: var(--color-warning); }
 .tone-muted { color: var(--color-text-muted); }
 
@@ -92,9 +86,11 @@
   text-overflow: ellipsis;
 }
 
+/* The level reads with the faction, on its baseline, never alone at the
+   edge; the name yields first. */
 .faction-big {
   flex-direction: row;
-  align-items: center;
+  align-items: baseline;
   gap: 8px;
 }
 
@@ -102,11 +98,17 @@
   width: 10px;
   height: 10px;
   border-radius: 5px;
+  align-self: center;
 }
 
 .faction-name {
   font-size: var(--font-size-title);
   font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .unknown .faction-name {
@@ -117,40 +119,86 @@
 
 .level {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 400;
   font-variant-numeric: tabular-nums;
   color: var(--color-text-secondary);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
+.level-sep {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+/* The engine aligns this row by the boxes' bottoms: the smaller text goes
+   up onto the name's baseline (2 px, measured at 100 %). */
+.level,
+.level-sep {
+  position: relative;
+  top: -2px;
+}
+
+/* The chips wrap under the first one, never under the label. */
 .use-row {
   flex-direction: row;
-  align-items: center;
-  flex-wrap: wrap;
+  align-items: start;
   gap: 6px;
-}
-
-.wide .use-row {
-  flex-wrap: nowrap;
 }
 
 .use-label {
   font-size: 12px;
   color: var(--color-text-muted);
   margin-right: 2px;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.chips {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .chip {
   flex-direction: row;
   align-items: center;
   gap: 5px;
-  padding: 4px 8px 4px 6px;
+  padding: 2px 8px 2px 2px;
   border-radius: var(--radius-sm);
   background: var(--color-surface-hover);
 }
 
-.chip-icon {
+/* A symbol's place, the same with the game's image or our icon, so that
+   nothing moves when the image arrives. The host's image is 72/64 of its
+   symbol: 22 px shows a 20 px symbol, 18 px a 16 px one. */
+.sym {
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sym-m,
+.sym-m .sym-img {
+  width: 22px;
+  height: 22px;
+}
+
+.sym-m .sym-icon {
   font-size: 15px;
+}
+
+.sym-s,
+.sym-s .sym-img {
+  width: 18px;
+  height: 18px;
+}
+
+.sym-s .sym-icon {
+  font-size: 13px;
 }
 
 .chip-text {
@@ -183,6 +231,7 @@
 .d-cold { color: #8fd0f5; }
 .d-electricity { color: #d0a8ff; }
 .d-toxin { color: #8fdc78; }
+.d-blast { color: #f0a08a; }
 .d-corrosive { color: #d2e05a; }
 .d-gas { color: #8fd8c4; }
 .d-magnetic { color: #7fb6ff; }
@@ -196,6 +245,7 @@
 .theme-light .d-cold { color: #0369a1; }
 .theme-light .d-electricity { color: #6d28d9; }
 .theme-light .d-toxin { color: #2f7d1e; }
+.theme-light .d-blast { color: #b4441f; }
 .theme-light .d-corrosive { color: #5f6b0a; }
 .theme-light .d-gas { color: #0f766e; }
 .theme-light .d-magnetic { color: #3f4fd6; }
@@ -322,4 +372,21 @@
   color: var(--color-text);
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+.strip-dmg {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* Under 260 px, the names only, so that the faction keeps its name. */
+.strip-joined,
+.narrow .strip-dmg {
+  display: none;
+}
+
+.narrow .strip-joined {
+  display: flex;
 }

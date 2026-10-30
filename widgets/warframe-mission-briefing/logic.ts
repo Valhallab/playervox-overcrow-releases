@@ -30,7 +30,9 @@ import {
 // factions with a resistance have `avoid`. Sub-factions are handled in
 // `advice`: Kuva Grineer share the Grineer's weaknesses; Corpus Amalgams
 // (Jupiter) are weak to Magnetic only among the Corpus' two; the Deimos
-// Infested of the Cambion Drift share none with the Infested.
+// Infested (the Cambion Drift and Deimos' nodes) are weak to Blast and Gas
+// and resist Viral. Each type shows the game's symbol, from the official
+// wiki, when PlayerVox OverCrow has it; our icon otherwise.
 interface Weakness {
   readonly use: readonly DamageId[];
   readonly avoid: readonly DamageId[];
@@ -44,6 +46,7 @@ type DamageId =
   | "electricity"
   | "heat"
   | "toxin"
+  | "blast"
   | "corrosive"
   | "gas"
   | "magnetic"
@@ -71,6 +74,7 @@ const DAMAGE_ICONS: Readonly<Record<DamageId, IconName>> = {
   electricity: "zap",
   heat: "flame",
   toxin: "droplet",
+  blast: "bomb",
   corrosive: "flask-conical",
   gas: "cloud-fog",
   magnetic: "magnet",
@@ -98,6 +102,8 @@ export interface Damage {
   readonly name: string;
   readonly icon: IconName;
   readonly cls: string;
+  /** The game's symbol (an `asset:` handle); empty: our icon in its place. */
+  readonly src: string;
 }
 
 export interface Modifier {
@@ -325,14 +331,10 @@ export function adviceFor(factionId: string, mission: Pick<WarframeMission, "pla
   const weakness = WEAKNESSES[factionId];
   if (weakness === undefined) return null;
   const planet = mission.planet?.id ?? null;
-  // The Cambion Drift's Infested are the Deimos Infested: weak to Blast
-  // and Gas, resistant to Viral. The star chart's Deimos nodes keep the
-  // Infested of the Orokin Derelicts. Without a sure way to tell a bounty
-  // of the Drift, no advice rather than a wrong one.
-  if (factionId === "infested" && planet === "deimos") {
-    const type = mission.type?.id ?? null;
-    if (type === null || type === "free_roam") return null;
-  }
+  // Deimos' Infested, the Cambion Drift's included, are the Deimos
+  // Infested: weak to Blast and Gas, resistant to Viral (the official
+  // wiki's Damage/Overview_Table).
+  if (factionId === "infested" && planet === "deimos") return { use: ["blast", "gas"], avoid: ["viral"] };
   // Jupiter's Corpus include the Amalgams of the Gas City: Magnetic hurts
   // both, Puncture only the Corpus.
   if (factionId === "corpus" && planet === "jupiter") return { use: ["magnetic"], avoid: [] };
@@ -353,7 +355,8 @@ function damages(ids: readonly DamageId[]): Damage[] {
   // A type without a name is left out, never shown by its ID.
   return ids.flatMap((id) => {
     const name = gameName("damage", id);
-    return name === null ? [] : [{ id, name, icon: DAMAGE_ICONS[id], cls: `d-${id}` }];
+    const src = glossary?.icons?.damage[id] ?? "";
+    return name === null ? [] : [{ id, name, icon: DAMAGE_ICONS[id], cls: `d-${id}`, src }];
   });
 }
 
@@ -409,11 +412,16 @@ export function sortieCondition(modifier: WarframeModifier, mission: WarframeMis
   return match?.modifier?.name ?? "";
 }
 
-/** Side by side only when there is something to put on the right. */
+/**
+ * Side by side only when there is something to put on the right. One line
+ * under 260 px names the types without their symbols, so that the faction
+ * keeps its name.
+ */
 export function rootClass(brief: Brief): string {
   const wide = brief.mode === "full" && host.viewport.width >= 500 && brief.mods.length > 0 ? " wide" : "";
   const unknown = brief.mode !== "wait" && brief.use.length === 0 ? " unknown" : "";
-  return `wf briefing ${brief.mode}${wide}${unknown} theme-${host.theme}`;
+  const narrow = brief.mode === "strip" && host.viewport.width < 260 ? " narrow" : "";
+  return `wf briefing ${brief.mode}${wide}${unknown}${narrow} theme-${host.theme}`;
 }
 
 /** "Impact, Corrosive". */

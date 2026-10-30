@@ -90,6 +90,24 @@ const GLOSSARY = {
     tenno: "Tenno",
   },
   term: { reactant: "Reactant", relic: "Relic", credits: "Credits" },
+  // No symbol yet, as before the host has the wiki's.
+  icons: {
+    damage: {
+      impact: null,
+      puncture: null,
+      slash: null,
+      heat: null,
+      cold: null,
+      electricity: null,
+      toxin: null,
+      blast: null,
+      corrosive: null,
+      gas: null,
+      magnetic: null,
+      radiation: null,
+      viral: null,
+    },
+  },
 };
 
 function value({
@@ -169,13 +187,35 @@ test("advice: none for a faction without weaknesses or unknown", () => {
   assert.equal(logic.adviceFor("anything_new", mission()), null);
 });
 
-test("advice: the Cambion Drift's Infested get none, Deimos' star chart keeps the Infested's", () => {
+test("advice: Deimos' Infested, the Cambion Drift's included, use Blast and Gas and avoid Viral", () => {
+  const deimos = { use: ["blast", "gas"], avoid: ["viral"] };
   const drift = { planet: named("deimos", "Deimos"), type: named("free_roam", "Free Roam") };
-  assert.equal(logic.adviceFor("infested", drift), null);
-  assert.equal(logic.adviceFor("infested", { planet: named("deimos", "Deimos"), type: null }), null);
-  assert.deepEqual(logic.adviceFor("infested", { planet: named("deimos", "Deimos"), type: named("defense", "Defense") }).use, ["slash", "heat"]);
-  // The Murmur of Deimos keep theirs.
+  assert.deepEqual(logic.adviceFor("infested", drift), deimos);
+  assert.deepEqual(logic.adviceFor("infested", { planet: named("deimos", "Deimos"), type: null }), deimos);
+  assert.deepEqual(logic.adviceFor("infested", { planet: named("deimos", "Deimos"), type: named("defense", "Defense") }), deimos);
+  // Elsewhere the Infested keep theirs; the Murmur of Deimos keep theirs.
+  assert.deepEqual(logic.adviceFor("infested", { planet: named("eris", "Eris"), type: null }).use, ["slash", "heat"]);
   assert.deepEqual(logic.adviceFor("murmur", drift).use, ["electricity", "radiation"]);
+  const brief = logic.build(value({ mission: mission({ planet: named("deimos", "Deimos"), faction: named("infested", "Infested") }) }), null);
+  assert.deepEqual([logic.names(brief.use), logic.names(brief.avoid)], ["Blast, Gas", "Viral"]);
+  assert.deepEqual(brief.use.map((each) => each.icon), ["bomb", "cloud-fog"]);
+  logic.build(value(), null);
+});
+
+test("symbols: the game's symbol once the host has it, our icon in the same place before", () => {
+  const symbols = { ...GLOSSARY.icons.damage, impact: "asset:00000000000000a1" };
+  const brief = logic.build(value({ glossary: { ...GLOSSARY, icons: { damage: symbols } }, mission: mission() }), null);
+  assert.deepEqual(
+    brief.use.map((each) => [each.id, each.src, each.icon]),
+    [
+      ["impact", "asset:00000000000000a1", "hammer"],
+      ["corrosive", "", "flask-conical"],
+    ],
+  );
+  // A host without symbols at all: our icons.
+  const { icons: _, ...older } = GLOSSARY;
+  assert.deepEqual(logic.build(value({ glossary: older, mission: mission() }), null).use.map((each) => each.src), ["", ""]);
+  logic.build(value(), null);
 });
 
 test("advice: on Jupiter, Magnetic only for the Corpus (the Amalgams resist nothing else of theirs)", () => {
@@ -341,6 +381,12 @@ test("state: One line folds the chosen mission; wide only at 500 px with modifie
   assert.equal(state.root, "wf briefing full wide theme-dark");
   vm.setHost({ viewport: { width: 300, height: 240 } });
   assert.equal(state.root, "wf briefing full theme-dark");
+  // One line under 260 px: the names without their symbols.
+  vm.setHost({ options: { layout: "line" } });
+  assert.equal(state.root, "wf briefing strip theme-dark");
+  vm.setHost({ viewport: { width: 240, height: 40 } });
+  assert.equal(state.root, "wf briefing strip narrow theme-dark");
+  vm.setHost({ options: { layout: "full" }, viewport: { width: 300, height: 240 } });
 });
 
 test("state: a failure says the mission is not found and subscribes again 30 s later; a refusal waits", () => {

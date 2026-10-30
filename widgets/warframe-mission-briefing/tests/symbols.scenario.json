@@ -1,0 +1,332 @@
+{
+  "scenarioVersion": 1,
+  "name": "symbols",
+  "description": "The game's damage symbols once PlayerVox OverCrow has them: Grineer on Hydron, the Corrupted with pale symbols in the light theme, then One line with its symbols at 300 px and the names alone at 220 px.",
+  "host": {
+    "startAt": 1793199600000
+  },
+  "assets": {
+    "impact": "tests/assets/symbol-impact.png",
+    "corrosive": "tests/assets/symbol-corrosive.png",
+    "puncture": "tests/assets/symbol-puncture.png",
+    "viral": "tests/assets/symbol-viral.png"
+  },
+  "steps": [
+    {
+      "gameEvents": {
+        "warframe": {
+          "glossary": {
+            "icons": {
+              "damage": {
+                "impact": "fixture:impact",
+                "corrosive": "fixture:corrosive",
+                "puncture": "fixture:puncture",
+                "viral": "fixture:viral"
+              }
+            }
+          },
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode195",
+                "name": "Hydron"
+              },
+              "planet": {
+                "id": "sedna",
+                "name": "Sedna"
+              },
+              "type": {
+                "id": "defense",
+                "name": "Defense"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "enemyLevel": {
+                "min": 30,
+                "max": 40
+              },
+              "fissure": null,
+              "modifiers": []
+            }
+          },
+          "event": "mission_selected"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Grineer",
+          "Impact",
+          "Corrosive"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "symbols-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "symbols-en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1500,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "symbols-fr-150",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "symbols-light-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode412",
+                "name": "Mot"
+              },
+              "planet": {
+                "id": "void",
+                "name": "Void"
+              },
+              "type": {
+                "id": "survival",
+                "name": "Survival"
+              },
+              "faction": {
+                "id": "corrupted",
+                "name": "Corrupted"
+              },
+              "enemyLevel": {
+                "min": 40,
+                "max": 45
+              },
+              "fissure": null,
+              "modifiers": []
+            }
+          },
+          "event": "mission_selected"
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Corrupted",
+          "Puncture",
+          "Viral",
+          "Avoid: Radiation"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "symbols-corrupted-light-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1500,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "symbols-corrupted-light-fr-150",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "symbols-corrupted-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "symbols-line-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 40
+        },
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "symbols-line-light-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1500,
+        "size": {
+          "width": 300,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "symbols-line-fr-150",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 220,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Puncture, Viral"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 220,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "symbols-line-220-fr-100",
+        "fault": "none"
+      }
+    }
+  ]
+}
