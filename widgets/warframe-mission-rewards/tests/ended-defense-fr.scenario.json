@@ -8,6 +8,11 @@
     "frame": true,
     "startAt": 1793217600000
   },
+  "assets": {
+    "currency": "tests/assets/item-currency.png",
+    "mod": "tests/assets/item-mod.png",
+    "relic": "tests/assets/item-relic.png"
+  },
   "steps": [
     {
       "expect": {
@@ -46,61 +51,91 @@
                         "id": "magazine_warp",
                         "name": "Mutation de Chargeur",
                         "quantity": 1,
-                        "chance": 0.1
+                        "chance": 0.1,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "neo_a16_relic",
                         "name": "Relique Neo A16",
                         "quantity": 1,
-                        "chance": 0.1
+                        "chance": 0.1,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "neo_c10_relic",
                         "name": "Relique Neo C10",
                         "quantity": 1,
-                        "chance": 0.1
+                        "chance": 0.1,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "neo_c11_relic",
                         "name": "Relique Neo C11",
                         "quantity": 1,
-                        "chance": 0.1
+                        "chance": 0.1,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "neo_c7_relic",
                         "name": "Relique Neo C7",
                         "quantity": 1,
-                        "chance": 0.1
+                        "chance": 0.1,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "neo_k10_relic",
                         "name": "Relique Neo K10",
                         "quantity": 1,
-                        "chance": 0.1
+                        "chance": 0.1,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "neo_v13_relic",
                         "name": "Relique Neo V13",
                         "quantity": 1,
-                        "chance": 0.1
+                        "chance": 0.1,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "neo_y2_relic",
                         "name": "Relique Neo Y2",
                         "quantity": 1,
-                        "chance": 0.1
+                        "chance": 0.1,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "trick_mag",
                         "name": "Chargeur Trafiqué",
                         "quantity": 1,
-                        "chance": 0.1
+                        "chance": 0.1,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "vitality",
                         "name": "Vitalité",
                         "quantity": 1,
-                        "chance": 0.1
+                        "chance": 0.1,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       }
                     ]
                   },
@@ -112,97 +147,143 @@
                         "id": "axi_a21_relic",
                         "name": "Relique Axi A21",
                         "quantity": 1,
-                        "chance": 0.0625
+                        "chance": 0.0625,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "axi_a22_relic",
                         "name": "Relique Axi A22",
                         "quantity": 1,
-                        "chance": 0.0625
+                        "chance": 0.0625,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "axi_c12_relic",
                         "name": "Relique Axi C12",
                         "quantity": 1,
-                        "chance": 0.0625
+                        "chance": 0.0625,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "axi_c13_relic",
                         "name": "Relique Axi C13",
                         "quantity": 1,
-                        "chance": 0.0625
+                        "chance": 0.0625,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "axi_d6_relic",
                         "name": "Relique Axi D6",
                         "quantity": 1,
-                        "chance": 0.0625
+                        "chance": 0.0625,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "axi_p10_relic",
                         "name": "Relique Axi P10",
                         "quantity": 1,
-                        "chance": 0.0625
+                        "chance": 0.0625,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "axi_s21_relic",
                         "name": "Relique Axi S21",
                         "quantity": 1,
-                        "chance": 0.0625
+                        "chance": 0.0625,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "axi_v14_relic",
                         "name": "Relique Axi V14",
                         "quantity": 1,
-                        "chance": 0.0625
+                        "chance": 0.0625,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "deep_freeze",
                         "name": "Froid Pénétrant",
                         "quantity": 1,
-                        "chance": 0.0625
+                        "chance": 0.0625,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "endo",
                         "name": "Endo",
                         "quantity": 200,
-                        "chance": 0.0625
+                        "chance": 0.0625,
+                        "category": "currency",
+                        "icon": "fixture:currency",
+                        "iconPending": false
                       },
                       {
                         "id": "hell_s_chamber",
                         "name": "Antre de l'Enfer",
                         "quantity": 1,
-                        "chance": 0.0625
+                        "chance": 0.0625,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "hornet_strike",
                         "name": "Nuée de Dards",
                         "quantity": 1,
-                        "chance": 0.0625
+                        "chance": 0.0625,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "north_wind",
                         "name": "Vent du Nord",
                         "quantity": 1,
-                        "chance": 0.0625
+                        "chance": 0.0625,
+                        "category": "other"
                       },
                       {
                         "id": "reflex_coil",
                         "name": "Bobine Réflexe",
                         "quantity": 1,
-                        "chance": 0.0625
+                        "chance": 0.0625,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "shocking_touch",
                         "name": "Toucher Choquant",
                         "quantity": 1,
-                        "chance": 0.0625
+                        "chance": 0.0625,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "streamline",
                         "name": "Rationalisation",
                         "quantity": 1,
-                        "chance": 0.0625
+                        "chance": 0.0625,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       }
                     ]
                   },
@@ -214,109 +295,163 @@
                         "id": "continuity",
                         "name": "Continuité",
                         "quantity": 1,
-                        "chance": 0.0226
+                        "chance": 0.0226,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "convulsion",
                         "name": "Convulsion",
                         "quantity": 1,
-                        "chance": 0.0226
+                        "chance": 0.0226,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "endo",
                         "name": "Endo",
                         "quantity": 400,
-                        "chance": 0.0226
+                        "chance": 0.0226,
+                        "category": "currency",
+                        "icon": "fixture:currency",
+                        "iconPending": false
                       },
                       {
                         "id": "handspring",
                         "name": "Mains sur Ressorts",
                         "quantity": 1,
-                        "chance": 0.0226
+                        "chance": 0.0226,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "master_thief",
                         "name": "Maître Voleur",
                         "quantity": 1,
-                        "chance": 0.0226
+                        "chance": 0.0226,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "metal_auger",
                         "name": "Pointe Métallique",
                         "quantity": 1,
-                        "chance": 0.0226
+                        "chance": 0.0226,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "ravage",
                         "name": "Ravage",
                         "quantity": 1,
-                        "chance": 0.0226
+                        "chance": 0.0226,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "split_chamber",
                         "name": "Chambre Divisée",
                         "quantity": 1,
-                        "chance": 0.0226
+                        "chance": 0.0226,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "stretch",
                         "name": "Allonge",
                         "quantity": 1,
-                        "chance": 0.0226
+                        "chance": 0.0226,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "vital_sense",
                         "name": "Perception Vitale",
                         "quantity": 1,
-                        "chance": 0.0226
+                        "chance": 0.0226,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "axi_a21_relic",
                         "name": "Relique Axi A21",
                         "quantity": 1,
-                        "chance": 0.0968
+                        "chance": 0.0968,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "axi_a22_relic",
                         "name": "Relique Axi A22",
                         "quantity": 1,
-                        "chance": 0.0968
+                        "chance": 0.0968,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "axi_c12_relic",
                         "name": "Relique Axi C12",
                         "quantity": 1,
-                        "chance": 0.0968
+                        "chance": 0.0968,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "axi_c13_relic",
                         "name": "Relique Axi C13",
                         "quantity": 1,
-                        "chance": 0.0968
+                        "chance": 0.0968,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "axi_d6_relic",
                         "name": "Relique Axi D6",
                         "quantity": 1,
-                        "chance": 0.0968
+                        "chance": 0.0968,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "axi_p10_relic",
                         "name": "Relique Axi P10",
                         "quantity": 1,
-                        "chance": 0.0968
+                        "chance": 0.0968,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "axi_s21_relic",
                         "name": "Relique Axi S21",
                         "quantity": 1,
-                        "chance": 0.0968
+                        "chance": 0.0968,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       },
                       {
                         "id": "axi_v14_relic",
                         "name": "Relique Axi V14",
                         "quantity": 1,
-                        "chance": 0.0968
+                        "chance": 0.0968,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
                       }
                     ]
                   }

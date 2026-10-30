@@ -2,6 +2,14 @@
 <component name="drops" props="items">
   <for each={items} as="d" key={d.id}>
     <box class="drop">
+      <box class="thumb">
+        <if test={hasText(d.icon)}>
+          <image class="thumb-img" src={d.icon}/>
+        </if>
+        <else-if test={hasText(d.glyph)}>
+          <icon class="thumb-glyph" name={d.glyph}/>
+        </else-if>
+      </box>
       <text class="drop-name">{d.name}</text>
       <if test={hasText(d.qty)}>
         <text class="drop-qty">{d.qty}</text>
@@ -163,7 +171,7 @@
         <box class="list">
           <drops items={sec.rows}/>
           <for each={sec.fill} as="f" key={f}>
-            <box class="drop filler"><text class="drop-name">&#160;</text></box>
+            <box class="drop filler"><box class="thumb"/><text class="drop-name">&#160;</text></box>
           </for>
           <more sec={sec}/>
           <if test={sec.fillMore}>

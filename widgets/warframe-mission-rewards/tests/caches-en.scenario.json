@@ -8,6 +8,11 @@
     "frame": true,
     "startAt": 1793217600000
   },
+  "assets": {
+    "currency": "tests/assets/item-currency.png",
+    "mod": "tests/assets/item-mod.png",
+    "resource": "tests/assets/item-resource.png"
+  },
   "steps": [
     {
       "expect": {
@@ -46,13 +51,19 @@
                         "id": "alloy_plate",
                         "name": "Alloy Plate",
                         "quantity": 300,
-                        "chance": 0.5
+                        "chance": 0.5,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
                       },
                       {
                         "id": "endo",
                         "name": "Endo",
                         "quantity": 80,
-                        "chance": 0.5
+                        "chance": 0.5,
+                        "category": "currency",
+                        "icon": "fixture:currency",
+                        "iconPending": false
                       }
                     ]
                   },
@@ -64,19 +75,28 @@
                         "id": "morphics",
                         "name": "Morphics",
                         "quantity": 1,
-                        "chance": 0.25
+                        "chance": 0.25,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
                       },
                       {
                         "id": "orokin_cell",
                         "name": "Orokin Cell",
                         "quantity": 1,
-                        "chance": 0.25
+                        "chance": 0.25,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
                       },
                       {
                         "id": "endo",
                         "name": "Endo",
                         "quantity": 150,
-                        "chance": 0.5
+                        "chance": 0.5,
+                        "category": "currency",
+                        "icon": "fixture:currency",
+                        "iconPending": false
                       }
                     ]
                   },
@@ -88,19 +108,28 @@
                         "id": "metal_auger",
                         "name": "Metal Auger",
                         "quantity": 1,
-                        "chance": 0.125
+                        "chance": 0.125,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "neurodes",
                         "name": "Neurodes",
                         "quantity": 2,
-                        "chance": 0.375
+                        "chance": 0.375,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
                       },
                       {
                         "id": "endo",
                         "name": "Endo",
                         "quantity": 250,
-                        "chance": 0.5
+                        "chance": 0.5,
+                        "category": "currency",
+                        "icon": "fixture:currency",
+                        "iconPending": false
                       }
                     ]
                   }

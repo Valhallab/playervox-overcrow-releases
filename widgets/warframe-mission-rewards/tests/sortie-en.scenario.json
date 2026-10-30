@@ -8,6 +8,11 @@
     "frame": true,
     "startAt": 1793217600000
   },
+  "assets": {
+    "currency": "tests/assets/item-currency.png",
+    "mod": "tests/assets/item-mod.png",
+    "resource": "tests/assets/item-resource.png"
+  },
   "steps": [
     {
       "expect": {
@@ -44,103 +49,142 @@
                         "id": "ayatan_anasa_sculpture",
                         "name": "Ayatan Anasa Sculpture",
                         "quantity": 1,
-                        "chance": 0.28
+                        "chance": 0.28,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
                       },
                       {
                         "id": "endo",
                         "name": "Endo",
                         "quantity": 4000,
-                        "chance": 0.12
+                        "chance": 0.12,
+                        "category": "currency",
+                        "icon": "fixture:currency",
+                        "iconPending": false
                       },
                       {
                         "id": "forma",
                         "name": "Forma",
                         "quantity": 1,
-                        "chance": 0.025
+                        "chance": 0.025,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
                       },
                       {
                         "id": "exilus_warframe_adapter",
                         "name": "Exilus Warframe Adapter",
                         "quantity": 1,
-                        "chance": 0.025
+                        "chance": 0.025,
+                        "category": "other"
                       },
                       {
                         "id": "orokin_reactor_blueprint",
                         "name": "Orokin Reactor Blueprint",
                         "quantity": 1,
-                        "chance": 0.025
+                        "chance": 0.025,
+                        "category": "blueprint"
                       },
                       {
                         "id": "orokin_catalyst_blueprint",
                         "name": "Orokin Catalyst Blueprint",
                         "quantity": 1,
-                        "chance": 0.025
+                        "chance": 0.025,
+                        "category": "blueprint"
                       },
                       {
                         "id": "legendary_core",
                         "name": "Legendary Core",
                         "quantity": 1,
-                        "chance": 0.0019
+                        "chance": 0.0019,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
                       },
                       {
                         "id": "kuva",
                         "name": "Kuva",
                         "quantity": 6000,
-                        "chance": 0.12
+                        "chance": 0.12,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
                       },
                       {
                         "id": "affinity_booster",
                         "name": "Affinity Booster",
                         "quantity": 1,
-                        "chance": 0.0327
+                        "chance": 0.0327,
+                        "category": "other"
                       },
                       {
                         "id": "resource_drop_chance_booster",
                         "name": "Resource Drop Chance Booster",
                         "quantity": 1,
-                        "chance": 0.0327
+                        "chance": 0.0327,
+                        "category": "other"
                       },
                       {
                         "id": "mod_drop_chance_booster",
                         "name": "Mod Drop Chance Booster",
                         "quantity": 1,
-                        "chance": 0.0327
+                        "chance": 0.0327,
+                        "category": "other"
                       },
                       {
                         "id": "rifle_riven_mod",
                         "name": "Rifle Riven Mod",
                         "quantity": 1,
-                        "chance": 0.07
+                        "chance": 0.07,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "pistol_riven_mod",
                         "name": "Pistol Riven Mod",
                         "quantity": 1,
-                        "chance": 0.07
+                        "chance": 0.07,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "shotgun_riven_mod",
                         "name": "Shotgun Riven Mod",
                         "quantity": 1,
-                        "chance": 0.022000000000000002
+                        "chance": 0.022000000000000002,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "melee_riven_mod",
                         "name": "Melee Riven Mod",
                         "quantity": 1,
-                        "chance": 0.098
+                        "chance": 0.098,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "zaw_riven_mod",
                         "name": "Zaw Riven Mod",
                         "quantity": 1,
-                        "chance": 0.01
+                        "chance": 0.01,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "kitgun_riven_mod",
                         "name": "Kitgun Riven Mod",
                         "quantity": 1,
-                        "chance": 0.01
+                        "chance": 0.01,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       }
                     ]
                   }

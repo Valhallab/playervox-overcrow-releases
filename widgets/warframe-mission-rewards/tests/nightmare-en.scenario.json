@@ -8,6 +8,9 @@
     "frame": true,
     "startAt": 1793217600000
   },
+  "assets": {
+    "mod": "tests/assets/item-mod.png"
+  },
   "steps": [
     {
       "expect": {
@@ -47,43 +50,64 @@
                         "id": "ice_storm",
                         "name": "Ice Storm",
                         "quantity": 1,
-                        "chance": 0.18969999999999998
+                        "chance": 0.18969999999999998,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "stunning_speed",
                         "name": "Stunning Speed",
                         "quantity": 1,
-                        "chance": 0.18969999999999998
+                        "chance": 0.18969999999999998,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "hammer_shot",
                         "name": "Hammer Shot",
                         "quantity": 1,
-                        "chance": 0.0101
+                        "chance": 0.0101,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "wildfire",
                         "name": "Wildfire",
                         "quantity": 1,
-                        "chance": 0.18969999999999998
+                        "chance": 0.18969999999999998,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "accelerated_blast",
                         "name": "Accelerated Blast",
                         "quantity": 1,
-                        "chance": 0.18969999999999998
+                        "chance": 0.18969999999999998,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "blaze",
                         "name": "Blaze",
                         "quantity": 1,
-                        "chance": 0.0101
+                        "chance": 0.0101,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "chilling_reload",
                         "name": "Chilling Reload",
                         "quantity": 1,
-                        "chance": 0.2211
+                        "chance": 0.2211,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       }
                     ]
                   }

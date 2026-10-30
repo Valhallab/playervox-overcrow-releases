@@ -25,7 +25,7 @@ const { state } = await import("@overcrow/sdk");
 
 const flush = () => new Promise((resolve) => setImmediate(resolve));
 
-const item = (id, name, chance, quantity = 1) => ({ id, name, quantity, chance });
+const item = (id, name, chance, quantity = 1) => ({ id, name, quantity, chance, icon: null, iconPending: false, category: "other" });
 const MOT = {
   source: "node",
   tables: [
@@ -263,6 +263,29 @@ test("tables: 10 rows then + n more, with one rate or a range; a single hidden r
   const open = logic.section("a", "A", twelve, 10, "rarest", ["a"]);
   assert.equal(open.rows.length, 12);
   assert.equal(open.more, "");
+});
+
+test("images: the game's once the host has it, an empty tile while it may come, our icon of its kind when none will", () => {
+  const relic = { ...item("neo_c7_relic", "Neo C7 Relic", 0.125), category: "relic" };
+  assert.deepEqual(logic.itemImage({ ...relic, icon: "asset:00000000000000b1" }), { icon: "asset:00000000000000b1", glyph: "" });
+  assert.deepEqual(logic.itemImage({ ...relic, iconPending: true }), { icon: "", glyph: "" });
+  for (const [category, glyph] of [
+    ["relic", "hexagon"],
+    ["mod", "layers"],
+    ["resource", "gem"],
+    ["blueprint", "scroll-text"],
+    ["warframe_part", "user-round"],
+    ["weapon_part", "sword"],
+    ["arcane", "sparkles"],
+    ["currency", "coins"],
+    ["other", "package"],
+  ]) {
+    assert.deepEqual(logic.itemImage({ ...relic, category }), { icon: "", glyph }, category);
+  }
+  // Each row carries its item's.
+  const table = { kind: "mission", rotation: "B", items: [{ ...relic, icon: "asset:00000000000000b1" }, { ...item("endo", "Endo", 0.2, 80), category: "currency" }] };
+  const rows = logic.section("b", "B", table, 10, "rarest", []).rows;
+  assert.deepEqual(rows.map((row) => [row.icon, row.glyph]), [["asset:00000000000000b1", ""], ["", "coins"]]);
 });
 
 test("the height never moves within a mission: empty lines up to the node's longest rotation", () => {

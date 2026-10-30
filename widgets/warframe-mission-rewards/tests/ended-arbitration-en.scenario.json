@@ -8,6 +8,11 @@
     "frame": true,
     "startAt": 1793217600000
   },
+  "assets": {
+    "currency": "tests/assets/item-currency.png",
+    "mod": "tests/assets/item-mod.png",
+    "resource": "tests/assets/item-resource.png"
+  },
   "steps": [
     {
       "expect": {
@@ -47,73 +52,101 @@
                         "id": "ayatan_valana_sculpture",
                         "name": "Ayatan Valana Sculpture",
                         "quantity": 1,
-                        "chance": 0.09
+                        "chance": 0.09,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
                       },
                       {
                         "id": "ayatan_sah_sculpture",
                         "name": "Ayatan Sah Sculpture",
                         "quantity": 1,
-                        "chance": 0.09
+                        "chance": 0.09,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
                       },
                       {
                         "id": "ayatan_ayr_sculpture",
                         "name": "Ayatan Ayr Sculpture",
                         "quantity": 1,
-                        "chance": 0.09
+                        "chance": 0.09,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
                       },
                       {
                         "id": "vitus_essence",
                         "name": "Vitus Essence",
                         "quantity": 3,
-                        "chance": 0.07
+                        "chance": 0.07,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
                       },
                       {
                         "id": "arcane_pistoleer",
                         "name": "Arcane Pistoleer",
                         "quantity": 1,
-                        "chance": 0.05
+                        "chance": 0.05,
+                        "category": "arcane"
                       },
                       {
                         "id": "arcane_tanker",
                         "name": "Arcane Tanker",
                         "quantity": 1,
-                        "chance": 0.05
+                        "chance": 0.05,
+                        "category": "arcane"
                       },
                       {
                         "id": "arcane_bodyguard",
                         "name": "Arcane Bodyguard",
                         "quantity": 1,
-                        "chance": 0.05
+                        "chance": 0.05,
+                        "category": "arcane"
                       },
                       {
                         "id": "combat_discipline",
                         "name": "Combat Discipline",
                         "quantity": 1,
-                        "chance": 0.02
+                        "chance": 0.02,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "adaptation",
                         "name": "Adaptation",
                         "quantity": 1,
-                        "chance": 0.02
+                        "chance": 0.02,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "aerodynamic",
                         "name": "Aerodynamic",
                         "quantity": 1,
-                        "chance": 0.02
+                        "chance": 0.02,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "omni_forma_blueprint",
                         "name": "Omni Forma Blueprint",
                         "quantity": 1,
-                        "chance": 0.01
+                        "chance": 0.01,
+                        "category": "blueprint"
                       },
                       {
                         "id": "endo",
                         "name": "Endo",
                         "quantity": 900,
-                        "chance": 0.44
+                        "chance": 0.44,
+                        "category": "currency",
+                        "icon": "fixture:currency",
+                        "iconPending": false
                       }
                     ]
                   },
@@ -125,67 +158,92 @@
                         "id": "ayatan_vaya_sculpture",
                         "name": "Ayatan Vaya Sculpture",
                         "quantity": 1,
-                        "chance": 0.12
+                        "chance": 0.12,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
                       },
                       {
                         "id": "ayatan_piv_sculpture",
                         "name": "Ayatan Piv Sculpture",
                         "quantity": 1,
-                        "chance": 0.12
+                        "chance": 0.12,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
                       },
                       {
                         "id": "vitus_essence",
                         "name": "Vitus Essence",
                         "quantity": 3,
-                        "chance": 0.07
+                        "chance": 0.07,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
                       },
                       {
                         "id": "arcane_bodyguard",
                         "name": "Arcane Bodyguard",
                         "quantity": 1,
-                        "chance": 0.05
+                        "chance": 0.05,
+                        "category": "arcane"
                       },
                       {
                         "id": "arcane_blade_charger",
                         "name": "Arcane Blade Charger",
                         "quantity": 1,
-                        "chance": 0.05
+                        "chance": 0.05,
+                        "category": "arcane"
                       },
                       {
                         "id": "arcane_primary_charger",
                         "name": "Arcane Primary Charger",
                         "quantity": 1,
-                        "chance": 0.05
+                        "chance": 0.05,
+                        "category": "arcane"
                       },
                       {
                         "id": "combat_discipline",
                         "name": "Combat Discipline",
                         "quantity": 1,
-                        "chance": 0.025
+                        "chance": 0.025,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "adaptation",
                         "name": "Adaptation",
                         "quantity": 1,
-                        "chance": 0.025
+                        "chance": 0.025,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "shepherd",
                         "name": "Shepherd",
                         "quantity": 1,
-                        "chance": 0.025
+                        "chance": 0.025,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "omni_forma_blueprint",
                         "name": "Omni Forma Blueprint",
                         "quantity": 1,
-                        "chance": 0.02
+                        "chance": 0.02,
+                        "category": "blueprint"
                       },
                       {
                         "id": "endo",
                         "name": "Endo",
                         "quantity": 1200,
-                        "chance": 0.445
+                        "chance": 0.445,
+                        "category": "currency",
+                        "icon": "fixture:currency",
+                        "iconPending": false
                       }
                     ]
                   },
@@ -197,67 +255,90 @@
                         "id": "ayatan_orta_sculpture",
                         "name": "Ayatan Orta Sculpture",
                         "quantity": 1,
-                        "chance": 0.2
+                        "chance": 0.2,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
                       },
                       {
                         "id": "vitus_essence",
                         "name": "Vitus Essence",
                         "quantity": 3,
-                        "chance": 0.1
+                        "chance": 0.1,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
                       },
                       {
                         "id": "arcane_pistoleer",
                         "name": "Arcane Pistoleer",
                         "quantity": 1,
-                        "chance": 0.05
+                        "chance": 0.05,
+                        "category": "arcane"
                       },
                       {
                         "id": "arcane_tanker",
                         "name": "Arcane Tanker",
                         "quantity": 1,
-                        "chance": 0.05
+                        "chance": 0.05,
+                        "category": "arcane"
                       },
                       {
                         "id": "arcane_blade_charger",
                         "name": "Arcane Blade Charger",
                         "quantity": 1,
-                        "chance": 0.05
+                        "chance": 0.05,
+                        "category": "arcane"
                       },
                       {
                         "id": "arcane_primary_charger",
                         "name": "Arcane Primary Charger",
                         "quantity": 1,
-                        "chance": 0.05
+                        "chance": 0.05,
+                        "category": "arcane"
                       },
                       {
                         "id": "combat_discipline",
                         "name": "Combat Discipline",
                         "quantity": 1,
-                        "chance": 0.035
+                        "chance": 0.035,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "melee_guidance",
                         "name": "Melee Guidance",
                         "quantity": 1,
-                        "chance": 0.035
+                        "chance": 0.035,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "swift_momentum",
                         "name": "Swift Momentum",
                         "quantity": 1,
-                        "chance": 0.035
+                        "chance": 0.035,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
                       },
                       {
                         "id": "omni_forma_blueprint",
                         "name": "Omni Forma Blueprint",
                         "quantity": 1,
-                        "chance": 0.045
+                        "chance": 0.045,
+                        "category": "blueprint"
                       },
                       {
                         "id": "endo",
                         "name": "Endo",
                         "quantity": 1500,
-                        "chance": 0.35
+                        "chance": 0.35,
+                        "category": "currency",
+                        "icon": "fixture:currency",
+                        "iconPending": false
                       }
                     ]
                   }

@@ -24,6 +24,7 @@ import {
   type WarframeEvents,
   type WarframeMission,
   type WarframeProgress,
+  type WarframeReward,
   type WarframeRewardTable,
 } from "@overcrow/sdk";
 
@@ -76,6 +77,33 @@ export interface Row {
   name: string;
   qty: string;
   chance: string;
+  /** The item's image from the game (an `asset:` handle); empty without. */
+  icon: string;
+  /** Our icon of the item's kind when no image will come; empty while one may. */
+  glyph: string;
+}
+
+/** Our icon of each kind of item, when the game's image will not come. */
+const KIND_ICONS: Readonly<Record<WarframeReward["category"], string>> = {
+  relic: "hexagon",
+  mod: "layers",
+  resource: "gem",
+  blueprint: "scroll-text",
+  warframe_part: "user-round",
+  weapon_part: "sword",
+  arcane: "sparkles",
+  currency: "coins",
+  other: "package",
+};
+
+/**
+ * The image of an item: the game's once PlayerVox OverCrow has it; an empty
+ * tile while it may still come; our icon of its kind when none will.
+ */
+export function itemImage(item: WarframeReward): Pick<Row, "icon" | "glyph"> {
+  if (item.icon !== null && item.icon !== undefined) return { icon: item.icon, glyph: "" };
+  if (item.iconPending === true) return { icon: "", glyph: "" };
+  return { icon: "", glyph: KIND_ICONS[item.category] ?? "package" };
 }
 
 /** One table as shown: its rows, then "+ n more" when it is cut. */
@@ -397,6 +425,7 @@ export function section(
       name: item.name,
       qty: item.quantity > 1 ? `×${formatNumber(item.quantity)}` : "",
       chance: rateText(item.chance),
+      ...itemImage(item),
     })),
     more: moreText(items.slice(shown.length)),
     open: unfolded,

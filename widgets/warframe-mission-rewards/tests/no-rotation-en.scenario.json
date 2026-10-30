@@ -46,19 +46,22 @@
                         "id": "loki_systems_blueprint",
                         "name": "Loki Systems Blueprint",
                         "quantity": 1,
-                        "chance": 0.2256
+                        "chance": 0.2256,
+                        "category": "warframe_part"
                       },
                       {
                         "id": "loki_chassis_blueprint",
                         "name": "Loki Chassis Blueprint",
                         "quantity": 1,
-                        "chance": 0.3872
+                        "chance": 0.3872,
+                        "category": "warframe_part"
                       },
                       {
                         "id": "loki_neuroptics_blueprint",
                         "name": "Loki Neuroptics Blueprint",
                         "quantity": 1,
-                        "chance": 0.3872
+                        "chance": 0.3872,
+                        "category": "warframe_part"
                       }
                     ]
                   }
