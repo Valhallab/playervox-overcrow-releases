@@ -726,7 +726,8 @@ charge, la vague 5 commence, puis la mission réussit.
 - `glossary` se fusionne comme `info` :
   `{ "language": "fr", "damage": { "corrosive": "Corrosif" } }` ne change
   que ces mots. Le `rewards` d’une étape est celui du nœud, sauf s’il
-  donne `source`.
+  donne `source` ; un objet sans `icon`, `iconPending` ni `category` n’a
+  pas d’image, aucune à attendre, et le genre `other`.
 - Les images sont celles du scénario, dessinées pour le test : déclarez-les
   dans `assets` et nommez-les `fixture:<nom>` là où va une poignée, comme
   `"icon": "fixture:relic"` ou

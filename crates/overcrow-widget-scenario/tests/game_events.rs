@@ -412,6 +412,75 @@ fn the_glossary_and_the_language_play_like_the_rest() {
     assert_eq!(updates[0].value["glossary"]["language"], json!("en"));
 }
 
+/// Where the game gives an image (a damage symbol, an item's image), a
+/// step names one of the scenario's own `assets`, as a fixture does; the
+/// runtime issues its handle. An image the scenario does not declare, a
+/// literal handle or a name outside the names' rule is refused.
+#[test]
+fn a_step_names_the_scenarios_images_where_handles_go() {
+    let with_assets = |steps: Value| {
+        let mut value = scenario(json!({}), steps);
+        value["assets"] =
+            json!({"impact": "tests/assets/impact.png", "relic": "tests/assets/relic.png"});
+        value
+    };
+    let item = |icon: Value| {
+        json!({"id": "neo_c7_relic", "name": "Neo C7 Relic", "quantity": 1, "chance": 0.1,
+               "icon": icon, "iconPending": false, "category": "relic"})
+    };
+    let rewards = |icon: Value| {
+        json!({"gameEvents": {"warframe": {"info": {"mission": {
+            "state": "selected",
+            "node": {"id": "SolNode195", "name": "Hydron"},
+            "rewards": {"tables": [{"kind": "mission", "rotation": "A", "items": [item(icon)]}]}
+        }}}}})
+    };
+    let played = read(&with_assets(json!([
+        {"gameEvents": {"warframe": {"glossary": {"icons": {"damage": {"impact": "fixture:impact"}}}}}},
+        rewards(json!("fixture:relic"))
+    ])))
+    .expect("valid");
+    let updates = played
+        .game_event_updates(&declared(&["warframe.mission", "warframe.rewards"]))
+        .expect("played");
+    assert_eq!(
+        updates[0].value["glossary"]["icons"]["damage"]["impact"],
+        json!("fixture:impact")
+    );
+    assert_eq!(
+        updates[0].value["glossary"]["icons"]["damage"]["viral"],
+        Value::Null
+    );
+    assert_eq!(
+        updates[1].value["info"]["mission"]["rewards"]["tables"][0]["items"][0]["icon"],
+        json!("fixture:relic")
+    );
+    for refused in [
+        json!("fixture:missing"),
+        json!("fixture:Not A Name"),
+        json!("asset:0000000000000001"),
+        json!("tests/assets/relic.png"),
+    ] {
+        for step in [
+            json!({"gameEvents": {"warframe": {"glossary": {"icons": {"damage": {"impact": refused.clone()}}}}}}),
+            rewards(refused.clone()),
+        ] {
+            let error = read(&with_assets(json!([step])))
+                .and_then(|scenario| {
+                    scenario
+                        .game_event_updates(&declared(&["warframe.mission", "warframe.rewards"]))
+                        .map(|_| scenario)
+                })
+                .expect_err("refused");
+            assert!(
+                error.path.starts_with("steps[0]"),
+                "{refused}: {}",
+                error.path
+            );
+        }
+    }
+}
+
 #[test]
 fn rewards_are_the_nodes_unless_a_step_says_whose() {
     let items = json!([{"id": "forma", "name": "Forma", "quantity": 1, "chance": 0.025}]);
@@ -434,6 +503,12 @@ fn rewards_are_the_nodes_unless_a_step_says_whose() {
     let mission = |index: usize| updates[index].value["info"]["mission"].clone();
     assert_eq!(mission(0)["rewards"]["source"], json!("node"));
     assert_eq!(mission(0)["rewardsPending"], json!(false));
+    // An item without its image or its kind: none to wait for, `other`.
+    let forma = &mission(0)["rewards"]["tables"][0]["items"][0];
+    assert_eq!(
+        [&forma["icon"], &forma["iconPending"], &forma["category"]],
+        [&Value::Null, &json!(false), &json!("other")]
+    );
     assert_eq!(mission(1)["rewards"]["source"], json!("sortie"));
     assert_eq!(
         mission(1)["rewards"]["tables"][0]["items"][0]["id"],

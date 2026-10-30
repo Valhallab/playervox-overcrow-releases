@@ -5,7 +5,9 @@
 //! state, words of the glossary, and one event. The fake host keeps the whole value, completes
 //! what the step leaves out (an absent nullable member is `null`, a list
 //! `[]`, a count `0`, a time the step's time), numbers the event, and
-//! publishes the value once it has the service's shape.
+//! publishes the value once it has the service's shape. Where the game
+//! gives an image, a step names one of the scenario's `assets` as
+//! `fixture:<name>`, as a fixture does; the runtime issues its handle.
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -364,13 +366,27 @@ fn change_game(
             }
         }
     }
-    if !service_returns(service).is_some_and(|shape| shape.matches(&state.value)) {
+    // A scenario's image stands for a handle the runtime issues.
+    let mut issue =
+        |name: &str| crate::valid_name(name).then(|| "asset:0000000000000000".to_owned());
+    if !service_returns(service).is_some_and(|shape| {
+        crate::resolve_assets(&shape, &state.value, &mut issue)
+            .is_some_and(|resolved| shape.matches(&resolved))
+    }) {
         return Err(ScenarioError::new(
             here,
             format!("the value does not have the shape of the `{service}` result"),
         ));
     }
     Ok(state)
+}
+
+/// `fixture:<name>`, a name of the scenario's `assets`.
+fn is_fixture_image(value: &Value) -> bool {
+    value
+        .as_str()
+        .and_then(|text| text.strip_prefix(crate::FIXTURE_ASSET_PREFIX))
+        .is_some_and(crate::valid_name)
 }
 
 fn member_shape(service: &str, member: &str) -> Shape {
@@ -579,9 +595,18 @@ fn complete(
             json!(0)
         }),
         Shape::Bool if value.is_none() => Ok(Value::Bool(false)),
-        // Rewards are the node's unless a step says whose.
+        // One of the scenario's images; its name is checked against
+        // `assets` with the whole scenario.
+        Shape::Asset if value.is_some_and(is_fixture_image) => {
+            Ok(value.cloned().unwrap_or_default())
+        }
+        // Rewards are the node's unless a step says whose; an item is of
+        // no kind in particular unless it says one.
         Shape::Keyword(words) if value.is_none() && *words == warframe::REWARD_SOURCES => {
             Ok(json!("node"))
+        }
+        Shape::Keyword(words) if value.is_none() && *words == warframe::REWARD_CATEGORIES => {
+            Ok(json!("other"))
         }
         _ => match value {
             None => Err(ScenarioError::new(path, "missing")),

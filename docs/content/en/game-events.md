@@ -705,7 +705,8 @@ wave 5 starts, then the mission succeeds.
   `publish` step a whole next one.
 - `glossary` merges like `info`: `{ "language": "fr", "damage": { "corrosive": "Corrosif" } }`
   changes those words only. A step's `rewards` are the node's unless it
-  gives `source`.
+  gives `source`; an item without `icon`, `iconPending` or `category` has
+  no image, none to wait for, and the kind `other`.
 - Images are the scenario's own, drawn for the test: declare them in
   `assets` and name them `fixture:<name>` where a handle goes, as
   `"icon": "fixture:relic"` or
