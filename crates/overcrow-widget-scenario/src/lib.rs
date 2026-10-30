@@ -927,8 +927,9 @@ pub fn parse(bytes: &[u8]) -> Result<Scenario, ScenarioError> {
         }
         None => return Err(ScenarioError::new("scenarioVersion", "missing or invalid")),
     }
-    let scenario: Scenario =
+    let mut scenario: Scenario =
         serde_json::from_slice(bytes).map_err(|error| ScenarioError::new("", error.to_string()))?;
+    game_events::complete_fixtures(&mut scenario.fixtures);
     scenario.check()?;
     Ok(scenario)
 }

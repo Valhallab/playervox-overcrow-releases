@@ -406,6 +406,10 @@ and `progress` elements draw them from values.
 appear in the terminal of `overcrow-widget dev` and nowhere else: an
 installed widget's logs are dropped. Never log user data.
 
+A text is cut at 4 KiB, and the terminal shows its first 512 characters,
+then `…`; `dev --format json` gives it whole. Log a summary of a large
+value (its counts, the members you check), not the value itself.
+
 <!-- source: docs/content/examples/countdown/logic.ts -->
 ```ts
   log.info(`round ${state.rounds} finished`);

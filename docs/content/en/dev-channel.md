@@ -92,7 +92,9 @@ last good build. Then come the overlay's reports.
 <!-- /generated:failure-categories -->
 
 **Logs**: each `log.debug`, `log.info`, `log.warn` and `log.error` of the
-logic, with its level. A log line is cut at 512 characters, and control
+logic, with its level. A log line shows the first 512 characters of its
+text, then `…` (the widget cuts a text at 4 KiB; `--format json` gives it
+whole), and control
 characters, terminal escape sequences and bidirectional controls are shown
 escaped (`\u{1b}`), never interpreted: a widget's text cannot take over
 your terminal.
@@ -107,7 +109,7 @@ messages (`state`, `log`, `event`…) as they come.
 | --- | --- |
 | `doctor.development_off` | No running overlay allows development installs: [turn it on](#turn-it-on). |
 | `doctor.overcrow_missing` | OverCrow is not installed. |
-| `doctor.channel_busy`, `too_many_sessions` | Four `dev` sessions are already connected to this overlay. |
+| `doctor.channel_busy`, `too_many_sessions` | Four `dev` sessions are already connected to this overlay, the most it runs at once: stop one (Ctrl+C in its terminal), then try again. |
 | `doctor.protocol_version`, `unsupported_protocol` | The overlay and the tool do not speak the same version of the channel: update the older one. |
 | `doctor.channel_untrusted` | What answers on the channel's address is not your own overlay. |
 | `busy` | Another install or removal is in progress: `dev` tries again. |

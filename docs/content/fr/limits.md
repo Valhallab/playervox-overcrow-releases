@@ -233,6 +233,7 @@ que la logique peut lire sont aussi des constantes du SDK : voir
 | `MAX_WARFRAME_FISSURES` | 64 | Fissures du Néant de l’état du monde données, les plus proches de leur fin d’abord. |
 | `MAX_WARFRAME_REWARD_TABLES` | 9 | Tables de butin d’un nœud : la sienne, les caches et la table en plus, par rotation. |
 | `MAX_WARFRAME_REWARD_ITEMS` | 64 | Objets d’une table de butin, les plus rares gardés. |
+| `MAX_WARFRAME_EARNED` | 64 | Rotations obtenues par une mission listées, les plus récentes ; ses totaux les comptent toutes. |
 
 ### Notes, avis et chat
 

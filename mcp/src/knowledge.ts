@@ -171,7 +171,7 @@ const PERMISSION_ADVICE: Record<string, string> = {
   clipboardWrite:
     "Write only in the handler of a user action (on:activate of a button), only the text the user asked to copy, and never on a timer or a data update: OverCrow refuses it otherwise (gesture_required).",
   gameEvents:
-    "List only the game features the widget shows (`warframe.mission`…); each one shows to the player before install.",
+    "List only the game features the widget shows (`warframe.mission`…); each one shows to the player before install. Show the game's words as the service gives them, in the game's language (the data, or `glossary`): never write one yourself.",
   capabilities:
     "Each capability needs the user's consent. A sensitive capability cannot be combined with network, links or clipboardWrite (OverCrow refuses the manifest): the data it reads cannot leave the computer.",
 };

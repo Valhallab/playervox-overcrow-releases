@@ -1233,6 +1233,12 @@ pub const MAX_WARFRAME_FISSURES: Limit = fixed(
     Unit::Count,
     "Void Fissures of the world state given, the soonest to end first.",
 );
+pub const MAX_WARFRAME_EARNED: Limit = fixed(
+    "MAX_WARFRAME_EARNED",
+    64,
+    Unit::Count,
+    "Rotations a mission earned listed, the latest; its totals count them all.",
+);
 
 // Write intents: the current built-in limits, confirmed by the P0.6 audit.
 pub const MAX_NOTES: Limit = fixed(
@@ -1553,6 +1559,7 @@ pub const ALL: &[&Limit] = &[
     &MAX_WARFRAME_HUNTS,
     &MAX_WARFRAME_MODIFIERS,
     &MAX_WARFRAME_FISSURES,
+    &MAX_WARFRAME_EARNED,
     &MAX_WARFRAME_REWARD_TABLES,
     &MAX_WARFRAME_REWARD_ITEMS,
     &MAX_NOTES,

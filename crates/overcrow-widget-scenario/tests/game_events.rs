@@ -95,10 +95,17 @@ fn a_session_is_played_without_writing_a_line() {
             "endedAt": null,
             "result": null,
             "durationSeconds": null,
-            "rewards": null
+            "rewards": null,
+            "rewardsPending": false,
+            "earned": null,
+            "credits": null
         })
     );
     assert_eq!(first["info"]["progress"], Value::Null);
+    assert_eq!(
+        first["glossary"],
+        overcrow_widget_schema::game_events::warframe::english_glossary()
+    );
     assert_eq!(first["events"].as_array().unwrap().len(), 1);
     assert_eq!(first["events"][0]["seq"], json!(1));
     assert_eq!(first["events"][0]["at"], json!(DEFAULT_START_AT));
@@ -110,8 +117,9 @@ fn a_session_is_played_without_writing_a_line() {
     assert_eq!(wave["info"]["mission"]["node"]["id"], json!("SolNode195"));
     assert_eq!(
         wave["info"]["progress"],
-        json!({"wave": 5, "round": null, "rewards": 0, "rotation": null,
-               "nextRewardAt": null, "nextRewardWave": null})
+        json!({"wave": 5, "waveEnemies": null, "round": null, "rewards": 0, "rotation": null,
+               "earned": {"rotations": [], "totals": {"A": 0, "B": 0, "C": 0}},
+               "cycle": null, "clock": null, "nextRewardAt": null, "nextRewardWave": null})
     );
     assert_eq!(wave["events"][1]["seq"], json!(2));
     assert_eq!(wave["events"][1]["at"], json!(DEFAULT_START_AT + 30_000));
@@ -300,6 +308,8 @@ fn a_game_the_manifest_lists_starts_with_a_first_value() {
     assert_eq!(value["features"]["squad"], json!("undeclared"));
     assert_eq!(value["info"]["mission"], Value::Null);
     assert_eq!(value["events"], json!([]));
+    assert_eq!(value["glossary"]["language"], json!("en"));
+    assert_eq!(value["glossary"]["damage"]["corrosive"], json!("Corrosive"));
     let shape = overcrow_widget_schema::results::shape("WarframeEvents").expect("shape");
     assert!(shape.shape.matches(value), "{value}");
     // No feature of the game listed: no value.
@@ -320,4 +330,115 @@ fn a_game_the_manifest_lists_starts_with_a_first_value() {
             .start_values()
             .is_empty()
     );
+}
+
+#[test]
+fn the_glossary_and_the_language_play_like_the_rest() {
+    let steps = json!([
+        {"gameEvents": {"warframe": {
+            "session": {"startedAt": 1_767_225_000_000_u64, "language": "fr"},
+            "glossary": {"language": "fr", "damage": {"corrosive": "Corrosif"},
+                         "term": {"reactant": "Réactif"}}
+        }}},
+        {"gameEvents": {"warframe": {"session": {"startedAt": 1_767_225_000_000_u64}}}}
+    ]);
+    let played = read(&scenario(json!({}), steps)).expect("valid");
+    let updates = played
+        .game_event_updates(&declared(&["warframe.mission"]))
+        .expect("played");
+    let first = &updates[0].value;
+    assert_eq!(first["session"]["language"], json!("fr"));
+    assert_eq!(first["glossary"]["language"], json!("fr"));
+    assert_eq!(first["glossary"]["damage"]["corrosive"], json!("Corrosif"));
+    // The other words keep their English.
+    assert_eq!(first["glossary"]["damage"]["impact"], json!("Impact"));
+    assert_eq!(first["glossary"]["term"]["reactant"], json!("Réactif"));
+    // A session without a language: not read yet.
+    assert_eq!(updates[1].value["session"]["language"], Value::Null);
+
+    // A word the glossary does not have, a language it is never in.
+    for (glossary, path) in [
+        (
+            json!({"damage": {"void": "Void"}}),
+            "gameEvents.warframe.glossary.damage.void",
+        ),
+        (
+            json!({"weapons": {}}),
+            "gameEvents.warframe.glossary.weapons",
+        ),
+        (
+            json!({"language": "de"}),
+            "gameEvents.warframe.glossary.language",
+        ),
+    ] {
+        let steps = json!([{"gameEvents": {"warframe": {"glossary": glossary}}}]);
+        let error = read(&scenario(json!({}), steps))
+            .and_then(|scenario| {
+                scenario
+                    .game_event_updates(&declared(&["warframe.mission"]))
+                    .map(|_| scenario)
+            })
+            .expect_err("refused");
+        assert!(
+            error.path.ends_with(path),
+            "{} {}",
+            error.path,
+            error.message
+        );
+    }
+
+    // A fixture written without the glossary has the English one.
+    let mut fixture = GameEvents::new(
+        &read(&scenario(
+            json!({}),
+            json!([{"expect": {"state": "running"}}]),
+        ))
+        .expect("valid")
+        .fixtures,
+        &declared(&["warframe.mission"]),
+    )
+    .start_values()
+    .remove(0)
+    .1;
+    fixture.as_object_mut().unwrap().remove("glossary");
+    let fixed = read(&scenario(
+        json!({"subscriptions": {"gameEvents.warframe.subscribe": fixture}}),
+        json!([{"gameEvents": {"warframe": {"playing": false}}}]),
+    ))
+    .expect("valid");
+    let updates = fixed
+        .game_event_updates(&declared(&["warframe.mission"]))
+        .expect("played");
+    assert_eq!(updates[0].value["glossary"]["language"], json!("en"));
+}
+
+#[test]
+fn rewards_are_the_nodes_unless_a_step_says_whose() {
+    let items = json!([{"id": "forma", "name": "Forma", "quantity": 1, "chance": 0.025}]);
+    let steps = json!([
+        {"gameEvents": {"warframe": {"info": {"mission": {
+            "state": "selected", "node": {"id": "SolNode195"},
+            "rewards": {"tables": [{"kind": "mission", "rotation": null, "items": items}]}
+        }}}}},
+        {"gameEvents": {"warframe": {"info": {"mission": {
+            "rewards": {"source": "sortie"}
+        }}}}},
+        {"gameEvents": {"warframe": {"info": {"mission": {
+            "rewards": null, "rewardsPending": true
+        }}}}}
+    ]);
+    let played = read(&scenario(json!({}), steps)).expect("valid");
+    let updates = played
+        .game_event_updates(&declared(&["warframe.mission", "warframe.rewards"]))
+        .expect("played");
+    let mission = |index: usize| updates[index].value["info"]["mission"].clone();
+    assert_eq!(mission(0)["rewards"]["source"], json!("node"));
+    assert_eq!(mission(0)["rewardsPending"], json!(false));
+    assert_eq!(mission(1)["rewards"]["source"], json!("sortie"));
+    assert_eq!(
+        mission(1)["rewards"]["tables"][0]["items"][0]["id"],
+        json!("forma")
+    );
+    assert_eq!(mission(2)["rewards"], Value::Null);
+    assert_eq!(mission(2)["rewardsPending"], json!(true));
 }

@@ -89,6 +89,30 @@ const AT: Member = member(
     "When it happened in the game, in Unix milliseconds.",
 );
 
+const WORD: &str = "Its name in the language of `glossary.language`.";
+
+/// One text member per word of `list`, by its ID: a group of the glossary.
+const fn words<const N: usize>(list: &'static [crate::game_events::Named]) -> [Member; N] {
+    assert!(list.len() == N);
+    let mut members = [member("", Shape::Text, WORD); N];
+    let mut index = 0;
+    while index < N {
+        members[index] = member(list[index].id, Shape::Text, WORD);
+        index += 1;
+    }
+    members
+}
+
+const DAMAGE_WORDS: [Member; 13] = words(warframe::DAMAGE_TYPES);
+const ERA_WORDS: [Member; 6] = words(warframe::ERAS);
+const FISSURE_WORDS: [Member; 6] = words(warframe::FISSURES);
+const ACTIVITY_WORDS: [Member; 10] = words(warframe::ACTIVITIES);
+const PLACE_WORDS: [Member; 17] = words(warframe::PLACES);
+const EIDOLON_WORDS: [Member; 3] = words(warframe::EIDOLONS);
+const FACTION_WORDS: [Member; 10] = words(warframe::FACTIONS);
+const CYCLE_WORDS: [Member; 6] = words(warframe::CYCLE_STATES);
+const TERM_WORDS: [Member; 3] = words(warframe::TERMS);
+
 /// Grades of a PlayerVox score; `--` without a valid score.
 pub const GRADES: &[&str] = &["S+", "S", "A", "B", "C", "D", "F", "--"];
 
@@ -713,7 +737,7 @@ pub const SHAPES: &[NamedShape] = &[
             member(
                 "name",
                 NULLABLE_TEXT,
-                "Its name in the user's language, one line of at most `MAX_GAME_EVENT_NAME_BYTES`; `null` when PlayerVox OverCrow has none yet.",
+                "Its name in the game's language, one line of at most `MAX_GAME_EVENT_NAME_BYTES`; `null` when PlayerVox OverCrow has none yet.",
             ),
         ]),
         "Something of Warframe, named.",
@@ -729,7 +753,7 @@ pub const SHAPES: &[NamedShape] = &[
             member(
                 "name",
                 NULLABLE_TEXT,
-                "Its name in the user's language, or `null` when PlayerVox OverCrow has none yet (new content).",
+                "Its name in the game's language, or `null` when PlayerVox OverCrow has none yet (new content).",
             ),
         ]),
         "A node of the star chart.",
@@ -744,12 +768,24 @@ pub const SHAPES: &[NamedShape] = &[
             ),
             member(
                 "session",
-                Shape::Nullable(&Shape::Record(&[member(
-                    "startedAt",
-                    Shape::Integer,
-                    "When Warframe was launched, in Unix milliseconds.",
-                )])),
+                Shape::Nullable(&Shape::Record(&[
+                    member(
+                        "startedAt",
+                        Shape::Integer,
+                        "When Warframe was launched, in Unix milliseconds.",
+                    ),
+                    member(
+                        "language",
+                        Shape::Nullable(&Shape::Keyword(warframe::LANGUAGES)),
+                        "The game's language (`en`, `fr`, `de`…); `null` until the game says it.",
+                    ),
+                ])),
                 "The Warframe session being followed, or `null` before any; a new launch is a new session.",
+            ),
+            member(
+                "glossary",
+                Shape::Named("WarframeGlossary"),
+                "Words of the game in the game's language, whatever the features the widget follows.",
             ),
             member(
                 "features",
@@ -768,6 +804,70 @@ pub const SHAPES: &[NamedShape] = &[
             ),
         ]),
         "Warframe's game events, for the features the widget lists.",
+    ),
+    named(
+        "WarframeGlossary",
+        Shape::Record(&[
+            member(
+                "language",
+                Shape::Keyword(warframe::GLOSSARY_LANGUAGES),
+                "The language of these words: the game's when PlayerVox OverCrow has them in it, English otherwise.",
+            ),
+            member(
+                "damage",
+                Shape::Record(&DAMAGE_WORDS),
+                "The damage types, by our ID.",
+            ),
+            member("era", Shape::Record(&ERA_WORDS), "The Void Fissure eras."),
+            member(
+                "fissure",
+                Shape::Record(&FISSURE_WORDS),
+                "A Void Fissure of each era, by the era's ID.",
+            ),
+            member(
+                "activity",
+                Shape::Record(&ACTIVITY_WORDS),
+                "Activities of the game.",
+            ),
+            member(
+                "place",
+                Shape::Record(&PLACE_WORDS),
+                "The places that are not a node.",
+            ),
+            member("eidolon", Shape::Record(&EIDOLON_WORDS), "The Eidolons."),
+            member("faction", Shape::Record(&FACTION_WORDS), "The factions."),
+            member(
+                "cycle",
+                Shape::Record(&CYCLE_WORDS),
+                "The states of the open worlds' cycles.",
+            ),
+            member(
+                "term",
+                Shape::Record(&TERM_WORDS),
+                "Other words of the game.",
+            ),
+        ]),
+        "Words of the game a widget shows on their own, in the game's language, so that it never writes one itself.",
+    ),
+    named(
+        "WarframeEarned",
+        Shape::Record(&[
+            member(
+                "rotations",
+                Shape::List(&Shape::Keyword(warframe::ROTATIONS)),
+                "The rotations earned, in order, the latest `MAX_WARFRAME_EARNED`.",
+            ),
+            member(
+                "totals",
+                Shape::Record(&[
+                    member("A", Shape::Integer, "Rotations A earned."),
+                    member("B", Shape::Integer, "Rotations B earned."),
+                    member("C", Shape::Integer, "Rotations C earned."),
+                ]),
+                "How many of each, all of them.",
+            ),
+        ]),
+        "The rotations a mission earned.",
     ),
     named(
         "WarframeFeatures",
@@ -902,7 +1002,22 @@ pub const SHAPES: &[NamedShape] = &[
             member(
                 "rewards",
                 Shape::Nullable(&Shape::Named("WarframeRewards")),
-                "What the node can reward, for a widget that follows `warframe.rewards`; `null` otherwise, or for a node without a reward table.",
+                "What the mission can reward, for a widget that follows `warframe.rewards`; `null` otherwise, for a node without a reward table, or for a mission whose table is not public or not known yet.",
+            ),
+            member(
+                "rewardsPending",
+                Shape::Bool,
+                "`true` while `rewards` is `null` for now: which table applies is not known yet (a node of the day's Sortie or Archon Hunt, chosen but not loaded; the world or the drop tables not read yet). `false` otherwise, `rewards` given or not.",
+            ),
+            member(
+                "earned",
+                Shape::Nullable(&Shape::Named("WarframeEarned")),
+                "The rotations earned from the start, for a type with rotations; `null` otherwise or before the start.",
+            ),
+            member(
+                "credits",
+                NULLABLE_INTEGER,
+                "The credits its end screen counts; `null` before the end, or when the game does not say (an aborted mission).",
             ),
         ]),
         "A Warframe mission.",
@@ -915,7 +1030,7 @@ pub const SHAPES: &[NamedShape] = &[
                 Shape::Keyword(warframe::MODIFIER_IDS),
                 "Our ID of the modifier.",
             ),
-            member("name", Shape::Text, "Its name in the user's language."),
+            member("name", Shape::Text, "Its name in the game's language."),
             member(
                 "stage",
                 NULLABLE_INTEGER,
@@ -933,6 +1048,18 @@ pub const SHAPES: &[NamedShape] = &[
                 "The current wave (Defense, Mirror Defense).",
             ),
             member(
+                "waveEnemies",
+                Shape::Nullable(&Shape::Record(&[
+                    member("total", Shape::Integer, "The enemies the wave announced."),
+                    member(
+                        "left",
+                        NULLABLE_INTEGER,
+                        "Those left, as the game counts them once all have spawned; 0 once the wave is cleared; `null` before.",
+                    ),
+                ])),
+                "The enemies of the current Defense wave; `null` before the first.",
+            ),
+            member(
                 "round",
                 NULLABLE_INTEGER,
                 "Rounds done (Interception, Disruption).",
@@ -941,17 +1068,40 @@ pub const SHAPES: &[NamedShape] = &[
             member(
                 "rotation",
                 Shape::Nullable(&Shape::Keyword(warframe::ROTATIONS)),
-                "The rotation of the next reward, counted A, A, B, C from the rewards given; `null` for a type without rotations or one we cannot count.",
+                "The rotation of the next reward; `null` for a type without rotations or one we cannot count.",
+            ),
+            member(
+                "earned",
+                Shape::Named("WarframeEarned"),
+                "The rotations given so far.",
+            ),
+            member(
+                "cycle",
+                Shape::Nullable(&Shape::Record(&[
+                    member("number", Shape::Integer, "1 for the first round."),
+                    member(
+                        "rotations",
+                        Shape::List(&Shape::Keyword(warframe::ROTATIONS)),
+                        "Its rotations, in order: `A`, `A`, `B`, `C`; an Arbitration's first `A`, `A`, `B`, `B`, then `C`, `C`, `C`, `C`.",
+                    ),
+                    member("earned", Shape::Integer, "How many of them were given."),
+                ])),
+                "The round of rotations of the next reward; `null` for a Disruption and a type without rotations.",
+            ),
+            member(
+                "clock",
+                Shape::Nullable(&Shape::Keyword(warframe::PROGRESS_CLOCKS)),
+                "For a type paid on time (Survival): `waiting` until its clock starts, then `running`; `null` otherwise.",
             ),
             member(
                 "nextRewardAt",
                 NULLABLE_INTEGER,
-                "When the next reward comes, in Unix milliseconds, for a type paid on time (Survival).",
+                "When the next reward comes, in Unix milliseconds, for a type paid on time (Survival) once its clock runs.",
             ),
             member(
                 "nextRewardWave",
                 NULLABLE_INTEGER,
-                "The wave of the next reward, for a type paid on waves (Defense).",
+                "The wave of the next reward, for a type paid on waves (Defense: every 3; Mirror Defense: every 2).",
             ),
         ]),
         "The progress of a mission.",
@@ -1105,7 +1255,7 @@ pub const SHAPES: &[NamedShape] = &[
             member(
                 "name",
                 Shape::Text,
-                "Its name in the user's language, or in English when PlayerVox OverCrow has no translation yet; never empty.",
+                "Its name in the game's language, or in English when PlayerVox OverCrow has no translation yet; never empty.",
             ),
             member("quantity", Shape::Integer, "How many at once."),
             member(
@@ -1139,12 +1289,19 @@ pub const SHAPES: &[NamedShape] = &[
     ),
     named(
         "WarframeRewards",
-        Shape::Record(&[member(
-            "tables",
-            Shape::List(&Shape::Named("WarframeRewardTable")),
-            "The node's tables, at most `MAX_WARFRAME_REWARD_TABLES`. Source: Digital Extremes' drop tables, no guarantees.",
-        )]),
-        "What a node can reward.",
+        Shape::Record(&[
+            member(
+                "source",
+                Shape::Keyword(warframe::REWARD_SOURCES),
+                "Whose tables: `node`, or the tables of their own that replace a node's: `arbitration` (every Arbitration's), `nightmare` (a Nightmare mission's reward, once, the rotation of its planet), `sortie` (a Sortie's, after its third mission).",
+            ),
+            member(
+                "tables",
+                Shape::List(&Shape::Named("WarframeRewardTable")),
+                "The tables, at most `MAX_WARFRAME_REWARD_TABLES`. Source: Digital Extremes' drop tables, no guarantees.",
+            ),
+        ]),
+        "What a mission can reward.",
     ),
     named(
         "WarframeWorldMission",

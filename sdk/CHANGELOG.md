@@ -17,10 +17,14 @@ game events, Warframe first:
   `warframe.mission`, `warframe.progress`, `warframe.squad`,
   `warframe.eidolons`, `warframe.world`, `warframe.rewards`): whether
   Warframe is played, the
-  status of each feature, its state ready to show (names in the user's
-  language beside stable IDs, times in Unix milliseconds, durations in
-  seconds) and the latest events, each typed by its `type`. The
-  `WarframeEvents`, `WarframeEvent` and related types.
+  status of each feature, its state ready to show (the game's names in
+  the game's language beside stable IDs, times in Unix milliseconds,
+  durations in seconds) and the latest events, each typed by its `type`.
+  The `WarframeEvents`, `WarframeEvent`, `WarframeGlossary`,
+  `WarframeEarned` and related types: the game's language and a glossary
+  of its words, the rotations a mission earned and the round of the
+  next one, a Survival's clock, the current Defense wave's enemies, the
+  credits of a mission's end, and whose tables its rewards are.
 - `gameEvents.subscribe` and the `GameEvent` type are removed, and
   `gameEvents` no longer takes `overcrow.game.<name>.v1` names. No release
   of PlayerVox OverCrow ever sent such an event, so no widget could rely on

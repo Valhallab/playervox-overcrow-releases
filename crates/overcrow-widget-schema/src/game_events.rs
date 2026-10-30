@@ -2,9 +2,9 @@
 //! features of a game it follows, each `<game>.<feature>`, and the game's
 //! service (`gameEvents.<game>.subscribe`) gives their state (`info`), their
 //! latest events and the status of each feature, ready to show: PlayerVox
-//! OverCrow names everything in the user's language and gives stable IDs
-//! beside the names, real times in Unix milliseconds and durations in
-//! seconds. Game events are not sensitive.
+//! OverCrow names what comes from the game in the game's language and gives
+//! stable IDs beside the names, real times in Unix milliseconds and
+//! durations in seconds. Game events are not sensitive.
 //!
 //! Warframe is the first game. Its IDs are ours, in `snake_case`, and never
 //! change, except a node's, which is the game's own key (`SolNode195`): the
@@ -50,12 +50,12 @@ pub const GAME_EVENT_FEATURES: &[GameEventFeature] = &[
     warframe(
         "warframe.mission",
         "mission",
-        "The mission chosen, loading, in progress or ended: node, planet, type, faction, enemy levels, Void Fissure era, modifiers, result and duration.",
+        "The mission chosen, loading, in progress or ended: node, planet, type, faction, enemy levels, Void Fissure era, modifiers, result, duration, and at the end the rotations earned and the credits.",
     ),
     warframe(
         "warframe.progress",
         "progress",
-        "The progress of the mission: wave, round, rewards given, the rotation of the next reward and when it comes.",
+        "The progress of the mission: wave and its enemies, round, the rotations earned, the rotation of the next reward and when it comes.",
     ),
     warframe(
         "warframe.squad",
@@ -116,6 +116,12 @@ pub mod warframe {
     /// caches of a Sabotage, Exterminate or Hive node, an additional one.
     pub const REWARD_TABLE_KINDS: &[&str] = &["mission", "caches", "extra"];
 
+    /// Where a mission's reward tables come from (`rewards.source`): its
+    /// node's, or a table of its own that replaces them: every
+    /// Arbitration's, a Nightmare mission's (once, the rotation of its
+    /// planet), a Sortie's (after its third mission).
+    pub const REWARD_SOURCES: &[&str] = &["node", "arbitration", "sortie", "nightmare"];
+
     /// Where the player is (`location.kind`).
     pub const LOCATION_KINDS: &[&str] = &[
         "orbiter",
@@ -136,6 +142,20 @@ pub mod warframe {
 
     /// Reward rotations.
     pub const ROTATIONS: &[&str] = &["A", "B", "C"];
+
+    /// The clock of a mission paid on time (`progress.clock`): `waiting`
+    /// until it starts (a Survival's alarm panel), then `running`.
+    pub const PROGRESS_CLOCKS: &[&str] = &["waiting", "running"];
+
+    /// The game's languages (`session.language`), as Digital Extremes names
+    /// them: `tc` is Traditional Chinese, `zh` Simplified Chinese.
+    pub const LANGUAGES: &[&str] = &[
+        "de", "en", "es", "fr", "it", "ja", "ko", "pl", "pt", "ru", "tc", "th", "tr", "uk", "zh",
+    ];
+
+    /// The languages PlayerVox OverCrow has the glossary's words in
+    /// (`glossary.language`); the others read English.
+    pub const GLOSSARY_LANGUAGES: &[&str] = &["en", "fr"];
 
     pub const MISSION_EVENTS: &[&str] = &[
         "mission_selected",
@@ -281,6 +301,9 @@ pub mod warframe {
         named("necralisk", "Necralisk"),
         named("sanctum_anatomica", "Sanctum Anatomica"),
         named("chrysalith", "Chrysalith"),
+        named("hollvania_central_mall", "Höllvania Central Mall"),
+        named("maroos_bazaar", "Maroo's Bazaar"),
+        named("iron_wake", "Iron Wake"),
         named("plains_of_eidolon", "Plains of Eidolon"),
         named("orb_vallis", "Orb Vallis"),
         named("cambion_drift", "Cambion Drift"),
@@ -375,6 +398,84 @@ pub mod warframe {
         named("archon_nira", "Archon Nira"),
         named("archon_boreal", "Archon Boreal"),
     ];
+
+    /// Damage types (`glossary.damage`): the physical three, then the
+    /// elements.
+    pub const DAMAGE_TYPES: &[Named] = &[
+        named("impact", "Impact"),
+        named("puncture", "Puncture"),
+        named("slash", "Slash"),
+        named("heat", "Heat"),
+        named("cold", "Cold"),
+        named("electricity", "Electricity"),
+        named("toxin", "Toxin"),
+        named("blast", "Blast"),
+        named("corrosive", "Corrosive"),
+        named("gas", "Gas"),
+        named("magnetic", "Magnetic"),
+        named("radiation", "Radiation"),
+        named("viral", "Viral"),
+    ];
+
+    /// A Void Fissure of each era (`glossary.fissure`), the eras' IDs.
+    pub const FISSURES: &[Named] = &[
+        named("lith", "Lith Fissure"),
+        named("meso", "Meso Fissure"),
+        named("neo", "Neo Fissure"),
+        named("axi", "Axi Fissure"),
+        named("requiem", "Requiem Fissure"),
+        named("omnia", "Omnia Fissure"),
+    ];
+
+    /// Activities of the game (`glossary.activity`).
+    pub const ACTIVITIES: &[Named] = &[
+        named("sortie", "Sortie"),
+        named("archon_hunt", "Archon Hunt"),
+        named("netracells", "Netracells"),
+        named("circuit", "The Circuit"),
+        named("nightwave", "Nightwave"),
+        named("baro_ki_teer", "Baro Ki'Teer"),
+        named("void_fissure", "Void Fissure"),
+        named("arbitration", "Arbitration"),
+        named("steel_path", "The Steel Path"),
+        named("void_storm", "Void Storm"),
+    ];
+
+    /// Other words of the game (`glossary.term`).
+    pub const TERMS: &[Named] = &[
+        named("reactant", "Reactant"),
+        named("relic", "Relic"),
+        named("credits", "Credits"),
+    ];
+
+    /// The glossary's groups (`glossary.<group>`), in order, with their
+    /// words.
+    pub const GLOSSARY: &[(&str, &[Named])] = &[
+        ("damage", DAMAGE_TYPES),
+        ("era", ERAS),
+        ("fissure", FISSURES),
+        ("activity", ACTIVITIES),
+        ("place", PLACES),
+        ("eidolon", EIDOLONS),
+        ("faction", FACTIONS),
+        ("cycle", CYCLE_STATES),
+        ("term", TERMS),
+    ];
+
+    /// The glossary in English (`WarframeGlossary`), as a host without the
+    /// game's language gives it.
+    pub fn english_glossary() -> serde_json::Value {
+        let mut glossary = serde_json::Map::new();
+        glossary.insert("language".to_owned(), serde_json::json!("en"));
+        for (group, words) in GLOSSARY {
+            let words: serde_json::Map<String, serde_json::Value> = words
+                .iter()
+                .map(|word| (word.id.to_owned(), serde_json::json!(word.english)))
+                .collect();
+            glossary.insert((*group).to_owned(), serde_json::Value::Object(words));
+        }
+        serde_json::Value::Object(glossary)
+    }
 
     /// Modifier IDs only, the words of `WarframeModifier.id`.
     pub const MODIFIER_IDS: &[&str] = &[

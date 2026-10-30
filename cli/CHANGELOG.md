@@ -25,6 +25,14 @@ widget's sources and the embedded SDK.
 - It embeds `@overcrow/sdk` 1.4.0: `gameEvents.warframe.subscribe` and its
   types; `gameEvents.subscribe` is gone.
 
+- A test scenario's `gameEvents` step can also change words of the
+  glossary (`glossary`); a fixture value written without it has the
+  English one, and a step's rewards are the node's unless it says whose
+  (`source`).
+- `dev` and `doctor` say why an overlay that already runs four widgets in
+  development refuses a fifth, and what to do (stop one), instead of a
+  broken pipe.
+
 ## 1.0.0-beta.9
 
 Released in the creator tools ZIPs of PlayerVox OverCrow 0.9.0-beta.1's

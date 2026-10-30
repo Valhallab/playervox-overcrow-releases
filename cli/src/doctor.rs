@@ -99,7 +99,9 @@ pub fn run(root: &Path, format: Format, deny_warnings: bool) -> ExitCode {
                     .help("another program holds PlayerVox OverCrow's development channel; stop it and restart OverCrow"),
                 ConnectError::Refused(_) => Diagnostic::warning("doctor.channel_busy", error.to_string())
                     .help("other `dev` sessions use the overlay; stop one of them"),
-                ConnectError::Io(_) => Diagnostic::warning("doctor.channel_io", error.to_string()),
+                ConnectError::Closed(_) | ConnectError::Io(_) => {
+                    Diagnostic::warning("doctor.channel_io", error.to_string())
+                }
             });
             json!({"active": false})
         }
