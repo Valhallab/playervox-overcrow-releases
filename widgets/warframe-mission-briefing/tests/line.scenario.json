@@ -528,8 +528,7 @@
       "expect": {
         "text": [
           "The Murmur",
-          "Electricity",
-          "Radiation"
+          "Electricity, Radiation"
         ]
       }
     },

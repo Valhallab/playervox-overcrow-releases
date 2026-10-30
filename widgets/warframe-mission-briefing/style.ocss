@@ -140,6 +140,17 @@
   top: -2px;
 }
 
+/* Beside the smaller name of unknown enemies: on its baseline already,
+   and no louder than it. */
+.unknown .level,
+.unknown .level-sep {
+  top: 0;
+}
+
+.unknown .level {
+  color: var(--color-text-muted);
+}
+
 /* The chips wrap under the first one, never under the label. */
 .use-row {
   flex-direction: row;

@@ -412,15 +412,34 @@ export function sortieCondition(modifier: WarframeModifier, mission: WarframeMis
   return match?.modifier?.name ?? "";
 }
 
+/** About the width of a text of One line, in px: 7 a letter, 13 a CJK character. */
+function textWidth(text: string): number {
+  let width = 0;
+  for (const c of text) width += (c.codePointAt(0) ?? 0) >= 0x2e80 ? 13 : 7;
+  return width;
+}
+
+/**
+ * Whether One line can show the damage symbols and keep the faction's
+ * whole name beside them, at `width` px: the padding, the dot and the
+ * separators (54 px), each type's symbol and name (20 px and its name),
+ * 8 px between two types, then the faction's name.
+ */
+export function symbolsFit(brief: Brief, width: number): boolean {
+  if (brief.use.length === 0) return true;
+  const types = brief.use.reduce((sum, each) => sum + 20 + textWidth(each.name), 0) + 8 * (brief.use.length - 1);
+  return 54 + types + textWidth(brief.faction) <= width;
+}
+
 /**
  * Side by side only when there is something to put on the right. One line
- * under 260 px names the types without their symbols, so that the faction
- * keeps its name.
+ * names the types without their symbols when the faction would lose its
+ * name beside them (under 260 px, or the Murmur's two long names).
  */
 export function rootClass(brief: Brief): string {
   const wide = brief.mode === "full" && host.viewport.width >= 500 && brief.mods.length > 0 ? " wide" : "";
   const unknown = brief.mode !== "wait" && brief.use.length === 0 ? " unknown" : "";
-  const narrow = brief.mode === "strip" && host.viewport.width < 260 ? " narrow" : "";
+  const narrow = brief.mode === "strip" && !symbolsFit(brief, host.viewport.width) ? " narrow" : "";
   return `wf briefing ${brief.mode}${wide}${unknown}${narrow} theme-${host.theme}`;
 }
 

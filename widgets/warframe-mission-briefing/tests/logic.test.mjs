@@ -386,6 +386,17 @@ test("state: One line folds the chosen mission; wide only at 500 px with modifie
   assert.equal(state.root, "wf briefing strip theme-dark");
   vm.setHost({ viewport: { width: 240, height: 40 } });
   assert.equal(state.root, "wf briefing strip narrow theme-dark");
+  // The Murmur's two long names: its name would go at 260 px.
+  vm.push(SERVICE, value({ mission: mission({ faction: named("murmur", "The Murmur") }) }));
+  vm.setHost({ viewport: { width: 260, height: 40 } });
+  assert.equal(state.root, "wf briefing strip narrow theme-dark");
+  vm.setHost({ viewport: { width: 320, height: 40 } });
+  assert.equal(state.root, "wf briefing strip theme-dark");
+  // Wide characters count wider.
+  const brief = { use: [{ name: "冲击" }, { name: "腐蚀" }], faction: "克隆尼" };
+  assert.equal(logic.symbolsFit(brief, 200), true);
+  assert.equal(logic.symbolsFit({ ...brief, faction: "克隆尼克隆尼克隆尼克隆尼" }, 200), false);
+  vm.push(SERVICE, value({ mission: mission() }));
   vm.setHost({ options: { layout: "full" }, viewport: { width: 300, height: 240 } });
 });
 
