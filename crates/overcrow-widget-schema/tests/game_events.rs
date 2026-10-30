@@ -214,15 +214,34 @@ fn glossary() -> Value {
         "eidolon": words(warframe::EIDOLONS),
         "faction": words(warframe::FACTIONS),
         "cycle": words(warframe::CYCLE_STATES),
-        "term": words(warframe::TERMS)
+        "term": words(warframe::TERMS),
+        "icons": {"damage": icons()}
     })
+}
+
+/// A symbol for Impact, none yet for the other damage types.
+fn icons() -> Value {
+    warframe::DAMAGE_TYPES
+        .iter()
+        .map(|damage| {
+            let icon = if damage.id == "impact" {
+                json!("asset:0000000000000001")
+            } else {
+                Value::Null
+            };
+            (damage.id.to_owned(), icon)
+        })
+        .collect::<serde_json::Map<_, _>>()
+        .into()
 }
 
 fn rewards() -> Value {
     json!({"source": "node", "tables": [
         {"kind": "mission", "rotation": "A", "items": [
-            {"id": "orokin_cell", "name": "Cellule Orokin", "quantity": 3, "chance": 0.0769},
-            {"id": "zid_an_core", "name": "Zid-An Core", "quantity": 1, "chance": 0.01}
+            {"id": "orokin_cell", "name": "Cellule Orokin", "quantity": 3, "chance": 0.0769,
+             "icon": "asset:0000000000000002", "iconPending": false, "category": "resource"},
+            {"id": "zid_an_core", "name": "Zid-An Core", "quantity": 1, "chance": 0.01,
+             "icon": null, "iconPending": true, "category": "other"}
         ]},
         {"kind": "caches", "rotation": null, "items": []}
     ]})
@@ -375,7 +394,7 @@ fn the_glossary_has_every_word_of_its_lists() {
         groups,
         [
             "language", "damage", "era", "fissure", "activity", "place", "eidolon", "faction",
-            "cycle", "term"
+            "cycle", "term", "icons"
         ]
     );
     for (group, list) in [
@@ -427,6 +446,98 @@ fn the_glossary_has_every_word_of_its_lists() {
             .iter()
             .all(|language| warframe::LANGUAGES.contains(language))
     );
+}
+
+#[test]
+fn the_glossary_has_a_symbol_per_damage_type() {
+    let Some(Shape::Record(members)) = shape("WarframeGlossaryIcons").map(|named| named.shape)
+    else {
+        panic!("a record");
+    };
+    assert_eq!(
+        members.iter().map(|member| member.name).collect::<Vec<_>>(),
+        ["damage"]
+    );
+    let Shape::Record(symbols) = members[0].shape else {
+        panic!("a record");
+    };
+    assert_eq!(
+        symbols.iter().map(|symbol| symbol.name).collect::<Vec<_>>(),
+        warframe::DAMAGE_TYPES
+            .iter()
+            .map(|damage| damage.id)
+            .collect::<Vec<_>>()
+    );
+    assert!(
+        symbols
+            .iter()
+            .all(|symbol| symbol.shape == Shape::Nullable(&Shape::Asset))
+    );
+    assert!(matches("WarframeGlossary", &glossary()));
+    // A handle only: never a package path or an address.
+    for refused in [
+        json!("assets/impact.png"),
+        json!("https://wiki.warframe.com/images/DmgImpactSmall64.png"),
+        json!(1),
+    ] {
+        let mut value = glossary();
+        value["icons"]["damage"]["impact"] = refused;
+        assert!(!matches("WarframeGlossary", &value));
+    }
+    let mut value = glossary();
+    value["icons"]["damage"]
+        .as_object_mut()
+        .unwrap()
+        .remove("viral");
+    assert!(!matches("WarframeGlossary", &value), "a symbol missing");
+    let mut value = glossary();
+    value.as_object_mut().unwrap().remove("icons");
+    assert!(!matches("WarframeGlossary", &value), "never absent");
+    // The host without them gives every symbol `null`.
+    let english = warframe::english_glossary();
+    assert!(matches("WarframeGlossary", &english), "{english}");
+    assert!(
+        english["icons"]["damage"]
+            .as_object()
+            .unwrap()
+            .values()
+            .all(Value::is_null)
+    );
+}
+
+#[test]
+fn a_reward_has_its_image_and_its_kind() {
+    assert_eq!(
+        warframe::REWARD_CATEGORIES,
+        [
+            "relic",
+            "mod",
+            "resource",
+            "blueprint",
+            "warframe_part",
+            "weapon_part",
+            "arcane",
+            "currency",
+            "other"
+        ]
+    );
+    let item = rewards()["tables"][0]["items"][0].clone();
+    assert!(matches("WarframeReward", &item));
+    for (member, refused) in [
+        ("icon", json!("assets/orokin_cell.png")),
+        ("iconPending", Value::Null),
+        ("category", json!("cosmetic")),
+        ("category", Value::Null),
+    ] {
+        let mut value = item.clone();
+        value[member] = refused;
+        assert!(!matches("WarframeReward", &value), "{member}");
+    }
+    for member in ["icon", "iconPending", "category"] {
+        let mut value = item.clone();
+        value.as_object_mut().unwrap().remove(member);
+        assert!(!matches("WarframeReward", &value), "{member} absent");
+    }
 }
 
 #[test]

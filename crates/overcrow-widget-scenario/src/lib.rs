@@ -934,7 +934,7 @@ pub fn parse(bytes: &[u8]) -> Result<Scenario, ScenarioError> {
     Ok(scenario)
 }
 
-fn valid_name(name: &str) -> bool {
+pub(crate) fn valid_name(name: &str) -> bool {
     (1..=MAX_NAME_BYTES).contains(&name.len())
         && name.starts_with(|c: char| c.is_ascii_lowercase() || c.is_ascii_digit())
         && name
@@ -1227,7 +1227,10 @@ impl Scenario {
                     ..
                 }) => games.published(service, value),
                 Step::GameEvents(step) => {
-                    let (service, value) = games.apply(&format!("steps[{index}]"), step, now)?;
+                    let path = format!("steps[{index}]");
+                    let (service, value) = games.apply(&path, step, now)?;
+                    // Its images are the scenario's own.
+                    check_value(&path, service, &value, &self.assets)?;
                     updates.push(GameEventUpdate {
                         step: index,
                         service,

@@ -122,6 +122,20 @@ pub mod warframe {
     /// planet), a Sortie's (after its third mission).
     pub const REWARD_SOURCES: &[&str] = &["node", "arbitration", "sortie", "nightmare"];
 
+    /// What kind of item a reward is (`WarframeReward.category`): a
+    /// widget's own icon for it while the item has no image.
+    pub const REWARD_CATEGORIES: &[&str] = &[
+        "relic",
+        "mod",
+        "resource",
+        "blueprint",
+        "warframe_part",
+        "weapon_part",
+        "arcane",
+        "currency",
+        "other",
+    ];
+
     /// Where the player is (`location.kind`).
     pub const LOCATION_KINDS: &[&str] = &[
         "orbiter",
@@ -463,7 +477,7 @@ pub mod warframe {
     ];
 
     /// The glossary in English (`WarframeGlossary`), as a host without the
-    /// game's language gives it.
+    /// game's language gives it, and without any symbol yet.
     pub fn english_glossary() -> serde_json::Value {
         let mut glossary = serde_json::Map::new();
         glossary.insert("language".to_owned(), serde_json::json!("en"));
@@ -474,6 +488,11 @@ pub mod warframe {
                 .collect();
             glossary.insert((*group).to_owned(), serde_json::Value::Object(words));
         }
+        let symbols: serde_json::Map<String, serde_json::Value> = DAMAGE_TYPES
+            .iter()
+            .map(|damage| (damage.id.to_owned(), serde_json::Value::Null))
+            .collect();
+        glossary.insert("icons".to_owned(), serde_json::json!({ "damage": symbols }));
         serde_json::Value::Object(glossary)
     }
 

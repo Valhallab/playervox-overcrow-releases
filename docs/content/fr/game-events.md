@@ -256,7 +256,8 @@ d’après une table qui n’est pas la sienne :
 { source: "node" | "arbitration" | "nightmare" | "sortie";
   tables: { kind: "mission" | "caches" | "extra";
             rotation: "A" | "B" | "C" | null;
-            items: { id: string; name: string; quantity: number; chance: number }[] }[] }
+            items: { id: string; name: string; quantity: number; chance: number;
+                     icon: string | null; iconPending: boolean; category: string }[] }[] }
 ```
 
 - `source` dit à qui sont les tables, et le titre à leur donner :
@@ -293,6 +294,16 @@ d’après une table qui n’est pas la sienne :
   anglais quand PlayerVox OverCrow n'a pas encore la traduction ;
   `quantity`, le nombre donné d'un coup ; `chance`, de 0 à 1, les entrées
   d'un même objet d'une table additionnées.
+- `icon` : l'image de l'objet, tirée du Public Export de Digital Extremes,
+  une poignée `asset:` d'un carré de 48 px (à afficher avec une
+  [`image`](elements.md#image), par exemple en 24 px). `iconPending` vaut
+  `true` tant qu'elle peut encore venir : gardez sa place vide, pour que
+  rien ne bouge à son arrivée. Avec `icon` à `null` et `iconPending` à
+  `false`, aucune image ne viendra (l'objet n'en a pas, ou la source ne
+  répond pas) : affichez votre propre icône de sa `category` (`relic`,
+  `mod`, `resource`, `blueprint`, `warframe_part`, `weapon_part`,
+  `arcane`, `currency`, `other`). Une image peut encore arriver plus
+  tard ; `iconPending` ne repasse jamais à `true`.
 - **Source** : les tables de butin officielles de Digital Extremes
   (warframe.com/droptables), lues par PlayerVox OverCrow sur le PC du
   joueur une fois par jour et à chaque mise à jour du jeu, tant qu'un
@@ -300,6 +311,10 @@ d’après une table qui n’est pas la sienne :
   les taux, avec ces mots : **« Taux : Digital Extremes, sans
   garantie »** (en anglais : **"Rates: Digital Extremes, no
   guarantees"**).
+- **Images** : le Public Export de Digital Extremes
+  (content.warframe.com), téléchargé par PlayerVox OverCrow sur le PC du
+  joueur, une fois pour chaque objet qu'un widget affiche, et gardé sur
+  ce PC. Rien n'est embarqué dans un widget.
 
 ### Types d’événements
 
@@ -421,6 +436,17 @@ langue du jeu, quelles que soient les fonctionnalités que suit le widget :
 | `faction` | les [factions](#factions) |
 | `cycle` | les [états des cycles](#états-des-cycles) |
 | `term` | `reactant`, `relic`, `credits` |
+| `icons` | `damage` : le symbole de chaque type de dégâts, par les mêmes ID |
+
+`glossary.icons.damage.<id>` est le symbole d'un type de dégâts, tiré du
+wiki officiel de Warframe (wiki.warframe.com) : une poignée `asset:` d'un
+carré de 72 px dont le symbole occupe les 64 px du milieu ; affichez-le
+en 22 px pour un symbole de 20 px. Les symboles pâles (`impact`,
+`puncture`, `slash`, `radiation`) ont un halo sombre très doux qui les
+garde lisibles sur un fond clair. Il vaut `null` tant que PlayerVox
+OverCrow ne l'a pas (téléchargé une fois sur le PC du joueur, relu tous
+les 30 jours), ou si le wiki ne répond pas : affichez votre propre icône
+à sa place.
 
 Noms anglais : les types de dégâts comme leurs ID (Impact, Puncture,
 Slash, Heat, Cold, Electricity, Toxin, Blast, Corrosive, Gas, Magnetic,
@@ -640,6 +666,11 @@ fonctionnalité avant d’installer le widget, et la politique de
 confidentialité du widget dit ce qu’il envoie. Voir
 [la sécurité](security.md#permissions-et-consentement).
 
+Les images du jeu viennent de Digital Extremes (images des objets) et du
+wiki officiel de Warframe (symboles des dégâts) : PlayerVox OverCrow les
+télécharge lui-même sur le PC du joueur, sans aucun identifiant, et les
+garde sur ce PC. Un widget n’en reçoit que des poignées.
+
 ## Tests
 
 Dans un [scénario](testing.md#scénarios), une étape `gameEvents` dit ce que
@@ -695,7 +726,13 @@ charge, la vague 5 commence, puis la mission réussit.
 - `glossary` se fusionne comme `info` :
   `{ "language": "fr", "damage": { "corrosive": "Corrosif" } }` ne change
   que ces mots. Le `rewards` d’une étape est celui du nœud, sauf s’il
-  donne `source`.
+  donne `source` ; un objet sans `icon`, `iconPending` ni `category` n’a
+  pas d’image, aucune à attendre, et le genre `other`.
+- Les images sont celles du scénario, dessinées pour le test : déclarez-les
+  dans `assets` et nommez-les `fixture:<nom>` là où va une poignée, comme
+  `"icon": "fixture:relic"` ou
+  `{ "icons": { "damage": { "impact": "fixture:impact" } } }` dans
+  `glossary`. Ne mettez jamais les images du jeu dans un widget.
 - Chaque étape est vérifiée à la lecture du scénario : une valeur qui n’a pas
   la forme du service est une erreur avec le chemin du premier membre
   fautif, et une étape ne peut toucher que les fonctionnalités que liste le

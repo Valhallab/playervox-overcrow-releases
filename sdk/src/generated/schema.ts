@@ -1047,6 +1047,41 @@ export interface WarframeGlossary {
     /** Its name in the language of `glossary.language`. */
     readonly credits: string;
   };
+  /** The game's symbols, as images. */
+  readonly icons: WarframeGlossaryIcons;
+}
+
+/** The game's symbols, downloaded once by PlayerVox OverCrow on the player's computer; each `null` until then, or while the source cannot be reached. */
+export interface WarframeGlossaryIcons {
+  /** The damage types' symbols, by our ID: the official Warframe wiki's, 72 px square, the symbol 64 px in the middle; the pale ones (`impact`, `puncture`, `slash`, `radiation`) with a soft dark halo that keeps them readable on a light background. */
+  readonly damage: {
+    /** `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. */
+    readonly impact: AssetHandle | null;
+    /** `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. */
+    readonly puncture: AssetHandle | null;
+    /** `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. */
+    readonly slash: AssetHandle | null;
+    /** `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. */
+    readonly heat: AssetHandle | null;
+    /** `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. */
+    readonly cold: AssetHandle | null;
+    /** `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. */
+    readonly electricity: AssetHandle | null;
+    /** `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. */
+    readonly toxin: AssetHandle | null;
+    /** `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. */
+    readonly blast: AssetHandle | null;
+    /** `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. */
+    readonly corrosive: AssetHandle | null;
+    /** `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. */
+    readonly gas: AssetHandle | null;
+    /** `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. */
+    readonly magnetic: AssetHandle | null;
+    /** `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. */
+    readonly radiation: AssetHandle | null;
+    /** `asset:` handle of its symbol, `null` while PlayerVox OverCrow has none. */
+    readonly viral: AssetHandle | null;
+  };
 }
 
 /** The rotations a mission earned. */
@@ -1302,6 +1337,12 @@ export interface WarframeReward {
   readonly quantity: number;
   /** The chance, from 0 to 1; the same item's entries of a table added together. */
   readonly chance: number;
+  /** `asset:` handle of the item's image, from Digital Extremes' public export, 48 px square; `null` while it downloads (`iconPending`) or when there is none. */
+  readonly icon: AssetHandle | null;
+  /** `true` while `icon` is `null` for now: the image may still come. `false` otherwise: `icon` given, or no image to come (the item has none, or the source cannot be reached); `icon` may still arrive later, never `iconPending` again. */
+  readonly iconPending: boolean;
+  /** What kind of item: `relic`, `mod`, `resource`, `blueprint`, `warframe_part`, `weapon_part`, `arcane`, `currency` or `other`. */
+  readonly category: "relic" | "mod" | "resource" | "blueprint" | "warframe_part" | "weapon_part" | "arcane" | "currency" | "other";
 }
 
 /** One reward table of a node. */
