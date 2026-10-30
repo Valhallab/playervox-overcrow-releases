@@ -1,0 +1,303 @@
+{
+  "scenarioVersion": 1,
+  "name": "wide-long-name-fr",
+  "description": "Large at 600 px: three equal columns; a long name (a Warframe part's blueprint) is cut in its own column, never the short names of the others.",
+  "host": {
+    "locale": "fr",
+    "mode": "interactive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "assets": {
+    "relic": "tests/assets/item-relic.png",
+    "mod": "tests/assets/item-mod.png",
+    "resource": "tests/assets/item-resource.png",
+    "currency": "tests/assets/item-currency.png"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode195",
+                "name": "Hydron"
+              },
+              "planet": {
+                "id": "sedna",
+                "name": "Sedna"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "type": {
+                "id": "defense",
+                "name": "Défense"
+              },
+              "rewards": {
+                "source": "node",
+                "tables": [
+                  {
+                    "kind": "mission",
+                    "rotation": "A",
+                    "items": [
+                      {
+                        "id": "neo_c7_relic",
+                        "name": "Relique Neo C7",
+                        "quantity": 1,
+                        "chance": 0.0313,
+                        "category": "relic",
+                        "iconPending": false,
+                        "icon": "fixture:relic"
+                      },
+                      {
+                        "id": "deep_freeze",
+                        "name": "Froid Pénétrant",
+                        "quantity": 1,
+                        "chance": 0.05,
+                        "category": "mod",
+                        "iconPending": false,
+                        "icon": "fixture:mod"
+                      },
+                      {
+                        "id": "orokin_cell",
+                        "name": "Cellule Orokin",
+                        "quantity": 3,
+                        "chance": 0.25,
+                        "category": "resource",
+                        "iconPending": false,
+                        "icon": "fixture:resource"
+                      },
+                      {
+                        "id": "endo",
+                        "name": "Endo",
+                        "quantity": 200,
+                        "chance": 0.3,
+                        "category": "currency",
+                        "iconPending": false,
+                        "icon": "fixture:currency"
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "B",
+                    "items": [
+                      {
+                        "id": "axi_a21_relic",
+                        "name": "Relique Axi A21",
+                        "quantity": 1,
+                        "chance": 0.0313,
+                        "category": "relic",
+                        "iconPending": false,
+                        "icon": "fixture:relic"
+                      },
+                      {
+                        "id": "neo_c7_relic",
+                        "name": "Relique Neo C7",
+                        "quantity": 1,
+                        "chance": 0.0313,
+                        "category": "relic",
+                        "iconPending": false,
+                        "icon": "fixture:relic"
+                      },
+                      {
+                        "id": "deep_freeze",
+                        "name": "Froid Pénétrant",
+                        "quantity": 1,
+                        "chance": 0.05,
+                        "category": "mod",
+                        "iconPending": false,
+                        "icon": "fixture:mod"
+                      },
+                      {
+                        "id": "rhino_neuroptics_blueprint",
+                        "name": "Plan de Rhino - Neuroptiques",
+                        "quantity": 1,
+                        "chance": 0.0625,
+                        "category": "warframe_part",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "forma_blueprint",
+                        "name": "Plan de Forma",
+                        "quantity": 1,
+                        "chance": 0.0625,
+                        "category": "blueprint",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "orokin_cell",
+                        "name": "Cellule Orokin",
+                        "quantity": 3,
+                        "chance": 0.25,
+                        "category": "resource",
+                        "iconPending": false,
+                        "icon": "fixture:resource"
+                      },
+                      {
+                        "id": "endo",
+                        "name": "Endo",
+                        "quantity": 200,
+                        "chance": 0.3,
+                        "category": "currency",
+                        "iconPending": false,
+                        "icon": "fixture:currency"
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "C",
+                    "items": [
+                      {
+                        "id": "axi_a21_relic",
+                        "name": "Relique Axi A21",
+                        "quantity": 1,
+                        "chance": 0.0313,
+                        "category": "relic",
+                        "iconPending": false,
+                        "icon": "fixture:relic"
+                      },
+                      {
+                        "id": "rhino_neuroptics_blueprint",
+                        "name": "Plan de Rhino - Neuroptiques",
+                        "quantity": 1,
+                        "chance": 0.0625,
+                        "category": "warframe_part",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "forma_blueprint",
+                        "name": "Plan de Forma",
+                        "quantity": 1,
+                        "chance": 0.0625,
+                        "category": "blueprint",
+                        "iconPending": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              "startedAt": 1793217190000,
+              "modifiers": [],
+              "earned": null,
+              "credits": null,
+              "rewardsPending": false
+            },
+            "progress": {
+              "wave": 8,
+              "waveEnemies": {
+                "total": 32,
+                "left": 14
+              },
+              "round": null,
+              "rewards": 2,
+              "rotation": "B",
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A"
+                ],
+                "totals": {
+                  "A": 2,
+                  "B": 0,
+                  "C": 0
+                }
+              },
+              "cycle": {
+                "number": 1,
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "earned": 2
+              },
+              "clock": null,
+              "nextRewardAt": null,
+              "nextRewardWave": 9
+            }
+          },
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "fr"
+          },
+          "glossary": {
+            "language": "fr",
+            "term": {
+              "reactant": "Réactif",
+              "relic": "Relique",
+              "credits": "Crédits"
+            }
+          },
+          "event": "wave_started"
+        }
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 600,
+          "height": 420
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Relique Neo C7",
+          "Froid Pénétrant",
+          "Cellule Orokin",
+          "Plan de Rhino - Neuroptiques"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "expect": {
+        "image": "wide-long-name-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 600,
+          "height": 420
+        },
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "wide-long-name-light-fr",
+        "fault": "none"
+      }
+    }
+  ]
+}
