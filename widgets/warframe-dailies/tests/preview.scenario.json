@@ -277,37 +277,45 @@
                 "normal": [
                   {
                     "id": "ivara",
-                    "name": "Ivara"
+                    "name": "Ivara",
+                    "rewards": []
                   },
                   {
                     "id": "inaros",
-                    "name": "Inaros"
+                    "name": "Inaros",
+                    "rewards": []
                   },
                   {
                     "id": "titania",
-                    "name": "Titania"
+                    "name": "Titania",
+                    "rewards": []
                   }
                 ],
                 "steelPath": [
                   {
                     "id": "braton",
-                    "name": "Braton"
+                    "name": "Braton",
+                    "rewards": []
                   },
                   {
                     "id": "lato",
-                    "name": "Lato"
+                    "name": "Lato",
+                    "rewards": []
                   },
                   {
                     "id": "skana",
-                    "name": "Skana"
+                    "name": "Skana",
+                    "rewards": []
                   },
                   {
                     "id": "paris",
-                    "name": "Paris"
+                    "name": "Paris",
+                    "rewards": []
                   },
                   {
                     "id": "kunai",
-                    "name": "Kunai"
+                    "name": "Kunai",
+                    "rewards": []
                   }
                 ],
                 "picked": {
@@ -330,7 +338,8 @@
                     "standing": 1000,
                     "endsAt": 1793318400000,
                     "progressed": false,
-                    "completed": true
+                    "completed": true,
+                    "description": "Customize a piece of Equipment's colors."
                   },
                   {
                     "id": "detonator",
@@ -339,7 +348,8 @@
                     "standing": 1000,
                     "endsAt": 1793318400000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Kill 150 Enemies with Blast Damage."
                   },
                   {
                     "id": "whole_arsenal",
@@ -348,7 +358,8 @@
                     "standing": 1000,
                     "endsAt": 1793318400000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Get a kill with your Primary, Secondary, and Melee weapons within 10 seconds."
                   },
                   {
                     "id": "mission_complete_xiii",
@@ -357,7 +368,8 @@
                     "standing": 4500,
                     "endsAt": 1793577600000,
                     "progressed": true,
-                    "completed": false
+                    "completed": false,
+                    "description": "Complete 15 missions"
                   },
                   {
                     "id": "eximus_eliminator_xiii",
@@ -366,7 +378,8 @@
                     "standing": 4500,
                     "endsAt": 1793577600000,
                     "progressed": true,
-                    "completed": false
+                    "completed": false,
+                    "description": "Kill 30 Eximus."
                   },
                   {
                     "id": "not_a_warning_shot_xiii",
@@ -375,7 +388,8 @@
                     "standing": 4500,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Kill 500 enemies."
                   },
                   {
                     "id": "gatherer",
@@ -384,7 +398,8 @@
                     "standing": 4500,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Collect 4,000 Resources"
                   },
                   {
                     "id": "earth_miner",
@@ -393,7 +408,8 @@
                     "standing": 4500,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Mine 3 Rare Gems or Ore in the Plains of Eidolon."
                   },
                   {
                     "id": "the_many_made_whole",
@@ -402,7 +418,8 @@
                     "standing": 7000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Exchange 10 Riven Slivers for a Riven Mod"
                   },
                   {
                     "id": "mirror_mirror",
@@ -411,7 +428,8 @@
                     "standing": 7000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Defend both Mirror Defense objectives 3 times each in a single mission."
                   }
                 ]
               }

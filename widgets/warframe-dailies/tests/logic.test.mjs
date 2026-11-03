@@ -272,6 +272,33 @@ test("the tracked activities of the menu, the Steel Path's Circuit on its own ro
   assert.equal(model().empty, false);
 });
 
+test("Nightwave: a challenge's objective on hover, in Interactive only, cut whole at 256 bytes", () => {
+  const challenges = [
+    challenge("artist", "Artist", "daily", SORTIE_END + 8 * HOUR, { description: "Customize a piece of Equipment's colors." }),
+    challenge("eximus", "Eximus Eliminator", "weekly", WEEK_END, { description: "Kill 150 Eximus." }),
+    // 280 bytes in letters of two, then of four: cut before the letter that would pass 256 with "…".
+    challenge("gatherer", "Gatherer", "weekly", WEEK_END, { description: "É".repeat(140) }),
+    challenge("mission_complete", "Mission Complete", "weekly", WEEK_END, { description: "\u{1D11E}".repeat(70) }),
+    challenge("mirror_mirror", "Mirror, Mirror", "elite", WEEK_END),
+  ];
+  const w = world(NOW, { nightwave: { endsAt: WEEK_END + 60 * DAY, challenges } });
+  const tips = (interactive) => actOf(logic.buildModel(inputs(logic, { world: w, interactive })), "nightwave").groups.flatMap((group) => group.parts).map((each) => each.tip);
+  const live = tips(true);
+  assert.deepEqual(live, [
+    "Customize a piece of Equipment's colors.",
+    "Kill 150 Eximus.",
+    `${"É".repeat(126)}…`,
+    `${"\u{1D11E}".repeat(63)}…`,
+    "",
+  ]);
+  for (const tip of live) assert.ok(Buffer.byteLength(tip) <= 256, tip);
+  // Passive is click-through: no tooltip there.
+  assert.deepEqual(tips(false), ["", "", "", "", ""]);
+  // Only a challenge has one.
+  const sortieTips = actOf(logic.buildModel(inputs(logic, { world: w, interactive: true })), "sortie").groups.flatMap((group) => group.parts).map((each) => each.tip);
+  assert.deepEqual(sortieTips, ["", "", ""]);
+});
+
 test("Wide: Nightwave on the right, the rest on the left", () => {
   vm.setHost({ viewport: { width: 600, height: 600 } });
   assert.equal(logic.layout(), "wide");

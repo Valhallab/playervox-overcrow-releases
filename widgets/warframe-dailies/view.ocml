@@ -12,7 +12,7 @@
 
 <component name="part" props="p">
   <if test={interactive()}>
-    <button class="part" label={p.label} on:activate={tick(p.id)}>
+    <button class="part" label={p.label} tooltip={p.tip} on:activate={tick(p.id)}>
       <part-body p={p}/>
     </button>
   </if>

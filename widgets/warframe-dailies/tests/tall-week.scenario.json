@@ -266,37 +266,45 @@
                 "normal": [
                   {
                     "id": "ivara",
-                    "name": "Ivara"
+                    "name": "Ivara",
+                    "rewards": []
                   },
                   {
                     "id": "inaros",
-                    "name": "Inaros"
+                    "name": "Inaros",
+                    "rewards": []
                   },
                   {
                     "id": "titania",
-                    "name": "Titania"
+                    "name": "Titania",
+                    "rewards": []
                   }
                 ],
                 "steelPath": [
                   {
                     "id": "braton",
-                    "name": "Braton"
+                    "name": "Braton",
+                    "rewards": []
                   },
                   {
                     "id": "lato",
-                    "name": "Lato"
+                    "name": "Lato",
+                    "rewards": []
                   },
                   {
                     "id": "skana",
-                    "name": "Skana"
+                    "name": "Skana",
+                    "rewards": []
                   },
                   {
                     "id": "paris",
-                    "name": "Paris"
+                    "name": "Paris",
+                    "rewards": []
                   },
                   {
                     "id": "kunai",
-                    "name": "Kunai"
+                    "name": "Kunai",
+                    "rewards": []
                   }
                 ],
                 "picked": {
@@ -319,7 +327,8 @@
                     "standing": 1000,
                     "endsAt": 1793318400000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Customize a piece of Equipment's colors."
                   },
                   {
                     "id": "c01",
@@ -328,7 +337,8 @@
                     "standing": 1000,
                     "endsAt": 1793318400000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Kill 150 Enemies with Blast Damage."
                   },
                   {
                     "id": "c02",
@@ -337,7 +347,8 @@
                     "standing": 1000,
                     "endsAt": 1793318400000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Get a kill with your Primary, Secondary, and Melee weapons within 10 seconds."
                   },
                   {
                     "id": "c03",
@@ -346,7 +357,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Complete 15 missions"
                   },
                   {
                     "id": "c04",
@@ -355,7 +367,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Kill 30 Eximus."
                   },
                   {
                     "id": "c05",
@@ -364,7 +377,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Kill 500 enemies."
                   },
                   {
                     "id": "c06",
@@ -373,7 +387,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Collect 4,000 Resources"
                   },
                   {
                     "id": "c07",
@@ -382,7 +397,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Mine 3 Rare Gems or Ore in the Plains of Eidolon."
                   },
                   {
                     "id": "c08",
@@ -391,7 +407,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": null
                   },
                   {
                     "id": "c09",
@@ -400,7 +417,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Donate to the Leverian"
                   },
                   {
                     "id": "c10",
@@ -409,7 +427,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Catch 3 Rare Fish in the Plains of Eidolon."
                   },
                   {
                     "id": "c11",
@@ -418,7 +437,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Mine 3 Rare Gems or Ore in the Orb Vallis."
                   },
                   {
                     "id": "c12",
@@ -427,7 +447,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": null
                   },
                   {
                     "id": "c13",
@@ -436,7 +457,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Exchange 10 Riven Slivers for a Riven Mod"
                   },
                   {
                     "id": "c14",
@@ -445,7 +467,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Defend both Mirror Defense objectives 3 times each in a single mission."
                   },
                   {
                     "id": "c15",
@@ -454,7 +477,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": null
                   }
                 ]
               }
@@ -696,37 +720,45 @@
                 "normal": [
                   {
                     "id": "ivara",
-                    "name": "Ivara"
+                    "name": "Ivara",
+                    "rewards": []
                   },
                   {
                     "id": "inaros",
-                    "name": "Inaros"
+                    "name": "Inaros",
+                    "rewards": []
                   },
                   {
                     "id": "titania",
-                    "name": "Titania"
+                    "name": "Titania",
+                    "rewards": []
                   }
                 ],
                 "steelPath": [
                   {
                     "id": "braton",
-                    "name": "Braton"
+                    "name": "Braton",
+                    "rewards": []
                   },
                   {
                     "id": "lato",
-                    "name": "Lato"
+                    "name": "Lato",
+                    "rewards": []
                   },
                   {
                     "id": "skana",
-                    "name": "Skana"
+                    "name": "Skana",
+                    "rewards": []
                   },
                   {
                     "id": "paris",
-                    "name": "Paris"
+                    "name": "Paris",
+                    "rewards": []
                   },
                   {
                     "id": "kunai",
-                    "name": "Kunai"
+                    "name": "Kunai",
+                    "rewards": []
                   }
                 ],
                 "picked": {
@@ -749,7 +781,8 @@
                     "standing": 1000,
                     "endsAt": 1793318400000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Customize a piece of Equipment's colors."
                   },
                   {
                     "id": "c01",
@@ -758,7 +791,8 @@
                     "standing": 1000,
                     "endsAt": 1793318400000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Kill 150 Enemies with Blast Damage."
                   },
                   {
                     "id": "c02",
@@ -767,7 +801,8 @@
                     "standing": 1000,
                     "endsAt": 1793318400000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Get a kill with your Primary, Secondary, and Melee weapons within 10 seconds."
                   },
                   {
                     "id": "c03",
@@ -776,7 +811,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Complete 15 missions"
                   },
                   {
                     "id": "c04",
@@ -785,7 +821,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Kill 30 Eximus."
                   },
                   {
                     "id": "c05",
@@ -794,7 +831,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Kill 500 enemies."
                   },
                   {
                     "id": "c06",
@@ -803,7 +841,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Collect 4,000 Resources"
                   },
                   {
                     "id": "c07",
@@ -812,7 +851,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Mine 3 Rare Gems or Ore in the Plains of Eidolon."
                   },
                   {
                     "id": "c08",
@@ -821,7 +861,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": null
                   },
                   {
                     "id": "c09",
@@ -830,7 +871,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Donate to the Leverian"
                   },
                   {
                     "id": "c10",
@@ -839,7 +881,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Catch 3 Rare Fish in the Plains of Eidolon."
                   },
                   {
                     "id": "c11",
@@ -848,7 +891,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Mine 3 Rare Gems or Ore in the Orb Vallis."
                   },
                   {
                     "id": "c12",
@@ -857,7 +901,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": null
                   },
                   {
                     "id": "c13",
@@ -866,7 +911,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Exchange 10 Riven Slivers for a Riven Mod"
                   },
                   {
                     "id": "c14",
@@ -875,7 +921,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Defend both Mirror Defense objectives 3 times each in a single mission."
                   },
                   {
                     "id": "c15",
@@ -884,7 +931,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": null
                   }
                 ]
               }
@@ -1075,37 +1123,45 @@
                 "normal": [
                   {
                     "id": "ivara",
-                    "name": "Ivara"
+                    "name": "Ivara",
+                    "rewards": []
                   },
                   {
                     "id": "inaros",
-                    "name": "Inaros"
+                    "name": "Inaros",
+                    "rewards": []
                   },
                   {
                     "id": "titania",
-                    "name": "Titania"
+                    "name": "Titania",
+                    "rewards": []
                   }
                 ],
                 "steelPath": [
                   {
                     "id": "braton",
-                    "name": "Braton"
+                    "name": "Braton",
+                    "rewards": []
                   },
                   {
                     "id": "lato",
-                    "name": "Lato"
+                    "name": "Lato",
+                    "rewards": []
                   },
                   {
                     "id": "skana",
-                    "name": "Skana"
+                    "name": "Skana",
+                    "rewards": []
                   },
                   {
                     "id": "paris",
-                    "name": "Paris"
+                    "name": "Paris",
+                    "rewards": []
                   },
                   {
                     "id": "kunai",
-                    "name": "Kunai"
+                    "name": "Kunai",
+                    "rewards": []
                   }
                 ],
                 "picked": {
@@ -1128,7 +1184,8 @@
                     "standing": 1000,
                     "endsAt": 1793318400000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Customize a piece of Equipment's colors."
                   },
                   {
                     "id": "c01",
@@ -1137,7 +1194,8 @@
                     "standing": 1000,
                     "endsAt": 1793318400000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Kill 150 Enemies with Blast Damage."
                   },
                   {
                     "id": "c02",
@@ -1146,7 +1204,8 @@
                     "standing": 1000,
                     "endsAt": 1793318400000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Get a kill with your Primary, Secondary, and Melee weapons within 10 seconds."
                   },
                   {
                     "id": "c03",
@@ -1155,7 +1214,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Complete 15 missions"
                   },
                   {
                     "id": "c04",
@@ -1164,7 +1224,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Kill 30 Eximus."
                   },
                   {
                     "id": "c05",
@@ -1173,7 +1234,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Kill 500 enemies."
                   },
                   {
                     "id": "c06",
@@ -1182,7 +1244,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Collect 4,000 Resources"
                   },
                   {
                     "id": "c07",
@@ -1191,7 +1254,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Mine 3 Rare Gems or Ore in the Plains of Eidolon."
                   },
                   {
                     "id": "c08",
@@ -1200,7 +1264,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": null
                   },
                   {
                     "id": "c09",
@@ -1209,7 +1274,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Donate to the Leverian"
                   },
                   {
                     "id": "c10",
@@ -1218,7 +1284,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Catch 3 Rare Fish in the Plains of Eidolon."
                   },
                   {
                     "id": "c11",
@@ -1227,7 +1294,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Mine 3 Rare Gems or Ore in the Orb Vallis."
                   },
                   {
                     "id": "c12",
@@ -1236,7 +1304,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": null
                   },
                   {
                     "id": "c13",
@@ -1245,7 +1314,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Exchange 10 Riven Slivers for a Riven Mod"
                   },
                   {
                     "id": "c14",
@@ -1254,7 +1324,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": "Defend both Mirror Defense objectives 3 times each in a single mission."
                   },
                   {
                     "id": "c15",
@@ -1263,7 +1334,8 @@
                     "standing": 1000,
                     "endsAt": 1793577600000,
                     "progressed": false,
-                    "completed": false
+                    "completed": false,
+                    "description": null
                   }
                 ]
               }

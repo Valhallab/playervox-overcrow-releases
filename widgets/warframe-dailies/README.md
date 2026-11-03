@@ -23,7 +23,7 @@ Digital Extremes.
 | By hand | A small hand in the right column where the player set a box against what the game said (a stage, a Netracell, a challenge, the Circuit's pick) |
 | Stage types | A Sortie stage whose type the game chooses at loading shows its node and planet in muted grey ("Morax · Europa") until then; before the world is read, "1st mission", "2nd mission"… |
 | Baro Ki'Teer | One quiet line under the lists: "Baro Ki'Teer arrives Fri 14:00 · Larunda Relay", brighter while he is there ("… at Larunda Relay · leaves Sun 14:00") |
-| Interactive | Every box, every Circuit name and the Circuit's own box is a button; a two-line note at the bottom: "Ticks itself while PlayerVox OverCrow runs during play. Played without it? Tick by hand." |
+| Interactive | Every box, every Circuit name and the Circuit's own box is a button; on hover, a Nightwave challenge shows its objective as the game writes it ("Kill 30 Eximus."); a two-line note at the bottom: "Ticks itself while PlayerVox OverCrow runs during play. Played without it? Tick by hand." |
 | Without the game's missions | "Game not detected" (or "Allow “Warframe: missions” in the Control Center." when the permission is refused): every box ticks by a click |
 | Offline | The last world stays, with "Offline · data from 10:42" when it is more than 15 minutes old; without any world, "Offline", and Nightwave waits: "List when back online" |
 | Nothing tracked | "No activity tracked", and where to choose some |
@@ -80,7 +80,7 @@ computes the same instants. A Nightwave challenge at its own end.
 | Permission | Why |
 | --- | --- |
 | `gameEvents`: `warframe.mission` | A Sortie stage, an Archon Hunt stage or a Netracell ticks when the mission ends with success |
-| `gameEvents`: `warframe.world` | The Sortie and Archon Hunt missions, the Archon Shard, the Circuit's rewards and picks, Nightwave's challenges, Baro Ki'Teer and the resets, game closed or not |
+| `gameEvents`: `warframe.world` | The Sortie and Archon Hunt missions, the Archon Shard, the Circuit's rewards and picks, Nightwave's challenges and their objectives, Baro Ki'Teer and the resets, game closed or not |
 | `storage` | One key, `ticks`: what was done this day and this week, when, what the hand set, the Circuit's picks and the stage types told at loading (a few KB) |
 
 No network: everything comes from PlayerVox OverCrow.
@@ -97,9 +97,10 @@ No network: everything comes from PlayerVox OverCrow.
 `node --test tests/*.test.mjs` runs the logic on `@overcrow/sdk/testing`
 with synthetic values (`tests/fixtures.mjs`): a Sortie in three stages,
 the hand against the game, the stages kept in order, Netracells, the
-Circuit's picks, Nightwave challenges completed by the game, a stage type
-told at loading, the tracked activities, the wide layout, the Passive
-fold, the world not read, the game not detected, a whole week of virtual
+Circuit's picks, Nightwave challenges completed by the game and their
+objectives on hover, a stage type told at loading, the tracked
+activities, the wide layout, the Passive fold, the world not read, the
+game not detected, a whole week of virtual
 time, a restart, the French wording.
 
 `overcrow-widget test` plays one scenario per state, in English, French
@@ -109,7 +110,8 @@ ticks, then the player's corrections), `sortie-replaced`,
 `sortie-learned`, `world-unread`, `offline`, `nightwave-complete`,
 `all-done`, `events-unavailable`, `long-list` (the host's scrollbar, the
 Passive fold), `tall-week` (taller than the frame), `ordered-stages` (the
-stages kept in order by hand and by the game), `baro-here`, `refused` and
+stages kept in order by hand and by the game), `nightwave-objective` (a
+challenge's objective on hover, in Interactive only), `baro-here`, `refused` and
 `nothing-tracked`; `week` runs
 Thursday to Monday in virtual time with clicks, `restart` repeats a
 session's events after a restart, and `preview` captures the catalog

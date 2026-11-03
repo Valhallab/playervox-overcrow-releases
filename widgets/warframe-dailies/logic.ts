@@ -11,6 +11,7 @@ import {
   host,
   initState,
   localTime,
+  MAX_LABEL_BYTES,
   onHost,
   option,
   storage,
@@ -527,6 +528,8 @@ export interface PartView {
   /** Set by hand against the game: the hand in the right column. */
   hand: boolean;
   label: string;
+  /** Shown on hover in Interactive: a Nightwave challenge's objective; empty otherwise. */
+  tip: string;
 }
 export interface GroupView {
   id: string;
@@ -705,8 +708,33 @@ function archonShort(name: string | null): string {
   return words[words.length - 1] ?? "";
 }
 
+/** How many bytes `text` takes in UTF-8. */
+function utf8Bytes(text: string): number {
+  let bytes = 0;
+  for (const char of text) {
+    const code = char.codePointAt(0) ?? 0;
+    bytes += code < 0x80 ? 1 : code < 0x800 ? 2 : code < 0x10000 ? 3 : 4;
+  }
+  return bytes;
+}
+
+/** `text` within `max` bytes of UTF-8: whole, or cut between two letters with "…". */
+export function clipped(text: string, max = MAX_LABEL_BYTES): string {
+  if (utf8Bytes(text) <= max) return text;
+  const room = max - utf8Bytes("…");
+  let out = "";
+  let bytes = 0;
+  for (const char of text) {
+    const size = utf8Bytes(char);
+    if (bytes + size > room) break;
+    out += char;
+    bytes += size;
+  }
+  return `${out.trimEnd()}…`;
+}
+
 /** A part's icon and classes: done (green check, struck through), progressed this session (dotted circle), or to do. */
-function partView(id: string, label: string, textValue: string, done: boolean, opts: { going?: boolean; pending?: boolean; hand?: boolean } = {}): PartView {
+function partView(id: string, label: string, textValue: string, done: boolean, opts: { going?: boolean; pending?: boolean; hand?: boolean; tip?: string } = {}): PartView {
   const going = !done && opts.going === true;
   const base = t(done ? "label-done-short" : "label-todo", { name: label });
   return {
@@ -717,6 +745,7 @@ function partView(id: string, label: string, textValue: string, done: boolean, o
     textCls: `part-text${done ? " done" : ""}${opts.pending === true ? " pending" : ""}`,
     hand: opts.hand === true,
     label: opts.hand === true ? t("label-by-hand", { label: base }) : base,
+    tip: opts.tip ?? "",
   };
 }
 
@@ -888,6 +917,8 @@ function nightwaveAct(inputs: Inputs): Built {
         return partView(`nightwave.${challenge.id}`, challenge.name, challenge.name, isDone(part), {
           going: challenge.progressed,
           hand: contradicted(part),
+          // Its objective, as the game writes it, where the pointer can hover.
+          tip: inputs.interactive && challenge.description !== null ? clipped(challenge.description) : "",
         });
       });
     if (parts.length > 0) groups.push({ id: kind, title: t(`kind-${kind}`), cls: "parts", parts, hand: false });

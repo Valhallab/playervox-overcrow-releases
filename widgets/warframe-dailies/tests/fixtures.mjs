@@ -20,6 +20,8 @@ export const SORTIE_END = Date.UTC(2026, 9, 29, 16);
 export const WEEK_END = Date.UTC(2026, 10, 2);
 
 const named = (id, name) => ({ id, name });
+/** A choice of the Circuit; what its tiers give does not matter here. */
+const choice = (id, name) => ({ id, name, rewards: [] });
 const mission = (node, nodeName, type, typeName, modifier = null) => ({
   node: named(node, nodeName),
   planet: named("europa", "Europa"),
@@ -39,6 +41,7 @@ export const challenge = (id, name, kind, endsAt, changes = {}) => ({
   endsAt,
   progressed: false,
   completed: false,
+  description: null,
   ...changes,
 });
 
@@ -74,8 +77,8 @@ export function world(now = NOW, changes = {}) {
       relay: named("larunda_relay", "Larunda Relay"),
     },
     circuit: {
-      normal: [named("excalibur", "Excalibur"), named("trinity", "Trinity"), named("ember", "Ember")],
-      steelPath: ["braton", "lato", "skana", "paris", "kunai"].map((id) => named(id, id[0].toUpperCase() + id.slice(1))),
+      normal: [choice("excalibur", "Excalibur"), choice("trinity", "Trinity"), choice("ember", "Ember")],
+      steelPath: ["braton", "lato", "skana", "paris", "kunai"].map((id) => choice(id, id[0].toUpperCase() + id.slice(1))),
       picked: { normal: [], steelPath: [] },
     },
     nightwave: {
