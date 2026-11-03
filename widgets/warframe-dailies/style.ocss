@@ -1,10 +1,36 @@
 /* Warframe dailies and weeklies. The first rules are the panel, header and
    type scale the PlayerVox Warframe widgets share. */
+/* The frame: never taller than the user's height (manual size). */
+.checklist {
+  flex-direction: column;
+  width: 100%;
+  max-height: 100%;
+}
+
+/* The panel stops at the frame's largest height (the manifest's): beyond,
+   the lists scroll in Interactive and Nightwave folds in Passive. */
 .wf {
   flex-direction: column;
   width: 100%;
+  max-height: 800px;
+  min-height: 0;
+  flex-shrink: 1;
   padding: 10px;
   gap: var(--space-4);
+}
+
+.body {
+  flex-direction: column;
+  min-height: 0;
+  flex-shrink: 1;
+  overflow: hidden;
+}
+
+/* The host's scrollbar sits over the right edge: the lists keep their
+   place, 9 px clear of it. */
+scroll.body {
+  margin-right: -9px;
+  padding-right: 9px;
 }
 
 .grow {
@@ -198,12 +224,6 @@
   gap: 16px;
 }
 
-.wide .group {
-  flex-grow: 1;
-  flex-basis: 0;
-  min-width: 0;
-}
-
 .group {
   flex-direction: column;
 }
@@ -225,24 +245,6 @@
   white-space: nowrap;
 }
 
-.item {
-  flex-direction: row;
-  align-items: start;
-  gap: 8px;
-  padding: 5px 0;
-  cursor: pointer;
-}
-
-.item:hover,
-.item:focus {
-  background: var(--color-surface-hover);
-}
-
-/* Just checked by a finished mission: "just now" in green, no motion. */
-.item.fresh .item-name {
-  color: var(--color-text-secondary);
-}
-
 .check-icon {
   font-size: 16px;
   flex-shrink: 0;
@@ -259,31 +261,6 @@
 
 .check-icon.done {
   color: var(--color-success);
-}
-
-.item-text {
-  flex-direction: column;
-  flex-grow: 1;
-  flex-shrink: 1;
-  min-width: 0;
-}
-
-.item-name {
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.item.done .item-name {
-  color: var(--color-text-muted);
-  font-weight: 400;
-}
-
-.item-sub {
-  font-size: var(--font-size-small);
-  color: var(--color-text-muted);
 }
 
 .row-value {
@@ -348,12 +325,6 @@
   min-width: 0;
 }
 
-/* Keeps the times in one column whether a hand shows or not. */
-.hand-slot {
-  width: 11px;
-  flex-shrink: 0;
-}
-
 .foot-icon.here {
   color: var(--color-text-secondary);
 }
@@ -368,12 +339,367 @@
   width: 12px;
 }
 
-.group .foot {
-  margin-top: 8px;
-}
-
 /* The count never shrinks: what follows it ends with "…" first. */
 .line .line-main {
   font-weight: 700;
   flex-shrink: 0;
+}
+
+/* A box per part. */
+.acts {
+  flex-direction: column;
+  gap: 2px;
+}
+
+.act {
+  flex-direction: column;
+  padding: 3px 0 1px 0;
+}
+
+.act-head {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  min-height: 20px;
+}
+
+.act-btn {
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.act-btn:hover,
+.act-btn:focus {
+  background: var(--color-surface-hover);
+}
+
+.act-name {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.act.done .act-name {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+/* Under the name: indented to the name's column. */
+.act-body {
+  flex-direction: column;
+  padding-left: 24px;
+  gap: 1px;
+}
+
+.meta-row {
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  min-height: 18px;
+}
+
+.shard {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.act-meta {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.sub-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.parts {
+  flex-direction: column;
+}
+
+.cells {
+  flex-direction: row;
+  gap: 2px;
+  padding-top: 1px;
+}
+
+.part {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  min-height: 17px;
+  padding: 0 4px 0 2px;
+  margin-left: -2px;
+  border-radius: 4px;
+}
+
+.cells .part {
+  padding: 2px 3px;
+  margin-left: 0;
+  gap: 0;
+}
+
+button.part {
+  cursor: pointer;
+}
+
+button.part:hover,
+button.part:focus {
+  background: var(--color-surface-hover);
+}
+
+.part-icon {
+  font-size: 13px;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.cells .part-icon {
+  font-size: 15px;
+}
+
+.part-icon.done {
+  color: var(--color-success);
+}
+
+.part-icon.part-going {
+  color: var(--color-text-secondary);
+}
+
+.part-text {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.part-text.done {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+
+/* Not the final text yet (a Sortie stage before its type is known, a
+   stage before the world is read): the muted grey of the theme, nothing
+   added. */
+.part-text.pending {
+  color: var(--color-text-muted);
+}
+
+/* Set by hand against the game: always in the right column, 14 px. */
+.part .hand,
+.act-head .hand {
+  font-size: 14px;
+  width: 14px;
+  margin-top: 0;
+  color: var(--color-text-secondary);
+}
+
+.choices {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 5px;
+  row-gap: 1px;
+  min-height: 18px;
+}
+
+.choice {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+/* The week's pick: positive green in an outlined chip (never read as
+   "done"), never the accent; the others grey. */
+.choice.picked {
+  color: var(--color-success);
+  font-weight: 600;
+  padding: 0 6px;
+  border-radius: 9px;
+  border: 1px solid var(--color-success);
+}
+
+/* A choice not picked: muted, still readable (it stays clickable). */
+.choice.other {
+  color: var(--color-text-muted);
+}
+
+.choice-sep {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.note-row {
+  flex-direction: row;
+  align-items: start;
+  gap: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--color-border);
+}
+
+.note-icon {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+/* Two lines at most: what ticks itself, and what to do otherwise. */
+.note-text {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.act-head .hand {
+  margin-top: 0;
+}
+
+/* Every state icon takes the same width: the names stay in one column. */
+.act-head .check-icon {
+  margin-top: 0;
+}
+
+/* Icons sit in a fixed slot: a dashed circle's wider box never moves the names. */
+.ico-slot {
+  width: 14px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.head-slot {
+  width: 16px;
+}
+
+.cells .ico-slot {
+  width: 16px;
+}
+
+.gcol {
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.wide .gcol {
+  flex-grow: 1;
+  flex-basis: 0;
+}
+
+.act-head .shard {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.act-head .meta-sep {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.act-head .act-meta {
+  font-size: 12px;
+}
+
+.acts {
+  gap: 1px;
+}
+
+.groups {
+  gap: 10px;
+}
+
+.wide .gcol .group {
+  flex-grow: 0;
+  flex-basis: auto;
+}
+
+.note-row .note-icon {
+  margin-top: 2px;
+}
+
+/* Interactive: every name is a button; the same padding picked or not, so
+   that a click never moves the others. */
+.choice-btn {
+  flex-direction: row;
+  align-items: center;
+  padding: 0 5px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  background: transparent;
+}
+
+.choice-btn:hover,
+.choice-btn:focus {
+  background: var(--color-surface-hover);
+}
+
+.choice-btn.picked {
+  border: 1px solid var(--color-success);
+}
+
+.choice-text {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.choice-btn.picked .choice-text {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.choice-btn.other .choice-text {
+  color: var(--color-text-muted);
+}
+
+.choices .hand {
+  font-size: 14px;
+  width: 14px;
+  color: var(--color-text-secondary);
+}
+
+.cells .hand {
+  font-size: 14px;
+  width: 14px;
+  color: var(--color-text-secondary);
+}
+
+/* Interactive: the buttons' own padding spaces the names, without dots. */
+.live .choices {
+  column-gap: 3px;
+  margin-left: -5px;
+}
+
+/* The Archon Shard when its image will not come: our icon. */
+.shard-glyph {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+/* Passive: what a long Nightwave list folds at its end. */
+.more {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  min-height: 17px;
+  padding-left: 2px;
 }

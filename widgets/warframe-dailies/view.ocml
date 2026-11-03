@@ -1,37 +1,128 @@
-<!-- Warframe dailies and weeklies: what is left, and when it resets. -->
-<component name="group" props="g baro here">
+<!-- Warframe dailies and weeklies: a box per part, and when each list resets. -->
+<component name="part-body" props="p">
+  <box class="ico-slot"><icon class={p.iconCls} name={p.icon}/></box>
+  <if test={hasText(p.text)}>
+    <text class={p.textCls}>{p.text}</text>
+  </if>
+  <if test={p.hand}>
+    <box class="grow"/>
+    <icon class="hand" name="hand" label={t("by-hand")} tooltip={t("by-hand")}/>
+  </if>
+</component>
+
+<component name="part" props="p">
+  <if test={interactive()}>
+    <button class="part" label={p.label} on:activate={tick(p.id)}>
+      <part-body p={p}/>
+    </button>
+  </if>
+  <else>
+    <box class="part" label={p.label}>
+      <part-body p={p}/>
+    </box>
+  </else>
+</component>
+
+<component name="head" props="a">
+  <box class="ico-slot head-slot"><icon class={a.iconCls} name={a.icon}/></box>
+  <text class="act-name">{a.name}</text>
+  <if test={hasText(a.shardText)}>
+    <text class="meta-sep">·</text>
+    <if test={hasText(a.shard)}>
+      <image class="shard" src={a.shard}/>
+    </if>
+    <else-if test={hasText(a.shardGlyph)}>
+      <icon class="shard-glyph" name={a.shardGlyph}/>
+    </else-if>
+    <text class="act-meta">{a.shardText}</text>
+  </if>
+  <box class="grow"/>
+  <if test={hasText(a.value)}>
+    <text class={a.valueCls}>{a.value}</text>
+  </if>
+</component>
+
+<component name="act" props="a">
+  <box class={a.cls}>
+    <if test={a.toggle && interactive()}>
+      <button class="act-head act-btn" label={a.label} on:activate={check(a.id)}>
+        <head a={a}/>
+      </button>
+    </if>
+    <else>
+      <box class="act-head" label={a.label}>
+        <head a={a}/>
+      </box>
+    </else>
+    <box class="act-body">
+      <if test={hasText(a.meta)}>
+        <box class="meta-row">
+          <text class="act-meta">{a.meta}</text>
+        </box>
+      </if>
+      <if test={a.choices.length > 0}>
+        <box class="choices">
+          <for each={a.choices} as="c" key={c.id}>
+            <if test={!interactive()}>
+              <text class={c.cls}>{c.text}</text>
+            </if>
+            <else-if test={!c.sep}>
+              <button class={c.cls + " choice-btn"} label={c.label} on:activate={pickChoice(c.id)}>
+                <text class="choice-text">{c.text}</text>
+              </button>
+            </else-if>
+          </for>
+          <if test={a.choicesHand}>
+            <box class="grow"/>
+            <icon class="hand" name="hand" label={t("by-hand")} tooltip={t("by-hand")}/>
+          </if>
+        </box>
+      </if>
+      <for each={a.groups} as="g" key={g.id}>
+        <if test={hasText(g.title)}>
+          <text class="sub-title">{g.title}</text>
+        </if>
+        <box class={g.cls}>
+          <for each={g.parts} as="p" key={p.id}>
+            <part p={p}/>
+          </for>
+          <if test={g.hand}>
+            <box class="grow"/>
+            <icon class="hand" name="hand" label={t("by-hand")} tooltip={t("by-hand")}/>
+          </if>
+        </box>
+      </for>
+      <if test={hasText(a.more)}>
+        <text class="more">{a.more}</text>
+      </if>
+    </box>
+  </box>
+</component>
+
+<component name="period" props="g">
   <box class="group">
     <box class="group-head">
       <text class="section-title">{g.title}</text>
       <box class="grow"/>
       <text class="reset">{g.reset}</text>
     </box>
-    <for each={g.rows} as="r" key={r.id}>
-      <button class={r.rowCls} label={r.label} on:activate={check(r.id)}>
-        <icon class={r.iconCls} name={r.icon}/>
-        <box class="item-text">
-          <text class="item-name">{r.name}</text>
-          <if test={hasText(r.sub)}>
-            <text class="item-sub">{r.sub}</text>
-          </if>
-        </box>
-        <if test={r.byHand}>
-          <icon class="hand" name="hand" label={t("by-hand")} tooltip={t("by-hand")}/>
-        </if>
-        <else-if test={hasText(r.value) && r.valueCls != "row-value"}>
-          <box class="hand-slot"/>
-        </else-if>
-        <if test={hasText(r.value)}>
-          <text class={r.valueCls}>{r.value}</text>
-        </if>
-      </button>
-    </for>
-    <if test={hasText(baro)}>
-      <box class="foot">
-        <icon class={here ? "foot-icon here" : "foot-icon"} name="store"/>
-        <text class={here ? "foot-text here" : "foot-text"}>{baro}</text>
+    <box class="acts">
+      <for each={g.acts} as="a" key={a.id}>
+        <act a={a}/>
+      </for>
+    </box>
+  </box>
+</component>
+
+<component name="lists" props="m">
+  <box class="groups">
+    <for each={m.cols} as="col" key={col.id}>
+      <box class="gcol">
+        <for each={col.groups} as="g" key={g.id}>
+          <period g={g}/>
+        </for>
       </box>
-    </if>
+    </for>
   </box>
 </component>
 
@@ -47,43 +138,53 @@
     </box>
   </if>
   <else>
-    <box class="eyebrow-row">
-      <icon class="eyebrow-icon tone-accent" name="calendar-check"/>
-      <text class="eyebrow tone-accent">{t("eyebrow")}</text>
-      <box class="grow"/>
-      <text class={state.model.leftCls}>{state.model.left}</text>
+    <box class="wf">
+      <box class="eyebrow-row">
+        <icon class="eyebrow-icon tone-accent" name="calendar-check"/>
+        <text class="eyebrow tone-accent">{t("eyebrow")}</text>
+        <box class="grow"/>
+        <text class={state.model.leftCls}>{state.model.left}</text>
+      </box>
+      <if test={hasText(state.model.hint)}>
+        <box class="hint-box">
+          <icon class={"notice-icon tone-" + state.model.hintTone} name={state.model.hintIcon}/>
+          <text class="notice-text">{state.model.hint}</text>
+        </box>
+      </if>
+      <if test={state.model.empty}>
+        <box class="empty">
+          <icon class="empty-icon" name="list-checks"/>
+          <text class="empty-title">{t("empty-title")}</text>
+          <text class="empty-text">{t("empty-text")}</text>
+        </box>
+      </if>
+      <else-if test={interactive()}>
+        <scroll class="body">
+          <lists m={state.model}/>
+        </scroll>
+      </else-if>
+      <else>
+        <box class="body">
+          <lists m={state.model}/>
+        </box>
+      </else>
+      <if test={hasText(state.model.baro)}>
+        <box class="foot">
+          <icon class={state.model.baroHere ? "foot-icon here" : "foot-icon"} name="store"/>
+          <text class={state.model.baroHere ? "foot-text here" : "foot-text"}>{state.model.baro}</text>
+        </box>
+      </if>
+      <if test={hasText(state.model.status)}>
+        <box class="status-line">
+          <icon class="status-icon tone-warning" name="wifi-off"/>
+          <text class="status-text">{state.model.status}</text>
+        </box>
+      </if>
+      <if test={interactive() && hasText(state.model.note)}>
+        <box class="note-row">
+          <text class="note-text">{state.model.note}</text>
+        </box>
+      </if>
     </box>
-    <if test={hasText(state.model.hint)}>
-      <box class="hint-box">
-        <icon class={"notice-icon tone-" + state.model.hintTone} name={state.model.hintIcon}/>
-        <text class="notice-text">{state.model.hint}</text>
-      </box>
-    </if>
-    <if test={state.model.empty}>
-      <box class="empty">
-        <icon class="empty-icon" name="list-checks"/>
-        <text class="empty-title">{t("empty-title")}</text>
-        <text class="empty-text">{t("empty-text")}</text>
-      </box>
-    </if>
-    <else>
-      <box class="groups">
-        <for each={state.model.groups} as="g" key={g.id}>
-          <group g={g} baro={baroIn(state.model, g.id)} here={state.model.baroHere}/>
-        </for>
-      </box>
-    </else>
-    <if test={layout() != "wide" && hasText(state.model.baro)}>
-      <box class="foot">
-        <icon class={state.model.baroHere ? "foot-icon here" : "foot-icon"} name="store"/>
-        <text class={state.model.baroHere ? "foot-text here" : "foot-text"}>{state.model.baro}</text>
-      </box>
-    </if>
-    <if test={hasText(state.model.status)}>
-      <box class="status-line">
-        <icon class="status-icon tone-warning" name="wifi-off"/>
-        <text class="status-text">{state.model.status}</text>
-      </box>
-    </if>
   </else>
 </box>

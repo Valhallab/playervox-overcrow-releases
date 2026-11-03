@@ -104,6 +104,15 @@
           },
           {
             "type": "toggle",
+            "id": "track-circuit-steel",
+            "label": {
+              "en": "The Circuit · Steel Path",
+              "fr": "Le Circuit · Route de l’Acier"
+            },
+            "default": true
+          },
+          {
+            "type": "toggle",
             "id": "track-nightwave",
             "label": {
               "en": "Nightwave",
