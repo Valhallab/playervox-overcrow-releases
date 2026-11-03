@@ -1491,6 +1491,58 @@ pub const SHAPES: &[NamedShape] = &[
         "The cycle of an open world.",
     ),
     named(
+        "WarframeCircuitReward",
+        Shape::Record(&[
+            member(
+                "part",
+                Shape::Keyword(warframe::CIRCUIT_PARTS),
+                "What it is: `neuroptics`, `chassis` or `systems` (a Warframe's part blueprint), `blueprint` (the Warframe's own blueprint) or `incarnon` (a weapon's Incarnon Genesis adapter).",
+            ),
+            member(
+                "id",
+                Shape::Text,
+                "Our ID: the item's English name in `snake_case` (`titania_neuroptics_blueprint`).",
+            ),
+            member(
+                "name",
+                Shape::Text,
+                "Its name in the game's language, or in English when the export has no translation; never empty.",
+            ),
+            member(
+                "icon",
+                Shape::Nullable(&Shape::Asset),
+                "`asset:` handle of its image, 48 px square; as `WarframeReward.icon`.",
+            ),
+            member(
+                "iconPending",
+                Shape::Bool,
+                "As `WarframeReward.iconPending`.",
+            ),
+        ]),
+        "An item a tier of the Circuit gives for a choice of the week.",
+    ),
+    named(
+        "WarframeCircuitChoice",
+        Shape::Record(&[
+            member(
+                "id",
+                Shape::Text,
+                "Our stable ID, in `snake_case`: the English name the world state gives.",
+            ),
+            member(
+                "name",
+                NULLABLE_TEXT,
+                "Its name in the game's language, one line of at most `MAX_GAME_EVENT_NAME_BYTES`.",
+            ),
+            member(
+                "rewards",
+                Shape::List(&Shape::Named("WarframeCircuitReward")),
+                "What its tiers give, as Digital Extremes' public export tells it, at most `MAX_WARFRAME_CIRCUIT_REWARDS`: a Warframe's Neuroptics, Chassis and Systems blueprints and its blueprint; a weapon's Incarnon Genesis adapter. An item the export does not tell for sure is left out, and so is the augment of tier 7, which the export does not name; the tier of each is the game's, not given.",
+            ),
+        ]),
+        "A Warframe or a weapon the Circuit offers this week.",
+    ),
+    named(
         "WarframeWorld",
         Shape::Record(&[
             member(
@@ -1627,12 +1679,12 @@ pub const SHAPES: &[NamedShape] = &[
                 Shape::Nullable(&Shape::Record(&[
                     member(
                         "normal",
-                        Shape::List(&Shape::Named("WarframeName")),
+                        Shape::List(&Shape::Named("WarframeCircuitChoice")),
                         "The rewards of the week.",
                     ),
                     member(
                         "steelPath",
-                        Shape::List(&Shape::Named("WarframeName")),
+                        Shape::List(&Shape::Named("WarframeCircuitChoice")),
                         "The Steel Path rewards of the week.",
                     ),
                     member(
@@ -1683,6 +1735,11 @@ pub const SHAPES: &[NamedShape] = &[
                                 "completed",
                                 Shape::Bool,
                                 "`true` when the game wrote, in this session, that this active challenge is complete.",
+                            ),
+                            member(
+                                "description",
+                                NULLABLE_TEXT,
+                                "Its objective in the game's language, its count written in (`Kill 150 Eximus.`), one line of at most `MAX_WARFRAME_OBJECTIVE_BYTES`; `null` when the export gives none PlayerVox OverCrow can write for sure.",
                             ),
                         ])),
                         "The active challenges, daily ones first, at most `MAX_WARFRAME_NIGHTWAVE`.",

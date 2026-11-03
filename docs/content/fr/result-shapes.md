@@ -854,6 +854,28 @@ Le cycle d’un monde ouvert. `{ state, endsAt }`
 | `state` | [`WarframeName`](#warframename) | Jour ou nuit (Cetus), chaud ou froid (Vallée Orbis), Fass ou Vome (Puy de Cambion). |
 | `endsAt` | entier | Quand il change, en millisecondes Unix. |
 
+### `WarframeCircuitReward`
+
+Un objet que donne un palier du Circuit pour un choix de la semaine. `{ part, id, name, icon, iconPending }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `part` | `neuroptics` \| `chassis` \| `systems` \| `blueprint` \| `incarnon` | Ce que c’est : `neuroptics`, `chassis` ou `systems` (le plan d’une pièce de Warframe), `blueprint` (le plan de la Warframe elle-même) ou `incarnon` (l’adaptateur Incarnon Genesis d’une arme). |
+| `id` | texte | Notre ID : le nom anglais de l’objet en `snake_case` (`titania_neuroptics_blueprint`). |
+| `name` | texte | Son nom dans la langue du jeu, ou en anglais quand l’export n’a pas de traduction ; jamais vide. |
+| `icon` | identifiant `asset:` ou `null` | Poignée `asset:` de son image, carrée de 48 px ; comme `WarframeReward.icon`. |
+| `iconPending` | booléen | Comme `WarframeReward.iconPending`. |
+
+### `WarframeCircuitChoice`
+
+Une Warframe ou une arme que le Circuit propose cette semaine. `{ id, name, rewards }`
+
+| Membre | Forme | Signification |
+| --- | --- | --- |
+| `id` | texte | Notre ID stable, en `snake_case` : le nom anglais que donne l’état du monde. |
+| `name` | texte ou `null` | Son nom dans la langue du jeu, sur une ligne d’au plus 128 octets. |
+| `rewards` | liste de [`WarframeCircuitReward`](#warframecircuitreward) | Ce que donnent ses paliers, d’après l’export public de Digital Extremes, au plus 4 : les plans des Neuroptiques, du Châssis et des Systèmes d’une Warframe et son plan ; l’adaptateur Incarnon Genesis d’une arme. Un objet que l’export ne donne pas avec certitude est laissé de côté, comme l’augment du palier 7, que l’export ne nomme pas ; le palier de chacun est celui du jeu, il n’est pas donné. |
+
 ### `WarframeWorld`
 
 Le monde de Warframe du jour et de la semaine. `{ updatedAt, sortie, archonHunt, fissures, cycles, resets, voidTrader, circuit, nightwave }`
@@ -888,12 +910,12 @@ Le monde de Warframe du jour et de la semaine. `{ updatedAt, sortie, archonHunt,
 | `voidTrader.leavesAt` | entier | Quand il repart. |
 | `voidTrader.relay` | [`WarframeName`](#warframename) ou `null` | Où il vient. |
 | `circuit` | `{ normal, steelPath, picked }` ou `null` | Les récompenses du Circuit de la semaine, quand l’état du monde les donne. |
-| `circuit.normal` | liste de [`WarframeName`](#warframename) | Les récompenses de la semaine. |
-| `circuit.steelPath` | liste de [`WarframeName`](#warframename) | Les récompenses de la Route de l’Acier de la semaine. |
+| `circuit.normal` | liste de [`WarframeCircuitChoice`](#warframecircuitchoice) | Les récompenses de la semaine. |
+| `circuit.steelPath` | liste de [`WarframeCircuitChoice`](#warframecircuitchoice) | Les récompenses de la Route de l’Acier de la semaine. |
 | `circuit.picked` | `{ normal, steelPath }` | Ce que le joueur a choisi pour la semaine ; vide tant que cette session du jeu ne l’a pas montré. |
 | `circuit.picked.normal` | liste de textes | Les ID de `normal` choisis par le joueur, tels que cette session du jeu les a montrés. |
 | `circuit.picked.steelPath` | liste de textes | Les ID de `steelPath` choisis par le joueur, tels que cette session du jeu les a montrés. |
 | `nightwave` | `{ endsAt, challenges }` ou `null` | La saison en cours des Ondes Nocturnes, quand le world state la donne. |
 | `nightwave.endsAt` | entier | Quand la saison se termine. |
-| `nightwave.challenges` | liste de `{ id, name, kind, standing, endsAt, progressed, completed }` | Les défis en cours, ceux du jour d’abord, au plus 16. |
+| `nightwave.challenges` | liste de `{ id, name, kind, standing, endsAt, progressed, completed, description }` | Les défis en cours, ceux du jour d’abord, au plus 16. |
 <!-- /generated:result-shapes -->

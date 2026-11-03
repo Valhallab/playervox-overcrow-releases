@@ -12,9 +12,10 @@ use overcrow_widget_schema::game_events::{
     FEATURE_GAME_EVENTS_WARFRAME, GAME_EVENT_FEATURES, game_event_feature, warframe,
 };
 use overcrow_widget_schema::limits::{
-    ALL, MAX_GAME_EVENT_NAME_BYTES, MAX_WARFRAME_EARNED, MAX_WARFRAME_FISSURES, MAX_WARFRAME_HUNTS,
-    MAX_WARFRAME_MODIFIERS, MAX_WARFRAME_NIGHTWAVE, MAX_WARFRAME_RELIC_ITEMS,
-    MAX_WARFRAME_REWARD_ITEMS, MAX_WARFRAME_REWARD_TABLES, MAX_WARFRAME_SQUAD,
+    ALL, MAX_GAME_EVENT_NAME_BYTES, MAX_WARFRAME_CIRCUIT_REWARDS, MAX_WARFRAME_EARNED,
+    MAX_WARFRAME_FISSURES, MAX_WARFRAME_HUNTS, MAX_WARFRAME_MODIFIERS, MAX_WARFRAME_NIGHTWAVE,
+    MAX_WARFRAME_OBJECTIVE_BYTES, MAX_WARFRAME_RELIC_ITEMS, MAX_WARFRAME_REWARD_ITEMS,
+    MAX_WARFRAME_REWARD_TABLES, MAX_WARFRAME_SQUAD,
 };
 use overcrow_widget_schema::manifest::{Manifest, validate_manifest};
 use overcrow_widget_schema::results::{Shape, shape};
@@ -300,7 +301,53 @@ fn hunt() -> Value {
     })
 }
 
+/// A choice of the Circuit and what its tiers give.
+fn choice(id: &str, name: &str, rewards: Value) -> Value {
+    json!({"id": id, "name": name, "rewards": rewards})
+}
+
+fn circuit_reward(part: &str, id: &str, name: &str, icon: Value, pending: bool) -> Value {
+    json!({"part": part, "id": id, "name": name, "icon": icon, "iconPending": pending})
+}
+
 fn world() -> Value {
+    let titania = json!([
+        circuit_reward(
+            "neuroptics",
+            "titania_neuroptics_blueprint",
+            "Plan de Titania - Neuroptiques",
+            json!("asset:0000000000000003"),
+            false
+        ),
+        circuit_reward(
+            "chassis",
+            "titania_chassis_blueprint",
+            "Plan de Titania - Châssis",
+            Value::Null,
+            true
+        ),
+        circuit_reward(
+            "systems",
+            "titania_systems_blueprint",
+            "Plan de Titania - Systèmes",
+            Value::Null,
+            false
+        ),
+        circuit_reward(
+            "blueprint",
+            "titania_blueprint",
+            "Plan de Titania",
+            Value::Null,
+            true
+        )
+    ]);
+    let lato = json!([circuit_reward(
+        "incarnon",
+        "lato_incarnon_genesis",
+        "Lato Genesis Incarnon",
+        json!("asset:0000000000000004"),
+        false
+    )]);
     let world_mission = json!({
         "node": node(),
         "planet": named("sedna", "Sedna"),
@@ -343,22 +390,25 @@ fn world() -> Value {
             "relay": named("strata_relay", "Strata Relay")
         },
         "circuit": {
-            "normal": [named("ivara", "Ivara"), named("inaros", "Inaros"), named("titania", "Titania")],
-            "steelPath": [named("braton", "Braton"), named("lato", "Lato"), named("skana", "Skana"),
-                          named("paris", "Paris"), named("kunai", "Kunai")],
+            "normal": [choice("ivara", "Ivara", json!([])), choice("inaros", "Inaros", json!([])),
+                       choice("titania", "Titania", titania)],
+            "steelPath": [choice("braton", "Braton", json!([])), choice("lato", "Lato", lato),
+                          choice("skana", "Skana", json!([])), choice("paris", "Paris", json!([])),
+                          choice("kunai", "Kunai", json!([]))],
             "picked": {"normal": ["titania"], "steelPath": ["lato", "paris"]}
         },
         "nightwave": {
             "endsAt": 1_804_464_000_000_u64,
             "challenges": [
                 {"id": "season_daily_artist", "name": "Artist", "kind": "daily", "standing": 1000,
-                 "endsAt": 1_793_100_000_000_u64, "progressed": false, "completed": false},
+                 "endsAt": 1_793_100_000_000_u64, "progressed": false, "completed": false,
+                 "description": "Customize a piece of Equipment's colors."},
                 {"id": "season_weekly_permanent_kill_eximus13", "name": "Eximus Eliminator XIII",
                  "kind": "weekly", "standing": 4500, "endsAt": 1_793_404_800_000_u64, "progressed": true,
-                 "completed": true},
+                 "completed": true, "description": "Kill 150 Eximus."},
                 {"id": "season_weekly_hard_the_many_made_whole", "name": "The Many Made Whole",
                  "kind": "elite", "standing": 7000, "endsAt": 1_793_404_800_000_u64, "progressed": false,
-                 "completed": false}
+                 "completed": false, "description": null}
             ]
         }
     })
@@ -646,6 +696,24 @@ fn values_out_of_their_words_are_refused() {
         ("/info/world/nightwave/challenges/1/progressed", Value::Null),
         ("/info/world/nightwave/challenges/1/completed", json!("yes")),
         ("/info/world/circuit/picked/normal/0", Value::Null),
+        (
+            "/info/world/circuit/normal/2/rewards/0/part",
+            json!("augment"),
+        ),
+        (
+            "/info/world/circuit/normal/2/rewards/0/icon",
+            json!("Titania.png"),
+        ),
+        (
+            "/info/world/circuit/normal/2/rewards/1/iconPending",
+            Value::Null,
+        ),
+        (
+            "/info/world/circuit/steelPath/1/rewards/0/name",
+            Value::Null,
+        ),
+        ("/info/world/circuit/normal/0/rewards", Value::Null),
+        ("/info/world/nightwave/challenges/0/description", json!(15)),
     ] {
         let mut value_of = full();
         *value_of.pointer_mut(path).expect(path) = value;
@@ -673,6 +741,8 @@ fn the_bounds_are_listed() {
         (&MAX_WARFRAME_EARNED, 64),
         (&MAX_WARFRAME_NIGHTWAVE, 16),
         (&MAX_WARFRAME_RELIC_ITEMS, 6),
+        (&MAX_WARFRAME_CIRCUIT_REWARDS, 4),
+        (&MAX_WARFRAME_OBJECTIVE_BYTES, 512),
     ] {
         assert_eq!(limit.value, value, "{}", limit.key);
         assert!(
@@ -841,6 +911,50 @@ fn the_world_has_the_shard_the_week_s_picks_and_nightwave() {
         .unwrap()
         .remove("picked");
     assert!(!matches("WarframeEvents", &missing));
+}
+
+#[test]
+fn the_circuit_s_choices_give_their_tiers_items() {
+    assert_eq!(
+        warframe::CIRCUIT_PARTS,
+        ["neuroptics", "chassis", "systems", "blueprint", "incarnon"]
+    );
+    let world = world();
+    let titania = &world["circuit"]["normal"][2];
+    assert!(matches("WarframeCircuitChoice", titania));
+    assert!(matches("WarframeCircuitReward", &titania["rewards"][0]));
+    // What the export does not tell is not given: no rewards at all.
+    assert!(matches(
+        "WarframeCircuitChoice",
+        &world["circuit"]["normal"][0]
+    ));
+    // A choice always has its list; a reward always has its image's state.
+    let mut bare = titania.clone();
+    bare.as_object_mut().unwrap().remove("rewards");
+    assert!(!matches("WarframeCircuitChoice", &bare));
+    for member in ["part", "id", "name", "icon", "iconPending"] {
+        let mut reward = titania["rewards"][0].clone();
+        reward.as_object_mut().unwrap().remove(member);
+        assert!(
+            !matches("WarframeCircuitReward", &reward),
+            "{member} absent"
+        );
+    }
+}
+
+#[test]
+fn a_challenge_has_its_objective_or_null() {
+    let challenges = &world()["nightwave"]["challenges"];
+    assert_eq!(challenges[1]["description"], json!("Kill 150 Eximus."));
+    assert!(challenges[2]["description"].is_null());
+    assert!(matches("WarframeEvents", &full()));
+    // Never absent.
+    let mut value = full();
+    value["info"]["world"]["nightwave"]["challenges"][0]
+        .as_object_mut()
+        .unwrap()
+        .remove("description");
+    assert!(!matches("WarframeEvents", &value));
 }
 
 #[test]

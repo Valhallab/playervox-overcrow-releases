@@ -234,6 +234,8 @@ see [limit constants](sdk.md#limit-constants).
 | `MAX_WARFRAME_EARNED` | 64 | Rotations a mission earned listed, the latest; its totals count them all. |
 | `MAX_WARFRAME_NIGHTWAVE` | 16 | Nightwave challenges of the world, the active ones. |
 | `MAX_WARFRAME_RELIC_ITEMS` | 6 | Items of a relic. |
+| `MAX_WARFRAME_CIRCUIT_REWARDS` | 4 | Items the Circuit's tiers give for one choice of the week. |
+| `MAX_WARFRAME_OBJECTIVE_BYTES` | 512 bytes | A Nightwave challenge's objective, one line. |
 
 ### Notes, reviews and chat
 

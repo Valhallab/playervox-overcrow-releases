@@ -135,6 +135,13 @@ pub mod warframe {
     /// The kinds of Nightwave challenge (`nightwave.challenges[].kind`).
     pub const NIGHTWAVE_KINDS: &[&str] = &["daily", "weekly", "elite"];
 
+    /// What a tier of the Circuit gives for a choice of the week
+    /// (`WarframeCircuitReward.part`): a Warframe's Neuroptics, Chassis
+    /// and Systems blueprints and its own blueprint; a weapon's Incarnon
+    /// Genesis adapter.
+    pub const CIRCUIT_PARTS: &[&str] =
+        &["neuroptics", "chassis", "systems", "blueprint", "incarnon"];
+
     /// What kind of item a reward is (`WarframeReward.category`): a
     /// widget's own icon for it while the item has no image.
     pub const REWARD_CATEGORIES: &[&str] = &[

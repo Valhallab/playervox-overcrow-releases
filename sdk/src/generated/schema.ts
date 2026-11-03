@@ -1440,6 +1440,30 @@ export interface WarframeCycle {
   readonly endsAt: number;
 }
 
+/** An item a tier of the Circuit gives for a choice of the week. */
+export interface WarframeCircuitReward {
+  /** What it is: `neuroptics`, `chassis` or `systems` (a Warframe's part blueprint), `blueprint` (the Warframe's own blueprint) or `incarnon` (a weapon's Incarnon Genesis adapter). */
+  readonly part: "neuroptics" | "chassis" | "systems" | "blueprint" | "incarnon";
+  /** Our ID: the item's English name in `snake_case` (`titania_neuroptics_blueprint`). */
+  readonly id: string;
+  /** Its name in the game's language, or in English when the export has no translation; never empty. */
+  readonly name: string;
+  /** `asset:` handle of its image, 48 px square; as `WarframeReward.icon`. */
+  readonly icon: AssetHandle | null;
+  /** As `WarframeReward.iconPending`. */
+  readonly iconPending: boolean;
+}
+
+/** A Warframe or a weapon the Circuit offers this week. */
+export interface WarframeCircuitChoice {
+  /** Our stable ID, in `snake_case`: the English name the world state gives. */
+  readonly id: string;
+  /** Its name in the game's language, one line of at most `MAX_GAME_EVENT_NAME_BYTES`. */
+  readonly name: string | null;
+  /** What its tiers give, as Digital Extremes' public export tells it, at most `MAX_WARFRAME_CIRCUIT_REWARDS`: a Warframe's Neuroptics, Chassis and Systems blueprints and its blueprint; a weapon's Incarnon Genesis adapter. An item the export does not tell for sure is left out, and so is the augment of tier 7, which the export does not name; the tier of each is the game's, not given. */
+  readonly rewards: ReadonlyArray<WarframeCircuitReward>;
+}
+
 /** Warframe's world of the day and the week. */
 export interface WarframeWorld {
   /** When PlayerVox OverCrow last read it, in Unix milliseconds. */
@@ -1520,9 +1544,9 @@ export interface WarframeWorld {
   /** The Circuit's rewards of the week, when the world state gives them. */
   readonly circuit: {
     /** The rewards of the week. */
-    readonly normal: ReadonlyArray<WarframeName>;
+    readonly normal: ReadonlyArray<WarframeCircuitChoice>;
     /** The Steel Path rewards of the week. */
-    readonly steelPath: ReadonlyArray<WarframeName>;
+    readonly steelPath: ReadonlyArray<WarframeCircuitChoice>;
     /** What the player picked for the week; empty while this session of the game did not show it. */
     readonly picked: {
       /** The IDs of `normal` the player picked, as this session of the game showed it. */
@@ -1551,6 +1575,8 @@ export interface WarframeWorld {
       readonly progressed: boolean;
       /** `true` when the game wrote, in this session, that this active challenge is complete. */
       readonly completed: boolean;
+      /** Its objective in the game's language, its count written in (`Kill 150 Eximus.`), one line of at most `MAX_WARFRAME_OBJECTIVE_BYTES`; `null` when the export gives none PlayerVox OverCrow can write for sure. */
+      readonly description: string | null;
     }>;
   } | null;
 }

@@ -236,6 +236,8 @@ que la logique peut lire sont aussi des constantes du SDK : voir
 | `MAX_WARFRAME_EARNED` | 64 | Rotations obtenues par une mission listées, les plus récentes ; ses totaux les comptent toutes. |
 | `MAX_WARFRAME_NIGHTWAVE` | 16 | Défis des Ondes Nocturnes du monde, ceux en cours. |
 | `MAX_WARFRAME_RELIC_ITEMS` | 6 | Objets d’une relique. |
+| `MAX_WARFRAME_CIRCUIT_REWARDS` | 4 | Objets que donnent les paliers du Circuit pour un choix de la semaine. |
+| `MAX_WARFRAME_OBJECTIVE_BYTES` | 512 octets | L’objectif d’un défi des Ondes Nocturnes, sur une ligne. |
 
 ### Notes, avis et chat
 

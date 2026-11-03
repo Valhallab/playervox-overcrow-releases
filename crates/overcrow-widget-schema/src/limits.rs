@@ -1239,6 +1239,18 @@ pub const MAX_WARFRAME_RELIC_ITEMS: Limit = fixed(
     Unit::Count,
     "Items of a relic.",
 );
+pub const MAX_WARFRAME_CIRCUIT_REWARDS: Limit = fixed(
+    "MAX_WARFRAME_CIRCUIT_REWARDS",
+    4,
+    Unit::Count,
+    "Items the Circuit's tiers give for one choice of the week.",
+);
+pub const MAX_WARFRAME_OBJECTIVE_BYTES: Limit = fixed(
+    "MAX_WARFRAME_OBJECTIVE_BYTES",
+    512,
+    Unit::Bytes,
+    "A Nightwave challenge's objective, one line.",
+);
 pub const MAX_WARFRAME_FISSURES: Limit = fixed(
     "MAX_WARFRAME_FISSURES",
     64,
@@ -1576,6 +1588,8 @@ pub const ALL: &[&Limit] = &[
     &MAX_WARFRAME_REWARD_ITEMS,
     &MAX_WARFRAME_NIGHTWAVE,
     &MAX_WARFRAME_RELIC_ITEMS,
+    &MAX_WARFRAME_CIRCUIT_REWARDS,
+    &MAX_WARFRAME_OBJECTIVE_BYTES,
     &MAX_NOTES,
     &MAX_NOTE_TITLE_BYTES,
     &MAX_NOTE_BODY_BYTES,
