@@ -204,6 +204,8 @@ reward }` :
   `items` ; `null` avant. Warframe n’écrit pas quelle relique de l’escouade
   le joueur a choisie : présentez-le comme « Votre relique : … », jamais
   comme obtenu.
+- Sans `warframe.rewards`, ou avant la lecture des tables de butin : le
+  nom anglais de DE, aucun objet, aucune image.
 - `icon`, `iconPending` : l’image de la relique pour son raffinement,
   comme pour un objet du butin.
 
@@ -271,7 +273,7 @@ Chaque chasse :
 | `cycles` | `{ cetus, vallis, cambion }`, chacun `{ state, endsAt }` : le jour ou la nuit à Cetus et sur les Plaines, le chaud ou le froid dans la Vallée Orbis, Fass ou Vome dans le Puy de Cambion ([états des cycles](#états-des-cycles)) ; `null` pour un cycle que PlayerVox OverCrow ne peut pas connaître. |
 | `resets` | `{ daily, weekly }` : la prochaine réinitialisation quotidienne (00:00 UTC) et hebdomadaire (lundi 00:00 UTC), en millisecondes Unix. |
 | `voidTrader` | La prochaine visite de Baro Ki’Teer, ou celle en cours, `{ arrivesAt, leavesAt, relay }`, ou `null`. Ce qu’il vend n’est pas donné. |
-| `circuit` | Les récompenses du Circuit de la semaine, `{ normal, steelPath, picked }`, quand l’état du monde les donne ; `null` sinon. `picked` vaut `{ normal, steelPath }` : les ID que le joueur a choisis pour la semaine (une Warframe, deux adaptateurs Incarnon Genesis), tels que cette session du jeu les a montrés ; vide d’ici là. Le palier atteint n’est pas donné. |
+| `circuit` | Les récompenses du Circuit de la semaine, `{ normal, steelPath, picked }`, quand l’état du monde les donne ; `null` sinon. `picked` vaut `{ normal, steelPath }` : les ID que le joueur a choisis pour la semaine (une Warframe, deux adaptateurs Incarnon Genesis), tels que cette session du jeu les a montrés ; vide d’ici là. Le jeu ne les montre que pendant que PlayerVox OverCrow peut le lire : laissez le joueur corriger un choix à la main, et gardez-le jusqu’au reset hebdomadaire. Le palier atteint n’est pas donné. |
 | `nightwave` | La saison en cours des Ondes Nocturnes, `{ endsAt, challenges }`, ou `null`. Chaque défi, ceux du jour d’abord (au plus 16), vaut `{ id, name, kind, standing, endsAt, progressed, completed }` : `kind` vaut `daily`, `weekly` ou `elite` ; `progressed` vaut `true` quand le jeu a montré une progression du défi dans cette session ; `completed` vaut `true` quand le jeu a écrit dans cette session que le défi est terminé. Le jeu ne l’écrit que pendant que PlayerVox OverCrow peut le lire : laissez aussi le joueur cocher un défi à la main, et gardez son choix. |
 
 Les missions de la Sortie et de la Chasse aux Archontes sont

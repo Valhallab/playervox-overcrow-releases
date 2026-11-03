@@ -401,6 +401,14 @@ Panneau flottant ancré à un élément, dessiné au-dessus du contenu et rogné
 | `placement` | `below` \| `above` \| `start` \| `end` \| `pointer` | non | Côté préféré, ou dernière position du pointeur ; `below` par défaut. |
 <!-- /generated:elements -->
 
+### Barres de défilement
+
+En mode interactif, l’hôte peint une barre fine aux couleurs du thème
+(4 px) sur le bord droit d’un `scroll` ou d’une `list` dont le contenu
+déborde, le bord bas d’un `scroll` horizontal ; en mode passif, aucune.
+Elle ne prend aucune place : pour que le contenu ne passe pas dessous,
+donnez au conteneur 9 px de marge intérieure de ce côté.
+
 ## Événements
 
 <!-- generated:events -->
