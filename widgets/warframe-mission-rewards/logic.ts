@@ -24,6 +24,7 @@ import {
   type AssetHandle,
   type IconName,
   type Timer,
+  type WarframeCircuitReward,
   type WarframeEvents,
   type WarframeMission,
   type WarframeModifier,
@@ -140,12 +141,17 @@ const KIND_ICONS: Readonly<Record<WarframeReward["category"], IconName>> = {
 
 /**
  * The image of an item: the game's once PlayerVox OverCrow has it; an empty
- * tile while it may still come; our icon of its kind when none will.
+ * tile while it may still come; `glyph`, our icon, when none will.
  */
-export function itemImage(item: Pick<WarframeReward, "icon" | "iconPending" | "category">): Pick<Row, "icon" | "glyph"> {
+function imageOr(item: Pick<WarframeReward, "icon" | "iconPending">, glyph: IconName): Pick<Row, "icon" | "glyph"> {
   if (item.icon !== null && item.icon !== undefined) return { icon: item.icon, glyph: "" };
   if (item.iconPending === true) return { icon: "", glyph: "" };
-  return { icon: "", glyph: KIND_ICONS[item.category] ?? "package" };
+  return { icon: "", glyph };
+}
+
+/** The image of an item, or our icon of its kind when none will come. */
+export function itemImage(item: Pick<WarframeReward, "icon" | "iconPending" | "category">): Pick<Row, "icon" | "glyph"> {
+  return imageOr(item, KIND_ICONS[item.category] ?? "package");
 }
 
 /** One table as shown: its rows, then "+ n more" when it is cut. */
@@ -842,7 +848,9 @@ function oneTable(s: Screen, tables: Tables, input: Input): boolean {
 }
 
 /** The Circuit's fixed tiers of the week, as the official wiki gives them:
- * the picked Warframe's parts, its augment at tier 7. */
+ * the picked Warframe's parts, its augment at tier 7, and our icon of each
+ * for when the game's image will not come (the augment's never does: the
+ * export does not name it). */
 const CIRCUIT_TIERS: readonly (readonly [string, number, IconName])[] = [
   ["neuroptics", 2, "scroll-text"],
   ["chassis", 5, "scroll-text"],
@@ -851,8 +859,10 @@ const CIRCUIT_TIERS: readonly (readonly [string, number, IconName])[] = [
   ["blueprint", 10, "scroll-text"],
 ];
 
-function tierRow(id: string, name: string, chance: string, glyph: IconName): Row {
-  return { id, name, qty: "", chance, icon: "", glyph, p: -1 };
+/** A tier's row: the game's image of its item when PlayerVox OverCrow gives it, else `glyph`. */
+function tierRow(id: string, name: string, chance: string, item: WarframeCircuitReward | undefined, glyph: IconName): Row {
+  const image = item === undefined ? { icon: "", glyph } : imageOr(item, glyph);
+  return { id, name, qty: "", chance, ...image, p: -1 };
 }
 
 /**
@@ -866,18 +876,26 @@ function circuit(s: Screen, mission: WarframeMission, tables: Tables, input: Inp
   const round = tables.others.find((x) => x.kind === "round") ?? tables.end;
   s.sections = round === null ? [] : [section("round", t("circuit-round"), round, cap, input.order, input.open)];
   const week = input.value?.info.world?.circuit ?? null;
-  const named = (list: readonly { id: string; name: string | null }[] | undefined, id: string) => list?.find((x) => x.id === id)?.name ?? id;
   let tiers: Section;
   if (mission.modifiers.some((m) => m.id === "steel_path")) {
+    // Each weapon picked: its Incarnon Genesis adapter, named as the game writes it.
     const picked = (week?.picked.steelPath ?? []).slice(0, 2);
     const rows = picked.length > 0
-      ? picked.map((id, i) => tierRow(`${i}-${id}`, named(week?.steelPath, id), t("circuit-tier-either"), "sword"))
-      : [tierRow("yours", t("circuit-incarnon-yours"), t("circuit-tier-either"), "sword")];
+      ? picked.map((id, i) => {
+          const choice = week?.steelPath.find((x) => x.id === id);
+          const adapter = choice?.rewards.find((r) => r.part === "incarnon");
+          return tierRow(`${i}-${id}`, adapter?.name ?? choice?.name ?? id, t("circuit-tier-either"), adapter, "sword");
+        })
+      : [tierRow("yours", t("circuit-incarnon-yours"), t("circuit-tier-either"), undefined, "sword")];
     tiers = { ...rowsSection("tiers", t("circuit-tiers-incarnon"), rows, cap, input.open), note: t("circuit-random-steel") };
   } else {
+    // The Warframe picked: our short names of its parts under its name, the game's images.
     const id = week?.picked.normal[0];
-    const title = id === undefined ? t("circuit-tiers-plain") : t("circuit-tiers", { w: named(week?.normal, id) });
-    const rows = CIRCUIT_TIERS.map(([part, n, glyph]) => tierRow(part, t(`circuit-${part}`), t("circuit-tier", { n }), glyph));
+    const choice = id === undefined ? undefined : week?.normal.find((x) => x.id === id);
+    const title = id === undefined ? t("circuit-tiers-plain") : t("circuit-tiers", { w: choice?.name ?? id });
+    const rows = CIRCUIT_TIERS.map(([part, n, glyph]) =>
+      tierRow(part, t(`circuit-${part}`), t("circuit-tier", { n }), choice?.rewards.find((r) => r.part === part), glyph),
+    );
     tiers = { ...rowsSection("tiers", title, rows, cap, input.open), note: t("circuit-random") };
   }
   s.sections.push(tiers);

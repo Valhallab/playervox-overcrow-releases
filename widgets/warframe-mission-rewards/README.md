@@ -33,7 +33,7 @@ Digital Extremes.
 | No loot table | "No published loot table for this mission" (Exterminate, Archon Hunt, Alert) |
 | New node | "Loot not published yet" |
 | Void Fissure | "Your relic": its image, its name and its refinement, then its six items, the rarest first, at the refinement's rates; the rarity in words ("rare", "uncommon", "common") when the game's words do not tell the refinement. "10 Reactant to open the relic", then the node's table, if it has one |
-| The Circuit | "Each round": what every round gives. "This week's tiers · Titania": the picked Warframe's parts at tiers 2, 5, 8 and 10, its augment at 7, "Tiers 1, 3, 4, 6, 9: random". On the Steel Path, the two Incarnon Genesis picked, "tier 5 or 10" ("Your two Incarnon" while this session of the game has not shown them). The tier reached is not known: none is shown |
+| The Circuit | "Each round": what every round gives. "This week's tiers · Titania": the picked Warframe's parts at tiers 2, 5, 8 and 10, its augment at 7, "Tiers 1, 3, 4, 6, 9: random", each with the game's image (the augment, which the game's data does not name, with our icon). On the Steel Path, the two Incarnon Genesis adapters picked, named and shown as the game does, "tier 5 or 10" ("Your two Incarnon" while this session of the game has not shown them). The tier reached is not known: none is shown |
 | Open world by its gate | The header (Free Roam, faction, clock) and "No table in an open world". Out of it, the last mission of the session, or "Pick a mission" |
 | Mission ended | The recap: the duration, the waves of a Defense, the rotations earned ("A ×6 · B ×3 · C ×3", in green); "Your relic: Orthos Prime Handle" with its image (Warframe does not say which relic of the squad was chosen: never "obtained"); "End bonus: 1,900 Credits" on a line of its own. A Void Fissure played alone: the game never says what the relic gave, so the relic's block stays, with its six items at their rates. After a failure or an abort: "Rotations lost: A ×2" |
 | After the game | The last recap, kept in storage: "Survival · succeeded · 2 h ago" with the game closed, "last mission" in the next session |
@@ -86,7 +86,7 @@ minute for "2 h ago"; none while the widget is hidden.
 | `gameEvents` `warframe.mission` | The mission picked, loading, in progress or ended; the relic equipped in a Void Fissure; at the end, the rotations earned and the end bonus |
 | `gameEvents` `warframe.progress` | The rewards given and their cycle, the wave and its enemies, the round, when the next reward comes |
 | `gameEvents` `warframe.rewards` | The node's tables, by rotation, with each item's chance; the relic's items |
-| `gameEvents` `warframe.world` | The Circuit's picks of the week and their names, for its tiers |
+| `gameEvents` `warframe.world` | The Circuit's picks of the week, their names and what their tiers give, with the game's images |
 | `storage` | The last recap, in one key (`last`) of a few hundred bytes |
 
 No network.
@@ -105,7 +105,7 @@ No network.
   reward told 26 s late), endless cycles (an hour of Survival, 24 waves of
   Defense, an Arbitration), the wait for the hack, the loot's sources, the
   recap, both orders, "+ n more", the rows the height holds, the relic
-  (in a squad and alone), the Circuit, open worlds.
+  (in a squad and alone), the Circuit and its items' images, open worlds.
 - `overcrow-widget test`: one scenario per state, in English, in French,
   and with the app in French and the game in English; a real Survival and
   a real Defense step by step. Full at 100 %, and a few at 150 %, One

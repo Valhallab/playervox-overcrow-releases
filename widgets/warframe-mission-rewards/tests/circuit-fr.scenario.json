@@ -12,7 +12,10 @@
     "currency": "tests/assets/item-currency.png",
     "mod": "tests/assets/item-mod.png",
     "resource": "tests/assets/item-resource.png",
-    "relic": "tests/assets/item-relic.png"
+    "relic": "tests/assets/item-relic.png",
+    "part": "tests/assets/item-part.png",
+    "frame": "tests/assets/item-frame.png",
+    "adapter": "tests/assets/item-adapter.png"
   },
   "steps": [
     {
@@ -153,29 +156,114 @@
                 "normal": [
                   {
                     "id": "titania",
-                    "name": "Titania"
+                    "name": "Titania",
+                    "rewards": [
+                      {
+                        "part": "neuroptics",
+                        "id": "titania_neuroptics_blueprint",
+                        "name": "Plan de Titania - Neuroptiques",
+                        "icon": "fixture:part",
+                        "iconPending": false
+                      },
+                      {
+                        "part": "chassis",
+                        "id": "titania_chassis_blueprint",
+                        "name": "Plan de Titania - Châssis",
+                        "icon": "fixture:part",
+                        "iconPending": false
+                      },
+                      {
+                        "part": "systems",
+                        "id": "titania_systems_blueprint",
+                        "name": "Plan de Titania - Systèmes",
+                        "icon": "fixture:part",
+                        "iconPending": false
+                      },
+                      {
+                        "part": "blueprint",
+                        "id": "titania_blueprint",
+                        "name": "Plan de Titania",
+                        "icon": "fixture:frame",
+                        "iconPending": false
+                      }
+                    ]
                   },
                   {
                     "id": "nekros",
-                    "name": "Nekros"
+                    "name": "Nekros",
+                    "rewards": []
                   },
                   {
                     "id": "wukong",
-                    "name": "Wukong"
+                    "name": "Wukong",
+                    "rewards": []
                   }
                 ],
                 "steelPath": [
                   {
-                    "id": "paris_incarnon_genesis",
-                    "name": "Paris Genesis Incarnon"
+                    "id": "paris",
+                    "name": "Paris",
+                    "rewards": [
+                      {
+                        "part": "incarnon",
+                        "id": "paris_incarnon_genesis",
+                        "name": "Paris Genesis Incarnon",
+                        "icon": "fixture:adapter",
+                        "iconPending": false
+                      }
+                    ]
                   },
                   {
-                    "id": "lato_incarnon_genesis",
-                    "name": "Lato Genesis Incarnon"
+                    "id": "lato",
+                    "name": "Lato",
+                    "rewards": [
+                      {
+                        "part": "incarnon",
+                        "id": "lato_incarnon_genesis",
+                        "name": "Lato Genesis Incarnon",
+                        "icon": "fixture:adapter",
+                        "iconPending": false
+                      }
+                    ]
                   },
                   {
-                    "id": "boar_incarnon_genesis",
-                    "name": "Boar Genesis Incarnon"
+                    "id": "dual_toxocyst",
+                    "name": "Doubles Toxocystes",
+                    "rewards": [
+                      {
+                        "part": "incarnon",
+                        "id": "dual_toxocyst_incarnon_genesis",
+                        "name": "Doubles Toxocystes Genesis Incarnon",
+                        "icon": "fixture:adapter",
+                        "iconPending": false
+                      }
+                    ]
+                  },
+                  {
+                    "id": "boar",
+                    "name": "Boar",
+                    "rewards": [
+                      {
+                        "part": "incarnon",
+                        "id": "boar_incarnon_genesis",
+                        "name": "Boar Genesis Incarnon",
+                        "icon": "fixture:adapter",
+                        "iconPending": false
+                      }
+                    ]
+                  },
+                  {
+                    "id": "ceramic_dagger",
+                    "name": "Dague en Céramique",
+                    "rewards": [
+                      {
+                        "part": "incarnon",
+                        "id": "ceramic_dagger_incarnon_genesis",
+                        "name": "Dague en Céramique Genesis Incarnon",
+                        "icon": "fixture:adapter",
+                        "iconPending": false
+                      }
+                    ]
                   }
                 ],
                 "picked": {
@@ -183,8 +271,8 @@
                     "titania"
                   ],
                   "steelPath": [
-                    "paris_incarnon_genesis",
-                    "lato_incarnon_genesis"
+                    "paris",
+                    "dual_toxocyst"
                   ]
                 }
               },
@@ -433,29 +521,114 @@
                 "normal": [
                   {
                     "id": "titania",
-                    "name": "Titania"
+                    "name": "Titania",
+                    "rewards": [
+                      {
+                        "part": "neuroptics",
+                        "id": "titania_neuroptics_blueprint",
+                        "name": "Plan de Titania - Neuroptiques",
+                        "icon": "fixture:part",
+                        "iconPending": false
+                      },
+                      {
+                        "part": "chassis",
+                        "id": "titania_chassis_blueprint",
+                        "name": "Plan de Titania - Châssis",
+                        "icon": "fixture:part",
+                        "iconPending": false
+                      },
+                      {
+                        "part": "systems",
+                        "id": "titania_systems_blueprint",
+                        "name": "Plan de Titania - Systèmes",
+                        "icon": "fixture:part",
+                        "iconPending": false
+                      },
+                      {
+                        "part": "blueprint",
+                        "id": "titania_blueprint",
+                        "name": "Plan de Titania",
+                        "icon": "fixture:frame",
+                        "iconPending": false
+                      }
+                    ]
                   },
                   {
                     "id": "nekros",
-                    "name": "Nekros"
+                    "name": "Nekros",
+                    "rewards": []
                   },
                   {
                     "id": "wukong",
-                    "name": "Wukong"
+                    "name": "Wukong",
+                    "rewards": []
                   }
                 ],
                 "steelPath": [
                   {
-                    "id": "paris_incarnon_genesis",
-                    "name": "Paris Genesis Incarnon"
+                    "id": "paris",
+                    "name": "Paris",
+                    "rewards": [
+                      {
+                        "part": "incarnon",
+                        "id": "paris_incarnon_genesis",
+                        "name": "Paris Genesis Incarnon",
+                        "icon": "fixture:adapter",
+                        "iconPending": false
+                      }
+                    ]
                   },
                   {
-                    "id": "lato_incarnon_genesis",
-                    "name": "Lato Genesis Incarnon"
+                    "id": "lato",
+                    "name": "Lato",
+                    "rewards": [
+                      {
+                        "part": "incarnon",
+                        "id": "lato_incarnon_genesis",
+                        "name": "Lato Genesis Incarnon",
+                        "icon": "fixture:adapter",
+                        "iconPending": false
+                      }
+                    ]
                   },
                   {
-                    "id": "boar_incarnon_genesis",
-                    "name": "Boar Genesis Incarnon"
+                    "id": "dual_toxocyst",
+                    "name": "Doubles Toxocystes",
+                    "rewards": [
+                      {
+                        "part": "incarnon",
+                        "id": "dual_toxocyst_incarnon_genesis",
+                        "name": "Doubles Toxocystes Genesis Incarnon",
+                        "icon": "fixture:adapter",
+                        "iconPending": false
+                      }
+                    ]
+                  },
+                  {
+                    "id": "boar",
+                    "name": "Boar",
+                    "rewards": [
+                      {
+                        "part": "incarnon",
+                        "id": "boar_incarnon_genesis",
+                        "name": "Boar Genesis Incarnon",
+                        "icon": "fixture:adapter",
+                        "iconPending": false
+                      }
+                    ]
+                  },
+                  {
+                    "id": "ceramic_dagger",
+                    "name": "Dague en Céramique",
+                    "rewards": [
+                      {
+                        "part": "incarnon",
+                        "id": "ceramic_dagger_incarnon_genesis",
+                        "name": "Dague en Céramique Genesis Incarnon",
+                        "icon": "fixture:adapter",
+                        "iconPending": false
+                      }
+                    ]
                   }
                 ],
                 "picked": {
@@ -615,29 +788,114 @@
                 "normal": [
                   {
                     "id": "titania",
-                    "name": "Titania"
+                    "name": "Titania",
+                    "rewards": [
+                      {
+                        "part": "neuroptics",
+                        "id": "titania_neuroptics_blueprint",
+                        "name": "Plan de Titania - Neuroptiques",
+                        "icon": "fixture:part",
+                        "iconPending": false
+                      },
+                      {
+                        "part": "chassis",
+                        "id": "titania_chassis_blueprint",
+                        "name": "Plan de Titania - Châssis",
+                        "icon": "fixture:part",
+                        "iconPending": false
+                      },
+                      {
+                        "part": "systems",
+                        "id": "titania_systems_blueprint",
+                        "name": "Plan de Titania - Systèmes",
+                        "icon": "fixture:part",
+                        "iconPending": false
+                      },
+                      {
+                        "part": "blueprint",
+                        "id": "titania_blueprint",
+                        "name": "Plan de Titania",
+                        "icon": "fixture:frame",
+                        "iconPending": false
+                      }
+                    ]
                   },
                   {
                     "id": "nekros",
-                    "name": "Nekros"
+                    "name": "Nekros",
+                    "rewards": []
                   },
                   {
                     "id": "wukong",
-                    "name": "Wukong"
+                    "name": "Wukong",
+                    "rewards": []
                   }
                 ],
                 "steelPath": [
                   {
-                    "id": "paris_incarnon_genesis",
-                    "name": "Paris Genesis Incarnon"
+                    "id": "paris",
+                    "name": "Paris",
+                    "rewards": [
+                      {
+                        "part": "incarnon",
+                        "id": "paris_incarnon_genesis",
+                        "name": "Paris Genesis Incarnon",
+                        "icon": "fixture:adapter",
+                        "iconPending": false
+                      }
+                    ]
                   },
                   {
-                    "id": "lato_incarnon_genesis",
-                    "name": "Lato Genesis Incarnon"
+                    "id": "lato",
+                    "name": "Lato",
+                    "rewards": [
+                      {
+                        "part": "incarnon",
+                        "id": "lato_incarnon_genesis",
+                        "name": "Lato Genesis Incarnon",
+                        "icon": "fixture:adapter",
+                        "iconPending": false
+                      }
+                    ]
                   },
                   {
-                    "id": "boar_incarnon_genesis",
-                    "name": "Boar Genesis Incarnon"
+                    "id": "dual_toxocyst",
+                    "name": "Doubles Toxocystes",
+                    "rewards": [
+                      {
+                        "part": "incarnon",
+                        "id": "dual_toxocyst_incarnon_genesis",
+                        "name": "Doubles Toxocystes Genesis Incarnon",
+                        "icon": "fixture:adapter",
+                        "iconPending": false
+                      }
+                    ]
+                  },
+                  {
+                    "id": "boar",
+                    "name": "Boar",
+                    "rewards": [
+                      {
+                        "part": "incarnon",
+                        "id": "boar_incarnon_genesis",
+                        "name": "Boar Genesis Incarnon",
+                        "icon": "fixture:adapter",
+                        "iconPending": false
+                      }
+                    ]
+                  },
+                  {
+                    "id": "ceramic_dagger",
+                    "name": "Dague en Céramique",
+                    "rewards": [
+                      {
+                        "part": "incarnon",
+                        "id": "ceramic_dagger_incarnon_genesis",
+                        "name": "Dague en Céramique Genesis Incarnon",
+                        "icon": "fixture:adapter",
+                        "iconPending": false
+                      }
+                    ]
                   }
                 ],
                 "picked": {

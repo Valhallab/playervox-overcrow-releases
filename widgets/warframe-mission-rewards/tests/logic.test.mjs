@@ -701,11 +701,23 @@ test("the recap of a solo Fissure: the relic's block stays, its items at its rat
 
 const ROUND = { kind: "round", rotation: null, items: [item("aggristone", "Aggristone", 0.3775, 7), item("dracroot", "Dracroot", 0.0025), item("kovnik", "Kovnik", 0.22)] };
 const CIRCUIT = { node: { id: "SolNode238", name: "The Circuit" }, planet: { id: "duviri", name: "Duviri" }, faction: null, type: { id: "circuit", name: "The Circuit" } };
+/** An item of the Circuit's tiers: its image given, still to come (`pending`), or none to come (`null`). */
+const tierItem = (part, id, name, icon) => ({ part, id, name, icon: icon === "pending" ? null : icon, iconPending: icon === "pending" });
+const TITANIA = [
+  tierItem("neuroptics", "titania_neuroptics_blueprint", "Titania Neuroptics Blueprint", "asset:00000000000000c1"),
+  tierItem("chassis", "titania_chassis_blueprint", "Titania Chassis Blueprint", "pending"),
+  tierItem("systems", "titania_systems_blueprint", "Titania Systems Blueprint", null),
+  tierItem("blueprint", "titania_blueprint", "Titania Blueprint", "asset:00000000000000c4"),
+];
 const world = (picked) => ({
   updatedAt: START, sortie: null, archonHunt: null, fissures: [], cycles: { cetus: null, vallis: null, cambion: null }, resets: { daily: START + 3600_000, weekly: START + 86400_000 }, voidTrader: null, nightwave: null,
   circuit: {
-    normal: [{ id: "titania", name: "Titania" }, { id: "nekros", name: "Nekros" }, { id: "wukong", name: "Wukong" }],
-    steelPath: [{ id: "paris_incarnon_genesis", name: "Paris Incarnon Genesis" }, { id: "lato_incarnon_genesis", name: "Lato Incarnon Genesis" }, { id: "boar_incarnon_genesis", name: "Boar Incarnon Genesis" }],
+    normal: [{ id: "titania", name: "Titania", rewards: TITANIA }, { id: "nekros", name: "Nekros", rewards: [] }, { id: "wukong", name: "Wukong", rewards: [] }],
+    steelPath: [
+      { id: "paris", name: "Paris", rewards: [tierItem("incarnon", "paris_incarnon_genesis", "Paris Incarnon Genesis", "asset:00000000000000d1")] },
+      { id: "lato", name: "Lato", rewards: [tierItem("incarnon", "lato_incarnon_genesis", "Lato Incarnon Genesis", "pending")] },
+      { id: "boar", name: "Boar", rewards: [] },
+    ],
     picked,
   },
 });
@@ -717,6 +729,10 @@ test("the Circuit: each round's table, then this week's tiers from the pick; no 
   assert.deepEqual(s.sections.map((x) => x.title), ["Each round", "This week’s tiers · Titania"]);
   assert.deepEqual(s.sections[0].rows.map((r) => r.name), ["Dracroot", "Kovnik", "Aggristone"]);
   assert.deepEqual(s.sections[1].rows.map((r) => `${r.name} ${r.chance}`), ["Neuroptics tier 2", "Chassis tier 5", "Augment tier 7", "Systems tier 8", "Blueprint tier 10"]);
+  // The game's images; an empty tile while one may come; our icon when none will, and for the augment, which the export does not name.
+  assert.deepEqual(s.sections[1].rows.map((r) => [r.icon, r.glyph]), [
+    ["asset:00000000000000c1", ""], ["", ""], ["", "layers"], ["", "scroll-text"], ["asset:00000000000000c4", ""],
+  ]);
   assert.deepEqual([s.sections[1].more, s.sections[1].note], ["", "Tiers 1, 3, 4, 6, 9: random"]);
   assert.deepEqual([s.track.length, s.heroValue, s.info, s.trackLabel], [0, "", "", ""]);
   assert.equal(s.eyebrowIcon, "infinity");
@@ -724,6 +740,10 @@ test("the Circuit: each round's table, then this week's tiers from the pick; no 
   assert.equal(JSON.stringify(s).includes("not tracked"), false);
   const none = screen({ mission: circuit({ state: "selected", startedAt: null }), progress: null, world: world({ normal: [], steelPath: [] }) });
   assert.equal(none.sections[1].title, "This week’s tiers");
+  assert.deepEqual(none.sections[1].rows.map((r) => [r.icon, r.glyph]), [["", "scroll-text"], ["", "scroll-text"], ["", "layers"], ["", "scroll-text"], ["", "scroll-text"]], "no pick: our icons");
+  // A Warframe whose items the export did not tell: our icons.
+  const nekros = screen({ mission: circuit(), progress: null, world: world({ normal: ["nekros"], steelPath: [] }) });
+  assert.deepEqual(nekros.sections[1].rows.map((r) => r.glyph), ["scroll-text", "scroll-text", "layers", "scroll-text", "scroll-text"]);
   const fr = inFrench(() => logic.buildScreen(input(v)));
   assert.deepEqual(fr.sections.map((x) => x.title), ["Chaque manche", "Paliers de la semaine · Titania"]);
   assert.deepEqual(fr.sections[1].rows.map((r) => `${r.name} ${r.chance}`), ["Neuroptiques palier 2", "Châssis palier 5", "Augment palier 7", "Systèmes palier 8", "Plan palier 10"]);
@@ -732,12 +752,18 @@ test("the Circuit: each round's table, then this week's tiers from the pick; no 
 
 test("the Circuit on the Steel Path: the two Incarnon picked, or yours unnamed when this session did not show them", () => {
   const steel = circuit({ modifiers: [{ id: "steel_path", name: "Steel Path", stage: null }] });
-  const s = screen({ mission: steel, progress: null, world: world({ normal: ["titania"], steelPath: ["paris_incarnon_genesis", "lato_incarnon_genesis"] }) });
+  const s = screen({ mission: steel, progress: null, world: world({ normal: ["titania"], steelPath: ["paris", "lato"] }) });
   assert.equal(s.sections[1].title, "This week’s tiers · Incarnon");
+  // The adapter's name as the game writes it, and its image.
   assert.deepEqual(s.sections[1].rows.map((r) => `${r.name} ${r.chance}`), ["Paris Incarnon Genesis tier 5 or 10", "Lato Incarnon Genesis tier 5 or 10"]);
+  assert.deepEqual(s.sections[1].rows.map((r) => [r.icon, r.glyph]), [["asset:00000000000000d1", ""], ["", ""]]);
+  // A weapon whose adapter the export did not tell: its name, our icon.
+  const boar = screen({ mission: steel, progress: null, world: world({ normal: [], steelPath: ["boar"] }) });
+  assert.deepEqual(boar.sections[1].rows.map((r) => [r.name, r.icon, r.glyph]), [["Boar", "", "sword"]]);
   assert.equal(s.sections[1].note, "Tiers 1 to 4, 6 to 9: random");
   const unseen = screen({ mission: steel, progress: null, world: world({ normal: [], steelPath: [] }) });
   assert.deepEqual(unseen.sections[1].rows.map((r) => `${r.name} ${r.chance}`), ["Your two Incarnon tier 5 or 10"]);
+  assert.deepEqual(unseen.sections[1].rows.map((r) => [r.icon, r.glyph]), [["", "sword"]]);
   const fr = inFrench(() => screen({ mission: steel, progress: null, world: world({ normal: [], steelPath: [] }) }));
   assert.deepEqual(fr.sections[1].rows.map((r) => `${r.name} ${r.chance}`), ["Vos deux Incarnon palier 5 ou 10"]);
   assert.equal(fr.sections[1].note, "Paliers 1 à 4, 6 à 9 : au hasard");
