@@ -441,8 +441,18 @@ fn the_glossary_has_every_word_of_its_lists() {
     assert_eq!(
         groups,
         [
-            "language", "damage", "era", "fissure", "activity", "place", "eidolon", "faction",
-            "cycle", "term", "refinement", "icons"
+            "language",
+            "damage",
+            "era",
+            "fissure",
+            "activity",
+            "place",
+            "eidolon",
+            "faction",
+            "cycle",
+            "term",
+            "refinement",
+            "icons"
         ]
     );
     for (group, list) in [
@@ -776,7 +786,10 @@ fn a_fissure_mission_carries_its_relic() {
         assert!(!matches("WarframeRelic", &relic_of), "{path}");
     }
     assert_eq!(
-        warframe::REFINEMENTS.iter().map(|word| word.id).collect::<Vec<_>>(),
+        warframe::REFINEMENTS
+            .iter()
+            .map(|word| word.id)
+            .collect::<Vec<_>>(),
         ["intact", "exceptional", "flawless", "radiant"]
     );
     assert_eq!(warframe::RELIC_RARITIES, ["common", "uncommon", "rare"]);
@@ -791,7 +804,10 @@ fn a_type_known_only_at_loading_is_null_until_then() {
     value["info"]["world"]["sortie"]["missions"][0]["typeAtLoading"] = json!(true);
     assert!(matches("WarframeEvents", &value));
     let mut missing = full();
-    missing["info"]["mission"].as_object_mut().unwrap().remove("typeAtLoading");
+    missing["info"]["mission"]
+        .as_object_mut()
+        .unwrap()
+        .remove("typeAtLoading");
     assert!(!matches("WarframeEvents", &missing));
 }
 
@@ -820,7 +836,10 @@ fn the_world_has_the_shard_the_week_s_picks_and_nightwave() {
     assert!(matches("WarframeEvents", &value));
     // The picks are part of the Circuit's record, never absent.
     let mut missing = full();
-    missing["info"]["world"]["circuit"].as_object_mut().unwrap().remove("picked");
+    missing["info"]["world"]["circuit"]
+        .as_object_mut()
+        .unwrap()
+        .remove("picked");
     assert!(!matches("WarframeEvents", &missing));
 }
 

@@ -1091,7 +1091,11 @@ pub const SHAPES: &[NamedShape] = &[
                 Shape::Nullable(&Shape::Asset),
                 "`asset:` handle of the relic's image for its refinement, 48 px square; as `WarframeReward.icon`.",
             ),
-            member("iconPending", Shape::Bool, "As `WarframeReward.iconPending`."),
+            member(
+                "iconPending",
+                Shape::Bool,
+                "As `WarframeReward.iconPending`.",
+            ),
             member(
                 "items",
                 Shape::List(&Shape::Named("WarframeRelicItem")),
@@ -1134,7 +1138,11 @@ pub const SHAPES: &[NamedShape] = &[
                 Shape::Nullable(&Shape::Asset),
                 "As `WarframeReward.icon`.",
             ),
-            member("iconPending", Shape::Bool, "As `WarframeReward.iconPending`."),
+            member(
+                "iconPending",
+                Shape::Bool,
+                "As `WarframeReward.iconPending`.",
+            ),
             member(
                 "category",
                 Shape::Keyword(warframe::REWARD_CATEGORIES),
@@ -1532,7 +1540,11 @@ pub const SHAPES: &[NamedShape] = &[
                                 Shape::Nullable(&Shape::Asset),
                                 "`asset:` handle of its image, 48 px square; as `WarframeReward.icon`.",
                             ),
-                            member("iconPending", Shape::Bool, "As `WarframeReward.iconPending`."),
+                            member(
+                                "iconPending",
+                                Shape::Bool,
+                                "As `WarframeReward.iconPending`.",
+                            ),
                         ])),
                         "The Archon Shard it gives; whether it is a Tauforged one is drawn at the reward and never known before. `null` for an Archon PlayerVox OverCrow does not know.",
                     ),
