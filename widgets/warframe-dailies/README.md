@@ -55,10 +55,15 @@ While PlayerVox OverCrow runs during play:
   starts again each launch).
 
 The Circuit's own boxes tick only by a click. A click in Interactive mode
-sets any box the other way; what the hand set always wins, and a tick of
-the game never changes it. A Circuit name picks it or takes it back (one
-Warframe, two adapters: a new pick beyond replaces the oldest); the pick
-by hand stays until the weekly reset.
+sets any box the other way; what the hand set wins, and a tick of the
+game never changes it, except for the stages played in order. The
+Sortie's and the Archon Hunt's stages done stay the first ones: a click
+on a stage done unticks it and every one after it, a click on a stage to
+do ticks it and every one before it, and a stage the game ends ticks
+every one before it, the hand's unticked ones included, since the game
+proves them; the stages after it stay as they are. A Circuit name picks
+it or takes it back (one Warframe, two adapters: a new pick beyond
+replaces the oldest); the pick by hand stays until the weekly reset.
 
 A tick never undoes itself before its reset. Each event is handled once:
 the widget keeps the `at` of the last mission it handled, so after a
@@ -91,11 +96,11 @@ No network: everything comes from PlayerVox OverCrow.
 
 `node --test tests/*.test.mjs` runs the logic on `@overcrow/sdk/testing`
 with synthetic values (`tests/fixtures.mjs`): a Sortie in three stages,
-the hand against the game, Netracells, the Circuit's picks, Nightwave
-challenges completed by the game, a stage type told at loading, the
-tracked activities, the wide layout, the Passive fold, the world not
-read, the game not detected, a whole week of virtual time, a restart, the
-French wording.
+the hand against the game, the stages kept in order, Netracells, the
+Circuit's picks, Nightwave challenges completed by the game, a stage type
+told at loading, the tracked activities, the wide layout, the Passive
+fold, the world not read, the game not detected, a whole week of virtual
+time, a restart, the French wording.
 
 `overcrow-widget test` plays one scenario per state, in English, French
 and French with the game in English, at 100 % and 150 %, in both themes
@@ -103,7 +108,9 @@ and modes, and the wide and one-line layouts: `typical-day` (the game's
 ticks, then the player's corrections), `sortie-replaced`,
 `sortie-learned`, `world-unread`, `offline`, `nightwave-complete`,
 `all-done`, `events-unavailable`, `long-list` (the host's scrollbar, the
-Passive fold), `baro-here`, `refused` and `nothing-tracked`; `week` runs
+Passive fold), `tall-week` (taller than the frame), `ordered-stages` (the
+stages kept in order by hand and by the game), `baro-here`, `refused` and
+`nothing-tracked`; `week` runs
 Thursday to Monday in virtual time with clicks, `restart` repeats a
 session's events after a restart, and `preview` captures the catalog
 preview. The data of the scenarios is illustrative; the Archon Shard's

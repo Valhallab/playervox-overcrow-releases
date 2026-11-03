@@ -126,26 +126,28 @@ test("Passive: a finished activity folds to its line; Interactive opens it again
   assert.equal(parts("sortie").length, 3);
 });
 
-test("the hand wins: unticked by hand, a stage the game ticked stays unticked, with the hand", async () => {
+test("the hand wins in order: a stage unticked by hand takes the next ones with it, each with the hand", async () => {
   logic.tick("sortie.1");
-  assert.deepEqual(done("sortie"), [true, false, true]);
-  assert.deepEqual([act("sortie").value, part("sortie", 1).hand, part("sortie", 0).hand], ["2/3", true, false]);
+  assert.deepEqual(done("sortie"), [true, false, false]);
+  assert.deepEqual([act("sortie").value, part("sortie", 0).hand, part("sortie", 1).hand, part("sortie", 2).hand], ["1/3", false, true, true]);
   assert.equal(part("sortie", 1).label, "Disruption: to do, set by hand");
   assert.deepEqual(saved().sortie.parts[1], { at: NOW + 40 * 60_000 - 12_000, hand: false, handAt: vm.now });
-  // The same stage again from the game: the hand stays.
+  // The same stage again from the game (a relaunch replays its log): nothing ticks twice.
   await push([next(vm.now - 1000, { node: "SolNode2", type: "disruption", modifiers: [sortie(2)] })]);
-  assert.deepEqual(done("sortie"), [true, false, true]);
-  // Ticked again by hand: the game agrees, no hand.
+  assert.deepEqual(done("sortie"), [true, false, false]);
+  // Ticked again by hand: up to it, as the game saw it, no hand; the third stays unticked, with the hand.
   logic.tick("sortie.1");
-  assert.deepEqual([done("sortie"), part("sortie", 1).hand], [[true, true, true], false]);
+  assert.deepEqual([done("sortie"), part("sortie", 1).hand, part("sortie", 2).hand], [[true, true, false], false, true]);
+  logic.tick("sortie.2");
+  assert.deepEqual([done("sortie"), part("sortie", 2).hand], [[true, true, true], false]);
 });
 
-test("a stage ticked by hand shows the hand; the game ticking it later takes the hand away", async () => {
+test("Archon Hunt in order: a stage ticked by hand ticks the ones before it; the game reaching it takes the hand away", async () => {
   logic.tick("archon.1");
-  assert.deepEqual([done("archon"), part("archon", 1).hand, act("archon").value], [[false, true, false], true, "1/3"]);
+  assert.deepEqual([done("archon"), part("archon", 0).hand, part("archon", 1).hand, act("archon").value], [[true, true, false], true, true, "2/3"]);
   vm.advance(60_000);
   await push([next(vm.now - 10_000, { node: "SolNode5", modifiers: [archon(2)] })]);
-  assert.deepEqual([done("archon"), part("archon", 1).hand], [[false, true, false], false]);
+  assert.deepEqual([done("archon"), part("archon", 0).hand, part("archon", 1).hand], [[true, true, false], false, false]);
 });
 
 test("Netracells: the game never fills a cell set by hand; the hand at the end of the row", async () => {
@@ -420,4 +422,63 @@ test("the estimate counts between Today and This week the gap the style draws", 
   const [none, one, two] = [[], ["Today"], ["Today", "This week"]].map((titles) => logic.panelHeight(model(titles), 300));
   // Two section heads and the gap, less two times one head.
   assert.equal(two - 2 * one + none, drawn);
+});
+
+// Ordered stages (the Sortie, the Archon Hunt): the stages done always form a prefix.
+const stages = (...seen) => seen.map((at) => ({ at }));
+const shown = (parts) => parts.map((part) => part.hand ?? part.at > 0);
+const hands = (parts) => parts.map((part) => part.hand !== undefined && part.hand !== part.at > 0);
+
+test("ordered stages: the game ticked 1 and 2, the hand unticked 2, then the game ends 3: all three done", () => {
+  const parts = stages(10, 20, 0);
+  logic.clickStage(parts, 1, 30);
+  assert.deepEqual(shown(parts), [true, false, false]);
+  assert.equal(logic.stageEnded(parts, 2, 40), true);
+  assert.deepEqual([shown(parts), hands(parts)], [[true, true, true], [false, false, false]]);
+});
+
+test("ordered stages: the game ticked 1 and 2, the hand unticks 1: none stays done", () => {
+  const parts = stages(10, 20, 0);
+  logic.clickStage(parts, 0, 30);
+  assert.deepEqual([shown(parts), hands(parts)], [[false, false, false], [true, true, false]]);
+});
+
+test("ordered stages: the third ticked by hand from none ticks all three, with the hand", () => {
+  const parts = stages(0, 0, 0);
+  logic.clickStage(parts, 2, 30);
+  assert.deepEqual([shown(parts), hands(parts)], [[true, true, true], [true, true, true]]);
+});
+
+test("ordered stages: the second unticked when the game saw all three leaves the first", () => {
+  const parts = stages(10, 20, 30);
+  logic.clickStage(parts, 1, 40);
+  assert.deepEqual([shown(parts), hands(parts)], [[true, false, false], [false, true, true]]);
+});
+
+test("ordered stages: the game proves the stages up to the one it ends, never those after, never twice", () => {
+  // Ticked by hand up to 3, the game ends 1: 1 as the game saw it, 2 and 3 still by hand.
+  const parts = stages(0, 0, 0);
+  logic.clickStage(parts, 2, 5);
+  assert.equal(logic.stageEnded(parts, 0, 10), true);
+  assert.deepEqual([shown(parts), hands(parts)], [[true, true, true], [false, true, true]]);
+  // A stage the game saw already (a relaunch replays its log): nothing changes.
+  const seen = stages(10, 20, 0);
+  logic.clickStage(seen, 1, 30);
+  assert.equal(logic.stageEnded(seen, 1, 20), false);
+  assert.deepEqual(shown(seen), [true, false, false]);
+});
+
+test("Netracells and Nightwave stay independent: a click changes only its own box", () => {
+  const ticks = logic.emptyTicks();
+  ticks.netracells[0].at = 10;
+  assert.equal(logic.tickPart(ticks, "netracells.3", null, 20), true);
+  assert.deepEqual(ticks.netracells.map((cell) => cell.hand ?? cell.at > 0), [true, false, false, true, false]);
+  assert.equal(logic.tickPart(ticks, "netracells.0", null, 30), true);
+  assert.deepEqual(ticks.netracells.map((cell) => cell.hand ?? cell.at > 0), [false, false, false, true, false]);
+  const world = { nightwave: { endsAt: 1000, challenges: [
+    { id: "a", name: "A", kind: "daily", standing: 1000, endsAt: 1000, progressed: false, completed: false },
+    { id: "b", name: "B", kind: "weekly", standing: 4500, endsAt: 1000, progressed: false, completed: false },
+  ] } };
+  assert.equal(logic.tickPart(ticks, "nightwave.b", world, 40), true);
+  assert.deepEqual([ticks.nightwave.a, ticks.nightwave.b.hand], [undefined, true]);
 });

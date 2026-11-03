@@ -3,7 +3,8 @@
 // challenge). The world (Sortie, Archon Hunt, Circuit, Nightwave, Baro
 // Ki'Teer) comes from PlayerVox OverCrow even with the game closed. A
 // finished mission, a pick the game showed or a challenge it wrote
-// complete ticks itself; the player's hand always wins.
+// complete ticks itself; the player's hand wins, except that a stage the
+// game ends proves the stages before it.
 import {
   formatTime,
   gameEvents,
@@ -86,8 +87,9 @@ const FIELD: Record<Circuit, "normal" | "steelPath"> = { circuit: "normal", stee
 
 /**
  * A part (a stage, a Netracell, a challenge): `at` when the game ticked it
- * (0: not), and what the player set by hand, which always wins: `hand`
- * `true` or `false`, absent when never set, at `handAt`.
+ * (0: not), and what the player set by hand, which wins until the game
+ * proves otherwise: `hand` `true` or `false`, absent when never set or
+ * when it matches the game, at `handAt`.
  */
 export interface Part {
   at: number;
@@ -238,6 +240,47 @@ function flip(part: Part, now: number): void {
   part.handAt = now;
 }
 
+/** Shows `done`: by hand where it differs from what the game saw, as the game saw it otherwise. */
+function setShown(part: Part, done: boolean, now: number): void {
+  if (done === part.at > 0) {
+    delete part.hand;
+    delete part.handAt;
+  } else {
+    part.hand = done;
+    part.handAt = now;
+  }
+}
+
+/**
+ * A click on a stage of an activity the game plays in order (the Sortie,
+ * the Archon Hunt): the stages done stay a prefix. A stage done is undone
+ * with every one after it; a stage to do is done with every one before it.
+ */
+export function clickStage(parts: Part[], index: number, now: number): void {
+  const target = parts[index];
+  if (target === undefined) return;
+  const done = !isDone(target);
+  parts.forEach((part, at) => {
+    if ((done ? at <= index : at >= index) && isDone(part) !== done) setShown(part, done, now);
+  });
+}
+
+/**
+ * The game ended the stage `index` of an ordered activity at `at`: every
+ * stage up to it is done, the hand's included, since the game proves them;
+ * the stages after it stay as they are. A stage the game saw already ticks
+ * nothing again (a relaunch replays its log). Returns whether anything changed.
+ */
+export function stageEnded(parts: Part[], index: number, at: number): boolean {
+  if (parts[index] === undefined || parts[index].at !== 0) return false;
+  for (const part of parts.slice(0, index + 1)) {
+    if (part.at === 0) part.at = at;
+    delete part.hand;
+    delete part.handAt;
+  }
+  return true;
+}
+
 // Resets.
 
 /** The next 16:00 UTC after `now`. */
@@ -338,7 +381,7 @@ function handleMission(ticks: Ticks, mission: WarframeMission, at: number, world
   if (mission.result !== "succeeded") return false;
   let changed = false;
   for (const { id, stage } of stagesOf(mission, world, at)) {
-    if (periodHas(ticks, PERIOD[id], at)) changed = tickAuto(ticks[id].parts[stage - 1], at) || changed;
+    if (periodHas(ticks, PERIOD[id], at)) changed = stageEnded(ticks[id].parts, stage - 1, at) || changed;
   }
   if (mission.type?.id === "netracell" && periodHas(ticks, "week", at)) {
     // The next free cell; one set by hand only when none is left.
@@ -416,8 +459,12 @@ function challengesOf(world: WarframeWorld | null, now: number): NonNullable<War
   return (world?.nightwave?.challenges ?? []).filter((challenge) => challenge.endsAt > now);
 }
 
-/** A click on a part: `sortie.1`, `netracells.4`, `nightwave.<challenge>`. Returns whether anything changed. */
-function tickPart(ticks: Ticks, id: string, world: WarframeWorld | null, now: number): boolean {
+/**
+ * A click on a part: `sortie.1`, `netracells.4`, `nightwave.<challenge>`.
+ * The Sortie's and the Archon Hunt's stages keep their order; a Netracell
+ * and a challenge change alone. Returns whether anything changed.
+ */
+export function tickPart(ticks: Ticks, id: string, world: WarframeWorld | null, now: number): boolean {
   const dot = id.indexOf(".");
   const activity = id.slice(0, dot);
   const key = id.slice(dot + 1);
@@ -428,10 +475,16 @@ function tickPart(ticks: Ticks, id: string, world: WarframeWorld | null, now: nu
     flip(kept, now);
     return true;
   }
-  const parts = activity === "sortie" || activity === "archon" ? ticks[activity].parts : activity === "netracells" ? ticks.netracells : null;
-  const part = parts?.[Number(key)];
-  if (part === undefined || !/^\d$/.test(key)) return false;
-  flip(part, now);
+  if (!/^\d$/.test(key)) return false;
+  const index = Number(key);
+  if (activity === "sortie" || activity === "archon") {
+    if (ticks[activity].parts[index] === undefined) return false;
+    clickStage(ticks[activity].parts, index, now);
+    return true;
+  }
+  const cell = activity === "netracells" ? ticks.netracells[index] : undefined;
+  if (cell === undefined) return false;
+  flip(cell, now);
   return true;
 }
 

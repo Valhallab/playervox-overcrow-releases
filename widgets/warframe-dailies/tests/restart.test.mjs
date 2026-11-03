@@ -64,7 +64,7 @@ function restarted() {
   return each;
 }
 
-test("after a restart, what the hand set and the types learned stay; events handled are not ticked again", async () => {
+test("after a restart, what the hand set and the types learned stay; events handled are not ticked again; a stage the game ends proves the ones before it", async () => {
   vm.lastCall("storage.get").resolve(stored);
   await flush();
   vm.push(
@@ -80,20 +80,23 @@ test("after a restart, what the hand set and the types learned stay; events hand
     }),
   );
   await flush();
-  assert.equal(act("sortie").value, "2/3");
-  assert.equal(parts("sortie")[1].text, "Excavation");
-  assert.equal(parts("sortie")[1].textCls, "part-text");
+  // Stage 3 ended by the game: stages 1 to 3 are done, the second one too.
+  assert.deepEqual([act("sortie").icon, act("sortie").value], ["circle-check", "10:00"]);
+  // Interactive opens the finished Sortie: its learned type stays, done.
+  vm.setHost({ mode: "interactive" });
+  assert.deepEqual([parts("sortie")[1].text, parts("sortie")[1].textCls], ["Excavation", "part-text done"]);
+  vm.setHost({ mode: "passive" });
   assert.deepEqual([act("archon").value, parts("archon")[0].hand], ["0/3", true]);
   assert.deepEqual([act("netracells").value, act("netracells").groups[0].hand], ["1/5", true]);
   assert.deepEqual([act("circuit").value, act("circuit").choicesHand], ["mer. 11:00", true]);
   assert.equal(act("circuit").choices.find((each) => each.text === "Ember").cls, "choice other", "done: every name grey");
   assert.equal(act("steel").choices.filter((each) => each.cls === "choice picked").map((each) => each.text).join(), "Lato,Paris");
   assert.equal(parts("nightwave")[0].icon, "circle-check");
-  assert.equal(state.model.left, "5 à faire");
+  assert.equal(state.model.left, "4 à faire");
   assert.equal(state.model.hint, "");
   const set = vm.lastCall("storage.set");
   assert.equal(set.params.value.lastAt, SECOND);
-  assert.deepEqual(set.params.value.sortie.parts, [{ at: FIRST }, { at: 0 }, { at: SECOND }]);
+  assert.deepEqual(set.params.value.sortie.parts, [{ at: FIRST }, { at: SECOND }, { at: SECOND }]);
 });
 
 test("French wording: the resets, the stages by rank, Nightwave's kinds, the Archon's own name", async () => {
