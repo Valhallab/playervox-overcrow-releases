@@ -921,8 +921,11 @@ export function panelHeight(model: Model, width: number): number {
   return H.pad + blocks.reduce((sum, each) => sum + each, 0) + H.gap * (blocks.length - 1);
 }
 
-/** The frame's largest height (the manifest's), logical px: the panel stops there. */
-export const MAX_HEIGHT = 800;
+/**
+ * The frame's largest height (the manifest's), logical px: the panel stops
+ * there. 680 points are 1,020 px at 150 %, 48 px short of a 1080p screen.
+ */
+export const MAX_HEIGHT = 680;
 
 /**
  * Passive: when the panel would pass its largest height, the end of the

@@ -37,7 +37,7 @@ game's language, the activities from its glossary.
 **Layouts.** "Full" (default) is 300 points wide and as tall as its
 content; from 560 points, Nightwave sits on the right, the rest on the
 left, Baro under both. The panel stops at the frame's largest height
-(800 points): beyond, the lists scroll in Interactive, and in Passive the
+(680 points, 1,020 px at 150 %: it fits a 1080p screen): beyond, the lists scroll in Interactive, and in Passive the
 end of Nightwave folds into "+ 3 challenges". "One line" says "3 to do ·
 Sortie resets in 6h", or "Sortie done · 2 to do" right after a mission.
 

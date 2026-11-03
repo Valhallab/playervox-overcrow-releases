@@ -360,3 +360,10 @@ test("refused game events: the way to fix it, the count stays", () => {
   assert.notEqual(model().left, "");
   assert.deepEqual([model().lineValue, model().lineValueCls], ["Access denied", "line-reset tone-warning"]);
 });
+
+test("the panel stops at 680 points: on a 1080p screen at 150 %, 1,020 px leave 48 px", () => {
+  const manifest = JSON.parse(readFileSync(new URL("../manifest.json", import.meta.url), "utf8"));
+  assert.equal(manifest.sizing.max.height, 680);
+  assert.equal(logic.MAX_HEIGHT, manifest.sizing.max.height);
+  assert.ok(logic.MAX_HEIGHT * 1.5 <= 1080 - 48);
+});
