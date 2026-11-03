@@ -1547,8 +1547,10 @@ export interface WarframeWorld {
       readonly standing: number;
       /** When it ends. */
       readonly endsAt: number;
-      /** `true` when the game showed progress on it in this session; it never says that one is complete. */
+      /** `true` when the game showed progress on it in this session. */
       readonly progressed: boolean;
+      /** `true` when the game wrote, in this session, that this active challenge is complete. */
+      readonly completed: boolean;
     }>;
   } | null;
 }

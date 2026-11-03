@@ -1918,7 +1918,7 @@ Warframe's world of the day and the week. `{ updatedAt, sortie, archonHunt, fiss
 | `circuit.picked.steelPath` | list of text | The IDs of `steelPath` the player picked, as this session of the game showed it. |
 | `nightwave` | `{ endsAt, challenges }` or `null` | Nightwave's current season, when the world state gives it. |
 | `nightwave.endsAt` | integer | When the season ends. |
-| `nightwave.challenges` | list of `{ id, name, kind, standing, endsAt, progressed }` | The active challenges, daily ones first, at most `MAX_WARFRAME_NIGHTWAVE`. |
+| `nightwave.challenges` | list of `{ id, name, kind, standing, endsAt, progressed, completed }` | The active challenges, daily ones first, at most `MAX_WARFRAME_NIGHTWAVE`. |
 
 Service error codes: `invalid_request`, `permission_denied`, `gesture_required`, `not_connected`, `account_refused`, `review_removed_by_moderation`, `stale_context`, `unavailable`, `busy`, `cancelled`, `quota_exceeded`, `unsupported`, `url_invalid`, `resolve_failed`, `address_denied`, `too_many_addresses`, `peer_mismatch`, `redirect_denied`, `encoding_denied`, `content_type_denied`, `response_metadata_limit`, `request_body_limit`, `response_body_limit`, `image_invalid`, `timeout`, `transport_failed`.
 

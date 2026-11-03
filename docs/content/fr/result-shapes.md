@@ -895,5 +895,5 @@ Le monde de Warframe du jour et de la semaine. `{ updatedAt, sortie, archonHunt,
 | `circuit.picked.steelPath` | liste de textes | Les ID de `steelPath` choisis par le joueur, tels que cette session du jeu les a montrés. |
 | `nightwave` | `{ endsAt, challenges }` ou `null` | La saison en cours des Ondes Nocturnes, quand le world state la donne. |
 | `nightwave.endsAt` | entier | Quand la saison se termine. |
-| `nightwave.challenges` | liste de `{ id, name, kind, standing, endsAt, progressed }` | Les défis en cours, ceux du jour d’abord, au plus 16. |
+| `nightwave.challenges` | liste de `{ id, name, kind, standing, endsAt, progressed, completed }` | Les défis en cours, ceux du jour d’abord, au plus 16. |
 <!-- /generated:result-shapes -->

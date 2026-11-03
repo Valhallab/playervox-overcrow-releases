@@ -352,11 +352,13 @@ fn world() -> Value {
             "endsAt": 1_804_464_000_000_u64,
             "challenges": [
                 {"id": "season_daily_artist", "name": "Artist", "kind": "daily", "standing": 1000,
-                 "endsAt": 1_793_100_000_000_u64, "progressed": false},
+                 "endsAt": 1_793_100_000_000_u64, "progressed": false, "completed": false},
                 {"id": "season_weekly_permanent_kill_eximus13", "name": "Eximus Eliminator XIII",
-                 "kind": "weekly", "standing": 4500, "endsAt": 1_793_404_800_000_u64, "progressed": true},
+                 "kind": "weekly", "standing": 4500, "endsAt": 1_793_404_800_000_u64, "progressed": true,
+                 "completed": true},
                 {"id": "season_weekly_hard_the_many_made_whole", "name": "The Many Made Whole",
-                 "kind": "elite", "standing": 7000, "endsAt": 1_793_404_800_000_u64, "progressed": false}
+                 "kind": "elite", "standing": 7000, "endsAt": 1_793_404_800_000_u64, "progressed": false,
+                 "completed": false}
             ]
         }
     })
@@ -632,6 +634,7 @@ fn values_out_of_their_words_are_refused() {
         ("/info/world/archonHunt/shard/id", json!("violet")),
         ("/info/world/nightwave/challenges/0/kind", json!("monthly")),
         ("/info/world/nightwave/challenges/1/progressed", Value::Null),
+        ("/info/world/nightwave/challenges/1/completed", json!("yes")),
         ("/info/world/circuit/picked/normal/0", Value::Null),
     ] {
         let mut value_of = full();

@@ -1665,7 +1665,12 @@ pub const SHAPES: &[NamedShape] = &[
                             member(
                                 "progressed",
                                 Shape::Bool,
-                                "`true` when the game showed progress on it in this session; it never says that one is complete.",
+                                "`true` when the game showed progress on it in this session.",
+                            ),
+                            member(
+                                "completed",
+                                Shape::Bool,
+                                "`true` when the game wrote, in this session, that this active challenge is complete.",
                             ),
                         ])),
                         "The active challenges, daily ones first, at most `MAX_WARFRAME_NIGHTWAVE`.",

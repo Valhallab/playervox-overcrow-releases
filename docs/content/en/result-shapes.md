@@ -893,5 +893,5 @@ Warframe's world of the day and the week. `{ updatedAt, sortie, archonHunt, fiss
 | `circuit.picked.steelPath` | list of text | The IDs of `steelPath` the player picked, as this session of the game showed it. |
 | `nightwave` | `{ endsAt, challenges }` or `null` | Nightwave's current season, when the world state gives it. |
 | `nightwave.endsAt` | integer | When the season ends. |
-| `nightwave.challenges` | list of `{ id, name, kind, standing, endsAt, progressed }` | The active challenges, daily ones first, at most 16. |
+| `nightwave.challenges` | list of `{ id, name, kind, standing, endsAt, progressed, completed }` | The active challenges, daily ones first, at most 16. |
 <!-- /generated:result-shapes -->

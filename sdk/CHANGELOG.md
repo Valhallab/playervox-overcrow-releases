@@ -36,7 +36,8 @@ game events, Warframe first:
   entered by its hub's gate as a mission, and `mission_left` when the
   player leaves it; the Circuit's round table (`source` `circuit`, `kind`
   `round`) and the week's picks; the Archon Hunt's shard; Nightwave's
-  active challenges; and the glossary's relic refinements.
+  active challenges, with those the game showed progressing or complete;
+  and the glossary's relic refinements.
 - `gameEvents.subscribe` and the `GameEvent` type are removed, and
   `gameEvents` no longer takes `overcrow.game.<name>.v1` names. No release
   of PlayerVox OverCrow ever sent such an event, so no widget could rely on

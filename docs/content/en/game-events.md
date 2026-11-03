@@ -262,7 +262,7 @@ Each hunt:
 | `resets` | `{ daily, weekly }`: the next daily reset (00:00 UTC) and weekly reset (Monday 00:00 UTC), in Unix milliseconds. |
 | `voidTrader` | Baro Ki'Teer's next visit, or the current one, `{ arrivesAt, leavesAt, relay }`, or `null`. What he sells is not given. |
 | `circuit` | The Circuit's rewards of the week, `{ normal, steelPath, picked }`, when the world state gives them; `null` otherwise. `picked` is `{ normal, steelPath }`: the IDs the player picked for the week (one Warframe, two Incarnon Genesis adapters), as this session of the game showed them; empty until it does. The tier the player reached is not given. |
-| `nightwave` | Nightwave's current season, `{ endsAt, challenges }`, or `null`. Each challenge, daily ones first (at most 16), is `{ id, name, kind, standing, endsAt, progressed }`: `kind` is `daily`, `weekly` or `elite`; `progressed` is `true` when the game showed progress on it in this session. Warframe never writes that a challenge is complete: let the player tick it. |
+| `nightwave` | Nightwave's current season, `{ endsAt, challenges }`, or `null`. Each challenge, daily ones first (at most 16), is `{ id, name, kind, standing, endsAt, progressed, completed }`: `kind` is `daily`, `weekly` or `elite`; `progressed` is `true` when the game showed progress on it in this session; `completed` is `true` when the game wrote in this session that it is complete. The game writes it only while PlayerVox OverCrow can read it: let the player tick a challenge by hand too, and keep what they set. |
 
 The missions of the Sortie and of the Archon Hunt are
 `{ node, planet, type, modifier, typeAtLoading }`, in order: `modifier` is
