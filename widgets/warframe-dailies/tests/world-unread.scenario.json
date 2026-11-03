@@ -1,0 +1,162 @@
+{
+  "scenarioVersion": 1,
+  "name": "world-unread",
+  "description": "PlayerVox OverCrow could not read the world yet: the stages by their rank, Nightwave waits for its list.",
+  "host": {
+    "startAt": 1793268000000,
+    "zone": {
+      "offsetMinutes": 60
+    },
+    "mode": "passive",
+    "storage": {
+      "ticks": {
+        "v": 2,
+        "lastAt": 0,
+        "dayEnd": 1793289600000,
+        "weekEnd": 1793577600000,
+        "sortie": {
+          "parts": [
+            {
+              "at": 0
+            },
+            {
+              "at": 0
+            },
+            {
+              "at": 0
+            }
+          ],
+          "types": [
+            null,
+            null,
+            null
+          ]
+        },
+        "archon": {
+          "parts": [
+            {
+              "at": 1793127000000
+            },
+            {
+              "at": 0
+            },
+            {
+              "at": 0
+            }
+          ],
+          "types": [
+            null,
+            null,
+            null
+          ]
+        },
+        "netracells": [
+          {
+            "at": 1793124000000
+          },
+          {
+            "at": 1793214600000
+          },
+          {
+            "at": 0
+          },
+          {
+            "at": 0
+          },
+          {
+            "at": 0
+          }
+        ],
+        "circuit": {
+          "done": 0,
+          "picks": {
+            "auto": [],
+            "hand": null
+          }
+        },
+        "steel": {
+          "done": 0,
+          "picks": {
+            "auto": [],
+            "hand": null
+          }
+        },
+        "nightwave": {}
+      }
+    }
+  },
+  "assets": {
+    "shard": "tests/assets/shard.png"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "playing": false
+        }
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "features": {
+            "world": "unavailable"
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "size": {
+          "width": 300,
+          "height": 320
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "1ʳᵉ mission",
+          "Liste au retour en ligne",
+          "Hors ligne"
+        ],
+        "image": "fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "1st mission",
+          "List when back online"
+        ],
+        "image": "en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "mode": "interactive"
+      }
+    },
+    {
+      "expect": {
+        "image": "fr-100-interactive",
+        "fault": "none"
+      }
+    }
+  ]
+}

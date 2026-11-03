@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "preview",
-  "description": "Thursday with Warframe closed, as in mid-week. The marketplace preview: dark theme, English, 150 %, on the stage colour; scripts/compose-previews.mjs frames it into assets/preview.png.",
+  "description": "The typical day after the player's corrections, Warframe closed; the Sortie, the Archon Hunt, Netracells and the Circuit tracked. The marketplace preview: dark theme, English, 150 %, on the stage colour; scripts/compose-previews.mjs frames it into assets/preview.png.",
   "host": {
     "startAt": 1793268000000,
     "zone": {
@@ -15,55 +15,101 @@
     },
     "storage": {
       "ticks": {
-        "v": 1,
+        "v": 2,
         "lastAt": 1793261100000,
-        "intro": true,
         "dayEnd": 1793289600000,
         "weekEnd": 1793577600000,
-        "activities": {
-          "sortie": {
-            "parts": [
-              1793261100000,
-              0,
-              0
-            ],
-            "done": null
-          },
-          "archon": {
-            "parts": [
-              1793130600000,
-              1793132100000,
-              1793133720000
-            ],
-            "done": {
-              "at": 1793133720000,
-              "hand": false
+        "sortie": {
+          "parts": [
+            {
+              "at": 1793261100000
+            },
+            {
+              "at": 0,
+              "hand": true,
+              "handAt": 1793266800000
+            },
+            {
+              "at": 0
             }
-          },
-          "netracells": {
-            "parts": [
-              1793124000000,
-              1793212200000,
-              1793214600000,
-              0,
-              0
-            ],
-            "done": null
-          },
-          "circuit": {
-            "parts": [],
-            "done": {
-              "at": 1793219700000,
-              "hand": true
+          ],
+          "types": [
+            null,
+            null,
+            null
+          ]
+        },
+        "archon": {
+          "parts": [
+            {
+              "at": 1793127000000,
+              "hand": false,
+              "handAt": 1793266800000
+            },
+            {
+              "at": 0
+            },
+            {
+              "at": 0
             }
+          ],
+          "types": [
+            null,
+            null,
+            null
+          ]
+        },
+        "netracells": [
+          {
+            "at": 1793124000000
           },
-          "nightwave": {
-            "parts": [],
-            "done": null
+          {
+            "at": 1793214600000
+          },
+          {
+            "at": 0,
+            "hand": true,
+            "handAt": 1793266800000
+          },
+          {
+            "at": 0
+          },
+          {
+            "at": 0
+          }
+        ],
+        "circuit": {
+          "done": 0,
+          "picks": {
+            "auto": [
+              "titania"
+            ],
+            "hand": [
+              "ivara"
+            ]
+          }
+        },
+        "steel": {
+          "done": 0,
+          "picks": {
+            "auto": [
+              "lato",
+              "paris"
+            ],
+            "hand": null
+          }
+        },
+        "nightwave": {
+          "artist": {
+            "at": 1793264700000,
+            "endsAt": 1793318400000
           }
         }
       }
     }
+  },
+  "assets": {
+    "shard": "tests/assets/shard.png"
   },
   "steps": [
     {
@@ -87,97 +133,127 @@
               "updatedAt": 1793268000000,
               "sortie": {
                 "boss": {
-                  "id": "captain_vor",
-                  "name": "Captain Vor"
+                  "id": "raptors",
+                  "name": "Raptors"
                 },
                 "faction": {
-                  "id": "grineer",
-                  "name": "Grineer"
+                  "id": "corpus",
+                  "name": "Corpus"
                 },
                 "endsAt": 1793289600000,
                 "missions": [
                   {
                     "node": {
-                      "id": "SolNode10",
-                      "name": null
+                      "id": "SolNode209",
+                      "name": "Morax"
                     },
-                    "planet": null,
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europa"
+                    },
                     "type": {
-                      "id": "rescue",
-                      "name": "Rescue"
+                      "id": "excavation",
+                      "name": "Excavation"
                     },
-                    "modifier": null
+                    "modifier": null,
+                    "typeAtLoading": false
                   },
                   {
                     "node": {
-                      "id": "SolNode11",
-                      "name": null
+                      "id": "SolNode102",
+                      "name": "Naeglar"
                     },
-                    "planet": null,
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europa"
+                    },
                     "type": {
-                      "id": "disruption",
-                      "name": "Disruption"
+                      "id": "sabotage",
+                      "name": "Sabotage"
                     },
-                    "modifier": null
+                    "modifier": null,
+                    "typeAtLoading": false
                   },
                   {
                     "node": {
-                      "id": "SolNode12",
-                      "name": null
+                      "id": "SolNode57",
+                      "name": "Sinai"
                     },
-                    "planet": null,
+                    "planet": {
+                      "id": "jupiter",
+                      "name": "Jupiter"
+                    },
                     "type": {
                       "id": "mobile_defense",
                       "name": "Mobile Defense"
                     },
-                    "modifier": null
+                    "modifier": null,
+                    "typeAtLoading": false
                   }
                 ]
               },
               "archonHunt": {
                 "boss": {
-                  "id": "nira",
-                  "name": "Nira"
+                  "id": "archon_boreal",
+                  "name": "Archon Boreal"
                 },
                 "endsAt": 1793577600000,
                 "missions": [
                   {
                     "node": {
-                      "id": "SolNode20",
-                      "name": null
+                      "id": "SolNode62",
+                      "name": "Adaro"
                     },
-                    "planet": null,
+                    "planet": {
+                      "id": "sedna",
+                      "name": "Sedna"
+                    },
                     "type": {
-                      "id": "rescue",
-                      "name": "Rescue"
+                      "id": "mobile_defense",
+                      "name": "Mobile Defense"
                     },
-                    "modifier": null
+                    "modifier": null,
+                    "typeAtLoading": false
                   },
                   {
                     "node": {
-                      "id": "SolNode21",
-                      "name": null
+                      "id": "SolNode63",
+                      "name": "Kappa"
                     },
-                    "planet": null,
+                    "planet": {
+                      "id": "sedna",
+                      "name": "Sedna"
+                    },
                     "type": {
-                      "id": "survival",
-                      "name": "Survival"
+                      "id": "interception",
+                      "name": "Interception"
                     },
-                    "modifier": null
+                    "modifier": null,
+                    "typeAtLoading": false
                   },
                   {
                     "node": {
-                      "id": "SolNode22",
-                      "name": null
+                      "id": "SolNode64",
+                      "name": "Hydron"
                     },
-                    "planet": null,
+                    "planet": {
+                      "id": "sedna",
+                      "name": "Sedna"
+                    },
                     "type": {
                       "id": "assassination",
                       "name": "Assassination"
                     },
-                    "modifier": null
+                    "modifier": null,
+                    "typeAtLoading": false
                   }
-                ]
+                ],
+                "shard": {
+                  "id": "azure",
+                  "name": "Azure Archon Shard",
+                  "icon": "fixture:shard",
+                  "iconPending": false
+                }
               },
               "fissures": [],
               "cycles": {
@@ -193,36 +269,195 @@
                 "arrivesAt": 1793365200000,
                 "leavesAt": 1793538000000,
                 "relay": {
-                  "id": "larunda_relay",
-                  "name": "Larunda Relay"
+                  "id": "kronia_relay",
+                  "name": "Kronia Relay"
                 }
               },
               "circuit": {
                 "normal": [
                   {
-                    "id": "excalibur",
-                    "name": "Excalibur"
+                    "id": "ivara",
+                    "name": "Ivara"
                   },
                   {
-                    "id": "trinity",
-                    "name": "Trinity"
+                    "id": "inaros",
+                    "name": "Inaros"
                   },
                   {
-                    "id": "ember",
-                    "name": "Ember"
+                    "id": "titania",
+                    "name": "Titania"
                   }
                 ],
-                "steelPath": []
+                "steelPath": [
+                  {
+                    "id": "braton",
+                    "name": "Braton"
+                  },
+                  {
+                    "id": "lato",
+                    "name": "Lato"
+                  },
+                  {
+                    "id": "skana",
+                    "name": "Skana"
+                  },
+                  {
+                    "id": "paris",
+                    "name": "Paris"
+                  },
+                  {
+                    "id": "kunai",
+                    "name": "Kunai"
+                  }
+                ],
+                "picked": {
+                  "normal": [
+                    "titania"
+                  ],
+                  "steelPath": [
+                    "lato",
+                    "paris"
+                  ]
+                }
+              },
+              "nightwave": {
+                "endsAt": 1798761600000,
+                "challenges": [
+                  {
+                    "id": "artist",
+                    "name": "Artist",
+                    "kind": "daily",
+                    "standing": 1000,
+                    "endsAt": 1793318400000,
+                    "progressed": false,
+                    "completed": true
+                  },
+                  {
+                    "id": "detonator",
+                    "name": "Detonator",
+                    "kind": "daily",
+                    "standing": 1000,
+                    "endsAt": 1793318400000,
+                    "progressed": false,
+                    "completed": false
+                  },
+                  {
+                    "id": "whole_arsenal",
+                    "name": "Whole Arsenal",
+                    "kind": "daily",
+                    "standing": 1000,
+                    "endsAt": 1793318400000,
+                    "progressed": false,
+                    "completed": false
+                  },
+                  {
+                    "id": "mission_complete_xiii",
+                    "name": "Mission Complete XIII",
+                    "kind": "weekly",
+                    "standing": 4500,
+                    "endsAt": 1793577600000,
+                    "progressed": true,
+                    "completed": false
+                  },
+                  {
+                    "id": "eximus_eliminator_xiii",
+                    "name": "Eximus Eliminator XIII",
+                    "kind": "weekly",
+                    "standing": 4500,
+                    "endsAt": 1793577600000,
+                    "progressed": true,
+                    "completed": false
+                  },
+                  {
+                    "id": "not_a_warning_shot_xiii",
+                    "name": "Not A Warning Shot XIII",
+                    "kind": "weekly",
+                    "standing": 4500,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false
+                  },
+                  {
+                    "id": "gatherer",
+                    "name": "Gatherer",
+                    "kind": "weekly",
+                    "standing": 4500,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false
+                  },
+                  {
+                    "id": "earth_miner",
+                    "name": "Earth Miner",
+                    "kind": "weekly",
+                    "standing": 4500,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false
+                  },
+                  {
+                    "id": "the_many_made_whole",
+                    "name": "The Many Made Whole",
+                    "kind": "elite",
+                    "standing": 7000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false
+                  },
+                  {
+                    "id": "mirror_mirror",
+                    "name": "Mirror, Mirror",
+                    "kind": "elite",
+                    "standing": 7000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false
+                  }
+                ]
               }
+            }
+          },
+          "glossary": {
+            "language": "en",
+            "activity": {
+              "sortie": "Sortie",
+              "archon_hunt": "Archon Hunt",
+              "netracells": "Netracells",
+              "circuit": "The Circuit",
+              "nightwave": "Nightwave",
+              "baro_ki_teer": "Baro Ki'Teer",
+              "steel_path": "The Steel Path"
             }
           }
         }
       }
     },
     {
+      "menu": {
+        "id": "track-circuit-steel",
+        "value": false
+      }
+    },
+    {
+      "menu": {
+        "id": "track-nightwave",
+        "value": false
+      }
+    },
+    {
+      "menu": {
+        "id": "track-baro",
+        "value": false
+      }
+    },
+    {
       "expect": {
         "text": [
-          "3 to do"
+          "4 to do",
+          "2/3",
+          "0/3",
+          "3/5",
+          "Ivara"
         ],
         "image": "preview",
         "fault": "none"
