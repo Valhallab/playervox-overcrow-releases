@@ -869,8 +869,8 @@ const H = {
   noteLine: 15,
   /** Px per character of the small text (`.foot-text`, `.note-text`): measured 4.9, a little more so that a wrap is not missed. */
   smallPx: 5.5,
-  /** Between Today and This week: `.gcol` gap is 10px, counted 8 (10 folds the tall week one challenge sooner). */
-  sections: 8,
+  /** Between Today and This week: `.gcol` gap. */
+  sections: 10,
   /** Between Wide's two columns: `.wide .groups` gap. */
   columns: 16,
   /** A section's title line, with `.group-head` padding-bottom 4px and border-bottom 1px. */

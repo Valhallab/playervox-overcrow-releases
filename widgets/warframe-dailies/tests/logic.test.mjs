@@ -405,3 +405,19 @@ test("a section's title and reset that do not fit one line count two: French at 
   assert.equal(long - short, 14);
   assert.equal(logic.panelHeight(model("Cette semaine", "reset dans 3 j 14 h"), 300), short);
 });
+
+test("the estimate counts between Today and This week the gap the style draws", () => {
+  const style = readFileSync(new URL("../style.ocss", import.meta.url), "utf8");
+  const rule = style.slice(style.indexOf(".gcol {"), style.indexOf("}", style.indexOf(".gcol {")));
+  const drawn = Number(rule.match(/gap: (\d+)px;/)[1]);
+  const model = (titles) => ({
+    cols: [{ id: "all", groups: titles.map((title) => ({ id: title, title, reset: "", acts: [] })) }],
+    baro: "",
+    hint: "",
+    status: "",
+    note: "",
+  });
+  const [none, one, two] = [[], ["Today"], ["Today", "This week"]].map((titles) => logic.panelHeight(model(titles), 300));
+  // Two section heads and the gap, less two times one head.
+  assert.equal(two - 2 * one + none, drawn);
+});
