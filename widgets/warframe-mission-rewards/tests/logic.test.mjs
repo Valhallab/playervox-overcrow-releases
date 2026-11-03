@@ -89,16 +89,35 @@ const progress = (rewards = 0, over = {}, arbitration = false) => {
 };
 const survival = (rewards, nextRewardAt, over = {}) => progress(rewards, { clock: "running", nextRewardAt, ...over });
 const GLOSSARY_EN = { language: "en", term: { reactant: "Reactant", relic: "Relic", credits: "Credits" } };
-const value = (info, over = {}) => ({
+const GLOSSARY_FR = { language: "fr", term: { reactant: "Réactif", relic: "Relique", credits: "Crédits" } };
+/** A value of the game events; `features` changes only the features it names. */
+const value = (info, { features = {}, ...over } = {}) => ({
   playing: true,
   session: { startedAt: START - 600_000, language: "en" },
   glossary: GLOSSARY_EN,
-  features: { location: "undeclared", mission: "available", progress: "available", squad: "undeclared", eidolons: "undeclared", world: "available", rewards: "available" },
+  features: { location: "undeclared", mission: "available", progress: "available", squad: "undeclared", eidolons: "undeclared", world: "available", rewards: "available", ...features },
   info: { location: null, mission: null, progress: null, squad: null, eidolons: null, world: null, ...info },
   events: [],
   ...over,
 });
 const input = (v, over = {}) => ({ value: v, failure: null, last: null, now: vm.now, layout: "standard", order: "rarest", open: [], mode: "interactive", width: 300, height: 520, ...over });
+/** The screen of `value(info, valueOver)`, with the input's `over`. */
+const screen = (info, over = {}, valueOver = {}) => logic.buildScreen(input(value(info, valueOver), over));
+/** A progress that counts no rotation. */
+const untracked = () => progress(0, { rotation: null, cycle: null });
+/** A mission picked, not started yet. */
+const picked = (over = {}) => mission({ state: "selected", startedAt: null, ...over });
+/** One hour of Survival, succeeded. */
+const ENDED_HOUR = mission({ state: "ended", result: "succeeded", endedAt: START, durationSeconds: 3734.4, earned: earned(12), credits: 128450 });
+/** Runs `fn` with the app in French, then in English again. */
+const inFrench = (fn) => {
+  vm.setHost({ locale: "fr", messages: FR });
+  try {
+    return fn();
+  } finally {
+    vm.setHost({ locale: "en", messages: EN });
+  }
+};
 const HYDRON = { node: { id: "SolNode195", name: "Hydron" }, planet: { id: "sedna", name: "Sedna" }, type: { id: "defense", name: "Defense" }, faction: { id: "grineer", name: "Grineer" } };
 const defense = (rewards, wave, nextRewardWave, waveEnemies) => progress(rewards, { wave, nextRewardWave, waveEnemies });
 const cells = (s) => s.track.map((c) => `${c.label}:${c.cls}`);
@@ -123,8 +142,8 @@ test("survival: the countdown, then the next rotation at the very moment, withou
 
 test("survival: Warframe tells the reward 26 s late; nothing jumps when it does", () => {
   const now = START + 15 * MIN + 26_000;
-  const a = logic.buildScreen(input(value({ mission: mission(), progress: survival(2, START + 15 * MIN) }), { now }));
-  const b = logic.buildScreen(input(value({ mission: mission(), progress: survival(3, START + 20 * MIN) }), { now }));
+  const a = screen({ mission: mission(), progress: survival(2, START + 15 * MIN) }, { now });
+  const b = screen({ mission: mission(), progress: survival(3, START + 20 * MIN) }, { now });
   assert.deepEqual(a, b);
   assert.equal(a.heroLabel, "Rotation C in");
   assert.equal(logic.at(a.heroValue, a, now), "4:34");
@@ -134,7 +153,7 @@ test("survival: Warframe tells the reward 26 s late; nothing jumps when it does"
 
 test("survival before the panel is hacked: no countdown, no rotation in progress, the mission clock runs", () => {
   const now = START + 11_000;
-  const s = logic.buildScreen(input(value({ mission: mission(), progress: progress(0, { clock: "waiting" }) }), { now }));
+  const s = screen({ mission: mission(), progress: progress(0, { clock: "waiting" }) }, { now });
   assert.equal(s.heroLabel, "Waiting for the hack");
   assert.equal(s.heroIcon, "hourglass");
   assert.equal(s.heroValue, "");
@@ -146,7 +165,7 @@ test("survival before the panel is hacked: no countdown, no rotation in progress
   assert.equal(s.lineValue, "");
   // Hacked at 0:45: the countdown runs from there; the clock is ahead of it.
   const hacked = START + 45_000;
-  const r = logic.buildScreen(input(value({ mission: mission(), progress: survival(0, hacked + 5 * MIN) }), { now: hacked + 60_000 }));
+  const r = screen({ mission: mission(), progress: survival(0, hacked + 5 * MIN) }, { now: hacked + 60_000 });
   assert.equal(logic.at(r.heroValue, r, hacked + 60_000), "4:00");
   assert.equal(logic.clockValue(r, hacked + 60_000), "1:45");
   assert.deepEqual(cells(r), ["A:cell now", "A:cell", "B:cell", "C:cell"]);
@@ -154,7 +173,7 @@ test("survival before the panel is hacked: no countdown, no rotation in progress
 
 test("endless cycles: the cells restart after C with the cycle's number; one hour of Survival", () => {
   const now = START + 41 * MIN + 5_000;
-  const c2 = logic.buildScreen(input(value({ mission: mission(), progress: survival(8, START + 45 * MIN) }), { now }));
+  const c2 = screen({ mission: mission(), progress: survival(8, START + 45 * MIN) }, { now });
   assert.equal(c2.trackLabel, "Cycle 3");
   assert.deepEqual(cells(c2), ["A:cell now", "A:cell", "B:cell", "C:cell"]);
   const p = survival(11, START + 60 * MIN);
@@ -162,7 +181,7 @@ test("endless cycles: the cells restart after C with the cycle's number; one hou
   assert.equal(hour.rewards, 12);
   assert.deepEqual(hour.cycle, { number: 4, rotations: ["A", "A", "B", "C"], earned: 0 });
   assert.deepEqual(hour.totals, { A: 6, B: 3, C: 3 });
-  const s = logic.buildScreen(input(value({ mission: mission(), progress: p }), { now: START + 56 * MIN }));
+  const s = screen({ mission: mission(), progress: p }, { now: START + 56 * MIN });
   assert.deepEqual(cells(s), ["A:cell earned", "A:cell earned", "B:cell earned", "C:cell now"]);
   assert.equal(s.sections[0].got, "C earned ×2", "the table of a rotation already earned says so");
 });
@@ -173,7 +192,7 @@ test("arbitration: A A B B, then C for ever; the cells then show the totals and 
   const after = logic.project(p, START + 20 * MIN);
   assert.deepEqual(after.cycle, { number: 2, rotations: ["C", "C", "C", "C"], earned: 0 });
   assert.equal(after.letter, "C");
-  const s = logic.buildScreen(input(value({ mission: arb, progress: progress(5, { clock: "running", nextRewardAt: START + 30 * MIN }, true) }), { now: START + 28 * MIN }));
+  const s = screen({ mission: arb, progress: progress(5, { clock: "running", nextRewardAt: START + 30 * MIN }, true) }, { now: START + 28 * MIN });
   assert.deepEqual(cells(s), ["A ×2:cell earned", "B ×2:cell earned", "C ×1:cell earned", "C:cell now"]);
   assert.equal(s.trackLabel, "");
   assert.equal(logic.heroSubText(s, START + 28 * MIN), "Then C in 7:00");
@@ -182,25 +201,25 @@ test("arbitration: A A B B, then C for ever; the cells then show the totals and 
 
 test("defense: the owner's words on one line, the current wave and its enemies under it", () => {
   const def = mission(HYDRON);
-  const s = logic.buildScreen(input(value({ mission: def, progress: defense(2, 8, 9, { total: 32, left: 14 }) })));
+  const s = screen({ mission: def, progress: defense(2, 8, 9, { total: 32, left: 14 }) });
   assert.equal(s.heroInline, true);
   assert.equal(s.heroLabel, "Rotation B at the end of wave ");
   assert.equal(s.heroValue, "9");
   assert.equal(s.heroCls, "next-big");
   assert.equal(s.heroSub, "Now: wave 8 · 14 enemies left");
-  assert.equal(s.clock, "", "the header keeps the mission clock");
+  assert.equal(logic.clockValue(s, START + 25 * MIN), "25:00", "the header keeps the mission clock");
   assert.equal([s.line, s.lineValue].join(" "), "Hydron · B at end of wave 9");
-  const pays = logic.buildScreen(input(value({ mission: def, progress: defense(2, 9, 9, { total: 34, left: 1 }) })));
+  const pays = screen({ mission: def, progress: defense(2, 9, 9, { total: 34, left: 1 }) });
   assert.equal(pays.heroLabel, "Rotation B at the end of ");
   assert.equal(pays.heroValue, "this wave");
   assert.equal(pays.heroCls, "next-big word accent");
   assert.equal([pays.line, pays.lineValue].join(" "), "Hydron · B at end of this wave", "One line stays within its 260 px");
   assert.equal(pays.heroSub, "Now: wave 9 · 1 enemy left");
-  const cleared = logic.buildScreen(input(value({ mission: def, progress: defense(3, 9, 12, { total: 34, left: 0 }) })));
+  const cleared = screen({ mission: def, progress: defense(3, 9, 12, { total: 34, left: 0 }) });
   assert.equal(cleared.heroLabel, "Rotation C at the end of wave ");
   assert.equal(cleared.heroValue, "12");
   assert.equal(cleared.heroSub, "Wave 9 done");
-  const counting = logic.buildScreen(input(value({ mission: def, progress: defense(6, 20, 21, { total: 40, left: null }) })));
+  const counting = screen({ mission: def, progress: defense(6, 20, 21, { total: 40, left: null }) });
   assert.equal(counting.heroSub, "Now: wave 20");
   assert.equal(counting.trackLabel, "Cycle 2");
 });
@@ -215,28 +234,28 @@ test("defense: a wave already past means its reward was given; every 3 waves, ev
 });
 
 test("before the mission: the three rotations stacked; Defense pays every 3 waves", () => {
-  const s = logic.buildScreen(input(value({ mission: mission({ state: "selected", startedAt: null }), progress: null })));
+  const s = screen({ mission: picked(), progress: null });
   assert.equal(s.eyebrow, "Survival · picked");
   assert.equal(s.info, "One rotation every 5 min · C at 20 min");
   assert.deepEqual(s.sections.map((x) => x.title), ["Rotation A", "Rotation B", "Rotation C"]);
   assert.equal(s.track.length, 0);
-  const d = logic.buildScreen(input(value({ mission: mission({ ...HYDRON, state: "selected", startedAt: null }), progress: null })));
+  const d = screen({ mission: picked(HYDRON), progress: null });
   assert.equal(d.info, "One rotation every 3 waves · C at wave 12");
   assert.equal(d.line, "Hydron · C at wave 12");
 });
 
 test("unknown progress (Excavation, Disruption): stacked tables, no rotation made up", () => {
   const exc = mission({ type: { id: "excavation", name: "Excavation" } });
-  const s = logic.buildScreen(input(value({ mission: exc, progress: progress(0, { rotation: null, cycle: null }) })));
+  const s = screen({ mission: exc, progress: untracked() });
   assert.equal(s.heroValue, "");
   assert.equal(s.track.length, 0);
   assert.equal(s.sections.length, 3);
-  const dis = logic.buildScreen(input(value({ mission: mission({ type: { id: "disruption", name: "Disruption" } }), progress: progress(2, { round: 2, rotation: "B", cycle: null }) })));
+  const dis = screen({ mission: mission({ type: { id: "disruption", name: "Disruption" } }), progress: progress(2, { round: 2, rotation: "B", cycle: null }) });
   assert.equal(dis.track.length, 0, "a Disruption has no cycle");
 });
 
 test("interception: the rotation at the end of the next round", () => {
-  const s = logic.buildScreen(input(value({ mission: mission({ type: { id: "interception", name: "Interception" } }), progress: progress(2, { round: 2 }) })));
+  const s = screen({ mission: mission({ type: { id: "interception", name: "Interception" } }), progress: progress(2, { round: 2 }) });
   assert.equal(s.info, "Rotation B at the end of round 3");
   assert.equal(s.sections[0].title, "Possible loot · rotation B");
 });
@@ -292,24 +311,24 @@ test("images: the game's once the host has it, an empty tile while it may come, 
 
 test("Compact: the height never moves within a mission, empty lines up to the node's longest rotation", () => {
   const now = START + 60_000;
-  const a = logic.buildScreen(input(value({ mission: mission(), progress: survival(0, START + 5 * MIN) }), { now, layout: "compact" }));
-  const b = logic.buildScreen(input(value({ mission: mission(), progress: survival(2, START + 15 * MIN) }), { now: START + 14 * MIN, layout: "compact" }));
+  const a = screen({ mission: mission(), progress: survival(0, START + 5 * MIN) }, { now, layout: "compact" });
+  const b = screen({ mission: mission(), progress: survival(2, START + 15 * MIN) }, { now: START + 14 * MIN, layout: "compact" });
   assert.equal(a.sections[0].rows.length + a.sections[0].fill.length, 3);
   assert.equal(b.sections[0].rows.length + b.sections[0].fill.length, 3);
   assert.equal(b.sections[0].fill.length, 1);
   const long = { source: "node", tables: [MOT.tables[0], { kind: "mission", rotation: "B", items: Array.from({ length: 14 }, (_, i) => item(`x${i}`, `X${i}`, 0.05)) }, MOT.tables[2]] };
-  const c = logic.buildScreen(input(value({ mission: mission({ rewards: long }), progress: survival(0, START + 5 * MIN) }), { now }));
+  const c = screen({ mission: mission({ rewards: long }), progress: survival(0, START + 5 * MIN) }, { now });
   assert.deepEqual([c.sections[0].rows.length, c.sections[0].fill.length, c.sections[0].fillMore], [3, 0, false], "Full: the user's frame keeps the height, no empty line");
-  const compact = logic.buildScreen(input(value({ mission: mission({ rewards: long }), progress: survival(0, START + 5 * MIN) }), { now, layout: "compact" }));
+  const compact = screen({ mission: mission({ rewards: long }), progress: survival(0, START + 5 * MIN) }, { now, layout: "compact" });
   assert.deepEqual([compact.sections[0].rows.length, compact.sections[0].fill.length, compact.sections[0].fillMore], [3, 0, true], "Compact: A's 3 rows; B has + n more, an empty one here");
 });
 
 test("where the loot comes from: an Arbitration's own table, a Sortie's reward, a Nightmare mod", () => {
   const arbTables = { source: "arbitration", tables: MOT.tables };
-  const arb = logic.buildScreen(input(value({ mission: mission({ rewards: arbTables, modifiers: [{ id: "arbitration", name: "Arbitration", stage: null }] }), progress: progress(5, { clock: "running", nextRewardAt: START + 30 * MIN }, true) }), { now: START + 28 * MIN }));
+  const arb = screen({ mission: mission({ rewards: arbTables, modifiers: [{ id: "arbitration", name: "Arbitration", stage: null }] }), progress: progress(5, { clock: "running", nextRewardAt: START + 30 * MIN }, true) }, { now: START + 28 * MIN });
   assert.equal(arb.sections[0].title, "Arbitration · rotation C");
   const one = { kind: "mission", rotation: null, items: [item("forma", "Forma", 0.025), item("legendary_core", "Legendary Core", 0.0019)] };
-  const sortie = logic.buildScreen(input(value({ mission: mission({ rewards: { source: "sortie", tables: [one] }, faction: null, modifiers: [{ id: "sortie", name: "Sortie", stage: 1 }] }), progress: progress(0, { rotation: null, cycle: null }) })));
+  const sortie = screen({ mission: mission({ rewards: { source: "sortie", tables: [one] }, faction: null, modifiers: [{ id: "sortie", name: "Sortie", stage: 1 }] }), progress: untracked() });
   assert.deepEqual(sortie.sections.map((x) => x.title), ["Sortie reward"]);
   assert.equal(sortie.info, "Just one, after the 3rd mission");
   assert.equal(sortie.heroValue, "");
@@ -318,7 +337,7 @@ test("where the loot comes from: an Arbitration's own table, a Sortie's reward, 
   assert.deepEqual(sortie.pills.map((x) => x.text), ["Sortie 1/3"]);
   assert.equal(sortie.line, "Mot · reward after the 3rd mission");
   const mod = { kind: "mission", rotation: "A", items: [item("blaze", "Blaze", 0.0101), item("ice_storm", "Ice Storm", 0.1897)] };
-  const nightmare = logic.buildScreen(input(value({ mission: mission({ type: { id: "extermination", name: "Extermination" }, rewards: { source: "nightmare", tables: [mod] }, modifiers: [{ id: "nightmare", name: "Nightmare", stage: null }] }), progress: progress(0, { rotation: null, cycle: null }) })));
+  const nightmare = screen({ mission: mission({ type: { id: "extermination", name: "Extermination" }, rewards: { source: "nightmare", tables: [mod] }, modifiers: [{ id: "nightmare", name: "Nightmare", stage: null }] }), progress: untracked() });
   assert.deepEqual(nightmare.sections.map((x) => x.title), ["Nightmare mod, once"]);
   assert.equal(nightmare.track.length, 0);
   assert.equal(nightmare.line, "Mot · Nightmare mod, once");
@@ -326,34 +345,32 @@ test("where the loot comes from: an Arbitration's own table, a Sortie's reward, 
 
 test("no loot: known on loading, or no published table; a new node; loot unavailable", () => {
   const iliad = { node: { id: "SolNode305", name: "Iliad" }, planet: { id: "phobos", name: "Phobos" }, type: { id: "assassination", name: "Assassination" }, faction: null };
-  const pending = logic.buildScreen(input(value({ mission: mission({ ...iliad, state: "selected", startedAt: null, rewards: null, rewardsPending: true }), progress: null })));
+  const pending = screen({ mission: picked({ ...iliad, rewards: null, rewardsPending: true }), progress: null });
   assert.equal(pending.empty.icon, "hourglass");
   assert.equal(pending.empty.title, "Loot known on loading");
   assert.equal(pending.empty.titleCls, "muted");
   assert.equal(pending.line, "Iliad · loot on loading");
-  const archon = logic.buildScreen(input(value({ mission: mission({ ...iliad, state: "loading", startedAt: null, rewards: null, modifiers: [{ id: "archon_hunt", name: "Archon Hunt", stage: 3 }] }), progress: null })));
+  const archon = screen({ mission: mission({ ...iliad, state: "loading", startedAt: null, rewards: null, modifiers: [{ id: "archon_hunt", name: "Archon Hunt", stage: 3 }] }), progress: null });
   assert.equal(archon.empty.icon, "package-x");
   assert.equal(archon.empty.title, "No published loot table for this mission");
   assert.equal(archon.line, "Iliad · no table");
   assert.deepEqual([archon.lineIcon, archon.lineTone], ["package-x", "muted"], "One line shows the panel's crossed-out box");
   assert.deepEqual([pending.lineIcon, pending.lineTone], ["hourglass", "muted"], "and the hourglass while it waits");
   assert.deepEqual(archon.pills.map((x) => x.text), ["Archon Hunt"]);
-  const ext = logic.buildScreen(input(value({ mission: mission({ type: { id: "extermination", name: "Exterminate" }, state: "selected", startedAt: null, rewards: null }), progress: null })));
+  const ext = screen({ mission: picked({ type: { id: "extermination", name: "Exterminate" }, rewards: null }), progress: null });
   assert.equal(ext.empty.title, "No published loot table for this mission", "an ordinary Exterminate, from its pick");
   assert.equal(ext.source, false);
-  const fresh = logic.buildScreen(input(value({ mission: mission({ state: "loading", node: { id: "SolNode999", name: null }, rewards: null }), progress: null })));
+  const fresh = screen({ mission: mission({ state: "loading", node: { id: "SolNode999", name: null }, rewards: null }), progress: null });
   assert.equal(fresh.node, "New node");
   assert.equal(fresh.empty.title, "Loot not published yet");
-  const off = value({ mission: mission({ rewards: null }), progress: survival(2, START + 15 * MIN) });
-  off.features.rewards = "unavailable";
-  const s = logic.buildScreen(input(off, { now: START + MIN }));
+  const s = screen({ mission: mission({ rewards: null }), progress: survival(2, START + 15 * MIN) }, { now: START + MIN }, { features: { rewards: "unavailable" } });
   assert.equal(s.empty.title, "Loot unavailable for now");
   assert.equal(s.heroLabel, "Rotation B in");
 });
 
 test("an end reward without rotation names it in One line", () => {
   const ps = { source: "node", tables: [{ kind: "mission", rotation: null, items: [item("loki_systems_blueprint", "Loki Systems Blueprint", 0.2256)] }] };
-  const ass = logic.buildScreen(input(value({ mission: mission({ type: { id: "assassination", name: "Assassination" }, rewards: ps }), progress: progress(0, { rotation: null, cycle: null }) })));
+  const ass = screen({ mission: mission({ type: { id: "assassination", name: "Assassination" }, rewards: ps }), progress: untracked() });
   assert.equal(ass.info, "No rotation: one reward at the end");
   assert.equal(ass.sections[0].title, "End reward");
   assert.equal(ass.line, "Mot · Loki Systems Blueprint");
@@ -366,19 +383,19 @@ test("the recap: one line of facts, no table; the rotations in green, the credit
   const ok = logic.buildScreen(input(ended({})));
   assert.equal(ok.eyebrow, "Survival · succeeded");
   assert.equal(ok.tone, "success");
-  assert.deepEqual([ok.factsTop, ok.factsLead, ok.factsGot, ok.factsTail], ["", "1:02:14 · ", "A ×6 · B ×3 · C ×3", ""]);
+  assert.deepEqual([ok.factsTop, ok.factsLead, ok.factsGot], ["", "1:02:14 · ", "A ×6 · B ×3 · C ×3"]);
   assert.deepEqual(ok.recap.map((r) => r.label + r.text), ["End bonus: 128,450 Credits"], "the end bonus on its own line");
   assert.equal(ok.factsCls, "facts-got");
   assert.equal(ok.track.length + ok.sections.length + ok.cols.length, 0, "no cells, no tables");
   assert.equal(ok.source, false);
-  assert.equal(ok.clock, "");
+  assert.equal(logic.hasClock(ok), false);
   assert.equal(ok.line, "Mot · A ×6 · B ×3 · C ×3");
   const wide = logic.buildScreen(input(ended({}), { layout: "wide" }));
   assert.equal(wide.cols.length, 0);
   const onlyA = logic.buildScreen(input(ended({ earned: earned(2), credits: 34300, durationSeconds: 393.6 })));
   assert.equal(onlyA.factsGot, "A ×2");
-  const def = logic.buildScreen(input(value({ mission: mission({ ...HYDRON, state: "ended", result: "succeeded", endedAt: START, durationSeconds: 1530.4, earned: earned(8), credits: 61870 }), progress: defense(8, 24, 27, { total: 44, left: 0 }) })));
-  assert.deepEqual([def.factsTop, def.factsLead, def.factsGot, def.factsTail], ["25:30 · 24 waves", "", "A ×4 · B ×2 · C ×2", ""], "a Defense on two lines, never cut in a group");
+  const def = screen({ mission: mission({ ...HYDRON, state: "ended", result: "succeeded", endedAt: START, durationSeconds: 1530.4, earned: earned(8), credits: 61870 }), progress: defense(8, 24, 27, { total: 44, left: 0 }) });
+  assert.deepEqual([def.factsTop, def.factsLead, def.factsGot], ["25:30 · 24 waves", "", "A ×4 · B ×2 · C ×2"], "a Defense on two lines, never cut in a group");
   assert.deepEqual(def.recap.map((r) => r.text), ["61,870 Credits"]);
   const noCredits = logic.buildScreen(input(ended({ credits: null })));
   assert.deepEqual(noCredits.recap, []);
@@ -388,7 +405,7 @@ test("the recap of a mission lost: the duration and the rotations lost, in neutr
   const lost = (result, n) => value({ mission: mission({ state: "ended", result, endedAt: START, durationSeconds: 880, earned: earned(n), credits: null }), progress: progress(n) });
   const aborted = logic.buildScreen(input(lost("aborted", 2)));
   assert.equal(aborted.tone, "warning");
-  assert.deepEqual([aborted.factsLead, aborted.factsGot, aborted.factsTail], ["14:40 · ", "Rotations lost: A ×2", ""]);
+  assert.deepEqual([aborted.factsLead, aborted.factsGot], ["14:40 · ", "Rotations lost: A ×2"]);
   assert.equal(aborted.factsCls, "facts-got lost");
   assert.equal(aborted.info, "");
   const failed = logic.buildScreen(input(lost("failed", 3)));
@@ -400,7 +417,7 @@ test("the recap of a mission lost: the duration and the rotations lost, in neutr
 });
 
 test("game closed: the same recap, its result and how long ago", () => {
-  const v = value({ mission: mission({ state: "ended", result: "succeeded", endedAt: START, durationSeconds: 3734.4, earned: earned(12), credits: 128450 }), progress: progress(12) }, { playing: false });
+  const v = value({ mission: ENDED_HOUR, progress: progress(12) }, { playing: false });
   const now = START + 2 * 3600_000 + 5 * MIN;
   const s = logic.buildScreen(input(v, { now }));
   assert.equal(logic.eyebrowText(s, now), "Survival · succeeded · 2 h ago");
@@ -410,11 +427,12 @@ test("game closed: the same recap, its result and how long ago", () => {
 });
 
 test("the stored last mission: the recap's facts, and an older stored shape ignored", () => {
-  const last = logic.lastFrom(mission({ state: "ended", result: "succeeded", endedAt: START, durationSeconds: 3734.4, earned: earned(12), credits: 128450 }), progress(12), START, "Credits");
+  const last = logic.lastFrom(ENDED_HOUR, progress(12), START, "Credits");
   assert.deepEqual(last.got, { A: 6, B: 3, C: 3 });
   assert.equal(last.credits, 128450);
   assert.equal(logic.isLast(last), true);
-  const s = logic.buildScreen(input(value({}), { last }));
+  assert.equal(logic.isLast({ ...last, typeId: "survival", rewards: 12 }), true, "a mission stored with fields this version no longer keeps");
+  const s = screen({}, { last });
   assert.equal(s.eyebrow, "Survival · last mission");
   assert.deepEqual(s.recap.map((r) => r.text), ["128,450 Credits"]);
   const old = { node: "Mot", planet: "Void", faction: "Corrupted", factionId: "corrupted", typeId: "survival", typeName: "Survival", result: "succeeded", durationSeconds: 1241, rewards: 4, endedAt: START };
@@ -427,9 +445,7 @@ test("the screen at start, refused, unreadable", () => {
   assert.equal(denied.empty.title, "Allow “Warframe: missions” in the Control Center.");
   assert.equal(denied.empty.titleCls, "tone-warning");
   assert.equal(denied.line, "Access denied · Control Center");
-  const off = value({});
-  off.features.mission = "unavailable";
-  assert.equal(logic.buildScreen(input(off)).empty.title, "Missions can't be read");
+  assert.equal(screen({}, {}, { features: { mission: "unavailable" } }).empty.title, "Missions can't be read");
 });
 
 test("an error never takes the place of a value still known: it goes beside it", () => {
@@ -439,15 +455,11 @@ test("an error never takes the place of a value still known: it goes beside it",
   assert.equal(lost.heroLabel, "Rotation B in");
   assert.equal(lost.status, "Allow “Warframe: missions” in the Control Center.");
   assert.equal([lost.line, logic.at(lost.lineValue, lost, now), lost.lineAfter].join("|"), "|14:00|· Access denied");
-  const noLoot = value({ mission: mission({ rewards: null }), progress: survival(2, START + 15 * MIN) });
-  noLoot.features.rewards = "undeclared";
-  const s = logic.buildScreen(input(noLoot, { now }));
+  const s = screen({ mission: mission({ rewards: null }), progress: survival(2, START + 15 * MIN) }, { now }, { features: { rewards: "undeclared" } });
   assert.equal(s.status, "Allow “Warframe: rewards” in the Control Center.");
   assert.equal(s.empty, null, "no false 'no loot table'");
   const last = logic.lastFrom(mission({ state: "ended", result: "succeeded", endedAt: START, durationSeconds: 1241, earned: earned(4), credits: 20000 }), progress(4), START, "Credits");
-  const off = value({});
-  off.features.mission = "unavailable";
-  const kept = logic.buildScreen(input(off, { last }));
+  const kept = screen({}, { last }, { features: { mission: "unavailable" } });
   assert.equal(kept.factsGot, "A ×2 · B ×1 · C ×1");
   assert.equal(kept.status, "Missions can't be read · restart Warframe");
   const refusedLast = logic.buildScreen(input(null, { last, failure: "permission_denied" }));
@@ -477,29 +489,28 @@ test("a relaunched mission folds the unfolded tables and starts again", async ()
   await flush();
   logic.toggle("list:A");
   assert.deepEqual(state.open, ["list:A"]);
-  vm.push(SERVICE, value({ mission: mission({ state: "selected", selectedAt: vm.now + 5, startedAt: null }), progress: null }));
+  vm.push(SERVICE, value({ mission: picked({ selectedAt: vm.now + 5 }), progress: null }));
   await flush();
   assert.deepEqual(state.open, []);
   assert.equal(state.s.eyebrow, "Survival · picked");
 });
 
-test("French app, English game: the widget's words in French, the game's names as the game writes them", () => {
-  vm.setHost({ locale: "fr", messages: FR });
-  const now = START + 13 * MIN + 12_000;
-  const s = logic.buildScreen(input(value({ mission: mission(), progress: survival(2, START + 15 * MIN) }), { now }));
-  assert.equal(s.heroLabel, "Rotation B dans");
-  assert.equal(logic.heroSubText(s, now), "Puis C dans 6:48");
-  assert.equal(s.eyebrow, "Survival · en cours");
-  assert.equal(s.sections[0].rows[0].chance, "12.50 %");
-  const def = logic.buildScreen(input(value({ mission: mission(HYDRON), progress: defense(2, 8, 9, { total: 32, left: 14 }) })));
-  assert.equal(def.heroLabel, "Rotation B à la fin de la vague ");
-  assert.equal(def.heroSub, "En cours : vague 8 · 14 ennemis restants");
-  const end = logic.buildScreen(input(value({ mission: mission({ state: "ended", result: "succeeded", endedAt: START, durationSeconds: 3734.4, earned: earned(12), credits: 128450 }), progress: progress(12) })));
-  assert.deepEqual(end.recap.map((r) => r.label + r.text), ["Prime de fin : 128,450 Credits"], "the game's word for credits");
-  const frGame = logic.buildScreen(input(value({ mission: mission({ state: "ended", result: "succeeded", endedAt: START, durationSeconds: 3734.4, earned: earned(12), credits: 128450 }), progress: progress(12) }, { glossary: { language: "fr", term: { reactant: "Réactif", relic: "Relique", credits: "Crédits" } } })));
-  assert.deepEqual(frGame.recap.map((r) => r.text), ["128,450 Crédits"]);
-  vm.setHost({ locale: "en", messages: EN });
-});
+test("French app, English game: the widget's words in French, the game's names as the game writes them", () =>
+  inFrench(() => {
+    const now = START + 13 * MIN + 12_000;
+    const s = screen({ mission: mission(), progress: survival(2, START + 15 * MIN) }, { now });
+    assert.equal(s.heroLabel, "Rotation B dans");
+    assert.equal(logic.heroSubText(s, now), "Puis C dans 6:48");
+    assert.equal(s.eyebrow, "Survival · en cours");
+    assert.equal(s.sections[0].rows[0].chance, "12.50 %");
+    const def = screen({ mission: mission(HYDRON), progress: defense(2, 8, 9, { total: 32, left: 14 }) });
+    assert.equal(def.heroLabel, "Rotation B à la fin de la vague ");
+    assert.equal(def.heroSub, "En cours : vague 8 · 14 ennemis restants");
+    const end = screen({ mission: ENDED_HOUR, progress: progress(12) });
+    assert.deepEqual(end.recap.map((r) => r.label + r.text), ["Prime de fin : 128,450 Credits"], "the game's word for credits");
+    const frGame = screen({ mission: ENDED_HOUR, progress: progress(12) }, {}, { glossary: GLOSSARY_FR });
+    assert.deepEqual(frGame.recap.map((r) => r.text), ["128,450 Crédits"]);
+  }));
 
 // ------------------------------------------------- the user's height, Sortie, Fissure, Circuit, open worlds
 
@@ -530,7 +541,7 @@ test("the manifest: the user's size, never the widget's; the world for the Circu
 });
 
 test("passive: as many rows as the height holds, then + n more for the commonest; interactive: every row, in a scroll", () => {
-  const v = value({ mission: sortie(), progress: progress(0, { rotation: null, cycle: null }) });
+  const v = value({ mission: sortie(), progress: untracked() });
   const at = (height, mode = "passive") => logic.buildScreen(input(v, { mode, height })).sections[0];
   assert.deepEqual([at(400).rows.length, at(400).more], [7, "+ 10 more, 2.50% to 28.00%"]);
   assert.deepEqual([at(560).rows.length, at(560).more], [13, "+ 4 more, 9.80% to 28.00%"]);
@@ -551,33 +562,31 @@ test("passive: as many rows as the height holds, then + n more for the commonest
 });
 
 test("passive: the tables share the height row by row, the shortest first; no room is left for a row more", () => {
-  const before = value({ mission: mission({ state: "selected", startedAt: null }), progress: null });
-  const s = logic.buildScreen(input(before, { mode: "passive", height: 520 }));
+  const s = screen({ mission: picked(), progress: null }, { mode: "passive", height: 520 });
   assert.deepEqual(s.sections.map((x) => x.rows.length), [3, 2, 2], "short tables shown whole");
   const many = (letter, n, base) => ({ kind: "mission", rotation: letter, items: Array.from({ length: n }, (_, i) => item(`${letter}${i}`, `${letter}${i}`, base + i / 1000)) });
   const three = { source: "node", tables: [many("A", 3, 0.2), many("B", 20, 0.01), many("C", 8, 0.05)] };
-  const stacked = logic.buildScreen(input(value({ mission: mission({ state: "selected", startedAt: null, rewards: three }), progress: null }), { mode: "passive", height: 400 }));
+  const stacked = screen({ mission: picked({ rewards: three }), progress: null }, { mode: "passive", height: 400 });
   // 400 px: 202 px for the rows (3 titles, 2 gaps): A whole (87), then one row each and + n more for B and C (98).
   assert.deepEqual(stacked.sections.map((x) => [x.rows.length, x.more]), [[3, ""], [1, "+ 19 more, 1.10% to 2.90%"], [1, "+ 7 more, 5.10% to 5.70%"]]);
-  const roomy = logic.buildScreen(input(value({ mission: mission({ state: "selected", startedAt: null, rewards: three }), progress: null }), { mode: "passive", height: 560 }));
+  const roomy = screen({ mission: picked({ rewards: three }), progress: null }, { mode: "passive", height: 560 });
   assert.deepEqual(roomy.sections.map((x) => x.rows.length), [3, 4, 4], "every row the height gives, shared");
-  const live = value({ mission: mission({ rewards: three }), progress: survival(2, START + 15 * MIN) });
-  const p = logic.buildScreen(input(live, { mode: "passive", height: 400, now: START + 11 * MIN }));
+  const p = screen({ mission: mission({ rewards: three }), progress: survival(2, START + 15 * MIN) }, { mode: "passive", height: 400, now: START + 11 * MIN });
   assert.deepEqual([p.sections[0].title, p.sections[0].rows.length, p.sections[0].fill.length, p.sections[0].more], ["Possible loot · rotation B", 6, 0, "+ 14 more, 1.60% to 2.90%"]);
 });
 
 test("Sortie: its table from the pick; a type not known before loading names no type", () => {
-  const picked = sortie({ state: "selected", startedAt: null, loadingAt: null, type: null, typeAtLoading: true });
-  const s = logic.buildScreen(input(value({ mission: picked, progress: null })));
+  const pick = sortie({ state: "selected", startedAt: null, loadingAt: null, type: null, typeAtLoading: true });
+  const s = screen({ mission: pick, progress: null });
   assert.equal(s.eyebrow, "Sortie");
   assert.equal(s.eyebrowIcon, "map-pin");
   assert.deepEqual(s.sections.map((x) => x.title), ["Sortie reward"]);
   assert.equal(s.info, "Just one, after the 3rd mission");
   assert.deepEqual(s.pills.map((x) => x.text), ["Sortie 1/3"]);
   assert.equal(s.line, "Morax · reward after the 3rd mission");
-  const known = logic.buildScreen(input(value({ mission: sortie({ state: "selected", startedAt: null }), progress: null })));
+  const known = screen({ mission: sortie({ state: "selected", startedAt: null }), progress: null });
   assert.equal(known.eyebrow, "Excavation · picked");
-  const live = logic.buildScreen(input(value({ mission: sortie(), progress: progress(0, { rotation: null, cycle: null }) })));
+  const live = screen({ mission: sortie(), progress: untracked() });
   assert.equal(live.eyebrow, "Excavation · in progress");
 });
 
@@ -599,7 +608,7 @@ const ROCHE = { node: { id: "SolNode304", name: "Roche" }, planet: { id: "phobos
 const fissure = (r, over = {}) => mission({ ...ROCHE, fissure: { id: "meso", name: "Meso" }, rewards: null, relic: r, ...over });
 
 test("Fissure: your relic on top, its items the rarest first at its refinement's rates", () => {
-  const s = logic.buildScreen(input(value({ mission: fissure(relic("radiant")), progress: progress(0, { rotation: null, cycle: null }) })));
+  const s = screen({ mission: fissure(relic("radiant")), progress: untracked() });
   assert.equal(s.empty, null, "no 'no table' for the node");
   assert.equal(s.info, "10 Reactant to open the relic");
   const head = s.sections[0];
@@ -614,18 +623,16 @@ test("Fissure: your relic on top, its items the rarest first at its refinement's
 });
 
 test("Fissure: a refinement the game's words do not tell shows the rarity, never a made-up rate; a relic without items", () => {
-  const s = logic.buildScreen(input(value({ mission: fissure(relic(null)), progress: null })));
+  const s = screen({ mission: fissure(relic(null)), progress: null });
   const head = s.sections[0];
   assert.deepEqual([head.badge, head.badgeCls], ["Refinement unknown", "ref-chip unknown"]);
   assert.deepEqual(head.rows.map((r) => r.chance), ["rare", "uncommon", "uncommon", "common", "common", "common"]);
-  vm.setHost({ locale: "fr", messages: FR });
-  const fr = logic.buildScreen(input(value({ mission: fissure(relic(null)), progress: null })));
+  const fr = inFrench(() => screen({ mission: fissure(relic(null)), progress: null }));
   assert.deepEqual(fr.sections[0].rows.map((r) => r.chance), ["rare", "peu commun", "peu commun", "commun", "commun", "commun"]);
   assert.deepEqual([fr.sections[0].title, fr.sections[0].badge, fr.info], ["Votre relique", "Raffinement inconnu", "10 réactifs pour ouvrir la relique"]);
-  vm.setHost({ locale: "en", messages: EN });
-  const bare = logic.buildScreen(input(value({ mission: fissure(relic("intact", { items: [], icon: null, iconPending: false })), progress: null })));
+  const bare = screen({ mission: fissure(relic("intact", { items: [], icon: null, iconPending: false })), progress: null });
   assert.deepEqual([bare.sections[0].rows.length, bare.sections[0].more, bare.sections[0].glyph, bare.empty], [0, "", "hexagon", null]);
-  const surv = logic.buildScreen(input(value({ mission: mission({ fissure: { id: "meso", name: "Meso" }, relic: relic("radiant") }), progress: survival(1, START + 10 * MIN) }), { now: START + 6 * MIN }));
+  const surv = screen({ mission: mission({ fissure: { id: "meso", name: "Meso" }, relic: relic("radiant") }), progress: survival(1, START + 10 * MIN) }, { now: START + 6 * MIN });
   assert.deepEqual(surv.sections.map((x) => x.title), ["Your relic", "Possible loot · rotation A"], "the node's table under the relic");
   assert.equal(logic.heroSubText(surv, START + 6 * MIN), "Then B in 9:00");
   assert.equal(surv.info, "10 Reactant to open the relic");
@@ -633,7 +640,7 @@ test("Fissure: a refinement the game's words do not tell shows the rarity, never
 
 test("the recap: your relic, never 'obtained'; the end bonus on its own line, the credits in the game's word", () => {
   const ended = mission({ ...ROCHE, fissure: { id: "meso", name: "Meso" }, rewards: null, state: "ended", result: "succeeded", endedAt: START, durationSeconds: 131, credits: 1900, relic: relic("radiant", { reward: relicItem("orthos_prime_handle", "Orthos Prime Handle", "common", 0.1667, { icon: "asset:00000000000000aa" }) }) });
-  const s = logic.buildScreen(input(value({ mission: ended, progress: null })));
+  const s = screen({ mission: ended, progress: null });
   assert.equal(s.info, "Succeeded in 2 min 11");
   assert.deepEqual(s.recap.map((r) => [r.img, r.icon, r.label, r.text, r.cls]), [
     ["asset:00000000000000aa", "", "Your relic: ", "Orthos Prime Handle", "recap-value"],
@@ -645,16 +652,14 @@ test("the recap: your relic, never 'obtained'; the end bonus on its own line, th
   const last = logic.lastFrom(ended, null, START, "Credits");
   assert.equal(logic.isLast(last), true);
   assert.deepEqual(last.relic, { name: "Orthos Prime Handle", icon: "asset:00000000000000aa", glyph: "scroll-text" });
-  const stored = logic.buildScreen(input(value({}), { last: { ...last, relic: { ...last.relic, icon: "" } } }));
+  const stored = screen({}, { last: { ...last, relic: { ...last.relic, icon: "" } } });
   assert.deepEqual(stored.recap[0].icon, "scroll-text", "without its image, our icon of its kind");
-  const surv = logic.buildScreen(input(value({ mission: mission({ state: "ended", result: "succeeded", endedAt: START, durationSeconds: 1039, earned: earned(4), credits: 40000 }), progress: progress(4) })));
-  assert.deepEqual([surv.factsLead, surv.factsGot, surv.factsTail], ["17:19 · ", "A ×2 · B ×1 · C ×1", ""]);
+  const surv = screen({ mission: mission({ state: "ended", result: "succeeded", endedAt: START, durationSeconds: 1039, earned: earned(4), credits: 40000 }), progress: progress(4) });
+  assert.deepEqual([surv.factsLead, surv.factsGot], ["17:19 · ", "A ×2 · B ×1 · C ×1"]);
   assert.deepEqual(surv.recap.map((r) => r.label + r.text), ["End bonus: 40,000 Credits"]);
-  vm.setHost({ locale: "fr", messages: FR });
-  const fr = logic.buildScreen(input(value({ mission: ended, progress: null }, { glossary: { language: "fr", term: { reactant: "Réactif", relic: "Relique", credits: "Crédits" } } })));
+  const fr = inFrench(() => screen({ mission: ended, progress: null }, {}, { glossary: GLOSSARY_FR }));
   assert.deepEqual(fr.recap.map((r) => r.label + r.text), ["Votre relique : Orthos Prime Handle", "Prime de fin : 1,900 Crédits"]);
-  vm.setHost({ locale: "en", messages: EN });
-  const lost = logic.buildScreen(input(value({ mission: { ...ended, result: "aborted", credits: null, relic: relic("radiant") }, progress: null })));
+  const lost = screen({ mission: { ...ended, result: "aborted", credits: null, relic: relic("radiant") }, progress: null });
   assert.deepEqual(lost.recap, []);
 });
 
@@ -681,47 +686,43 @@ test("the Circuit: each round's table, then this week's tiers from the pick; no 
   assert.equal(s.eyebrowIcon, "infinity");
   assert.equal(s.line, "The Circuit · this week’s tiers");
   assert.equal(JSON.stringify(s).includes("not tracked"), false);
-  const none = logic.buildScreen(input(value({ mission: circuit({ state: "selected", startedAt: null }), progress: null, world: world({ normal: [], steelPath: [] }) })));
+  const none = screen({ mission: circuit({ state: "selected", startedAt: null }), progress: null, world: world({ normal: [], steelPath: [] }) });
   assert.equal(none.sections[1].title, "This week’s tiers");
-  vm.setHost({ locale: "fr", messages: FR });
-  const fr = logic.buildScreen(input(v));
+  const fr = inFrench(() => logic.buildScreen(input(v)));
   assert.deepEqual(fr.sections.map((x) => x.title), ["Chaque manche", "Paliers de la semaine · Titania"]);
   assert.deepEqual(fr.sections[1].rows.map((r) => `${r.name} ${r.chance}`), ["Neuroptiques palier 2", "Châssis palier 5", "Augment palier 7", "Systèmes palier 8", "Plan palier 10"]);
   assert.equal(fr.sections[1].note, "Paliers 1, 3, 4, 6, 9 : au hasard");
-  vm.setHost({ locale: "en", messages: EN });
 });
 
 test("the Circuit on the Steel Path: the two Incarnon picked, or yours unnamed when this session did not show them", () => {
   const steel = circuit({ modifiers: [{ id: "steel_path", name: "Steel Path", stage: null }] });
-  const s = logic.buildScreen(input(value({ mission: steel, progress: null, world: world({ normal: ["titania"], steelPath: ["paris_incarnon_genesis", "lato_incarnon_genesis"] }) })));
+  const s = screen({ mission: steel, progress: null, world: world({ normal: ["titania"], steelPath: ["paris_incarnon_genesis", "lato_incarnon_genesis"] }) });
   assert.equal(s.sections[1].title, "This week’s tiers · Incarnon");
   assert.deepEqual(s.sections[1].rows.map((r) => `${r.name} ${r.chance}`), ["Paris Incarnon Genesis tier 5 or 10", "Lato Incarnon Genesis tier 5 or 10"]);
   assert.equal(s.sections[1].note, "Tiers 1 to 4, 6 to 9: random");
-  const unseen = logic.buildScreen(input(value({ mission: steel, progress: null, world: world({ normal: [], steelPath: [] }) })));
+  const unseen = screen({ mission: steel, progress: null, world: world({ normal: [], steelPath: [] }) });
   assert.deepEqual(unseen.sections[1].rows.map((r) => `${r.name} ${r.chance}`), ["Your two Incarnon tier 5 or 10"]);
-  vm.setHost({ locale: "fr", messages: FR });
-  const fr = logic.buildScreen(input(value({ mission: steel, progress: null, world: world({ normal: [], steelPath: [] }) })));
+  const fr = inFrench(() => screen({ mission: steel, progress: null, world: world({ normal: [], steelPath: [] }) }));
   assert.deepEqual(fr.sections[1].rows.map((r) => `${r.name} ${r.chance}`), ["Vos deux Incarnon palier 5 ou 10"]);
   assert.equal(fr.sections[1].note, "Paliers 1 à 4, 6 à 9 : au hasard");
-  vm.setHost({ locale: "en", messages: EN });
 });
 
 const DRIFT = { node: { id: "SolNode229", name: "Cambion Drift" }, planet: { id: "deimos", name: "Deimos" }, faction: { id: "infested", name: "Infested" }, type: { id: "free_roam", name: "Free Roam" } };
 
 test("an open world by its gate: its header, no table; once left, the last real mission of the session or the first screen", () => {
-  const s = logic.buildScreen(input(value({ mission: mission({ ...DRIFT, rewards: null }), progress: null }), { now: START + 305_000 }));
+  const s = screen({ mission: mission({ ...DRIFT, rewards: null }), progress: null }, { now: START + 305_000 });
   assert.equal(s.eyebrow, "Free Roam · in progress");
   assert.equal(s.eyebrowIcon, "map");
   assert.equal(logic.clockValue(s, START + 305_000), "5:05");
   assert.deepEqual([s.empty.icon, s.empty.title, s.empty.titleCls, s.empty.iconCls], ["map", "No table in an open world", "soft", "soft"]);
   assert.equal(s.line, "Cambion Drift · no table");
   const left = { seq: 9, type: "mission_left", at: START + 400_000, mission: mission({ ...DRIFT, rewards: null }) };
-  const fresh = logic.buildScreen(input(value({}, { events: [left] })));
+  const fresh = screen({}, {}, { events: [left] });
   assert.equal(fresh.empty.title, "Pick a mission");
   const old = logic.lastFrom(mission({ state: "ended", result: "succeeded", endedAt: START - 3600_000, durationSeconds: 600, earned: earned(2), credits: 100 }), progress(2), START, "Credits");
-  assert.equal(logic.buildScreen(input(value({}, { events: [left] }), { last: old })).empty.title, "Pick a mission", "a mission of an earlier session is not this session's");
+  assert.equal(screen({}, { last: old }, { events: [left] }).empty.title, "Pick a mission", "a mission of an earlier session is not this session's");
   const recent = { ...old, endedAt: START - 60_000 };
-  assert.equal(logic.buildScreen(input(value({}, { events: [left] }), { last: recent })).eyebrow, "Survival · last mission");
+  assert.equal(screen({}, { last: recent }, { events: [left] }).eyebrow, "Survival · last mission");
 });
 
 test("the stored recap keeps the game's word for credits, and not the relic's image of this session", async () => {

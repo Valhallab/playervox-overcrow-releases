@@ -21,9 +21,11 @@ import {
   storage,
   t,
   timers,
+  type IconName,
   type Timer,
   type WarframeEvents,
   type WarframeMission,
+  type WarframeModifier,
   type WarframeProgress,
   type WarframeRelic,
   type WarframeReward,
@@ -49,7 +51,8 @@ export const WIDE_FROM = 580;
 /** The storage key of the last mission. */
 export const LAST_KEY = "last";
 
-type Letter = "A" | "B" | "C";
+const LETTERS = ["A", "B", "C"] as const;
+type Letter = (typeof LETTERS)[number];
 type Tone = "accent" | "success" | "danger" | "warning" | "muted";
 type Result = NonNullable<WarframeMission["result"]>;
 export type Layout = "line" | "compact" | "standard" | "wide";
@@ -61,11 +64,9 @@ export type LastMission = {
   planet: string;
   faction: string;
   factionId: string;
-  typeId: string;
   typeName: string;
   result: Result | null;
   durationSeconds: number | null;
-  rewards: number;
   endedAt: number;
   /** Rotations earned, by letter. */
   got: Partial<Record<Letter, number>>;
@@ -89,13 +90,13 @@ export interface Row {
   /** The item's image from the game (an `asset:` handle); empty without. */
   icon: string;
   /** Our icon of the item's kind when no image will come; empty while one may. */
-  glyph: string;
+  glyph: IconName | "";
   /** Its chance from 0 to 1, for "+ n more"; -1 when it has none (a tier, a rarity). */
   p: number;
 }
 
 /** Our icon of each kind of item, when the game's image will not come. */
-const KIND_ICONS: Readonly<Record<WarframeReward["category"], string>> = {
+const KIND_ICONS: Readonly<Record<WarframeReward["category"], IconName>> = {
   relic: "hexagon",
   mod: "layers",
   resource: "gem",
@@ -111,7 +112,7 @@ const KIND_ICONS: Readonly<Record<WarframeReward["category"], string>> = {
  * The image of an item: the game's once PlayerVox OverCrow has it; an empty
  * tile while it may still come; our icon of its kind when none will.
  */
-export function itemImage(item: WarframeReward): Pick<Row, "icon" | "glyph"> {
+export function itemImage(item: Pick<WarframeReward, "icon" | "iconPending" | "category">): Pick<Row, "icon" | "glyph"> {
   if (item.icon !== null && item.icon !== undefined) return { icon: item.icon, glyph: "" };
   if (item.iconPending === true) return { icon: "", glyph: "" };
   return { icon: "", glyph: KIND_ICONS[item.category] ?? "package" };
@@ -128,8 +129,6 @@ export interface Section {
   open: boolean;
   /** Wide: the column of the rotation in progress, in accent. */
   now: boolean;
-  /** Wide: a rotation already earned in this cycle, with a check. */
-  earned: boolean;
   /** "×3": how many times this rotation was earned; empty when never. */
   got: string;
   /** Empty lines that keep the height of the longest rotation. */
@@ -142,7 +141,7 @@ export interface Section {
    * `glyph`), `name` and refinement chip (`badge`, `badgeCls`). */
   relic: boolean;
   img: string;
-  glyph: string;
+  glyph: IconName | "";
   name: string;
   badge: string;
   badgeCls: string;
@@ -163,9 +162,8 @@ export interface Cell {
   id: string;
   label: string;
   cls: string;
-  earned: boolean;
   /** `check` when earned, empty otherwise. */
-  icon: string;
+  icon: IconName | "";
 }
 
 /** A modifier's chip; a type, so that the stored last mission is JSON. */
@@ -176,7 +174,7 @@ export type Pill = {
 };
 
 export interface Box {
-  icon: string;
+  icon: IconName;
   tone: Tone;
   title: string;
   text: string;
@@ -194,11 +192,8 @@ export interface Box {
  */
 export interface Screen {
   eyebrow: string;
-  eyebrowIcon: string;
+  eyebrowIcon: IconName;
   tone: Tone;
-  /** The header's value: the wave, or nothing. */
-  clock: string;
-  clockIcon: string;
   /** The mission clock counts from here, Unix ms; `null` without one. */
   clockFrom: number | null;
   node: string;
@@ -216,7 +211,7 @@ export interface Screen {
   /** Defense: the label and its number on one line. */
   heroInline: boolean;
   /** An icon in place of the number: the countdown has not started. */
-  heroIcon: string;
+  heroIcon: IconName | "";
   heroSub: string;
   /** "Cycle 2" before the cells from the second cycle on. */
   trackLabel: string;
@@ -226,7 +221,6 @@ export interface Screen {
   factsTop: string;
   factsGot: string;
   factsCls: string;
-  factsTail: string;
   subAt: number | null;
   /** A plain line instead of a hero: before the mission, after it. */
   info: string;
@@ -243,7 +237,7 @@ export interface Screen {
   empty: Box | null;
   line: string;
   lineValue: string;
-  lineIcon: string;
+  lineIcon: IconName;
   lineTone: Tone;
   /** One line: words after the value ("· Access denied"); empty without. */
   lineAfter: string;
@@ -299,24 +293,14 @@ export function countdownText(ms: number): string {
   return clockText(Math.ceil(Math.max(0, ms) / 1000) * 1000);
 }
 
-/** "20 min 41", "1 h 05 min", "41 s": how long a mission lasted. */
-export function durationText(seconds: number): string {
-  const total = Math.max(0, Math.floor(seconds));
-  const h = Math.floor(total / 3600);
-  const m = Math.floor(total / 60) % 60;
-  const s = total % 60;
-  if (h > 0) return t("dur-hm", { h, m: pad(m) });
-  if (m > 0) return t("dur-ms", { m, s: pad(s) });
-  return t("dur-s", { s });
-}
-
-/** "13 min", "1 h 05 min", "41 s": a rough length. */
-export function minutesText(seconds: number): string {
+/** "20 min 41", "1 h 05 min", "41 s": how long a mission lasted; without
+ * its seconds, a rough length ("13 min"). */
+export function durationText(seconds: number, withSeconds = true): string {
   const total = Math.max(0, Math.floor(seconds));
   const h = Math.floor(total / 3600);
   const m = Math.floor(total / 60) % 60;
   if (h > 0) return t("dur-hm", { h, m: pad(m) });
-  if (m > 0) return t("dur-m", { m });
+  if (m > 0) return withSeconds ? t("dur-ms", { m, s: pad(total % 60) }) : t("dur-m", { m });
   return t("dur-s", { s: total });
 }
 
@@ -415,7 +399,6 @@ export function track(c: Cycle, current: boolean): Cell[] {
     id: `${i}`,
     label,
     cls: `cell${i < c.earned ? " earned" : ""}${current && i === c.earned ? " now" : ""}`,
-    earned: i < c.earned,
     icon: i < c.earned ? "check" : "",
   }));
 }
@@ -436,10 +419,10 @@ export function sortItems<T extends { chance: number }>(items: readonly T[], ord
 
 /** "+ 6 more at 6.25%", or "+ 11 more, 2.26% to 9.68%" when they differ;
  * "+ 2 more" for rows without a chance (a rarity, a tier). */
-export function moreText(hidden: readonly { chance: number }[]): string {
+export function moreText(hidden: readonly Row[]): string {
   if (hidden.length === 0) return "";
-  if (hidden.some((r) => r.chance < 0)) return t("more-count", { count: hidden.length });
-  const rates = hidden.map((r) => Math.round(r.chance * 10_000));
+  if (hidden.some((r) => r.p < 0)) return t("more-count", { count: hidden.length });
+  const rates = hidden.map((r) => Math.round(r.p * 10_000));
   const lo = Math.min(...rates);
   const hi = Math.max(...rates);
   if (lo === hi) return t("more-same", { count: hidden.length, rate: rateText(lo / 10_000) });
@@ -458,31 +441,36 @@ export function section(
   order: Order,
   open: readonly string[],
 ): Section {
-  const rows = sortItems(table.items, order).map((item, i) => ({
-    id: `${i}-${item.id}`,
-    name: item.name,
-    qty: item.quantity > 1 ? `×${formatNumber(item.quantity)}` : "",
-    chance: rateText(item.chance),
-    ...itemImage(item),
-    p: item.chance,
-  }));
+  const rows = sortItems(table.items, order).map((item, i) => itemRow(item, i, rateText(item.chance), item.chance));
   return rowsSection(id, title, rows, cap, open);
 }
 
+/** An item's row: `chance` as shown, `p` from 0 to 1 (-1 without one). */
+function itemRow(item: Omit<WarframeReward, "chance">, i: number, chance: string, p: number): Row {
+  return {
+    id: `${i}-${item.id}`,
+    name: item.name,
+    qty: item.quantity > 1 ? `×${formatNumber(item.quantity)}` : "",
+    chance,
+    ...itemImage(item),
+    p,
+  };
+}
+
 /** Rows as a table: `cap` of them, then "+ n more" (all of them with a
- * single one to hide, or unfolded). `cap` is infinite in Full. */
+ * single one to hide, or unfolded). `cap` is infinite in Full. Listed, as
+ * a table that pays; `stacked` lists none. */
 function rowsSection(id: string, title: string, all: Row[], cap: number, open: readonly string[]): Section {
   const unfolded = open.includes(id);
   const rows = unfolded || all.length <= cap + 1 ? all : all.slice(0, cap);
   return {
     id,
-    cls: "section",
+    cls: "section listed",
     title,
     rows,
-    more: moreText(all.slice(rows.length).map((r) => ({ chance: r.p }))),
+    more: moreText(all.slice(rows.length)),
     open: unfolded,
     now: false,
-    earned: false,
     got: "",
     fill: [],
     fillMore: false,
@@ -547,7 +535,7 @@ function otherSections(tables: Tables, letter: Letter | null, cap: number, input
 
 // ------------------------------------------------------------------ screen
 
-const TYPE_ICONS: Readonly<Record<string, string>> = {
+const TYPE_ICONS: Readonly<Record<string, IconName>> = {
   survival: "timer",
   void_cascade: "timer",
   defense: "shield",
@@ -560,6 +548,21 @@ const TYPE_ICONS: Readonly<Record<string, string>> = {
 };
 
 const FACTIONS = new Set(["grineer", "corpus", "infested", "corrupted", "sentient", "murmur", "narmer"]);
+
+/** The faction's dot: its colour, or the unknown one's. */
+function factionCls(id: string): string {
+  return `dot f-${FACTIONS.has(id) ? id : "unknown"}`;
+}
+
+/** A modifier's chip in the header: its id and icon. */
+const PILLS: Readonly<Partial<Record<WarframeModifier["id"], readonly [string, IconName]>>> = {
+  steel_path: ["sp", "flame"],
+  arbitration: ["ar", "scale"],
+  sortie: ["so", "swords"],
+  nightmare: ["nm", "moon"],
+  archon_hunt: ["ah", "crown"],
+  alert: ["al", "siren"],
+};
 
 /** How a type pays its rotations, when it is known. */
 function cadence(typeId: string): "time" | "waves" | "rounds" | "excavation" | null {
@@ -575,8 +578,6 @@ function blank(): Screen {
     eyebrow: t("title"),
     eyebrowIcon: "gift",
     tone: "muted",
-    clock: "",
-    clockIcon: "clock-3",
     clockFrom: null,
     node: "",
     planet: "",
@@ -595,7 +596,6 @@ function blank(): Screen {
     factsTop: "",
     factsGot: "",
     factsCls: "facts-got",
-    factsTail: "",
     subAt: null,
     info: "",
     track: [],
@@ -615,7 +615,7 @@ function blank(): Screen {
   };
 }
 
-function waiting(icon: string, tone: Tone, title: string, text: string): Screen {
+function waiting(icon: IconName, tone: Tone, title: string, text: string): Screen {
   return { ...blank(), empty: { icon, tone, title, text, titleCls: "", iconCls: "" }, line: title, lineIcon: icon, lineTone: tone };
 }
 
@@ -636,40 +636,51 @@ function typeLater(mission: WarframeMission): string | null {
   return activity?.name ?? t("mission");
 }
 
+/** The modifiers' chips, in the mission's order (a Sortie with its stage), then the Fissure's. */
+function pillsOf(mission: WarframeMission): Pill[] {
+  const pills: Pill[] = [];
+  for (const modifier of mission.modifiers) {
+    const pill = PILLS[modifier.id];
+    if (pill === undefined) continue;
+    const text = modifier.id === "sortie" && modifier.stage !== null ? `${modifier.name} ${modifier.stage}/3` : modifier.name;
+    pills.push({ id: pill[0], text, icon: pill[1] });
+  }
+  if (mission.fissure !== null) {
+    pills.push({ id: "fi", text: t("fissure", { era: mission.fissure.name ?? mission.fissure.id }), icon: "hexagon" });
+  }
+  return pills;
+}
+
 /** The header of a mission: node, planet, faction, Steel Path and Fissure. */
 function header(mission: WarframeMission): Screen {
   const s = blank();
   s.node = nodeName(mission);
   s.planet = mission.planet?.name ?? "";
   s.faction = mission.faction?.name ?? "";
-  const fid = mission.faction?.id ?? "";
-  s.factionCls = `dot f-${FACTIONS.has(fid) ? fid : "unknown"}`;
-  for (const modifier of mission.modifiers) {
-    if (modifier.id === "steel_path") s.pills.push({ id: "sp", text: modifier.name, icon: "flame" });
-    if (modifier.id === "arbitration") s.pills.push({ id: "ar", text: modifier.name, icon: "scale" });
-    if (modifier.id === "sortie") s.pills.push({ id: "so", text: modifier.stage === null ? modifier.name : `${modifier.name} ${modifier.stage}/3`, icon: "swords" });
-    if (modifier.id === "nightmare") s.pills.push({ id: "nm", text: modifier.name, icon: "moon" });
-    if (modifier.id === "archon_hunt") s.pills.push({ id: "ah", text: modifier.name, icon: "crown" });
-    if (modifier.id === "alert") s.pills.push({ id: "al", text: modifier.name, icon: "siren" });
-  }
-  if (mission.fissure !== null) {
-    s.pills.push({ id: "fi", text: t("fissure", { era: mission.fissure.name ?? mission.fissure.id }), icon: "hexagon" });
-  }
+  s.factionCls = factionCls(mission.faction?.id ?? "");
+  s.pills = pillsOf(mission);
   return s;
+}
+
+/** A rotation's table under its own name ("Rotation A"). */
+function rotationSection(prefix: string, l: Letter, cap: number, tables: Tables, input: Input): Section {
+  return section(`${prefix}:${l}`, t("stack-rotation", { r: l }), tables.rotations[l] as WarframeRewardTable, cap, input.order, input.open);
 }
 
 /** The rotations stacked, a few rows each: before the mission, or when its progress is unknown. */
 function stacked(s: Screen, tables: Tables, input: Input): void {
   const compact = input.layout === "compact";
   const cap = capOf(input, ROWS_STACK_COMPACT);
-  const letters = (["A", "B", "C"] as const).filter((l) => tables.rotations[l] !== undefined);
+  const letters = LETTERS.filter((l) => tables.rotations[l] !== undefined);
   if (input.layout === "wide") {
-    s.cols = letters.map((l) => section(`col:${l}`, t("stack-rotation", { r: l }), tables.rotations[l] as WarframeRewardTable, ROWS_LIST, input.order, input.open));
+    s.cols = letters.map((l) => rotationSection("col", l, ROWS_LIST, tables, input));
     s.sections = otherSections(tables, null, ROWS_LIST, input, "list");
   } else {
-    s.sections = letters.map((l) => section(`stack:${l}`, t("stack-rotation", { r: l }), tables.rotations[l] as WarframeRewardTable, cap, input.order, input.open));
+    s.sections = letters.map((l) => rotationSection("stack", l, cap, tables, input));
     if (!compact) s.sections.push(...otherSections(tables, null, cap, input, "stack"));
   }
+  // None pays more than another: none listed.
+  for (const sec of [...s.cols, ...s.sections]) sec.cls = "section";
   s.source = true;
 }
 
@@ -681,14 +692,11 @@ function listed(s: Screen, tables: Tables, letter: Letter | null, got: Partial<R
     if (tables.end === null) return;
     s.sections = [section("end", t("list-end"), tables.end, cap, input.order, input.open)];
   } else if (input.layout === "wide") {
-    s.cols = (["A", "B", "C"] as const)
-      .filter((l) => tables.rotations[l] !== undefined)
-      .map((l) => ({
-        ...section(`col:${l}`, t("stack-rotation", { r: l }), tables.rotations[l] as WarframeRewardTable, ROWS_LIST, input.order, input.open),
-        now: l === letter,
-        earned: (got[l] ?? 0) > 0,
-        got: (got[l] ?? 0) > 0 ? `×${got[l]}` : "",
-      }));
+    s.cols = LETTERS.filter((l) => tables.rotations[l] !== undefined).map((l) => ({
+      ...rotationSection("col", l, ROWS_LIST, tables, input),
+      now: l === letter,
+      got: (got[l] ?? 0) > 0 ? `×${got[l]}` : "",
+    }));
   } else {
     const table = tables.rotations[letter];
     if (table === undefined) return stacked(s, tables, input);
@@ -710,7 +718,6 @@ function listed(s: Screen, tables: Tables, letter: Letter | null, got: Partial<R
     }];
   }
   if (!compact) s.sections.push(...otherSections(tables, letter, cap, input, "list"));
-  for (const sec of s.sections) sec.cls = "section listed";
   s.source = true;
 }
 
@@ -739,54 +746,52 @@ function cadenceLine(node: string, typeId: string): string {
   return c === null ? t("line-untracked", { node }) : t(`line-cadence-${c}`, { node });
 }
 
-/** The tables part shared by every mission before its end. */
-function loot(s: Screen, mission: WarframeMission, rewardsFeature: string, keepLine = false): Tables | null {
-  if (mission.rewards === null) {
-    let line = s.line;
-    // One line of "known on loading" or "no table" shows the panel's icon.
-    let icon = "";
-    if (rewardsFeature === "undeclared") {
-      // Refused: the status line says so.
-    } else if (mission.type?.id === "free_roam") {
-      // An open world by its hub's gate: a walk, no table.
-      s.empty = { icon: "map", tone: "muted", title: t("open-world-title"), text: "", titleCls: "soft", iconCls: "soft" };
-      line = t("line-loot-none", { node: s.node });
-      icon = "map";
-    } else if (rewardsFeature === "unavailable") {
-      s.empty = { icon: "package-x", tone: "muted", title: t("rewards-off-title"), text: t("rewards-off-text"), titleCls: "", iconCls: "" };
-      line = t("line-rewards-off", { node: s.node });
-    } else if (mission.node.name === null) {
-      s.empty = { icon: "package-open", tone: "muted", title: t("unknown-title"), text: t("unknown-text"), titleCls: "", iconCls: "" };
-      line = t("line-unknown", { node: s.node });
-    } else if (mission.rewardsPending) {
-      // Not known yet: a node of today's Sortie or Archon Hunt is only
-      // told apart at loading.
-      s.empty = { icon: "hourglass", tone: "muted", title: t("loot-later-title"), text: "", titleCls: "muted", iconCls: "" };
-      line = t("line-loot-later", { node: s.node });
-      icon = "hourglass";
-    } else if (mission.relic !== null) {
-      // A Void Fissure on a node without a table: the relic is what it gives.
-      line = t("line-relic", { node: s.node, relic: mission.relic.name });
-      icon = "hexagon";
-    } else {
-      // No published table: Archon Hunt, Alert, Netracell, or a type without one.
-      s.empty = { icon: "package-x", tone: "muted", title: t("loot-none-title"), text: "", titleCls: "", iconCls: "" };
-      line = t("line-loot-none", { node: s.node });
-      icon = "package-x";
-    }
-    if (!keepLine) {
-      s.line = line;
-      if (icon !== "") {
-        s.lineIcon = icon;
-        s.lineTone = icon === "hexagon" ? "accent" : "muted";
-      }
-    }
-    return null;
-  }
+/** The mission's tables, sorted out; `null` without any. */
+function tablesOf(mission: WarframeMission): Tables | null {
+  if (mission.rewards === null) return null;
   const tables = sortTables(mission.rewards.tables);
   tables.source = mission.rewards.source;
   tables.sourceName = mission.modifiers.find((m) => m.id === tables.source)?.name ?? "";
   return tables;
+}
+
+/** A mission without tables: the panel's box that says why, and One line. */
+function noTable(s: Screen, mission: WarframeMission, rewardsFeature: string): void {
+  // One line of "known on loading" or "no table" shows the panel's icon.
+  let icon: IconName | "" = "";
+  if (rewardsFeature === "undeclared") {
+    // Refused: the status line says so.
+  } else if (mission.type?.id === "free_roam") {
+    // An open world by its hub's gate: a walk, no table.
+    s.empty = { icon: "map", tone: "muted", title: t("open-world-title"), text: "", titleCls: "soft", iconCls: "soft" };
+    s.line = t("line-loot-none", { node: s.node });
+    icon = "map";
+  } else if (rewardsFeature === "unavailable") {
+    s.empty = { icon: "package-x", tone: "muted", title: t("rewards-off-title"), text: t("rewards-off-text"), titleCls: "", iconCls: "" };
+    s.line = t("line-rewards-off", { node: s.node });
+  } else if (mission.node.name === null) {
+    s.empty = { icon: "package-open", tone: "muted", title: t("unknown-title"), text: t("unknown-text"), titleCls: "", iconCls: "" };
+    s.line = t("line-unknown", { node: s.node });
+  } else if (mission.rewardsPending) {
+    // Not known yet: a node of today's Sortie or Archon Hunt is only
+    // told apart at loading.
+    s.empty = { icon: "hourglass", tone: "muted", title: t("loot-later-title"), text: "", titleCls: "muted", iconCls: "" };
+    s.line = t("line-loot-later", { node: s.node });
+    icon = "hourglass";
+  } else if (mission.relic !== null) {
+    // A Void Fissure on a node without a table: the relic is what it gives.
+    s.line = t("line-relic", { node: s.node, relic: mission.relic.name });
+    icon = "hexagon";
+  } else {
+    // No published table: Archon Hunt, Alert, Netracell, or a type without one.
+    s.empty = { icon: "package-x", tone: "muted", title: t("loot-none-title"), text: "", titleCls: "", iconCls: "" };
+    s.line = t("line-loot-none", { node: s.node });
+    icon = "package-x";
+  }
+  if (icon !== "") {
+    s.lineIcon = icon;
+    s.lineTone = icon === "hexagon" ? "accent" : "muted";
+  }
 }
 
 /**
@@ -799,7 +804,7 @@ function oneTable(s: Screen, tables: Tables, input: Input): boolean {
   if (table === undefined) return false;
   const cap = capOf(input, ROWS_COMPACT);
   const title = t(`list-${tables.source}`, { name: tables.sourceName });
-  s.sections = [{ ...section("one", title, table, cap, input.order, input.open), cls: "section listed" }];
+  s.sections = [section("one", title, table, cap, input.order, input.open)];
   if (tables.source === "sortie") s.info = t("info-sortie");
   s.line = t(`line-${tables.source}`, { node: s.node, name: tables.sourceName });
   s.source = true;
@@ -808,7 +813,7 @@ function oneTable(s: Screen, tables: Tables, input: Input): boolean {
 
 /** The Circuit's fixed tiers of the week, as the official wiki gives them:
  * the picked Warframe's parts, its augment at tier 7. */
-const CIRCUIT_TIERS: readonly (readonly [string, number, string])[] = [
+const CIRCUIT_TIERS: readonly (readonly [string, number, IconName])[] = [
   ["neuroptics", 2, "scroll-text"],
   ["chassis", 5, "scroll-text"],
   ["augment", 7, "layers"],
@@ -816,7 +821,7 @@ const CIRCUIT_TIERS: readonly (readonly [string, number, string])[] = [
   ["blueprint", 10, "scroll-text"],
 ];
 
-function tierRow(id: string, name: string, chance: string, glyph: string): Row {
+function tierRow(id: string, name: string, chance: string, glyph: IconName): Row {
   return { id, name, qty: "", chance, icon: "", glyph, p: -1 };
 }
 
@@ -829,7 +834,7 @@ function circuit(s: Screen, mission: WarframeMission, tables: Tables, input: Inp
   if (tables.source !== "circuit") return false;
   const cap = capOf(input, ROWS_COMPACT);
   const round = tables.others.find((x) => x.kind === "round") ?? tables.end;
-  s.sections = round === undefined || round === null ? [] : [section("round", t("circuit-round"), round, cap, input.order, input.open)];
+  s.sections = round === null ? [] : [section("round", t("circuit-round"), round, cap, input.order, input.open)];
   const week = input.value?.info.world?.circuit ?? null;
   const named = (list: readonly { id: string; name: string | null }[] | undefined, id: string) => list?.find((x) => x.id === id)?.name ?? id;
   let tiers: Section;
@@ -846,8 +851,6 @@ function circuit(s: Screen, mission: WarframeMission, tables: Tables, input: Inp
     tiers = { ...rowsSection("tiers", title, rows, cap, input.open), note: t("circuit-random") };
   }
   s.sections.push(tiers);
-  for (const sec of s.sections) sec.cls = "section listed";
-  s.info = "";
   s.line = t("line-circuit", { node: s.node });
   s.lineIcon = "infinity";
   s.source = true;
@@ -858,22 +861,16 @@ function circuit(s: Screen, mission: WarframeMission, tables: Tables, input: Inp
 const RARITY: Readonly<Record<string, number>> = { rare: 0, uncommon: 1, common: 2 };
 
 /** The equipped relic: its block, then its items at its refinement's rates. */
-export function relicSection(relic: WarframeRelic, value: WarframeEvents | null, input: Input): Section {
+export function relicSection(relic: WarframeRelic, input: Input): Section {
   const items = relic.items.map((item) => ({ item, chance: item.chance ?? RARITY[item.rarity] ?? 2 }));
-  const rows = sortItems(items, input.order).map(({ item }, i) => ({
-    id: `${i}-${item.id}`,
-    name: item.name,
-    qty: item.quantity > 1 ? `×${formatNumber(item.quantity)}` : "",
-    chance: item.chance === null ? t(`rarity-${item.rarity}`) : rateText(item.chance),
-    ...itemImage(item as unknown as WarframeReward),
-    p: item.chance ?? -1,
-  }));
+  const rows = sortItems(items, input.order).map(({ item }, i) =>
+    itemRow(item, i, item.chance === null ? t(`rarity-${item.rarity}`) : rateText(item.chance), item.chance ?? -1),
+  );
   const ref = relic.refinement;
-  const glossary = value?.glossary.refinement as Readonly<Record<string, string>> | undefined;
-  const image = itemImage({ icon: relic.icon, iconPending: relic.iconPending, category: "relic" } as WarframeReward);
+  const glossary = input.value?.glossary.refinement as Readonly<Record<string, string>> | undefined;
+  const image = itemImage({ icon: relic.icon, iconPending: relic.iconPending, category: "relic" });
   return {
     ...rowsSection("relic", t("your-relic"), rows, capOf(input, ROWS_COMPACT), input.open),
-    cls: "section listed",
     relic: true,
     img: image.icon,
     glyph: image.glyph,
@@ -886,7 +883,7 @@ export function relicSection(relic: WarframeRelic, value: WarframeEvents | null,
 /** A Void Fissure's relic, once the game asked to confirm it: on top of the tables. */
 function withRelic(s: Screen, mission: WarframeMission, input: Input): void {
   if (mission.relic === null) return;
-  s.sections.unshift(relicSection(mission.relic, input.value, input));
+  s.sections.unshift(relicSection(mission.relic, input));
   s.info = s.info === "" ? t("relic-reactant") : `${s.info} · ${t("fissure-reactant")}`;
   s.source = true;
 }
@@ -901,8 +898,9 @@ function before(mission: WarframeMission, input: Input, rewardsFeature: string):
   s.lineIcon = s.eyebrowIcon;
   s.lineTone = "accent";
   s.line = t("line-type", { node: s.node, type: typeName(mission) });
-  const tables = loot(s, mission, rewardsFeature);
+  const tables = tablesOf(mission);
   if (tables === null) {
+    noTable(s, mission, rewardsFeature);
     // A new node: its loot is not out yet, but its type still says when C comes.
     if (mission.node.name === null && s.empty !== null) s.info = cadenceInfo(typeId);
     withRelic(s, mission, input);
@@ -933,21 +931,26 @@ function live(mission: WarframeMission, progress: WarframeProgress | null, input
   s.lineIcon = s.eyebrowIcon;
   s.lineTone = "accent";
   s.clockFrom = mission.startedAt;
-  const special = mission.rewards !== null ? loot(blank(), mission, rewardsFeature) : null;
-  if (special !== null && (oneTable(s, special, input) || circuit(s, mission, special, input))) return s;
+  const tables = tablesOf(mission);
+  if (tables !== null && (oneTable(s, tables, input) || circuit(s, mission, tables, input))) return s;
   const p = project(progress, input.now);
   // With the relic known, its block says how to open it.
   const fissure = mission.fissure !== null && mission.relic === null ? ` · ${t("fissure-reactant")}` : "";
 
   if (p !== null) {
+    if (tables === null) {
+      // The panel says why there is no table; One line says the progress
+      // (below), with the type's icon.
+      noTable(s, mission, rewardsFeature);
+      s.lineIcon = s.eyebrowIcon;
+      s.lineTone = "accent";
+    }
     // Arbitrations pay C for ever after their first A A B B: the cells
     // then say what was earned, and the C to come.
     const allC = p.cycle.rotations.every((l) => l === "C");
     if (allC) {
-      s.track = (["A", "B", "C"] as const)
-        .filter((l) => p.totals[l] > 0)
-        .map((l) => ({ id: l, label: `${l} ×${p.totals[l]}`, cls: "cell earned", earned: true, icon: "check" }));
-      s.track.push({ id: "next", label: "C", cls: "cell now", earned: false, icon: "" });
+      s.track = earnedLetters(p.totals).map(({ l, label }) => ({ id: l, label, cls: "cell earned", icon: "check" }));
+      s.track.push({ id: "next", label: "C", cls: "cell now", icon: "" });
       s.trackLabel = "";
     } else {
       s.track = track(p.cycle, !p.waiting);
@@ -998,10 +1001,8 @@ function live(mission: WarframeMission, progress: WarframeProgress | null, input
       s.info = t("info-next", { r: p.letter });
       s.line = t("line-next", { node: s.node, r: p.letter });
     }
-    const earned = p.totals;
-    const tables = loot(s, mission, rewardsFeature, true);
     if (tables !== null) {
-      if (hasRotations(tables)) listed(s, tables, p.letter, earned, input);
+      if (hasRotations(tables)) listed(s, tables, p.letter, p.totals, input);
       else if (tables.end !== null) listed(s, tables, null, {}, input);
     }
     withRelic(s, mission, input);
@@ -1010,8 +1011,8 @@ function live(mission: WarframeMission, progress: WarframeProgress | null, input
 
   // No rotation counted: one reward at the end, or rotations we cannot follow.
   s.line = t("line-type", { node: s.node, type: typeName(mission) });
-  const tables = loot(s, mission, rewardsFeature);
   if (tables === null) {
+    noTable(s, mission, rewardsFeature);
     withRelic(s, mission, input);
     return s;
   }
@@ -1033,7 +1034,13 @@ function live(mission: WarframeMission, progress: WarframeProgress | null, input
 }
 
 const RESULT_TONE: Readonly<Record<Result, Tone>> = { succeeded: "success", failed: "danger", aborted: "warning" };
-const RESULT_ICON: Readonly<Record<Result, string>> = { succeeded: "circle-check", failed: "circle-x", aborted: "log-out" };
+const RESULT_ICON: Readonly<Record<Result, IconName>> = { succeeded: "circle-check", failed: "circle-x", aborted: "log-out" };
+
+/** The eyebrow of a result; without one, `none` muted. */
+function resultEyebrow(s: Screen, result: Result | null, none: IconName): void {
+  s.eyebrowIcon = result === null ? none : RESULT_ICON[result];
+  s.tone = result === null ? "muted" : RESULT_TONE[result];
+}
 
 /** The last mission from what Warframe last told. */
 export function lastFrom(mission: WarframeMission, progress: WarframeProgress | null, fallbackAt: number, creditsName = ""): LastMission {
@@ -1043,17 +1050,15 @@ export function lastFrom(mission: WarframeMission, progress: WarframeProgress | 
     planet: mission.planet?.name ?? "",
     faction: mission.faction?.name ?? "",
     factionId: mission.faction?.id ?? "",
-    typeId: mission.type?.id ?? "",
     typeName: typeName(mission),
     result: mission.result,
     durationSeconds: mission.durationSeconds,
-    rewards: progress?.rewards ?? 0,
     endedAt: mission.endedAt ?? fallbackAt,
     got,
     credits: mission.credits === null ? null : Math.round(mission.credits),
     creditsName,
     waves: mission.type?.id === "defense" ? (progress?.wave ?? null) : null,
-    pills: header(mission).pills,
+    pills: pillsOf(mission),
     relic: relicReward(mission.relic),
   };
 }
@@ -1065,9 +1070,14 @@ function relicReward(relic: WarframeRelic | null): LastMission["relic"] {
   return { name: reward.name, icon: reward.icon ?? "", glyph: KIND_ICONS[reward.category] ?? "package" };
 }
 
+/** The rotations earned, in order: "A ×6", "B ×3"… */
+function earnedLetters(got: Partial<Record<Letter, number>>): { l: Letter; label: string }[] {
+  return LETTERS.filter((l) => (got[l] ?? 0) > 0).map((l) => ({ l, label: `${l} ×${got[l]}` }));
+}
+
 /** "A ×6 · B ×3 · C ×3". */
 function gotText(got: Partial<Record<Letter, number>>): string {
-  return (["A", "B", "C"] as const).filter((l) => (got[l] ?? 0) > 0).map((l) => `${l} ×${got[l]}`).join(" · ");
+  return earnedLetters(got).map((x) => x.label).join(" · ");
 }
 
 /**
@@ -1081,28 +1091,26 @@ function after(last: LastMission, how: "fresh" | "last" | "closed", input: Input
   s.node = last.node;
   s.planet = last.planet;
   s.faction = last.faction;
-  s.factionCls = `dot f-${FACTIONS.has(last.factionId) ? last.factionId : "unknown"}`;
+  s.factionCls = factionCls(last.factionId);
   s.pills = last.pills;
   const result = last.result;
   const lost = result === "failed" || result === "aborted";
   const word = t(`res-${result ?? "ended"}`);
   if (how === "fresh") {
     s.eyebrow = t("state-result", { type: last.typeName, result: word });
-    s.eyebrowIcon = result === null ? "flag" : RESULT_ICON[result];
-    s.tone = result === null ? "muted" : RESULT_TONE[result];
+    resultEyebrow(s, result, "flag");
   } else if (how === "last") {
     s.eyebrow = t("state-last", { type: last.typeName });
     s.eyebrowIcon = "rocket";
   } else {
     s.eyebrow = result === null ? last.typeName : t("state-result", { type: last.typeName, result: word });
-    s.eyebrowIcon = result === null ? "clock-3" : RESULT_ICON[result];
-    s.tone = result === null ? "muted" : RESULT_TONE[result];
+    resultEyebrow(s, result, "clock-3");
     s.agoFrom = last.endedAt;
   }
   s.lineIcon = s.eyebrowIcon;
   s.lineTone = how === "fresh" ? s.tone : "muted";
   const d = last.durationSeconds;
-  const got = last.got ?? {};
+  const got = last.got;
   const total = Object.values(got).reduce((a, n) => a + (n ?? 0), 0);
   // The game never says which item was won: one line of facts, no tables.
   // Duration · (waves ·) rotations · credits; what was lost when it was.
@@ -1118,7 +1126,7 @@ function after(last: LastMission, how: "fresh" | "last" | "closed", input: Input
     s.factsGot = lost ? t("facts-lost", { got: gotText(got) }) : gotText(got);
     s.factsCls = lost ? "facts-got lost" : "facts-got";
   } else if (result === "failed") {
-    s.info = d === null ? t("summary-failed-nod") : t("summary-failed", { duration: minutesText(d) });
+    s.info = d === null ? t("summary-failed-nod") : t("summary-failed", { duration: durationText(d, false) });
   } else if (result === "aborted") {
     s.info = t("summary-aborted");
   } else if (d !== null) {
@@ -1126,7 +1134,7 @@ function after(last: LastMission, how: "fresh" | "last" | "closed", input: Input
   }
   // Under the facts: what the player's relic gave (never "obtained": the
   // game does not say which relic of the squad was chosen), the end bonus.
-  const relic = last.relic ?? null;
+  const relic = last.relic;
   if (relic !== null) {
     s.recap.push({ id: "relic", img: relic.icon, icon: relic.icon === "" ? relic.glyph : "", label: t("recap-relic"), text: relic.name, cls: "recap-value" });
   }
@@ -1139,7 +1147,6 @@ function after(last: LastMission, how: "fresh" | "last" | "closed", input: Input
   return s;
 }
 
-/** The whole screen, from what is known at `input.now`. */
 /** The features the widget declares, in the manifest's order. */
 const DECLARED = ["mission", "progress", "rewards", "world"] as const;
 
@@ -1163,9 +1170,8 @@ function known(input: Input): Screen | null {
   const progress = value?.info.progress ?? null;
   const playing = value?.playing ?? false;
   const rewardsFeature = value?.features.rewards ?? "available";
-  if (mission !== null && !playing) return after(lastFrom(mission, progress, input.now, creditsName(value)), "closed", input);
   if (mission !== null) {
-    if (mission.state === "ended") return after(lastFrom(mission, progress, input.now, creditsName(value)), "fresh", input);
+    if (!playing || mission.state === "ended") return after(lastFrom(mission, progress, input.now, creditsName(value)), playing ? "fresh" : "closed", input);
     if (mission.state === "in_progress") return live(mission, progress, input, rewardsFeature);
     return before(mission, input, rewardsFeature);
   }
@@ -1294,7 +1300,7 @@ export function fitTables(s: Screen, width: number, height: number): void {
   secs.forEach((sec, i) => {
     const k = shown[i] ?? 0;
     if (k >= sec.rows.length) return;
-    sec.more = moreText(sec.rows.slice(k).map((r) => ({ chance: r.p })));
+    sec.more = moreText(sec.rows.slice(k));
     sec.rows = sec.rows.slice(0, k);
   });
 }
@@ -1312,20 +1318,21 @@ export function buildScreen(input: Input): Screen {
 
 function screenOf(input: Input): Screen {
   const denied = refused(input);
+  const deniedText = denied === null ? "" : t("denied", { feature: t(`feature-${denied}`) });
   const unreadable =
     denied === null &&
     (input.failure !== null || (input.value?.playing === true && input.value.features.mission === "unavailable"));
   const s = known(input);
   if (s === null) {
     if (denied !== null) {
-      const box = waiting("circle-alert", "warning", t("denied", { feature: t(`feature-${denied}`) }), "");
+      const box = waiting("circle-alert", "warning", deniedText, "");
       return { ...box, empty: { ...(box.empty as Box), titleCls: "tone-warning" }, line: t("line-denied") };
     }
     if (unreadable) return waiting("circle-alert", "warning", t("unavailable-title"), t("unavailable-text"));
     return waiting("gift", "muted", t("first-title"), t("first-text"));
   }
   if (denied !== null) {
-    s.status = t("denied", { feature: t(`feature-${denied}`) });
+    s.status = deniedText;
   } else if (unreadable) {
     s.status = t("status-unreadable");
   }
@@ -1368,10 +1375,10 @@ export function isLast(v: unknown): v is LastMission {
   const pills = o.pills;
   const relic = o.relic as Record<string, unknown> | null | undefined;
   return (
-    (relic === null || (typeof relic === "object" && relic !== undefined && ["name", "icon", "glyph"].every((k) => typeof relic[k] === "string"))) &&
-    str("node") && str("planet") && str("faction") && str("factionId") && str("typeId") && str("typeName") && str("creditsName") &&
+    (relic === null || (typeof relic === "object" && ["name", "icon", "glyph"].every((k) => typeof relic[k] === "string"))) &&
+    str("node") && str("planet") && str("faction") && str("factionId") && str("typeName") && str("creditsName") &&
     (o.result === null || o.result === "succeeded" || o.result === "failed" || o.result === "aborted") &&
-    (o.durationSeconds === null || num(o.durationSeconds)) && num(o.rewards) && num(o.endedAt) &&
+    (o.durationSeconds === null || num(o.durationSeconds)) && num(o.endedAt) &&
     (o.credits === null || num(o.credits)) && (o.waves === null || num(o.waves)) &&
     typeof got === "object" && got !== null && Object.entries(got).every(([k, n]) => (k === "A" || k === "B" || k === "C") && num(n)) &&
     Array.isArray(pills) && pills.length <= 8 &&
@@ -1382,7 +1389,6 @@ export function isLast(v: unknown): v is LastMission {
 let value: WarframeEvents | null = null;
 let failure: string | null = null;
 let last: LastMission | null = null;
-let shown = "";
 let ticker: Timer | null = null;
 
 const state = initState({ s: blank(), now: Date.now(), open: [] as string[] });
@@ -1402,15 +1408,11 @@ function inputNow(): Input {
   };
 }
 
-/** Rebuilds the screen; the view only changes when it does. */
+/** Rebuilds the screen (the VM compares the view by value). */
 function refresh(): void {
   const input = inputNow();
   const next = buildScreen(input);
-  const text = JSON.stringify(next);
-  if (text !== shown) {
-    shown = text;
-    state.s = next;
-  }
+  state.s = next;
   state.now = input.now;
   arm(next, input.now);
 }
@@ -1517,11 +1519,11 @@ export function heroSubText(s: Screen, now: number): string {
 }
 
 export function clockValue(s: Screen, now: number): string {
-  return s.clockFrom === null ? s.clock : clockText(now - s.clockFrom);
+  return s.clockFrom === null ? "" : clockText(now - s.clockFrom);
 }
 
 export function hasClock(s: Screen): boolean {
-  return s.clockFrom !== null || s.clock !== "";
+  return s.clockFrom !== null;
 }
 
 export function hasText(text: string): boolean {

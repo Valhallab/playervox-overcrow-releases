@@ -90,7 +90,7 @@
           <box class={colCls(col)}>
             <box class="col-head">
               <text class="col-title">{col.title}</text>
-              <if test={col.earned}>
+              <if test={hasText(col.got)}>
                 <icon class="col-check" name="check"/>
                 <text class="col-got">{col.got}</text>
               </if>
@@ -127,7 +127,7 @@
         <text class={"eyebrow tone-" + state.s.tone}>{eyebrowText(state.s, state.now)}</text>
         <box class="grow"/>
         <if test={hasClock(state.s)}>
-          <icon class="clock-icon" name={state.s.clockIcon}/>
+          <icon class="clock-icon" name="clock-3"/>
           <text class="clock">{clockValue(state.s, state.now)}</text>
         </if>
       </box>
@@ -199,9 +199,7 @@
       <if test={hasText(state.s.factsTop)}>
         <text class="facts">{state.s.factsTop}</text>
       </if>
-      <if test={hasText(state.s.factsGot)}>
-        <text class="facts"><span>{state.s.factsLead}</span><span class={state.s.factsCls}>{state.s.factsGot}</span><span>{state.s.factsTail}</span></text>
-      </if>
+      <text class="facts"><span>{state.s.factsLead}</span><span class={state.s.factsCls}>{state.s.factsGot}</span></text>
       </box>
     </if>
 
