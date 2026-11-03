@@ -1,7 +1,18 @@
 // Synthetic Warframe values for the unit tests, in the shapes of
-// gameEvents.warframe.subscribe. Every instant is taken from Thursday
-// 2026-10-29 10:00 UTC: the Sortie ends at 16:00 UTC, the week on Monday
-// 2026-11-02 00:00 UTC, Baro Ki'Teer comes on Friday at 13:00 UTC.
+// gameEvents.warframe.subscribe, and the helpers the tests share. Every
+// instant is taken from Thursday 2026-10-29 10:00 UTC: the Sortie ends at
+// 16:00 UTC, the week on Monday 2026-11-02 00:00 UTC, Baro Ki'Teer comes on
+// Friday at 13:00 UTC.
+import { readFileSync } from "node:fs";
+
+export const SERVICE = "gameEvents.warframe.subscribe";
+/** Lets the logic's pending promises settle. */
+export const flush = () => new Promise((resolve) => setImmediate(resolve));
+/** The widget's messages in a locale. */
+export const messages = (locale) => JSON.parse(readFileSync(new URL(`../locales/${locale}.json`, import.meta.url), "utf8"));
+/** An activity of a model, by its ID. */
+export const actOf = (model, id) => model.cols.flatMap((col) => col.groups.flatMap((group) => group.acts)).find((each) => each.id === id);
+
 export const HOUR = 3_600_000;
 export const DAY = 24 * HOUR;
 export const NOW = Date.UTC(2026, 9, 29, 10);
@@ -77,6 +88,22 @@ export function world(now = NOW, changes = {}) {
         challenge("mirror_mirror", "Mirror, Mirror", "elite", WEEK_END),
       ],
     },
+    ...changes,
+  };
+}
+
+/** Whole inputs of `buildModel`: every activity tracked, nothing ticked, the world at NOW, Passive at 300 points. */
+export function inputs(logic, changes = {}) {
+  return {
+    ticks: logic.emptyTicks(),
+    world: world(),
+    worldStatus: "available",
+    source: "available",
+    tracked: { sortie: true, archon: true, netracells: true, circuit: true, steel: true, nightwave: true },
+    baro: true,
+    now: NOW,
+    interactive: false,
+    width: 300,
     ...changes,
   };
 }

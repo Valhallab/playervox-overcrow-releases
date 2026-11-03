@@ -9,14 +9,31 @@ import { test } from "node:test";
 import { installRuntime } from "@overcrow/sdk/testing";
 
 import { loadLogic } from "./load-logic.mjs";
-import { DAY, HOUR, NOW, SORTIE_END, WEEK_END, archon, challenge, ended, missionAt, replaced, sortie, value, world } from "./fixtures.mjs";
+import {
+  DAY,
+  HOUR,
+  NOW,
+  SERVICE,
+  SORTIE_END,
+  WEEK_END,
+  actOf,
+  archon,
+  challenge,
+  ended,
+  flush,
+  inputs,
+  messages,
+  missionAt,
+  replaced,
+  sortie,
+  value,
+  world,
+} from "./fixtures.mjs";
 
-const MESSAGES = JSON.parse(readFileSync(new URL("../locales/en.json", import.meta.url), "utf8"));
-const SERVICE = "gameEvents.warframe.subscribe";
 const vm = installRuntime({
   now: NOW,
   host: {
-    messages: MESSAGES,
+    messages: messages("en"),
     mode: "interactive",
     grants: ["storage"],
     viewport: { width: 300, height: 600 },
@@ -26,16 +43,15 @@ const vm = installRuntime({
 });
 const logic = await loadLogic();
 const { state } = await import("@overcrow/sdk");
-const flush = () => new Promise((resolve) => setImmediate(resolve));
 const model = () => state.model;
 const sections = () => model().cols.flatMap((col) => col.groups);
-const act = (id) => sections().flatMap((section) => section.acts).find((each) => each.id === id);
+const act = (id) => actOf(model(), id);
 const parts = (id) => act(id).groups.flatMap((group) => group.parts);
 const part = (id, index) => parts(id)[index];
 const texts = (id) => parts(id).map((each) => each.text);
 const done = (id) => parts(id).map((each) => each.icon === "circle-check");
 const section = (id) => sections().find((each) => each.id === id);
-const saved = () => vm.calls.filter((call) => call.service === "storage.set").at(-1)?.params.value;
+const saved = () => vm.lastCall("storage.set")?.params.value;
 
 let seq = 0;
 let currentWorld = () => world(vm.now);
@@ -46,7 +62,7 @@ async function push(events = [], options = {}) {
 const next = (at, options) => ended(++seq, at, options);
 
 test("first run: a box per part, everything to do, no help sentence", async () => {
-  const get = vm.calls.find((call) => call.service === "storage.get");
+  const get = vm.lastCall("storage.get");
   assert.deepEqual(get.params, { key: "ticks" });
   get.resolve(null);
   await flush();
@@ -293,19 +309,8 @@ test("Passive: past the frame's largest height, the end of Nightwave folds into 
 test("Passive: the typical day's full week, 651 px tall, fits under 680 points: nothing folds", () => {
   // The world of the typical-day scenario: French names, the Circuit's picks, Baro's relay.
   const scenario = JSON.parse(readFileSync(new URL("./typical-day.scenario.json", import.meta.url), "utf8"));
-  const inputs = (width) => ({
-    ticks: logic.emptyTicks(),
-    world: scenario.steps[1].gameEvents.warframe.info.world,
-    worldStatus: "available",
-    source: "available",
-    tracked: { sortie: true, archon: true, netracells: true, circuit: true, steel: true, nightwave: true },
-    baro: true,
-    now: scenario.host.startAt,
-    interactive: false,
-    width,
-  });
-  const built = logic.buildModel(inputs(300));
-  const night = built.cols.flatMap((col) => col.groups.flatMap((group) => group.acts)).find((each) => each.id === "nightwave");
+  const built = logic.buildModel(inputs(logic, { world: scenario.steps[1].gameEvents.warframe.info.world, now: scenario.host.startAt }));
+  const night = actOf(built, "nightwave");
   assert.equal(night.more, "", "nothing folded");
   assert.equal(night.groups.flatMap((group) => group.parts).length, 10);
   assert.ok(logic.panelHeight(built, 300) <= logic.MAX_HEIGHT);
@@ -319,18 +324,8 @@ test("the world not read yet: the stages by their rank, Nightwave waits", async 
   vm.push(SERVICE, value({ worldValue: null, features: { world: "unavailable" } }));
   await flush();
   // The widget keeps the last world it had; a first run has none.
-  const empty = logic.buildModel({
-    ticks: logic.emptyTicks(),
-    world: null,
-    worldStatus: "unavailable",
-    source: "available",
-    tracked: { sortie: true, archon: true, netracells: true, circuit: true, steel: true, nightwave: true },
-    baro: true,
-    now: vm.now,
-    interactive: true,
-    width: 300,
-  });
-  const find = (id) => empty.cols.flatMap((col) => col.groups.flatMap((group) => group.acts)).find((each) => each.id === id);
+  const empty = logic.buildModel(inputs(logic, { world: null, worldStatus: "unavailable", now: vm.now, interactive: true }));
+  const find = (id) => actOf(empty, id);
   const stageTexts = (id) => find(id).groups[0].parts.map((each) => `${each.text}|${each.textCls}`);
   assert.deepEqual(stageTexts("sortie"), ["1st mission|part-text pending", "2nd mission|part-text pending", "3rd mission|part-text pending"]);
   assert.deepEqual(stageTexts("archon").length, 3);

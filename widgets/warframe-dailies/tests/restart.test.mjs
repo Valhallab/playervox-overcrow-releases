@@ -3,19 +3,34 @@
 // starts again at 1, their at does not change), and none is ticked twice.
 // Also the pure helpers, in French.
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { installRuntime } from "@overcrow/sdk/testing";
 
 import { loadLogic } from "./load-logic.mjs";
-import { DAY, GLOSSARY, HOUR, NOW, SORTIE_END, WEEK_END, ended, replaced, sortie, value, world } from "./fixtures.mjs";
+import {
+  DAY,
+  GLOSSARY,
+  HOUR,
+  NOW,
+  SERVICE,
+  SORTIE_END,
+  WEEK_END,
+  actOf,
+  ended,
+  flush,
+  inputs,
+  messages,
+  replaced,
+  sortie,
+  value,
+  world,
+} from "./fixtures.mjs";
 
-const MESSAGES = JSON.parse(readFileSync(new URL("../locales/fr.json", import.meta.url), "utf8"));
 const vm = installRuntime({
   now: NOW,
   host: {
     locale: "fr",
-    messages: MESSAGES,
+    messages: messages("fr"),
     mode: "passive",
     grants: ["storage"],
     viewport: { width: 300, height: 600 },
@@ -24,8 +39,7 @@ const vm = installRuntime({
 });
 const logic = await loadLogic();
 const { state } = await import("@overcrow/sdk");
-const flush = () => new Promise((resolve) => setImmediate(resolve));
-const act = (id) => state.model.cols.flatMap((col) => col.groups.flatMap((group) => group.acts)).find((each) => each.id === id);
+const act = (id) => actOf(state.model, id);
 const parts = (id) => act(id).groups.flatMap((group) => group.parts);
 
 const FIRST = NOW - 2 * HOUR;
@@ -51,10 +65,10 @@ function restarted() {
 }
 
 test("after a restart, what the hand set and the types learned stay; events handled are not ticked again", async () => {
-  vm.calls.find((call) => call.service === "storage.get").resolve(stored);
+  vm.lastCall("storage.get").resolve(stored);
   await flush();
   vm.push(
-    "gameEvents.warframe.subscribe",
+    SERVICE,
     value({
       worldValue: restarted(),
       events: [
@@ -77,7 +91,7 @@ test("after a restart, what the hand set and the types learned stay; events hand
   assert.equal(parts("nightwave")[0].icon, "circle-check");
   assert.equal(state.model.left, "5 à faire");
   assert.equal(state.model.hint, "");
-  const set = vm.calls.filter((call) => call.service === "storage.set").at(-1);
+  const set = vm.lastCall("storage.set");
   assert.equal(set.params.value.lastAt, SECOND);
   assert.deepEqual(set.params.value.sortie.parts, [{ at: FIRST }, { at: 0 }, { at: SECOND }]);
 });
@@ -90,36 +104,26 @@ test("French wording: the resets, the stages by rank, Nightwave's kinds, the Arc
   assert.equal(parts("netracells")[2].label, "Cellule 3\u00a0: fait, réglé à la main");
   const french = world(NOW);
   french.archonHunt.boss = { id: "archon_boreal", name: "Archonte Boréal" };
-  vm.push("gameEvents.warframe.subscribe", value({ worldValue: french }));
+  vm.push(SERVICE, value({ worldValue: french }));
   await flush();
   assert.equal(act("archon").shardText, "Boréal");
   const nameless = world(NOW);
   nameless.archonHunt.shard = null;
-  vm.push("gameEvents.warframe.subscribe", value({ worldValue: nameless }));
+  vm.push(SERVICE, value({ worldValue: nameless }));
   await flush();
   assert.deepEqual([act("archon").shard, act("archon").shardText], ["", ""]);
   const pending = world(NOW);
   pending.archonHunt.shard = { ...pending.archonHunt.shard, icon: null, iconPending: true };
-  vm.push("gameEvents.warframe.subscribe", value({ worldValue: pending }));
+  vm.push(SERVICE, value({ worldValue: pending }));
   await flush();
   assert.deepEqual([act("archon").shard, act("archon").shardGlyph], ["", ""], "its image may still come");
   pending.archonHunt.shard = { ...pending.archonHunt.shard, iconPending: false };
-  vm.push("gameEvents.warframe.subscribe", value({ worldValue: pending }));
+  vm.push(SERVICE, value({ worldValue: pending }));
   await flush();
   assert.deepEqual([act("archon").shard, act("archon").shardGlyph], ["", "gem"], "none will come: our icon");
-  const stages = logic.buildModel({
-    ticks: logic.emptyTicks(),
-    world: null,
-    worldStatus: "unavailable",
-    source: "available",
-    tracked: { sortie: true, archon: true, netracells: true, circuit: true, steel: true, nightwave: true },
-    baro: true,
-    now: NOW,
-    interactive: false,
-    width: 300,
-  });
+  const stages = logic.buildModel(inputs(logic, { world: null, worldStatus: "unavailable" }));
   assert.deepEqual(
-    stages.cols[0].groups[0].acts[0].groups[0].parts.map((each) => each.text),
+    actOf(stages, "sortie").groups[0].parts.map((each) => each.text),
     ["1ʳᵉ mission", "2ᵉ mission", "3ᵉ mission"],
   );
   assert.equal(logic.inTime(42 * 60_000), "42\u00a0min");
@@ -127,7 +131,7 @@ test("French wording: the resets, the stages by rank, Nightwave's kinds, the Arc
 });
 
 test("a game in English, the app in French: the game's names, the widget's French", async () => {
-  vm.push("gameEvents.warframe.subscribe", value());
+  vm.push(SERVICE, value());
   await flush();
   assert.deepEqual(
     state.model.cols.flatMap((col) => col.groups.flatMap((group) => group.acts.map((each) => each.name))),
@@ -138,7 +142,7 @@ test("a game in English, the app in French: the game's names, the widget's Frenc
     language: "fr",
     activity: { ...GLOSSARY.activity, archon_hunt: "Chasse aux Archontes", nightwave: "Ondes Nocturnes", circuit: "Le Circuit", steel_path: "La Route de l'Acier" },
   };
-  vm.push("gameEvents.warframe.subscribe", value({ glossary: french }));
+  vm.push(SERVICE, value({ glossary: french }));
   await flush();
   assert.equal(act("archon").name, "Chasse aux Archontes");
   assert.equal(act("steel").name, "Le Circuit · Route de l'Acier");
@@ -147,8 +151,7 @@ test("a game in English, the app in French: the game's names, the widget's Frenc
 
 test("names: no name of the game in the locales", () => {
   for (const locale of ["en", "fr"]) {
-    const messages = JSON.parse(readFileSync(new URL(`../locales/${locale}.json`, import.meta.url), "utf8"));
-    for (const [key, text] of Object.entries(messages)) {
+    for (const [key, text] of Object.entries(messages(locale))) {
       assert.doesNotMatch(key, /^(activity|fresh)-/, key);
       assert.doesNotMatch(text, /Sortie|Archon|Netracell|Circuit|Nightwave|Baro/, `${locale} ${key}`);
     }

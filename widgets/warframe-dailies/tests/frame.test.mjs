@@ -115,7 +115,8 @@ test("the typical day fits whole under 680 points, its note and margin included:
   const modes = new Set(shots.map((shot) => `${shot.mode} ${shot.scale}`));
   for (const each of ["passive 1", "interactive 1", "passive 1.5", "interactive 1.5"]) assert.ok(modes.has(each), each);
   for (const shot of shots) {
-    const image = png(read(`./reference/${shot.scenario}/${shot.image}.png`));
-    assert.ok(image.height < Math.round(MAX_HEIGHT * shot.scale), `${shot.image}: ${image.height} px, nothing scrolls`);
+    // The height, from the PNG's header: no pixel to decode.
+    const height = read(`./reference/${shot.scenario}/${shot.image}.png`).readUInt32BE(20);
+    assert.ok(height < Math.round(MAX_HEIGHT * shot.scale), `${shot.image}: ${height} px, nothing scrolls`);
   }
 });

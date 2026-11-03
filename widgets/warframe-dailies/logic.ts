@@ -15,10 +15,14 @@ import {
   storage,
   t,
   timers,
+  type IconName,
   type JsonValue,
   type WarframeEvents,
+  type WarframeFeatures,
   type WarframeGlossary,
   type WarframeMission,
+  type WarframeModifier,
+  type WarframeName,
   type WarframeWorld,
   type WarframeWorldMission,
 } from "@overcrow/sdk";
@@ -30,9 +34,9 @@ const WEEK = 7 * DAY;
 /** The Sortie resets at 16:00 UTC, when the world does not say. */
 const SORTIE_RESET_UTC_HOUR = 16;
 /** An activity a game event just finished shows "just now" this long. */
-export const FRESH_MS = 5 * MINUTE;
+const FRESH_MS = 5 * MINUTE;
 /** The world is old ("offline") when the host has not read it for this long; it reads it every 5 minutes. */
-export const STALE_MS = 15 * MINUTE;
+const STALE_MS = 15 * MINUTE;
 /** The widget becomes "wide" (two columns) from this width, logical px. */
 const WIDE_PX = 560;
 const STORAGE_KEY = "ticks";
@@ -42,9 +46,11 @@ const MAX_KEPT_CHALLENGES = 64;
 const MAX_TEXT = 256;
 
 /** The activities, in their order on screen. */
-export const ACTIVITIES = ["sortie", "archon", "netracells", "circuit", "steel", "nightwave"] as const;
+const ACTIVITIES = ["sortie", "archon", "netracells", "circuit", "steel", "nightwave"] as const;
 export type ActivityId = (typeof ACTIVITIES)[number];
 type Period = "day" | "week";
+/** How long each period lasts. */
+const LENGTH: Record<Period, number> = { day: DAY, week: WEEK };
 const PERIOD: Record<ActivityId, Period> = {
   sortie: "day",
   archon: "week",
@@ -65,9 +71,16 @@ const TRACK: Record<ActivityId, string> = {
 const STAGES = 3;
 const CELLS = 5;
 type Staged = "sortie" | "archon";
+/** The staged activity each modifier of a mission marks. */
+const STAGED_BY_MODIFIER = new Map<WarframeModifier["id"], Staged>([
+  ["sortie", "sortie"],
+  ["archon_hunt", "archon"],
+]);
 type Circuit = "circuit" | "steel";
 /** How many rewards the player picks a week: one Warframe, two Incarnon adapters. */
 const PICKS: Record<Circuit, number> = { circuit: 1, steel: 2 };
+/** Where the world lists each Circuit's rewards and picks. */
+const FIELD: Record<Circuit, "normal" | "steelPath"> = { circuit: "normal", steel: "steelPath" };
 
 // Storage.
 
@@ -126,20 +139,18 @@ export interface Ticks {
 const freshParts = (count: number): Part[] => Array.from({ length: count }, () => ({ at: 0 }));
 const freshStages = (): Stages => ({ parts: freshParts(STAGES), types: new Array<Learned | null>(STAGES).fill(null) });
 const freshCircuit = (): CircuitTicks => ({ done: 0, picks: { auto: [], hand: null } });
+/** The day's ticks, as a new day starts them. */
+const freshDay = (): Pick<Ticks, "sortie"> => ({ sortie: freshStages() });
+/** The week's ticks, as a new week starts them. */
+const freshWeek = (): Pick<Ticks, "archon" | "netracells" | "circuit" | "steel"> => ({
+  archon: freshStages(),
+  netracells: freshParts(CELLS),
+  circuit: freshCircuit(),
+  steel: freshCircuit(),
+});
 
 export function emptyTicks(): Ticks {
-  return {
-    v: 2,
-    lastAt: 0,
-    dayEnd: 0,
-    weekEnd: 0,
-    sortie: freshStages(),
-    archon: freshStages(),
-    netracells: freshParts(CELLS),
-    circuit: freshCircuit(),
-    steel: freshCircuit(),
-    nightwave: {},
-  };
+  return { v: 2, lastAt: 0, dayEnd: 0, weekEnd: 0, ...freshDay(), ...freshWeek(), nightwave: {} };
 }
 
 const time = (value: unknown): number =>
@@ -215,11 +226,11 @@ export function readTicks(value: unknown): Ticks {
 // Parts.
 
 /** Done: what the hand set, else what the game ticked. */
-export const isDone = (part: Part): boolean => part.hand ?? part.at > 0;
+const isDone = (part: Part): boolean => part.hand ?? part.at > 0;
 /** When it was done; 0 when it is not. */
 const doneAt = (part: Part): number => (part.hand === true ? part.handAt ?? 0 : part.hand === false ? 0 : part.at);
 /** Set by hand against what the game says: the hand shows. */
-export const contradicted = (part: Part): boolean => part.hand !== undefined && part.hand !== part.at > 0;
+const contradicted = (part: Part): boolean => part.hand !== undefined && part.hand !== part.at > 0;
 
 /** A click on a part: the hand sets the other state. */
 function flip(part: Part, now: number): void {
@@ -244,32 +255,32 @@ export function nextWeeklyReset(now: number): number {
   return day + ((8 - weekday) % 7 || 7) * DAY;
 }
 
+/** The world's end of a period when it is ahead by one period at most, else the reset `next` computes. */
+function endAhead(end: number | undefined, period: Period, now: number, next: (now: number) => number): number {
+  return end !== undefined && end > now && end - now <= LENGTH[period] ? end : next(now);
+}
+
 /** The end of the day's period: the Sortie's end when the world gives a future one. */
 export function dayEndOf(world: WarframeWorld | null, now: number): number {
-  const end = world?.sortie?.endsAt;
-  return end !== undefined && end > now && end - now <= DAY ? end : nextSortieReset(now);
+  return endAhead(world?.sortie?.endsAt, "day", now, nextSortieReset);
 }
 
 /** The end of the week's period: the world's weekly reset when it is ahead. */
-export function weekEndOf(world: WarframeWorld | null, now: number): number {
-  const end = world?.resets.weekly;
-  return end !== undefined && end > now && end - now <= WEEK ? end : nextWeeklyReset(now);
+function weekEndOf(world: WarframeWorld | null, now: number): number {
+  return endAhead(world?.resets.weekly, "week", now, nextWeeklyReset);
 }
 
 /** Starts a new period for each one that ended, and forgets the challenges that ended. Returns whether anything changed. */
-export function roll(ticks: Ticks, world: WarframeWorld | null, now: number): boolean {
+function roll(ticks: Ticks, world: WarframeWorld | null, now: number): boolean {
   let changed = false;
   if (now >= ticks.dayEnd) {
     ticks.dayEnd = dayEndOf(world, now);
-    ticks.sortie = freshStages();
+    Object.assign(ticks, freshDay());
     changed = true;
   }
   if (now >= ticks.weekEnd) {
     ticks.weekEnd = weekEndOf(world, now);
-    ticks.archon = freshStages();
-    ticks.netracells = freshParts(CELLS);
-    ticks.circuit = freshCircuit();
-    ticks.steel = freshCircuit();
+    Object.assign(ticks, freshWeek());
     changed = true;
   }
   for (const [id, challenge] of Object.entries(ticks.nightwave)) {
@@ -281,13 +292,15 @@ export function roll(ticks: Ticks, world: WarframeWorld | null, now: number): bo
   return changed;
 }
 
-const periodHas = (ticks: Ticks, period: Period, at: number): boolean =>
-  period === "day" ? at >= ticks.dayEnd - DAY && at < ticks.dayEnd : at >= ticks.weekEnd - WEEK && at < ticks.weekEnd;
+/** When the period ends. */
+const endOf = (ticks: Ticks, period: Period): number => (period === "day" ? ticks.dayEnd : ticks.weekEnd);
+const periodHas = (ticks: Ticks, period: Period, at: number): boolean => at >= endOf(ticks, period) - LENGTH[period] && at < endOf(ticks, period);
 
 // What the game tells.
 
 /** The Sortie or the Archon Hunt of the world while it runs: just after a reset the world may still hold the last one. */
-function current<T extends { endsAt: number }>(list: T | null | undefined, now: number): T | null {
+function stagedList(world: WarframeWorld | null, id: Staged, now: number) {
+  const list = id === "sortie" ? world?.sortie : world?.archonHunt;
   return list !== null && list !== undefined && list.endsAt > now ? list : null;
 }
 
@@ -298,8 +311,8 @@ function stageByNode(missions: readonly WarframeWorldMission[] | undefined, node
 }
 
 /** The game ticks a part; a part set by hand stays as the hand set it. */
-function tickAuto(part: Part | undefined, at: number): boolean {
-  if (part === undefined || part.at !== 0) return false;
+function tickAuto(part: Part | null | undefined, at: number): boolean {
+  if (part === null || part === undefined || part.at !== 0) return false;
   part.at = at;
   return true;
 }
@@ -308,10 +321,9 @@ function tickAuto(part: Part | undefined, at: number): boolean {
 function stagesOf(mission: WarframeMission, world: WarframeWorld | null, at: number): { id: Staged; stage: number }[] {
   const found: { id: Staged; stage: number }[] = [];
   for (const modifier of mission.modifiers) {
-    const id: Staged | null = modifier.id === "sortie" ? "sortie" : modifier.id === "archon_hunt" ? "archon" : null;
-    if (id === null) continue;
-    const list = current(id === "sortie" ? world?.sortie : world?.archonHunt, at);
-    const stage = modifier.stage ?? stageByNode(list?.missions, mission.node.id);
+    const id = STAGED_BY_MODIFIER.get(modifier.id);
+    if (id === undefined) continue;
+    const stage = modifier.stage ?? stageByNode(stagedList(world, id, at)?.missions, mission.node.id);
     if (stage !== null && stage >= 1 && stage <= STAGES) found.push({ id, stage });
   }
   return found;
@@ -322,7 +334,7 @@ function stagesOf(mission: WarframeMission, world: WarframeWorld | null, at: num
  * the Archon Hunt, or a Netracell. Only a success counts, once, in the
  * period it happened. Returns whether anything changed.
  */
-export function handleMission(ticks: Ticks, mission: WarframeMission, at: number, world: WarframeWorld | null): boolean {
+function handleMission(ticks: Ticks, mission: WarframeMission, at: number, world: WarframeWorld | null): boolean {
   if (mission.result !== "succeeded") return false;
   let changed = false;
   for (const { id, stage } of stagesOf(mission, world, at)) {
@@ -341,7 +353,7 @@ export function handleMission(ticks: Ticks, mission: WarframeMission, at: number
  * Keeps the type the game chose at loading for a stage whose published
  * type it replaces: it survives a restart of the game, until the reset.
  */
-export function learnType(ticks: Ticks, mission: WarframeMission, world: WarframeWorld | null, now: number): boolean {
+function learnType(ticks: Ticks, mission: WarframeMission, world: WarframeWorld | null, now: number): boolean {
   const type = mission.type;
   if (!mission.typeAtLoading || type === null || type.name === null) return false;
   let changed = false;
@@ -357,19 +369,33 @@ export function learnType(ticks: Ticks, mission: WarframeMission, world: Warfram
 const sameSet = (a: readonly string[], b: readonly string[]): boolean =>
   a.length === b.length && a.every((id) => b.includes(id));
 
+/** The rewards the world offers this week in a Circuit; none without the world. */
+const offeredOf = (world: WarframeWorld | null, id: Circuit): readonly WarframeName[] => world?.circuit?.[FIELD[id]] ?? [];
+
+/** The IDs, in their order, that are among the rewards offered. */
+const onlyOffered = (ids: readonly string[], offered: readonly WarframeName[]): string[] =>
+  ids.filter((id) => offered.some((reward) => reward.id === id));
+
+/** The challenge kept by its ID, a new one when there is room for it; null when there is none. */
+function keptChallenge(ticks: Ticks, id: string, endsAt: number): Challenge | null {
+  const kept = ticks.nightwave[id];
+  if (kept !== undefined) return kept;
+  if (Object.keys(ticks.nightwave).length >= MAX_KEPT_CHALLENGES) return null;
+  const added: Challenge = { at: 0, endsAt };
+  ticks.nightwave[id] = added;
+  return added;
+}
+
 /**
  * What the world tells this week: the Circuit's picks the game showed, and
  * the Nightwave challenges it wrote complete, kept until they end.
  */
-export function syncWorld(ticks: Ticks, world: WarframeWorld | null, now: number): boolean {
+function syncWorld(ticks: Ticks, world: WarframeWorld | null, now: number): boolean {
   let changed = false;
   const circuit = world?.circuit ?? null;
   if (circuit !== null) {
-    for (const [id, offered, picked] of [
-      ["circuit", circuit.normal, circuit.picked.normal],
-      ["steel", circuit.steelPath, circuit.picked.steelPath],
-    ] as const) {
-      const seen = picked.filter((pick) => offered.some((reward) => reward.id === pick)).slice(0, PICKS[id]);
+    for (const id of ["circuit", "steel"] as const) {
+      const seen = onlyOffered(circuit.picked[FIELD[id]], offeredOf(world, id)).slice(0, PICKS[id]);
       if (seen.length > 0 && !sameSet(seen, ticks[id].picks.auto)) {
         ticks[id].picks.auto = [...seen];
         changed = true;
@@ -378,15 +404,7 @@ export function syncWorld(ticks: Ticks, world: WarframeWorld | null, now: number
   }
   for (const challenge of world?.nightwave?.challenges ?? []) {
     if (!challenge.completed || challenge.endsAt <= now) continue;
-    const kept = ticks.nightwave[challenge.id];
-    if (kept === undefined) {
-      if (Object.keys(ticks.nightwave).length >= MAX_KEPT_CHALLENGES) continue;
-      ticks.nightwave[challenge.id] = { at: now, endsAt: challenge.endsAt };
-      changed = true;
-    } else if (kept.at === 0) {
-      kept.at = now;
-      changed = true;
-    }
+    changed = tickAuto(keptChallenge(ticks, challenge.id, challenge.endsAt), now) || changed;
   }
   return changed;
 }
@@ -399,19 +417,14 @@ function challengesOf(world: WarframeWorld | null, now: number): NonNullable<War
 }
 
 /** A click on a part: `sortie.1`, `netracells.4`, `nightwave.<challenge>`. Returns whether anything changed. */
-export function tickPart(ticks: Ticks, id: string, world: WarframeWorld | null, now: number): boolean {
+function tickPart(ticks: Ticks, id: string, world: WarframeWorld | null, now: number): boolean {
   const dot = id.indexOf(".");
   const activity = id.slice(0, dot);
   const key = id.slice(dot + 1);
   if (activity === "nightwave") {
     const challenge = challengesOf(world, now).find((each) => each.id === key);
-    if (challenge === undefined) return false;
-    let kept = ticks.nightwave[key];
-    if (kept === undefined) {
-      if (Object.keys(ticks.nightwave).length >= MAX_KEPT_CHALLENGES) return false;
-      kept = { at: 0, endsAt: challenge.endsAt };
-      ticks.nightwave[key] = kept;
-    }
+    const kept = challenge === undefined ? null : keptChallenge(ticks, key, challenge.endsAt);
+    if (kept === null) return false;
     flip(kept, now);
     return true;
   }
@@ -423,7 +436,7 @@ export function tickPart(ticks: Ticks, id: string, world: WarframeWorld | null, 
 }
 
 /** A click on the Circuit's own box: only a click ticks it. */
-export function toggleActivity(ticks: Ticks, id: string, now: number): boolean {
+function toggleActivity(ticks: Ticks, id: string, now: number): boolean {
   if (id !== "circuit" && id !== "steel") return false;
   ticks[id].done = ticks[id].done === 0 ? now : 0;
   return true;
@@ -437,14 +450,14 @@ const picksOf = (picks: Picks): string[] => picks.hand ?? picks.auto;
  * it, or takes it back. One Warframe, two Incarnon adapters: a new pick
  * beyond replaces the oldest. Returns whether anything changed.
  */
-export function pick(ticks: Ticks, id: string, world: WarframeWorld | null): boolean {
+function pick(ticks: Ticks, id: string, world: WarframeWorld | null): boolean {
   const dot = id.indexOf(".");
   const which = id.slice(0, dot);
   const reward = id.slice(dot + 1);
   if (which !== "circuit" && which !== "steel") return false;
-  const offered = which === "circuit" ? world?.circuit?.normal : world?.circuit?.steelPath;
-  if (offered === undefined || !offered.some((each) => each.id === reward)) return false;
-  const picks = picksOf(ticks[which].picks).filter((each) => offered.some((one) => one.id === each));
+  const offered = offeredOf(world, which);
+  if (!offered.some((each) => each.id === reward)) return false;
+  const picks = onlyOffered(picksOf(ticks[which].picks), offered);
   const next = picks.includes(reward) ? picks.filter((each) => each !== reward) : [...picks, reward].slice(-PICKS[which]);
   ticks[which].picks.hand = next;
   return true;
@@ -455,7 +468,7 @@ export function pick(ticks: Ticks, id: string, world: WarframeWorld | null): boo
 export interface PartView {
   id: string;
   text: string;
-  icon: string;
+  icon: IconName;
   iconCls: string;
   textCls: string;
   /** Set by hand against the game: the hand in the right column. */
@@ -483,7 +496,7 @@ export interface ChoiceView {
 export interface ActView {
   id: ActivityId;
   name: string;
-  icon: string;
+  icon: IconName;
   iconCls: string;
   value: string;
   valueCls: string;
@@ -491,7 +504,7 @@ export interface ActView {
   meta: string;
   /** The Archon Shard: its image, or our icon when none will come; the Archon's name beside it. */
   shard: string;
-  shardGlyph: string;
+  shardGlyph: IconName | "";
   shardText: string;
   choices: ChoiceView[];
   /** The player's picks override what the game showed: the hand at the end of the names. */
@@ -520,9 +533,8 @@ export interface Model {
   cols: Column[];
   baro: string;
   baroHere: boolean;
+  /** Why nothing ticks itself (refused, game not detected), beside a warning icon. */
   hint: string;
-  hintIcon: string;
-  hintTone: string;
   status: string;
   /** Interactive only: what ticks itself, and what to do otherwise. */
   note: string;
@@ -547,7 +559,7 @@ type Source = "waiting" | "available" | "unavailable" | "refused";
 export interface Inputs {
   ticks: Ticks;
   world: WarframeWorld | null;
-  worldStatus: "available" | "unavailable" | "undeclared";
+  worldStatus: WarframeFeatures["world"];
   source: Source;
   tracked: Record<ActivityId, boolean>;
   baro: boolean;
@@ -573,7 +585,7 @@ const sameLocalDay = (a: number, b: number): boolean => {
 };
 
 /** "09:12" today, "mar. 21:42" another day. */
-export function when(at: number, now: number): string {
+function when(at: number, now: number): string {
   if (sameLocalDay(at, now)) return formatTime(at);
   return t("weekday-time", { day: t(`weekday-${localTime(at).weekday}`), time: formatTime(at) });
 }
@@ -621,7 +633,7 @@ function gameName(id: keyof Glossary["activity"]): string {
 }
 
 /** An activity's name; the Steel Path's Circuit says both. */
-export function activityName(id: ActivityId): string {
+function activityName(id: ActivityId): string {
   switch (id) {
     case "archon":
       return gameName("archon_hunt");
@@ -669,17 +681,18 @@ function stageText(mission: WarframeWorldMission | undefined, learned: Learned |
 interface Built {
   act: ActView;
   done: boolean;
-  /** When it was done, and whether the game's tick did it (for "just now"). */
+  /** When it was done (0: not). */
   at: number;
-  auto: boolean;
+  /** A game event just finished it: "just now", and the one line says so. */
+  fresh: boolean;
 }
 
-/** An activity's head: its icon, its count or the time it was done. */
-function headOf(id: ActivityId, inputs: Inputs, counted: number, total: number, done: boolean, at: number, auto: boolean, count: boolean): Pick<ActView, "icon" | "iconCls" | "value" | "valueCls" | "cls" | "label"> & { fresh: boolean } {
+/** An activity's head: its icon, its count or the time it was done, and whether a game event just did it. */
+function headOf(id: ActivityId, now: number, counted: number, total: number, done: boolean, at: number, auto: boolean): Pick<ActView, "icon" | "iconCls" | "value" | "valueCls" | "cls" | "label"> & { fresh: boolean } {
   const name = activityName(id);
   if (done) {
-    const fresh = auto && inputs.now - at < FRESH_MS;
-    const value = at === 0 ? "" : fresh ? t("just-now") : when(at, inputs.now);
+    const fresh = auto && now - at < FRESH_MS;
+    const value = at === 0 ? "" : fresh ? t("just-now") : when(at, now);
     return {
       icon: "circle-check",
       iconCls: "check-icon done",
@@ -690,7 +703,7 @@ function headOf(id: ActivityId, inputs: Inputs, counted: number, total: number, 
       fresh,
     };
   }
-  const value = count && total > 0 ? `${counted}/${total}` : "";
+  const value = total > 0 ? `${counted}/${total}` : "";
   return {
     icon: counted > 0 ? "circle-dashed" : "circle",
     iconCls: counted > 0 ? "check-icon part" : "check-icon todo",
@@ -736,29 +749,31 @@ function lastOf(parts: readonly Part[]): { at: number; auto: boolean } {
   return { at, auto };
 }
 
+/** An activity counted by its parts (stages, cells, challenges): done when there are some and all are. */
+function countedAct(id: ActivityId, now: number, states: readonly Part[], groups: GroupView[]): Built {
+  const counted = states.filter(isDone).length;
+  const done = states.length > 0 && counted === states.length;
+  const last = lastOf(states);
+  const { fresh, ...head } = headOf(id, now, counted, states.length, done, last.at, last.auto);
+  return { act: { ...blankAct(id), ...head, groups }, done, at: last.at, fresh };
+}
+
 function stagedAct(id: Staged, inputs: Inputs): Built {
-  const { ticks, now } = inputs;
-  const stages = ticks[id];
-  const list = id === "sortie" ? current(inputs.world?.sortie, now) : current(inputs.world?.archonHunt, now);
+  const stages = inputs.ticks[id];
+  const list = stagedList(inputs.world, id, inputs.now);
   const parts = stages.parts.map((part, index) => {
     const shown = stageText(list?.missions[index], stages.types[index] ?? null, index);
     return partView(`${id}.${index}`, shown.text, shown.text, isDone(part), { pending: shown.pending, hand: contradicted(part) });
   });
-  const counted = stages.parts.filter(isDone).length;
-  const done = counted === STAGES;
-  const last = lastOf(stages.parts);
-  const head = headOf(id, inputs, counted, STAGES, done, last.at, last.auto, true);
-  const act: ActView = { ...blankAct(id), ...head, groups: [{ id: "stages", title: "", cls: "parts", parts, hand: false }] };
-  if (id === "archon" && !done && list !== null) {
-    const hunt = inputs.world?.archonHunt ?? null;
-    const shard = hunt?.shard ?? null;
-    if (shard !== null) {
-      act.shard = shard.icon ?? "";
-      act.shardGlyph = shard.icon === null && !shard.iconPending ? "gem" : "";
-      act.shardText = archonShort(hunt?.boss.name ?? null);
-    }
+  const built = countedAct(id, inputs.now, stages.parts, [{ id: "stages", title: "", cls: "parts", parts, hand: false }]);
+  // The Archon Hunt's shard and Archon beside its name, until it is done.
+  if (!built.done && list !== null && "shard" in list && list.shard !== null) {
+    const { shard } = list;
+    built.act.shard = shard.icon ?? "";
+    built.act.shardGlyph = shard.icon === null && !shard.iconPending ? "gem" : "";
+    built.act.shardText = archonShort(list.boss.name);
   }
-  return { act, done, at: last.at, auto: last.auto };
+  return built;
 }
 
 function netracellsAct(inputs: Inputs): Built {
@@ -768,24 +783,14 @@ function netracellsAct(inputs: Inputs): Built {
     const view = partView(`netracells.${index}`, t("cell", { n: index + 1 }), "", isDone(cell), { hand: contradicted(cell) });
     return { ...view, hand: false };
   });
-  const counted = cells.filter(isDone).length;
-  const done = counted === CELLS;
-  const last = lastOf(cells);
-  const head = headOf("netracells", inputs, counted, CELLS, done, last.at, last.auto, true);
-  const hand = cells.some(contradicted);
-  return {
-    act: { ...blankAct("netracells"), ...head, groups: [{ id: "cells", title: "", cls: "cells", parts, hand }] },
-    done,
-    at: last.at,
-    auto: last.auto,
-  };
+  return countedAct("netracells", inputs.now, cells, [{ id: "cells", title: "", cls: "cells", parts, hand: cells.some(contradicted) }]);
 }
 
 function circuitAct(id: Circuit, inputs: Inputs): Built {
   const circuit = inputs.ticks[id];
-  const offered = (id === "circuit" ? inputs.world?.circuit?.normal : inputs.world?.circuit?.steelPath) ?? [];
+  const offered = offeredOf(inputs.world, id);
   const done = circuit.done !== 0;
-  const picks = picksOf(circuit.picks).filter((each) => offered.some((reward) => reward.id === each));
+  const picks = onlyOffered(picksOf(circuit.picks), offered);
   const choices: ChoiceView[] = [];
   for (const reward of offered) {
     if (reward.name === null) continue;
@@ -800,13 +805,14 @@ function circuitAct(id: Circuit, inputs: Inputs): Built {
       label: t(picked ? "label-picked" : "label-pick", { name: reward.name }),
     });
   }
-  const head = headOf(id, inputs, 0, 0, done, circuit.done, false, false);
-  const hand = circuit.picks.hand !== null && !sameSet(picks, circuit.picks.auto.filter((each) => offered.some((reward) => reward.id === each)));
+  // Only a click ticks it: never "just now".
+  const { fresh, ...head } = headOf(id, inputs.now, 0, 0, done, circuit.done, false);
+  const hand = circuit.picks.hand !== null && !sameSet(picks, onlyOffered(circuit.picks.auto, offered));
   return {
     act: { ...blankAct(id), ...head, toggle: true, choices, choicesHand: hand },
     done,
     at: circuit.done,
-    auto: false,
+    fresh,
   };
 }
 
@@ -816,7 +822,7 @@ function nightwaveAct(inputs: Inputs): Built {
   const { ticks, now } = inputs;
   const season = inputs.world?.nightwave ?? null;
   if (season === null) {
-    return { act: { ...blankAct("nightwave"), meta: t("nightwave-waiting"), label: t("label-todo", { name: activityName("nightwave") }) }, done: false, at: 0, auto: false };
+    return { act: { ...blankAct("nightwave"), meta: t("nightwave-waiting"), label: t("label-todo", { name: activityName("nightwave") }) }, done: false, at: 0, fresh: false };
   }
   const challenges = challengesOf(inputs.world, now);
   const kept = (id: string): Part => ticks.nightwave[id] ?? { at: 0 };
@@ -833,12 +839,7 @@ function nightwaveAct(inputs: Inputs): Built {
       });
     if (parts.length > 0) groups.push({ id: kind, title: t(`kind-${kind}`), cls: "parts", parts, hand: false });
   }
-  const states = challenges.map((challenge) => kept(challenge.id));
-  const counted = states.filter(isDone).length;
-  const done = challenges.length > 0 && counted === challenges.length;
-  const last = lastOf(states);
-  const head = headOf("nightwave", inputs, counted, challenges.length, done, last.at, last.auto, true);
-  return { act: { ...blankAct("nightwave"), ...head, groups }, done, at: last.at, auto: last.auto };
+  return countedAct("nightwave", now, challenges.map((challenge) => kept(challenge.id)), groups);
 }
 
 // Heights, logical px, for the Passive fold: the box model of style.ocss.
@@ -952,11 +953,10 @@ const FOLD_MARGIN = 8;
  */
 function fold(model: Model, width: number): void {
   const night = model.cols.flatMap((col) => col.groups.flatMap((section) => section.acts)).find((act) => act.id === "nightwave");
-  if (night === undefined || night.groups.length === 0) return;
+  if (night === undefined) return;
   let hidden = 0;
-  const total = night.groups.reduce((sum, group) => sum + group.parts.length, 0);
-  while (panelHeight(model, width) > MAX_HEIGHT - FOLD_MARGIN && hidden < total) {
-    const last = night.groups[night.groups.length - 1];
+  while (panelHeight(model, width) > MAX_HEIGHT - FOLD_MARGIN) {
+    const last = night.groups.at(-1);
     if (last === undefined) break;
     last.parts = last.parts.slice(0, -1);
     if (last.parts.length === 0) night.groups.pop();
@@ -985,9 +985,69 @@ function baroOf(inputs: Inputs): { text: string; here: boolean } {
   };
 }
 
+/** The lists in their columns: one, or in Wide two, Nightwave on the right and the rest on the left. */
+function columnsOf(built: ReadonlyMap<ActivityId, Built>, inputs: Inputs): Column[] {
+  const section = (period: Period, ids: readonly ActivityId[], key: string): Section[] => {
+    const acts = ids.map((id) => built.get(id)?.act).filter((act): act is ActView => act !== undefined);
+    if (acts.length === 0) return [];
+    return [
+      {
+        id: key,
+        title: t(period === "day" ? "today" : "this-week"),
+        reset: t("resets-in", { in: inTime(endOf(inputs.ticks, period) - inputs.now) }),
+        acts,
+      },
+    ];
+  };
+  const day = section("day", ["sortie"], "day");
+  const week = ACTIVITIES.filter((id) => PERIOD[id] === "week");
+  const cols: Column[] =
+    inputs.width >= WIDE_PX
+      ? [
+          { id: "left", groups: [...day, ...section("week", week.filter((id) => id !== "nightwave"), "week")] },
+          { id: "right", groups: section("week", ["nightwave"], "week-nightwave") },
+        ]
+      : [{ id: "one", groups: [...day, ...section("week", week, "week")] }];
+  return cols.filter((col) => col.groups.length > 0);
+}
+
+/** "6 to do", or "All done". */
+const leftText = (left: number): string => (left === 0 ? t("all-done") : t("to-do", { count: left }));
+
+/**
+ * The one line: the latest activity a game event just finished, else what
+ * is left; beside it, what is left, or the first list's reset.
+ */
+function lineOf(built: ReadonlyMap<ActivityId, Built>, left: number, inputs: Inputs): Pick<Model, "line" | "lineValue" | "lineValueCls" | "lineCls" | "lineLabel"> {
+  const empty = built.size === 0;
+  const fresh = [...built.values()].filter((one) => one.fresh).sort((a, b) => b.at - a.at)[0];
+  const count = leftText(left);
+  // The first list's reset: the Sortie's when it is tracked, else the week's.
+  const period: Period = built.has("sortie") ? "day" : "week";
+  const reset = t(period === "day" ? "line-reset-sortie" : "line-reset-week", {
+    name: activityName("sortie"),
+    in: inTime(endOf(inputs.ticks, period) - inputs.now),
+  });
+  const success = fresh !== undefined || left === 0;
+  // Refused: the count stays, the way to fix it comes beside it, in amber.
+  const refused = inputs.source === "refused";
+  // One line, refused: beside a value, only "Access denied"; without one,
+  // where to fix it. The whole sentence stays in the label and in Full.
+  const line = empty ? (refused ? t("line-refused-full") : t("line-empty")) : fresh !== undefined ? t("fresh", { name: fresh.act.name }) : count;
+  const lineValue = empty ? "" : refused ? t("line-refused") : fresh !== undefined ? count : reset;
+  const shown = lineValue === "" ? line : `${line} · ${lineValue}`;
+  return {
+    line,
+    lineValue,
+    lineValueCls: refused ? "line-reset tone-warning" : "line-reset",
+    lineCls: empty && refused ? "line-main tone-warning" : !empty && success ? "line-main tone-success" : "line-main",
+    lineLabel: refused ? `${shown}. ${t("hint-refused")}` : shown,
+  };
+}
+
 /** What the view shows, from the ticks, the world and the options. */
 export function buildModel(inputs: Inputs): Model {
-  const { ticks, now } = inputs;
+  const { now } = inputs;
   const built = new Map<ActivityId, Built>();
   for (const id of ACTIVITIES) {
     if (!inputs.tracked[id]) continue;
@@ -1000,48 +1060,14 @@ export function buildModel(inputs: Inputs): Model {
             ? circuitAct(id, inputs)
             : nightwaveAct(inputs);
     // Passive: a finished activity folds to its line, with its time.
-    if (one.done && !inputs.interactive) {
-      one.act.groups = [];
-      one.act.more = "";
-    }
+    if (one.done && !inputs.interactive) one.act.groups = [];
     built.set(id, one);
   }
-  const acts = [...built.values()];
-  const left = acts.filter((one) => !one.done).length;
-  const wide = inputs.width >= WIDE_PX;
-  const section = (period: Period, ids: readonly ActivityId[], key: string): Section | null => {
-    const list = ids.map((id) => built.get(id)?.act).filter((act): act is ActView => act !== undefined);
-    if (list.length === 0) return null;
-    const end = period === "day" ? ticks.dayEnd : ticks.weekEnd;
-    return {
-      id: key,
-      title: t(period === "day" ? "today" : "this-week"),
-      reset: t("resets-in", { in: inTime(end - now) }),
-      acts: list,
-    };
-  };
-  const day = section("day", ["sortie"], "day");
-  const weekIds = ACTIVITIES.filter((id) => PERIOD[id] === "week");
-  const present = <T,>(list: (T | null)[]): T[] => list.filter((each): each is T => each !== null);
-  let cols: Column[];
-  if (wide) {
-    // Wide: Nightwave on the right, the rest on the left.
-    const left = present([day, section("week", weekIds.filter((id) => id !== "nightwave"), "week")]);
-    const right = present([section("week", ["nightwave"], "week-nightwave")]);
-    cols = [{ id: "left", groups: left }, { id: "right", groups: right }].filter((col) => col.groups.length > 0);
-  } else {
-    cols = [{ id: "one", groups: present([day, section("week", weekIds, "week")]) }].filter((col) => col.groups.length > 0);
-  }
+  const left = [...built.values()].filter((one) => !one.done).length;
+  const empty = built.size === 0;
   const baro = baroOf(inputs);
-
-  let hint = "";
-  let hintIcon = "";
-  let hintTone = "muted";
-  if (inputs.source === "refused") {
-    [hint, hintIcon, hintTone] = [t("hint-refused"), "circle-alert", "warning"];
-  } else if (inputs.source === "unavailable") {
-    [hint, hintIcon, hintTone] = [t("hint-unavailable"), "circle-alert", "warning"];
-  }
+  // Why nothing ticks itself: refused, or the game not detected.
+  const hint = inputs.source === "refused" ? t("hint-refused") : inputs.source === "unavailable" ? t("hint-unavailable") : "";
 
   let status = "";
   if (inputs.world !== null && now - inputs.world.updatedAt > STALE_MS) {
@@ -1050,45 +1076,16 @@ export function buildModel(inputs: Inputs): Model {
     status = t("offline");
   }
 
-  // The one line: the latest activity a game event just finished, else what is left.
-  const fresh = acts
-    .filter((one) => one.done && one.auto && now - one.at < FRESH_MS)
-    .sort((a, b) => b.at - a.at)[0];
-  const count = left === 0 ? t("all-done") : t("to-do", { count: left });
-  // The first list's reset: the Sortie's when it is tracked, else the week's.
-  const firstPeriod: Period | null = built.has("sortie") ? "day" : acts.length > 0 ? "week" : null;
-  const nextReset =
-    firstPeriod === null
-      ? ""
-      : t(firstPeriod === "day" ? "line-reset-sortie" : "line-reset-week", {
-          name: activityName("sortie"),
-          in: inTime((firstPeriod === "day" ? ticks.dayEnd : ticks.weekEnd) - now),
-        });
-  const empty = acts.length === 0;
-  const success = fresh !== undefined || left === 0;
-  // Refused: the count stays, the way to fix it comes beside it, in amber.
-  const refused = inputs.source === "refused";
-  // One line, refused: beside a value, only "Access denied"; without one,
-  // where to fix it. The whole sentence stays in the label and in Full.
-  const line = empty ? (refused ? t("line-refused-full") : t("line-empty")) : fresh !== undefined ? t("fresh", { name: fresh.act.name }) : count;
-  const lineValue = empty ? "" : refused ? t("line-refused") : fresh !== undefined ? count : nextReset;
-
   const model: Model = {
-    left: empty ? "" : count,
+    left: empty ? "" : leftText(left),
     leftCls: left === 0 ? "left all" : "left",
-    cols,
+    cols: columnsOf(built, inputs),
     baro: baro.text,
     baroHere: baro.here,
     hint,
-    hintIcon,
-    hintTone,
     status,
     note: empty ? "" : t("note"),
-    line,
-    lineValue,
-    lineValueCls: refused ? "line-reset tone-warning" : "line-reset",
-    lineCls: empty && refused ? "line-main tone-warning" : !empty && success ? "line-main tone-success" : "line-main",
-    lineLabel: refused ? `${lineValue === "" ? line : `${line} · ${lineValue}`}. ${t("hint-refused")}` : lineValue === "" ? line : `${line} · ${lineValue}`,
+    ...lineOf(built, left, inputs),
     empty,
   };
   if (!inputs.interactive) fold(model, inputs.width);
@@ -1118,7 +1115,7 @@ const inputsNow = (): Inputs => ({
   tracked: tracked(),
   baro: option("track-baro", true),
   now: Date.now(),
-  interactive: host.mode === "interactive",
+  interactive: interactive(),
   width: host.viewport.width,
 });
 
@@ -1131,7 +1128,7 @@ function save(): void {
 }
 
 /** Handles a value of the game's events: the world, then the missions not handled yet. */
-export function receive(value: WarframeEvents): void {
+function receive(value: WarframeEvents): void {
   glossary = value.glossary;
   world = value.info.world ?? world;
   worldStatus = value.features.world;
@@ -1155,28 +1152,28 @@ export function receive(value: WarframeEvents): void {
   refresh();
 }
 
+/** Interactive: a click, once the ticks are read; `change` says whether it changed them. */
+function click(change: (now: number) => boolean): void {
+  if (!loaded) return;
+  const now = Date.now();
+  roll(ticks, world, now);
+  if (change(now)) save();
+  refresh();
+}
+
 /** Interactive: a click on a part (a stage, a cell, a challenge). */
 export function tick(id: string): void {
-  if (!loaded) return;
-  roll(ticks, world, Date.now());
-  if (tickPart(ticks, id, world, Date.now())) save();
-  refresh();
+  click((now) => tickPart(ticks, id, world, now));
 }
 
 /** Interactive: a click on the Circuit's box. */
 export function check(id: string): void {
-  if (!loaded) return;
-  roll(ticks, world, Date.now());
-  if (toggleActivity(ticks, id, Date.now())) save();
-  refresh();
+  click((now) => toggleActivity(ticks, id, now));
 }
 
 /** Interactive: a click on a reward of the Circuit. */
 export function pickChoice(id: string): void {
-  if (!loaded) return;
-  roll(ticks, world, Date.now());
-  if (pick(ticks, id, world)) save();
-  refresh();
+  click(() => pick(ticks, id, world));
 }
 
 /** "line", or "wide" (two columns) or "standard"; the width alone decides. */

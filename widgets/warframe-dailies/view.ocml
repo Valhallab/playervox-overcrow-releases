@@ -147,7 +147,7 @@
       </box>
       <if test={hasText(state.model.hint)}>
         <box class="hint-box">
-          <icon class={"notice-icon tone-" + state.model.hintTone} name={state.model.hintIcon}/>
+          <icon class="notice-icon tone-warning" name="circle-alert"/>
           <text class="notice-text">{state.model.hint}</text>
         </box>
       </if>
