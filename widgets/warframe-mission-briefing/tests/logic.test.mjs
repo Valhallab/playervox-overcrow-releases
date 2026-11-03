@@ -10,6 +10,7 @@ import { loadLogic } from "./load-logic.mjs";
 
 const read = (path) => JSON.parse(readFileSync(new URL(path, import.meta.url), "utf8"));
 const MESSAGES = read("../locales/en.json");
+const FR = read("../locales/fr.json");
 const START = Date.UTC(2026, 9, 28, 15);
 const SERVICE = "gameEvents.warframe.subscribe";
 
@@ -18,6 +19,8 @@ const logic = await loadLogic();
 const { state } = await import("@overcrow/sdk");
 
 const named = (id, name) => ({ id, name });
+const sortie = (stage) => ({ id: "sortie", name: "Sortie", stage });
+const subscriptionCount = () => vm.subscriptions.filter((each) => each.service === SERVICE).length;
 const features = (mission = "available", world = "available") => ({
   location: "undeclared",
   mission,
@@ -130,9 +133,6 @@ function value({
 
 const ids = (list) => list.map((each) => each.id);
 
-// The functions called alone read the glossary of the latest value built.
-logic.build(value(), null);
-
 // The weaknesses of the official wiki's overview table (Damage 3.0),
 // written out again so that a slip in the widget's table shows here.
 test("weaknesses: each faction's types, as the wiki gives them", () => {
@@ -152,19 +152,23 @@ test("weaknesses: each faction's types, as the wiki gives them", () => {
   });
 });
 
-test("weaknesses: every type and faction is the glossary's, none is both used and avoided", () => {
-  for (const [faction, { use, avoid }] of Object.entries(logic.WEAKNESSES)) {
-    for (const id of [...use, ...avoid]) assert.ok(Object.hasOwn(GLOSSARY.damage, id), `${faction}: ${id}`);
-    assert.deepEqual(use.filter((id) => avoid.includes(id)), [], faction);
-    assert.ok(Object.hasOwn(GLOSSARY.faction, faction), faction);
+test("weaknesses: every type and faction is the glossary's, none is both used and avoided, regional ones included", () => {
+  const regional = Object.entries(logic.REGIONAL).flatMap(([faction, planets]) =>
+    Object.entries(planets).map(([planet, weakness]) => [`${faction} on ${planet}`, faction, weakness]),
+  );
+  const tables = [...Object.entries(logic.WEAKNESSES).map(([faction, weakness]) => [faction, faction, weakness]), ...regional];
+  for (const [label, faction, { use, avoid }] of tables) {
+    for (const id of [...use, ...avoid]) assert.ok(Object.hasOwn(GLOSSARY.damage, id), `${label}: ${id}`);
+    assert.deepEqual(use.filter((id) => avoid.includes(id)), [], label);
+    assert.ok(Object.hasOwn(logic.WEAKNESSES, faction), label);
+    assert.ok(Object.hasOwn(GLOSSARY.faction, faction), label);
   }
-  assert.deepEqual(Object.keys(MESSAGES).sort(), Object.keys(read("../locales/fr.json")).sort());
+  assert.deepEqual(Object.keys(MESSAGES).sort(), Object.keys(FR).sort());
 });
 
 test("names: every name of the game comes from the glossary, none from the locales", () => {
-  const fr = read("../locales/fr.json");
   for (const key of Object.keys(MESSAGES)) assert.doesNotMatch(key, /^(damage|faction|fissure|eidolon|activity)-/, key);
-  for (const text of [...Object.values(MESSAGES), ...Object.values(fr)]) {
+  for (const text of [...Object.values(MESSAGES), ...Object.values(FR)]) {
     assert.doesNotMatch(text, /Grineer|Corpus|Corrupted|Corrompus|Reactant|Réactif|Impact|Fissure/, text);
   }
   // A game in French: its terms, whatever the app's language.
@@ -179,7 +183,6 @@ test("names: every name of the game comes from the glossary, none from the local
   const brief = logic.build(value({ glossary: french, mission: mission({ faction: named("grineer", null), fissure: named("neo", "Neo") }) }), null);
   assert.deepEqual(logic.names(brief.use), "Impact, Corrosif");
   assert.deepEqual([brief.faction, brief.mods[0].title, brief.mods[0].text], ["Grineer", "Fissure Neo", "Collect 10 Réactif from Corrompus enemies"]);
-  logic.build(value(), null);
 });
 
 test("advice: none for a faction without weaknesses or unknown", () => {
@@ -199,7 +202,6 @@ test("advice: Deimos' Infested, the Cambion Drift's included, use Blast and Gas 
   const brief = logic.build(value({ mission: mission({ planet: named("deimos", "Deimos"), faction: named("infested", "Infested") }) }), null);
   assert.deepEqual([logic.names(brief.use), logic.names(brief.avoid)], ["Blast, Gas", "Viral"]);
   assert.deepEqual(brief.use.map((each) => each.icon), ["bomb", "cloud-fog"]);
-  logic.build(value(), null);
 });
 
 test("symbols: the game's symbol once the host has it, our icon in the same place before", () => {
@@ -215,7 +217,6 @@ test("symbols: the game's symbol once the host has it, our icon in the same plac
   // A host without symbols at all: our icons.
   const { icons: _, ...older } = GLOSSARY;
   assert.deepEqual(logic.build(value({ glossary: older, mission: mission() }), null).use.map((each) => each.src), ["", ""]);
-  logic.build(value(), null);
 });
 
 test("advice: on Jupiter, Magnetic only for the Corpus (the Amalgams resist nothing else of theirs)", () => {
@@ -237,9 +238,7 @@ test("modifiers: the Steel Path first, then the Fissure, then the others in the 
         { id: "arbitration", name: "Arbitration", stage: null },
         { id: "steel_path", name: "Steel Path", stage: null },
       ],
-    }),
-    null,
-  );
+    }), null, GLOSSARY);
   assert.deepEqual(
     lines.map(({ id, title, text }) => [id, title, text]),
     [
@@ -252,9 +251,7 @@ test("modifiers: the Steel Path first, then the Fissure, then the others in the 
 
 test("modifiers: no Reactant hint in a Void Storm; a Fissure of an era the glossary lacks stays generic", () => {
   const lines = logic.modifiers(
-    mission({ fissure: named("someday", null), modifiers: [{ id: "void_storm", name: "Void Storm", stage: null }] }),
-    null,
-  );
+    mission({ fissure: named("someday", null), modifiers: [{ id: "void_storm", name: "Void Storm", stage: null }] }), null, GLOSSARY);
   assert.deepEqual(lines[0], { id: "fissure", icon: "hexagon", title: "Void Fissure", text: "" });
   assert.deepEqual(lines[1], { id: "void_storm", icon: "tornado", title: "Void Storm", text: "" });
 });
@@ -281,21 +278,21 @@ const SORTIE_WORLD = {
 
 test("sortie: the condition of its stage, matched on the node", () => {
   const helene = mission({ node: named("SolNode42", "Helene") });
-  assert.equal(logic.sortieCondition({ id: "sortie", name: "Sortie", stage: 2 }, helene, SORTIE_WORLD), "Sniper Only");
+  assert.equal(logic.sortieCondition(sortie(2), helene, SORTIE_WORLD), "Sniper Only");
   // A stage that does not match the node: found by the node.
-  assert.equal(logic.sortieCondition({ id: "sortie", name: "Sortie", stage: 1 }, helene, SORTIE_WORLD), "Sniper Only");
-  assert.equal(logic.sortieCondition({ id: "sortie", name: "Sortie", stage: null }, helene, SORTIE_WORLD), "Sniper Only");
+  assert.equal(logic.sortieCondition(sortie(1), helene, SORTIE_WORLD), "Sniper Only");
+  assert.equal(logic.sortieCondition(sortie(null), helene, SORTIE_WORLD), "Sniper Only");
   // A condition without a name yet, another node, or no world: nothing.
   const hyperion = mission({ node: named("SolNode110", "Hyperion") });
-  assert.equal(logic.sortieCondition({ id: "sortie", name: "Sortie", stage: 3 }, hyperion, SORTIE_WORLD), "");
-  assert.equal(logic.sortieCondition({ id: "sortie", name: "Sortie", stage: 2 }, mission(), SORTIE_WORLD), "");
-  assert.equal(logic.sortieCondition({ id: "sortie", name: "Sortie", stage: 2 }, helene, null), "");
+  assert.equal(logic.sortieCondition(sortie(3), hyperion, SORTIE_WORLD), "");
+  assert.equal(logic.sortieCondition(sortie(2), mission(), SORTIE_WORLD), "");
+  assert.equal(logic.sortieCondition(sortie(2), helene, null), "");
 });
 
 test("sortie: the title carries the stage when it is known", () => {
-  const [line] = logic.modifiers(mission({ modifiers: [{ id: "sortie", name: "Sortie", stage: 2 }] }), null);
+  const [line] = logic.modifiers(mission({ modifiers: [sortie(2)] }), null, GLOSSARY);
   assert.equal(line.title, "Sortie 2/3");
-  const [plain] = logic.modifiers(mission({ modifiers: [{ id: "sortie", name: "Sortie", stage: null }] }), null);
+  const [plain] = logic.modifiers(mission({ modifiers: [sortie(null)] }), null, GLOSSARY);
   assert.equal(plain.title, "Sortie");
 });
 
@@ -311,7 +308,7 @@ test("state: waits for a mission, briefs it in full when chosen, loading and in 
   assert.equal(state.brief.dot, "dot f-grineer");
   assert.deepEqual(ids(state.brief.use), ["impact", "corrosive"]);
   assert.deepEqual(state.brief.avoid, []);
-  assert.equal(state.root, "wf briefing full theme-dark");
+  assert.equal(logic.rootClass(state.brief), "wf briefing full theme-dark");
 
   vm.push(SERVICE, value({ mission: mission({ state: "loading", loadingAt: START }) }));
   assert.equal(state.brief.mode, "full");
@@ -321,7 +318,7 @@ test("state: waits for a mission, briefs it in full when chosen, loading and in 
   assert.equal(state.brief.mode, "full");
   assert.equal(state.brief.eyebrow, "");
   assert.equal(logic.names(state.brief.use), "Impact, Corrosive");
-  assert.equal(state.root, "wf briefing full theme-dark");
+  assert.equal(logic.rootClass(state.brief), "wf briefing full theme-dark");
   // After it, the last briefing stays until the next node is chosen, marked as past.
   vm.push(SERVICE, value({ mission: mission({ state: "ended", result: "succeeded", startedAt: START, endedAt: START }) }));
   assert.deepEqual([state.brief.mode, state.brief.eyebrow, state.brief.faction], ["full", "Last mission", "Grineer"]);
@@ -360,7 +357,7 @@ test("state: an unknown faction or none says there is no advice; names fall back
     [state.brief.where, state.brief.faction, state.brief.dot, state.brief.note],
     ["Defense", "Unknown enemies", "dot f-unknown", "No advice yet for these enemies."],
   );
-  assert.equal(state.root, "wf briefing full unknown theme-dark");
+  assert.equal(logic.rootClass(state.brief), "wf briefing full unknown theme-dark");
   vm.push(SERVICE, value({ mission: mission({ faction: named("techrot", null) }) }));
   assert.deepEqual([state.brief.faction, state.brief.dot, state.brief.note], ["Techrot", "dot f-techrot", ""]);
   assert.deepEqual(ids(state.brief.avoid), ["cold"]);
@@ -376,22 +373,22 @@ test("state: One line folds the chosen mission; wide only at 500 px with modifie
   vm.setHost({ options: { layout: "full" } });
   assert.equal(state.brief.mode, "full");
   vm.setHost({ viewport: { width: 540, height: 240 } });
-  assert.equal(state.root, "wf briefing full theme-dark");
+  assert.equal(logic.rootClass(state.brief), "wf briefing full theme-dark");
   vm.push(SERVICE, value({ mission: mission({ modifiers: [{ id: "steel_path", name: "Steel Path", stage: null }] }) }));
-  assert.equal(state.root, "wf briefing full wide theme-dark");
+  assert.equal(logic.rootClass(state.brief), "wf briefing full wide theme-dark");
   vm.setHost({ viewport: { width: 300, height: 240 } });
-  assert.equal(state.root, "wf briefing full theme-dark");
+  assert.equal(logic.rootClass(state.brief), "wf briefing full theme-dark");
   // One line under 260 px: the names without their symbols.
   vm.setHost({ options: { layout: "line" } });
-  assert.equal(state.root, "wf briefing strip theme-dark");
+  assert.equal(logic.rootClass(state.brief), "wf briefing strip theme-dark");
   vm.setHost({ viewport: { width: 240, height: 40 } });
-  assert.equal(state.root, "wf briefing strip narrow theme-dark");
+  assert.equal(logic.rootClass(state.brief), "wf briefing strip narrow theme-dark");
   // The Murmur's two long names: its name would go at 260 px.
   vm.push(SERVICE, value({ mission: mission({ faction: named("murmur", "The Murmur") }) }));
   vm.setHost({ viewport: { width: 260, height: 40 } });
-  assert.equal(state.root, "wf briefing strip narrow theme-dark");
+  assert.equal(logic.rootClass(state.brief), "wf briefing strip narrow theme-dark");
   vm.setHost({ viewport: { width: 320, height: 40 } });
-  assert.equal(state.root, "wf briefing strip theme-dark");
+  assert.equal(logic.rootClass(state.brief), "wf briefing strip theme-dark");
   // Wide characters count wider.
   const brief = { use: [{ name: "冲击" }, { name: "腐蚀" }], faction: "克隆尼" };
   assert.equal(logic.symbolsFit(brief, 200), true);
@@ -401,11 +398,11 @@ test("state: One line folds the chosen mission; wide only at 500 px with modifie
 });
 
 test("state: a failure says the mission is not found and subscribes again 30 s later; a refusal waits", () => {
-  const before = vm.subscriptions.filter((each) => each.service === SERVICE).length;
+  const before = subscriptionCount();
   vm.fail(SERVICE, "unavailable");
   assert.deepEqual([state.brief.waitText, state.brief.waitTone], ["Mission not found yet.", "warning"]);
   vm.advance(30_000);
-  assert.equal(vm.subscriptions.filter((each) => each.service === SERVICE).length, before + 1);
+  assert.equal(subscriptionCount(), before + 1);
   vm.push(SERVICE, value({ mission: mission() }));
   assert.equal(state.brief.mode, "full");
 
@@ -427,7 +424,7 @@ test("state: a failure says the mission is not found and subscribes again 30 s l
   assert.equal(ended.waitText, "Access denied · Control Center");
   vm.setHost({ options: { layout: "full" } });
   vm.advance(60_000);
-  assert.equal(vm.subscriptions.filter((each) => each.service === SERVICE).length, before + 1);
+  assert.equal(subscriptionCount(), before + 1);
 });
 
 test("where: node, planet and type; a node named after its mission does not repeat the type", () => {
@@ -485,7 +482,7 @@ test("where: a Sortie stage whose type the game replaces says its node and plane
     typeAtLoading: true,
     faction: named("corpus", "Corpus"),
     enemyLevel: null,
-    modifiers: [{ id: "sortie", name: "Sortie", stage: 1 }],
+    modifiers: [sortie(1)],
   });
   const before = logic.build(value({ mission: chosen }), null);
   assert.deepEqual([before.where, before.level], ["Morax · Europa", ""]);

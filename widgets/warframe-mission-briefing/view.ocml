@@ -8,12 +8,12 @@
       <image class="sym-img" src={d.src}/>
     </if>
     <else>
-      <icon class={"sym-icon " + d.cls} name={d.icon}/>
+      <icon class={"sym-icon d-" + d.id} name={d.icon}/>
     </else>
   </box>
 </component>
 
-<box class={state.root}>
+<box class={rootClass(state.brief)}>
   <if test={state.brief.mode == "wait"}>
     <box class="line">
       <icon class={"line-icon tone-" + state.brief.waitTone} name={state.brief.waitIcon}/>
