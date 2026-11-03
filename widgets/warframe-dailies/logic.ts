@@ -864,8 +864,12 @@ const H = {
   choices: 18,
   meta: 18,
   more: 17,
-  /** Characters of the choices' 12 px text per px, generous: a wrap is never missed. */
-  charPx: 7.5,
+  /**
+   * Px per character of the choices' 12 px text: measured 6.3 on the
+   * rendered rows, a little more so that a wrap is not missed, no more so
+   * that a row that fits is not counted twice.
+   */
+  charPx: 6.5,
   /** A choice's padding and the gap after it. */
   choicePad: 12,
 };
@@ -897,7 +901,8 @@ function actHeight(act: ActView, width: number): number {
   return height;
 }
 
-const textLines = (value: string, width: number): number => Math.max(1, Math.ceil((value.length * 6.5) / Math.max(1, width)));
+/** Lines of an 11 px line of text (Baro, the note): measured 4.9 px per character, 5.5 counted. */
+const textLines = (value: string, width: number): number => Math.max(1, Math.ceil((value.length * 5.5) / Math.max(1, width)));
 
 /** The height of a column of sections. */
 function columnHeight(sections: readonly Section[], width: number): number {

@@ -290,6 +290,32 @@ test("Passive: past the frame's largest height, the end of Nightwave folds into 
   await push();
 });
 
+test("Passive: the typical day's full week, 651 px tall, fits under 680 points: nothing folds", () => {
+  // The world of the typical-day scenario: French names, the Circuit's picks, Baro's relay.
+  const scenario = JSON.parse(readFileSync(new URL("./typical-day.scenario.json", import.meta.url), "utf8"));
+  const inputs = (width) => ({
+    ticks: logic.emptyTicks(),
+    world: scenario.steps[1].gameEvents.warframe.info.world,
+    worldStatus: "available",
+    source: "available",
+    tracked: { sortie: true, archon: true, netracells: true, circuit: true, steel: true, nightwave: true },
+    baro: true,
+    now: scenario.host.startAt,
+    interactive: false,
+    width,
+  });
+  const built = logic.buildModel(inputs(300));
+  const night = built.cols.flatMap((col) => col.groups.flatMap((group) => group.acts)).find((each) => each.id === "nightwave");
+  assert.equal(night.more, "", "nothing folded");
+  assert.equal(night.groups.flatMap((group) => group.parts).length, 10);
+  assert.ok(logic.panelHeight(built, 300) <= logic.MAX_HEIGHT);
+  // Narrower, the same week passes 680 points: the end of Nightwave folds.
+  const narrow = logic.buildModel(inputs(220));
+  const folded = narrow.cols.flatMap((col) => col.groups.flatMap((group) => group.acts)).find((each) => each.id === "nightwave");
+  assert.ok(logic.panelHeight(narrow, 220) <= logic.MAX_HEIGHT);
+  assert.notEqual(folded.more, "");
+});
+
 test("the world not read yet: the stages by their rank, Nightwave waits", async () => {
   vm.push(SERVICE, value({ worldValue: null, features: { world: "unavailable" } }));
   await flush();
