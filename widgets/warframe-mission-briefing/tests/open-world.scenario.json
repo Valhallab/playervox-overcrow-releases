@@ -1,0 +1,926 @@
+{
+  "scenarioVersion": 1,
+  "name": "open-world",
+  "description": "An open world entered by its hub's gate is briefed as a mission (Free Roam, its faction and levels), in either language and in One line; left, the widget asks to pick a mission.",
+  "host": {
+    "startAt": 1793199600000
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "type": {
+                "id": "free_roam",
+                "name": "Exploration Libre"
+              },
+              "fissure": null,
+              "modifiers": [],
+              "selectedAt": null,
+              "loadingAt": 1793199580000,
+              "startedAt": 1793199590000,
+              "typeAtLoading": false,
+              "relic": null,
+              "node": {
+                "id": "SolNode228",
+                "name": "Les Plaines d’Eidolon"
+              },
+              "planet": {
+                "id": "earth",
+                "name": "Terre"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "enemyLevel": {
+                "min": 10,
+                "max": 30
+              }
+            }
+          },
+          "event": "mission_started",
+          "glossary": {
+            "language": "fr",
+            "damage": {
+              "impact": "Impact",
+              "puncture": "Perforation",
+              "slash": "Tranchant",
+              "heat": "Feu",
+              "cold": "Glace",
+              "electricity": "Électrique",
+              "toxin": "Poison",
+              "blast": "Explosion",
+              "corrosive": "Corrosif",
+              "gas": "Gaz",
+              "magnetic": "Magnétique",
+              "radiation": "Radiation",
+              "viral": "Viral"
+            },
+            "fissure": {
+              "lith": "Fissure Lith",
+              "meso": "Fissure Meso",
+              "neo": "Fissure Neo",
+              "axi": "Fissure Axi",
+              "requiem": "Fissure Requiem",
+              "omnia": "Fissure Omnia"
+            },
+            "activity": {
+              "void_fissure": "Fissure du Néant"
+            },
+            "faction": {
+              "corpus": "Corpus",
+              "corrupted": "Corrompus",
+              "grineer": "Grineer",
+              "infested": "Infestés",
+              "murmur": "Le Murmure",
+              "sentient": "Sentients"
+            },
+            "term": {
+              "reactant": "Réactif"
+            }
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Les Plaines d’Eidolon · Terre · Exploration Libre",
+          "niv. 10–30"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "type": {
+                "id": "free_roam",
+                "name": "Exploration Libre"
+              },
+              "fissure": null,
+              "modifiers": [],
+              "selectedAt": null,
+              "loadingAt": 1793199580000,
+              "startedAt": 1793199590000,
+              "typeAtLoading": false,
+              "relic": null,
+              "node": {
+                "id": "SolNode228",
+                "name": "Les Plaines d’Eidolon"
+              },
+              "planet": {
+                "id": "earth",
+                "name": "Terre"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "enemyLevel": {
+                "min": 10,
+                "max": 30
+              }
+            }
+          },
+          "event": "mission_started",
+          "glossary": {
+            "language": "fr",
+            "damage": {
+              "impact": "Impact",
+              "puncture": "Perforation",
+              "slash": "Tranchant",
+              "heat": "Feu",
+              "cold": "Glace",
+              "electricity": "Électrique",
+              "toxin": "Poison",
+              "blast": "Explosion",
+              "corrosive": "Corrosif",
+              "gas": "Gaz",
+              "magnetic": "Magnétique",
+              "radiation": "Radiation",
+              "viral": "Viral"
+            },
+            "fissure": {
+              "lith": "Fissure Lith",
+              "meso": "Fissure Meso",
+              "neo": "Fissure Neo",
+              "axi": "Fissure Axi",
+              "requiem": "Fissure Requiem",
+              "omnia": "Fissure Omnia"
+            },
+            "activity": {
+              "void_fissure": "Fissure du Néant"
+            },
+            "faction": {
+              "corpus": "Corpus",
+              "corrupted": "Corrompus",
+              "grineer": "Grineer",
+              "infested": "Infestés",
+              "murmur": "Le Murmure",
+              "sentient": "Sentients"
+            },
+            "term": {
+              "reactant": "Réactif"
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "open-world-plains-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "type": {
+                "id": "free_roam",
+                "name": "Exploration Libre"
+              },
+              "fissure": null,
+              "modifiers": [],
+              "selectedAt": null,
+              "loadingAt": 1793199580000,
+              "startedAt": 1793199590000,
+              "typeAtLoading": false,
+              "relic": null,
+              "node": {
+                "id": "SolNode228",
+                "name": "Les Plaines d’Eidolon"
+              },
+              "planet": {
+                "id": "earth",
+                "name": "Terre"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "enemyLevel": {
+                "min": 10,
+                "max": 30
+              }
+            }
+          },
+          "event": "mission_started",
+          "glossary": {
+            "language": "fr",
+            "damage": {
+              "impact": "Impact",
+              "puncture": "Perforation",
+              "slash": "Tranchant",
+              "heat": "Feu",
+              "cold": "Glace",
+              "electricity": "Électrique",
+              "toxin": "Poison",
+              "blast": "Explosion",
+              "corrosive": "Corrosif",
+              "gas": "Gaz",
+              "magnetic": "Magnétique",
+              "radiation": "Radiation",
+              "viral": "Viral"
+            },
+            "fissure": {
+              "lith": "Fissure Lith",
+              "meso": "Fissure Meso",
+              "neo": "Fissure Neo",
+              "axi": "Fissure Axi",
+              "requiem": "Fissure Requiem",
+              "omnia": "Fissure Omnia"
+            },
+            "activity": {
+              "void_fissure": "Fissure du Néant"
+            },
+            "faction": {
+              "corpus": "Corpus",
+              "corrupted": "Corrompus",
+              "grineer": "Grineer",
+              "infested": "Infestés",
+              "murmur": "Le Murmure",
+              "sentient": "Sentients"
+            },
+            "term": {
+              "reactant": "Réactif"
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1500,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "open-world-plains-fr-150",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "type": {
+                "id": "free_roam",
+                "name": "Free Roam"
+              },
+              "fissure": null,
+              "modifiers": [],
+              "selectedAt": null,
+              "loadingAt": 1793199580000,
+              "startedAt": 1793199590000,
+              "typeAtLoading": false,
+              "relic": null,
+              "node": {
+                "id": "SolNode129",
+                "name": "Orb Vallis"
+              },
+              "planet": {
+                "id": "venus",
+                "name": "Venus"
+              },
+              "faction": {
+                "id": "corpus",
+                "name": "Corpus"
+              },
+              "enemyLevel": {
+                "min": 10,
+                "max": 30
+              }
+            }
+          },
+          "event": "mission_started",
+          "glossary": {
+            "language": "en",
+            "damage": {
+              "impact": "Impact",
+              "puncture": "Puncture",
+              "slash": "Slash",
+              "heat": "Heat",
+              "cold": "Cold",
+              "electricity": "Electricity",
+              "toxin": "Toxin",
+              "blast": "Blast",
+              "corrosive": "Corrosive",
+              "gas": "Gas",
+              "magnetic": "Magnetic",
+              "radiation": "Radiation",
+              "viral": "Viral"
+            },
+            "fissure": {
+              "lith": "Lith Fissure",
+              "meso": "Meso Fissure",
+              "neo": "Neo Fissure",
+              "axi": "Axi Fissure",
+              "requiem": "Requiem Fissure",
+              "omnia": "Omnia Fissure"
+            },
+            "activity": {
+              "void_fissure": "Void Fissure"
+            },
+            "faction": {
+              "corpus": "Corpus",
+              "corrupted": "Corrupted",
+              "grineer": "Grineer",
+              "infested": "Infested",
+              "murmur": "The Murmur",
+              "sentient": "Sentient"
+            },
+            "term": {
+              "reactant": "Reactant"
+            }
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Orb Vallis · Venus · Free Roam"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "type": {
+                "id": "free_roam",
+                "name": "Free Roam"
+              },
+              "fissure": null,
+              "modifiers": [],
+              "selectedAt": null,
+              "loadingAt": 1793199580000,
+              "startedAt": 1793199590000,
+              "typeAtLoading": false,
+              "relic": null,
+              "node": {
+                "id": "SolNode129",
+                "name": "Orb Vallis"
+              },
+              "planet": {
+                "id": "venus",
+                "name": "Venus"
+              },
+              "faction": {
+                "id": "corpus",
+                "name": "Corpus"
+              },
+              "enemyLevel": {
+                "min": 10,
+                "max": 30
+              }
+            }
+          },
+          "event": "mission_started",
+          "glossary": {
+            "language": "en",
+            "damage": {
+              "impact": "Impact",
+              "puncture": "Puncture",
+              "slash": "Slash",
+              "heat": "Heat",
+              "cold": "Cold",
+              "electricity": "Electricity",
+              "toxin": "Toxin",
+              "blast": "Blast",
+              "corrosive": "Corrosive",
+              "gas": "Gas",
+              "magnetic": "Magnetic",
+              "radiation": "Radiation",
+              "viral": "Viral"
+            },
+            "fissure": {
+              "lith": "Lith Fissure",
+              "meso": "Meso Fissure",
+              "neo": "Neo Fissure",
+              "axi": "Axi Fissure",
+              "requiem": "Requiem Fissure",
+              "omnia": "Omnia Fissure"
+            },
+            "activity": {
+              "void_fissure": "Void Fissure"
+            },
+            "faction": {
+              "corpus": "Corpus",
+              "corrupted": "Corrupted",
+              "grineer": "Grineer",
+              "infested": "Infested",
+              "murmur": "The Murmur",
+              "sentient": "Sentient"
+            },
+            "term": {
+              "reactant": "Reactant"
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "open-world-vallis-en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "type": {
+                "id": "free_roam",
+                "name": "Exploration Libre"
+              },
+              "fissure": null,
+              "modifiers": [],
+              "selectedAt": null,
+              "loadingAt": 1793199580000,
+              "startedAt": 1793199590000,
+              "typeAtLoading": false,
+              "relic": null,
+              "node": {
+                "id": "SolNode229",
+                "name": "Puy de Cambion"
+              },
+              "planet": {
+                "id": "deimos",
+                "name": "Deimos"
+              },
+              "faction": {
+                "id": "infested",
+                "name": "Infestés"
+              },
+              "enemyLevel": {
+                "min": 15,
+                "max": 30
+              }
+            }
+          },
+          "event": "mission_started",
+          "glossary": {
+            "language": "fr",
+            "damage": {
+              "impact": "Impact",
+              "puncture": "Perforation",
+              "slash": "Tranchant",
+              "heat": "Feu",
+              "cold": "Glace",
+              "electricity": "Électrique",
+              "toxin": "Poison",
+              "blast": "Explosion",
+              "corrosive": "Corrosif",
+              "gas": "Gaz",
+              "magnetic": "Magnétique",
+              "radiation": "Radiation",
+              "viral": "Viral"
+            },
+            "fissure": {
+              "lith": "Fissure Lith",
+              "meso": "Fissure Meso",
+              "neo": "Fissure Neo",
+              "axi": "Fissure Axi",
+              "requiem": "Fissure Requiem",
+              "omnia": "Fissure Omnia"
+            },
+            "activity": {
+              "void_fissure": "Fissure du Néant"
+            },
+            "faction": {
+              "corpus": "Corpus",
+              "corrupted": "Corrompus",
+              "grineer": "Grineer",
+              "infested": "Infestés",
+              "murmur": "Le Murmure",
+              "sentient": "Sentients"
+            },
+            "term": {
+              "reactant": "Réactif"
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "open-world-cambion-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "type": {
+                "id": "free_roam",
+                "name": "Exploration Libre"
+              },
+              "fissure": null,
+              "modifiers": [],
+              "selectedAt": null,
+              "loadingAt": 1793199580000,
+              "startedAt": 1793199590000,
+              "typeAtLoading": false,
+              "relic": null,
+              "node": {
+                "id": "SolNode229",
+                "name": "Puy de Cambion"
+              },
+              "planet": {
+                "id": "deimos",
+                "name": "Deimos"
+              },
+              "faction": {
+                "id": "infested",
+                "name": "Infestés"
+              },
+              "enemyLevel": {
+                "min": 15,
+                "max": 30
+              }
+            }
+          },
+          "event": "mission_started",
+          "glossary": {
+            "language": "fr",
+            "damage": {
+              "impact": "Impact",
+              "puncture": "Perforation",
+              "slash": "Tranchant",
+              "heat": "Feu",
+              "cold": "Glace",
+              "electricity": "Électrique",
+              "toxin": "Poison",
+              "blast": "Explosion",
+              "corrosive": "Corrosif",
+              "gas": "Gaz",
+              "magnetic": "Magnétique",
+              "radiation": "Radiation",
+              "viral": "Viral"
+            },
+            "fissure": {
+              "lith": "Fissure Lith",
+              "meso": "Fissure Meso",
+              "neo": "Fissure Neo",
+              "axi": "Fissure Axi",
+              "requiem": "Fissure Requiem",
+              "omnia": "Fissure Omnia"
+            },
+            "activity": {
+              "void_fissure": "Fissure du Néant"
+            },
+            "faction": {
+              "corpus": "Corpus",
+              "corrupted": "Corrompus",
+              "grineer": "Grineer",
+              "infested": "Infestés",
+              "murmur": "Le Murmure",
+              "sentient": "Sentients"
+            },
+            "term": {
+              "reactant": "Réactif"
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "open-world-cambion-line-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": null
+          },
+          "event": {
+            "type": "mission_left",
+            "mission": {
+              "state": "in_progress",
+              "type": {
+                "id": "free_roam",
+                "name": "Exploration Libre"
+              },
+              "fissure": null,
+              "modifiers": [],
+              "selectedAt": null,
+              "loadingAt": 1793199580000,
+              "startedAt": 1793199590000,
+              "typeAtLoading": false,
+              "relic": null,
+              "node": {
+                "id": "SolNode229",
+                "name": "Puy de Cambion"
+              },
+              "planet": {
+                "id": "deimos",
+                "name": "Deimos"
+              },
+              "faction": {
+                "id": "infested",
+                "name": "Infestés"
+              },
+              "enemyLevel": {
+                "min": 15,
+                "max": 30
+              }
+            }
+          },
+          "glossary": {
+            "language": "fr",
+            "damage": {
+              "impact": "Impact",
+              "puncture": "Perforation",
+              "slash": "Tranchant",
+              "heat": "Feu",
+              "cold": "Glace",
+              "electricity": "Électrique",
+              "toxin": "Poison",
+              "blast": "Explosion",
+              "corrosive": "Corrosif",
+              "gas": "Gaz",
+              "magnetic": "Magnétique",
+              "radiation": "Radiation",
+              "viral": "Viral"
+            },
+            "fissure": {
+              "lith": "Fissure Lith",
+              "meso": "Fissure Meso",
+              "neo": "Fissure Neo",
+              "axi": "Fissure Axi",
+              "requiem": "Fissure Requiem",
+              "omnia": "Fissure Omnia"
+            },
+            "activity": {
+              "void_fissure": "Fissure du Néant"
+            },
+            "faction": {
+              "corpus": "Corpus",
+              "corrupted": "Corrompus",
+              "grineer": "Grineer",
+              "infested": "Infestés",
+              "murmur": "Le Murmure",
+              "sentient": "Sentients"
+            },
+            "term": {
+              "reactant": "Réactif"
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Choisissez une mission pour voir le briefing."
+        ],
+        "noText": [
+          "Puy de Cambion"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": null
+          },
+          "event": {
+            "type": "mission_left",
+            "mission": {
+              "state": "in_progress",
+              "type": {
+                "id": "free_roam",
+                "name": "Exploration Libre"
+              },
+              "fissure": null,
+              "modifiers": [],
+              "selectedAt": null,
+              "loadingAt": 1793199580000,
+              "startedAt": 1793199590000,
+              "typeAtLoading": false,
+              "relic": null,
+              "node": {
+                "id": "SolNode229",
+                "name": "Puy de Cambion"
+              },
+              "planet": {
+                "id": "deimos",
+                "name": "Deimos"
+              },
+              "faction": {
+                "id": "infested",
+                "name": "Infestés"
+              },
+              "enemyLevel": {
+                "min": 15,
+                "max": 30
+              }
+            }
+          },
+          "glossary": {
+            "language": "fr",
+            "damage": {
+              "impact": "Impact",
+              "puncture": "Perforation",
+              "slash": "Tranchant",
+              "heat": "Feu",
+              "cold": "Glace",
+              "electricity": "Électrique",
+              "toxin": "Poison",
+              "blast": "Explosion",
+              "corrosive": "Corrosif",
+              "gas": "Gaz",
+              "magnetic": "Magnétique",
+              "radiation": "Radiation",
+              "viral": "Viral"
+            },
+            "fissure": {
+              "lith": "Fissure Lith",
+              "meso": "Fissure Meso",
+              "neo": "Fissure Neo",
+              "axi": "Fissure Axi",
+              "requiem": "Fissure Requiem",
+              "omnia": "Fissure Omnia"
+            },
+            "activity": {
+              "void_fissure": "Fissure du Néant"
+            },
+            "faction": {
+              "corpus": "Corpus",
+              "corrupted": "Corrompus",
+              "grineer": "Grineer",
+              "infested": "Infestés",
+              "murmur": "Le Murmure",
+              "sentient": "Sentients"
+            },
+            "term": {
+              "reactant": "Réactif"
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "open-world-left-fr-100",
+        "fault": "none"
+      }
+    }
+  ]
+}

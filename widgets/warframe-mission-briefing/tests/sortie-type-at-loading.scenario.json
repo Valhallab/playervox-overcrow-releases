@@ -1,0 +1,1405 @@
+{
+  "scenarioVersion": 1,
+  "name": "sortie-type-at-loading",
+  "description": "A Sortie stage whose type the game replaces: chosen, its node and planet without a type or a level; loaded, its real type and level.",
+  "host": {
+    "startAt": 1793199600000
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "world": {
+              "updatedAt": 1793199540000,
+              "sortie": {
+                "boss": {
+                  "id": "hyena_pack",
+                  "name": "La Meute de Hyènes"
+                },
+                "faction": {
+                  "id": "corpus",
+                  "name": "Corpus"
+                },
+                "endsAt": 1793203200000,
+                "missions": [
+                  {
+                    "node": {
+                      "id": "SolNode209",
+                      "name": "Morax"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europe"
+                    },
+                    "type": null,
+                    "typeAtLoading": true,
+                    "modifier": {
+                      "id": "assault_rifle_only",
+                      "name": "Fusil d'Assaut uniquement"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode102",
+                      "name": "Oestrus"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europe"
+                    },
+                    "type": {
+                      "id": "sabotage",
+                      "name": "Sabotage"
+                    },
+                    "typeAtLoading": false,
+                    "modifier": {
+                      "id": "augmented_armor",
+                      "name": "Armure Ennemie Augmentée"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode57",
+                      "name": "Sinai"
+                    },
+                    "planet": {
+                      "id": "jupiter",
+                      "name": "Jupiter"
+                    },
+                    "type": {
+                      "id": "mobile_defense",
+                      "name": "Défense Mobile"
+                    },
+                    "typeAtLoading": false,
+                    "modifier": {
+                      "id": "eximus_stronghold",
+                      "name": "Bastion Eximus"
+                    }
+                  }
+                ]
+              },
+              "resets": {
+                "daily": 1793232000000,
+                "weekly": 1793664000000
+              }
+            },
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode209",
+                "name": "Morax"
+              },
+              "planet": {
+                "id": "europa",
+                "name": "Europe"
+              },
+              "type": null,
+              "typeAtLoading": true,
+              "faction": {
+                "id": "corpus",
+                "name": "Corpus"
+              },
+              "enemyLevel": null,
+              "fissure": null,
+              "modifiers": [
+                {
+                  "id": "sortie",
+                  "name": "Sortie",
+                  "stage": 1
+                }
+              ],
+              "selectedAt": 1793199570000,
+              "loadingAt": null,
+              "relic": null
+            }
+          },
+          "event": "mission_selected",
+          "glossary": {
+            "language": "fr",
+            "damage": {
+              "impact": "Impact",
+              "puncture": "Perforation",
+              "slash": "Tranchant",
+              "heat": "Feu",
+              "cold": "Glace",
+              "electricity": "Électrique",
+              "toxin": "Poison",
+              "blast": "Explosion",
+              "corrosive": "Corrosif",
+              "gas": "Gaz",
+              "magnetic": "Magnétique",
+              "radiation": "Radiation",
+              "viral": "Viral"
+            },
+            "fissure": {
+              "lith": "Fissure Lith",
+              "meso": "Fissure Meso",
+              "neo": "Fissure Neo",
+              "axi": "Fissure Axi",
+              "requiem": "Fissure Requiem",
+              "omnia": "Fissure Omnia"
+            },
+            "activity": {
+              "void_fissure": "Fissure du Néant"
+            },
+            "faction": {
+              "corpus": "Corpus",
+              "corrupted": "Corrompus",
+              "grineer": "Grineer",
+              "infested": "Infestés",
+              "murmur": "Le Murmure",
+              "sentient": "Sentients"
+            },
+            "term": {
+              "reactant": "Réactif"
+            }
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Morax · Europe",
+          "Sortie 1/3"
+        ],
+        "noText": [
+          "Morax · Europe · Excavation",
+          "Excavation",
+          "niv. 50–60"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "world": {
+              "updatedAt": 1793199540000,
+              "sortie": {
+                "boss": {
+                  "id": "hyena_pack",
+                  "name": "La Meute de Hyènes"
+                },
+                "faction": {
+                  "id": "corpus",
+                  "name": "Corpus"
+                },
+                "endsAt": 1793203200000,
+                "missions": [
+                  {
+                    "node": {
+                      "id": "SolNode209",
+                      "name": "Morax"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europe"
+                    },
+                    "type": null,
+                    "typeAtLoading": true,
+                    "modifier": {
+                      "id": "assault_rifle_only",
+                      "name": "Fusil d'Assaut uniquement"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode102",
+                      "name": "Oestrus"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europe"
+                    },
+                    "type": {
+                      "id": "sabotage",
+                      "name": "Sabotage"
+                    },
+                    "typeAtLoading": false,
+                    "modifier": {
+                      "id": "augmented_armor",
+                      "name": "Armure Ennemie Augmentée"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode57",
+                      "name": "Sinai"
+                    },
+                    "planet": {
+                      "id": "jupiter",
+                      "name": "Jupiter"
+                    },
+                    "type": {
+                      "id": "mobile_defense",
+                      "name": "Défense Mobile"
+                    },
+                    "typeAtLoading": false,
+                    "modifier": {
+                      "id": "eximus_stronghold",
+                      "name": "Bastion Eximus"
+                    }
+                  }
+                ]
+              },
+              "resets": {
+                "daily": 1793232000000,
+                "weekly": 1793664000000
+              }
+            },
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode209",
+                "name": "Morax"
+              },
+              "planet": {
+                "id": "europa",
+                "name": "Europe"
+              },
+              "type": null,
+              "typeAtLoading": true,
+              "faction": {
+                "id": "corpus",
+                "name": "Corpus"
+              },
+              "enemyLevel": null,
+              "fissure": null,
+              "modifiers": [
+                {
+                  "id": "sortie",
+                  "name": "Sortie",
+                  "stage": 1
+                }
+              ],
+              "selectedAt": 1793199570000,
+              "loadingAt": null,
+              "relic": null
+            }
+          },
+          "event": "mission_selected",
+          "glossary": {
+            "language": "fr",
+            "damage": {
+              "impact": "Impact",
+              "puncture": "Perforation",
+              "slash": "Tranchant",
+              "heat": "Feu",
+              "cold": "Glace",
+              "electricity": "Électrique",
+              "toxin": "Poison",
+              "blast": "Explosion",
+              "corrosive": "Corrosif",
+              "gas": "Gaz",
+              "magnetic": "Magnétique",
+              "radiation": "Radiation",
+              "viral": "Viral"
+            },
+            "fissure": {
+              "lith": "Fissure Lith",
+              "meso": "Fissure Meso",
+              "neo": "Fissure Neo",
+              "axi": "Fissure Axi",
+              "requiem": "Fissure Requiem",
+              "omnia": "Fissure Omnia"
+            },
+            "activity": {
+              "void_fissure": "Fissure du Néant"
+            },
+            "faction": {
+              "corpus": "Corpus",
+              "corrupted": "Corrompus",
+              "grineer": "Grineer",
+              "infested": "Infestés",
+              "murmur": "Le Murmure",
+              "sentient": "Sentients"
+            },
+            "term": {
+              "reactant": "Réactif"
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "sortie-type-at-loading-chosen-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "world": {
+              "updatedAt": 1793199540000,
+              "sortie": {
+                "boss": {
+                  "id": "hyena_pack",
+                  "name": "La Meute de Hyènes"
+                },
+                "faction": {
+                  "id": "corpus",
+                  "name": "Corpus"
+                },
+                "endsAt": 1793203200000,
+                "missions": [
+                  {
+                    "node": {
+                      "id": "SolNode209",
+                      "name": "Morax"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europe"
+                    },
+                    "type": {
+                      "id": "excavation",
+                      "name": "Excavation"
+                    },
+                    "typeAtLoading": false,
+                    "modifier": {
+                      "id": "assault_rifle_only",
+                      "name": "Fusil d'Assaut uniquement"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode102",
+                      "name": "Oestrus"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europe"
+                    },
+                    "type": {
+                      "id": "sabotage",
+                      "name": "Sabotage"
+                    },
+                    "typeAtLoading": false,
+                    "modifier": {
+                      "id": "augmented_armor",
+                      "name": "Armure Ennemie Augmentée"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode57",
+                      "name": "Sinai"
+                    },
+                    "planet": {
+                      "id": "jupiter",
+                      "name": "Jupiter"
+                    },
+                    "type": {
+                      "id": "mobile_defense",
+                      "name": "Défense Mobile"
+                    },
+                    "typeAtLoading": false,
+                    "modifier": {
+                      "id": "eximus_stronghold",
+                      "name": "Bastion Eximus"
+                    }
+                  }
+                ]
+              },
+              "resets": {
+                "daily": 1793232000000,
+                "weekly": 1793664000000
+              }
+            },
+            "mission": {
+              "state": "loading",
+              "node": {
+                "id": "SolNode209",
+                "name": "Morax"
+              },
+              "planet": {
+                "id": "europa",
+                "name": "Europe"
+              },
+              "type": {
+                "id": "excavation",
+                "name": "Excavation"
+              },
+              "typeAtLoading": false,
+              "faction": {
+                "id": "corpus",
+                "name": "Corpus"
+              },
+              "enemyLevel": {
+                "min": 50,
+                "max": 60
+              },
+              "fissure": null,
+              "modifiers": [
+                {
+                  "id": "sortie",
+                  "name": "Sortie",
+                  "stage": 1
+                }
+              ],
+              "selectedAt": 1793199570000,
+              "loadingAt": 1793199595000,
+              "relic": null
+            }
+          },
+          "event": "mission_loading",
+          "glossary": {
+            "language": "fr",
+            "damage": {
+              "impact": "Impact",
+              "puncture": "Perforation",
+              "slash": "Tranchant",
+              "heat": "Feu",
+              "cold": "Glace",
+              "electricity": "Électrique",
+              "toxin": "Poison",
+              "blast": "Explosion",
+              "corrosive": "Corrosif",
+              "gas": "Gaz",
+              "magnetic": "Magnétique",
+              "radiation": "Radiation",
+              "viral": "Viral"
+            },
+            "fissure": {
+              "lith": "Fissure Lith",
+              "meso": "Fissure Meso",
+              "neo": "Fissure Neo",
+              "axi": "Fissure Axi",
+              "requiem": "Fissure Requiem",
+              "omnia": "Fissure Omnia"
+            },
+            "activity": {
+              "void_fissure": "Fissure du Néant"
+            },
+            "faction": {
+              "corpus": "Corpus",
+              "corrupted": "Corrompus",
+              "grineer": "Grineer",
+              "infested": "Infestés",
+              "murmur": "Le Murmure",
+              "sentient": "Sentients"
+            },
+            "term": {
+              "reactant": "Réactif"
+            }
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Morax · Europe · Excavation",
+          "Sortie 1/3"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "world": {
+              "updatedAt": 1793199540000,
+              "sortie": {
+                "boss": {
+                  "id": "hyena_pack",
+                  "name": "La Meute de Hyènes"
+                },
+                "faction": {
+                  "id": "corpus",
+                  "name": "Corpus"
+                },
+                "endsAt": 1793203200000,
+                "missions": [
+                  {
+                    "node": {
+                      "id": "SolNode209",
+                      "name": "Morax"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europe"
+                    },
+                    "type": {
+                      "id": "excavation",
+                      "name": "Excavation"
+                    },
+                    "typeAtLoading": false,
+                    "modifier": {
+                      "id": "assault_rifle_only",
+                      "name": "Fusil d'Assaut uniquement"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode102",
+                      "name": "Oestrus"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europe"
+                    },
+                    "type": {
+                      "id": "sabotage",
+                      "name": "Sabotage"
+                    },
+                    "typeAtLoading": false,
+                    "modifier": {
+                      "id": "augmented_armor",
+                      "name": "Armure Ennemie Augmentée"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode57",
+                      "name": "Sinai"
+                    },
+                    "planet": {
+                      "id": "jupiter",
+                      "name": "Jupiter"
+                    },
+                    "type": {
+                      "id": "mobile_defense",
+                      "name": "Défense Mobile"
+                    },
+                    "typeAtLoading": false,
+                    "modifier": {
+                      "id": "eximus_stronghold",
+                      "name": "Bastion Eximus"
+                    }
+                  }
+                ]
+              },
+              "resets": {
+                "daily": 1793232000000,
+                "weekly": 1793664000000
+              }
+            },
+            "mission": {
+              "state": "loading",
+              "node": {
+                "id": "SolNode209",
+                "name": "Morax"
+              },
+              "planet": {
+                "id": "europa",
+                "name": "Europe"
+              },
+              "type": {
+                "id": "excavation",
+                "name": "Excavation"
+              },
+              "typeAtLoading": false,
+              "faction": {
+                "id": "corpus",
+                "name": "Corpus"
+              },
+              "enemyLevel": {
+                "min": 50,
+                "max": 60
+              },
+              "fissure": null,
+              "modifiers": [
+                {
+                  "id": "sortie",
+                  "name": "Sortie",
+                  "stage": 1
+                }
+              ],
+              "selectedAt": 1793199570000,
+              "loadingAt": 1793199595000,
+              "relic": null
+            }
+          },
+          "event": "mission_loading",
+          "glossary": {
+            "language": "fr",
+            "damage": {
+              "impact": "Impact",
+              "puncture": "Perforation",
+              "slash": "Tranchant",
+              "heat": "Feu",
+              "cold": "Glace",
+              "electricity": "Électrique",
+              "toxin": "Poison",
+              "blast": "Explosion",
+              "corrosive": "Corrosif",
+              "gas": "Gaz",
+              "magnetic": "Magnétique",
+              "radiation": "Radiation",
+              "viral": "Viral"
+            },
+            "fissure": {
+              "lith": "Fissure Lith",
+              "meso": "Fissure Meso",
+              "neo": "Fissure Neo",
+              "axi": "Fissure Axi",
+              "requiem": "Fissure Requiem",
+              "omnia": "Fissure Omnia"
+            },
+            "activity": {
+              "void_fissure": "Fissure du Néant"
+            },
+            "faction": {
+              "corpus": "Corpus",
+              "corrupted": "Corrompus",
+              "grineer": "Grineer",
+              "infested": "Infestés",
+              "murmur": "Le Murmure",
+              "sentient": "Sentients"
+            },
+            "term": {
+              "reactant": "Réactif"
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "sortie-type-at-loading-loaded-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "world": {
+              "updatedAt": 1793199540000,
+              "sortie": {
+                "boss": {
+                  "id": "hyena_pack",
+                  "name": "Hyena Pack"
+                },
+                "faction": {
+                  "id": "corpus",
+                  "name": "Corpus"
+                },
+                "endsAt": 1793203200000,
+                "missions": [
+                  {
+                    "node": {
+                      "id": "SolNode209",
+                      "name": "Morax"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europa"
+                    },
+                    "type": null,
+                    "typeAtLoading": true,
+                    "modifier": {
+                      "id": "assault_rifle_only",
+                      "name": "Assault Rifle Only"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode102",
+                      "name": "Oestrus"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europa"
+                    },
+                    "type": {
+                      "id": "sabotage",
+                      "name": "Sabotage"
+                    },
+                    "typeAtLoading": false,
+                    "modifier": {
+                      "id": "augmented_armor",
+                      "name": "Augmented Enemy Armor"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode57",
+                      "name": "Sinai"
+                    },
+                    "planet": {
+                      "id": "jupiter",
+                      "name": "Jupiter"
+                    },
+                    "type": {
+                      "id": "mobile_defense",
+                      "name": "Mobile Defense"
+                    },
+                    "typeAtLoading": false,
+                    "modifier": {
+                      "id": "eximus_stronghold",
+                      "name": "Eximus Stronghold"
+                    }
+                  }
+                ]
+              },
+              "resets": {
+                "daily": 1793232000000,
+                "weekly": 1793664000000
+              }
+            },
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode209",
+                "name": "Morax"
+              },
+              "planet": {
+                "id": "europa",
+                "name": "Europa"
+              },
+              "type": null,
+              "typeAtLoading": true,
+              "faction": {
+                "id": "corpus",
+                "name": "Corpus"
+              },
+              "enemyLevel": null,
+              "fissure": null,
+              "modifiers": [
+                {
+                  "id": "sortie",
+                  "name": "Sortie",
+                  "stage": 1
+                }
+              ],
+              "selectedAt": 1793199570000,
+              "loadingAt": null,
+              "relic": null
+            }
+          },
+          "event": "mission_selected",
+          "glossary": {
+            "language": "en",
+            "damage": {
+              "impact": "Impact",
+              "puncture": "Puncture",
+              "slash": "Slash",
+              "heat": "Heat",
+              "cold": "Cold",
+              "electricity": "Electricity",
+              "toxin": "Toxin",
+              "blast": "Blast",
+              "corrosive": "Corrosive",
+              "gas": "Gas",
+              "magnetic": "Magnetic",
+              "radiation": "Radiation",
+              "viral": "Viral"
+            },
+            "fissure": {
+              "lith": "Lith Fissure",
+              "meso": "Meso Fissure",
+              "neo": "Neo Fissure",
+              "axi": "Axi Fissure",
+              "requiem": "Requiem Fissure",
+              "omnia": "Omnia Fissure"
+            },
+            "activity": {
+              "void_fissure": "Void Fissure"
+            },
+            "faction": {
+              "corpus": "Corpus",
+              "corrupted": "Corrupted",
+              "grineer": "Grineer",
+              "infested": "Infested",
+              "murmur": "The Murmur",
+              "sentient": "Sentient"
+            },
+            "term": {
+              "reactant": "Reactant"
+            }
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Morax · Europa",
+          "Sortie 1/3"
+        ],
+        "noText": [
+          "Morax · Europa · Excavation",
+          "Excavation",
+          "Lv. 50–60"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "world": {
+              "updatedAt": 1793199540000,
+              "sortie": {
+                "boss": {
+                  "id": "hyena_pack",
+                  "name": "Hyena Pack"
+                },
+                "faction": {
+                  "id": "corpus",
+                  "name": "Corpus"
+                },
+                "endsAt": 1793203200000,
+                "missions": [
+                  {
+                    "node": {
+                      "id": "SolNode209",
+                      "name": "Morax"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europa"
+                    },
+                    "type": null,
+                    "typeAtLoading": true,
+                    "modifier": {
+                      "id": "assault_rifle_only",
+                      "name": "Assault Rifle Only"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode102",
+                      "name": "Oestrus"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europa"
+                    },
+                    "type": {
+                      "id": "sabotage",
+                      "name": "Sabotage"
+                    },
+                    "typeAtLoading": false,
+                    "modifier": {
+                      "id": "augmented_armor",
+                      "name": "Augmented Enemy Armor"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode57",
+                      "name": "Sinai"
+                    },
+                    "planet": {
+                      "id": "jupiter",
+                      "name": "Jupiter"
+                    },
+                    "type": {
+                      "id": "mobile_defense",
+                      "name": "Mobile Defense"
+                    },
+                    "typeAtLoading": false,
+                    "modifier": {
+                      "id": "eximus_stronghold",
+                      "name": "Eximus Stronghold"
+                    }
+                  }
+                ]
+              },
+              "resets": {
+                "daily": 1793232000000,
+                "weekly": 1793664000000
+              }
+            },
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode209",
+                "name": "Morax"
+              },
+              "planet": {
+                "id": "europa",
+                "name": "Europa"
+              },
+              "type": null,
+              "typeAtLoading": true,
+              "faction": {
+                "id": "corpus",
+                "name": "Corpus"
+              },
+              "enemyLevel": null,
+              "fissure": null,
+              "modifiers": [
+                {
+                  "id": "sortie",
+                  "name": "Sortie",
+                  "stage": 1
+                }
+              ],
+              "selectedAt": 1793199570000,
+              "loadingAt": null,
+              "relic": null
+            }
+          },
+          "event": "mission_selected",
+          "glossary": {
+            "language": "en",
+            "damage": {
+              "impact": "Impact",
+              "puncture": "Puncture",
+              "slash": "Slash",
+              "heat": "Heat",
+              "cold": "Cold",
+              "electricity": "Electricity",
+              "toxin": "Toxin",
+              "blast": "Blast",
+              "corrosive": "Corrosive",
+              "gas": "Gas",
+              "magnetic": "Magnetic",
+              "radiation": "Radiation",
+              "viral": "Viral"
+            },
+            "fissure": {
+              "lith": "Lith Fissure",
+              "meso": "Meso Fissure",
+              "neo": "Neo Fissure",
+              "axi": "Axi Fissure",
+              "requiem": "Requiem Fissure",
+              "omnia": "Omnia Fissure"
+            },
+            "activity": {
+              "void_fissure": "Void Fissure"
+            },
+            "faction": {
+              "corpus": "Corpus",
+              "corrupted": "Corrupted",
+              "grineer": "Grineer",
+              "infested": "Infested",
+              "murmur": "The Murmur",
+              "sentient": "Sentient"
+            },
+            "term": {
+              "reactant": "Reactant"
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "sortie-type-at-loading-chosen-en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "world": {
+              "updatedAt": 1793199540000,
+              "sortie": {
+                "boss": {
+                  "id": "hyena_pack",
+                  "name": "Hyena Pack"
+                },
+                "faction": {
+                  "id": "corpus",
+                  "name": "Corpus"
+                },
+                "endsAt": 1793203200000,
+                "missions": [
+                  {
+                    "node": {
+                      "id": "SolNode209",
+                      "name": "Morax"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europa"
+                    },
+                    "type": {
+                      "id": "excavation",
+                      "name": "Excavation"
+                    },
+                    "typeAtLoading": false,
+                    "modifier": {
+                      "id": "assault_rifle_only",
+                      "name": "Assault Rifle Only"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode102",
+                      "name": "Oestrus"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europa"
+                    },
+                    "type": {
+                      "id": "sabotage",
+                      "name": "Sabotage"
+                    },
+                    "typeAtLoading": false,
+                    "modifier": {
+                      "id": "augmented_armor",
+                      "name": "Augmented Enemy Armor"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode57",
+                      "name": "Sinai"
+                    },
+                    "planet": {
+                      "id": "jupiter",
+                      "name": "Jupiter"
+                    },
+                    "type": {
+                      "id": "mobile_defense",
+                      "name": "Mobile Defense"
+                    },
+                    "typeAtLoading": false,
+                    "modifier": {
+                      "id": "eximus_stronghold",
+                      "name": "Eximus Stronghold"
+                    }
+                  }
+                ]
+              },
+              "resets": {
+                "daily": 1793232000000,
+                "weekly": 1793664000000
+              }
+            },
+            "mission": {
+              "state": "loading",
+              "node": {
+                "id": "SolNode209",
+                "name": "Morax"
+              },
+              "planet": {
+                "id": "europa",
+                "name": "Europa"
+              },
+              "type": {
+                "id": "excavation",
+                "name": "Excavation"
+              },
+              "typeAtLoading": false,
+              "faction": {
+                "id": "corpus",
+                "name": "Corpus"
+              },
+              "enemyLevel": {
+                "min": 50,
+                "max": 60
+              },
+              "fissure": null,
+              "modifiers": [
+                {
+                  "id": "sortie",
+                  "name": "Sortie",
+                  "stage": 1
+                }
+              ],
+              "selectedAt": 1793199570000,
+              "loadingAt": 1793199595000,
+              "relic": null
+            }
+          },
+          "event": "mission_loading",
+          "glossary": {
+            "language": "en",
+            "damage": {
+              "impact": "Impact",
+              "puncture": "Puncture",
+              "slash": "Slash",
+              "heat": "Heat",
+              "cold": "Cold",
+              "electricity": "Electricity",
+              "toxin": "Toxin",
+              "blast": "Blast",
+              "corrosive": "Corrosive",
+              "gas": "Gas",
+              "magnetic": "Magnetic",
+              "radiation": "Radiation",
+              "viral": "Viral"
+            },
+            "fissure": {
+              "lith": "Lith Fissure",
+              "meso": "Meso Fissure",
+              "neo": "Neo Fissure",
+              "axi": "Axi Fissure",
+              "requiem": "Requiem Fissure",
+              "omnia": "Omnia Fissure"
+            },
+            "activity": {
+              "void_fissure": "Void Fissure"
+            },
+            "faction": {
+              "corpus": "Corpus",
+              "corrupted": "Corrupted",
+              "grineer": "Grineer",
+              "infested": "Infested",
+              "murmur": "The Murmur",
+              "sentient": "Sentient"
+            },
+            "term": {
+              "reactant": "Reactant"
+            }
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Morax · Europa · Excavation",
+          "Sortie 1/3"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "world": {
+              "updatedAt": 1793199540000,
+              "sortie": {
+                "boss": {
+                  "id": "hyena_pack",
+                  "name": "Hyena Pack"
+                },
+                "faction": {
+                  "id": "corpus",
+                  "name": "Corpus"
+                },
+                "endsAt": 1793203200000,
+                "missions": [
+                  {
+                    "node": {
+                      "id": "SolNode209",
+                      "name": "Morax"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europa"
+                    },
+                    "type": {
+                      "id": "excavation",
+                      "name": "Excavation"
+                    },
+                    "typeAtLoading": false,
+                    "modifier": {
+                      "id": "assault_rifle_only",
+                      "name": "Assault Rifle Only"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode102",
+                      "name": "Oestrus"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europa"
+                    },
+                    "type": {
+                      "id": "sabotage",
+                      "name": "Sabotage"
+                    },
+                    "typeAtLoading": false,
+                    "modifier": {
+                      "id": "augmented_armor",
+                      "name": "Augmented Enemy Armor"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode57",
+                      "name": "Sinai"
+                    },
+                    "planet": {
+                      "id": "jupiter",
+                      "name": "Jupiter"
+                    },
+                    "type": {
+                      "id": "mobile_defense",
+                      "name": "Mobile Defense"
+                    },
+                    "typeAtLoading": false,
+                    "modifier": {
+                      "id": "eximus_stronghold",
+                      "name": "Eximus Stronghold"
+                    }
+                  }
+                ]
+              },
+              "resets": {
+                "daily": 1793232000000,
+                "weekly": 1793664000000
+              }
+            },
+            "mission": {
+              "state": "loading",
+              "node": {
+                "id": "SolNode209",
+                "name": "Morax"
+              },
+              "planet": {
+                "id": "europa",
+                "name": "Europa"
+              },
+              "type": {
+                "id": "excavation",
+                "name": "Excavation"
+              },
+              "typeAtLoading": false,
+              "faction": {
+                "id": "corpus",
+                "name": "Corpus"
+              },
+              "enemyLevel": {
+                "min": 50,
+                "max": 60
+              },
+              "fissure": null,
+              "modifiers": [
+                {
+                  "id": "sortie",
+                  "name": "Sortie",
+                  "stage": 1
+                }
+              ],
+              "selectedAt": 1793199570000,
+              "loadingAt": 1793199595000,
+              "relic": null
+            }
+          },
+          "event": "mission_loading",
+          "glossary": {
+            "language": "en",
+            "damage": {
+              "impact": "Impact",
+              "puncture": "Puncture",
+              "slash": "Slash",
+              "heat": "Heat",
+              "cold": "Cold",
+              "electricity": "Electricity",
+              "toxin": "Toxin",
+              "blast": "Blast",
+              "corrosive": "Corrosive",
+              "gas": "Gas",
+              "magnetic": "Magnetic",
+              "radiation": "Radiation",
+              "viral": "Viral"
+            },
+            "fissure": {
+              "lith": "Lith Fissure",
+              "meso": "Meso Fissure",
+              "neo": "Neo Fissure",
+              "axi": "Axi Fissure",
+              "requiem": "Requiem Fissure",
+              "omnia": "Omnia Fissure"
+            },
+            "activity": {
+              "void_fissure": "Void Fissure"
+            },
+            "faction": {
+              "corpus": "Corpus",
+              "corrupted": "Corrupted",
+              "grineer": "Grineer",
+              "infested": "Infested",
+              "murmur": "The Murmur",
+              "sentient": "Sentient"
+            },
+            "term": {
+              "reactant": "Reactant"
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "sortie-type-at-loading-loaded-en-100",
+        "fault": "none"
+      }
+    }
+  ]
+}

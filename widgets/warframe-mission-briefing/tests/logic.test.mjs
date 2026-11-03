@@ -457,3 +457,39 @@ test("state: One line keeps its waiting lines short, the whole sentence as their
   vm.setHost({ options: { layout: "full" } });
   assert.equal(logic.build(value(), null).waitText, "Pick a mission to see the briefing.");
 });
+
+test("state: an open world entered by its gate is briefed as a mission; left, the widget asks for one", () => {
+  const plains = mission({
+    state: "in_progress",
+    node: named("SolNode228", "Plains of Eidolon"),
+    planet: named("earth", "Earth"),
+    type: named("free_roam", "Free Roam"),
+    enemyLevel: { min: 10, max: 30 },
+    selectedAt: null,
+    loadingAt: START,
+    startedAt: START,
+  });
+  const brief = logic.build(value({ mission: plains }), null);
+  assert.deepEqual([brief.mode, brief.where, brief.level], ["full", "Plains of Eidolon · Earth · Free Roam", "Lv. 10–30"]);
+  assert.deepEqual(ids(brief.use), ["impact", "corrosive"]);
+  // `mission_left`: the mission is null, never an ended one to keep.
+  const left = logic.build(value({ mission: null }), null);
+  assert.deepEqual([left.mode, left.waitText], ["wait", "Pick a mission to see the briefing."]);
+});
+
+test("where: a Sortie stage whose type the game replaces says its node and planet only until it loads", () => {
+  const chosen = mission({
+    node: named("SolNode209", "Morax"),
+    planet: named("europa", "Europa"),
+    type: null,
+    typeAtLoading: true,
+    faction: named("corpus", "Corpus"),
+    enemyLevel: null,
+    modifiers: [{ id: "sortie", name: "Sortie", stage: 1 }],
+  });
+  const before = logic.build(value({ mission: chosen }), null);
+  assert.deepEqual([before.where, before.level], ["Morax · Europa", ""]);
+  const loaded = { ...chosen, state: "loading", type: named("excavation", "Excavation"), typeAtLoading: false, enemyLevel: { min: 50, max: 60 } };
+  const after = logic.build(value({ mission: loaded }), null);
+  assert.deepEqual([after.where, after.level], ["Morax · Europa · Excavation", "Lv. 50–60"]);
+});
