@@ -113,14 +113,27 @@ pub mod warframe {
     ];
 
     /// The tables of a node's rewards (`kind`): the mission's own, the
-    /// caches of a Sabotage, Exterminate or Hive node, an additional one.
-    pub const REWARD_TABLE_KINDS: &[&str] = &["mission", "caches", "extra"];
+    /// caches of a Sabotage, Exterminate or Hive node, an additional one,
+    /// and what each round of the Circuit gives.
+    pub const REWARD_TABLE_KINDS: &[&str] = &["mission", "caches", "extra", "round"];
 
     /// Where a mission's reward tables come from (`rewards.source`): its
     /// node's, or a table of its own that replaces them: every
     /// Arbitration's, a Nightmare mission's (once, the rotation of its
-    /// planet), a Sortie's (after its third mission).
-    pub const REWARD_SOURCES: &[&str] = &["node", "arbitration", "sortie", "nightmare"];
+    /// planet), a Sortie's (after its third mission), the Circuit's (each
+    /// round).
+    pub const REWARD_SOURCES: &[&str] = &["node", "arbitration", "sortie", "nightmare", "circuit"];
+
+    /// How rare an item of a relic is (`WarframeRelicItem.rarity`), as
+    /// the drop tables class it.
+    pub const RELIC_RARITIES: &[&str] = &["common", "uncommon", "rare"];
+
+    /// The Archon Shard of the week's Archon Hunt (`archonHunt.shard.id`):
+    /// Boreal's azure, Amar's crimson, Nira's amber.
+    pub const ARCHON_SHARDS: &[&str] = &["azure", "crimson", "amber"];
+
+    /// The kinds of Nightwave challenge (`nightwave.challenges[].kind`).
+    pub const NIGHTWAVE_KINDS: &[&str] = &["daily", "weekly", "elite"];
 
     /// What kind of item a reward is (`WarframeReward.category`): a
     /// widget's own icon for it while the item has no image.
@@ -176,6 +189,7 @@ pub mod warframe {
         "mission_loading",
         "mission_started",
         "mission_ended",
+        "mission_left",
     ];
     pub const PROGRESS_EVENTS: &[&str] = &["wave_started", "reward_given"];
     pub const CYCLE_EVENTS: &[&str] = &["night_started", "day_started"];
@@ -455,6 +469,15 @@ pub mod warframe {
         named("void_storm", "Void Storm"),
     ];
 
+    /// A relic's refinements (`glossary.refinement`), from the least to
+    /// the most refined.
+    pub const REFINEMENTS: &[Named] = &[
+        named("intact", "Intact"),
+        named("exceptional", "Exceptional"),
+        named("flawless", "Flawless"),
+        named("radiant", "Radiant"),
+    ];
+
     /// Other words of the game (`glossary.term`).
     pub const TERMS: &[Named] = &[
         named("reactant", "Reactant"),
@@ -474,6 +497,7 @@ pub mod warframe {
         ("faction", FACTIONS),
         ("cycle", CYCLE_STATES),
         ("term", TERMS),
+        ("refinement", REFINEMENTS),
     ];
 
     /// The glossary in English (`WarframeGlossary`), as a host without the

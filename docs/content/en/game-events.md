@@ -163,7 +163,8 @@ The latest mission of the session.
 | `state` | `selected` (chosen on the star chart), `loading`, `in_progress` or `ended`. |
 | `node` | The node: `{ id, name }`. |
 | `planet` | Its [planet or region](#planets-and-regions). |
-| `type` | The [mission type](#mission-types); `null` for a type not in the list. |
+| `type` | The [mission type](#mission-types); `null` for a type not in the list, and until the mission loads when `typeAtLoading` is `true`. |
+| `typeAtLoading` | `true` when the game replaces the type the world state publishes for this node (a Sortie mission whose published type the node's tileset cannot play): `type` stays `null` until the mission loads, then is the type the game chose. Show no type until then. |
 | `faction` | The enemy [faction](#factions). |
 | `enemyLevel` | `{ min, max }`: the enemy levels. Chosen, the node's (on the Steel Path, plus 100); a Nightmare, Arbitration, Alert or Kuva Lich mission's are `null` until it loads, then the game's. |
 | `fissure` | The [era](#void-fissure-eras) of a Void Fissure mission, or `null`. |
@@ -172,9 +173,39 @@ The latest mission of the session.
 | `result` | `succeeded`, `failed` or `aborted`; `null` before the end, or when Warframe did not say. |
 | `durationSeconds` | From the start of play to the end, in seconds, to the millisecond. |
 | `earned` | The rotations earned, `{ rotations, totals }` as in [`info.progress`](#infoprogress), for a type with rotations; `null` otherwise. Kept after the end, for a recap. |
-| `credits` | The credits the end screen counts; `null` before the end, or when the game does not say (an aborted mission). |
+| `credits` | The mission's end bonus in credits, as its end screen pays it: not the credits picked up during the mission. Name it so ("End bonus"). `null` before the end, or when the game does not say (an aborted mission). |
+| `relic` | The relic the player equipped for a Void Fissure, from the moment the game asks to confirm it, kept on the ended mission; `null` otherwise. See below. |
 | `rewards` | What the mission can reward, for a widget that follows `warframe.rewards` ([rewards](#rewards-warframerewards)); `null` otherwise. |
 | `rewardsPending` | `true` while `rewards` is `null` for now: which table applies is not known yet. `false` otherwise. |
+
+`relic` is `{ id, name, era, refinement, icon, iconPending, items,
+reward }`:
+
+- `name` in the game's language, `id` the English name in `snake_case`
+  (`meso_f5_relic`), `era` the [era](#void-fissure-eras).
+- `refinement`: `intact`, `exceptional`, `flawless` or `radiant`, named in
+  the game's language ([glossary](#glossary)); `null` when the game's words
+  do not tell it.
+- `items`: its six items, the rarest first, each `{ id, name, quantity,
+  rarity, chance, icon, iconPending, category }`: `rarity` is `common`,
+  `uncommon` or `rare`; `chance` the chance of the relic's refinement,
+  from 0 to 1, `null` when the refinement is not known (show the rarity
+  instead). Source: Digital Extremes' drop tables, as for
+  [rewards](#rewards-warframerewards).
+- `reward`: at the end, the item the player's own relic gave, one of
+  `items`; `null` before. Warframe does not write which relic of the
+  squad the player chose: show it as "Your relic: …", never as obtained.
+- `icon`, `iconPending`: the relic's image for its refinement, as for a
+  reward.
+- Without `warframe.rewards`, or before the drop tables are read: DE's
+  English name, no item, no image.
+
+An open world entered by its hub's gate (the Plains of Eidolon, the Orb
+Vallis, the Cambion Drift) is a mission `in_progress`, of type
+`free_roam`, with its faction and enemy levels, as when it is chosen on
+the star chart. When the player leaves it (back to the hub, the orbiter or
+another mission), `mission_left` comes with it and `info.mission` becomes
+`null`: an open world has no end and no recap.
 
 `mission_ended` comes with the credits of the end screen, written a moment
 after the end: at most 10 seconds of the game later, and without them for
@@ -227,16 +258,19 @@ Each hunt:
 | --- | --- |
 | `updatedAt` | When PlayerVox OverCrow last read it, in Unix milliseconds. |
 | `sortie` | The Sortie of the day, `{ boss, faction, endsAt, missions }`, or `null`. |
-| `archonHunt` | The Archon Hunt of the week, `{ boss, endsAt, missions }`, or `null`. |
+| `archonHunt` | The Archon Hunt of the week, `{ boss, endsAt, missions, shard }`, or `null`. `shard` is the Archon Shard it gives, `{ id, name, icon, iconPending }`: `id` is `azure`, `crimson` or `amber`, `name` in the game's language, `icon` its image as for a reward; `null` for an Archon PlayerVox OverCrow does not know. Whether the shard is a Tauforged one is drawn at the reward and never known before. |
 | `fissures` | The open Void Fissures, the soonest to close first, at most 64, each `{ node, planet, type, era, steelPath, voidStorm, endsAt }`. `voidStorm` is a Railjack Void Storm. |
 | `cycles` | `{ cetus, vallis, cambion }`, each `{ state, endsAt }`: day or night at Cetus and on the Plains, warm or cold in the Orb Vallis, Fass or Vome in the Cambion Drift ([cycle states](#cycle-states)); `null` for a cycle PlayerVox OverCrow cannot tell. |
 | `resets` | `{ daily, weekly }`: the next daily reset (00:00 UTC) and weekly reset (Monday 00:00 UTC), in Unix milliseconds. |
 | `voidTrader` | Baro Ki'Teer's next visit, or the current one, `{ arrivesAt, leavesAt, relay }`, or `null`. What he sells is not given. |
-| `circuit` | The Circuit's rewards of the week, `{ normal, steelPath }`, when the world state gives them; `null` otherwise. |
+| `circuit` | The Circuit's rewards of the week, `{ normal, steelPath, picked }`, when the world state gives them; `null` otherwise. `picked` is `{ normal, steelPath }`: the IDs the player picked for the week (one Warframe, two Incarnon Genesis adapters), as this session of the game showed them; empty until it does. The game shows them only while PlayerVox OverCrow can read it: let the player correct a pick by hand, and keep it until the weekly reset. The tier the player reached is not given. |
+| `nightwave` | Nightwave's current season, `{ endsAt, challenges }`, or `null`. Each challenge, daily ones first (at most 16), is `{ id, name, kind, standing, endsAt, progressed, completed }`: `kind` is `daily`, `weekly` or `elite`; `progressed` is `true` when the game showed progress on it in this session; `completed` is `true` when the game wrote in this session that it is complete. The game writes it only while PlayerVox OverCrow can read it: let the player tick a challenge by hand too, and keep what they set. |
 
 The missions of the Sortie and of the Archon Hunt are
-`{ node, planet, type, modifier }`, in order: `modifier` is the condition of
-a Sortie mission, `null` in the Archon Hunt.
+`{ node, planet, type, modifier, typeAtLoading }`, in order: `modifier` is
+the condition of a Sortie mission, `null` in the Archon Hunt;
+`typeAtLoading` is `true` when the game replaces the published type, and
+`type` is then `null` until that mission loads.
 
 ### Rewards (`warframe.rewards`)
 
@@ -245,8 +279,8 @@ current mission can reward, by table and rotation, never from a table
 that is not its own:
 
 ```text
-{ source: "node" | "arbitration" | "nightmare" | "sortie";
-  tables: { kind: "mission" | "caches" | "extra";
+{ source: "node" | "arbitration" | "nightmare" | "sortie" | "circuit";
+  tables: { kind: "mission" | "caches" | "extra" | "round";
             rotation: "A" | "B" | "C" | null;
             items: { id: string; name: string; quantity: number; chance: number;
                      icon: string | null; iconPending: boolean; category: string }[] }[] }
@@ -260,9 +294,10 @@ that is not its own:
   | `arbitration` | Every Arbitration's, A, B and C, in place of the node's. | "Arbitration rewards" |
   | `nightmare` | A Nightmare mission's reward: the rotation of its planet (all three for a Rescue, by objectives done), given once per mission. | "Nightmare mod, once" |
   | `sortie` | The Sortie's reward, without rotation, given after its third mission. | "Sortie reward, after the 3rd mission" |
+  | `circuit` | The Circuit: what each round gives (`kind` `round`), without rotations. The week's tiers are not in the drop tables. | "Each round" |
 
 - `null`, with `rewardsPending` `false`: no table for this mission: a node
-  without one (Exterminate, open worlds, events, the Circuit), an Archon
+  without one (Exterminate, open worlds, events), an Archon
   Hunt, a Netracell or an Alert (Digital Extremes publishes none).
 - `null`, with `rewardsPending` `true`: not known yet. A node of the day's
   Sortie or Archon Hunt, chosen, is told apart when it loads; without the
@@ -270,11 +305,12 @@ that is not its own:
 
 - `kind`: `mission` is the mission's own table; `caches` the caches of a
   Sabotage, Exterminate or Hive node; `extra` an additional table of the
-  node.
+  node; `round` what each round of the Circuit gives.
 - `rotation`: `null` for a table without rotations.
 - In a Void Fissure mission, the node's rewards are still given and the
   relic opens on top: `rewards` stays the node's tables, even when
-  `fissure` is not `null`. What a relic gives is not listed.
+  `fissure` is not `null`. What the equipped relic gives is in
+  [`info.mission.relic`](#infomission).
 - `items`, **the rarest first**: from the lowest `chance` to the highest,
   equal chances by English name, the same order in every language. A
   table keeps its 64 rarest items at most. `id` is the English
@@ -307,7 +343,7 @@ that is not its own:
 
 | Type | Feature | Carries |
 | --- | --- | --- |
-| `mission_selected`, `mission_loading`, `mission_started`, `mission_ended` | `warframe.mission` | `mission` |
+| `mission_selected`, `mission_loading`, `mission_started`, `mission_ended`, `mission_left` | `warframe.mission` | `mission` |
 | `wave_started`, `reward_given` | `warframe.progress` | `progress` |
 | `night_started`, `day_started` | `warframe.eidolons` | nothing more |
 | `eidolon_spawned`, `weakpoint_destroyed`, `eidolon_captured`, `eidolon_killed`, `eidolon_fled` | `warframe.eidolons` | `eidolon`: the hunt |
@@ -333,7 +369,9 @@ calculates:
 - **Which Eidolon.** Teralyst, Gantulyst or Hydrolyst, told by the order
   of the hunt; `null` when the order cannot tell.
 - **The stage of a Sortie or an Archon Hunt mission**, only for a widget
-  that also follows `warframe.world`; otherwise `stage` is `null`.
+  that also follows `warframe.world`; otherwise `stage` is `null`. The
+  game's own stage when it writes it, else the rank of the node in the
+  day's list.
 - **The resets**, at 00:00 UTC each day and on Monday.
 
 ### Rotations
@@ -370,8 +408,9 @@ Mission Rewards and Arbitrations pages.
 
 PlayerVox OverCrow does not give the excavators of an Excavation, kill
 counts, the progress of Capture, Mobile Defense and Spy missions, the
-progress of the Circuit, relics, Nightwave, what Baro Ki'Teer sells, or
-which item a reward gave (Warframe does not write it). For those missions,
+tier reached in the Circuit, a Nightwave challenge's completion, what Baro
+Ki'Teer sells, which item a reward gave, or which relic of the squad the
+player chose (Warframe does not write them). For those missions,
 the mission itself is given, and `progress` keeps `null` counters and a
 `null` `rotation`.
 
@@ -418,6 +457,7 @@ words: `fr` or `en` (English for the game's other languages). Its groups:
 | `faction` | the [factions](#factions) |
 | `cycle` | the [cycle states](#cycle-states) |
 | `term` | `reactant`, `relic`, `credits` |
+| `refinement` | `intact`, `exceptional`, `flawless`, `radiant`: a relic's refinements |
 | `icons` | `damage`: each damage type's symbol, by the same IDs |
 
 `glossary.icons.damage.<id>` is the symbol of a damage type from the
@@ -433,7 +473,8 @@ English names: damage types as their IDs (Impact, Puncture, Slash, Heat,
 Cold, Electricity, Toxin, Blast, Corrosive, Gas, Magnetic, Radiation,
 Viral); activities Sortie, Archon Hunt, Netracells, The Circuit,
 Nightwave, Baro Ki'Teer, Void Fissure, Arbitration, The Steel Path, Void
-Storm; terms Reactant, Relic, Credits.
+Storm; terms Reactant, Relic, Credits; refinements Intact, Exceptional,
+Flawless, Radiant.
 
 #### Planets and regions
 

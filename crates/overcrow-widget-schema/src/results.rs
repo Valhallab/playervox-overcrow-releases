@@ -127,6 +127,7 @@ const EIDOLON_WORDS: [Member; 3] = words(warframe::EIDOLONS);
 const FACTION_WORDS: [Member; 10] = words(warframe::FACTIONS);
 const CYCLE_WORDS: [Member; 6] = words(warframe::CYCLE_STATES);
 const TERM_WORDS: [Member; 3] = words(warframe::TERMS);
+const REFINEMENT_WORDS: [Member; 4] = words(warframe::REFINEMENTS);
 
 /// Grades of a PlayerVox score; `--` without a valid score.
 pub const GRADES: &[&str] = &["S+", "S", "A", "B", "C", "D", "F", "--"];
@@ -862,6 +863,11 @@ pub const SHAPES: &[NamedShape] = &[
                 "Other words of the game.",
             ),
             member(
+                "refinement",
+                Shape::Record(&REFINEMENT_WORDS),
+                "A relic's refinements.",
+            ),
+            member(
                 "icons",
                 Shape::Named("WarframeGlossaryIcons"),
                 "The game's symbols, as images.",
@@ -1046,10 +1052,104 @@ pub const SHAPES: &[NamedShape] = &[
             member(
                 "credits",
                 NULLABLE_INTEGER,
-                "The credits its end screen counts; `null` before the end, or when the game does not say (an aborted mission).",
+                "The mission's end bonus in credits, as its end screen pays it; not the credits picked up during the mission. `null` before the end, or when the game does not say (an aborted mission).",
+            ),
+            member(
+                "typeAtLoading",
+                Shape::Bool,
+                "`true` when the game replaces the type the world state publishes for this node: `type` stays `null` until the mission loads, then is the type the game chose. `false` otherwise.",
+            ),
+            member(
+                "relic",
+                Shape::Nullable(&Shape::Named("WarframeRelic")),
+                "The relic the player equipped for a Void Fissure, once the game asked to confirm it; kept on the ended mission. `null` otherwise.",
             ),
         ]),
         "A Warframe mission.",
+    ),
+    named(
+        "WarframeRelic",
+        Shape::Record(&[
+            member(
+                "id",
+                Shape::Text,
+                "Our ID: the relic's English name in `snake_case` (`meso_f5_relic`).",
+            ),
+            member(
+                "name",
+                Shape::Text,
+                "Its name in the game's language, or in English when PlayerVox OverCrow has no translation yet.",
+            ),
+            member("era", Shape::Named("WarframeName"), "Its era."),
+            member(
+                "refinement",
+                Shape::Nullable(&Shape::Named("WarframeName")),
+                "Its refinement (`intact`, `exceptional`, `flawless`, `radiant`); `null` when the game's words do not tell it (then no item has a chance).",
+            ),
+            member(
+                "icon",
+                Shape::Nullable(&Shape::Asset),
+                "`asset:` handle of the relic's image for its refinement, 48 px square; as `WarframeReward.icon`.",
+            ),
+            member(
+                "iconPending",
+                Shape::Bool,
+                "As `WarframeReward.iconPending`.",
+            ),
+            member(
+                "items",
+                Shape::List(&Shape::Named("WarframeRelicItem")),
+                "What it can give, the rarest first, at most `MAX_WARFRAME_RELIC_ITEMS`. Source: Digital Extremes' drop tables, no guarantees.",
+            ),
+            member(
+                "reward",
+                Shape::Nullable(&Shape::Named("WarframeRelicItem")),
+                "What the player's own relic gave at the end; not what the player chose among the squad's relics, which the game does not say. `null` before.",
+            ),
+        ]),
+        "A relic equipped for a Void Fissure.",
+    ),
+    named(
+        "WarframeRelicItem",
+        Shape::Record(&[
+            member(
+                "id",
+                Shape::Text,
+                "Our ID: the item's English name in `snake_case`.",
+            ),
+            member(
+                "name",
+                Shape::Text,
+                "Its name in the game's language, or in English when PlayerVox OverCrow has no translation yet.",
+            ),
+            member("quantity", Shape::Integer, "How many at once."),
+            member(
+                "rarity",
+                Shape::Keyword(warframe::RELIC_RARITIES),
+                "`common`, `uncommon` or `rare`.",
+            ),
+            member(
+                "chance",
+                NULLABLE_NUMBER,
+                "The chance of the relic's refinement, from 0 to 1; `null` when the refinement is not known.",
+            ),
+            member(
+                "icon",
+                Shape::Nullable(&Shape::Asset),
+                "As `WarframeReward.icon`.",
+            ),
+            member(
+                "iconPending",
+                Shape::Bool,
+                "As `WarframeReward.iconPending`.",
+            ),
+            member(
+                "category",
+                Shape::Keyword(warframe::REWARD_CATEGORIES),
+                "As `WarframeReward.category`.",
+            ),
+        ]),
+        "An item of a relic.",
     ),
     named(
         "WarframeModifier",
@@ -1316,7 +1416,7 @@ pub const SHAPES: &[NamedShape] = &[
             member(
                 "kind",
                 Shape::Keyword(warframe::REWARD_TABLE_KINDS),
-                "`mission`, `caches` or `extra`.",
+                "`mission`, `caches`, `extra`, or `round` (what each round of the Circuit gives).",
             ),
             member(
                 "rotation",
@@ -1337,7 +1437,7 @@ pub const SHAPES: &[NamedShape] = &[
             member(
                 "source",
                 Shape::Keyword(warframe::REWARD_SOURCES),
-                "Whose tables: `node`, or the tables of their own that replace a node's: `arbitration` (every Arbitration's), `nightmare` (a Nightmare mission's reward, once, the rotation of its planet), `sortie` (a Sortie's, after its third mission).",
+                "Whose tables: `node`, or the tables of their own that replace a node's: `arbitration` (every Arbitration's), `nightmare` (a Nightmare mission's reward, once, the rotation of its planet), `sortie` (a Sortie's, after its third mission), `circuit` (the Circuit's round, without rotations).",
             ),
             member(
                 "tables",
@@ -1365,6 +1465,11 @@ pub const SHAPES: &[NamedShape] = &[
                 "modifier",
                 Shape::Nullable(&Shape::Named("WarframeName")),
                 "The condition of a Sortie mission; `null` otherwise.",
+            ),
+            member(
+                "typeAtLoading",
+                Shape::Bool,
+                "`true` when the game replaces this mission's published type: `type` is `null` until the mission loads in this session, then the type the game chose.",
             ),
         ]),
         "A mission of the Sortie or the Archon Hunt.",
@@ -1420,6 +1525,28 @@ pub const SHAPES: &[NamedShape] = &[
                         "missions",
                         Shape::List(&Shape::Named("WarframeWorldMission")),
                         "Its missions, in order.",
+                    ),
+                    member(
+                        "shard",
+                        Shape::Nullable(&Shape::Record(&[
+                            member(
+                                "id",
+                                Shape::Keyword(warframe::ARCHON_SHARDS),
+                                "`azure`, `crimson` or `amber`.",
+                            ),
+                            member("name", Shape::Text, "Its name in the game's language."),
+                            member(
+                                "icon",
+                                Shape::Nullable(&Shape::Asset),
+                                "`asset:` handle of its image, 48 px square; as `WarframeReward.icon`.",
+                            ),
+                            member(
+                                "iconPending",
+                                Shape::Bool,
+                                "As `WarframeReward.iconPending`.",
+                            ),
+                        ])),
+                        "The Archon Shard it gives; whether it is a Tauforged one is drawn at the reward and never known before. `null` for an Archon PlayerVox OverCrow does not know.",
                     ),
                 ])),
                 "The Archon Hunt of the week.",
@@ -1508,8 +1635,60 @@ pub const SHAPES: &[NamedShape] = &[
                         Shape::List(&Shape::Named("WarframeName")),
                         "The Steel Path rewards of the week.",
                     ),
+                    member(
+                        "picked",
+                        Shape::Record(&[
+                            member(
+                                "normal",
+                                Shape::List(&Shape::Text),
+                                "The IDs of `normal` the player picked, as this session of the game showed it.",
+                            ),
+                            member(
+                                "steelPath",
+                                Shape::List(&Shape::Text),
+                                "The IDs of `steelPath` the player picked, as this session of the game showed it.",
+                            ),
+                        ]),
+                        "What the player picked for the week; empty while this session of the game did not show it.",
+                    ),
                 ])),
                 "The Circuit's rewards of the week, when the world state gives them.",
+            ),
+            member(
+                "nightwave",
+                Shape::Nullable(&Shape::Record(&[
+                    member("endsAt", Shape::Integer, "When the season ends."),
+                    member(
+                        "challenges",
+                        Shape::List(&Shape::Record(&[
+                            member(
+                                "id",
+                                Shape::Text,
+                                "Our ID of the challenge, stable in a season.",
+                            ),
+                            member("name", Shape::Text, "Its name in the game's language."),
+                            member(
+                                "kind",
+                                Shape::Keyword(warframe::NIGHTWAVE_KINDS),
+                                "`daily`, `weekly` or `elite`.",
+                            ),
+                            member("standing", Shape::Integer, "The standing it gives."),
+                            member("endsAt", Shape::Integer, "When it ends."),
+                            member(
+                                "progressed",
+                                Shape::Bool,
+                                "`true` when the game showed progress on it in this session.",
+                            ),
+                            member(
+                                "completed",
+                                Shape::Bool,
+                                "`true` when the game wrote, in this session, that this active challenge is complete.",
+                            ),
+                        ])),
+                        "The active challenges, daily ones first, at most `MAX_WARFRAME_NIGHTWAVE`.",
+                    ),
+                ])),
+                "Nightwave's current season, when the world state gives it.",
             ),
         ]),
         "Warframe's world of the day and the week.",

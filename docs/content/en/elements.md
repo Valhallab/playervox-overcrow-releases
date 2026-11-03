@@ -396,6 +396,14 @@ Floating panel anchored to an element, drawn above the content and clipped to th
 | `placement` | `below` \| `above` \| `start` \| `end` \| `pointer` | no | Preferred side, or the last pointer position; default `below`. |
 <!-- /generated:elements -->
 
+### Scrollbars
+
+In Interactive mode, the host paints a thin bar in the theme's colours
+(4 px) over the right edge of a `scroll` or `list` whose content
+overflows, the bottom edge of a horizontal `scroll`; in Passive mode,
+none. It takes no room: to keep content clear of it, give the container
+9 px of padding on that side.
+
 ## Events
 
 <!-- generated:events -->

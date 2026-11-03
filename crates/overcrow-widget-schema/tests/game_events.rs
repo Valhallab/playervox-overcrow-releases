@@ -13,8 +13,8 @@ use overcrow_widget_schema::game_events::{
 };
 use overcrow_widget_schema::limits::{
     ALL, MAX_GAME_EVENT_NAME_BYTES, MAX_WARFRAME_EARNED, MAX_WARFRAME_FISSURES, MAX_WARFRAME_HUNTS,
-    MAX_WARFRAME_MODIFIERS, MAX_WARFRAME_REWARD_ITEMS, MAX_WARFRAME_REWARD_TABLES,
-    MAX_WARFRAME_SQUAD,
+    MAX_WARFRAME_MODIFIERS, MAX_WARFRAME_NIGHTWAVE, MAX_WARFRAME_RELIC_ITEMS,
+    MAX_WARFRAME_REWARD_ITEMS, MAX_WARFRAME_REWARD_TABLES, MAX_WARFRAME_SQUAD,
 };
 use overcrow_widget_schema::manifest::{Manifest, validate_manifest};
 use overcrow_widget_schema::results::{Shape, shape};
@@ -189,7 +189,33 @@ fn mission(state: &str) -> Value {
         "rewards": if state == "in_progress" { rewards() } else { Value::Null },
         "rewardsPending": state == "selected",
         "earned": if state == "selected" { Value::Null } else { earned() },
-        "credits": if state == "ended" { json!(34_300) } else { Value::Null }
+        "credits": if state == "ended" { json!(34_300) } else { Value::Null },
+        "typeAtLoading": false,
+        "relic": Value::Null
+    })
+}
+
+/// A relic item, its chance of the relic's refinement.
+fn relic_item(id: &str, name: &str, rarity: &str, chance: Value) -> Value {
+    json!({"id": id, "name": name, "quantity": 1, "rarity": rarity, "chance": chance,
+           "icon": null, "iconPending": true, "category": "weapon_part"})
+}
+
+/// A Radiant Meso relic, and what the player's own relic gave.
+fn relic() -> Value {
+    json!({
+        "id": "meso_f5_relic",
+        "name": "Relique Meso F5",
+        "era": named("meso", "Meso"),
+        "refinement": named("radiant", "Éclatante"),
+        "icon": "asset:0000000000000003",
+        "iconPending": false,
+        "items": [
+            relic_item("fulmin_prime_receiver", "Fulmin Prime - Culasse", "rare", json!(0.1)),
+            relic_item("orthos_prime_handle", "Orthos Prime - Manche", "common", json!(0.1667)),
+            relic_item("paris_prime_grip", "Paris Prime - Prise", "uncommon", json!(0.2))
+        ],
+        "reward": relic_item("orthos_prime_handle", "Orthos Prime - Manche", "common", json!(0.1667))
     })
 }
 
@@ -215,6 +241,7 @@ fn glossary() -> Value {
         "faction": words(warframe::FACTIONS),
         "cycle": words(warframe::CYCLE_STATES),
         "term": words(warframe::TERMS),
+        "refinement": words(warframe::REFINEMENTS),
         "icons": {"damage": icons()}
     })
 }
@@ -278,7 +305,8 @@ fn world() -> Value {
         "node": node(),
         "planet": named("sedna", "Sedna"),
         "type": named("defense", "Defense"),
-        "modifier": named("augmented_armor", "Augmented Enemy Armor")
+        "modifier": named("augmented_armor", "Augmented Enemy Armor"),
+        "typeAtLoading": false
     });
     json!({
         "updatedAt": 1_793_000_000_000_u64,
@@ -291,7 +319,8 @@ fn world() -> Value {
         "archonHunt": {
             "boss": named("amar", "Archon Amar"),
             "endsAt": 1_793_400_000_000_u64,
-            "missions": [world_mission]
+            "missions": [world_mission],
+            "shard": {"id": "crimson", "name": "Crimson Archon Shard", "icon": null, "iconPending": true}
         },
         "fissures": [{
             "node": node(),
@@ -313,7 +342,25 @@ fn world() -> Value {
             "leavesAt": 1_793_272_800_000_u64,
             "relay": named("strata_relay", "Strata Relay")
         },
-        "circuit": null
+        "circuit": {
+            "normal": [named("ivara", "Ivara"), named("inaros", "Inaros"), named("titania", "Titania")],
+            "steelPath": [named("braton", "Braton"), named("lato", "Lato"), named("skana", "Skana"),
+                          named("paris", "Paris"), named("kunai", "Kunai")],
+            "picked": {"normal": ["titania"], "steelPath": ["lato", "paris"]}
+        },
+        "nightwave": {
+            "endsAt": 1_804_464_000_000_u64,
+            "challenges": [
+                {"id": "season_daily_artist", "name": "Artist", "kind": "daily", "standing": 1000,
+                 "endsAt": 1_793_100_000_000_u64, "progressed": false, "completed": false},
+                {"id": "season_weekly_permanent_kill_eximus13", "name": "Eximus Eliminator XIII",
+                 "kind": "weekly", "standing": 4500, "endsAt": 1_793_404_800_000_u64, "progressed": true,
+                 "completed": true},
+                {"id": "season_weekly_hard_the_many_made_whole", "name": "The Many Made Whole",
+                 "kind": "elite", "standing": 7000, "endsAt": 1_793_404_800_000_u64, "progressed": false,
+                 "completed": false}
+            ]
+        }
     })
 }
 
@@ -347,7 +394,8 @@ fn full() -> Value {
             {"seq": 5, "at": 1_793_000_190_456_u64, "type": "eidolon_captured", "eidolon": hunt()},
             {"seq": 6, "at": 1_793_000_000_000_u64, "type": "member_joined", "member": {"name": "Ember", "you": false}},
             {"seq": 7, "at": 1_793_000_000_000_u64, "type": "location_changed",
-             "location": {"kind": "orbiter", "place": null, "since": 1_793_000_000_000_u64}}
+             "location": {"kind": "orbiter", "place": null, "since": 1_793_000_000_000_u64}},
+            {"seq": 8, "at": 1_793_000_400_000_u64, "type": "mission_left", "mission": mission("in_progress")}
         ]
     })
 }
@@ -393,8 +441,18 @@ fn the_glossary_has_every_word_of_its_lists() {
     assert_eq!(
         groups,
         [
-            "language", "damage", "era", "fissure", "activity", "place", "eidolon", "faction",
-            "cycle", "term", "icons"
+            "language",
+            "damage",
+            "era",
+            "fissure",
+            "activity",
+            "place",
+            "eidolon",
+            "faction",
+            "cycle",
+            "term",
+            "refinement",
+            "icons"
         ]
     );
     for (group, list) in [
@@ -407,6 +465,7 @@ fn the_glossary_has_every_word_of_its_lists() {
         ("faction", warframe::FACTIONS),
         ("cycle", warframe::CYCLE_STATES),
         ("term", warframe::TERMS),
+        ("refinement", warframe::REFINEMENTS),
     ] {
         let member = members
             .iter()
@@ -581,6 +640,12 @@ fn values_out_of_their_words_are_refused() {
         ("/info/progress/cycle/rotations/0", json!("E")),
         ("/info/progress/waveEnemies/total", Value::Null),
         ("/info/mission/credits", json!("34300")),
+        ("/info/mission/typeAtLoading", Value::Null),
+        ("/info/world/archonHunt/shard/id", json!("violet")),
+        ("/info/world/nightwave/challenges/0/kind", json!("monthly")),
+        ("/info/world/nightwave/challenges/1/progressed", Value::Null),
+        ("/info/world/nightwave/challenges/1/completed", json!("yes")),
+        ("/info/world/circuit/picked/normal/0", Value::Null),
     ] {
         let mut value_of = full();
         *value_of.pointer_mut(path).expect(path) = value;
@@ -606,6 +671,8 @@ fn the_bounds_are_listed() {
         (&MAX_WARFRAME_REWARD_TABLES, 9),
         (&MAX_WARFRAME_REWARD_ITEMS, 64),
         (&MAX_WARFRAME_EARNED, 64),
+        (&MAX_WARFRAME_NIGHTWAVE, 16),
+        (&MAX_WARFRAME_RELIC_ITEMS, 6),
     ] {
         assert_eq!(limit.value, value, "{}", limit.key);
         assert!(
@@ -633,6 +700,7 @@ fn our_ids_are_stable_snake_case_and_distinct() {
         (warframe::FISSURES, "fissures"),
         (warframe::ACTIVITIES, "activities"),
         (warframe::TERMS, "terms"),
+        (warframe::REFINEMENTS, "refinements"),
     ] {
         let mut seen = BTreeSet::new();
         assert!(!list.is_empty(), "{name}");
@@ -690,4 +758,93 @@ fn each_event_belongs_to_one_feature() {
         }
     }
     assert_eq!(warframe::feature_of_event("relic_opened"), None);
+}
+
+#[test]
+fn a_fissure_mission_carries_its_relic() {
+    let mut value = full();
+    value["info"]["mission"]["relic"] = relic();
+    assert!(matches("WarframeEvents", &value));
+    // Before the end, the player's relic has given nothing yet.
+    value["info"]["mission"]["relic"]["reward"] = Value::Null;
+    assert!(matches("WarframeEvents", &value));
+    // A refinement the game's words do not tell: no chance, the rarity only.
+    let mut unread = relic();
+    unread["refinement"] = Value::Null;
+    for item in unread["items"].as_array_mut().unwrap() {
+        item["chance"] = Value::Null;
+    }
+    assert!(matches("WarframeRelic", &unread));
+    for (path, wrong) in [
+        ("/items/0/rarity", json!("legendary")),
+        ("/refinement/id", Value::Null),
+        ("/era", Value::Null),
+        ("/items/0/name", Value::Null),
+    ] {
+        let mut relic_of = relic();
+        *relic_of.pointer_mut(path).expect(path) = wrong;
+        assert!(!matches("WarframeRelic", &relic_of), "{path}");
+    }
+    assert_eq!(
+        warframe::REFINEMENTS
+            .iter()
+            .map(|word| word.id)
+            .collect::<Vec<_>>(),
+        ["intact", "exceptional", "flawless", "radiant"]
+    );
+    assert_eq!(warframe::RELIC_RARITIES, ["common", "uncommon", "rare"]);
+}
+
+#[test]
+fn a_type_known_only_at_loading_is_null_until_then() {
+    let mut value = full();
+    value["info"]["mission"]["type"] = Value::Null;
+    value["info"]["mission"]["typeAtLoading"] = json!(true);
+    value["info"]["world"]["sortie"]["missions"][0]["type"] = Value::Null;
+    value["info"]["world"]["sortie"]["missions"][0]["typeAtLoading"] = json!(true);
+    assert!(matches("WarframeEvents", &value));
+    let mut missing = full();
+    missing["info"]["mission"]
+        .as_object_mut()
+        .unwrap()
+        .remove("typeAtLoading");
+    assert!(!matches("WarframeEvents", &missing));
+}
+
+#[test]
+fn the_circuit_pays_each_round_from_its_own_table() {
+    let mut value = full();
+    value["info"]["mission"]["rewards"] = json!({"source": "circuit", "tables": [
+        {"kind": "round", "rotation": null, "items": [
+            {"id": "kovnik", "name": "Kovnik", "quantity": 1, "chance": 0.22,
+             "icon": null, "iconPending": false, "category": "resource"}
+        ]}
+    ]});
+    assert!(matches("WarframeEvents", &value));
+    assert!(warframe::REWARD_SOURCES.contains(&"circuit"));
+    assert!(warframe::REWARD_TABLE_KINDS.contains(&"round"));
+}
+
+#[test]
+fn the_world_has_the_shard_the_week_s_picks_and_nightwave() {
+    assert_eq!(warframe::ARCHON_SHARDS, ["azure", "crimson", "amber"]);
+    assert_eq!(warframe::NIGHTWAVE_KINDS, ["daily", "weekly", "elite"]);
+    let mut value = full();
+    value["info"]["world"]["archonHunt"]["shard"] = Value::Null;
+    value["info"]["world"]["nightwave"] = Value::Null;
+    value["info"]["world"]["circuit"]["picked"] = json!({"normal": [], "steelPath": []});
+    assert!(matches("WarframeEvents", &value));
+    // The picks are part of the Circuit's record, never absent.
+    let mut missing = full();
+    missing["info"]["world"]["circuit"]
+        .as_object_mut()
+        .unwrap()
+        .remove("picked");
+    assert!(!matches("WarframeEvents", &missing));
+}
+
+#[test]
+fn leaving_an_open_world_is_a_mission_event() {
+    assert!(warframe::MISSION_EVENTS.contains(&"mission_left"));
+    assert_eq!(warframe::feature_of_event("mission_left"), Some("mission"));
 }
