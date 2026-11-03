@@ -663,6 +663,42 @@ test("the recap: your relic, never 'obtained'; the end bonus on its own line, th
   assert.deepEqual(lost.recap, []);
 });
 
+test("the recap of a solo Fissure: the relic's block stays, its items at its rates, never 'Your relic: …'", () => {
+  // Alone, the game never writes what the relic gave.
+  const ended = mission({ ...ROCHE, fissure: { id: "meso", name: "Meso" }, rewards: null, state: "ended", result: "succeeded", endedAt: START, durationSeconds: 131, credits: 1900, relic: relic("radiant") });
+  const s = screen({ mission: ended, progress: null });
+  assert.equal(s.info, "Succeeded in 2 min 11");
+  assert.deepEqual(s.recap.map((r) => r.label + r.text), ["End bonus: 1,900 Credits"]);
+  assert.equal(s.sections.length, 1);
+  const head = s.sections[0];
+  assert.deepEqual([head.relic, head.name, head.badge, head.badgeCls, head.img, head.glyph], [true, "Meso F5 Relic", "Radiant", "ref-chip", "asset:00000000000000f5", ""]);
+  assert.deepEqual(head.rows.map((r) => `${r.name} ${r.chance}`), [
+    "Fulmin Prime Receiver 10.00%", "Bronco Prime Blueprint 16.67%", "Gunsen Prime Blueprint 16.67%", "Orthos Prime Handle 16.67%", "Paris Prime Grip 20.00%", "Shade Prime Systems 20.00%",
+  ]);
+  assert.equal(s.source, true, "the rates' source under the block");
+  assert.equal(s.info.includes("Reactant"), false, "the relic is opened");
+  assert.equal(JSON.stringify(s.recap).includes("Your relic"), false);
+  assert.equal(s.line, "Roche · succeeded");
+  // Kept with the recap, without its images: our icons of their kinds.
+  const last = logic.lastFrom(ended, null, START, "Credits");
+  assert.equal(logic.isLast(last), true);
+  assert.equal(last.relic, null);
+  const stored = screen({}, { last: logic.storedLast(last) });
+  assert.equal(logic.isLast(logic.storedLast(last)), true);
+  const kept = stored.sections[0];
+  assert.deepEqual([kept.relic, kept.name, kept.img, kept.glyph], [true, "Meso F5 Relic", "", "hexagon"]);
+  assert.deepEqual(kept.rows.map((r) => [r.icon, r.glyph]).slice(0, 2), [["", "scroll-text"], ["", "scroll-text"]]);
+  const fr = inFrench(() => screen({ mission: ended, progress: null }, {}, { glossary: GLOSSARY_FR }));
+  assert.deepEqual([fr.sections[0].title, fr.recap.map((r) => r.label + r.text)], ["Votre relique", ["Prime de fin : 1,900 Crédits"]]);
+  // In a squad, the item it gave, as before: no block.
+  const squad = screen({ mission: { ...ended, relic: relic("radiant", { reward: relicItem("orthos_prime_handle", "Orthos Prime Handle", "common", 0.1667) }) }, progress: null });
+  assert.deepEqual([squad.sections.length, squad.recap[0].label], [0, "Your relic: "]);
+  // A Fissure lost or left: nothing came of the relic.
+  for (const result of ["failed", "aborted"]) {
+    assert.equal(screen({ mission: { ...ended, result }, progress: null }).sections.length, 0, result);
+  }
+});
+
 const ROUND = { kind: "round", rotation: null, items: [item("aggristone", "Aggristone", 0.3775, 7), item("dracroot", "Dracroot", 0.0025), item("kovnik", "Kovnik", 0.22)] };
 const CIRCUIT = { node: { id: "SolNode238", name: "The Circuit" }, planet: { id: "duviri", name: "Duviri" }, faction: null, type: { id: "circuit", name: "The Circuit" } };
 const world = (picked) => ({

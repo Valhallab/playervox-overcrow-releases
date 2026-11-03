@@ -21,6 +21,7 @@ import {
   storage,
   t,
   timers,
+  type AssetHandle,
   type IconName,
   type Timer,
   type WarframeEvents,
@@ -28,6 +29,7 @@ import {
   type WarframeModifier,
   type WarframeProgress,
   type WarframeRelic,
+  type WarframeRelicItem,
   type WarframeReward,
   type WarframeRewardTable,
 } from "@overcrow/sdk";
@@ -58,6 +60,30 @@ type Result = NonNullable<WarframeMission["result"]>;
 export type Layout = "line" | "compact" | "standard" | "wide";
 export type Order = "rarest" | "likely";
 
+/** An item of a kept relic: the contract's fields, as a type so that it stores as JSON. */
+type KeptRelicItem = {
+  readonly id: string;
+  readonly name: string;
+  readonly quantity: number;
+  readonly rarity: WarframeRelicItem["rarity"];
+  readonly chance: number | null;
+  readonly icon: AssetHandle | null;
+  readonly iconPending: boolean;
+  readonly category: WarframeReward["category"];
+};
+
+/** A relic as the recap keeps it: the contract's fields, as a type so that it stores as JSON. */
+export type KeptRelic = {
+  readonly id: string;
+  readonly name: string;
+  readonly era: { readonly id: string; readonly name: string | null };
+  readonly refinement: { readonly id: string; readonly name: string | null } | null;
+  readonly icon: AssetHandle | null;
+  readonly iconPending: boolean;
+  readonly items: readonly KeptRelicItem[];
+  readonly reward: KeptRelicItem | null;
+};
+
 /** The last mission, kept for the summary after the game. */
 export type LastMission = {
   node: string;
@@ -80,6 +106,10 @@ export type LastMission = {
   /** What the player's own relic gave in a Void Fissure: its name, its
    * image (an `asset:` handle, empty once stored) and our icon of its kind. */
   relic: { name: string; icon: string; glyph: string } | null;
+  /** The relic of a Fissure whose reward the game did not write (played
+   * alone, the game never does): its block stays in the recap. Its images
+   * are the session's, none once stored. */
+  equipped: KeptRelic | null;
 };
 
 export interface Row {
@@ -1060,6 +1090,19 @@ export function lastFrom(mission: WarframeMission, progress: WarframeProgress | 
     waves: mission.type?.id === "defense" ? (progress?.wave ?? null) : null,
     pills: pillsOf(mission),
     relic: relicReward(mission.relic),
+    equipped: mission.relic !== null && mission.relic.reward === null ? mission.relic : null,
+  };
+}
+
+/** The last mission as stored: an image handle is the session's, so the stored recap shows our icons. */
+export function storedLast(last: LastMission): LastMission {
+  const equipped = last.equipped;
+  return {
+    ...last,
+    relic: last.relic === null ? null : { ...last.relic, icon: "" },
+    equipped: equipped === null
+      ? null
+      : { ...equipped, icon: null, iconPending: false, items: equipped.items.map((item) => ({ ...item, icon: null, iconPending: false })) },
   };
 }
 
@@ -1137,6 +1180,12 @@ function after(last: LastMission, how: "fresh" | "last" | "closed", input: Input
   const relic = last.relic;
   if (relic !== null) {
     s.recap.push({ id: "relic", img: relic.icon, icon: relic.icon === "" ? relic.glyph : "", label: t("recap-relic"), text: relic.name, cls: "recap-value" });
+  }
+  // Alone, the game never writes what the relic gave: its block stays,
+  // with what it could give.
+  if (last.equipped !== null && !lost) {
+    s.sections = [relicSection(last.equipped, input)];
+    s.source = true;
   }
   if (!lost && last.credits !== null) {
     const text = t("facts-credits", { n: formatNumber(last.credits), credits: last.creditsName });
@@ -1365,6 +1414,31 @@ export function lootOrder(): Order {
   return option("order", "rarest") === "likely" ? "likely" : "rarest";
 }
 
+const RARITIES: readonly unknown[] = ["common", "uncommon", "rare"];
+
+/** A stored relic: what its block shows, bounded. */
+function isRelic(v: unknown): v is KeptRelic {
+  if (typeof v !== "object" || v === null) return false;
+  const o = v as Record<string, unknown>;
+  const ref = o.refinement as Record<string, unknown> | null | undefined;
+  const era = o.era as Record<string, unknown> | null | undefined;
+  const items = o.items;
+  return (
+    typeof o.id === "string" && typeof o.name === "string" && o.reward === null &&
+    typeof era === "object" && era !== null && typeof era.id === "string" && (era.name === null || typeof era.name === "string") &&
+    (ref === null || (typeof ref === "object" && typeof ref.id === "string" && (ref.name === null || typeof ref.name === "string"))) &&
+    (o.icon === null || typeof o.icon === "string") && typeof o.iconPending === "boolean" &&
+    Array.isArray(items) && items.length <= 6 &&
+    items.every((x) => {
+      if (typeof x !== "object" || x === null) return false;
+      const i = x as Record<string, unknown>;
+      return typeof i.id === "string" && typeof i.name === "string" && typeof i.quantity === "number" && RARITIES.includes(i.rarity) &&
+        (i.chance === null || (typeof i.chance === "number" && Number.isFinite(i.chance))) &&
+        (i.icon === null || typeof i.icon === "string") && typeof i.iconPending === "boolean" && typeof i.category === "string";
+    })
+  );
+}
+
 /** A stored last mission of this version's shape; an older one is ignored. */
 export function isLast(v: unknown): v is LastMission {
   if (typeof v !== "object" || v === null) return false;
@@ -1376,6 +1450,7 @@ export function isLast(v: unknown): v is LastMission {
   const relic = o.relic as Record<string, unknown> | null | undefined;
   return (
     (relic === null || (typeof relic === "object" && ["name", "icon", "glyph"].every((k) => typeof relic[k] === "string"))) &&
+    (o.equipped === null || isRelic(o.equipped)) &&
     str("node") && str("planet") && str("faction") && str("factionId") && str("typeName") && str("creditsName") &&
     (o.result === null || o.result === "succeeded" || o.result === "failed" || o.result === "aborted") &&
     (o.durationSeconds === null || num(o.durationSeconds)) && num(o.endedAt) &&
@@ -1441,9 +1516,7 @@ function remember(mission: WarframeMission, progress: WarframeProgress | null, c
   const next = lastFrom(mission, progress, Date.now(), credits);
   if (last !== null && JSON.stringify(last) === JSON.stringify(next)) return;
   last = next;
-  // An image handle is the session's: the stored recap shows our icon instead.
-  const stored = { ...next, relic: next.relic === null ? null : { ...next.relic, icon: "" } };
-  storage.set({ key: LAST_KEY, value: stored }).catch(() => undefined);
+  storage.set({ key: LAST_KEY, value: storedLast(next) }).catch(() => undefined);
 }
 
 let mission = "";
