@@ -1,0 +1,387 @@
+{
+  "scenarioVersion": 1,
+  "name": "open-world-en",
+  "description": "An open world entered by its hub's gate: its header and no table; once left, the first screen, or the last mission of the session.",
+  "host": {
+    "locale": "en",
+    "mode": "passive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "assets": {
+    "currency": "tests/assets/item-currency.png",
+    "mod": "tests/assets/item-mod.png",
+    "resource": "tests/assets/item-resource.png",
+    "relic": "tests/assets/item-relic.png"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode229",
+                "name": "Cambion Drift"
+              },
+              "planet": {
+                "id": "deimos",
+                "name": "Deimos"
+              },
+              "faction": {
+                "id": "infested",
+                "name": "Infested"
+              },
+              "type": {
+                "id": "free_roam",
+                "name": "Free Roam"
+              },
+              "modifiers": [],
+              "rewards": null,
+              "rewardsPending": false,
+              "earned": null,
+              "credits": null,
+              "selectedAt": null,
+              "loadingAt": 1793217270000,
+              "startedAt": 1793217295000
+            },
+            "progress": null
+          },
+          "event": "mission_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "en"
+          },
+          "glossary": {
+            "language": "en"
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "No table in an open world"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "open-world-en",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "open-world-interactive-en",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": null,
+            "progress": null
+          },
+          "event": {
+            "type": "mission_left",
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode229",
+                "name": "Cambion Drift"
+              },
+              "planet": {
+                "id": "deimos",
+                "name": "Deimos"
+              },
+              "faction": {
+                "id": "infested",
+                "name": "Infested"
+              },
+              "type": {
+                "id": "free_roam",
+                "name": "Free Roam"
+              },
+              "modifiers": [],
+              "rewards": null,
+              "rewardsPending": false,
+              "earned": null,
+              "credits": null,
+              "selectedAt": null,
+              "loadingAt": 1793217270000,
+              "startedAt": 1793217295000
+            }
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Pick a mission"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "open-world-left-en",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode405",
+                "name": "Mot"
+              },
+              "planet": {
+                "id": "void",
+                "name": "Void"
+              },
+              "faction": {
+                "id": "corrupted",
+                "name": "Corrupted"
+              },
+              "type": {
+                "id": "survival",
+                "name": "Survival"
+              },
+              "modifiers": [],
+              "rewards": null,
+              "rewardsPending": false,
+              "earned": null,
+              "credits": null,
+              "selectedAt": 1793216400000,
+              "loadingAt": 1793216450000,
+              "startedAt": 1793216500000
+            },
+            "progress": {
+              "wave": null,
+              "waveEnemies": null,
+              "round": null,
+              "rewards": 4,
+              "rotation": "A",
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "totals": {
+                  "A": 2,
+                  "B": 1,
+                  "C": 1
+                }
+              },
+              "cycle": {
+                "number": 2,
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "earned": 0
+              },
+              "clock": "running",
+              "nextRewardAt": null,
+              "nextRewardWave": null
+            }
+          },
+          "event": "mission_started"
+        }
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "ended",
+              "result": "succeeded",
+              "endedAt": 1793217599000,
+              "durationSeconds": 1039.2,
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "totals": {
+                  "A": 2,
+                  "B": 1,
+                  "C": 1
+                }
+              },
+              "credits": 40000
+            }
+          },
+          "event": "mission_ended"
+        }
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode229",
+                "name": "Cambion Drift"
+              },
+              "planet": {
+                "id": "deimos",
+                "name": "Deimos"
+              },
+              "faction": {
+                "id": "infested",
+                "name": "Infested"
+              },
+              "type": {
+                "id": "free_roam",
+                "name": "Free Roam"
+              },
+              "modifiers": [],
+              "rewards": null,
+              "rewardsPending": false,
+              "earned": null,
+              "credits": null,
+              "selectedAt": null,
+              "loadingAt": 1793217270000,
+              "startedAt": 1793217295000
+            },
+            "progress": null
+          },
+          "event": "mission_started"
+        }
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": null,
+            "progress": null
+          },
+          "event": {
+            "type": "mission_left",
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode229",
+                "name": "Cambion Drift"
+              },
+              "planet": {
+                "id": "deimos",
+                "name": "Deimos"
+              },
+              "faction": {
+                "id": "infested",
+                "name": "Infested"
+              },
+              "type": {
+                "id": "free_roam",
+                "name": "Free Roam"
+              },
+              "modifiers": [],
+              "rewards": null,
+              "rewardsPending": false,
+              "earned": null,
+              "credits": null,
+              "selectedAt": null,
+              "loadingAt": 1793217270000,
+              "startedAt": 1793217295000
+            }
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Survival · last mission"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "open-world-left-last-en",
+        "fault": "none"
+      }
+    }
+  ]
+}

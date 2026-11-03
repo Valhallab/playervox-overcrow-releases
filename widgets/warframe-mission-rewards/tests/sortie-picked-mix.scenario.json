@@ -1,0 +1,261 @@
+{
+  "scenarioVersion": 1,
+  "name": "sortie-picked-mix",
+  "description": "A Sortie mission picked, its type known only at loading: its table from the pick, the header says Sortie alone.",
+  "host": {
+    "locale": "fr",
+    "mode": "passive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "assets": {
+    "currency": "tests/assets/item-currency.png",
+    "mod": "tests/assets/item-mod.png",
+    "resource": "tests/assets/item-resource.png",
+    "relic": "tests/assets/item-relic.png"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode57",
+                "name": "Morax"
+              },
+              "planet": {
+                "id": "europa",
+                "name": "Europa"
+              },
+              "faction": {
+                "id": "corpus",
+                "name": "Corpus"
+              },
+              "type": null,
+              "typeAtLoading": true,
+              "modifiers": [
+                {
+                  "id": "sortie",
+                  "name": "Sortie",
+                  "stage": 1
+                }
+              ],
+              "rewards": {
+                "source": "sortie",
+                "tables": [
+                  {
+                    "kind": "mission",
+                    "rotation": null,
+                    "items": [
+                      {
+                        "id": "legendary_core",
+                        "name": "Legendary Core",
+                        "quantity": 1,
+                        "chance": 0.0019,
+                        "category": "other"
+                      },
+                      {
+                        "id": "kitgun_riven_mod",
+                        "name": "Kitgun Riven Mod",
+                        "quantity": 1,
+                        "chance": 0.01,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "zaw_riven_mod",
+                        "name": "Zaw Riven Mod",
+                        "quantity": 1,
+                        "chance": 0.01,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "shotgun_riven_mod",
+                        "name": "Shotgun Riven Mod",
+                        "quantity": 1,
+                        "chance": 0.022,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "exilus_warframe_adapter",
+                        "name": "Exilus Warframe Adapter",
+                        "quantity": 1,
+                        "chance": 0.025,
+                        "category": "other",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "forma",
+                        "name": "Forma",
+                        "quantity": 1,
+                        "chance": 0.025,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "orokin_catalyst_blueprint",
+                        "name": "Orokin Catalyst Blueprint",
+                        "quantity": 1,
+                        "chance": 0.025,
+                        "category": "blueprint"
+                      },
+                      {
+                        "id": "orokin_reactor_blueprint",
+                        "name": "Orokin Reactor Blueprint",
+                        "quantity": 1,
+                        "chance": 0.025,
+                        "category": "blueprint"
+                      },
+                      {
+                        "id": "affinity_booster",
+                        "name": "Affinity Booster",
+                        "quantity": 1,
+                        "chance": 0.0327,
+                        "category": "other"
+                      },
+                      {
+                        "id": "mod_drop_chance_booster",
+                        "name": "Mod Drop Chance Booster",
+                        "quantity": 1,
+                        "chance": 0.0327,
+                        "category": "other"
+                      },
+                      {
+                        "id": "resource_drop_chance_booster",
+                        "name": "Resource Drop Chance Booster",
+                        "quantity": 1,
+                        "chance": 0.0327,
+                        "category": "other"
+                      },
+                      {
+                        "id": "pistol_riven_mod",
+                        "name": "Pistol Riven Mod",
+                        "quantity": 1,
+                        "chance": 0.07,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "rifle_riven_mod",
+                        "name": "Rifle Riven Mod",
+                        "quantity": 1,
+                        "chance": 0.07,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "melee_riven_mod",
+                        "name": "Melee Riven Mod",
+                        "quantity": 1,
+                        "chance": 0.098,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "endo",
+                        "name": "Endo",
+                        "quantity": 4000,
+                        "chance": 0.12,
+                        "category": "currency",
+                        "icon": "fixture:currency",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "kuva",
+                        "name": "Kuva",
+                        "quantity": 6000,
+                        "chance": 0.12,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "ayatan_anasa_sculpture",
+                        "name": "Ayatan Anasa Sculpture",
+                        "quantity": 1,
+                        "chance": 0.28,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              "rewardsPending": false,
+              "earned": null,
+              "credits": null,
+              "selectedAt": 1793217340000,
+              "loadingAt": null,
+              "startedAt": null
+            },
+            "progress": null
+          },
+          "event": "mission_selected",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "en"
+          },
+          "glossary": {
+            "language": "en"
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Sortie",
+          "Une seule, après la 3ᵉ mission"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 560
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "sortie-picked-mix",
+        "fault": "none"
+      }
+    }
+  ]
+}

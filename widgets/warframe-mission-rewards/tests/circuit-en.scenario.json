@@ -1,0 +1,488 @@
+{
+  "scenarioVersion": 1,
+  "name": "circuit-en",
+  "description": "The Circuit: each round's table and this week's tiers from the pick; on the Steel Path, the two Incarnon.",
+  "host": {
+    "locale": "en",
+    "mode": "passive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "assets": {
+    "currency": "tests/assets/item-currency.png",
+    "mod": "tests/assets/item-mod.png",
+    "resource": "tests/assets/item-resource.png",
+    "relic": "tests/assets/item-relic.png"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode238",
+                "name": "The Circuit"
+              },
+              "planet": {
+                "id": "duviri",
+                "name": "Duviri"
+              },
+              "faction": null,
+              "type": {
+                "id": "circuit",
+                "name": "The Circuit"
+              },
+              "modifiers": [],
+              "rewards": {
+                "source": "circuit",
+                "tables": [
+                  {
+                    "kind": "round",
+                    "rotation": null,
+                    "items": [
+                      {
+                        "id": "dracroot",
+                        "name": "Dracroot",
+                        "quantity": 1,
+                        "chance": 0.0025,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "yao_shrub",
+                        "name": "Yao Shrub",
+                        "quantity": 1,
+                        "chance": 0.0025,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "connla_sprout",
+                        "name": "Connla Sprout",
+                        "quantity": 1,
+                        "chance": 0.01,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "eevani",
+                        "name": "Eevani",
+                        "quantity": 1,
+                        "chance": 0.01,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "kovnik",
+                        "name": "Kovnik",
+                        "quantity": 1,
+                        "chance": 0.22,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "aggristone",
+                        "name": "Aggristone",
+                        "quantity": 7,
+                        "chance": 0.3775,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "saggen_pearl",
+                        "name": "Saggen Pearl",
+                        "quantity": 5,
+                        "chance": 0.3775,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              "rewardsPending": false,
+              "earned": null,
+              "credits": null,
+              "selectedAt": 1793216800000,
+              "loadingAt": 1793216820000,
+              "startedAt": 1793216840000
+            },
+            "progress": null,
+            "world": {
+              "updatedAt": 1793217540000,
+              "sortie": null,
+              "archonHunt": null,
+              "fissures": [],
+              "cycles": {
+                "cetus": null,
+                "vallis": null,
+                "cambion": null
+              },
+              "resets": {
+                "daily": 1793221200000,
+                "weekly": 1793304000000
+              },
+              "voidTrader": null,
+              "circuit": {
+                "normal": [
+                  {
+                    "id": "titania",
+                    "name": "Titania"
+                  },
+                  {
+                    "id": "nekros",
+                    "name": "Nekros"
+                  },
+                  {
+                    "id": "wukong",
+                    "name": "Wukong"
+                  }
+                ],
+                "steelPath": [
+                  {
+                    "id": "paris_incarnon_genesis",
+                    "name": "Paris Incarnon Genesis"
+                  },
+                  {
+                    "id": "lato_incarnon_genesis",
+                    "name": "Lato Incarnon Genesis"
+                  },
+                  {
+                    "id": "boar_incarnon_genesis",
+                    "name": "Boar Incarnon Genesis"
+                  }
+                ],
+                "picked": {
+                  "normal": [
+                    "titania"
+                  ],
+                  "steelPath": [
+                    "paris_incarnon_genesis",
+                    "lato_incarnon_genesis"
+                  ]
+                }
+              },
+              "nightwave": null
+            }
+          },
+          "event": "mission_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "en"
+          },
+          "glossary": {
+            "language": "en"
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Each round",
+          "Tiers 1, 3, 4, 6, 9: random"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 560
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "circuit-en",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 560
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "circuit-interactive-en",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode238",
+                "name": "The Circuit"
+              },
+              "planet": {
+                "id": "duviri",
+                "name": "Duviri"
+              },
+              "faction": null,
+              "type": {
+                "id": "circuit",
+                "name": "The Circuit"
+              },
+              "modifiers": [
+                {
+                  "id": "steel_path",
+                  "name": "Steel Path",
+                  "stage": null
+                }
+              ],
+              "rewards": {
+                "source": "circuit",
+                "tables": [
+                  {
+                    "kind": "round",
+                    "rotation": null,
+                    "items": [
+                      {
+                        "id": "dracroot",
+                        "name": "Dracroot",
+                        "quantity": 1,
+                        "chance": 0.0025,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "yao_shrub",
+                        "name": "Yao Shrub",
+                        "quantity": 1,
+                        "chance": 0.0025,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "connla_sprout",
+                        "name": "Connla Sprout",
+                        "quantity": 1,
+                        "chance": 0.01,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "eevani",
+                        "name": "Eevani",
+                        "quantity": 1,
+                        "chance": 0.01,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "kovnik",
+                        "name": "Kovnik",
+                        "quantity": 1,
+                        "chance": 0.22,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "aggristone",
+                        "name": "Aggristone",
+                        "quantity": 7,
+                        "chance": 0.3775,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "saggen_pearl",
+                        "name": "Saggen Pearl",
+                        "quantity": 5,
+                        "chance": 0.3775,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              "rewardsPending": false,
+              "earned": null,
+              "credits": null,
+              "selectedAt": 1793216800000,
+              "loadingAt": 1793216820000,
+              "startedAt": 1793216840000
+            }
+          },
+          "event": "mission_started"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Tiers 1 to 4, 6 to 9: random"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 560
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "circuit-steel-en",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 560
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "circuit-steel-interactive-en",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "world": {
+              "updatedAt": 1793217540000,
+              "sortie": null,
+              "archonHunt": null,
+              "fissures": [],
+              "cycles": {
+                "cetus": null,
+                "vallis": null,
+                "cambion": null
+              },
+              "resets": {
+                "daily": 1793221200000,
+                "weekly": 1793304000000
+              },
+              "voidTrader": null,
+              "circuit": {
+                "normal": [
+                  {
+                    "id": "titania",
+                    "name": "Titania"
+                  },
+                  {
+                    "id": "nekros",
+                    "name": "Nekros"
+                  },
+                  {
+                    "id": "wukong",
+                    "name": "Wukong"
+                  }
+                ],
+                "steelPath": [
+                  {
+                    "id": "paris_incarnon_genesis",
+                    "name": "Paris Incarnon Genesis"
+                  },
+                  {
+                    "id": "lato_incarnon_genesis",
+                    "name": "Lato Incarnon Genesis"
+                  },
+                  {
+                    "id": "boar_incarnon_genesis",
+                    "name": "Boar Incarnon Genesis"
+                  }
+                ],
+                "picked": {
+                  "normal": [],
+                  "steelPath": []
+                }
+              },
+              "nightwave": null
+            }
+          },
+          "event": "mission_started"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Your two Incarnon"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 560
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "circuit-steel-unseen-en",
+        "fault": "none"
+      }
+    }
+  ]
+}
