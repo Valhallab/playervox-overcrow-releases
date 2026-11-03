@@ -258,7 +258,7 @@ scroll.body {
   color: var(--color-text-muted);
 }
 
-.check-icon.part {
+.check-icon.started {
   color: var(--color-text-secondary);
 }
 
@@ -576,7 +576,7 @@ button.part:focus {
   margin-top: 0;
 }
 
-/* Icons sit in a fixed slot: a dashed circle's wider box never moves the names. */
+/* Icons sit in a fixed slot: every status icon on the same centre, whatever its shape. */
 .ico-slot {
   width: 14px;
   flex-shrink: 0;

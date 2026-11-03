@@ -788,7 +788,8 @@ function headOf(id: ActivityId, now: number, counted: number, total: number, don
   const value = total > 0 ? `${counted}/${total}` : "";
   return {
     icon: counted > 0 ? "circle-dashed" : "circle",
-    iconCls: counted > 0 ? "check-icon part" : "check-icon todo",
+    // Not `part`: the class of the stages' rows.
+    iconCls: counted > 0 ? "check-icon started" : "check-icon todo",
     value,
     valueCls: "row-value",
     cls: "act",

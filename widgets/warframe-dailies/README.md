@@ -100,8 +100,9 @@ the hand against the game, the stages kept in order, Netracells, the
 Circuit's picks, Nightwave challenges completed by the game and their
 objectives on hover, a stage type told at loading, the tracked
 activities, the wide layout, the Passive fold, the world not read, the
-game not detected, a whole week of virtual
-time, a restart, the French wording.
+game not detected, a whole week of virtual time, a restart, the French
+wording; and, read from the reference captures, the frame that never cuts
+the panel and every status icon on its slot's centre.
 
 `overcrow-widget test` plays one scenario per state, in English, French
 and French with the game in English, at 100 % and 150 %, in both themes
@@ -111,7 +112,8 @@ ticks, then the player's corrections), `sortie-replaced`,
 `all-done`, `events-unavailable`, `long-list` (the host's scrollbar, the
 Passive fold), `tall-week` (taller than the frame), `ordered-stages` (the
 stages kept in order by hand and by the game), `nightwave-objective` (a
-challenge's objective on hover, in Interactive only), `baro-here`, `refused` and
+challenge's objective on hover, in Interactive only), `status-icons`
+(every status icon in its slot, at 100 % and 150 %), `baro-here`, `refused` and
 `nothing-tracked`; `week` runs
 Thursday to Monday in virtual time with clicks, `restart` repeats a
 session's events after a restart, and `preview` captures the catalog
