@@ -12,11 +12,13 @@
 .wf {
   flex-direction: column;
   width: 100%;
-  max-height: 800px;
+  /* The manifest's largest height: past it, the list shrinks and scrolls,
+     the note and the bottom margin stay whole. */
+  max-height: 680px;
   min-height: 0;
   flex-shrink: 1;
   padding: 10px;
-  gap: var(--space-4);
+  gap: 6px;
 }
 
 .body {
@@ -215,7 +217,7 @@ scroll.body {
 
 .groups {
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .wide .groups {
@@ -296,7 +298,7 @@ scroll.body {
   flex-direction: row;
   align-items: center;
   gap: 6px;
-  padding-top: 6px;
+  padding-top: 4px;
   border-top: 1px solid var(--color-border);
 }
 
@@ -353,7 +355,7 @@ scroll.body {
 
 .act {
   flex-direction: column;
-  padding: 3px 0 1px 0;
+  padding: 2px 0 0 0;
 }
 
 .act-head {
@@ -550,7 +552,7 @@ button.part:focus {
   flex-direction: row;
   align-items: start;
   gap: 6px;
-  padding-top: 6px;
+  padding-top: 4px;
   border-top: 1px solid var(--color-border);
 }
 

@@ -309,11 +309,10 @@ test("Passive: the typical day's full week, 651 px tall, fits under 680 points: 
   assert.equal(night.more, "", "nothing folded");
   assert.equal(night.groups.flatMap((group) => group.parts).length, 10);
   assert.ok(logic.panelHeight(built, 300) <= logic.MAX_HEIGHT);
-  // Narrower, the same week passes 680 points: the end of Nightwave folds.
-  const narrow = logic.buildModel(inputs(220));
-  const folded = narrow.cols.flatMap((col) => col.groups.flatMap((group) => group.acts)).find((each) => each.id === "nightwave");
-  assert.ok(logic.panelHeight(narrow, 220) <= logic.MAX_HEIGHT);
-  assert.notEqual(folded.more, "");
+  // Interactive adds the note at the foot, two lines, still under 680 points.
+  const note = logic.panelHeight(built, 300, true) - logic.panelHeight(built, 300);
+  assert.ok(note >= 30, `${note} px for the note`);
+  assert.ok(logic.panelHeight(built, 300, true) <= logic.MAX_HEIGHT);
 });
 
 test("the world not read yet: the stages by their rank, Nightwave waits", async () => {
@@ -392,4 +391,22 @@ test("the panel stops at 680 points: on a 1080p screen at 150 %, 1,020 px leave 
   assert.equal(manifest.sizing.max.height, 680);
   assert.equal(logic.MAX_HEIGHT, manifest.sizing.max.height);
   assert.ok(logic.MAX_HEIGHT * 1.5 <= 1080 - 48);
+  // The panel stops there too: past it, its list shrinks and scrolls, the note stays whole.
+  const style = readFileSync(new URL("../style.ocss", import.meta.url), "utf8");
+  const panel = style.slice(style.indexOf(".wf {"), style.indexOf("}", style.indexOf(".wf {")));
+  assert.match(panel, new RegExp(`max-height: ${logic.MAX_HEIGHT}px;`));
+});
+
+test("a section's title and reset that do not fit one line count two: French at 220 points", () => {
+  const model = (title, reset) => ({
+    cols: [{ id: "all", groups: [{ id: "week", title, reset, acts: [] }] }],
+    baro: "",
+    hint: "",
+    status: "",
+    note: "",
+  });
+  const short = logic.panelHeight(model("This week", "resets in 3d 14h"), 220);
+  const long = logic.panelHeight(model("Cette semaine", "reset dans 3 j 14 h"), 220);
+  assert.equal(long - short, 14);
+  assert.equal(logic.panelHeight(model("Cette semaine", "reset dans 3 j 14 h"), 300), short);
 });

@@ -490,7 +490,7 @@
     {
       "expect": {
         "text": [
-          "+ 6 challenges"
+          "+ 5 challenges"
         ],
         "fault": "none"
       }
@@ -516,7 +516,7 @@
     {
       "expect": {
         "noText": [
-          "+ 6 challenges"
+          "+ 5 challenges"
         ],
         "fault": "none"
       }

@@ -845,19 +845,27 @@ function nightwaveAct(inputs: Inputs): Built {
 const H = {
   /** The panel's padding, top and bottom. */
   pad: 20,
-  /** Between the panel's blocks (header, hint, lists, Baro, status). */
-  gap: 8,
+  /** Between the panel's blocks (header, hint, lists, Baro, status, note). */
+  gap: 6,
   header: 17,
   hint: 16,
   status: 14,
   /** Baro's line, its rule and padding. */
-  foot: 21,
+  foot: 19,
+  /** Interactive: the note's rule and padding, then each of its lines. */
+  noteTop: 5,
+  noteLine: 15,
   /** Between Today and This week. */
-  sections: 10,
+  sections: 8,
   /** A section's title, its rule and padding. */
   sectionHead: 21,
+  /** A second line when its title and reset do not fit one (French, narrow). */
+  sectionLine: 14,
+  /** Px per character: the title's capitals, spaced, and the reset's 12 px text. */
+  titlePx: 7,
+  resetPx: 6,
   /** An activity's name line, its padding and the gap to the next. */
-  act: 25,
+  act: 23,
   part: 17,
   cells: 21,
   subTitle: 15,
@@ -909,13 +917,15 @@ function columnHeight(sections: readonly Section[], width: number): number {
   let height = 0;
   sections.forEach((section, index) => {
     if (index > 0) height += H.sections;
-    height += H.sectionHead + section.acts.reduce((sum, act) => sum + actHeight(act, width), 0);
+    const head = section.title.length * H.titlePx + section.reset.length * H.resetPx + 6;
+    height += H.sectionHead + (head > width ? H.sectionLine : 0);
+    height += section.acts.reduce((sum, act) => sum + actHeight(act, width), 0);
   });
   return height;
 }
 
-/** The whole Passive panel's height. */
-export function panelHeight(model: Model, width: number): number {
+/** The whole panel's height; Interactive adds the note at its foot. */
+export function panelHeight(model: Model, width: number, interactive = false): number {
   const inner = width - H.pad;
   const columns = model.cols.length;
   const colWidth = columns > 1 ? (inner - 16) / 2 : inner;
@@ -923,6 +933,7 @@ export function panelHeight(model: Model, width: number): number {
   if (model.hint !== "") blocks.push(H.hint * textLines(model.hint, inner - 20));
   if (model.baro !== "") blocks.push(H.foot + 14 * (textLines(model.baro, inner - 20) - 1));
   if (model.status !== "") blocks.push(H.status);
+  if (interactive && model.note !== "") blocks.push(H.noteTop + H.noteLine * textLines(model.note, inner));
   return H.pad + blocks.reduce((sum, each) => sum + each, 0) + H.gap * (blocks.length - 1);
 }
 
@@ -931,6 +942,9 @@ export function panelHeight(model: Model, width: number): number {
  * there. 680 points are 1,020 px at 150 %, 48 px short of a 1080p screen.
  */
 export const MAX_HEIGHT = 680;
+
+/** Px the estimate keeps clear of the largest height: a wrap it misses never cuts the panel. */
+const FOLD_MARGIN = 8;
 
 /**
  * Passive: when the panel would pass its largest height, the end of the
@@ -941,7 +955,7 @@ function fold(model: Model, width: number): void {
   if (night === undefined || night.groups.length === 0) return;
   let hidden = 0;
   const total = night.groups.reduce((sum, group) => sum + group.parts.length, 0);
-  while (panelHeight(model, width) > MAX_HEIGHT && hidden < total) {
+  while (panelHeight(model, width) > MAX_HEIGHT - FOLD_MARGIN && hidden < total) {
     const last = night.groups[night.groups.length - 1];
     if (last === undefined) break;
     last.parts = last.parts.slice(0, -1);
