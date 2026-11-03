@@ -1047,6 +1047,17 @@ export interface WarframeGlossary {
     /** Its name in the language of `glossary.language`. */
     readonly credits: string;
   };
+  /** A relic's refinements. */
+  readonly refinement: {
+    /** Its name in the language of `glossary.language`. */
+    readonly intact: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly exceptional: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly flawless: string;
+    /** Its name in the language of `glossary.language`. */
+    readonly radiant: string;
+  };
   /** The game's symbols, as images. */
   readonly icons: WarframeGlossaryIcons;
 }
@@ -1184,8 +1195,52 @@ export interface WarframeMission {
   readonly rewardsPending: boolean;
   /** The rotations earned from the start, for a type with rotations; `null` otherwise or before the start. */
   readonly earned: WarframeEarned | null;
-  /** The credits its end screen counts; `null` before the end, or when the game does not say (an aborted mission). */
+  /** The mission's end bonus in credits, as its end screen pays it; not the credits picked up during the mission. `null` before the end, or when the game does not say (an aborted mission). */
   readonly credits: number | null;
+  /** `true` when the game replaces the type the world state publishes for this node: `type` stays `null` until the mission loads, then is the type the game chose. `false` otherwise. */
+  readonly typeAtLoading: boolean;
+  /** The relic the player equipped for a Void Fissure, once the game asked to confirm it; kept on the ended mission. `null` otherwise. */
+  readonly relic: WarframeRelic | null;
+}
+
+/** A relic equipped for a Void Fissure. */
+export interface WarframeRelic {
+  /** Our ID: the relic's English name in `snake_case` (`meso_f5_relic`). */
+  readonly id: string;
+  /** Its name in the game's language, or in English when PlayerVox OverCrow has no translation yet. */
+  readonly name: string;
+  /** Its era. */
+  readonly era: WarframeName;
+  /** Its refinement (`intact`, `exceptional`, `flawless`, `radiant`); `null` when the game's words do not tell it (then no item has a chance). */
+  readonly refinement: WarframeName | null;
+  /** `asset:` handle of the relic's image for its refinement, 48 px square; as `WarframeReward.icon`. */
+  readonly icon: AssetHandle | null;
+  /** As `WarframeReward.iconPending`. */
+  readonly iconPending: boolean;
+  /** What it can give, the rarest first, at most `MAX_WARFRAME_RELIC_ITEMS`. Source: Digital Extremes' drop tables, no guarantees. */
+  readonly items: ReadonlyArray<WarframeRelicItem>;
+  /** What the player's own relic gave at the end; not what the player chose among the squad's relics, which the game does not say. `null` before. */
+  readonly reward: WarframeRelicItem | null;
+}
+
+/** An item of a relic. */
+export interface WarframeRelicItem {
+  /** Our ID: the item's English name in `snake_case`. */
+  readonly id: string;
+  /** Its name in the game's language, or in English when PlayerVox OverCrow has no translation yet. */
+  readonly name: string;
+  /** How many at once. */
+  readonly quantity: number;
+  /** `common`, `uncommon` or `rare`. */
+  readonly rarity: "common" | "uncommon" | "rare";
+  /** The chance of the relic's refinement, from 0 to 1; `null` when the refinement is not known. */
+  readonly chance: number | null;
+  /** As `WarframeReward.icon`. */
+  readonly icon: AssetHandle | null;
+  /** As `WarframeReward.iconPending`. */
+  readonly iconPending: boolean;
+  /** As `WarframeReward.category`. */
+  readonly category: "relic" | "mod" | "resource" | "blueprint" | "warframe_part" | "weapon_part" | "arcane" | "currency" | "other";
 }
 
 /** What changes a mission. */
@@ -1279,7 +1334,7 @@ export type WarframeEvent = {
   /** When it happened in the game, in Unix milliseconds. */
   readonly at: number;
   /** What happened. */
-  readonly type: "mission_selected" | "mission_loading" | "mission_started" | "mission_ended";
+  readonly type: "mission_selected" | "mission_loading" | "mission_started" | "mission_ended" | "mission_left";
   /** The mission then. */
   readonly mission: WarframeMission;
 } | {
@@ -1347,8 +1402,8 @@ export interface WarframeReward {
 
 /** One reward table of a node. */
 export interface WarframeRewardTable {
-  /** `mission`, `caches` or `extra`. */
-  readonly kind: "mission" | "caches" | "extra";
+  /** `mission`, `caches`, `extra`, or `round` (what each round of the Circuit gives). */
+  readonly kind: "mission" | "caches" | "extra" | "round";
   /** The rotation, or `null` for a table without rotations. */
   readonly rotation: "A" | "B" | "C" | null;
   /** The items, the rarest first (equal chances by English name), at most `MAX_WARFRAME_REWARD_ITEMS`. */
@@ -1357,8 +1412,8 @@ export interface WarframeRewardTable {
 
 /** What a mission can reward. */
 export interface WarframeRewards {
-  /** Whose tables: `node`, or the tables of their own that replace a node's: `arbitration` (every Arbitration's), `nightmare` (a Nightmare mission's reward, once, the rotation of its planet), `sortie` (a Sortie's, after its third mission). */
-  readonly source: "node" | "arbitration" | "sortie" | "nightmare";
+  /** Whose tables: `node`, or the tables of their own that replace a node's: `arbitration` (every Arbitration's), `nightmare` (a Nightmare mission's reward, once, the rotation of its planet), `sortie` (a Sortie's, after its third mission), `circuit` (the Circuit's round, without rotations). */
+  readonly source: "node" | "arbitration" | "sortie" | "nightmare" | "circuit";
   /** The tables, at most `MAX_WARFRAME_REWARD_TABLES`. Source: Digital Extremes' drop tables, no guarantees. */
   readonly tables: ReadonlyArray<WarframeRewardTable>;
 }
@@ -1373,6 +1428,8 @@ export interface WarframeWorldMission {
   readonly type: WarframeName | null;
   /** The condition of a Sortie mission; `null` otherwise. */
   readonly modifier: WarframeName | null;
+  /** `true` when the game replaces this mission's published type: `type` is `null` until the mission loads in this session, then the type the game chose. */
+  readonly typeAtLoading: boolean;
 }
 
 /** The cycle of an open world. */
@@ -1406,6 +1463,17 @@ export interface WarframeWorld {
     readonly endsAt: number;
     /** Its missions, in order. */
     readonly missions: ReadonlyArray<WarframeWorldMission>;
+    /** The Archon Shard it gives; whether it is a Tauforged one is drawn at the reward and never known before. `null` for an Archon PlayerVox OverCrow does not know. */
+    readonly shard: {
+      /** `azure`, `crimson` or `amber`. */
+      readonly id: "azure" | "crimson" | "amber";
+      /** Its name in the game's language. */
+      readonly name: string;
+      /** `asset:` handle of its image, 48 px square; as `WarframeReward.icon`. */
+      readonly icon: AssetHandle | null;
+      /** As `WarframeReward.iconPending`. */
+      readonly iconPending: boolean;
+    } | null;
   } | null;
   /** The open Void Fissures, the soonest to close first, at most `MAX_WARFRAME_FISSURES`. */
   readonly fissures: ReadonlyArray<{
@@ -1455,6 +1523,33 @@ export interface WarframeWorld {
     readonly normal: ReadonlyArray<WarframeName>;
     /** The Steel Path rewards of the week. */
     readonly steelPath: ReadonlyArray<WarframeName>;
+    /** What the player picked for the week; empty while this session of the game did not show it. */
+    readonly picked: {
+      /** The IDs of `normal` the player picked, as this session of the game showed it. */
+      readonly normal: ReadonlyArray<string>;
+      /** The IDs of `steelPath` the player picked, as this session of the game showed it. */
+      readonly steelPath: ReadonlyArray<string>;
+    };
+  } | null;
+  /** Nightwave's current season, when the world state gives it. */
+  readonly nightwave: {
+    /** When the season ends. */
+    readonly endsAt: number;
+    /** The active challenges, daily ones first, at most `MAX_WARFRAME_NIGHTWAVE`. */
+    readonly challenges: ReadonlyArray<{
+      /** Our ID of the challenge, stable in a season. */
+      readonly id: string;
+      /** Its name in the game's language. */
+      readonly name: string;
+      /** `daily`, `weekly` or `elite`. */
+      readonly kind: "daily" | "weekly" | "elite";
+      /** The standing it gives. */
+      readonly standing: number;
+      /** When it ends. */
+      readonly endsAt: number;
+      /** `true` when the game showed progress on it in this session; it never says that one is complete. */
+      readonly progressed: boolean;
+    }>;
   } | null;
 }
 

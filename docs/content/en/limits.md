@@ -232,6 +232,8 @@ see [limit constants](sdk.md#limit-constants).
 | `MAX_WARFRAME_REWARD_TABLES` | 9 | Reward tables of one node: its own, caches and extra, by rotation. |
 | `MAX_WARFRAME_REWARD_ITEMS` | 64 | Items of one reward table, the rarest kept. |
 | `MAX_WARFRAME_EARNED` | 64 | Rotations a mission earned listed, the latest; its totals count them all. |
+| `MAX_WARFRAME_NIGHTWAVE` | 16 | Nightwave challenges of the world, the active ones. |
+| `MAX_WARFRAME_RELIC_ITEMS` | 6 | Items of a relic. |
 
 ### Notes, reviews and chat
 

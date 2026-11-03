@@ -234,6 +234,8 @@ que la logique peut lire sont aussi des constantes du SDK : voir
 | `MAX_WARFRAME_REWARD_TABLES` | 9 | Tables de butin d’un nœud : la sienne, les caches et la table en plus, par rotation. |
 | `MAX_WARFRAME_REWARD_ITEMS` | 64 | Objets d’une table de butin, les plus rares gardés. |
 | `MAX_WARFRAME_EARNED` | 64 | Rotations obtenues par une mission listées, les plus récentes ; ses totaux les comptent toutes. |
+| `MAX_WARFRAME_NIGHTWAVE` | 16 | Défis des Ondes Nocturnes du monde, ceux en cours. |
+| `MAX_WARFRAME_RELIC_ITEMS` | 6 | Objets d’une relique. |
 
 ### Notes, avis et chat
 

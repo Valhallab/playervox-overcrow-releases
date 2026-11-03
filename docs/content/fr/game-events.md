@@ -171,7 +171,8 @@ La dernière mission de la session.
 | `state` | `selected` (choisie sur la carte stellaire), `loading`, `in_progress` ou `ended`. |
 | `node` | Le nœud : `{ id, name }`. |
 | `planet` | Sa [planète ou sa région](#planètes-et-régions). |
-| `type` | Le [type de mission](#types-de-mission) ; `null` pour un type absent de la liste. |
+| `type` | Le [type de mission](#types-de-mission) ; `null` pour un type absent de la liste, et jusqu’au chargement quand `typeAtLoading` vaut `true`. |
+| `typeAtLoading` | `true` quand le jeu remplace le type que l’état du monde publie pour ce nœud (une mission de Sortie dont le type publié n’existe pas sur le décor du nœud) : `type` reste `null` jusqu’au chargement, puis vaut le type choisi par le jeu. N’affichez aucun type d’ici là. |
 | `faction` | La [faction](#factions) ennemie. |
 | `enemyLevel` | `{ min, max }` : les niveaux des ennemis. À la sélection, ceux du nœud (plus 100 sur la Route de l’Acier) ; ceux d’une mission Cauchemar, d’Arbitrage, d’Alerte ou de Liche Kuva valent `null` jusqu’au chargement, puis ceux du jeu. |
 | `fissure` | L’[ère](#ères-des-fissures-du-néant) d’une mission de Fissure du Néant, ou `null`. |
@@ -180,9 +181,39 @@ La dernière mission de la session.
 | `result` | `succeeded`, `failed` ou `aborted` ; `null` avant la fin, ou quand Warframe ne l’a pas dit. |
 | `durationSeconds` | Du début de la partie à la fin, en secondes, à la milliseconde près. |
 | `earned` | Les rotations obtenues, `{ rotations, totals }` comme dans [`info.progress`](#infoprogress), pour un type à rotations ; `null` sinon. Gardées après la fin, pour un récapitulatif. |
-| `credits` | Les crédits que compte l’écran de fin ; `null` avant la fin, ou quand le jeu ne le dit pas (mission abandonnée). |
+| `credits` | La prime de fin de mission en crédits, telle que l’écran de fin la verse : pas les crédits ramassés pendant la mission. Nommez-la ainsi (« Prime de fin »). `null` avant la fin, ou quand le jeu ne le dit pas (mission abandonnée). |
+| `relic` | La relique que le joueur a équipée pour une Fissure du Néant, dès que le jeu demande de la confirmer, gardée sur la mission terminée ; `null` sinon. Voir ci-dessous. |
 | `rewards` | Ce que la mission peut rapporter, pour un widget qui suit `warframe.rewards` ([butin](#butin-warframerewards)) ; `null` sinon. |
 | `rewardsPending` | `true` tant que `rewards` vaut `null` pour le moment : la table qui s’applique n’est pas encore connue. `false` sinon. |
+
+`relic` vaut `{ id, name, era, refinement, icon, iconPending, items,
+reward }` :
+
+- `name` dans la langue du jeu, `id` le nom anglais en `snake_case`
+  (`meso_f5_relic`), `era` l’[ère](#ères-des-fissures-du-néant).
+- `refinement` : `intact`, `exceptional`, `flawless` ou `radiant`, nommé
+  dans la langue du jeu ([glossaire](#glossaire)) ; `null` quand les mots
+  du jeu ne le disent pas.
+- `items` : ses six objets, le plus rare d’abord, chacun `{ id, name,
+  quantity, rarity, chance, icon, iconPending, category }` : `rarity`
+  vaut `common`, `uncommon` ou `rare` ; `chance`, la chance au raffinement
+  de la relique, de 0 à 1, `null` quand le raffinement n’est pas connu
+  (affichez alors la rareté). Source : les tables de butin de Digital
+  Extremes, comme pour le [butin](#butin-warframerewards).
+- `reward` : à la fin, l’objet qu’a donné la relique du joueur, l’un des
+  `items` ; `null` avant. Warframe n’écrit pas quelle relique de l’escouade
+  le joueur a choisie : présentez-le comme « Votre relique : … », jamais
+  comme obtenu.
+- `icon`, `iconPending` : l’image de la relique pour son raffinement,
+  comme pour un objet du butin.
+
+Un monde ouvert entré par la porte de son hub (les Plaines d’Eidolon, la
+Vallée Orbis, le Puy de Cambion) est une mission `in_progress`, de type
+`free_roam`, avec sa faction et les niveaux des ennemis, comme quand on le
+choisit sur la carte stellaire. Quand le joueur le quitte (retour au hub,
+au vaisseau ou une autre mission), `mission_left` arrive avec lui et
+`info.mission` passe à `null` : un monde ouvert n’a ni fin ni
+récapitulatif.
 
 `mission_ended` arrive avec les crédits de l’écran de fin, écrits un
 instant après la fin : au plus 10 secondes de jeu plus tard, et sans eux
@@ -235,16 +266,19 @@ Chaque chasse :
 | --- | --- |
 | `updatedAt` | Quand PlayerVox OverCrow l’a lu pour la dernière fois, en millisecondes Unix. |
 | `sortie` | La Sortie du jour, `{ boss, faction, endsAt, missions }`, ou `null`. |
-| `archonHunt` | La Chasse aux Archontes de la semaine, `{ boss, endsAt, missions }`, ou `null`. |
+| `archonHunt` | La Chasse aux Archontes de la semaine, `{ boss, endsAt, missions, shard }`, ou `null`. `shard` est le Fragment d’Archonte qu’elle donne, `{ id, name, icon, iconPending }` : `id` vaut `azure`, `crimson` ou `amber`, `name` dans la langue du jeu, `icon` son image comme pour un objet du butin ; `null` pour un Archonte que PlayerVox OverCrow ne connaît pas. Qu’il soit amélioré se tire à la récompense et n’est jamais connu avant. |
 | `fissures` | Les Fissures du Néant ouvertes, les plus proches de leur fermeture d’abord, au plus 64, chacune `{ node, planet, type, era, steelPath, voidStorm, endsAt }`. `voidStorm` est une Tempête du Néant (Railjack). |
 | `cycles` | `{ cetus, vallis, cambion }`, chacun `{ state, endsAt }` : le jour ou la nuit à Cetus et sur les Plaines, le chaud ou le froid dans la Vallée Orbis, Fass ou Vome dans le Puy de Cambion ([états des cycles](#états-des-cycles)) ; `null` pour un cycle que PlayerVox OverCrow ne peut pas connaître. |
 | `resets` | `{ daily, weekly }` : la prochaine réinitialisation quotidienne (00:00 UTC) et hebdomadaire (lundi 00:00 UTC), en millisecondes Unix. |
 | `voidTrader` | La prochaine visite de Baro Ki’Teer, ou celle en cours, `{ arrivesAt, leavesAt, relay }`, ou `null`. Ce qu’il vend n’est pas donné. |
-| `circuit` | Les récompenses du Circuit de la semaine, `{ normal, steelPath }`, quand l’état du monde les donne ; `null` sinon. |
+| `circuit` | Les récompenses du Circuit de la semaine, `{ normal, steelPath, picked }`, quand l’état du monde les donne ; `null` sinon. `picked` vaut `{ normal, steelPath }` : les ID que le joueur a choisis pour la semaine (une Warframe, deux adaptateurs Incarnon Genesis), tels que cette session du jeu les a montrés ; vide d’ici là. Le palier atteint n’est pas donné. |
+| `nightwave` | La saison en cours des Ondes Nocturnes, `{ endsAt, challenges }`, ou `null`. Chaque défi, ceux du jour d’abord (au plus 16), vaut `{ id, name, kind, standing, endsAt, progressed }` : `kind` vaut `daily`, `weekly` ou `elite` ; `progressed` vaut `true` quand le jeu a montré une progression du défi dans cette session. Warframe n’écrit jamais qu’un défi est terminé : laissez le joueur le cocher. |
 
 Les missions de la Sortie et de la Chasse aux Archontes sont
-`{ node, planet, type, modifier }`, dans l’ordre : `modifier` est la
-condition d’une mission de Sortie, `null` dans la Chasse aux Archontes.
+`{ node, planet, type, modifier, typeAtLoading }`, dans l’ordre :
+`modifier` est la condition d’une mission de Sortie, `null` dans la Chasse
+aux Archontes ; `typeAtLoading` vaut `true` quand le jeu remplace le type
+publié, et `type` vaut alors `null` jusqu’au chargement de cette mission.
 
 ### Butin (`warframe.rewards`)
 
@@ -253,8 +287,8 @@ choisie ou en cours peut rapporter, par table et par rotation, jamais
 d’après une table qui n’est pas la sienne :
 
 ```text
-{ source: "node" | "arbitration" | "nightmare" | "sortie";
-  tables: { kind: "mission" | "caches" | "extra";
+{ source: "node" | "arbitration" | "nightmare" | "sortie" | "circuit";
+  tables: { kind: "mission" | "caches" | "extra" | "round";
             rotation: "A" | "B" | "C" | null;
             items: { id: string; name: string; quantity: number; chance: number;
                      icon: string | null; iconPending: boolean; category: string }[] }[] }
@@ -268,10 +302,11 @@ d’après une table qui n’est pas la sienne :
   | `arbitration` | Celles de tous les Arbitrages, A, B et C, à la place de celles du nœud. | « Butin d’Arbitrage » |
   | `nightmare` | La récompense d’une mission Cauchemar : la rotation de sa planète (les trois pour un Sauvetage, selon les objectifs), donnée une fois par mission. | « Mod Cauchemar, une fois » |
   | `sortie` | La récompense de la Sortie, sans rotation, donnée après sa troisième mission. | « Récompense de la Sortie, après la 3e mission » |
+  | `circuit` | Le Circuit : ce que donne chaque manche (`kind` `round`), sans rotations. Les paliers de la semaine ne sont pas dans les tables de butin. | « Chaque manche » |
 
 - `null`, avec `rewardsPending` à `false` : pas de table pour cette
   mission : un nœud qui n’en a pas (Extermination, mondes ouverts,
-  événements, Circuit), une Chasse aux Archontes, une Cellule de Netra ou
+  événements), une Chasse aux Archontes, une Cellule de Netra ou
   une Alerte (Digital Extremes n’en publie pas).
 - `null`, avec `rewardsPending` à `true` : pas encore connu. Un nœud de la
   Sortie ou de la Chasse aux Archontes du jour, choisi, se départage au
@@ -280,12 +315,12 @@ d’après une table qui n’est pas la sienne :
 
 - `kind` : `mission`, la table de la mission ; `caches`, les caches d'un
   nœud de Sabotage, d'Extermination ou de Ruche ; `extra`, une table de
-  plus du nœud.
+  plus du nœud ; `round`, ce que donne chaque manche du Circuit.
 - `rotation` : `null` pour une table sans rotation.
 - Dans une mission de Fissure du Néant, le butin du nœud reste donné et la
   relique s'ouvre en plus : `rewards` reste les tables du nœud, même
-  quand `fissure` n'est pas `null`. Ce que donne une relique n'est pas
-  listé.
+  quand `fissure` n'est pas `null`. Ce que donne la relique équipée est
+  dans [`info.mission.relic`](#infomission).
 - `items`, **le plus rare d'abord** : de la `chance` la plus faible à la
   plus forte, à chance égale par nom anglais, le même ordre dans toutes
   les langues. Une table garde au plus ses 64 objets les plus rares.
@@ -320,7 +355,7 @@ d’après une table qui n’est pas la sienne :
 
 | Type | Fonctionnalité | Porte |
 | --- | --- | --- |
-| `mission_selected`, `mission_loading`, `mission_started`, `mission_ended` | `warframe.mission` | `mission` |
+| `mission_selected`, `mission_loading`, `mission_started`, `mission_ended`, `mission_left` | `warframe.mission` | `mission` |
 | `wave_started`, `reward_given` | `warframe.progress` | `progress` |
 | `night_started`, `day_started` | `warframe.eidolons` | rien de plus |
 | `eidolon_spawned`, `weakpoint_destroyed`, `eidolon_captured`, `eidolon_killed`, `eidolon_fled` | `warframe.eidolons` | `eidolon` : la chasse |
@@ -348,7 +383,8 @@ calcule :
   la chasse ; `null` quand l’ordre ne permet pas de le savoir.
 - **L’étape d’une mission de Sortie ou de Chasse aux Archontes**, seulement
   pour un widget qui suit aussi `warframe.world` ; sinon `stage` vaut
-  `null`.
+  `null`. L’étape que le jeu écrit quand il l’écrit, sinon le rang du nœud
+  dans la liste du jour.
 - **Les réinitialisations**, à 00:00 UTC chaque jour et le lundi.
 
 ### Rotations
@@ -385,9 +421,10 @@ Rewards et Arbitrations du wiki officiel.
 
 PlayerVox OverCrow ne donne pas les excavatrices d’une Excavation, les
 compteurs d’ennemis tués, la progression des missions de Capture, de
-Défense Mobile et d’Espionnage, la progression du Circuit, les reliques,
-Nightwave, ce que vend Baro Ki’Teer, ni quel objet une récompense a donné
-(Warframe ne l’écrit pas). Pour ces missions, la mission elle-même est
+Défense Mobile et d’Espionnage, le palier atteint au Circuit, la fin d’un
+défi des Ondes Nocturnes, ce que vend Baro Ki’Teer, quel objet une
+récompense a donné, ni quelle relique de l’escouade le joueur a choisie
+(Warframe ne les écrit pas). Pour ces missions, la mission elle-même est
 donnée, et `progress` garde des compteurs `null` et une `rotation`
 `null`.
 
@@ -436,6 +473,7 @@ langue du jeu, quelles que soient les fonctionnalités que suit le widget :
 | `faction` | les [factions](#factions) |
 | `cycle` | les [états des cycles](#états-des-cycles) |
 | `term` | `reactant`, `relic`, `credits` |
+| `refinement` | `intact`, `exceptional`, `flawless`, `radiant` : les raffinements d’une relique |
 | `icons` | `damage` : le symbole de chaque type de dégâts, par les mêmes ID |
 
 `glossary.icons.damage.<id>` est le symbole d'un type de dégâts, tiré du
@@ -452,7 +490,8 @@ Noms anglais : les types de dégâts comme leurs ID (Impact, Puncture,
 Slash, Heat, Cold, Electricity, Toxin, Blast, Corrosive, Gas, Magnetic,
 Radiation, Viral) ; les activités Sortie, Archon Hunt, Netracells, The
 Circuit, Nightwave, Baro Ki'Teer, Void Fissure, Arbitration, The Steel
-Path, Void Storm ; les termes Reactant, Relic, Credits.
+Path, Void Storm ; les termes Reactant, Relic, Credits ; les raffinements
+Intact, Exceptional, Flawless, Radiant.
 
 #### Planètes et régions
 

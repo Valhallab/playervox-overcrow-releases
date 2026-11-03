@@ -1227,6 +1227,18 @@ pub const MAX_WARFRAME_REWARD_ITEMS: Limit = fixed(
     Unit::Count,
     "Items of one reward table, the rarest kept.",
 );
+pub const MAX_WARFRAME_NIGHTWAVE: Limit = fixed(
+    "MAX_WARFRAME_NIGHTWAVE",
+    16,
+    Unit::Count,
+    "Nightwave challenges of the world, the active ones.",
+);
+pub const MAX_WARFRAME_RELIC_ITEMS: Limit = fixed(
+    "MAX_WARFRAME_RELIC_ITEMS",
+    6,
+    Unit::Count,
+    "Items of a relic.",
+);
 pub const MAX_WARFRAME_FISSURES: Limit = fixed(
     "MAX_WARFRAME_FISSURES",
     64,
@@ -1562,6 +1574,8 @@ pub const ALL: &[&Limit] = &[
     &MAX_WARFRAME_EARNED,
     &MAX_WARFRAME_REWARD_TABLES,
     &MAX_WARFRAME_REWARD_ITEMS,
+    &MAX_WARFRAME_NIGHTWAVE,
+    &MAX_WARFRAME_RELIC_ITEMS,
     &MAX_NOTES,
     &MAX_NOTE_TITLE_BYTES,
     &MAX_NOTE_BODY_BYTES,

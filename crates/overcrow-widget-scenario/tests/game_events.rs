@@ -98,7 +98,9 @@ fn a_session_is_played_without_writing_a_line() {
             "rewards": null,
             "rewardsPending": false,
             "earned": null,
-            "credits": null
+            "credits": null,
+            "typeAtLoading": false,
+            "relic": null
         })
     );
     assert_eq!(first["info"]["progress"], Value::Null);

@@ -29,7 +29,14 @@ game events, Warframe first:
   computer: each reward's `icon` (`asset:` handle, from Digital Extremes'
   public export), `iconPending` and `category`, and the damage types'
   symbols of the official wiki in `glossary.icons.damage`
-  (`WarframeGlossaryIcons`).
+  (`WarframeGlossaryIcons`). A Void Fissure mission's equipped relic, its
+  refinement, its six items with the chances of that refinement and what
+  the player's own relic gave (`WarframeRelic`, `WarframeRelicItem`); a
+  mission type known only at loading (`typeAtLoading`); an open world
+  entered by its hub's gate as a mission, and `mission_left` when the
+  player leaves it; the Circuit's round table (`source` `circuit`, `kind`
+  `round`) and the week's picks; the Archon Hunt's shard; Nightwave's
+  active challenges; and the glossary's relic refinements.
 - `gameEvents.subscribe` and the `GameEvent` type are removed, and
   `gameEvents` no longer takes `overcrow.game.<name>.v1` names. No release
   of PlayerVox OverCrow ever sent such an event, so no widget could rely on

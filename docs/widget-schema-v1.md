@@ -209,6 +209,8 @@ Lengths are logical pixels at 100 % content scale. Text limits count UTF-8 bytes
 | `MAX_WARFRAME_EARNED` | 64 | fixed | Rotations a mission earned listed, the latest; its totals count them all. |
 | `MAX_WARFRAME_REWARD_TABLES` | 9 | fixed | Reward tables of one node: its own, caches and extra, by rotation. |
 | `MAX_WARFRAME_REWARD_ITEMS` | 64 | fixed | Items of one reward table, the rarest kept. |
+| `MAX_WARFRAME_NIGHTWAVE` | 16 | fixed | Nightwave challenges of the world, the active ones. |
+| `MAX_WARFRAME_RELIC_ITEMS` | 6 | fixed | Items of a relic. |
 | `MAX_NOTES` | 8 | fixed | Notes in the user's notes document; `notes.create` fails beyond it. |
 | `MAX_NOTE_TITLE_BYTES` | 96 bytes | fixed | Note title, non-empty after trimming. |
 | `MAX_NOTE_BODY_BYTES` | 8 KiB | fixed | Note body. |
@@ -1481,7 +1483,7 @@ Warframe's game events, for the features the widget lists. `{ playing, session, 
 
 #### `WarframeGlossary`
 
-Words of the game a widget shows on their own, in the game's language, so that it never writes one itself. `{ language, damage, era, fissure, activity, place, eidolon, faction, cycle, term, icons }`
+Words of the game a widget shows on their own, in the game's language, so that it never writes one itself. `{ language, damage, era, fissure, activity, place, eidolon, faction, cycle, term, refinement, icons }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
@@ -1569,6 +1571,11 @@ Words of the game a widget shows on their own, in the game's language, so that i
 | `term.reactant` | text | Its name in the language of `glossary.language`. |
 | `term.relic` | text | Its name in the language of `glossary.language`. |
 | `term.credits` | text | Its name in the language of `glossary.language`. |
+| `refinement` | `{ intact, exceptional, flawless, radiant }` | A relic's refinements. |
+| `refinement.intact` | text | Its name in the language of `glossary.language`. |
+| `refinement.exceptional` | text | Its name in the language of `glossary.language`. |
+| `refinement.flawless` | text | Its name in the language of `glossary.language`. |
+| `refinement.radiant` | text | Its name in the language of `glossary.language`. |
 | `icons` | `WarframeGlossaryIcons` | The game's symbols, as images. |
 
 #### `WarframeGlossaryIcons`
@@ -1643,7 +1650,7 @@ Where the player is. `{ kind, place, since }`
 
 #### `WarframeMission`
 
-A Warframe mission. `{ state, node, planet, type, faction, enemyLevel, fissure, modifiers, selectedAt, loadingAt, startedAt, endedAt, result, durationSeconds, rewards, rewardsPending, earned, credits }`
+A Warframe mission. `{ state, node, planet, type, faction, enemyLevel, fissure, modifiers, selectedAt, loadingAt, startedAt, endedAt, result, durationSeconds, rewards, rewardsPending, earned, credits, typeAtLoading, relic }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
@@ -1666,7 +1673,39 @@ A Warframe mission. `{ state, node, planet, type, faction, enemyLevel, fissure, 
 | `rewards` | `WarframeRewards` or `null` | What the mission can reward, for a widget that follows `warframe.rewards`; `null` otherwise, for a node without a reward table, or for a mission whose table is not public or not known yet. |
 | `rewardsPending` | boolean | `true` while `rewards` is `null` for now: which table applies is not known yet (a node of the day's Sortie or Archon Hunt, chosen but not loaded; the world or the drop tables not read yet). `false` otherwise, `rewards` given or not. |
 | `earned` | `WarframeEarned` or `null` | The rotations earned from the start, for a type with rotations; `null` otherwise or before the start. |
-| `credits` | integer or `null` | The credits its end screen counts; `null` before the end, or when the game does not say (an aborted mission). |
+| `credits` | integer or `null` | The mission's end bonus in credits, as its end screen pays it; not the credits picked up during the mission. `null` before the end, or when the game does not say (an aborted mission). |
+| `typeAtLoading` | boolean | `true` when the game replaces the type the world state publishes for this node: `type` stays `null` until the mission loads, then is the type the game chose. `false` otherwise. |
+| `relic` | `WarframeRelic` or `null` | The relic the player equipped for a Void Fissure, once the game asked to confirm it; kept on the ended mission. `null` otherwise. |
+
+#### `WarframeRelic`
+
+A relic equipped for a Void Fissure. `{ id, name, era, refinement, icon, iconPending, items, reward }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `id` | text | Our ID: the relic's English name in `snake_case` (`meso_f5_relic`). |
+| `name` | text | Its name in the game's language, or in English when PlayerVox OverCrow has no translation yet. |
+| `era` | `WarframeName` | Its era. |
+| `refinement` | `WarframeName` or `null` | Its refinement (`intact`, `exceptional`, `flawless`, `radiant`); `null` when the game's words do not tell it (then no item has a chance). |
+| `icon` | `asset:` handle or `null` | `asset:` handle of the relic's image for its refinement, 48 px square; as `WarframeReward.icon`. |
+| `iconPending` | boolean | As `WarframeReward.iconPending`. |
+| `items` | list of `WarframeRelicItem` | What it can give, the rarest first, at most `MAX_WARFRAME_RELIC_ITEMS`. Source: Digital Extremes' drop tables, no guarantees. |
+| `reward` | `WarframeRelicItem` or `null` | What the player's own relic gave at the end; not what the player chose among the squad's relics, which the game does not say. `null` before. |
+
+#### `WarframeRelicItem`
+
+An item of a relic. `{ id, name, quantity, rarity, chance, icon, iconPending, category }`
+
+| Member | Shape | Meaning |
+| --- | --- | --- |
+| `id` | text | Our ID: the item's English name in `snake_case`. |
+| `name` | text | Its name in the game's language, or in English when PlayerVox OverCrow has no translation yet. |
+| `quantity` | integer | How many at once. |
+| `rarity` | `common` \| `uncommon` \| `rare` | `common`, `uncommon` or `rare`. |
+| `chance` | number or `null` | The chance of the relic's refinement, from 0 to 1; `null` when the refinement is not known. |
+| `icon` | `asset:` handle or `null` | As `WarframeReward.icon`. |
+| `iconPending` | boolean | As `WarframeReward.iconPending`. |
+| `category` | `relic` \| `mod` \| `resource` \| `blueprint` \| `warframe_part` \| `weapon_part` \| `arcane` \| `currency` \| `other` | As `WarframeReward.category`. |
 
 #### `WarframeModifier`
 
@@ -1747,7 +1786,7 @@ One Warframe event; its type tells which state it carries. `{ seq, at, type, mis
 | --- | --- | --- |
 | `seq` | integer | Order of the event in the subscription, from 1. |
 | `at` | integer | When it happened in the game, in Unix milliseconds. |
-| `type` | `mission_selected` \| `mission_loading` \| `mission_started` \| `mission_ended` | What happened. |
+| `type` | `mission_selected` \| `mission_loading` \| `mission_started` \| `mission_ended` \| `mission_left` | What happened. |
 | `mission` | `WarframeMission` | The mission then. |
 
 | Member | Shape | Meaning |
@@ -1804,7 +1843,7 @@ One reward table of a node. `{ kind, rotation, items }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
-| `kind` | `mission` \| `caches` \| `extra` | `mission`, `caches` or `extra`. |
+| `kind` | `mission` \| `caches` \| `extra` \| `round` | `mission`, `caches`, `extra`, or `round` (what each round of the Circuit gives). |
 | `rotation` | `A` \| `B` \| `C` or `null` | The rotation, or `null` for a table without rotations. |
 | `items` | list of `WarframeReward` | The items, the rarest first (equal chances by English name), at most `MAX_WARFRAME_REWARD_ITEMS`. |
 
@@ -1814,12 +1853,12 @@ What a mission can reward. `{ source, tables }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
-| `source` | `node` \| `arbitration` \| `sortie` \| `nightmare` | Whose tables: `node`, or the tables of their own that replace a node's: `arbitration` (every Arbitration's), `nightmare` (a Nightmare mission's reward, once, the rotation of its planet), `sortie` (a Sortie's, after its third mission). |
+| `source` | `node` \| `arbitration` \| `sortie` \| `nightmare` \| `circuit` | Whose tables: `node`, or the tables of their own that replace a node's: `arbitration` (every Arbitration's), `nightmare` (a Nightmare mission's reward, once, the rotation of its planet), `sortie` (a Sortie's, after its third mission), `circuit` (the Circuit's round, without rotations). |
 | `tables` | list of `WarframeRewardTable` | The tables, at most `MAX_WARFRAME_REWARD_TABLES`. Source: Digital Extremes' drop tables, no guarantees. |
 
 #### `WarframeWorldMission`
 
-A mission of the Sortie or the Archon Hunt. `{ node, planet, type, modifier }`
+A mission of the Sortie or the Archon Hunt. `{ node, planet, type, modifier, typeAtLoading }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
@@ -1827,6 +1866,7 @@ A mission of the Sortie or the Archon Hunt. `{ node, planet, type, modifier }`
 | `planet` | `WarframeName` or `null` | Its planet or region. |
 | `type` | `WarframeName` or `null` | The mission type. |
 | `modifier` | `WarframeName` or `null` | The condition of a Sortie mission; `null` otherwise. |
+| `typeAtLoading` | boolean | `true` when the game replaces this mission's published type: `type` is `null` until the mission loads in this session, then the type the game chose. |
 
 #### `WarframeCycle`
 
@@ -1839,7 +1879,7 @@ The cycle of an open world. `{ state, endsAt }`
 
 #### `WarframeWorld`
 
-Warframe's world of the day and the week. `{ updatedAt, sortie, archonHunt, fissures, cycles, resets, voidTrader, circuit }`
+Warframe's world of the day and the week. `{ updatedAt, sortie, archonHunt, fissures, cycles, resets, voidTrader, circuit, nightwave }`
 
 | Member | Shape | Meaning |
 | --- | --- | --- |
@@ -1849,10 +1889,15 @@ Warframe's world of the day and the week. `{ updatedAt, sortie, archonHunt, fiss
 | `sortie.faction` | `WarframeName` or `null` | Its faction. |
 | `sortie.endsAt` | integer | When it ends. |
 | `sortie.missions` | list of `WarframeWorldMission` | Its missions, in order. |
-| `archonHunt` | `{ boss, endsAt, missions }` or `null` | The Archon Hunt of the week. |
+| `archonHunt` | `{ boss, endsAt, missions, shard }` or `null` | The Archon Hunt of the week. |
 | `archonHunt.boss` | `WarframeName` | The Archon. |
 | `archonHunt.endsAt` | integer | When it ends. |
 | `archonHunt.missions` | list of `WarframeWorldMission` | Its missions, in order. |
+| `archonHunt.shard` | `{ id, name, icon, iconPending }` or `null` | The Archon Shard it gives; whether it is a Tauforged one is drawn at the reward and never known before. `null` for an Archon PlayerVox OverCrow does not know. |
+| `archonHunt.shard.id` | `azure` \| `crimson` \| `amber` | `azure`, `crimson` or `amber`. |
+| `archonHunt.shard.name` | text | Its name in the game's language. |
+| `archonHunt.shard.icon` | `asset:` handle or `null` | `asset:` handle of its image, 48 px square; as `WarframeReward.icon`. |
+| `archonHunt.shard.iconPending` | boolean | As `WarframeReward.iconPending`. |
 | `fissures` | list of `{ node, planet, type, era, steelPath, voidStorm, endsAt }` | The open Void Fissures, the soonest to close first, at most `MAX_WARFRAME_FISSURES`. |
 | `cycles` | `{ cetus, vallis, cambion }` | The open worlds' cycles; `null` for one PlayerVox OverCrow cannot tell. |
 | `cycles.cetus` | `WarframeCycle` or `null` | Day and night at Cetus and on the Plains. |
@@ -1865,9 +1910,15 @@ Warframe's world of the day and the week. `{ updatedAt, sortie, archonHunt, fiss
 | `voidTrader.arrivesAt` | integer | When he arrives. |
 | `voidTrader.leavesAt` | integer | When he leaves. |
 | `voidTrader.relay` | `WarframeName` or `null` | Where he comes. |
-| `circuit` | `{ normal, steelPath }` or `null` | The Circuit's rewards of the week, when the world state gives them. |
+| `circuit` | `{ normal, steelPath, picked }` or `null` | The Circuit's rewards of the week, when the world state gives them. |
 | `circuit.normal` | list of `WarframeName` | The rewards of the week. |
 | `circuit.steelPath` | list of `WarframeName` | The Steel Path rewards of the week. |
+| `circuit.picked` | `{ normal, steelPath }` | What the player picked for the week; empty while this session of the game did not show it. |
+| `circuit.picked.normal` | list of text | The IDs of `normal` the player picked, as this session of the game showed it. |
+| `circuit.picked.steelPath` | list of text | The IDs of `steelPath` the player picked, as this session of the game showed it. |
+| `nightwave` | `{ endsAt, challenges }` or `null` | Nightwave's current season, when the world state gives it. |
+| `nightwave.endsAt` | integer | When the season ends. |
+| `nightwave.challenges` | list of `{ id, name, kind, standing, endsAt, progressed }` | The active challenges, daily ones first, at most `MAX_WARFRAME_NIGHTWAVE`. |
 
 Service error codes: `invalid_request`, `permission_denied`, `gesture_required`, `not_connected`, `account_refused`, `review_removed_by_moderation`, `stale_context`, `unavailable`, `busy`, `cancelled`, `quota_exceeded`, `unsupported`, `url_invalid`, `resolve_failed`, `address_denied`, `too_many_addresses`, `peer_mismatch`, `redirect_denied`, `encoding_denied`, `content_type_denied`, `response_metadata_limit`, `request_body_limit`, `response_body_limit`, `image_invalid`, `timeout`, `transport_failed`.
 
