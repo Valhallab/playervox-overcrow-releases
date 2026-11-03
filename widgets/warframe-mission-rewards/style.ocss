@@ -759,3 +759,176 @@
   color: var(--color-text-muted);
   font-weight: 400;
 }
+
+/* The user's size: the panel fills the frame, the tables take what is
+   left and the source stays last. */
+.mission.standard,
+.mission.compact,
+.mission.wide {
+  height: 100%;
+}
+
+.tables {
+  flex-direction: column;
+  gap: var(--space-4);
+  flex-shrink: 0;
+  width: 100%;
+}
+
+/* Interactive: the tables scroll. The host paints its bar over the right
+   edge; 9 px keep the rates 5 px clear of it. */
+.tables-scroll {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-height: 0;
+  padding-right: 9px;
+}
+
+.grow-v {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-height: 0;
+}
+
+.live .grow-v {
+  flex-grow: 0;
+}
+
+/* The equipped relic: its image, its name and its refinement. */
+.relic-head {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--color-border-strong);
+}
+
+.relic-tile {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.relic-img {
+  width: 30px;
+  height: 30px;
+}
+
+.relic-glyph {
+  font-size: 18px;
+  color: var(--color-text-muted);
+}
+
+.relic-text {
+  flex-direction: column;
+  gap: 1px;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.relic-label {
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.relic-line {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.relic-name {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+/* The refinement: a quiet chip, never a state colour. */
+.ref-chip {
+  font-size: var(--font-size-caption);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border-strong);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ref-chip.unknown {
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
+/* The recap: what the player's relic gave, the end bonus. */
+.recap {
+  flex-direction: column;
+  gap: 4px;
+}
+
+.recap-row {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.recap-img {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.recap-ico {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.recap-icon {
+  font-size: 16px;
+  color: var(--color-text-muted);
+}
+
+.recap-text {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.recap-label {
+  color: var(--color-text-muted);
+}
+
+.recap-value {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.recap-value.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* A plain fact, not a warning: quieter than the place above it. */
+.empty-title.soft {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+.empty-icon.soft {
+  font-size: 16px;
+}

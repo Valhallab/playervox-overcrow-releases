@@ -8,10 +8,10 @@
     "fr": "Récompenses de mission"
   },
   "sizing": {
-    "fit": "height",
+    "fit": "none",
     "preferred": {
       "width": 300,
-      "height": 400
+      "height": 520
     },
     "min": {
       "width": 200,
@@ -19,11 +19,11 @@
     },
     "max": {
       "width": 640,
-      "height": 900
+      "height": 1200
     }
   },
   "permissions": {
-    "gameEvents": ["warframe.mission", "warframe.progress", "warframe.rewards"],
+    "gameEvents": ["warframe.mission", "warframe.progress", "warframe.rewards", "warframe.world"],
     "storage": true
   },
   "wrapper": {

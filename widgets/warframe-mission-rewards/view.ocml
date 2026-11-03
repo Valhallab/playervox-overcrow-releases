@@ -30,6 +30,81 @@
   </else-if>
 </component>
 
+<!-- The tables, one under the other: a title, or the equipped relic's
+     block; the rows; "+ n more"; a note of their own. -->
+<component name="sections" props="list">
+  <for each={list} as="sec" key={sec.id}>
+    <box class={sec.cls}>
+      <if test={sec.relic}>
+        <box class="relic-head">
+          <box class="relic-tile">
+            <if test={hasText(sec.img)}>
+              <image class="relic-img" src={sec.img}/>
+            </if>
+            <else-if test={hasText(sec.glyph)}>
+              <icon class="relic-glyph" name={sec.glyph}/>
+            </else-if>
+          </box>
+          <box class="relic-text">
+            <text class="relic-label">{sec.title}</text>
+            <box class="relic-line">
+              <text class="relic-name">{sec.name}</text>
+              <text class={sec.badgeCls}>{sec.badge}</text>
+            </box>
+          </box>
+        </box>
+      </if>
+      <else>
+        <box class="section-head">
+          <text class="section-title">{sec.title}</text>
+          <if test={hasText(sec.got)}>
+            <box class="grow"/>
+            <icon class="got-icon" name="check"/>
+            <text class="got-text">{sec.got}</text>
+          </if>
+        </box>
+      </else>
+      <box class="list">
+        <drops items={sec.rows}/>
+        <for each={sec.fill} as="f" key={f}>
+          <box class="drop filler"><box class="thumb"/><text class="drop-name">&#160;</text></box>
+        </for>
+        <more sec={sec}/>
+        <if test={sec.fillMore}>
+          <text class="more">&#160;</text>
+        </if>
+        <if test={hasText(sec.note)}>
+          <text class="more">{sec.note}</text>
+        </if>
+      </box>
+    </box>
+  </for>
+</component>
+
+<!-- Wide: the rotations side by side, then the other tables. -->
+<component name="tables" props="s">
+  <box class="tables">
+    <if test={s.cols.length > 0}>
+      <box class="cols">
+        <for each={s.cols} as="col" key={col.id}>
+          <box class={colCls(col)}>
+            <box class="col-head">
+              <text class="col-title">{col.title}</text>
+              <if test={col.earned}>
+                <icon class="col-check" name="check"/>
+                <text class="col-got">{col.got}</text>
+              </if>
+            </box>
+            <drops items={col.rows}/>
+            <more sec={col}/>
+          </box>
+        </for>
+      </box>
+    </if>
+    <sections list={s.sections}/>
+  </box>
+</component>
+
 <box class={rootClass()}>
   <if test={layout() == "line"}>
     <box class={hasText(state.s.lineAfter) ? "line after" : "line"} label={lineLabel(state.s, state.now)}>
@@ -130,9 +205,25 @@
       </box>
     </if>
 
+    <if test={state.s.recap.length > 0}>
+      <box class="recap">
+        <for each={state.s.recap} as="r" key={r.id}>
+          <box class="recap-row">
+            <if test={hasText(r.img)}>
+              <image class="recap-img" src={r.img}/>
+            </if>
+            <else>
+              <box class="recap-ico"><icon class="recap-icon" name={r.icon}/></box>
+            </else>
+            <text class="recap-text"><span class="recap-label">{r.label}</span><span class={r.cls}>{r.text}</span></text>
+          </box>
+        </for>
+      </box>
+    </if>
+
     <if test={state.s.empty != null}>
       <box class="empty">
-        <icon class={"empty-icon tone-" + state.s.empty.tone} name={state.s.empty.icon}/>
+        <icon class={"empty-icon tone-" + state.s.empty.tone + " " + state.s.empty.iconCls} name={state.s.empty.icon}/>
         <text class={"empty-title " + state.s.empty.titleCls}>{state.s.empty.title}</text>
         <if test={hasText(state.s.empty.text)}>
           <text class="empty-text">{state.s.empty.text}</text>
@@ -140,46 +231,17 @@
       </box>
     </if>
 
-    <if test={state.s.cols.length > 0}>
-      <box class="cols">
-        <for each={state.s.cols} as="col" key={col.id}>
-          <box class={colCls(col)}>
-            <box class="col-head">
-              <text class="col-title">{col.title}</text>
-              <if test={col.earned}>
-                <icon class="col-check" name="check"/>
-                <text class="col-got">{col.got}</text>
-              </if>
-            </box>
-            <drops items={col.rows}/>
-            <more sec={col}/>
-          </box>
-        </for>
-      </box>
+    <!-- Interactive: every row, in a scroll the host gives a bar. Passive:
+         the rows the height holds. The panel fills the user's frame. -->
+    <if test={state.s.scroll && interactive()}>
+      <scroll class="tables-scroll">
+        <tables s={state.s}/>
+      </scroll>
     </if>
-
-    <for each={state.s.sections} as="sec" key={sec.id}>
-      <box class={sec.cls}>
-        <box class="section-head">
-          <text class="section-title">{sec.title}</text>
-          <if test={hasText(sec.got)}>
-            <box class="grow"/>
-            <icon class="got-icon" name="check"/>
-            <text class="got-text">{sec.got}</text>
-          </if>
-        </box>
-        <box class="list">
-          <drops items={sec.rows}/>
-          <for each={sec.fill} as="f" key={f}>
-            <box class="drop filler"><box class="thumb"/><text class="drop-name">&#160;</text></box>
-          </for>
-          <more sec={sec}/>
-          <if test={sec.fillMore}>
-            <text class="more">&#160;</text>
-          </if>
-        </box>
-      </box>
-    </for>
+    <else-if test={state.s.scroll}>
+      <tables s={state.s}/>
+    </else-if>
+    <box class="grow-v"/>
 
     <if test={hasText(state.s.status)}>
       <box class="status-line">
