@@ -215,9 +215,10 @@ scroll.body {
   font-size: 12px;
 }
 
+/* The columns. Today and This week are spaced by `.gcol`'s gap. */
 .groups {
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .wide .groups {
@@ -350,7 +351,7 @@ scroll.body {
 /* A box per part. */
 .acts {
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .act {
@@ -570,10 +571,6 @@ button.part:focus {
   min-width: 0;
 }
 
-.act-head .hand {
-  margin-top: 0;
-}
-
 /* Every state icon takes the same width: the names stay in one column. */
 .act-head .check-icon {
   margin-top: 0;
@@ -619,14 +616,6 @@ button.part:focus {
 
 .act-head .act-meta {
   font-size: 12px;
-}
-
-.acts {
-  gap: 1px;
-}
-
-.groups {
-  gap: 10px;
 }
 
 .wide .gcol .group {

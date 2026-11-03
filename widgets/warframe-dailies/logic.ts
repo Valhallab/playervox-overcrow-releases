@@ -842,44 +842,69 @@ function nightwaveAct(inputs: Inputs): Built {
   return countedAct("nightwave", now, challenges.map((challenge) => kept(challenge.id)), groups);
 }
 
-// Heights, logical px, for the Passive fold: the box model of style.ocss.
+// Sizes, logical px, for the Passive fold: the box model of style.ocss. Each
+// says the rule it comes from; the style sets no line height, so a line of
+// text counts the height measured on the rendered rows.
 const H = {
-  /** The panel's padding, top and bottom. */
+  /** `.wf` padding: 10px on each side. */
   pad: 20,
-  /** Between the panel's blocks (header, hint, lists, Baro, status, note). */
+  /** `.wf` gap: between the panel's blocks (header, hint, lists, Baro, status, note). */
   gap: 6,
+  /** The header's line: `.left`, 13 px bold. */
   header: 17,
+  /** A line of the hint: `.hint-box .notice-text`, 12 px. */
   hint: 16,
+  /** Before the hint's text: `.hint-box .notice-icon` font-size 12px, then `.hint-box` gap 7px. */
+  hintIcon: 19,
+  /** `.status-text`: one line of caption text. */
   status: 14,
-  /** Baro's line, its rule and padding. */
+  /** Baro's first line, with `.foot` padding-top 4px and border-top 1px. */
   foot: 19,
-  /** Interactive: the note's rule and padding, then each of its lines. */
+  /** Each further line of Baro: `.foot-text`, small text. */
+  footLine: 14,
+  /** Before Baro's text: `.foot-icon` width 12px, then `.foot` gap 6px. */
+  footIcon: 18,
+  /** Interactive: `.note-row` padding-top 4px and border-top 1px, then each line of `.note-text`. */
   noteTop: 5,
   noteLine: 15,
-  /** Between Today and This week. */
+  /** Px per character of the small text (`.foot-text`, `.note-text`): measured 4.9, a little more so that a wrap is not missed. */
+  smallPx: 5.5,
+  /** Between Today and This week: `.gcol` gap is 10px, counted 8 (10 folds the tall week one challenge sooner). */
   sections: 8,
-  /** A section's title, its rule and padding. */
+  /** Between Wide's two columns: `.wide .groups` gap. */
+  columns: 16,
+  /** A section's title line, with `.group-head` padding-bottom 4px and border-bottom 1px. */
   sectionHead: 21,
   /** A second line when its title and reset do not fit one (French, narrow). */
   sectionLine: 14,
-  /** Px per character: the title's capitals, spaced, and the reset's 12 px text. */
+  /** Between the title, the spacer and the reset: `.group-head` gap 6px, twice. */
+  sectionGaps: 12,
+  /** Px per character: the title's spaced capitals (`.section-title`) and the reset's 12 px text (`.reset`). */
   titlePx: 7,
   resetPx: 6,
-  /** An activity's name line, its padding and the gap to the next. */
+  /** An activity's name line: `.act` padding-top 2px, `.act-head` min-height 20px, then `.acts` gap 1px to the next. */
   act: 23,
+  /** `.part` min-height 17px. */
   part: 17,
+  /** A row of cells: `.cells` padding-top 1px, then a cell with its `.cells .part` padding 2px. */
   cells: 21,
+  /** `.sub-title`: its 10 px text and margin-top 2px. */
   subTitle: 15,
+  /** A line of choices: `.choices` min-height 18px. */
   choices: 18,
+  /** `.meta-row` min-height 18px. */
   meta: 18,
+  /** `.more` min-height 17px. */
   more: 17,
+  /** The choices wrap within the body: `.act-body` padding-left 24px. */
+  indent: 24,
   /**
-   * Px per character of the choices' 12 px text: measured 6.3 on the
-   * rendered rows, a little more so that a wrap is not missed, no more so
-   * that a row that fits is not counted twice.
+   * Px per character of the choices' 12 px text (`.choice`): measured 6.3
+   * on the rendered rows, a little more so that a wrap is not missed, no
+   * more so that a row that fits is not counted twice.
    */
   charPx: 6.5,
-  /** A choice's padding and the gap after it. */
+  /** A choice's padding and the gap after it (`.choice.picked` padding 0 6px, `.choices` column-gap 5px), counted 12. */
   choicePad: 12,
 };
 
@@ -889,7 +914,7 @@ function actHeight(act: ActView, width: number): number {
   if (act.meta !== "") height += H.meta;
   if (act.choices.length > 0) {
     // The names wrap within the body's width: count the lines.
-    const room = Math.max(1, width - 24);
+    const room = Math.max(1, width - H.indent);
     let lines = 1;
     let used = 0;
     for (const choice of act.choices) {
@@ -910,15 +935,15 @@ function actHeight(act: ActView, width: number): number {
   return height;
 }
 
-/** Lines of an 11 px line of text (Baro, the note): measured 4.9 px per character, 5.5 counted. */
-const textLines = (value: string, width: number): number => Math.max(1, Math.ceil((value.length * 5.5) / Math.max(1, width)));
+/** Lines of small text (Baro, the note) in a width. */
+const textLines = (value: string, width: number): number => Math.max(1, Math.ceil((value.length * H.smallPx) / Math.max(1, width)));
 
 /** The height of a column of sections. */
 function columnHeight(sections: readonly Section[], width: number): number {
   let height = 0;
   sections.forEach((section, index) => {
     if (index > 0) height += H.sections;
-    const head = section.title.length * H.titlePx + section.reset.length * H.resetPx + 6;
+    const head = section.title.length * H.titlePx + section.reset.length * H.resetPx + H.sectionGaps;
     height += H.sectionHead + (head > width ? H.sectionLine : 0);
     height += section.acts.reduce((sum, act) => sum + actHeight(act, width), 0);
   });
@@ -929,10 +954,10 @@ function columnHeight(sections: readonly Section[], width: number): number {
 export function panelHeight(model: Model, width: number, interactive = false): number {
   const inner = width - H.pad;
   const columns = model.cols.length;
-  const colWidth = columns > 1 ? (inner - 16) / 2 : inner;
+  const colWidth = columns > 1 ? (inner - H.columns) / 2 : inner;
   const blocks = [H.header, Math.max(...model.cols.map((col) => columnHeight(col.groups, colWidth)), 0)];
-  if (model.hint !== "") blocks.push(H.hint * textLines(model.hint, inner - 20));
-  if (model.baro !== "") blocks.push(H.foot + 14 * (textLines(model.baro, inner - 20) - 1));
+  if (model.hint !== "") blocks.push(H.hint * textLines(model.hint, inner - H.hintIcon));
+  if (model.baro !== "") blocks.push(H.foot + H.footLine * (textLines(model.baro, inner - H.footIcon) - 1));
   if (model.status !== "") blocks.push(H.status);
   if (interactive && model.note !== "") blocks.push(H.noteTop + H.noteLine * textLines(model.note, inner));
   return H.pad + blocks.reduce((sum, each) => sum + each, 0) + H.gap * (blocks.length - 1);
