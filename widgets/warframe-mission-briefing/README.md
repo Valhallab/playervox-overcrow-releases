@@ -1,4 +1,4 @@
-# Mission Briefing
+# Mission briefing
 
 `com.playervox.overcrow.warframe.mission-briefing` — while a Warframe
 mission loads, shows what it is up against and what hurts it: the enemy

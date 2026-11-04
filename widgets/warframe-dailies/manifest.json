@@ -4,8 +4,8 @@
   "id": "com.playervox.overcrow.warframe.dailies",
   "version": "1.0.0",
   "name": {
-    "en": "Dailies & Weeklies",
-    "fr": "Quotidien et hebdo"
+    "en": "Checklist",
+    "fr": "Checklist"
   },
   "sizing": {
     "fit": "height",

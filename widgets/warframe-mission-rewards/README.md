@@ -1,4 +1,4 @@
-# Warframe mission rewards
+# Mission rewards
 
 `com.playervox.overcrow.warframe.mission-rewards` — what the node of your
 Warframe mission can give, and when the next rotation comes. A PlayerVox

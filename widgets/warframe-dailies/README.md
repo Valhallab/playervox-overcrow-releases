@@ -1,4 +1,4 @@
-# Dailies & Weeklies
+# Checklist
 
 `com.playervox.overcrow.warframe.dailies` — what is left to do in Warframe
 today and this week, and when each list resets: the Sortie, the Archon
@@ -15,7 +15,7 @@ Digital Extremes.
 
 | Part | Shows |
 | --- | --- |
-| Header | "Dailies & weeklies", and on the right how many tracked activities are left ("3 to do"), or "All done" in green |
+| Header | "Checklist", and on the right how many tracked activities are left ("3 to do"), or "All done" in green |
 | Today | The Sortie, with its reset ("resets in 6h"): a box per stage, named by its mission type, and "1/3" |
 | This week | The Archon Hunt (a box per stage, the week's Archon Shard and the Archon beside its name, "0/3"); Netracells (a row of five boxes, "3/5"); the Circuit and the Circuit · Steel Path (the week's Warframes and Incarnon adapters, the picks in a green chip); Nightwave (a box per challenge, Daily, Weekly and Elite, "1/10"); with the week's reset ("resets in 3d 14h") |
 | Done | A green check and the text struck through. A finished activity shows the time it was done ("09:12" today, "Tue 21:42" before); right after a game event, "just now" in green for five minutes, without animation. In Passive it folds to its line; in Interactive its boxes stay, to untick |

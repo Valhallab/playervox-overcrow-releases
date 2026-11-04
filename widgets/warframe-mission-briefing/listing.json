@@ -7,7 +7,7 @@
   "localizations": [
     {
       "locale": "en",
-      "name": "Mission Briefing",
+      "name": "Mission briefing",
       "description": "While a Warframe mission loads: the enemy faction and its level, the damage to use and the one to avoid, and what changes the mission (Steel Path, Void Fissure, Sortie condition). PlayerVox is not affiliated with Digital Extremes."
     },
     {

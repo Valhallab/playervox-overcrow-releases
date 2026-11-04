@@ -1,4 +1,4 @@
-# Eidolon Hunt
+# Eidolon hunt
 
 `com.playervox.overcrow.warframe.eidolon-hunt` — the timer of each tricap on
 the Plains of Eidolon, every capture to the hundredth against your best, and
