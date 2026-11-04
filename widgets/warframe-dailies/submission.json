@@ -6,7 +6,7 @@
     },
     {
       "permission": "gameEvent:warframe.world",
-      "text": "Shows the Sortie and Archon Hunt missions, the Circuit's rewards of the week, Baro Ki'Teer's visit and when each list resets, even with the game closed."
+      "text": "Shows the Sortie and Archon Hunt missions, the Circuit's rewards of the week, Nightwave's challenges, Baro Ki'Teer's visit and when each list resets, even with the game closed."
     },
     {
       "permission": "storage",

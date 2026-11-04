@@ -13,6 +13,10 @@
       "text": "Reads what the mission's node can give, by rotation, with each item's chance, from Digital Extremes' drop tables as PlayerVox OverCrow gives them. The widget makes no request of its own."
     },
     {
+      "permission": "gameEvent:warframe.world",
+      "text": "Reads this week's Circuit choices and the day's Sortie, to show the Circuit's tiers and a Sortie's reward."
+    },
+    {
       "permission": "storage",
       "text": "Keeps the last mission's recap (node, type, result, duration, rotations earned, credits) on this computer, to show it after the game."
     }
