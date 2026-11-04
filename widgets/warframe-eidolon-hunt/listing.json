@@ -8,12 +8,12 @@
     {
       "locale": "en",
       "name": "Eidolon Hunt",
-      "description": "Times each tricap on the Plains of Eidolon from the first spawn, with every capture to the hundredth against your best, and the night left at Cetus. Keeps your best and your past hunts on this computer."
+      "description": "Times each Eidolon capture on the Plains against your best, and shows the night left at Cetus. Keeps your best and your last hunts on this computer. PlayerVox is not affiliated with Digital Extremes."
     },
     {
       "locale": "fr",
       "name": "Chasse aux Eidolons",
-      "description": "Chronomètre chaque tricap sur les Plaines d’Eidolon dès la première apparition, avec chaque capture au centième face à votre record, et la nuit restante à Cetus. Garde votre record et vos chasses sur cet ordinateur."
+      "description": "Chronomètre chaque capture d’Eidolon dans les Plaines face à votre record, et affiche la nuit restante à Cetus. Garde votre record et vos dernières chasses sur cet ordinateur. PlayerVox n’est pas affilié à Digital Extremes."
     }
   ]
 }
