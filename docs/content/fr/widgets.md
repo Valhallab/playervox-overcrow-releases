@@ -61,6 +61,7 @@ lisez-les, copiez-les et servez-vous-en comme point de départ.
 | appeler une API HTTP, la mettre en cache dans le stockage, copier dans le presse-papiers | Marché Warframe |
 | utiliser un service connecté (Steam) : aucune clé dans le widget, une grande réponse lue par tranches, des images d’un CDN avec replis | Succès Steam |
 | utiliser un service connecté OAuth (Twitch) : scopes dans le manifeste, routes lues seulement quand elles s’affichent, un décompte local | Objectifs du live |
+| suivre les événements d’un jeu, chronométrer depuis leurs heures exactes, garder des records dans le stockage | Chasse aux Eidolons |
 
 Marché Warframe n’est pas un widget intégré : widget PlayerVox du catalogue,
 installé à la demande, il montre des routes réseau avec une limite de

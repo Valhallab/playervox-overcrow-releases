@@ -59,6 +59,7 @@ license: read them, copy them, and use them as a starting point.
 | call an HTTP API, cache it in storage, copy to the clipboard | Warframe Market |
 | use a connected service (Steam): no key in the widget, a large answer read in slices, images on a CDN with fallbacks | Steam achievements |
 | use a connected OAuth service (Twitch): scopes in the manifest, routes read only when shown, a local countdown | Live goals |
+| follow a game's events, time from their exact moments, keep records in storage | Eidolon Hunt |
 
 Warframe Market is not a built-in: a PlayerVox widget of the catalog,
 installed on request, it shows network routes with a declared response
