@@ -46,6 +46,12 @@ test("a save reads the first page only", async () => {
   steam.local[100][`ACH_${COUNT - 1}`] = Math.floor(Date.now() / 1000);
   vm.push("steam.events.subscribe", { state: "live", reason: null, events: [{ seq: 1, type: "stats.saved", at: Date.now(), data: { appid: 100 } }] });
   await settle(vm, steam);
+  // Thousands of achievements: merged, compared and shown a slice a turn,
+  // within a few seconds.
+  for (let round = 0; round < 30; round += 1) {
+    vm.advance(100);
+    await settle(vm, steam);
+  }
   assert.deepEqual(steam.localCalls.slice(calls).map((call) => call.offset ?? 0), [0]);
   assert.equal(state.game.unlocked, COUNT);
   assert.ok(`ACH_${COUNT - 1}` in state.fresh);

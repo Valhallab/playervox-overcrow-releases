@@ -424,10 +424,43 @@ export class ItemReader {
   }
 }
 
+/**
+ * Waits for the next slice's turn. One host timer serves every slice in
+ * turn (lists, answers read in slices, storage): two slices never meet in
+ * one VM turn, and a job waits behind the others, the first asked first.
+ */
 function pause(): Promise<void> {
-  return new Promise((resolve) => {
-    timers.after(SLICE_PAUSE_MS, () => resolve());
-  });
+  return new Promise((resolve) => queue(resolve));
+}
+
+/** Slices waiting for their turn, one a timer: what the player asked first (the checklist). */
+const urgent: (() => void)[] = [];
+const waiting: (() => void)[] = [];
+let sliceTimer: Timer | null = null;
+function queue(run: () => void, first = false): void {
+  (first ? urgent : waiting).push(run);
+  arm();
+}
+function unqueue(run: () => void): void {
+  for (const list of [urgent, waiting]) {
+    const at = list.indexOf(run);
+    if (at >= 0) list.splice(at, 1);
+  }
+}
+function arm(): void {
+  if (sliceTimer !== null || urgent.length + waiting.length === 0) return;
+  try {
+    sliceTimer = timers.after(SLICE_PAUSE_MS, nextSlice);
+  } catch {
+    // No timer free (`MAX_TIMERS`): the minute's tick goes on.
+    sliceTimer = null;
+  }
+}
+function nextSlice(): void {
+  sliceTimer = null;
+  left = TURN_UNITS;
+  (urgent.shift() ?? waiting.shift())?.();
+  arm();
 }
 
 /**
@@ -436,6 +469,8 @@ function pause(): Promise<void> {
  */
 async function readItems(text: string, key: string, each: (item: JsonValue) => void): Promise<"read" | "found-none" | "invalid"> {
   const reader = new ItemReader(text, key);
+  // The answer's own turn takes it in (megabytes): the slices from the next.
+  await pause();
   try {
     for (;;) {
       const items = reader.step();
@@ -445,6 +480,136 @@ async function readItems(text: string, key: string, each: (item: JsonValue) => v
     }
   } catch {
     return "invalid";
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Turns
+
+/**
+ * List items handled in one VM turn, at most. A widget runs on a quarter
+ * of one core and each JavaScript turn has 50 ms of wall time: a turn must
+ * stay a few milliseconds of CPU. A game of thousands of achievements is
+ * sorted, searched and shown in slices of this many, each in its own turn
+ * a host timer apart. Nothing shows a partial result: the view keeps what
+ * it showed until the whole list is through.
+ */
+export const TURN_UNITS = 1000;
+/** A list up to this long, a usual game's, is handled at once, in the turn of its action. */
+export const ONE_TURN = 1000;
+/** What a name's sort key costs (`normalize` and its replacements), in items. */
+export const KEY_UNITS = 2;
+
+let work = 0;
+/** List items handled so far, for tests: their count per turn stays within `TURN_UNITS`. */
+export function workDone(): number {
+  return work;
+}
+
+/** What is left of the running slice. */
+let left = 0;
+/** Counts `units` of the running slice; `true` once it is spent. */
+function spend(units = 1): boolean {
+  work += units;
+  left -= units;
+  return left <= 0;
+}
+
+type Job = Generator<void, void, void>;
+
+/**
+ * One job at a time: a short list's at once, a long one's in slices, each
+ * in its own turn. Starting another job gives up the running one: the last
+ * one asked wins, so a burst of reads, options or keystrokes leaves one
+ * job to finish.
+ */
+class Task {
+  private job: Job | null = null;
+  private queued: (() => void) | null = null;
+
+  /** `first`: the player waits for it, its slices before the others. */
+  constructor(private readonly first = false) {}
+
+  /** Runs `job` over a list of `size`: at once up to `ONE_TURN`. */
+  start(job: Job, size: number): void {
+    this.stop();
+    this.job = job;
+    if (size > ONE_TURN) this.next(job);
+    else {
+      left = Infinity;
+      this.step(job);
+    }
+  }
+
+  stop(): void {
+    this.job = null;
+    if (this.queued !== null) {
+      unqueue(this.queued);
+      this.queued = null;
+    }
+  }
+
+  get running(): boolean {
+    return this.job !== null;
+  }
+
+  private step(job: Job): void {
+    const done = job.next().done === true;
+    // The job may have started another one of this task.
+    if (this.job !== job) return;
+    if (done) this.job = null;
+    else this.next(job);
+  }
+
+  private next(job: Job): void {
+    const run = (): void => {
+      this.queued = null;
+      if (this.job === job) this.step(job);
+    };
+    this.queued = run;
+    queue(run, this.first);
+  }
+}
+
+/** Calls `each` on every item of `size`: at once up to `ONE_TURN`, else `TURN_UNITS` a turn. */
+async function eachSliced<T>(items: Iterable<T>, size: number, each: (item: T) => void): Promise<void> {
+  if (size > ONE_TURN) await pause();
+  let used = 0;
+  for (const item of items) {
+    if (used >= TURN_UNITS) {
+      await pause();
+      used = 0;
+    }
+    each(item);
+    used += 1;
+    work += 1;
+  }
+}
+
+/**
+ * The `k` best positions offered, in order, as `best` keeps them: one pass,
+ * ties in the order offered.
+ */
+class Top {
+  readonly out: number[] = [];
+  constructor(
+    private readonly k: number,
+    private readonly before: (a: number, b: number) => boolean,
+  ) {}
+
+  offer(i: number): void {
+    const out = this.out;
+    if (this.k <= 0 || (out.length === this.k && !this.before(i, out[this.k - 1] as number))) return;
+    // After every one it does not come before: the first it does, by halves.
+    let low = 0;
+    let high = out.length;
+    while (low < high) {
+      const middle = (low + high) >> 1;
+      if (this.before(i, out[middle] as number)) high = middle;
+      else low = middle + 1;
+    }
+    out.splice(low, 0, i);
+    if (out.length > this.k) out.pop();
   }
 }
 
@@ -683,7 +848,29 @@ export const state = initState({
 // ---------------------------------------------------------------------------
 // Engine
 
-interface SchemaEntry { list: SchemaAch[]; gameName: string }
+interface SchemaEntry {
+  list: SchemaAch[];
+  gameName: string;
+  /** The position of each API name in `list` (the first one): filled as the list is read. */
+  index: Map<string, number>;
+  /** Sort keys of the names (`sortKey`), prepared in slices the first time they are needed. */
+  keys: string[];
+}
+
+/** Adds `item` to a list being read, and to its index. */
+function addEntry(list: SchemaAch[], index: Map<string, number>, item: SchemaAch): void {
+  if (!index.has(item.api)) index.set(item.api, list.length);
+  list.push(item);
+}
+
+/** A list read at once (a small answer, storage): its index built here. */
+function entryOf(list: SchemaAch[], gameName: string): SchemaEntry {
+  const index = new Map<string, number>();
+  list.forEach((item, position) => {
+    if (!index.has(item.api)) index.set(item.api, position);
+  });
+  return { list, gameName, index, keys: [] };
+}
 
 /** Everything read from Steam, the view being built from it. */
 const model = {
@@ -798,12 +985,9 @@ function localOf(appid: number): Map<string, number> | null {
   return local.appid === appid && local.steamid === model.steamid ? local.unlocked : null;
 }
 
-/** Unlocked by Steam's answer or on this computer; Steam's time first. */
-function merged(api: Map<string, number> | null, here: Map<string, number> | null): Map<string, number> | null {
-  if (here === null) return api;
-  const all = new Map(here);
-  for (const [id, at] of api ?? []) all.set(id, at);
-  return all;
+/** The unlock time of `id`, by Steam's answer or on this computer; Steam's first. */
+function unlockAt(id: string, api: Map<string, number> | null, here: Map<string, number> | null): number | undefined {
+  return api?.get(id) ?? here?.get(id);
 }
 
 /**
@@ -827,8 +1011,11 @@ async function readLocal(appid: number, full: boolean, inRead = false): Promise<
     const found = await localPages(steamid, appid, full || known === null);
     // Another game or profile meanwhile: this answer is not its.
     if (found !== null && steamid === model.steamid && appid === model.appid) {
-      if (found.partial) for (const [id, at] of known ?? []) if (!found.unlocked.has(id)) found.unlocked.set(id, at);
-      showLocal(appid, steamid, known, found.unlocked, inRead);
+      const all = found.unlocked;
+      if (found.partial) await eachSliced(known ?? [], known?.size ?? 0, ([id, at]) => {
+        if (!all.has(id)) all.set(id, at);
+      });
+      await showLocal(appid, steamid, known, all, inRead);
     }
   } finally {
     local.busy = false;
@@ -881,9 +1068,20 @@ async function localPages(
 }
 
 /** Shows what this computer gave: the new ones marked New. */
-function showLocal(appid: number, steamid: string, known: Map<string, number> | null, found: Map<string, number>, inRead: boolean): void {
+async function showLocal(appid: number, steamid: string, known: Map<string, number> | null, found: Map<string, number>, inRead: boolean): Promise<void> {
   const now = Date.now();
-  markNew(merged(model.unlocked, known), merged(model.unlocked, found) ?? found, now);
+  // New: unlocked here, neither in Steam's answer nor here before.
+  const since = newSince();
+  const api = model.unlocked;
+  const fresh: string[] = [];
+  if (api !== null || known !== null) {
+    await eachSliced(found, found.size, ([id, at]) => {
+      if (api?.has(id) !== true && known?.has(id) !== true && at * 1000 >= since) fresh.push(id);
+    });
+  }
+  // Another game or profile meanwhile: this answer is not its.
+  if (steamid !== model.steamid || appid !== model.appid) return;
+  markNew(fresh, now);
   local.appid = appid;
   local.steamid = steamid;
   local.unlocked = found;
@@ -1098,7 +1296,7 @@ function failed(outcome: Outcome, now: number): void {
     // backoff would grow without one); the minute asks again.
     state.stale = "quota";
     model.playing = false;
-    if (state.phase === "loading" || state.phase === "nothing") state.phase = "empty-unreachable";
+    if (state.phase === "loading" || state.phase === "nothing") setPhase("empty-unreachable");
     render();
     return;
   }
@@ -1113,7 +1311,7 @@ function failed(outcome: Outcome, now: number): void {
   // "Playing now" only from a fresh read.
   model.playing = false;
   // Without a game shown, never "Play a Steam game" while Steam is down.
-  if (state.phase === "loading" || state.phase === "nothing") state.phase = "empty-unreachable";
+  if (state.phase === "loading" || state.phase === "nothing") setPhase("empty-unreachable");
   render();
 }
 
@@ -1126,7 +1324,7 @@ function hide(hidden: Exclude<Hidden, "">, now: number): void {
   model.playing = false;
   saveHidden(hidden);
   state.hidden = hidden;
-  state.phase = "hidden";
+  setPhase("hidden");
 }
 
 /** A read showed the game details: no longer hidden (stored at the end of the read). */
@@ -1255,7 +1453,7 @@ async function read(): Promise<void> {
   if (appid === 0) {
     succeeded(now);
     if (model.hidden !== "") return hide(model.hidden, now);
-    state.phase = "nothing";
+    setPhase("nothing");
     render();
     return;
   }
@@ -1314,8 +1512,7 @@ async function read(): Promise<void> {
   succeeded(now);
   saveHidden("");
   state.hidden = "";
-  state.phase = "game";
-  render();
+  enterGame();
   void saveSnapshot();
 }
 
@@ -1339,8 +1536,7 @@ async function lookAgain(now: number): Promise<void> {
 function showGame(now: number): void {
   succeeded(now);
   if (model.hidden !== "") return;
-  state.phase = "game";
-  render();
+  enterGame();
 }
 
 /**
@@ -1388,20 +1584,31 @@ async function playerStep(appid: number, now: number, stopped: boolean, schema: 
     if (read === null) return { kind: "server" };
     setPublicDetails(true);
     const before = model.unlocked;
-    const found = [...read.unlocked.keys()].some((id) => before?.has(id) !== true);
+    const here = localOf(appid);
+    // In one pass, a slice a turn: anything new (the looks), new since the
+    // last read (marked New), unknown to the stored list.
+    const since = newSince();
+    let found = false;
+    let unknown = false;
+    const fresh: string[] = [];
+    await eachSliced(read.unlocked, read.unlocked.size, ([id, at]) => {
+      if (before?.has(id) !== true) {
+        found = true;
+        if ((before !== null || here !== null) && here?.has(id) !== true && at * 1000 >= since) fresh.push(id);
+      }
+      if (schema !== null && !schema.index.has(id)) unknown = true;
+    });
     // A save's read plans the next look; any read that finds something ends them.
     if (save || found) looked(found);
-    const here = localOf(appid);
-    markNew(merged(model.unlocked, here), merged(read.unlocked, here) ?? read.unlocked, now);
+    markNew(fresh, now);
     model.unlocked = read.unlocked;
     if (schema === null) {
       model.playerTotal = read.total;
       model.playerIds = read.ids;
-    } else {
+    } else if (unknown) {
       // An achievement the stored list does not know: the game was
       // updated; its list is read again.
-      const known = new Set(schema.list.map((entry) => entry.api));
-      if ([...read.unlocked.keys()].some((id) => !known.has(id))) forgetSchema(appid);
+      forgetSchema(appid);
     }
     model.readable = true;
   }
@@ -1420,6 +1627,7 @@ async function namedList(appid: number, lang: string, now: number): Promise<Sche
   if (!canCall(key, now)) return null;
   const answer = await call("player", { steamid: model.steamid, appid, l: lang }, key, now);
   let list: SchemaAch[] | null = null;
+  const index = new Map<string, number>();
   if (answer.kind === "ok") {
     list = [];
     const into = list;
@@ -1427,18 +1635,20 @@ async function namedList(appid: number, lang: string, now: number): Promise<Sche
       ? Array.isArray(object(object(answer.body)?.["playerstats"])?.["achievements"])
       : (await readItems(answer.text, "achievements", (entry) => {
           const item = namedItem(entry);
-          if (item !== null) into.push(item);
+          if (item !== null) addEntry(into, index, item);
         })) === "read";
     if (answer.text === "") {
       const items = object(object(answer.body)?.["playerstats"])?.["achievements"];
       if (Array.isArray(items)) for (const entry of items) {
         const item = namedItem(entry);
-        if (item !== null) into.push(item);
+        if (item !== null) addEntry(into, index, item);
       }
     }
     if (!ok) list = null;
   } else if (answer.kind === "too-large" && model.playerIds.length > 0) {
-    list = model.playerIds.map((api) => ({ api, name: api, desc: "", hidden: false, icon: "", iconGray: "" }));
+    const into: SchemaAch[] = [];
+    await eachSliced(model.playerIds, model.playerIds.length, (api) => addEntry(into, index, { api, name: api, desc: "", hidden: false, icon: "", iconGray: "" }));
+    list = into;
   } else if (answer.kind === "status" && answer.status < 500) {
     // Refused: S4 without `l` says why, at its next read.
     return null;
@@ -1446,7 +1656,7 @@ async function namedList(appid: number, lang: string, now: number): Promise<Sche
     return answer;
   }
   if (list === null) return answer.kind === "too-large" ? null : { kind: "server" };
-  const schema: SchemaEntry = { list, gameName: "" };
+  const schema: SchemaEntry = { list, gameName: "", index, keys: [] };
   model.schemas.set(schemaKey(appid, lang), schema);
   model.playerIds = [];
   return schema;
@@ -1485,7 +1695,7 @@ async function ensureSchema(appid: number, lang: string, now: number, beforeSlic
   let schema: SchemaEntry;
   if (answer.kind === "status" && answer.status < 500) {
     // A game without stats can answer 400 (or 403) for its schema.
-    schema = { list: [], gameName: "" };
+    schema = entryOf([], "");
   } else if (answer.kind !== "ok") {
     return answer;
   } else {
@@ -1507,14 +1717,15 @@ async function schemaOf(answer: Ok, appid: number): Promise<SchemaEntry | null> 
   if (answer.text === "") {
     const list = parseSchema(answer.body, appid);
     const game = object(object(answer.body)?.["game"]);
-    return list === null ? null : { list, gameName: text(game?.["gameName"]) ?? "" };
+    return list === null ? null : entryOf(list, text(game?.["gameName"]) ?? "");
   }
   const name = /"gameName":("(?:[^"\\]|\\.)*")/.exec(answer.text.slice(0, 4096));
   const list: SchemaAch[] = [];
+  const index = new Map<string, number>();
   // A game without achievements has no list: that is no achievement.
   const ok = (await readItems(answer.text, "achievements", (entry) => {
     const item = schemaItem(entry, appid);
-    if (item !== null) list.push(item);
+    if (item !== null) addEntry(list, index, item);
   })) !== "invalid";
   let gameName = "";
   try {
@@ -1522,7 +1733,7 @@ async function schemaOf(answer: Ok, appid: number): Promise<SchemaEntry | null> 
   } catch {
     gameName = "";
   }
-  return ok ? { list, gameName } : null;
+  return ok ? { list, gameName, index, keys: [] } : null;
 }
 
 interface PlayerRead { unlocked: Map<string, number>; total: number; ids: string[] }
@@ -1575,31 +1786,28 @@ function switchGame(appid: number): void {
   model.readPlayer = 0;
   model.readable = true;
   state.fresh = {};
-  state.picking = false;
+  // The other game's view stays until this one's.
+  views.stop();
+  closePick();
 }
 
 /**
  * Achievements unlocked since the last read of the same game, Steam's or
- * this computer's, are new: `before` is what was known (`null` for a first
- * read), `unlocked` what is now.
+ * this computer's, are new: unlocked after the previous read (a margin
+ * for clocks). An unlock made while the widget was closed, or on another
+ * computer, is not new; nor is any on a first read.
  */
-function markNew(before: Map<string, number> | null, unlocked: Map<string, number>, now: number): void {
-  if (before === null) return;
-  // Unlocked after the previous read (a margin for clocks): an unlock made
-  // while the widget was closed, or on another computer, is not new.
-  const since = (Math.max(model.readPlayer, local.appid === model.appid ? local.readAt : 0) || state.readAt) - 2 * MINUTE;
+function newSince(): number {
+  return (Math.max(model.readPlayer, local.appid === model.appid ? local.readAt : 0) || state.readAt) - 2 * MINUTE;
+}
+
+/** Marks `ids` New, for a minute. */
+function markNew(ids: readonly string[], now: number): void {
+  if (ids.length === 0) return;
   const fresh = { ...state.fresh };
-  let any = false;
-  for (const [id, at] of unlocked) {
-    if (!before.has(id) && at * 1000 >= since) {
-      fresh[id] = now + NEW_FOR;
-      any = true;
-    }
-  }
-  if (any) {
-    state.fresh = fresh;
-    armFresh();
-  }
+  for (const id of ids) fresh[id] = now + NEW_FOR;
+  state.fresh = fresh;
+  armFresh();
 }
 
 /**
@@ -1630,65 +1838,222 @@ function dropEndedMarks(): void {
   state.now = at;
 }
 
-/** Every achievement of the shown game: out of the state (see `Lists`). */
-let achList: Ach[] = [];
-/** The full list, for tests. */
-export function achievements(): Ach[] {
-  return achList;
+/**
+ * What a view is built from, taken when it is asked: maps and lists are
+ * replaced, never changed, so a job in slices sees one state of them.
+ */
+interface ViewInputs {
+  appid: number;
+  schema: SchemaEntry | undefined;
+  list: SchemaAch[];
+  api: Map<string, number> | null;
+  here: Map<string, number> | null;
+  rarity: Map<string, number>;
+  playerTotal: number;
+  order: string;
+  reveal: boolean;
+  /**
+   * Once built: the first missing ones in the order, as many as the
+   * checklist shows without a search (its tracked ones aside), and how
+   * many are missing.
+   */
+  firstMissing?: number[];
+  missingCount?: number;
 }
-/** Bumped when the names change (another schema): see `sortKeys`. */
-let nameVersion = 0;
-let namedFrom: SchemaEntry | undefined;
 
-/** Builds the view from the model. */
+/** What the published view was built from (see `Lists`): the full list stays out of the state. */
+let shown: ViewInputs | null = null;
+
+/** One achievement of the shown list, as the view reads it. */
+function achOf(v: ViewInputs, entry: SchemaAch): Ach {
+  const at = unlockAt(entry.api, v.api, v.here);
+  return {
+    id: entry.api,
+    name: entry.name,
+    desc: entry.desc,
+    icon: iconUrl(v.appid, entry.icon),
+    iconGray: iconUrl(v.appid, entry.iconGray || entry.icon),
+    achieved: at !== undefined,
+    at: (at ?? 0) * 1000,
+    rarity: v.rarity.get(entry.api) ?? -1,
+    hidden: entry.hidden,
+  };
+}
+
+/** Every achievement of the shown game, for tests (the view never builds them all). */
+export function achievements(): Ach[] {
+  const v = shown;
+  return v === null ? [] : v.list.map((entry) => achOf(v, entry));
+}
+
+function shownSchema(appid: number): SchemaEntry | undefined {
+  return model.schemas.get(schemaKey(appid, language())) ?? model.schemas.get(schemaKey(appid, "english"));
+}
+
+/**
+ * The game's view: shown with its first view, never empty. A long list's
+ * first view takes a few turns; what was shown (reading, hidden…) stays
+ * until then.
+ */
+let gameOnPublish = false;
+function enterGame(): void {
+  if (state.game?.appid === model.appid) setPhase("game");
+  else gameOnPublish = true;
+  render();
+}
+function setPhase(phase: Phase): void {
+  gameOnPublish = false;
+  state.phase = phase;
+}
+
+/** No game: nothing shown, no job left. */
+function clearView(): void {
+  views.stop();
+  closePick();
+  shown = null;
+  state.lists = { latest: null, tracked: [], recent: [], missing: [], pick: [] };
+  state.pickLeft = 0;
+  state.pickCapped = false;
+}
+
+/** Builds the view from the model: at once for a usual game, in slices for thousands of achievements. */
 function render(): void {
   const appid = model.appid;
   if (appid === 0) return;
-  const schema = model.schemas.get(schemaKey(appid, language())) ?? model.schemas.get(schemaKey(appid, "english"));
+  const schema = shownSchema(appid);
   const list = schema?.list ?? [];
-  const unlocked = merged(model.unlocked, localOf(appid)) ?? new Map<string, number>();
-  const rarity = model.rarity.get(appid)?.values ?? new Map<string, number>();
-  achList = list.map((entry) => {
-    const at = unlocked.get(entry.api);
-    return {
-      id: entry.api,
-      name: entry.name,
-      desc: entry.desc,
-      icon: iconUrl(appid, entry.icon),
-      iconGray: iconUrl(appid, entry.iconGray || entry.icon),
-      achieved: at !== undefined,
-      at: (at ?? 0) * 1000,
-      rarity: rarity.get(entry.api) ?? -1,
-      hidden: entry.hidden,
-    };
-  });
-  if (schema !== undefined && schema !== namedFrom) {
-    namedFrom = schema;
-    nameVersion += 1;
+  views.start(viewJob({
+    appid,
+    schema,
+    list,
+    api: model.unlocked,
+    here: localOf(appid),
+    rarity: model.rarity.get(appid)?.values ?? new Map<string, number>(),
+    playerTotal: model.playerTotal,
+    order: order(),
+    reveal: revealHidden(),
+  }), Math.max(list.length, model.playerTotal));
+}
+
+/** The view's job, and the checklist's. */
+const views = new Task();
+const picks = new Task(true);
+const keying = new Task();
+
+/** The sort keys of a list's names, `KEY_UNITS` each: kept with the list, so a job given up loses none. */
+function* prepareKeys(schema: SchemaEntry | undefined): Job {
+  if (schema === undefined) return;
+  const { keys, list } = schema;
+  while (keys.length < list.length) {
+    keys.push(sortKey((list[keys.length] as SchemaAch).name));
+    if (spend(KEY_UNITS) && keys.length < list.length) yield;
+  }
+}
+
+/** The key a missing achievement sorts and is searched by: what is shown of it, never a hidden name. */
+function keyOf(v: ViewInputs, position: number, achieved: boolean, hiddenKey: string): string {
+  const entry = v.list[position] as SchemaAch;
+  return entry.hidden && !achieved && !v.reveal ? hiddenKey : (v.schema?.keys[position] ?? sortKey(entry.name));
+}
+
+/** The order of missing achievements: by name, or by rarity (an unknown one last in both). */
+function missingOrder(v: ViewInputs): (a: number, b: number) => boolean {
+  if (v.order === "name") {
+    const hiddenKey = sortKey(t("hidden"));
+    return (a, b) => keyOf(v, a, false, hiddenKey) < keyOf(v, b, false, hiddenKey);
+  }
+  const rarity = (position: number): number => v.rarity.get((v.list[position] as SchemaAch).api) ?? -1;
+  const rarest = v.order === "rarest";
+  return (a, b) => {
+    const x = rarity(a);
+    const y = rarity(b);
+    if ((x < 0) !== (y < 0)) return y < 0;
+    return rarest ? x < y : x > y;
+  };
+}
+
+function* viewJob(v: ViewInputs): Job {
+  if (v.order === "name") yield* prepareKeys(v.schema);
+  const { list, api, here } = v;
+  const atOf = (position: number): number => unlockAt((list[position] as SchemaAch).api, api, here) ?? 0;
+  const recent = new Top(6 + MAX_TRACKED, (a, b) => atOf(a) > atOf(b));
+  // The view's 15, and the checklist's rows without a search.
+  const missing = new Top(PICK_MAX + MAX_TRACKED, missingOrder(v));
+  let unlocked = 0;
+  for (let i = 0; i < list.length; i += 1) {
+    if (unlockAt((list[i] as SchemaAch).api, api, here) !== undefined) {
+      unlocked += 1;
+      recent.offer(i);
+    } else missing.offer(i);
+    if (spend() && i + 1 < list.length) yield;
   }
   // Not read yet: the count S4 gave, names to come.
-  const total = list.length > 0 ? list.length : schema === undefined ? model.playerTotal : 0;
+  const total = list.length > 0 ? list.length : v.schema === undefined ? v.playerTotal : 0;
+  if (list.length === 0 && total > 0) {
+    unlocked = api?.size ?? 0;
+    for (const id of here?.keys() ?? []) {
+      if (api?.has(id) !== true) unlocked += 1;
+      if (spend()) yield;
+    }
+  }
+  v.firstMissing = missing.out;
+  v.missingCount = list.length - unlocked;
+  publishView(v, total, unlocked, recent.out, missing.out.slice(0, 12 + MAX_TRACKED));
+}
+
+/** The view of a whole list, at once: the counts, the few achievements shown, the checklist after. */
+function publishView(v: ViewInputs, total: number, unlocked: number, recentAt: number[], missingAt: number[]): void {
+  const appid = v.appid;
+  // Another game meanwhile: its own view is coming.
+  if (appid !== model.appid) return;
+  shown = v;
+  if (gameOnPublish) setPhase("game");
   const hasAch = total > 0;
   state.game = {
     appid,
-    name: model.gameName || schema?.gameName || "",
+    name: gameName(appid),
     icon: gameIconUrl(appid, model.icons.get(appid) ?? (appid === model.iconHashOf ? model.iconHash : "")),
     header: headerUrl(appid),
     playing: model.playing && state.stale === "",
     readable: model.readable,
-    known: schema !== undefined,
+    known: v.schema !== undefined,
     hasAch,
-    unlocked: list.length > 0 ? list.reduce((count, entry) => count + (unlocked.has(entry.api) ? 1 : 0), 0) : hasAch ? unlocked.size : 0,
+    unlocked: hasAch ? unlocked : 0,
     total,
   };
-  // An achievement the game no longer lists is no longer tracked.
+  // An achievement the game no longer lists is no longer tracked: the
+  // tracked ones as they are now, ticked during the job included.
+  const index = v.schema?.index;
   const ids = model.tracked.get(appid) ?? [];
-  if (list.length > 0 && ids.some((id) => !list.some((entry) => entry.api === id))) {
-    setTracked(appid, ids.filter((id) => list.some((entry) => entry.api === id)));
+  if (v.list.length > 0 && index !== undefined && ids.some((id) => !index.has(id))) {
+    setTracked(appid, ids.filter((id) => index.has(id)));
   }
   state.tracked = model.tracked.get(appid) ?? [];
-  compute();
+  const recent = recentAt.map((position) => achOf(v, v.list[position] as SchemaAch));
+  state.lists = {
+    latest: recent[0] ?? null,
+    tracked: trackedOf(state.tracked),
+    recent,
+    missing: missingAt.map((position) => achOf(v, v.list[position] as SchemaAch)),
+    pick: state.picking ? state.lists.pick : [],
+  };
+  if (state.picking || pickOpening) startPick(pickOpening);
+  else {
+    state.pickLeft = 0;
+    state.pickCapped = false;
+  }
+  // A long list: its sort keys meanwhile, for the search and the order by
+  // name to come (at once, a usual game's, when needed).
+  const schema = v.schema;
+  if (schema !== undefined && schema.list.length > ONE_TURN && schema.keys.length < schema.list.length && !keying.running) {
+    keying.start(prepareKeys(schema), schema.list.length);
+  }
   void loadImages();
+}
+
+/** The game's name: the one Steam or the host gave, else the list's. */
+function gameName(appid: number): string {
+  return model.gameName || shownSchema(appid)?.gameName || "";
 }
 
 // ---------------------------------------------------------------------------
@@ -1798,10 +2163,7 @@ async function loadSchema(appid: number, lang: string): Promise<SchemaEntry | nu
   }
   try {
     const parsed = JSON.parse(textValue) as { n: string; l: [string, string, string, number, string, string][] };
-    const schema: SchemaEntry = {
-      gameName: parsed.n,
-      list: parsed.l.map(([api, name, desc, hidden, icon, iconGray]) => ({ api, name, desc, hidden: hidden === 1, icon, iconGray })),
-    };
+    const schema = entryOf(parsed.l.map(([api, name, desc, hidden, icon, iconGray]) => ({ api, name, desc, hidden: hidden === 1, icon, iconGray })), parsed.n);
     model.schemas.set(key, schema);
     return schema;
   } catch {
@@ -1872,28 +2234,58 @@ async function saveSchemaNow(appid: number, lang: string, schema: SchemaEntry): 
 
 /** The last view, shown at once at the next start. */
 async function saveSnapshot(): Promise<void> {
-  const game = state.game;
-  if (game === null) return;
-  const unlocked = model.unlocked === null ? null : Object.fromEntries(model.unlocked);
-  const rarity = model.rarity.get(game.appid);
-  let snapshot: JsonValue = {
-    appid: game.appid,
-    name: game.name,
-    icon: model.icons.get(game.appid) ?? "",
-    readAt: state.readAt,
-    unlocked,
-    rarity: rarity === undefined ? null : Object.fromEntries(rarity.values),
+  const appid = model.appid;
+  if (appid === 0) return;
+  const mine = ++snapshots;
+  const unlocked = model.unlocked;
+  const rarity = model.rarity.get(appid)?.values ?? null;
+  const base = { appid, name: gameName(appid), icon: model.icons.get(appid) ?? "", readAt: state.readAt, unlocked: null, rarity: null };
+  // The JSON's length with each part or without (`null`), measured a
+  // slice a turn: a large game's never fits, and is not even measured.
+  const length = JSON.stringify(base).length - 2 * "null".length;
+  const lengths = await jsonLengths(unlocked, rarity);
+  const unlockedLength = lengths[0] ?? SNAPSHOT_MAX + 1;
+  const rarityLength = lengths[1] ?? SNAPSHOT_MAX + 1;
+  // A later read's snapshot is on its way.
+  if (mine !== snapshots || appid !== model.appid) return;
+  let withRarity = rarity !== null;
+  let withUnlocked = unlocked !== null;
+  const total = (): number => length + (withUnlocked ? unlockedLength : 4) + (withRarity ? rarityLength : 4);
+  if (total() > SNAPSHOT_MAX) withRarity = false;
+  if (total() > SNAPSHOT_MAX) withUnlocked = false;
+  const snapshot: JsonValue = {
+    ...base,
+    unlocked: withUnlocked && unlocked !== null ? Object.fromEntries(unlocked) : null,
+    rarity: withRarity && rarity !== null ? Object.fromEntries(rarity) : null,
   };
-  if (JSON.stringify(snapshot).length > SNAPSHOT_MAX) snapshot = { ...snapshot, rarity: null };
-  if (JSON.stringify(snapshot).length > SNAPSHOT_MAX) snapshot = { ...snapshot, unlocked: null };
   await storage.set({ key: "snapshot", value: snapshot }).catch(() => null);
+}
+
+let snapshots = 0;
+
+/**
+ * The length of each map's JSON object, `"null"`'s for none, in one pass;
+ * past `SNAPSHOT_MAX`, any larger one (a large game's is not even measured).
+ */
+async function jsonLengths(...maps: (Map<string, number> | null)[]): Promise<number[]> {
+  // `"x":0,` at least each.
+  const measured = maps.map((map) => map !== null && map.size * 6 <= SNAPSHOT_MAX);
+  const lengths = maps.map((map, at) => (map === null ? 4 : !measured[at] ? SNAPSHOT_MAX + 1 : map.size === 0 ? 2 : 1));
+  function* entries(): Generator<[number, string, number]> {
+    for (const [at, map] of maps.entries()) if (measured[at] && map !== null) for (const [key, value] of map) yield [at, key, value];
+  }
+  const size = maps.reduce((sum, map, at) => sum + (measured[at] ? (map?.size ?? 0) : 0), 0);
+  await eachSliced(entries(), size, ([at, key, value]) => {
+    lengths[at] = (lengths[at] ?? 0) + JSON.stringify(key).length + 1 + JSON.stringify(value).length + 1;
+  });
+  return lengths;
 }
 
 async function restore(): Promise<void> {
   const profile = object(await storage.get({ key: "profile" }).catch(() => null));
   const steamid = text(profile?.["steamid"]);
   if (steamid === null || !STEAMID.test(steamid)) {
-    state.phase = "profile";
+    setPhase("profile");
     return;
   }
   model.steamid = steamid;
@@ -1918,10 +2310,7 @@ async function restore(): Promise<void> {
     }
     await loadSchema(appid, language());
     state.readAt = whole(snapshot["readAt"]) ?? 0;
-    if (model.schemas.has(schemaKey(appid, language()))) {
-      state.phase = "game";
-      render();
-    }
+    if (model.schemas.has(schemaKey(appid, language()))) enterGame();
   }
   model.publicDetails = (await storage.get({ key: "publicDetails" }).catch(() => null)) === steamid;
   // Hidden at the last read: said at once, never a game that may be stale.
@@ -1929,7 +2318,7 @@ async function restore(): Promise<void> {
   if (hidden === "profile" || hidden === "details") {
     model.hidden = hidden;
     state.hidden = hidden;
-    state.phase = "hidden";
+    setPhase("hidden");
   }
 }
 
@@ -1993,15 +2382,15 @@ export async function submitProfile(): Promise<void> {
     model.readRecent = 0;
     model.gameName = "";
     state.game = null;
-    achList = [];
-    compute();
+    clearView();
     await storage.remove({ key: "snapshot" }).catch(() => null);
   }
   state.profile = { status: "idle", value: model.input, canCancel: false };
   state.stale = "";
   model.failures = 0;
   model.retryAt = 0;
-  state.phase = model.appid === 0 ? "loading" : "game";
+  if (model.appid === 0) setPhase("loading");
+  else enterGame();
   // This summary is the read's own: no second request of the route.
   model.checked = { steamid, at: checkedAt, body: answer.kind === "ok" ? answer.body : null };
   void refresh();
@@ -2010,7 +2399,7 @@ export async function submitProfile(): Promise<void> {
 export function cancelProfile(): void {
   if (!state.profile.canCancel) return;
   state.profile = { status: "idle", value: model.input, canCancel: false };
-  state.phase = model.previousPhase;
+  setPhase(model.previousPhase);
 }
 
 function openProfile(): void {
@@ -2018,7 +2407,7 @@ function openProfile(): void {
   model.previousPhase = state.phase;
   state.profile = { status: "idle", value: model.input, canCancel: model.steamid !== "" };
   state.picking = false;
-  state.phase = "profile";
+  setPhase("profile");
 }
 
 // ---------------------------------------------------------------------------
@@ -2059,7 +2448,10 @@ export function toggleTrack(id: string): void {
   const next = ids.includes(id) ? ids.filter((other) => other !== id) : [...ids, id];
   setTracked(appid, next);
   state.tracked = next;
-  compute();
+  // The checklist's rows hold their place: only the tracked card changes.
+  state.lists = { ...state.lists, tracked: trackedOf(next) };
+  // A checklist on its way: again, with this one tracked.
+  if (picks.running) startPick(pickOpening);
   void loadImages();
 }
 /** Opens the checklist: the tracked ones, then the first `PICK_PAGE` missing. */
@@ -2069,35 +2461,31 @@ export function openPick(): void {
   pickRows = PICK_PAGE;
   state.pickQuery = "";
   state.pickSearch = state.game.total - state.game.unlocked > PICK_PAGE;
-  state.picking = true;
-  compute();
-  void loadImages();
+  // Shown once its rows are ready, never empty: at once for a usual game.
+  startPick(!state.picking);
 }
 /** `PICK_PAGE` more missing rows at the end of the checklist. */
 export function showMorePicks(): void {
   if (!state.picking || state.pickLeft === 0 || pickMissing >= PICK_MAX) return;
   pickRows += PICK_PAGE;
-  compute();
-  void loadImages();
+  startPick(false);
 }
 export function closePick(): void {
+  picks.stop();
+  pickOpening = false;
   state.picking = false;
 }
-/** The checklist's search: names as sorted by name, accents and case aside. */
+/**
+ * The checklist's search: names as sorted by name, accents and case
+ * aside. The field shows each keystroke at once; the rows follow once the
+ * list is through, the last keystroke's.
+ */
 export function pickTyped(value: string): void {
   if (!state.picking) return;
   state.pickQuery = value.slice(0, 64);
   pickOrder = null;
   pickRows = PICK_PAGE;
-  compute();
-  void loadImages();
-}
-function pickMatcher(): (a: Ach) => boolean {
-  const query = sortKey(state.pickQuery.trim());
-  if (query === "") return () => true;
-  // A hidden achievement matches by what is shown of it, never its name.
-  const keys = sortKeys();
-  return (a) => (keys.get(a.id) ?? sortKey(achName(a))).includes(query);
+  startPick(false);
 }
 
 // ---------------------------------------------------------------------------
@@ -2107,12 +2495,13 @@ onHost((changed) => {
   if (changed.includes("viewport")) measure();
   if (changed.includes("mode")) {
     state.interactive = host.mode === "interactive";
-    if (!state.interactive) state.picking = false;
+    if (!state.interactive) closePick();
   }
   if (changed.includes("theme")) state.theme = host.theme;
   if (changed.includes("options")) {
     state.optionsVersion += 1;
-    compute();
+    // The order or what hidden ones show: the lists again.
+    render();
     void loadImages();
   }
   if (changed.includes("locale")) {
@@ -2167,6 +2556,8 @@ account.subscribe({ id: "steam" }, (update) => {
 
 timers.every(MINUTE, () => {
   dropEndedMarks();
+  // Slices whose timer was refused.
+  if (sliceTimer === null && urgent.length + waiting.length > 0) nextSlice();
   void refresh();
 });
 
@@ -2339,14 +2730,6 @@ export function sortKey(name: string): string {
     .replace(/æ/g, "ae");
 }
 
-/** The sort keys by name, computed once per list of names and reveal option. */
-let keys = { version: "", byId: new Map<string, string>() };
-function sortKeys(): Map<string, string> {
-  const version = `${nameVersion}|${revealHidden()}`;
-  if (keys.version !== version) keys = { version, byId: new Map(achList.map((a) => [a.id, sortKey(achName(a))])) };
-  return keys.byId;
-}
-
 /** The `k` best items of `items` by `before`, in order: one pass, never a full sort. */
 export function best<T>(items: readonly T[], k: number, before: (a: T, b: T) => boolean): T[] {
   const out: T[] = [];
@@ -2363,7 +2746,12 @@ export function best<T>(items: readonly T[], k: number, before: (a: T, b: T) => 
 
 /** The tracked achievements in the order they were added, the unlocked ones last. */
 function trackedOf(ids: readonly string[]): Ach[] {
-  const list = ids.flatMap((id) => achList.find((a) => a.id === id) ?? []);
+  const v = shown;
+  if (v === null) return [];
+  const list = ids.flatMap((id) => {
+    const position = v.schema?.index.get(id);
+    return position === undefined ? [] : [achOf(v, v.list[position] as SchemaAch)];
+  });
   return [...list.filter((a) => !a.achieved), ...list.filter((a) => a.achieved)];
 }
 
@@ -2377,53 +2765,81 @@ let pickOrder: string[] | null = null;
 let pickRows = PICK_PAGE;
 /** Missing rows already in `pickOrder`. */
 let pickMissing = 0;
-function pickOf(missingList: Ach[], before: (a: Ach, b: Ach) => boolean, matches: (a: Ach) => boolean): Ach[] {
-  if (pickOrder === null) {
-    pickOrder = trackedOf(state.tracked).filter(matches).map((a) => a.id);
-    pickMissing = 0;
-  }
-  const kept = new Set(pickOrder);
-  const rest = missingList.filter((a) => !kept.has(a.id) && !state.tracked.includes(a.id) && matches(a));
-  const want = Math.min(pickRows, PICK_MAX) - pickMissing;
-  let added = 0;
-  if (want > 0 && rest.length > 0) {
-    // The rows already shown keep their place; the next ones follow.
-    // `best` stays one pass for a window of `PICK_MAX` rows.
-    const next = best(rest, want, before).map((a) => a.id);
-    pickOrder = [...pickOrder, ...next];
-    pickMissing += next.length;
-    added = next.length;
-  }
-  state.pickLeft = rest.length - added;
-  state.pickCapped = state.pickLeft > 0 && pickMissing >= PICK_MAX;
-  const byId = new Map(achList.map((a) => [a.id, a]));
-  return pickOrder.flatMap((id) => byId.get(id) ?? []);
+/** The checklist opens once its first rows are ready. */
+let pickOpening = false;
+
+/** Computes the checklist's rows (again): `opening` shows it once they are ready. */
+function startPick(opening: boolean): void {
+  const v = shown;
+  if (v === null) return;
+  pickOpening = opening;
+  const query = state.pickQuery.trim();
+  // Without a search, the view's job did the pass: at once, whatever the game.
+  const size = sortKey(query) === "" && v.firstMissing !== undefined ? 0 : v.list.length;
+  picks.start(pickJob(v, query, [...state.tracked]), size);
 }
 
-/** Chooses what the view shows; after each read, option, choice or language. */
-function compute(): void {
-  const by = order();
-  const names = by === "name" ? sortKeys() : null;
-  const missingBefore = (a: Ach, b: Ach): boolean => {
-    if (names !== null) return (names.get(a.id) ?? "") < (names.get(b.id) ?? "");
-    // An unknown rarity sorts last in both orders.
-    if ((a.rarity < 0) !== (b.rarity < 0)) return b.rarity < 0;
-    return by === "rarest" ? a.rarity < b.rarity : a.rarity > b.rarity;
-  };
-  const unlockedList = achList.filter((a) => a.achieved);
-  const missingList = achList.filter((a) => !a.achieved);
-  const recentList = best(unlockedList, 6 + MAX_TRACKED, (a, b) => a.at > b.at);
-  state.lists = {
-    latest: recentList[0] ?? null,
-    tracked: trackedOf(state.tracked),
-    recent: recentList,
-    missing: best(missingList, 12 + MAX_TRACKED, missingBefore),
-    pick: state.picking ? pickOf(missingList, missingBefore, pickMatcher()) : [],
-  };
-  if (!state.picking) {
-    state.pickLeft = 0;
-    state.pickCapped = false;
+function* pickJob(v: ViewInputs, query: string, tracked: string[]): Job {
+  const needle = sortKey(query);
+  if (needle !== "") yield* prepareKeys(v.schema);
+  const hiddenKey = sortKey(t("hidden"));
+  const matches = (position: number, achieved: boolean): boolean => needle === "" || keyOf(v, position, achieved, hiddenKey).includes(needle);
+  const index = v.schema?.index;
+  let order = pickOrder;
+  let missingCount = pickMissing;
+  if (order === null) {
+    order = trackedOf(tracked).filter((a) => matches(index?.get(a.id) ?? 0, a.achieved)).map((a) => a.id);
+    missingCount = 0;
   }
+  const kept = new Set(order);
+  // The rows already shown keep their place; the next ones follow, one
+  // pass for a window of `PICK_MAX` rows.
+  const next = new Top(Math.min(pickRows, PICK_MAX) - missingCount, missingOrder(v));
+  const { list, api, here } = v;
+  const missing = (position: number): boolean => {
+    const id = (list[position] as SchemaAch).api;
+    return unlockAt(id, api, here) === undefined && index?.get(id) === position;
+  };
+  let rest = 0;
+  if (needle === "" && v.firstMissing !== undefined && v.missingCount !== undefined) {
+    // Without a search, the view's job has them in order: no pass.
+    for (const position of v.firstMissing) {
+      const id = (list[position] as SchemaAch).api;
+      if (!kept.has(id) && !tracked.includes(id)) next.offer(position);
+    }
+    const aside = new Set([...kept, ...tracked]);
+    rest = v.missingCount;
+    for (const id of aside) {
+      const position = index?.get(id);
+      if (position !== undefined && missing(position)) rest -= 1;
+    }
+  } else {
+    for (let i = 0; i < list.length; i += 1) {
+      // The name first: most do not match.
+      if (matches(i, false) && missing(i) && !kept.has((list[i] as SchemaAch).api) && !tracked.includes((list[i] as SchemaAch).api)) {
+        rest += 1;
+        next.offer(i);
+      }
+      if (spend() && i + 1 < list.length) yield;
+    }
+  }
+  const added = next.out.map((position) => (list[position] as SchemaAch).api);
+  pickOrder = [...order, ...added];
+  pickMissing = missingCount + added.length;
+  state.pickLeft = rest - added.length;
+  state.pickCapped = state.pickLeft > 0 && pickMissing >= PICK_MAX;
+  state.lists = {
+    ...state.lists,
+    pick: pickOrder.flatMap((id) => {
+      const position = index?.get(id);
+      return position === undefined ? [] : [achOf(v, list[position] as SchemaAch)];
+    }),
+  };
+  if (pickOpening) {
+    pickOpening = false;
+    state.picking = true;
+  }
+  void loadImages();
 }
 
 export function isNew(a: Ach, s: typeof state): boolean {

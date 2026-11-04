@@ -180,6 +180,20 @@ your computer and sends it only to `api.steampowered.com`. To revoke it:
   the user's language, without icons nor hidden flags. The view only ever
   receives the few achievements it shows, chosen without sorting the whole
   list, and memory holds the shown game only.
+- **Turns.** A widget runs on a quarter of one core and each VM turn has
+  50 ms of wall time, so every pass over a game's list is cut in slices of
+  1,000 achievements (`TURN_UNITS`), one turn each, a single host timer
+  apart for all of them: the view (counts, latest, missing), the
+  checklist's search, the checks of each read, the snapshot's size. A
+  list of up to 1,000 (`ONE_TURN`), a usual game's, is handled in the turn
+  of its action, as before. Nothing shows a partial result: the view keeps
+  what it showed until the whole list is through, and a new read, option,
+  language or keystroke restarts the pass (the last one wins). An index
+  of each list (position by API name) is filled as it is read; the names'
+  sort keys are prepared in the background after a long list is read.
+  The checklist opens and adds rows at once whatever the game (the view's
+  pass keeps its first 203 missing); a search on 5,000 achievements shows
+  its rows about half a second after the last keystroke, 1.2 s on 12,000.
 - **Storage.** The achievement lists of past games are kept within 180 kB
   in all (parts of 20,000 characters, the oldest making room), so the
   profile, the tracked achievements and the last view always fit the

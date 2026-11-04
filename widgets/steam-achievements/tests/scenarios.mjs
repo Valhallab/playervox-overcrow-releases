@@ -1141,15 +1141,20 @@ scenario("huge-game", "5,000 achievements, Steam's cap, in French: a list of abo
     { expect: { fault: "none", image: "full" } },
     { menu: { id: "layout", value: "standard" } },
     { host: { mode: "interactive", size: { width: WIDTH.standard, height: 200 } } },
+    // The checklist, "more" and the search go through 5,000 achievements
+    // a slice a turn: their rows within a second.
     { menu: { id: "track" } },
+    { advance: { ms: 1000 } },
     { expect: { text: ["Suivre des succès", "0 / 3"], fault: "none", image: "pick" } },
     ...repeat(4, () => ({ pointer: { wheel: { target: { at: [150, 150] }, dx: 0, dy: 100 } } })),
     { expect: { text: ["50 de plus"], fault: "none", image: "pick-more" } },
     { pointer: { click: { text: "50 de plus" } } },
+    { advance: { ms: 1000 } },
     ...repeat(8, () => ({ pointer: { wheel: { target: { at: [150, 150] }, dx: 0, dy: 100 } } })),
     { expect: { text: ["50 de plus"], fault: "none" } },
     { pointer: { click: { label: "Chercher un succès" } } },
     { text: "savoir 123" },
+    { advance: { ms: 1000 } },
     { expect: { text: ["Page de savoir 123", "Page de savoir 1239"], noText: ["50 de plus"], fault: "none", image: "pick-search" } },
   ],
 });
@@ -1177,6 +1182,8 @@ scenario("huge-game-beyond", "12,000 achievements, a game from before Steam's ca
     { expect: { fault: "none", image: "full" } },
     { host: { mode: "interactive" } },
     { menu: { id: "track" } },
+    // 12,000 achievements a slice a turn: the checklist within two seconds.
+    { advance: { ms: 2000 } },
     { expect: { text: ["Track achievements"], fault: "none", image: "pick" } },
   ],
 });
