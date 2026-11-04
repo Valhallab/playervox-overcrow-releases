@@ -292,8 +292,10 @@ test("Nightwave: a challenge's objective on hover, in Interactive only, cut whol
     "",
   ]);
   for (const tip of live) assert.ok(Buffer.byteLength(tip) <= 256, tip);
-  // Passive is click-through: no tooltip there.
-  assert.deepEqual(tips(false), ["", "", "", "", ""]);
+  // Passive is click-through: no tooltip on the challenges it shows.
+  const passive = tips(false);
+  assert.ok(passive.length > 0);
+  assert.deepEqual(passive, passive.map(() => ""));
   // Only a challenge has one.
   const sortieTips = actOf(logic.buildModel(inputs(logic, { world: w, interactive: true })), "sortie").groups.flatMap((group) => group.parts).map((each) => each.tip);
   assert.deepEqual(sortieTips, ["", "", ""]);
@@ -327,26 +329,35 @@ test("Passive: past the frame's largest height, the end of Nightwave folds into 
   vm.setHost({ mode: "passive" });
   const shown = parts("nightwave").length;
   assert.ok(logic.panelHeight(model(), 220) <= logic.MAX_HEIGHT, "the panel fits");
-  assert.ok(shown < 16 && shown > 0, `${shown} shown`);
+  // At the narrowest width, with the long names, the whole list folds: only Nightwave does.
+  assert.ok(shown < 16, `${shown} shown`);
   assert.equal(act("nightwave").more, `+ ${16 - shown} challenges`);
+  for (const id of ["sortie", "archon", "netracells", "circuit", "steel"]) assert.equal(act(id).more, "", `${id} whole`);
   assert.equal(act("nightwave").value, "0/16", "the count still counts them all");
   vm.setHost({ viewport: { width: 300, height: 600 }, mode: "interactive" });
   currentWorld = () => world(vm.now);
   await push();
 });
 
-test("Passive: the typical day's full week, 651 px tall, fits under 680 points: nothing folds", () => {
+test("Passive: the typical day's full week folds the end of Nightwave under 520 points, the activities above stay whole; Interactive keeps every challenge", () => {
   // The world of the typical-day scenario: French names, the Circuit's picks, Baro's relay.
   const scenario = JSON.parse(readFileSync(new URL("./typical-day.scenario.json", import.meta.url), "utf8"));
-  const built = logic.buildModel(inputs(logic, { world: scenario.steps[1].gameEvents.warframe.info.world, now: scenario.host.startAt }));
-  const night = actOf(built, "nightwave");
-  assert.equal(night.more, "", "nothing folded");
-  assert.equal(night.groups.flatMap((group) => group.parts).length, 10);
-  assert.ok(logic.panelHeight(built, 300) <= logic.MAX_HEIGHT);
-  // Interactive adds the note at the foot, two lines, still under 680 points.
-  const note = logic.panelHeight(built, 300, true) - logic.panelHeight(built, 300);
-  assert.ok(note >= 30, `${note} px for the note`);
-  assert.ok(logic.panelHeight(built, 300, true) <= logic.MAX_HEIGHT);
+  const at = { world: scenario.steps[1].gameEvents.warframe.info.world, now: scenario.host.startAt };
+  const passive = logic.buildModel(inputs(logic, at));
+  const interactive = logic.buildModel(inputs(logic, { ...at, interactive: true }));
+  const count = (built, id) => actOf(built, id).groups.flatMap((group) => group.parts).length;
+  // Interactive: all ten challenges, the list scrolls under the host's scrollbar.
+  assert.equal(count(interactive, "nightwave"), 10);
+  assert.equal(actOf(interactive, "nightwave").more, "");
+  // Passive: only Nightwave folds, from its end, into "+ N challenges".
+  const shown = count(passive, "nightwave");
+  assert.ok(shown > 0 && shown < 10, `${shown} shown`);
+  assert.equal(actOf(passive, "nightwave").more, `+ ${10 - shown} challenge${10 - shown === 1 ? "" : "s"}`);
+  for (const id of ["sortie", "archon", "netracells", "circuit", "steel"]) {
+    assert.equal(count(passive, id), count(interactive, id), `${id} whole`);
+    assert.equal(actOf(passive, id).more, "", `${id} not folded`);
+  }
+  assert.ok(logic.panelHeight(passive, 300) <= logic.MAX_HEIGHT, "the panel fits");
 });
 
 test("the world not read yet: the stages by their rank, Nightwave waits", async () => {
@@ -410,11 +421,11 @@ test("refused game events: the way to fix it, the count stays", () => {
   assert.deepEqual([model().lineValue, model().lineValueCls], ["Access denied", "line-reset tone-warning"]);
 });
 
-test("the panel stops at 680 points: on a 1080p screen at 150 %, 1,020 px leave 48 px", () => {
+test("the panel stops at 520 points: under half a 1080p screen at 100 %, 780 px at 150 %", () => {
   const manifest = JSON.parse(readFileSync(new URL("../manifest.json", import.meta.url), "utf8"));
-  assert.equal(manifest.sizing.max.height, 680);
+  assert.equal(manifest.sizing.max.height, 520);
   assert.equal(logic.MAX_HEIGHT, manifest.sizing.max.height);
-  assert.ok(logic.MAX_HEIGHT * 1.5 <= 1080 - 48);
+  assert.ok(logic.MAX_HEIGHT <= 1080 / 2);
   // The panel stops there too: past it, its list shrinks and scrolls, the note stays whole.
   const style = readFileSync(new URL("../style.ocss", import.meta.url), "utf8");
   const panel = style.slice(style.indexOf(".wf {"), style.indexOf("}", style.indexOf(".wf {")));

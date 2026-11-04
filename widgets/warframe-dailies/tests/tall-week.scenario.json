@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "tall-week",
-  "description": "Sixteen Nightwave challenges and every activity at the default width: past 680 points (1,020 px at 150 %, a 1080p screen less 48 px) the panel stops; Interactive scrolls under the host's scrollbar, Passive folds the end of Nightwave.",
+  "description": "Sixteen Nightwave challenges and every activity at the default width: past 520 points (under half a 1080p screen) the panel stops; Interactive scrolls under the host's scrollbar, Passive folds the end of Nightwave.",
   "host": {
     "startAt": 1793268000000,
     "zone": {
@@ -514,7 +514,7 @@
     {
       "expect": {
         "text": [
-          "+ 6 challenges"
+          "+ 14 challenges"
         ],
         "fault": "none"
       }

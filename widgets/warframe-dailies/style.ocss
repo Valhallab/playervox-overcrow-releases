@@ -14,7 +14,7 @@
   width: 100%;
   /* The manifest's largest height: past it, the list shrinks and scrolls,
      the note and the bottom margin stay whole. */
-  max-height: 680px;
+  max-height: 520px;
   min-height: 0;
   flex-shrink: 1;
   padding: 10px;

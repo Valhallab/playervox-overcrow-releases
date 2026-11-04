@@ -76,10 +76,11 @@ for (const [name, scale] of [["icons-fr-100", 1], ["icons-fr-150", 1.5]]) {
   });
 
   test(`${name}: every stage's icon in the same slot, on the same centre`, () => {
-    // The Archon Hunt's three stages, Nightwave's ten challenges: done, to do, in progress.
+    // The Archon Hunt's three stages and the five challenges Passive shows
+    // under 520 points (the rest folds): done, to do, in progress.
     const from = at(PAD + HEAD_SLOT + HEAD_GAP / 2);
     const stages = icons(image, from, from + at(20), at(11.5), at(14.5), true);
-    assert.ok(stages.length >= 13, JSON.stringify(stages));
+    assert.ok(stages.length >= 8, JSON.stringify(stages));
     const centres = stages.map((icon) => icon.centre);
     assert.ok(Math.max(...centres) - Math.min(...centres) <= 0.5, `stage centres ${centres}`);
     const widths = stages.map((icon) => icon.right - icon.left);

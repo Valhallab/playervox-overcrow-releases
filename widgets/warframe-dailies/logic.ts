@@ -1050,9 +1050,9 @@ export function panelHeight(model: Model, width: number, interactive = false): n
 
 /**
  * The frame's largest height (the manifest's), logical px: the panel stops
- * there. 680 points are 1,020 px at 150 %, 48 px short of a 1080p screen.
+ * there. 520 points are under half a 1080p screen, 780 px at 150 %.
  */
-export const MAX_HEIGHT = 680;
+export const MAX_HEIGHT = 520;
 
 /** Px the estimate keeps clear of the largest height: a wrap it misses never cuts the panel. */
 const FOLD_MARGIN = 8;

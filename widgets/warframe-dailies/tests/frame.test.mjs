@@ -60,13 +60,19 @@ test("the frame never cuts the panel: a bottom margin, a scrollbar in Interactiv
   assert.deepEqual(faults, []);
 });
 
-test("the typical day fits whole under 680 points, its note and margin included: Interactive and Passive, French and English, 100 % and 150 %", () => {
-  const shots = captures().filter((shot) => shot.scenario === "typical-day" && shot.layout !== "line");
+test("the typical day at 520 points: Passive folds below the largest height, Interactive stops at it and scrolls; French and English, 100 % and 150 %", () => {
+  const shots = captures().filter((shot) => shot.scenario === "typical-day" && shot.layout === "full" && !shot.image.includes("wide"));
   const modes = new Set(shots.map((shot) => `${shot.mode} ${shot.scale}`));
   for (const each of ["passive 1", "interactive 1", "passive 1.5", "interactive 1.5"]) assert.ok(modes.has(each), each);
   for (const shot of shots) {
     // The height, from the PNG's header: no pixel to decode.
     const height = read(`./reference/${shot.scenario}/${shot.image}.png`).readUInt32BE(20);
-    assert.ok(height < Math.round(MAX_HEIGHT * shot.scale), `${shot.image}: ${height} px, nothing scrolls`);
+    const largest = Math.round(MAX_HEIGHT * shot.scale);
+    if (shot.mode === "passive") assert.ok(height < largest, `${shot.image}: ${height} px, folded under ${largest}`);
+    else assert.ok(height <= largest, `${shot.image}: ${height} px, never past ${largest}`);
+  }
+  // The full week in Interactive stops at the largest height: its list scrolls.
+  for (const image of ["mid-en-100-interactive", "mid-fr-100-interactive"]) {
+    assert.equal(read(`./reference/typical-day/${image}.png`).readUInt32BE(20), MAX_HEIGHT, image);
   }
 });
