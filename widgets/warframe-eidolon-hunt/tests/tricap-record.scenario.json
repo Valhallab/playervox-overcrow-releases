@@ -146,7 +146,7 @@
         "locale": "fr",
         "scale": 1000,
         "size": {
-          "width": 260,
+          "width": 300,
           "height": 260
         },
         "theme": "dark"
@@ -163,7 +163,7 @@
         "locale": "en",
         "scale": 1000,
         "size": {
-          "width": 260,
+          "width": 300,
           "height": 260
         },
         "theme": "dark"
@@ -180,7 +180,7 @@
         "locale": "fr",
         "scale": 1500,
         "size": {
-          "width": 260,
+          "width": 300,
           "height": 260
         },
         "theme": "dark"
@@ -197,7 +197,7 @@
         "locale": "en",
         "scale": 1500,
         "size": {
-          "width": 260,
+          "width": 300,
           "height": 260
         },
         "theme": "dark"
@@ -220,7 +220,7 @@
         "locale": "fr",
         "scale": 1000,
         "size": {
-          "width": 260,
+          "width": 300,
           "height": 40
         },
         "theme": "dark"
@@ -237,7 +237,7 @@
         "locale": "en",
         "scale": 1000,
         "size": {
-          "width": 260,
+          "width": 300,
           "height": 40
         },
         "theme": "dark"

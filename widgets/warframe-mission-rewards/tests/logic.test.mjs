@@ -536,7 +536,7 @@ const sortie = (over = {}) =>
 test("the manifest: the user's size, never the widget's; the world for the Circuit's picks", () => {
   const manifest = read("../manifest.json");
   assert.equal(manifest.sizing.fit, "none");
-  assert.deepEqual([manifest.sizing.preferred, manifest.sizing.min, manifest.sizing.max], [{ width: 300, height: 520 }, { width: 200, height: 40 }, { width: 640, height: 1200 }]);
+  assert.deepEqual([manifest.sizing.preferred, manifest.sizing.min, manifest.sizing.max], [{ width: 300, height: 380 }, { width: 200, height: 40 }, { width: 640, height: 1200 }]);
   assert.deepEqual(manifest.permissions.gameEvents, ["warframe.mission", "warframe.progress", "warframe.rewards", "warframe.world"]);
 });
 
