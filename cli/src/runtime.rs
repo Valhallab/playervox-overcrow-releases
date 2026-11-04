@@ -27,17 +27,17 @@ pub struct Pin {
 }
 
 /// The runtime this CLI pins: the one in the creator tools ZIPs of
-/// PlayerVox OverCrow 0.9.0-beta.1, with the digests of that release's `runtimes.json`.
+/// PlayerVox OverCrow 0.10.0-beta.1, with the digests of that release's `runtimes.json`.
 pub const PIN: Option<Pin> = Some(Pin {
-    version: "0.9.0-beta.1",
+    version: "0.10.0-beta.1",
     artifacts: &[
         (
             "linux-x86_64",
-            "7705323bf44aef2758cd38a52fd0c380733a958f0c8a6994c4dc04cde65a1afb",
+            "c18ec4d1bd0e3dbd7bdc15634a93222897fa4442a72f0b9f2365887a6ad5585d",
         ),
         (
             "windows-x86_64",
-            "a31f98f1ecc79876d829e498367da89381236b90c67fa0b3af2865c548fe5d82",
+            "40bbf62be3d51dbb27af4db7ea4fac129bec0dfa10a374d8dbaabaa14a84f601",
         ),
     ],
 });
@@ -361,7 +361,7 @@ mod tests {
     #[test]
     fn the_pin_covers_both_published_platforms() {
         let pin = PIN.as_ref().expect("a pinned runtime");
-        assert_eq!(pin.version, "0.9.0-beta.1");
+        assert_eq!(pin.version, "0.10.0-beta.1");
         for platform in ["linux-x86_64", "windows-x86_64"] {
             let digest = pinned_digest(Some(pin), platform).expect(platform);
             assert_eq!(digest.len(), 64, "{platform}");
