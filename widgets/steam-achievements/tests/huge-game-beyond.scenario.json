@@ -256,6 +256,11 @@
       }
     },
     {
+      "advance": {
+        "ms": 2000
+      }
+    },
+    {
       "expect": {
         "text": [
           "Track achievements"

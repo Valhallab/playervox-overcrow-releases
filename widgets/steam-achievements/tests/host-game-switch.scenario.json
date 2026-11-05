@@ -9,6 +9,13 @@
         "steamid": "76561198000000000",
         "input": "https://steamcommunity.com/profiles/76561198000000000"
       }
+    },
+    "options": {
+      "layout": "standard"
+    },
+    "size": {
+      "width": 300,
+      "height": 184
     }
   },
   "fixtures": {
@@ -443,7 +450,6 @@
       "expect": {
         "text": [
           "Neon Courier",
-          "Playing now",
           "This game has no Steam achievements."
         ],
         "noText": [

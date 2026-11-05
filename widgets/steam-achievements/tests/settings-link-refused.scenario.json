@@ -16,7 +16,14 @@
       "game.read",
       "network",
       "storage"
-    ]
+    ],
+    "options": {
+      "layout": "standard"
+    },
+    "size": {
+      "width": 300,
+      "height": 184
+    }
   },
   "fixtures": {
     "calls": {

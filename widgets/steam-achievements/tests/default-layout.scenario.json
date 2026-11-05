@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
-  "name": "opt-no-logo",
-  "description": "Steam logo off: the word Steam in its place.",
+  "name": "default-layout",
+  "description": "A new widget, no option set: Full, the default layout, at the manifest's preferred size, its height fitted to the content without a jump; in English, then in French.",
   "host": {
     "startAt": 1767225600000,
     "storage": {
@@ -9,9 +9,6 @@
         "steamid": "76561198000000000",
         "input": "https://steamcommunity.com/profiles/76561198000000000"
       }
-    },
-    "options": {
-      "show-logo": false
     }
   },
   "fixtures": {
@@ -376,66 +373,29 @@
   "steps": [
     {
       "expect": {
-        "state": "running"
-      }
-    },
-    {
-      "menu": {
-        "id": "layout",
-        "value": "compact"
-      }
-    },
-    {
-      "host": {
-        "size": {
-          "width": 280,
-          "height": 200
-        }
-      }
-    },
-    {
-      "expect": {
-        "image": "opt-no-logo-compact",
+        "state": "running",
+        "text": [
+          "Latest achievement",
+          "Recently unlocked",
+          "Next to get"
+        ],
+        "image": "en",
         "fault": "none"
       }
     },
     {
-      "menu": {
-        "id": "layout",
-        "value": "standard"
-      }
-    },
-    {
       "host": {
-        "size": {
-          "width": 300,
-          "height": 200
-        }
+        "locale": "fr"
       }
     },
     {
       "expect": {
-        "image": "opt-no-logo-standard",
-        "fault": "none"
-      }
-    },
-    {
-      "menu": {
-        "id": "layout",
-        "value": "full"
-      }
-    },
-    {
-      "host": {
-        "size": {
-          "width": 340,
-          "height": 200
-        }
-      }
-    },
-    {
-      "expect": {
-        "image": "opt-no-logo-full",
+        "text": [
+          "Dernier succès",
+          "Débloqués récemment",
+          "Prochains à obtenir"
+        ],
+        "image": "fr",
         "fault": "none"
       }
     }

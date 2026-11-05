@@ -169,6 +169,8 @@ function reads(game, { minutes = 1, playing = true, visible = 3, unlockedNow = {
 /** The stage colour of catalog previews (scripts/compose-previews.mjs). */
 const STAGE = (await import("../../../scripts/compose-previews.mjs")).STAGE_COLOUR;
 const WIDTH = { line: 240, compact: 280, standard: 300, full: 340 };
+/** The manifest's preferred size: the default layout's at its default width. */
+const PREFERRED = manifest.sizing.preferred;
 const profile = { profile: { steamid: ID, input: `https://steamcommunity.com/profiles/${ID}` } };
 
 /** `steam.achievements.local`: what the Steam client of this computer saved. */
@@ -187,7 +189,16 @@ function localPage(game, unlockedNow = {}) {
   return { value: { appid: game.appid, total: achievements.length, achievements } };
 }
 
-function scenario(name, description, { host = {}, http = [], subscriptions, confirmations, calls = { [LOCAL]: repeat(8, NOTHING_HERE) }, steps }) {
+/**
+ * Full is the default layout, at 340 × 562; a scenario whose subject is
+ * not the layout keeps Standard, as the user chose it, and the size the
+ * widget had before (300 × 184), unless it plays the default
+ * (`defaultLayout`).
+ */
+const EARLIER_SIZE = { width: 300, height: 184 };
+function scenario(name, description, { host = {}, http = [], subscriptions, confirmations, calls = { [LOCAL]: repeat(8, NOTHING_HERE) }, steps, defaultLayout = false }) {
+  if (!defaultLayout && host.options?.layout === undefined) host = { ...host, options: { layout: "standard", ...host.options } };
+  if (!defaultLayout && host.size === undefined) host = { ...host, size: EARLIER_SIZE };
   const fixtures = { calls, http };
   if (subscriptions !== undefined) fixtures.subscriptions = subscriptions;
   if (confirmations !== undefined) fixtures.confirmations = confirmations;
@@ -267,10 +278,10 @@ scenario("unlock", "Endless Night unlocks in game: New on its card and in the co
 });
 
 // --- states of §1.6.
-scenario("last-played", "Out of game: the last game played, under a neutral heading.", {
+scenario("last-played", "Out of game: the last game played, shown as in game (no status).", {
   http: reads(ASHEN, { playing: false }),
   steps: [
-    { expect: { state: "running", text: ["Last game played"] } },
+    { expect: { state: "running" } },
     ...layouts("last-played", ["line", "compact", "standard", "full"]),
   ],
 });
@@ -303,7 +314,7 @@ const detailsHidden = (minutes = 11) => [
 scenario("details-hidden", "Game details Friends Only: Steam names no running game and refuses the achievements of the last one played (403 Profile is not public); said with where to set them Public, no game guessed.", {
   http: detailsHidden(),
   steps: [
-    { expect: { state: "running", text: ["Game details hidden", "Steam hides your game details. Set them to Public (Friends Only is not enough)."], noText: ["Ashen Crown", "Rune Table", "Playing now", "Last game played"], fault: "none" } },
+    { expect: { state: "running", text: ["Game details hidden", "Steam hides your game details. Set them to Public (Friends Only is not enough)."], noText: ["Ashen Crown", "Rune Table"], fault: "none" } },
     ...layouts("details-hidden"),
     { host: { scale: 1500 } },
     ...layouts("details-hidden-150", ["compact", "standard"]),
@@ -329,9 +340,9 @@ scenario("details-hidden-after-game", "In game, then the game details go Friends
     ...probes(2),
   ],
   steps: [
-    { expect: { state: "running", text: ["Playing now", "12 / 40"] } },
+    { expect: { state: "running", text: ["12 / 40"] } },
     { advance: { ms: MIN } },
-    { expect: { text: ["Game details hidden"], noText: ["Playing now", "Ashen Crown"], fault: "none" } },
+    { expect: { text: ["Game details hidden"], noText: ["Ashen Crown"], fault: "none" } },
   ],
 });
 
@@ -414,7 +425,7 @@ scenario("not-readable", "Steam names the running game but refuses its achieveme
     ...images(ASHEN),
   ],
   steps: [
-    { expect: { state: "running", text: ["Playing now", "Steam doesn't share your achievements for this game. Check that your game details are Public in your Steam profile."], noText: ["borrowed", "no Steam achievements"], fault: "none" } },
+    { expect: { state: "running", text: ["Steam doesn't share your achievements for this game. Check that your game details are Public in your Steam profile."], noText: ["borrowed", "no Steam achievements"], fault: "none" } },
     ...layouts("not-readable", ["line", "compact", "standard", "full"]),
     { host: { scale: 1500 } },
     ...layouts("not-readable-150", ["compact", "standard"]),
@@ -453,7 +464,7 @@ scenario("no-stats", "Steam answers 400 Requested app has no stats although the 
   steps: [
     { expect: { state: "running", text: ["Steam doesn't share your achievements for this game. Check that your game details are Public in your Steam profile."], noText: ["no Steam achievements", "Unreachable"], fault: "none" } },
     { advance: { ms: 2 * MIN } },
-    { expect: { text: ["Playing now", "Steam doesn't share your achievements for this game. Check that your game details are Public in your Steam profile."], noText: ["Unreachable"], fault: "none" } },
+    { expect: { text: ["Steam doesn't share your achievements for this game. Check that your game details are Public in your Steam profile."], noText: ["Unreachable"], fault: "none" } },
   ],
 });
 
@@ -462,14 +473,14 @@ scenario("borrowed", "A game borrowed through Steam Families, readable: Steam na
     ...reads(RUNE, { recentGames: [ASHEN] }),
   ],
   steps: [
-    { expect: { state: "running", text: ["Rune Table", "Playing now", "12 / 40"], fault: "none" } },
+    { expect: { state: "running", text: ["Rune Table", "12 / 40"], fault: "none" } },
     ...layouts("borrowed", ["standard"]),
   ],
 });
 
 scenario("playtime-private", "Total playtime kept private: Steam lists the recent games with no time; out of game, the last game played as usual.", {
   http: reads(ASHEN, { playing: false }).map((entry) => (entry.request.url === urls.recent ? fixture(urls.recent, recent([ASHEN], false, { playtime: false })) : entry)),
-  steps: [{ expect: { state: "running", text: ["Last game played", "12 / 40"], fault: "none" } }],
+  steps: [{ expect: { state: "running", text: ["12 / 40"], fault: "none" } }],
 });
 
 scenario("nothing", "No game now and none recently: how to start.", {
@@ -579,7 +590,7 @@ scenario("change-profile", "Change Steam profile…: the current link, and Cance
 });
 
 // --- failures: values kept, cause and age said.
-scenario("unreachable", "Steam stops answering in game (network, then 503): the values stay, the heading says Unreachable and how old the data is, never Playing now.", {
+scenario("unreachable", "Steam stops answering in game (network, then 503): the values stay, and above the bar the widget says Unreachable and how old the data is.", {
   http: [
     ...reads(ASHEN, { minutes: 0 }),
     failure(urls.summary, "transport_failed"),
@@ -587,9 +598,9 @@ scenario("unreachable", "Steam stops answering in game (network, then 503): the 
     fixture(urls.summary, json(503, {})),
   ],
   steps: [
-    { expect: { state: "running", text: ["Playing now"] } },
+    { expect: { state: "running" } },
     { advance: { ms: MIN } },
-    { expect: { noText: ["Playing now"], text: ["Unreachable · 1 min ago"] } },
+    { expect: { text: ["Unreachable · 1 min ago"] } },
     { advance: { ms: 4 * MIN } },
     { expect: { text: ["Unreachable · 5 min ago", "12 / 40"], fault: "none" } },
     ...layouts("unreachable"),
@@ -622,15 +633,15 @@ scenario("retry-after", "Steam limits the requests and says when to try again (4
     ...repeat(2, () => fixture(urls.player(ASHEN), player(ASHEN))),
   ],
   steps: [
-    { expect: { state: "running", text: ["Playing now"], fault: "none" } },
+    { expect: { state: "running", fault: "none" } },
     { advance: { ms: MIN } },
     { expect: { text: ["Rate limited · 1 min ago"], fault: "none" } },
     // A request within the 5 minutes would read the game again.
     { advance: { ms: 4 * MIN } },
-    { expect: { text: ["Rate limited · 5 min ago"], noText: ["Playing now"], fault: "none" } },
+    { expect: { text: ["Rate limited · 5 min ago"], fault: "none" } },
     ...layouts("retry-after", ["line", "standard"]),
     { advance: { ms: MIN } },
-    { expect: { text: ["Playing now"], fault: "none" } },
+    { expect: { fault: "none" } },
   ],
 });
 
@@ -656,12 +667,12 @@ scenario("refused", "Steam refuses the key (403, and the host's probe too): Play
   ],
 });
 
-scenario("playing-only-when-confirmed", "After Playing now, one failed read: the heading is no longer Playing now.", {
+scenario("playing-only-when-confirmed", "In game, one failed read: the values stay, above the bar how old they are.", {
   http: [...reads(ASHEN, { minutes: 0 }), failure(urls.summary, "timeout")],
   steps: [
-    { expect: { state: "running", text: ["Playing now"] } },
+    { expect: { state: "running" } },
     { advance: { ms: MIN } },
-    { expect: { noText: ["Playing now"], text: ["Unreachable · 1 min ago"], fault: "none" } },
+    { expect: { text: ["Unreachable · 1 min ago"], fault: "none" } },
   ],
 });
 
@@ -684,7 +695,6 @@ option("opt-no-rarity", "Rarity off: no percentages, the description instead.", 
 option("opt-reveal-hidden", "Hidden achievements revealed.", { "reveal-hidden": true, "missing-only": true }, ["full"]);
 option("opt-rows", "One row per list.", { rows: 1 }, ["full"]);
 option("opt-rows-5", "Five rows per list.", { rows: 5 }, ["full"]);
-option("opt-no-logo", "Steam logo off: the word Steam in its place.", { "show-logo": false }, ["compact", "standard", "full"]);
 
 // --- tracking.
 scenario("track", "Track achievements…: the checklist, one tracked on its own card, three in one card, the others greyed at three, then all unticked.", {
@@ -895,7 +905,7 @@ scenario("invisible-host-game", "Status Invisible: Steam names no game and the l
   subscriptions: { [GAME]: hostGame(ASHEN), ...LIVE.subscriptions },
   http: reads(ASHEN, { playing: false, recentGames: [COURIER, ASHEN] }),
   steps: [
-    { expect: { state: "running", text: ["Ashen Crown", "Playing now", "12 / 40"], noText: ["Neon Courier", "Last game played"], fault: "none" } },
+    { expect: { state: "running", text: ["Ashen Crown", "12 / 40"], noText: ["Neon Courier"], fault: "none" } },
     ...layouts("invisible-host-game", ["standard"]),
   ],
 });
@@ -913,7 +923,7 @@ scenario("host-game-switch", "Status Invisible: the host's game changes from Ash
     { expect: { state: "running", text: ["Ashen Crown", "12 / 40"] } },
     { advance: { ms: 10_000 } },
     { publish: { service: GAME, value: hostGame(COURIER) } },
-    { expect: { text: ["Neon Courier", "Playing now", "This game has no Steam achievements."], noText: ["Ashen Crown", "12 / 40"], fault: "none" } },
+    { expect: { text: ["Neon Courier", "This game has no Steam achievements."], noText: ["Ashen Crown", "12 / 40"], fault: "none" } },
     ...layouts("host-game-switch", ["standard"]),
   ],
 });
@@ -922,15 +932,15 @@ scenario("host-game-out-of-focus", "Status Invisible: the game loses the focus (
   subscriptions: { [GAME]: hostGame(ASHEN), ...LIVE.subscriptions },
   http: reads(ASHEN, { minutes: 3, playing: false, recentGames: [COURIER, ASHEN] }),
   steps: [
-    { expect: { state: "running", text: ["Ashen Crown", "Playing now", "12 / 40"] } },
+    { expect: { state: "running", text: ["Ashen Crown", "12 / 40"] } },
     // Past the minute: Steam's recent list may be read again.
     { advance: { ms: 70_000 } },
     { publish: { service: GAME, value: null } },
-    { expect: { text: ["Ashen Crown", "Last game played", "12 / 40"], noText: ["Neon Courier", "Playing now"], fault: "none" } },
+    { expect: { text: ["Ashen Crown", "12 / 40"], noText: ["Neon Courier"], fault: "none" } },
     ...layouts("host-game-out-of-focus", ["standard"]),
     { advance: { ms: 10_000 } },
     { publish: { service: GAME, value: hostGame(ASHEN) } },
-    { expect: { text: ["Ashen Crown", "Playing now", "12 / 40"], noText: ["Neon Courier"], fault: "none" } },
+    { expect: { text: ["Ashen Crown", "12 / 40"], noText: ["Neon Courier"], fault: "none" } },
   ],
 });
 
@@ -938,7 +948,7 @@ scenario("host-game-no-steam-id", "A game outside the Steam store (steamAppId nu
   subscriptions: { [GAME]: { steamAppId: null, name: "Manual game" }, ...LIVE.subscriptions },
   http: reads(ASHEN, { playing: false }),
   steps: [
-    { expect: { state: "running", text: ["Ashen Crown", "Last game played"], noText: ["Manual game", "Playing now"], fault: "none" } },
+    { expect: { state: "running", text: ["Ashen Crown"], noText: ["Manual game"], fault: "none" } },
     ...layouts("host-game-no-steam-id", ["standard"]),
   ],
 });
@@ -956,7 +966,7 @@ scenario("steam-offline-host-game", "Steam's offline mode: no game named, the ho
     ...images(ASHEN),
   ],
   steps: [
-    { expect: { state: "running", text: ["Ashen Crown", "Playing now", "12 / 40"], fault: "none" } },
+    { expect: { state: "running", text: ["Ashen Crown", "12 / 40"], fault: "none" } },
     { advance: { ms: 5_000 } },
     saved(1, ASHEN, START + 5_000),
     { expect: { text: ["13 / 40", "Endless Night", "New"], fault: "none" } },
@@ -995,7 +1005,7 @@ scenario("local-unlock-now", "Status Invisible: Endless Night unlocks; Steam on 
   calls: { [LOCAL]: [localPage(ASHEN), ...repeat(4, () => localPage(ASHEN, { A13: 0 }))] },
   steps: [
     SHOW,
-    { expect: { state: "running", text: ["Ashen Crown", "Playing now", "12 / 40"], fault: "none" } },
+    { expect: { state: "running", text: ["Ashen Crown", "12 / 40"], fault: "none" } },
     { advance: { ms: 5_000 } },
     saved(1, ASHEN, START + 5_000),
     { expect: { text: ["13 / 40", "Endless Night", "New"], fault: "none" } },
@@ -1014,7 +1024,7 @@ scenario("local-details-hidden", "Game details Friends Only and status Invisible
   http: [...atStart(ASHEN, repeat(2, () => fixture(urls.player(ASHEN), NOT_PUBLIC())), { details: "friends" }), ...probes(4)],
   calls: { [LOCAL]: repeat(6, () => localPage(ASHEN)) },
   steps: [
-    { expect: { state: "running", text: ["Ashen Crown", "Playing now", "12 / 40", "Crown of Ashes"], noText: ["Game details hidden"], fault: "none" } },
+    { expect: { state: "running", text: ["Ashen Crown", "12 / 40", "Crown of Ashes"], noText: ["Game details hidden"], fault: "none" } },
     ...layouts("local-details-hidden"),
     { host: { scale: 1500 } },
     ...layouts("local-details-hidden-150", ["compact", "standard"]),
@@ -1049,7 +1059,7 @@ scenario("local-unavailable", "Nothing on this computer (Steam elsewhere): exact
   http: reads(ASHEN, { playing: false, recentGames: [COURIER, ASHEN] }),
   calls: { [LOCAL]: repeat(4, NOTHING_HERE) },
   steps: [
-    { expect: { state: "running", text: ["Ashen Crown", "Playing now", "12 / 40"], noText: ["Neon Courier", "Last game played"], fault: "none" } },
+    { expect: { state: "running", text: ["Ashen Crown", "12 / 40"], noText: ["Neon Courier"], fault: "none" } },
     ...layouts("local-unavailable", ["standard"]),
   ],
 });
@@ -1061,15 +1071,57 @@ scenario("hidden", "Hidden, nothing is called; shown again after an hour, one re
     { host: { visible: false } },
     { advance: { ms: 60 * MIN } },
     { host: { visible: true } },
-    { expect: { fault: "none", text: ["Playing now", "12 / 40"] } },
+    { expect: { fault: "none", text: ["12 / 40"] } },
   ],
 });
 
-// --- catalog preview: Standard, 300 wide, dark, English, 150 %, logo off.
-scenario("preview", "The catalog preview: Standard at 300 px, dark, English, 150 %, Steam logo off. Fictional game and figures.", {
-  host: { scale: 1500, background: STAGE, size: { width: 300, height: 184 }, options: { "show-logo": false } },
+// --- catalog preview: Full (the default) at its preferred width, one row a
+// list, dark, English, 150 %, logo off.
+scenario("preview", "The catalog preview: Full, the default layout, at the preferred 340 px with one row a list, dark, English, 150 %. Fictional game and figures.", {
+  host: { scale: 1500, background: STAGE, size: PREFERRED, options: { layout: "full", rows: 1 } },
   http: reads(ASHEN),
-  steps: [{ expect: { state: "running", text: ["Ashen Crown", "Crown of Ashes"], image: "preview", fault: "none" } }],
+  // The game's name is in its banner.
+  steps: [{ expect: { state: "running", text: ["Crown of Ashes"], image: "preview", fault: "none" } }],
+});
+
+// --- the default: no option set, the manifest's size; Full, in English then French.
+scenario("default-layout", "A new widget, no option set: Full, the default layout, at the manifest's preferred size, its height fitted to the content without a jump; in English, then in French.", {
+  defaultLayout: true,
+  http: reads(ASHEN),
+  steps: [
+    { expect: { state: "running", text: ["Latest achievement", "Recently unlocked", "Next to get"], image: "en", fault: "none" } },
+    { host: { locale: "fr" } },
+    { expect: { text: ["Dernier succès", "Débloqués récemment", "Prochains à obtenir"], image: "fr", fault: "none" } },
+  ],
+});
+
+// --- "Game image" off: as a game without one, and the image never asked
+// (no answer for it: a request would fail the scenario).
+scenario("opt-no-cover", "Game image off, in French: Full shows no banner and the game's name in text, Standard its icon instead of the image; the store image is never downloaded.", {
+  host: { locale: "fr", region: { numberFormat: "fr", dateOrder: "dmy" }, options: { layout: "full", "show-cover": false }, size: { width: WIDTH.full, height: 200 } },
+  http: reads(ASHEN).filter((entry) => !entry.request.url.endsWith("/header.jpg")),
+  steps: [
+    { expect: { state: "running", text: ["12 / 40", "Débloqués récemment"], noText: ["Ashen Crown"], image: "full", fault: "none" } },
+    { menu: { id: "layout", value: "standard" } },
+    { host: { size: { width: WIDTH.standard, height: 200 } } },
+    { expect: { text: ["12 / 40", "Dernier succès"], noText: ["Ashen Crown"], image: "standard", fault: "none" } },
+  ],
+});
+
+// --- the goal of an unlocked achievement on hover, as of a missing one.
+scenario("tooltip-done", "Interactive, Full, in French: hovering an unlocked achievement shows its goal, on a row of the recently unlocked ones as on the latest achievement's card.", {
+  host: { locale: "fr", region: { numberFormat: "fr", dateOrder: "dmy" }, mode: "interactive", options: { layout: "full" }, size: { width: WIDTH.full, height: 200 } },
+  http: reads(ASHEN),
+  steps: [
+    { expect: { state: "running", text: ["Lame du veilleur"], fault: "none" } },
+    { pointer: { move: { text: "Lame du veilleur" } } },
+    { advance: { ms: 1000 } },
+    // The tooltip is drawn by the host, in the image only.
+    { expect: { image: "recent-row", fault: "none" } },
+    { pointer: { move: { text: "Couronne de cendres" } } },
+    { advance: { ms: 1000 } },
+    { expect: { image: "latest-card", fault: "none" } },
+  ],
 });
 
 // --- a very large game: thousands of achievements, within the turn budget.
@@ -1141,15 +1193,20 @@ scenario("huge-game", "5,000 achievements, Steam's cap, in French: a list of abo
     { expect: { fault: "none", image: "full" } },
     { menu: { id: "layout", value: "standard" } },
     { host: { mode: "interactive", size: { width: WIDTH.standard, height: 200 } } },
+    // The checklist, "more" and the search go through 5,000 achievements
+    // a slice a turn: their rows within a second.
     { menu: { id: "track" } },
+    { advance: { ms: 1000 } },
     { expect: { text: ["Suivre des succès", "0 / 3"], fault: "none", image: "pick" } },
     ...repeat(4, () => ({ pointer: { wheel: { target: { at: [150, 150] }, dx: 0, dy: 100 } } })),
     { expect: { text: ["50 de plus"], fault: "none", image: "pick-more" } },
     { pointer: { click: { text: "50 de plus" } } },
+    { advance: { ms: 1000 } },
     ...repeat(8, () => ({ pointer: { wheel: { target: { at: [150, 150] }, dx: 0, dy: 100 } } })),
     { expect: { text: ["50 de plus"], fault: "none" } },
     { pointer: { click: { label: "Chercher un succès" } } },
     { text: "savoir 123" },
+    { advance: { ms: 1000 } },
     { expect: { text: ["Page de savoir 123", "Page de savoir 1239"], noText: ["50 de plus"], fault: "none", image: "pick-search" } },
   ],
 });
@@ -1177,6 +1234,8 @@ scenario("huge-game-beyond", "12,000 achievements, a game from before Steam's ca
     { expect: { fault: "none", image: "full" } },
     { host: { mode: "interactive" } },
     { menu: { id: "track" } },
+    // 12,000 achievements a slice a turn: the checklist within two seconds.
+    { advance: { ms: 2000 } },
     { expect: { text: ["Track achievements"], fault: "none", image: "pick" } },
   ],
 });

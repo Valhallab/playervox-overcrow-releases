@@ -25,7 +25,7 @@ test("the last values at once, as the last game played", () => {
   assert.equal(state.game.name, "Ashen Crown");
   assert.deepEqual([state.game.unlocked, state.game.total], [1, 2]);
   assert.equal(state.game.playing, false);
-  assert.equal(logic.eyebrow(state), "Last game played");
+  assert.equal(state.game.playing, false);
   assert.equal(logic.latest(state).name, "Crown of Ashes");
   assert.equal(logic.rarity(logic.latest(state)), "4.2% of players");
 });

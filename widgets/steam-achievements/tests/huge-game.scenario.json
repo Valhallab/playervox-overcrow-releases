@@ -470,6 +470,11 @@
       }
     },
     {
+      "advance": {
+        "ms": 1000
+      }
+    },
+    {
       "expect": {
         "text": [
           "Suivre des succès",
@@ -549,6 +554,11 @@
         "click": {
           "text": "50 de plus"
         }
+      }
+    },
+    {
+      "advance": {
+        "ms": 1000
       }
     },
     {
@@ -680,6 +690,11 @@
     },
     {
       "text": "savoir 123"
+    },
+    {
+      "advance": {
+        "ms": 1000
+      }
     },
     {
       "expect": {

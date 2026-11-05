@@ -84,15 +84,22 @@ test("the checklist: 50 more at a time up to 200, a search for the others", asyn
   assert.equal(logic.pickList(state).length, 200, "the view's bound");
   assert.equal(logic.pickMore(state), false);
   assert.equal(state.pickCapped, true);
-  // Accents and case aside; a hidden achievement never by its name.
+  // Accents and case aside; a hidden achievement never by its name. The
+  // search goes through 5,000 a slice a turn: its rows within a second,
+  // the last ones shown meanwhile.
+  const shown = logic.pickList(state);
   logic.pickTyped("ACHIEVEMENT 123");
+  assert.equal(state.pickQuery, "ACHIEVEMENT 123", "the field at once");
+  assert.equal(logic.pickList(state), shown, "the rows stay until the new ones");
+  await slices(1);
   assert.deepEqual(logic.pickList(state).map((a) => a.name).sort(), ["Achievement 123", "Achievement 1230", "Achievement 1231", "Achievement 1233", "Achievement 1234", "Achievement 1235", "Achievement 1237", "Achievement 1238", "Achievement 1239"]);
   assert.equal(logic.pickList(state).length, 9);
   assert.equal(state.pickCapped, false);
   logic.pickTyped("4999");
+  await slices(1);
   assert.equal(logic.pickNone(state), true, "the hidden one is not found by its name");
   logic.pickTyped("");
-  assert.equal(logic.pickList(state).length, 50);
+  assert.equal(logic.pickList(state).length, 50, "without a search, at once");
   logic.closePick();
   logic.openPick();
   assert.equal(state.pickQuery, "");

@@ -97,11 +97,13 @@
 .full .gamecard {
   padding: 0 0 var(--space-4);
 }
-/* No store image (recent games): the game's icon, as in Standard. */
+/* No banner: a game without a store image (its icon and name, as in
+   Standard), or "Game image" off (the progress alone). */
 .full .gamecard.bare {
   padding-top: var(--space-4);
 }
 .full .gamecard > .head,
+.full .gamecard > .stale-row,
 .full .gamecard > .prog,
 .full .gamecard > .muted-line {
   padding: 0 var(--space-5);
@@ -157,28 +159,27 @@
 .line-icon.fallback {
   font-size: 12px;
 }
-.head-text {
-  flex-direction: column;
-  flex-grow: 1;
-  flex-shrink: 1;
-  min-width: 0;
-}
-.eyebrow-row {
+/* Steam does not answer: how old the values are, above the bar, only
+   then. Sentence case, so the age always fits, from Compact to Full, in
+   English and French (owner's correction). */
+.stale-row {
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
 }
-.live-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: var(--radius-pill);
-  background: var(--color-success);
-  flex-shrink: 0;
-}
-.eyebrow-icon {
+.stale-icon {
   font-size: 11px;
   color: var(--color-warning);
   flex-shrink: 0;
+}
+.stale-text {
+  flex-shrink: 1;
+  min-width: 0;
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  color: var(--color-warning);
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .eyebrow {
   flex-shrink: 1;
@@ -194,23 +195,14 @@
 .eyebrow.accent {
   color: var(--color-accent);
 }
-.eyebrow.live {
-  color: var(--color-success);
-}
-.eyebrow.warn {
-  color: var(--color-warning);
-}
-/* "Unreachable · 5 min ago": sentence case, so the age always fits, from
-   Compact to Full, in English and French (owner's correction). */
-.eyebrow.stale {
-  text-transform: none;
-  letter-spacing: 0;
-}
 .inline-icon {
   font-size: 11px;
   vertical-align: middle;
 }
 .game-name {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
   font-size: var(--font-size-body);
   font-weight: 600;
   white-space: nowrap;
@@ -790,21 +782,4 @@
 @keyframes breathe {
   from { opacity: 1; }
   to { opacity: 0.55; }
-}
-
-/* Steam symbol, cut from Valve's guide unchanged: 16 px, clear space of the
-   small circle's diameter (about 3 px) on every side. */
-.steam-mark {
-  width: 16px;
-  height: 16px;
-  margin: 3px;
-  flex-shrink: 0;
-  align-self: start;
-}
-.source-word {
-  flex-shrink: 0;
-  align-self: start;
-  margin-left: 6px;
-  font-size: var(--font-size-small);
-  color: var(--color-text-muted);
 }

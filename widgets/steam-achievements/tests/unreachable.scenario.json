@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "unreachable",
-  "description": "Steam stops answering in game (network, then 503): the values stay, the heading says Unreachable and how old the data is, never Playing now.",
+  "description": "Steam stops answering in game (network, then 503): the values stay, and above the bar the widget says Unreachable and how old the data is.",
   "host": {
     "startAt": 1767225600000,
     "storage": {
@@ -9,6 +9,13 @@
         "steamid": "76561198000000000",
         "input": "https://steamcommunity.com/profiles/76561198000000000"
       }
+    },
+    "options": {
+      "layout": "standard"
+    },
+    "size": {
+      "width": 300,
+      "height": 184
     }
   },
   "fixtures": {
@@ -401,10 +408,7 @@
   "steps": [
     {
       "expect": {
-        "state": "running",
-        "text": [
-          "Playing now"
-        ]
+        "state": "running"
       }
     },
     {
@@ -414,9 +418,6 @@
     },
     {
       "expect": {
-        "noText": [
-          "Playing now"
-        ],
         "text": [
           "Unreachable · 1 min ago"
         ]

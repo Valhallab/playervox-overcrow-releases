@@ -4,7 +4,7 @@
 </component>
 
 <component name="feature" props="a title metaText cls">
-  <box class={cls}>
+  <box class={cls} tooltip={achDesc(a)}>
     <achicon a={a} cls="ach-icon"/>
     <box class="feature-text">
       <box class="feature-top">
@@ -142,7 +142,7 @@
       </if>
       <scroll class="pick-list">
         <for each={pickList(state)} as="a" key={a.id}>
-          <button class={pickRowClass(a, state)} label={pickLabel(a, state)} disabled={pickDisabled(a, state)} on:activate={toggleTrack(a.id)}>
+          <button class={pickRowClass(a, state)} label={pickLabel(a, state)} tooltip={achDesc(a)} disabled={pickDisabled(a, state)} on:activate={toggleTrack(a.id)}>
             <achicon a={a} cls="row-icon"/>
             <box class="row-text">
               <text class={concealed(a) ? "row-name hidden" : "row-name"}>{achName(a)}</text>
@@ -175,7 +175,7 @@
         <box class="line-top">
           <gameicon cls="line-icon"/>
           <text class="line-name">{state.game.name}</text>
-          <if test={isStale(state)}><icon class="warn-icon" name={staleIcon(state)} tooltip={eyebrow(state)}/></if>
+          <if test={isStale(state)}><icon class="warn-icon" name={staleIcon(state)} tooltip={staleText(state)}/></if>
           <else-if test={state.game.known && !state.game.readable}><icon class="warn-icon" name="circle-alert" tooltip={muted(state.game)}/></else-if>
           <if test={hasAch(state.game)}>
             <if test={missingOnly(state.optionsVersion)}><text class="line-count">{countText(state.game, state.optionsVersion)}</text></if>
@@ -188,28 +188,23 @@
       </box>
     </if>
     <else>
-      <box class={hasHeader(state) ? "gamecard" : "gamecard bare"}>
-        <if test={layout(state.optionsVersion) == "full" && hasHeader(state)}>
-          <box class="banner-clip"><image class="banner" src={gameSrc(state)} label={state.game.name}/></box>
+      <box class={banner(state, state.optionsVersion) ? "gamecard" : "gamecard bare"}>
+        <if test={banner(state, state.optionsVersion)}>
+          <box class="banner-clip"><image class="banner" src={gameSrc(state, state.optionsVersion)} label={state.game.name}/></box>
         </if>
-        <box class="head">
-          <if test={layout(state.optionsVersion) != "full" || !hasHeader(state)}>
-            <if test={hasHeader(state)}><image class="capsule" src={gameSrc(state)} label={state.game.name}/></if>
+        <if test={gameHead(state, state.optionsVersion)}>
+          <box class="head">
+            <if test={hasHeader(state, state.optionsVersion)}><image class="capsule" src={gameSrc(state, state.optionsVersion)} label={state.game.name}/></if>
             <else><gameicon cls="capsule-icon"/></else>
-          </if>
-          <box class="head-text">
-            <box class="eyebrow-row" tooltip={staleTip(state)}>
-              <if test={isStale(state)}><icon class="eyebrow-icon" name={staleIcon(state)}/></if>
-              <else-if test={state.game.playing}><box class="live-dot"/></else-if>
-              <text class={eyebrowClass(state)}>{eyebrow(state)}</text>
-            </box>
-            <if test={layout(state.optionsVersion) != "full" || !hasHeader(state)}><text class="game-name">{state.game.name}</text></if>
+            <text class="game-name">{state.game.name}</text>
           </box>
-          <if test={steamLogo(state.theme, state.optionsVersion) != ""}>
-            <image class="steam-mark" src={steamLogo(state.theme, state.optionsVersion)} label="Steam" tooltip={t("source")}/>
-          </if>
-          <else><text class="source-word" tooltip={t("source")}>Steam</text></else>
-        </box>
+        </if>
+        <if test={isStale(state)}>
+          <box class="stale-row" tooltip={staleTip(state)}>
+            <icon class="stale-icon" name={staleIcon(state)}/>
+            <text class="stale-text">{staleText(state)}</text>
+          </box>
+        </if>
         <if test={hasAch(state.game)}>
           <box class="prog">
             <progress class={done(state.game) ? "bar done" : "bar"} value={state.game.unlocked} max={state.game.total} label={pct(state.game)}/>
@@ -258,7 +253,7 @@
             <box class="section">
               <text class="section-title">{t("recent")}</text>
               <for each={recent(state, rows(state.optionsVersion))} as="a" key={a.id}>
-                <box class="row">
+                <box class="row" tooltip={achDesc(a)}>
                   <achicon a={a} cls="row-icon"/>
                   <text class="row-name">{achName(a)}</text>
                   <text class="row-side">{a.at > 0 ? ago(state.now - a.at) : ""}</text>

@@ -10,7 +10,14 @@
         "input": "https://steamcommunity.com/profiles/76561198000000000"
       }
     },
-    "visible": false
+    "visible": false,
+    "options": {
+      "layout": "standard"
+    },
+    "size": {
+      "width": 300,
+      "height": 184
+    }
   },
   "fixtures": {
     "calls": {
@@ -689,7 +696,6 @@
         "state": "running",
         "text": [
           "Ashen Crown",
-          "Playing now",
           "12 / 40"
         ],
         "fault": "none"

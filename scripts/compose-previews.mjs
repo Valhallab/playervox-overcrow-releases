@@ -4,7 +4,7 @@
 // content in dark English at 150 %, on the stage colour), framed as
 // OverCrow's wrapper frames it in the overlay (padding, panel, border,
 // radius and shadow from the schema's dark tokens) and centred on a 4:3
-// stage, the smallest of three that holds it. Every widget keeps its real
+// stage, the smallest of four that holds it. Every widget keeps its real
 // size: one point of the widget is 1.5 pixels of the preview, whatever the
 // widget, and a page shows a preview at 1.5 pixels per CSS pixel at most.
 //
@@ -22,12 +22,14 @@ const root = fileURLToPath(new URL("..", import.meta.url));
 
 /**
  * The stages, points, all 4:3: small widgets fill a small stage, and the
- * large one holds the tallest widget at its usual size.
+ * large one holds the tallest widget at its usual size. The largest stays
+ * within the listing's 1,024 × 768 pixels.
  */
 export const STAGES_POINTS = [
   { width: 320, height: 240 },
   { width: 440, height: 330 },
   { width: 560, height: 420 },
+  { width: 680, height: 510 },
 ];
 /** Pixels per point of a preview: the scale of its scenario, 150 %. */
 export const DENSITY = 1.5;

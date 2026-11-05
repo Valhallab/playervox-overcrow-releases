@@ -83,6 +83,13 @@ test("each stage holds what the smaller one cannot", () => {
   }
 });
 
+test("every stage is a listing preview: 4:3, from 480 × 360 to 1,024 × 768", () => {
+  for (const { width, height } of STAGES) {
+    assert.equal(width * 3, height * 4, `${width} × ${height} is 4:3`);
+    assert.ok(width >= 480 && height >= 360 && width <= 1024 && height <= 768, `${width} × ${height}`);
+  }
+});
+
 test("a widget too large for every stage is refused", () => {
   const largest = STAGES.at(-1);
   assert.throws(() => composePreview(image(largest.width, 10, () => [0, 0, 0, 255]), tokens), /does not fit/);

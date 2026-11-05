@@ -1,6 +1,4 @@
 {
-  "playing": "Playing now",
-  "last-played": "Last game played",
   "achievements": "Achievements",
   "count-of": "of {total}",
   "percent": "{value}%",
@@ -62,7 +60,6 @@
   "pick-none": "No achievement matches.",
   "done": "Done",
   "nothing-shown": "Nothing to show",
-  "source": "Data from Steam",
   "not-readable": "Steam doesn't share your achievements for this game. Check that your game details are Public in your Steam profile.",
   "profile-cancel": "Cancel",
   "hidden-details-title": "Game details hidden",

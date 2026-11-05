@@ -1,6 +1,4 @@
 {
-  "playing": "En jeu",
-  "last-played": "Dernier jeu joué",
   "achievements": "Succès",
   "count-of": "sur {total}",
   "percent": "{value} %",
@@ -62,7 +60,6 @@
   "pick-none": "Aucun succès ne correspond.",
   "done": "Terminé",
   "nothing-shown": "Rien à afficher",
-  "source": "Données de Steam",
   "not-readable": "Steam ne donne pas vos succès pour ce jeu. Vérifiez que vos détails de jeu sont Publics dans votre profil Steam.",
   "profile-cancel": "Annuler",
   "hidden-details-title": "Détails de jeu cachés",

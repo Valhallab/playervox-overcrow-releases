@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "apiVersion": 1,
   "id": "com.playervox.overcrow.steam.achievements",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "name": {
     "en": "Steam achievements",
     "fr": "Succès Steam"
@@ -10,8 +10,8 @@
   "sizing": {
     "fit": "height",
     "preferred": {
-      "width": 300,
-      "height": 184
+      "width": 340,
+      "height": 532
     },
     "min": {
       "width": 150,
@@ -241,7 +241,7 @@
             }
           }
         ],
-        "default": "standard"
+        "default": "full"
       },
       {
         "type": "slider",
@@ -326,10 +326,10 @@
       },
       {
         "type": "toggle",
-        "id": "show-logo",
+        "id": "show-cover",
         "label": {
-          "en": "Steam logo",
-          "fr": "Logo Steam"
+          "en": "Game image",
+          "fr": "Image du jeu"
         },
         "default": true
       },

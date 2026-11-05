@@ -9,6 +9,13 @@
         "steamid": "76561198000000000",
         "input": "https://steamcommunity.com/profiles/76561198000000000"
       }
+    },
+    "options": {
+      "layout": "standard"
+    },
+    "size": {
+      "width": 300,
+      "height": 184
     }
   },
   "fixtures": {
@@ -387,12 +394,10 @@
         "state": "running",
         "text": [
           "Ashen Crown",
-          "Playing now",
           "12 / 40"
         ],
         "noText": [
-          "Neon Courier",
-          "Last game played"
+          "Neon Courier"
         ],
         "fault": "none"
       }

@@ -24,9 +24,9 @@ Valve Corporation ([trademarks](../../TRADEMARKS.md)).
 | Profile | "Last step · Your Steam profile": a field for the profile link (`steamcommunity.com/id/<name>`, `/profiles/<id>`, a SteamID or a custom name), in Interactive mode; in Passive mode, a line saying to switch to Interactive mode |
 | Loading | A skeleton, on the very first start only |
 | Thousands of achievements | The count, bar and percentage within seconds, then "Reading your achievements…" under them until the names are read (a few seconds per thousand achievements, once per session) |
-| Playing now | The game (store image, name), a green "Playing now", the count, bar and percentage, then by layout the tracked achievements (one: its own card; two or three: one card, a row each), else the next or latest achievement, and in Full the recently unlocked and next ones |
+| A game | The game (store image, name; Full: its image across the top), the count, bar and percentage, then by layout the tracked achievements (one: its own card; two or three: one card, a row each), else the next or latest achievement, and in Full the recently unlocked and next ones |
 | New unlock | The card in the accent colour, pulsing twice, with "New" for a minute |
-| Last game played | The same, with a neutral "Last game played" heading: not playing is not a problem |
+| Hover | Every achievement shown, unlocked or not (cards, rows, the checklist), has its goal as tooltip; a hidden one still missing, "Revealed when you unlock it." |
 | All achievements | Green bar and check |
 | No achievements | "This game has no Steam achievements." |
 | Not readable | Steam names the running game but refuses its achievements (a 403 with public game details: a game the player does not own; a 400 "Requested app has no stats"; `success: false`): the game, and "Steam doesn't share your achievements for this game. Check that your game details are Public in your Steam profile." instead of the bar; in Standard and Full, the path "In Steam: Profile › Edit Profile › Privacy Settings", "Game details: Public"; in One line, an amber alert icon with the text in its tooltip. Asked again every 10 minutes; never "no achievements", never a server failure |
@@ -34,11 +34,11 @@ Valve Corporation ([trademarks](../../TRADEMARKS.md)).
 | Profile hidden | A private profile (`communityvisibilitystate` 1): "Profile hidden", "Steam hides your profile. Set it to Public, and your game details too.", and the same path to "My profile and Game details: Public". Nothing else is asked until it is public. In Interactive mode, "Open Steam settings" (below) |
 | Open Steam settings | Under the path of both states above, in Interactive mode: a button (One line: the icon alone at the line's end) that opens Steam's privacy settings page, `steamcommunity.com/my/edit/settings`, in the browser; PlayerVox OverCrow shows the address and asks the first time. "Open web pages" not allowed: the button gives way to "Allow “Open web pages” in the Control Center." (One line: in its tooltip); the browser did not open: "Your browser didn't open. Try again." under the button. Not on the not-readable card: there the details are public, or Steam gives another reason |
 | Nothing | "Play a Steam game: its achievements show up here." |
-| Unreachable, rate limited | The heading becomes "Unreachable · 5 min ago" or "Rate limited · 2 min ago" (amber), the values stay; the tooltip says why and when it retries. Without any value yet: "Steam unreachable. Retrying every minute." |
+| Unreachable, rate limited | Above the bar, "Unreachable · 5 min ago" or "Rate limited · 2 min ago" (amber), the values stay; the tooltip says why and when it retries. One line: an amber icon, the text in its tooltip. Without any value yet: "Steam unreachable. Retrying every minute." |
 
-"Playing now" shows only after a successful read that named the game: a
-failed read never leaves it on. Values never disappear during a read, a
-failure or a limit. Texts are in English and French; numbers use the user's
+No status: the player knows whether they play. Values never disappear
+during a read, a failure or a limit; only their age is said, while Steam
+does not answer. Texts are in English and French; numbers use the user's
 format; names and descriptions of achievements come from Steam in the
 user's language.
 
@@ -46,13 +46,13 @@ user's language.
 
 | Row | Values |
 | --- | --- |
-| Layout | One line, Compact, Standard (default), Full. The frame fits its height to the content; the width is yours |
+| Layout | One line, Compact, Standard, Full (default; also for a value this version does not know). The frame fits its height to the content; the width is yours, 340 at first |
 | Rows per list | 1 to 6 (3): rows of each list in Full |
 | Achievements › Only missing achievements | The count becomes "28 missing", Standard shows the next one to get, Full one "Missing achievements" list of twice the rows |
 | Achievements › Sort missing | Easiest first (default), Rarest first, By name |
 | Achievements › Show rarity | On (default): "4.2% of players"; off, the description instead |
 | Achievements › Reveal hidden achievements | Off (default): "Hidden achievement", "Revealed when you unlock it.", a lock. No effect for the few games of more than about 6,000 achievements: Steam does not say which ones are hidden there |
-| Steam logo | On (default): the Steam symbol on the game card; off, the word "Steam" |
+| Game image | On (default): the game's store image (Full's banner, the capsule and name of Standard and Compact; a game without one, its icon and name); off, the game card is the progress alone (bar, count, percentage), and the image is never downloaded; on again, it comes at once. One line is unchanged |
 | Track achievements… | In Interactive mode: a checklist, the tracked ones first, then the missing achievements; a click ticks or unticks at once, up to three per game ("Limit reached" greys the other rows), "Done" closes it. The rows keep their place while it is open. With more than 50 missing achievements, a search field above the list (by name, accents and case aside; a hidden achievement never by its name), and "50 more" at its end, up to 200 rows; the search reaches the others. Tracked achievements stay at the top of the widget in the order they were added; one unlocked goes last with a green check and "Unlocked … ago", until it is unticked. Each game keeps its own (the last 20 games) |
 | Change Steam profile… | The profile step, with the current link and Cancel |
 
@@ -180,6 +180,20 @@ your computer and sends it only to `api.steampowered.com`. To revoke it:
   the user's language, without icons nor hidden flags. The view only ever
   receives the few achievements it shows, chosen without sorting the whole
   list, and memory holds the shown game only.
+- **Turns.** A widget runs on a quarter of one core and each VM turn has
+  50 ms of wall time, so every pass over a game's list is cut in slices of
+  1,000 achievements (`TURN_UNITS`), one turn each, a single host timer
+  apart for all of them: the view (counts, latest, missing), the
+  checklist's search, the checks of each read, the snapshot's size. A
+  list of up to 1,000 (`ONE_TURN`), a usual game's, is handled in the turn
+  of its action, as before. Nothing shows a partial result: the view keeps
+  what it showed until the whole list is through, and a new read, option,
+  language or keystroke restarts the pass (the last one wins). An index
+  of each list (position by API name) is filled as it is read; the names'
+  sort keys are prepared in the background after a long list is read.
+  The checklist opens and adds rows at once whatever the game (the view's
+  pass keeps its first 203 missing); a search on 5,000 achievements shows
+  its rows about half a second after the last keystroke, 1.2 s on 12,000.
 - **Storage.** The achievement lists of past games are kept within 180 kB
   in all (parts of 20,000 characters, the oldest making room), so the
   profile, the tracked achievements and the last view always fit the
@@ -187,12 +201,6 @@ your computer and sends it only to `api.steampowered.com`. To revoke it:
   nothing behind. A list that misses an achievement Steam reports (the game
   was updated) is read again. The last view is kept so a
   new start shows it at once, as the last game played, until Steam answers.
-- **The Steam symbol.** Cut out of Valve's `steam_brandAssets.eps` (through
-  PlayerVox OverCrow's `assets/service-logos/steam-symbol.png`), white on the
-  dark theme, black on the light one, shown in the widget only (owner's
-  decision of 2026-10-14; removed at once if Valve asks: empty
-  `STEAM_LOGO` in `logic.ts`). Never in marketing material: the catalog
-  preview is captured with the option off.
 
 ## Limits
 

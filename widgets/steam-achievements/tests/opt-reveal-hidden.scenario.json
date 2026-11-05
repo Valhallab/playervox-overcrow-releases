@@ -11,8 +11,13 @@
       }
     },
     "options": {
+      "layout": "standard",
       "reveal-hidden": true,
       "missing-only": true
+    },
+    "size": {
+      "width": 300,
+      "height": 184
     }
   },
   "fixtures": {
