@@ -20,6 +20,13 @@ const ROOT = fileURLToPath(new URL("../", import.meta.url));
  * heaviest take about 2 ms here (an answer read in slices), 4 ms there.
  */
 const TURN_MS = 3;
+/**
+ * The wall time of a turn on a shared CI runner measures its neighbours
+ * too (11 ms seen on a slice that handled no list item): there, the items
+ * a turn handles (the next test) are the bound, and the time is checked on
+ * a developer's machine.
+ */
+const WALL_TIME = process.env.CI ? "wall time on a shared CI runner: the items per turn are the bound there" : false;
 
 function drive(mode, count, flags = []) {
   const output = execFileSync(process.execPath, [...flags, DRIVER, mode, String(count)], { cwd: ROOT, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
@@ -27,7 +34,7 @@ function drive(mode, count, flags = []) {
 }
 
 for (const count of [5000, 12000]) {
-  test(`${count} achievements: no turn beyond its share, under Node without JIT`, () => {
+  test(`${count} achievements: no turn beyond its share, under Node without JIT`, { skip: WALL_TIME }, () => {
     // The machine may be busy: the best of three runs.
     let run;
     for (let attempt = 0; attempt < 3; attempt += 1) {
