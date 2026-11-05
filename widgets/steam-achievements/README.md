@@ -26,7 +26,7 @@ Valve Corporation ([trademarks](../../TRADEMARKS.md)).
 | Thousands of achievements | The count, bar and percentage within seconds, then "Reading your achievements…" under them until the names are read (a few seconds per thousand achievements, once per session) |
 | A game | The game (store image, name; Full: its image across the top), the count, bar and percentage, then by layout the tracked achievements (one: its own card; two or three: one card, a row each), else the next or latest achievement, and in Full the recently unlocked and next ones |
 | New unlock | The card in the accent colour, pulsing twice, with "New" for a minute |
-| Hover | Every achievement shown, unlocked or not (cards, rows, the checklist), has its goal as tooltip; a hidden one still missing, "Revealed when you unlock it." |
+| Hover | Every achievement shown, unlocked or not (cards, rows, the checklist), has its goal as tooltip, hidden ones' included once unlocked; a hidden one still missing, "Revealed when you unlock it.". A goal Steam does not give: "Hidden achievement: goal unavailable." or "Goal unavailable."; one beyond 256 bytes is cut with an ellipsis |
 | All achievements | Green bar and check |
 | No achievements | "This game has no Steam achievements." |
 | Not readable | Steam names the running game but refuses its achievements (a 403 with public game details: a game the player does not own; a 400 "Requested app has no stats"; `success: false`): the game, and "Steam doesn't share your achievements for this game. Check that your game details are Public in your Steam profile." instead of the bar; in Standard and Full, the path "In Steam: Profile › Edit Profile › Privacy Settings", "Game details: Public"; in One line, an amber alert icon with the text in its tooltip. Asked again every 10 minutes; never "no achievements", never a server failure |
@@ -51,7 +51,7 @@ user's language.
 | Achievements › Only missing achievements | The count becomes "28 missing", Standard shows the next one to get, Full one "Missing achievements" list of twice the rows |
 | Achievements › Sort missing | Easiest first (default), Rarest first, By name |
 | Achievements › Show rarity | On (default): "4.2% of players"; off, the description instead |
-| Achievements › Reveal hidden achievements | Off (default): "Hidden achievement", "Revealed when you unlock it.", a lock. No effect for the few games of more than about 6,000 achievements: Steam does not say which ones are hidden there |
+| Achievements › Reveal hidden achievements | Off (default): "Hidden achievement", "Revealed when you unlock it.", a lock. On: the name and the real goal of a hidden achievement still missing. No effect for the few games of more than about 6,000 achievements: Steam does not say which ones are hidden there |
 | Game image | On (default): the game's store image (Full's banner, the capsule and name of Standard and Compact; a game without one, its icon and name); off, the game card is the progress alone (bar, count, percentage), and the image is never downloaded; on again, it comes at once. One line is unchanged |
 | Track achievements… | In Interactive mode: a checklist, the tracked ones first, then the missing achievements; a click ticks or unticks at once, up to three per game ("Limit reached" greys the other rows), "Done" closes it. The rows keep their place while it is open. With more than 50 missing achievements, a search field above the list (by name, accents and case aside; a hidden achievement never by its name), and "50 more" at its end, up to 200 rows; the search reaches the others. Tracked achievements stay at the top of the widget in the order they were added; one unlocked goes last with a green check and "Unlocked … ago", until it is unticked. Each game keeps its own (the last 20 games) |
 | Change Steam profile… | The profile step, with the current link and Cancel |
@@ -66,7 +66,7 @@ keep the previous version of the widget).
 | --- | --- |
 | `account:steam` | The integrated Steam service. Read only: the widget never calls a trade route (`IEconService`), and PlayerVox OverCrow refuses any route outside the read interfaces of the player and the games. With `events` (`stats.saved`) and `local` (`achievements`): when Steam on this computer saves a game's achievements, and which they are |
 | `game.read` | The game PlayerVox OverCrow says you are playing (`game.subscribe`): its Steam app ID and name, even when your Steam status is Invisible or offline. Not sensitive: the overlay is a game aid |
-| `network` | Six `GET` routes of `https://api.steampowered.com` (below); the store image of a game on two Steam image hosts; the icons of achievements and games on `https://shared.akamai.steamstatic.com/community_assets/images/apps/`, a `file` parameter (`<name>.jpg`, catalog feature `network-file-param`) |
+| `network` | Seven `GET` routes of `https://api.steampowered.com` (below); the store image of a game on two Steam image hosts; the icons of achievements and games on `https://shared.akamai.steamstatic.com/community_assets/images/apps/`, a `file` parameter (`<name>.jpg`, catalog feature `network-file-param`) |
 | `links` | One page, `https://steamcommunity.com/my/edit/settings` (Steam's privacy settings), opened only when you click "Open Steam settings" (catalog feature `open-links`) |
 | `storage` | The profile link, the tracked achievements (three per game, 20 games), the last values shown and the achievement lists of the last three games |
 
@@ -78,6 +78,7 @@ keep the previous version of the widget).
 | `ISteamUserStats/GetPlayerAchievements/v1` | Every minute in game, at once when your game changes or, when this computer has none of the game's achievements, when Steam on it saves them (never twice within 5 seconds), every 10 minutes out of game (up to 3 MiB). With `l`, once per game and language, only for a game whose list exceeds its route's bound: the names and descriptions instead |
 | `ISteamUserStats/GetSchemaForGame/v2` | Once per game and language, then kept (up to 3 MiB: Steam's limit of 5,000 achievements per game fits); a list beyond, tried again a day later |
 | `ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2` | Once per game and day, without the key (up to 2 MiB) |
+| `IPlayerService/GetGameAchievements/v1` | Without the key, game data only: the goals of the game's achievements in your language (`language`), hidden ones' included, which the list of `GetSchemaForGame` leaves out. Only when the list has an empty goal; once per game and language, kept with the list; a day later at most, and only if an unlocked achievement still has none. Up to 3 MiB (about 6,000 achievements); beyond, or when it fails, the tooltip says the goal is unavailable, never a warning, tried again ten minutes later after a failure |
 
 At worst, in game all day: about 2,880 calls a day, far under the 100,000
 of Steam's terms.
@@ -212,6 +213,12 @@ your computer and sends it only to `api.steampowered.com`. To revoke it:
   needs a route the widget does not use); a borrowed game Steam reads
   shows as any game.
 - Games outside the Steam store are not seen.
+- The goals of a game of more than about 6,000 achievements exceed the
+  goals route's 3 MiB: its hidden achievements' goals stay unavailable.
+- Every `label` and `tooltip` the view fills with Steam's or the player's
+  text is cut within the schema's 256 bytes, never inside a character, an
+  emoji sequence or a flag; half a character (a lone surrogate) becomes
+  U+FFFD: the VM refuses a render with either, and the view would freeze.
 - Without proof that the game details are public, a game the player does
   not own, refused while Steam's presence names none, says the details are
   hidden.

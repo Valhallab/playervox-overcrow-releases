@@ -33,6 +33,10 @@
       "text": "Reads the share of players who unlocked each achievement (rarity). Once per game and day, without your key. Up to 2 MiB, for games of thousands of achievements."
     },
     {
+      "permission": "network:GET https://api.steampowered.com/IPlayerService/GetGameAchievements/v1/",
+      "text": "Reads the goal of each achievement of the shown game, hidden ones included, which Steam's list of the game leaves out, in your language. No key, game data only. Once per game and language, then kept with the list; read again a day later only if an unlocked achievement still has no goal. Up to 3 MiB, for games of thousands of achievements."
+    },
+    {
       "permission": "network:GET https://shared.akamai.steamstatic.com/community_assets/images/apps/{app}/{file}",
       "text": "Shows the icons of the achievements on screen and of the game, the file name taken from Steam's answer and checked (<name>.jpg). The one path Steam serves for every game, recent ones included. Each icon once; a failure is not asked again for an hour."
     },

@@ -158,6 +158,28 @@
       {
         "request": {
           "method": "GET",
+          "url": "https://api.steampowered.com/IPlayerService/GetGameAchievements/v1/?appid=1874100&language=english"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\n\t\"response\": {\n\t\t\"achievements\": [],\n\t\t\"schema_version\": 1,\n\t\t\"groups\": [\n\t\t\t{\n\t\t\t\t\"groupid\": 0,\n\t\t\t\t\"localized_name\": \"\",\n\t\t\t\t\"dlcappid\": 0,\n\t\t\t\t\"archived\": false,\n\t\t\t\t\"developeronly\": false,\n\t\t\t\t\"order\": 0,\n\t\t\t\t\"ispublic\": true\n\t\t\t}\n\t\t],\n\t\t\"schema_hash\": 1\n\t}\n}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.steampowered.com/IPlayerService/GetGameAchievements/v1/?appid=1874100&language=french"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\n\t\"response\": {\n\t\t\"achievements\": [],\n\t\t\"schema_version\": 1,\n\t\t\"groups\": [\n\t\t\t{\n\t\t\t\t\"groupid\": 0,\n\t\t\t\t\"localized_name\": \"\",\n\t\t\t\t\"dlcappid\": 0,\n\t\t\t\t\"archived\": false,\n\t\t\t\t\"developeronly\": false,\n\t\t\t\t\"order\": 0,\n\t\t\t\t\"ispublic\": true\n\t\t\t}\n\t\t],\n\t\t\"schema_hash\": 1\n\t}\n}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
           "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1874100/header.jpg"
         },
         "response": {

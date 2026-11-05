@@ -357,10 +357,29 @@ test("every achievement the view shows has its goal as tooltip", () => {
   const view = readFileSync(new URL("../view.ocml", import.meta.url), "utf8");
   // The cards (latest, tracked, next one), the tracked rows, the recent and
   // missing rows of Full, the checklist's rows.
-  assert.match(view, /<component name="feature"[^>]*>\s*<box class=\{cls\} tooltip=\{achDesc\(a\)\}>/);
-  assert.match(view, /class=\{a\.achieved \? "trow done" : "trow"\} tooltip=\{achDesc\(a\)\}/);
-  assert.equal((view.match(/<box class="row" tooltip=\{achDesc\(a\)\}>/g) ?? []).length, 2, "recent and missing rows");
-  assert.match(view, /<button class=\{pickRowClass\(a, state\)\}[^>]*tooltip=\{achDesc\(a\)\}/);
+  assert.match(view, /<component name="feature"[^>]*>\s*<box class=\{cls\} tooltip=\{goalTip\(a\)\}>/);
+  assert.match(view, /class=\{a\.achieved \? "trow done" : "trow"\} tooltip=\{goalTip\(a\)\}/);
+  assert.equal((view.match(/<box class="row" tooltip=\{goalTip\(a\)\}>/g) ?? []).length, 2, "recent and missing rows");
+  assert.match(view, /<button class=\{pickRowClass\(a, state\)\}[^>]*tooltip=\{goalTip\(a\)\}/);
   // Every element that names an achievement sits in one of those.
   assert.equal((view.match(/\{achName\(a\)\}<\/text>/g) ?? []).length, 5);
+});
+
+test("every bounded attribute of the view stays within 256 bytes", () => {
+  const view = readFileSync(new URL("../view.ocml", import.meta.url), "utf8");
+  // Outside data goes through clip(); the widget's own texts are one
+  // message each, every message within the bound in both languages.
+  const clipped = new Set(["goalTip(a)", "achLabel(a)", "gameLabel(state)", "pickLabel(a, state)", "hiddenTip(state)"]);
+  const ownTexts = new Set(["muted(state.game)", "profileMessage(state, true)", "rarity(a)", "staleText(state)", "staleTip(state)", "pct(state.game)"]);
+  const found = [...view.matchAll(/\b(label|tooltip|placeholder)=\{([^}]*)\}/g)].map((m) => m[2]);
+  assert.ok(found.length > 20);
+  for (const expression of found) {
+    const constant = /^t\("[a-z0-9-]+"\)$/.test(expression);
+    assert.ok(constant || clipped.has(expression) || ownTexts.has(expression), `${expression}: not within the bound`);
+  }
+  for (const messages of [EN, FR]) {
+    for (const [key, value] of Object.entries(messages)) {
+      assert.ok(logic.utf8Bytes(value) <= logic.LABEL_BYTES, `${key}: ${logic.utf8Bytes(value)} bytes`);
+    }
+  }
 });

@@ -16,6 +16,8 @@
   "rarity-short": "{value} %",
   "hidden": "Succès caché",
   "hidden-hint": "Révélé quand vous l'obtenez.",
+  "goal-hidden": "Succès caché : objectif indisponible.",
+  "goal-none": "Objectif indisponible.",
   "step": "Dernière étape",
   "profile-title": "Votre profil Steam",
   "profile-placeholder": "Lien de votre profil Steam",

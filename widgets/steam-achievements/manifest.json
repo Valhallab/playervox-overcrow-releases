@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "apiVersion": 1,
   "id": "com.playervox.overcrow.steam.achievements",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "name": {
     "en": "Steam achievements",
     "fr": "Succès Steam"
@@ -143,6 +143,28 @@
           }
         },
         "maxResponseBytes": 2097152
+      },
+      {
+        "origin": "https://api.steampowered.com",
+        "method": "GET",
+        "path": "/IPlayerService/GetGameAchievements/v1/",
+        "queryParams": {
+          "appid": {
+            "type": "integer",
+            "min": 1,
+            "max": 99999999,
+            "required": true
+          },
+          "language": {
+            "type": "enum",
+            "values": [
+              "english",
+              "french"
+            ],
+            "required": true
+          }
+        },
+        "maxResponseBytes": 3145728
       },
       {
         "origin": "https://shared.akamai.steamstatic.com",

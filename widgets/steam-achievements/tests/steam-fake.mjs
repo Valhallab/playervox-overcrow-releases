@@ -6,14 +6,19 @@ const API = "https://api.steampowered.com";
 export const PNG = "asset:png";
 
 export function achievementsOf(count, prefix = "ACH") {
-  return Array.from({ length: count }, (_, index) => ({
-    name: `${prefix}_${index}`,
-    displayName: `Achievement ${index}`,
-    description: `Do thing ${index}`,
-    hidden: index === count - 1 ? 1 : 0,
-    icon: `https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1/${String(index).padStart(40, "a")}.jpg`,
-    icongray: `https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1/${String(index).padStart(40, "b")}.jpg`,
-  }));
+  return Array.from({ length: count }, (_, index) => {
+    const hidden = index === count - 1;
+    return {
+      name: `${prefix}_${index}`,
+      displayName: `Achievement ${index}`,
+      // As Steam: no description for a hidden achievement, unlocked or not;
+      // its goal comes from GetGameAchievements only.
+      ...(hidden ? { goal: `Do secret thing ${index}` } : { description: `Do thing ${index}` }),
+      hidden: hidden ? 1 : 0,
+      icon: `https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1/${String(index).padStart(40, "a")}.jpg`,
+      icongray: `https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1/${String(index).padStart(40, "b")}.jpg`,
+    };
+  });
 }
 
 export function fakeSteam() {
@@ -103,8 +108,15 @@ export function fakeSteam() {
         if (game === undefined || game.schema.length === 0 || game.noStats === true) return json(400, { playerstats: { error: "Requested app has no stats", success: false } });
         // With `l`, Steam adds each achievement's name and description; as
         // in Steam's answers, `success` closes it.
-        const named = (a) => (query.l === undefined ? {} : { name: query.l === "french" ? `${a.displayName} (fr)` : a.displayName, description: a.description });
+        const named = (a) => (query.l === undefined ? {} : { name: query.l === "french" ? `${a.displayName} (fr)` : a.displayName, description: a.description ?? "" });
         return bounded(steam, "player" + (query.l === undefined ? "" : ":l"), json(200, { playerstats: { steamID: ID, gameName: game.name, achievements: game.schema.map((a) => ({ apiname: a.name, achieved: a.name in game.unlocked ? 1 : 0, unlocktime: game.unlocked[a.name] ?? 0, ...named(a) })), success: true } }));
+      }
+      if (path === "/IPlayerService/GetGameAchievements/v1/") {
+        // Keyless; the goal of every achievement, hidden ones included.
+        if (game === undefined) return json(200, { response: {} });
+        const goal = (a) => a.description ?? a.goal ?? "";
+        const name = (a) => (query.language === "french" ? `${a.displayName} (fr)` : a.displayName);
+        return bounded(steam, "goals", json(200, { response: { achievements: game.schema.map((a) => ({ internal_name: a.name, localized_name: name(a), localized_desc: query.language === "french" && goal(a) !== "" ? `${goal(a)} (fr)` : goal(a), hidden: a.hidden === 1, icon: `${"c".repeat(40)}.jpg`, icon_gray: `${"d".repeat(40)}.jpg`, player_percent_unlocked: "50.0", internal_key: 256, groupid: 0, archived: false, progress_type: 0 })), schema_version: 1, groups: [{ groupid: 0, localized_name: "", dlcappid: 0, archived: false, developeronly: false, order: 0, ispublic: true }], schema_hash: 2434873485 } }));
       }
       if (path === "/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/") {
         return bounded(steam, "rarity", json(200, { achievementpercentages: { achievements: (game?.schema ?? []).map((a, index) => ({ name: a.name, percent: 50 - index })) } }));
@@ -119,7 +131,7 @@ export function fakeSteam() {
 }
 
 /** The manifest's `maxResponseBytes` of each route, by name. */
-export const MANIFEST_BOUNDS = { schema: 3 * 1024 * 1024, player: 3 * 1024 * 1024, "player:l": 3 * 1024 * 1024, rarity: 2 * 1024 * 1024 };
+export const MANIFEST_BOUNDS = { schema: 3 * 1024 * 1024, player: 3 * 1024 * 1024, "player:l": 3 * 1024 * 1024, rarity: 2 * 1024 * 1024, goals: 3 * 1024 * 1024 };
 
 function bounded(steam, route, answer) {
   const bound = steam.bounds?.[route];

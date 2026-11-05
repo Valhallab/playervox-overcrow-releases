@@ -43,6 +43,7 @@ export const ROUTES = {
   player: `${API}/ISteamUserStats/GetPlayerAchievements/v1/`,
   schema: `${API}/ISteamUserStats/GetSchemaForGame/v2/`,
   rarity: `${API}/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/`,
+  goals: `${API}/IPlayerService/GetGameAchievements/v1/`,
 } as const;
 export type Route = keyof typeof ROUTES;
 /**
@@ -127,7 +128,30 @@ function object(value: JsonValue | undefined): JsonObject | null {
   return value !== null && typeof value === "object" && !Array.isArray(value) ? (value as JsonObject) : null;
 }
 function text(value: JsonValue | undefined): string | null {
-  return typeof value === "string" ? value : null;
+  return typeof value === "string" ? wellFormed(value) : null;
+}
+
+/**
+ * A text the view can show: half of a character (a lone surrogate, which a
+ * JSON escape can carry) becomes U+FFFD. The VM refuses a node or an
+ * attribute that is not valid text, and the view would freeze.
+ */
+export function wellFormed(value: string): string {
+  if (!/[\uD800-\uDFFF]/.test(value)) return value;
+  let out = "";
+  for (let i = 0; i < value.length; i += 1) {
+    const c = value.charCodeAt(i);
+    if (c >= 0xd800 && c < 0xdc00 && i + 1 < value.length) {
+      const next = value.charCodeAt(i + 1);
+      if (next >= 0xdc00 && next < 0xe000) {
+        out += value.charAt(i) + value.charAt(i + 1);
+        i += 1;
+        continue;
+      }
+    }
+    out += c >= 0xd800 && c < 0xe000 ? "\uFFFD" : value.charAt(i);
+  }
+  return out;
 }
 function whole(value: JsonValue | undefined): number | null {
   return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : null;
@@ -855,21 +879,32 @@ interface SchemaEntry {
   index: Map<string, number>;
   /** Sort keys of the names (`sortKey`), prepared in slices the first time they are needed. */
   keys: string[];
+  /** Achievements without a description: Steam's list leaves out hidden ones' goals. */
+  blank: number;
+  /** When the goals route was last read for this list (see `fillGoals`). */
+  goalsAt?: number;
+  /** After a failure of the goals route (Steam down), not before then. */
+  goalsRetry?: number;
 }
 
 /** Adds `item` to a list being read, and to its index. */
-function addEntry(list: SchemaAch[], index: Map<string, number>, item: SchemaAch): void {
-  if (!index.has(item.api)) index.set(item.api, list.length);
-  list.push(item);
+function addEntry(entry: SchemaEntry, item: SchemaAch): void {
+  if (!entry.index.has(item.api)) entry.index.set(item.api, entry.list.length);
+  entry.list.push(item);
+  if (item.desc === "") entry.blank += 1;
+}
+
+/** An empty list being read. */
+function newEntry(gameName = ""): SchemaEntry {
+  return { list: [], gameName, index: new Map(), keys: [], blank: 0 };
 }
 
 /** A list read at once (a small answer, storage): its index built here. */
-function entryOf(list: SchemaAch[], gameName: string): SchemaEntry {
-  const index = new Map<string, number>();
-  list.forEach((item, position) => {
-    if (!index.has(item.api)) index.set(item.api, position);
-  });
-  return { list, gameName, index, keys: [] };
+function entryOf(list: SchemaAch[], gameName: string, goalsAt?: number): SchemaEntry {
+  const entry = newEntry(gameName);
+  for (const item of list) addEntry(entry, item);
+  if (goalsAt !== undefined) entry.goalsAt = goalsAt;
+  return entry;
 }
 
 /** Everything read from Steam, the view being built from it. */
@@ -1483,6 +1518,7 @@ async function read(): Promise<void> {
   if (found !== null && "kind" in found) return failed(found, now);
   // In another language, the English list serves until its own arrives.
   const schema = found ?? model.schemas.get(schemaKey(appid, "english"));
+  const schemaLang = found ? lang : "english";
   if (schema === undefined) {
     // Not read yet (once a minute at most): what is known stays shown.
     if (state.phase === "game") render();
@@ -1501,6 +1537,9 @@ async function read(): Promise<void> {
   }
   // Still hidden since the last refusal (asked again in 10 minutes).
   if (model.hidden !== "") return hide(model.hidden, now);
+
+  // The goals Steam's list leaves out (hidden achievements'), once.
+  if (schema.blank > 0) await fillGoals(appid, schemaLang, schema, now);
 
   const rarity = model.rarity.get(appid);
   if (schema.list.length > 0 && (rarity === undefined || now - rarity.at >= RARITY_EVERY) && canCall("rarity", now)) {
@@ -1626,40 +1665,104 @@ async function namedList(appid: number, lang: string, now: number): Promise<Sche
   const key = `player:${lang}`;
   if (!canCall(key, now)) return null;
   const answer = await call("player", { steamid: model.steamid, appid, l: lang }, key, now);
-  let list: SchemaAch[] | null = null;
-  const index = new Map<string, number>();
+  let read: SchemaEntry | null = null;
   if (answer.kind === "ok") {
-    list = [];
-    const into = list;
+    const into = newEntry();
     const ok = answer.text === ""
       ? Array.isArray(object(object(answer.body)?.["playerstats"])?.["achievements"])
       : (await readItems(answer.text, "achievements", (entry) => {
           const item = namedItem(entry);
-          if (item !== null) addEntry(into, index, item);
+          if (item !== null) addEntry(into, item);
         })) === "read";
     if (answer.text === "") {
       const items = object(object(answer.body)?.["playerstats"])?.["achievements"];
       if (Array.isArray(items)) for (const entry of items) {
         const item = namedItem(entry);
-        if (item !== null) addEntry(into, index, item);
+        if (item !== null) addEntry(into, item);
       }
     }
-    if (!ok) list = null;
+    if (ok) read = into;
   } else if (answer.kind === "too-large" && model.playerIds.length > 0) {
-    const into: SchemaAch[] = [];
-    await eachSliced(model.playerIds, model.playerIds.length, (api) => addEntry(into, index, { api, name: api, desc: "", hidden: false, icon: "", iconGray: "" }));
-    list = into;
+    const into = newEntry();
+    await eachSliced(model.playerIds, model.playerIds.length, (api) => addEntry(into, { api, name: api, desc: "", hidden: false, icon: "", iconGray: "" }));
+    read = into;
   } else if (answer.kind === "status" && answer.status < 500) {
     // Refused: S4 without `l` says why, at its next read.
     return null;
   } else if (answer.kind !== "too-large") {
     return answer;
   }
-  if (list === null) return answer.kind === "too-large" ? null : { kind: "server" };
-  const schema: SchemaEntry = { list, gameName: "", index, keys: [] };
+  if (read === null) return answer.kind === "too-large" ? null : { kind: "server" };
+  const schema = read;
   model.schemas.set(schemaKey(appid, lang), schema);
   model.playerIds = [];
   return schema;
+}
+
+/**
+ * The goals route (GetGameAchievements, keyless): the goal of every
+ * achievement of a game in a language, hidden ones included, which
+ * Steam's list (S5) and the player's achievements with `l` (S4) leave out.
+ * It fills only the empty descriptions of a list. Read once per game and
+ * language; again a day later at most, and only if an unlocked
+ * achievement still has none. Its failures stay silent: the tooltip then
+ * says the goal is unavailable.
+ */
+const GOALS_EVERY = 24 * 60 * MINUTE;
+const GOALS_RETRY = 10 * MINUTE;
+
+async function goalsDue(appid: number, schema: SchemaEntry, now: number): Promise<boolean> {
+  if (schema.blank === 0) return false;
+  if (schema.goalsRetry !== undefined && now < schema.goalsRetry - TICK_SLACK) return false;
+  if (schema.goalsAt === undefined) return true;
+  if (now - schema.goalsAt < GOALS_EVERY - TICK_SLACK) return false;
+  let found = false;
+  const check = ([id]: [string, number]): void => {
+    const at = schema.index.get(id);
+    if (at !== undefined && (schema.list[at] as SchemaAch).desc === "") found = true;
+  };
+  const api = model.unlocked;
+  const here = localOf(appid);
+  await eachSliced(api ?? [], api?.size ?? 0, check);
+  if (!found) await eachSliced(here ?? [], here?.size ?? 0, check);
+  return found;
+}
+
+async function fillGoals(appid: number, lang: string, schema: SchemaEntry, now: number): Promise<void> {
+  const key = `goals:${lang}`;
+  if (!(await goalsDue(appid, schema, now)) || !canCall(key, now)) return;
+  const answer = await call("goals", { appid, language: lang }, key, now);
+  const each = (value: JsonValue): void => {
+    const item = object(value);
+    const api = text(item?.["internal_name"]);
+    const desc = text(item?.["localized_desc"]) ?? "";
+    if (api === null || desc.trim() === "") return;
+    const at = schema.index.get(api);
+    const entry = at === undefined ? undefined : schema.list[at];
+    if (at === undefined || entry === undefined || entry.desc !== "") return;
+    // A list read from the player's achievements says nothing hidden: this does.
+    schema.list[at] = { ...entry, desc, hidden: entry.hidden || item?.["hidden"] === true };
+    schema.blank -= 1;
+  };
+  if (answer.kind === "ok") {
+    if (answer.text === "") {
+      const items = object(object(answer.body)?.["response"])?.["achievements"];
+      if (Array.isArray(items)) await eachSliced(items, items.length, each);
+    } else {
+      await readItems(answer.text, "achievements", each);
+    }
+    schema.goalsAt = now;
+  } else if (answer.kind === "too-large" || (answer.kind === "status" && answer.status < 500)) {
+    // Beyond the route's bound (a game of more than about 6,000), or refused: a day later.
+    schema.goalsAt = now;
+  } else {
+    // Steam down, or the host's budget full: again in ten minutes.
+    schema.goalsRetry = now + GOALS_RETRY;
+  }
+  // Kept with the list when it is stored (a usual game's), the date of the
+  // read with it: never asked again at each start.
+  if (schema.goalsAt === now && schema.list.length <= 2000 && model.schemas.get(schemaKey(appid, lang)) === schema) void saveSchema(appid, lang, schema);
+
 }
 
 /** A game whose list exceeded the schema's bound within a day. */
@@ -1720,12 +1823,11 @@ async function schemaOf(answer: Ok, appid: number): Promise<SchemaEntry | null> 
     return list === null ? null : entryOf(list, text(game?.["gameName"]) ?? "");
   }
   const name = /"gameName":("(?:[^"\\]|\\.)*")/.exec(answer.text.slice(0, 4096));
-  const list: SchemaAch[] = [];
-  const index = new Map<string, number>();
+  const read = newEntry();
   // A game without achievements has no list: that is no achievement.
   const ok = (await readItems(answer.text, "achievements", (entry) => {
     const item = schemaItem(entry, appid);
-    if (item !== null) addEntry(list, index, item);
+    if (item !== null) addEntry(read, item);
   })) !== "invalid";
   let gameName = "";
   try {
@@ -1733,7 +1835,8 @@ async function schemaOf(answer: Ok, appid: number): Promise<SchemaEntry | null> 
   } catch {
     gameName = "";
   }
-  return ok ? { list, gameName, index, keys: [] } : null;
+  read.gameName = gameName;
+  return ok ? read : null;
 }
 
 interface PlayerRead { unlocked: Map<string, number>; total: number; ids: string[] }
@@ -2163,8 +2266,9 @@ async function loadSchema(appid: number, lang: string): Promise<SchemaEntry | nu
     textValue += part;
   }
   try {
-    const parsed = JSON.parse(textValue) as { n: string; l: [string, string, string, number, string, string][] };
-    const schema = entryOf(parsed.l.map(([api, name, desc, hidden, icon, iconGray]) => ({ api, name, desc, hidden: hidden === 1, icon, iconGray })), parsed.n);
+    const parsed = JSON.parse(textValue) as { n: string; g?: number | null; l: [string, string, string, number, string, string][] };
+    const goalsAt = typeof parsed.g === "number" ? parsed.g : undefined;
+    const schema = entryOf(parsed.l.map(([api, name, desc, hidden, icon, iconGray]) => ({ api, name, desc, hidden: hidden === 1, icon, iconGray })), parsed.n, goalsAt);
     model.schemas.set(key, schema);
     return schema;
   } catch {
@@ -2200,7 +2304,7 @@ async function saveSchemaNow(appid: number, lang: string, schema: SchemaEntry): 
   const key = schemaKey(appid, lang);
   // A list of thousands of achievements never fits: not even measured.
   if (schema.list.length > 2000) return;
-  const textValue = JSON.stringify({ n: schema.gameName, l: schema.list.map((a) => [a.api, a.name, a.desc, a.hidden ? 1 : 0, a.icon, a.iconGray]) });
+  const textValue = JSON.stringify({ n: schema.gameName, g: schema.goalsAt ?? null, l: schema.list.map((a) => [a.api, a.name, a.desc, a.hidden ? 1 : 0, a.icon, a.iconGray]) });
   if (textValue.length > SCHEMA_STORE_BYTES) return;
   const parts: string[] = [];
   for (let at = 0; at < textValue.length; at += SCHEMA_PART_CHARS) parts.push(textValue.slice(at, at + SCHEMA_PART_CHARS));
@@ -2483,7 +2587,8 @@ export function closePick(): void {
  */
 export function pickTyped(value: string): void {
   if (!state.picking) return;
-  state.pickQuery = value.slice(0, 64);
+  // 64 characters, never half of one.
+  state.pickQuery = Array.from(value).slice(0, 64).join("");
   pickOrder = null;
   pickRows = PICK_PAGE;
   startPick(false);
@@ -2607,6 +2712,94 @@ export function achName(a: Ach): string {
 export function achDesc(a: Ach): string {
   return concealed(a) ? t("hidden-hint") : a.desc;
 }
+
+/**
+ * The schema's bound of `label`, `tooltip` and `placeholder`
+ * (`MAX_LABEL_BYTES`): beyond it the VM refuses the whole render and the
+ * view keeps its previous scene, frozen.
+ */
+export const LABEL_BYTES = 256;
+const ELLIPSIS = "\u2026";
+
+/** UTF-8 bytes of a text, as the host counts them. */
+export function utf8Bytes(text: string): number {
+  let bytes = 0;
+  for (let i = 0; i < text.length; i += 1) {
+    const c = text.charCodeAt(i);
+    if (c < 0x80) bytes += 1;
+    else if (c < 0x800) bytes += 2;
+    else if (c >= 0xd800 && c < 0xdc00 && i + 1 < text.length) {
+      bytes += 4;
+      i += 1;
+    } else bytes += 3;
+  }
+  return bytes;
+}
+
+/** A code point that belongs to the character before it: marks, joiners, selectors, skin tones, tags. */
+function extendsPrevious(point: number): boolean {
+  return (
+    (point >= 0x300 && point <= 0x36f) ||
+    (point >= 0x1ab0 && point <= 0x1aff) ||
+    (point >= 0x1dc0 && point <= 0x1dff) ||
+    (point >= 0x20d0 && point <= 0x20ff) ||
+    (point >= 0xfe00 && point <= 0xfe0f) ||
+    (point >= 0xfe20 && point <= 0xfe2f) ||
+    point === 0x200c ||
+    point === 0x200d ||
+    (point >= 0x1f3fb && point <= 0x1f3ff) ||
+    (point >= 0xe0020 && point <= 0xe007f) ||
+    (point >= 0xe0100 && point <= 0xe01ef)
+  );
+}
+const isRegional = (point: number): boolean => point >= 0x1f1e6 && point <= 0x1f1ff;
+
+/**
+ * A text from Steam or the player within `max` UTF-8 bytes, "…" included:
+ * cut between two characters, never inside one, nor inside a flag, an
+ * accented letter written in two parts or an emoji sequence. The one cut
+ * of every bounded attribute the view fills with outside data.
+ */
+export function clip(text: string, max = LABEL_BYTES): string {
+  if (utf8Bytes(text) <= max) return text;
+  const points = Array.from(text);
+  const budget = max - utf8Bytes(ELLIPSIS);
+  let end = 0;
+  let bytes = 0;
+  while (end < points.length) {
+    const size = utf8Bytes(points[end] as string);
+    if (bytes + size > budget) break;
+    bytes += size;
+    end += 1;
+  }
+  const code = (index: number): number => (points[index] as string).codePointAt(0) ?? 0;
+  // The first character left out must not belong to the last one kept.
+  while (end > 0 && (extendsPrevious(code(end)) || code(end - 1) === 0x200d)) end -= 1;
+  // Flags are pairs of regional indicators: never half of one.
+  let regional = 0;
+  while (regional < end && isRegional(code(end - 1 - regional))) regional += 1;
+  if (regional % 2 === 1 && isRegional(code(end))) end -= 1;
+  return `${points.slice(0, end).join("").trimEnd()}${ELLIPSIS}`;
+}
+
+/**
+ * The goal of an achievement on hover, never empty: its description; a
+ * hidden one still missing, the hint; and when Steam gives none (always
+ * for a hidden one, unlocked included), say so.
+ */
+export function goalTip(a: Ach): string {
+  if (concealed(a)) return clip(t("hidden-hint"));
+  if (a.desc.trim() !== "") return clip(a.desc);
+  return clip(t(a.hidden ? "goal-hidden" : "goal-none"));
+}
+/** The name of an achievement as an image's label, within the bound. */
+export function achLabel(a: Ach): string {
+  return clip(achName(a));
+}
+/** The game's name as an image's label, within the bound. */
+export function gameLabel(s: typeof state): string {
+  return clip(s.game?.name ?? "");
+}
 export function achIcon(a: Ach): string {
   return a.achieved ? a.icon : a.iconGray;
 }
@@ -2670,7 +2863,7 @@ export function hiddenSetting(s: typeof state): string {
 /** One line has room for the title only: the rest in its tooltip, with what the link could not do. */
 export function hiddenTip(s: typeof state): string {
   const note = linkNote(s);
-  return `${hiddenBody(s)} ${hiddenPath(s)} › ${hiddenSetting(s)}${note === "" ? "" : ` ${note}`}`;
+  return clip(`${hiddenBody(s)} ${hiddenPath(s)} › ${hiddenSetting(s)}${note === "" ? "" : ` ${note}`}`);
 }
 
 /**
@@ -2925,7 +3118,7 @@ export function pickRowClass(a: Ach, s: typeof state): string {
 }
 /** The row's accessible name says whether it is tracked. */
 export function pickLabel(a: Ach, s: typeof state): string {
-  return isTracked(a, s) ? t("pick-on", { name: achName(a) }) : achName(a);
+  return clip(isTracked(a, s) ? t("pick-on", { name: achName(a) }) : achName(a));
 }
 export function rootClass(s: typeof state): string {
   return `root ${layout(s.optionsVersion)}${s.narrow ? " narrow" : ""}${s.wide ? " wide" : ""}`;

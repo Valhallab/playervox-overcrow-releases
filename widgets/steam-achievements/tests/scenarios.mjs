@@ -69,6 +69,7 @@ const urls = {
   player: (game, l = null) => `${API}/ISteamUserStats/GetPlayerAchievements/v1/?steamid=${ID}&appid=${game.appid}` + (l === null ? "" : `&l=${l}`),
   schema: (game, l = "english") => `${API}/ISteamUserStats/GetSchemaForGame/v2/?appid=${game.appid}&l=${l}`,
   rarity: (game) => `${API}/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?gameid=${game.appid}`,
+  goals: (game, l = "english") => `${API}/IPlayerService/GetGameAchievements/v1/?appid=${game.appid}&language=${l}`,
   vanity: (name) => `${API}/ISteamUser/ResolveVanityURL/v1/?vanityurl=${name}`,
   header: (game) => `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${game.appid}/header.jpg`,
   headerCdn: (game) => `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg`,
@@ -109,7 +110,8 @@ function schema(game, l, form = "old") {
   const url = (a, gray) => ICON_FORMS[form](game, `${hash(a.ic, gray)}.jpg`, gray);
   const achievements = game.achievements.map((a) => ({
     name: a.api, defaultvalue: 0, displayName: l === "french" ? a.fr : a.en, hidden: a.hidden ? 1 : 0,
-    description: a.hidden ? "" : l === "french" ? a.descFr : a.descEn,
+    // Steam gives no description of a hidden achievement, unlocked or not.
+    ...(a.hidden ? {} : { description: l === "french" ? a.descFr : a.descEn }),
     // Old hosts by default: the widget sets each file on its declared path.
     icon: a.icon ? url(a, false) : "",
     icongray: a.icon ? url(a, true) : "",
@@ -124,11 +126,21 @@ function player(game, unlockedNow = {}, l = null) {
   const achievements = game.achievements.map((a) => {
     const ago = a.api in unlockedNow ? unlockedNow[a.api] : a.ago;
     const item = { apiname: a.api, achieved: ago === null ? 0 : 1, unlocktime: ago === null ? 0 : at(ago) };
-    // With `l`, Steam adds the name and description, nothing about hidden ones.
-    if (l !== null) Object.assign(item, { name: l === "french" ? a.fr : a.en, description: l === "french" ? a.descFr : a.descEn });
+    // With `l`, Steam adds the name and description, nothing about hidden
+    // ones: a hidden one's description is empty, unlocked or not.
+    if (l !== null) Object.assign(item, { name: l === "french" ? a.fr : a.en, description: a.hidden ? "" : l === "french" ? a.descFr : a.descEn });
     return item;
   });
   return json(200, { playerstats: { steamID: ID, gameName: game.name, achievements, success: true } });
+}
+/** GetGameAchievements (keyless): every goal, hidden ones' included, as Steam sends it. */
+function goals(game, l = "english") {
+  const achievements = game.achievements.map((a) => ({
+    internal_name: a.api, localized_name: l === "french" ? a.fr : a.en, localized_desc: l === "french" ? a.descFr : a.descEn,
+    icon: `${hash(a.ic, false)}.jpg`, icon_gray: `${hash(a.ic, true)}.jpg`, hidden: a.hidden, player_percent_unlocked: String(a.rarity ?? "0.0"),
+    internal_key: 256, groupid: 0, archived: false, progress_type: 0,
+  }));
+  return json(200, { response: { achievements, schema_version: 1, groups: [{ groupid: 0, localized_name: "", dlcappid: 0, archived: false, developeronly: false, order: 0, ispublic: true }], schema_hash: 1 } });
 }
 function rarity(game) {
   return json(200, { achievementpercentages: { achievements: game.achievements.filter((a) => a.rarity !== null).map((a) => ({ name: a.api, percent: a.rarity })) } });
@@ -162,6 +174,8 @@ function reads(game, { minutes = 1, playing = true, visible = 3, unlockedNow = {
     fixture(urls.schema(game, "french"), schema(game, "french")),
     ...repeat(n, () => fixture(urls.player(game), player(game, unlockedNow))),
     fixture(urls.rarity(game), rarity(game), false),
+    fixture(urls.goals(game), goals(game), false),
+    fixture(urls.goals(game, "french"), goals(game, "french"), false),
     ...images(game),
   ];
 }
@@ -422,6 +436,8 @@ scenario("not-readable", "Steam names the running game but refuses its achieveme
     ...repeat(3, () => fixture(urls.player(ASHEN), NOT_PUBLIC())),
     ...probes(6),
     fixture(urls.rarity(ASHEN), rarity(ASHEN), false),
+    fixture(urls.goals(ASHEN), goals(ASHEN), false),
+    fixture(urls.goals(ASHEN, "french"), goals(ASHEN, "french"), false),
     ...images(ASHEN),
   ],
   steps: [
@@ -459,6 +475,8 @@ scenario("no-stats", "Steam answers 400 Requested app has no stats although the 
     fixture(urls.schema(ASHEN), schema(ASHEN, "english")),
     ...repeat(2, () => fixture(urls.player(ASHEN), NO_STATS())),
     fixture(urls.rarity(ASHEN), rarity(ASHEN), false),
+    fixture(urls.goals(ASHEN), goals(ASHEN), false),
+    fixture(urls.goals(ASHEN, "french"), goals(ASHEN, "french"), false),
     ...images(ASHEN),
   ],
   steps: [
@@ -833,6 +851,8 @@ function eventReads(game, { summaries, players, from = 0, unlockedNow = { A13: 0
     fixture(urls.schema(game, "french"), schema(game, "french")),
     ...repeat(1 + players, (_, n) => fixture(urls.player(game), player(game, n > from ? unlockedNow : {}))),
     fixture(urls.rarity(game), rarity(game), false),
+    fixture(urls.goals(game), goals(game), false),
+    fixture(urls.goals(game, "french"), goals(game, "french"), false),
     ...images(game),
   ];
 }
@@ -963,6 +983,8 @@ scenario("steam-offline-host-game", "Steam's offline mode: no game named, the ho
     fixture(urls.player(ASHEN), player(ASHEN)),
     fixture(urls.player(ASHEN), player(ASHEN, { A13: 0 })),
     fixture(urls.rarity(ASHEN), rarity(ASHEN), false),
+    fixture(urls.goals(ASHEN), goals(ASHEN), false),
+    fixture(urls.goals(ASHEN, "french"), goals(ASHEN, "french"), false),
     ...images(ASHEN),
   ],
   steps: [
@@ -983,6 +1005,8 @@ const atStart = (game, players, { details = "public" } = {}) => [
   fixture(urls.schema(game, "french"), schema(game, "french")),
   ...players,
   fixture(urls.rarity(game), rarity(game), false),
+  fixture(urls.goals(game), goals(game), false),
+  fixture(urls.goals(game, "french"), goals(game, "french"), false),
   ...images(game),
 ];
 
@@ -1124,6 +1148,99 @@ scenario("tooltip-done", "Interactive, Full, in French: hovering an unlocked ach
   ],
 });
 
+// --- the goal on hover, hidden ones' included. The latest (Crown of
+// Ashes) is a hidden story achievement, unlocked: Steam's list leaves its
+// goal out, the goals route gives it. Warden's Blade has none anywhere. Eye
+// of the Abyss, first to get, has a goal beyond the 256 bytes of a tooltip.
+// The Pale King, hidden and missing: the hint, its real name and goal with
+// "Reveal hidden achievements".
+const LONG_GOAL_FR = "Vaincre le Veilleur sans subir de dégâts, sans potion, sans allié, en moins de trois minutes, à la lueur des braises éteintes, après avoir allumé les quatre phares de la côte et rendu à chaque gardien déchu l'épée qu'il a perdue dans les cendres de la citadelle";
+const GOALS = {
+  ...ASHEN,
+  achievements: ASHEN.achievements.map((a) => {
+    if (a.api === "A1") return { ...a, hidden: true };
+    if (a.api === "A2") return { ...a, descEn: "", descFr: "" };
+    if (a.api === "A10") return { ...a, descFr: LONG_GOAL_FR, descEn: LONG_GOAL_FR };
+    return a;
+  }),
+};
+scenario("tooltip-goals", "Interactive, Full, in French: the goal on hover. A hidden achievement unlocked shows its real goal (from the goals route); one without any goal says it is unavailable; a goal beyond 256 bytes is cut with an ellipsis; a hidden one still missing shows the hint, then its name and real goal with Reveal hidden achievements. The view always renders.", {
+  host: { locale: "fr", region: { numberFormat: "fr", dateOrder: "dmy" }, mode: "interactive", options: { layout: "full" }, size: { width: WIDTH.full, height: 200 } },
+  http: reads(GOALS),
+  steps: [
+    { expect: { state: "running", text: ["Couronne de cendres", "Lame du veilleur", "Œil du gouffre"], fault: "none" } },
+    { pointer: { move: { text: "Couronne de cendres" } } },
+    { advance: { ms: 1000 } },
+    // The tooltip is drawn by the host, in the image only.
+    { expect: { image: "hidden-unlocked", fault: "none" } },
+    { pointer: { move: { text: "Lame du veilleur" } } },
+    { advance: { ms: 1000 } },
+    { expect: { image: "no-goal", fault: "none" } },
+    { pointer: { move: { text: "Œil du gouffre" } } },
+    { advance: { ms: 1000 } },
+    { expect: { image: "long-goal", fault: "none" } },
+    { pointer: { move: { text: "Succès caché" } } },
+    { advance: { ms: 1000 } },
+    { expect: { image: "hidden-missing", fault: "none" } },
+    { menu: { id: "reveal-hidden", value: true } },
+    { pointer: { move: { text: "Le Roi pâle" } } },
+    { advance: { ms: 1000 } },
+    { expect: { text: ["Le Roi pâle"], noText: ["Succès caché"], image: "hidden-revealed", fault: "none" } },
+  ],
+});
+
+// --- the goals route fails (Steam down): the tooltips say the goal is
+// unavailable, nothing else changes, never a warning.
+scenario("goals-unavailable", "Interactive, Full, in French: the goals route answers 503 at every try. The hidden achievement unlocked says its goal is unavailable, the one without any goal too; the values stay, no warning.", {
+  host: { locale: "fr", region: { numberFormat: "fr", dateOrder: "dmy" }, mode: "interactive", options: { layout: "full" }, size: { width: WIDTH.full, height: 200 } },
+  http: [
+    ...reads(GOALS).filter((entry) => !entry.request.url.includes("GetGameAchievements")),
+    ...repeat(4, () => fixture(urls.goals(GOALS, "french"), json(503, {}), false)),
+  ],
+  steps: [
+    { expect: { state: "running", text: ["Couronne de cendres", "Lame du veilleur"], noText: ["Injoignable"], fault: "none" } },
+    { pointer: { move: { text: "Couronne de cendres" } } },
+    { advance: { ms: 1000 } },
+    { expect: { image: "hidden-unlocked", fault: "none" } },
+    { pointer: { move: { text: "Lame du veilleur" } } },
+    { advance: { ms: 1000 } },
+    { expect: { image: "no-goal", fault: "none" } },
+  ],
+});
+
+// --- 1,000-byte names, goals and game name, accents and emoji: every
+// bounded attribute is cut, the view renders in every layout.
+const GIANT_TEXT = "Ünïcödé e\u0301 👩‍👩‍👧‍👦 🇫🇷 ".repeat(40).slice(0, 600);
+const GIANT = {
+  appid: 1_874_900,
+  name: `Endless ${GIANT_TEXT}`,
+  header: "header-ashen",
+  icon: "game-ashen",
+  achievements: Array.from({ length: 12 }, (_, n) => ({
+    api: `GIANT_${n}`, en: `${n} ${GIANT_TEXT}`, fr: `${n} ${GIANT_TEXT}`, ic: (n % 9) + 1,
+    ago: n % 3 === 0 ? 60 * (n + 1) : null, rarity: n % 4 === 0 ? null : 10 + n,
+    descEn: `${GIANT_TEXT} ${n}`, descFr: `${GIANT_TEXT} ${n}`, hidden: false, icon: true,
+  })),
+};
+scenario("giant-data", "Names, goals and a game name of about 1,000 bytes, accents, combining marks, emoji sequences and flags: every bounded attribute is cut within its bound, and the view renders in every layout, in the checklist and on hover. Never a frozen view.", {
+  host: { locale: "fr", region: { numberFormat: "fr", dateOrder: "dmy" }, mode: "interactive", options: { layout: "full" }, size: { width: WIDTH.full, height: 200 } },
+  http: reads(GIANT),
+  steps: [
+    { expect: { state: "running", text: ["4 / 12", "Débloqués récemment", "Prochains à obtenir"], fault: "none", image: "full" } },
+    { pointer: { move: { text: "Débloqués récemment" } } },
+    { menu: { id: "layout", value: "standard" } },
+    { host: { size: { width: WIDTH.standard, height: 200 } } },
+    { expect: { text: ["4 / 12"], fault: "none", image: "standard" } },
+    { menu: { id: "layout", value: "compact" } },
+    { expect: { text: ["4 / 12"], fault: "none" } },
+    { menu: { id: "layout", value: "line" } },
+    { expect: { text: ["4 / 12"], fault: "none" } },
+    { menu: { id: "layout", value: "full" } },
+    { menu: { id: "track" } },
+    { expect: { text: ["Suivre des succès"], fault: "none", image: "pick" } },
+  ],
+});
+
 // --- a very large game: thousands of achievements, within the turn budget.
 const HUGE = {
   appid: 1_874_200,
@@ -1145,6 +1262,7 @@ scenario("large-game", "A game of 1,500 achievements: read, sorted and shown in 
     fixture(urls.schema(HUGE), schema(HUGE, "english")),
     ...repeat(3, () => fixture(urls.player(HUGE), player(HUGE))),
     fixture(urls.rarity(HUGE), rarity(HUGE), false),
+    fixture(urls.goals(HUGE), goals(HUGE), false),
     ...images(HUGE),
   ],
   steps: [
@@ -1180,6 +1298,7 @@ scenario("huge-game", "5,000 achievements, Steam's cap, in French: a list of abo
     fixture(urls.schema(ARCHIVE, "french"), schema(ARCHIVE, "french")),
     ...repeat(3, () => fixture(urls.player(ARCHIVE), player(ARCHIVE))),
     fixture(urls.rarity(ARCHIVE), rarity(ARCHIVE), false),
+    fixture(urls.goals(ARCHIVE, "french"), goals(ARCHIVE, "french"), false),
     ...images(ARCHIVE).filter((entry) => !entry.request.url.includes("/header.jpg")),
     ...noHeader(ARCHIVE),
   ],
@@ -1221,6 +1340,8 @@ scenario("huge-game-beyond", "12,000 achievements, a game from before Steam's ca
     ...repeat(2, () => fixture(urls.player(VAULT), player(VAULT))),
     fixture(urls.player(VAULT, "english"), player(VAULT, {}, "english")),
     fixture(urls.rarity(VAULT), rarity(VAULT), false),
+    // The goals of 12,000 achievements exceed the route's 3 MiB: refused.
+    failure(urls.goals(VAULT), "response_body_limit", false),
     fixture(`${ICON_HOST}/${VAULT.appid}/${ICON_HASH[VAULT.icon]}.jpg`, jpeg(VAULT.icon), false),
     ...noHeader(VAULT),
   ],

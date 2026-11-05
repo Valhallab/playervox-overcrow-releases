@@ -122,6 +122,10 @@ test("12,000 achievements: the names come from the player's achievements, never 
   assert.equal(logic.latest(state).name, "Achievement 11997");
   assert.equal(logic.latest(state).icon, "", "the generic icon");
   assert.equal(logic.achievements().at(-1).hidden, false, "Steam does not say the hidden ones here");
+  // The goals route is beyond its bound for so many (about 400 bytes each):
+  // asked once, refused by the host, the goal then said unavailable.
+  assert.equal(steam.count("GetGameAchievements/v1/?appid=200"), 1);
+  assert.equal(logic.goalTip(logic.achievements().at(-1)), "Goal unavailable.");
   assert.equal(state.stale, "");
   assert.equal(steam.count("GetSchemaForGame"), 2);
   assert.equal(steam.requests.filter((url) => url.includes("GetPlayerAchievements") && url.includes("&l=")).length, 1);

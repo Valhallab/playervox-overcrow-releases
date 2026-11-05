@@ -16,6 +16,8 @@
   "rarity-short": "{value}%",
   "hidden": "Hidden achievement",
   "hidden-hint": "Revealed when you unlock it.",
+  "goal-hidden": "Hidden achievement: goal unavailable.",
+  "goal-none": "Goal unavailable.",
   "step": "Last step",
   "profile-title": "Your Steam profile",
   "profile-placeholder": "Link to your Steam profile",
