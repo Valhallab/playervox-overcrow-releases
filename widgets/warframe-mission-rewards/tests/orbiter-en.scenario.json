@@ -1,0 +1,80 @@
+{
+  "scenarioVersion": 1,
+  "name": "orbiter-en",
+  "description": "Playing, no mission yet this session: the stored recap.",
+  "host": {
+    "locale": "en",
+    "mode": "interactive",
+    "frame": true,
+    "startAt": 1793217600000,
+    "storage": {
+      "last": {
+        "node": "Mot",
+        "planet": "Void",
+        "faction": "Corrupted",
+        "factionId": "corrupted",
+        "typeId": "survival",
+        "typeName": "Survival",
+        "result": "succeeded",
+        "durationSeconds": 3734.4,
+        "rewards": 12,
+        "endedAt": 1793216400000,
+        "got": {
+          "A": 6,
+          "B": 3,
+          "C": 3
+        },
+        "credits": 128450,
+        "creditsName": "Credits",
+        "waves": null,
+        "pills": []
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "playing": true,
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "en"
+          }
+        }
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "orbiter-en",
+        "fault": "none"
+      }
+    }
+  ]
+}

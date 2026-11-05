@@ -1,0 +1,339 @@
+{
+  "scenarioVersion": 1,
+  "name": "arbitration",
+  "description": "An Arbitration on Casta: the Arbitration line and its two rules.",
+  "host": {
+    "startAt": 1793199600000
+  },
+  "steps": [
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode149",
+                "name": "Casta"
+              },
+              "planet": {
+                "id": "ceres",
+                "name": "Ceres"
+              },
+              "type": {
+                "id": "defense",
+                "name": "Defense"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "enemyLevel": {
+                "min": 60,
+                "max": 80
+              },
+              "fissure": null,
+              "modifiers": [
+                {
+                  "id": "arbitration",
+                  "name": "Arbitration",
+                  "stage": null
+                }
+              ]
+            }
+          },
+          "event": "mission_selected"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Arbitration",
+          "Drones first · no self-revive"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode149",
+                "name": "Casta"
+              },
+              "planet": {
+                "id": "ceres",
+                "name": "Ceres"
+              },
+              "type": {
+                "id": "defense",
+                "name": "Defense"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "enemyLevel": {
+                "min": 60,
+                "max": 80
+              },
+              "fissure": null,
+              "modifiers": [
+                {
+                  "id": "arbitration",
+                  "name": "Arbitration",
+                  "stage": null
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "arbitration-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode149",
+                "name": "Casta"
+              },
+              "planet": {
+                "id": "ceres",
+                "name": "Ceres"
+              },
+              "type": {
+                "id": "defense",
+                "name": "Defense"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "enemyLevel": {
+                "min": 60,
+                "max": 80
+              },
+              "fissure": null,
+              "modifiers": [
+                {
+                  "id": "arbitration",
+                  "name": "Arbitration",
+                  "stage": null
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "arbitration-en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode149",
+                "name": "Casta"
+              },
+              "planet": {
+                "id": "ceres",
+                "name": "Ceres"
+              },
+              "type": {
+                "id": "defense",
+                "name": "Defense"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "enemyLevel": {
+                "min": 60,
+                "max": 80
+              },
+              "fissure": null,
+              "modifiers": [
+                {
+                  "id": "arbitration",
+                  "name": "Arbitration",
+                  "stage": null
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1500,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "arbitration-fr-150",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode149",
+                "name": "Casta"
+              },
+              "planet": {
+                "id": "ceres",
+                "name": "Ceres"
+              },
+              "type": {
+                "id": "defense",
+                "name": "Defense"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "enemyLevel": {
+                "min": 60,
+                "max": 80
+              },
+              "fissure": null,
+              "modifiers": [
+                {
+                  "id": "arbitration",
+                  "name": "Arbitration",
+                  "stage": null
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1500,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "arbitration-en-150",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode149",
+                "name": "Casta"
+              },
+              "planet": {
+                "id": "ceres",
+                "name": "Ceres"
+              },
+              "type": {
+                "id": "defense",
+                "name": "Defense"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "enemyLevel": {
+                "min": 60,
+                "max": 80
+              },
+              "fissure": null,
+              "modifiers": [
+                {
+                  "id": "arbitration",
+                  "name": "Arbitration",
+                  "stage": null
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 540,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "arbitration-wide-fr-100",
+        "fault": "none"
+      }
+    }
+  ]
+}

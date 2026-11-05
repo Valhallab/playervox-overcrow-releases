@@ -1,0 +1,241 @@
+{
+  "scenarioVersion": 1,
+  "name": "murmur",
+  "description": "A Netracell against the Murmur: a node without a name yet, no enemy level, and Viral to avoid.",
+  "host": {
+    "startAt": 1793199600000
+  },
+  "steps": [
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode720",
+                "name": null
+              },
+              "planet": {
+                "id": "deimos",
+                "name": "Deimos"
+              },
+              "type": {
+                "id": "netracell",
+                "name": "Netracell"
+              },
+              "faction": {
+                "id": "murmur",
+                "name": "The Murmur"
+              },
+              "enemyLevel": null,
+              "fissure": null,
+              "modifiers": []
+            }
+          },
+          "event": "mission_selected"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Deimos · Netracell",
+          "The Murmur",
+          "Electricity",
+          "Radiation",
+          "Avoid: Viral"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode720",
+                "name": null
+              },
+              "planet": {
+                "id": "deimos",
+                "name": "Deimos"
+              },
+              "type": {
+                "id": "netracell",
+                "name": "Netracell"
+              },
+              "faction": {
+                "id": "murmur",
+                "name": "The Murmur"
+              },
+              "enemyLevel": null,
+              "fissure": null,
+              "modifiers": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "murmur-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode720",
+                "name": null
+              },
+              "planet": {
+                "id": "deimos",
+                "name": "Deimos"
+              },
+              "type": {
+                "id": "netracell",
+                "name": "Netracell"
+              },
+              "faction": {
+                "id": "murmur",
+                "name": "The Murmur"
+              },
+              "enemyLevel": null,
+              "fissure": null,
+              "modifiers": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "murmur-en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode720",
+                "name": null
+              },
+              "planet": {
+                "id": "deimos",
+                "name": "Deimos"
+              },
+              "type": {
+                "id": "netracell",
+                "name": "Netracell"
+              },
+              "faction": {
+                "id": "murmur",
+                "name": "The Murmur"
+              },
+              "enemyLevel": null,
+              "fissure": null,
+              "modifiers": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1500,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "murmur-fr-150",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode720",
+                "name": null
+              },
+              "planet": {
+                "id": "deimos",
+                "name": "Deimos"
+              },
+              "type": {
+                "id": "netracell",
+                "name": "Netracell"
+              },
+              "faction": {
+                "id": "murmur",
+                "name": "The Murmur"
+              },
+              "enemyLevel": null,
+              "fissure": null,
+              "modifiers": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1500,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "murmur-en-150",
+        "fault": "none"
+      }
+    }
+  ]
+}

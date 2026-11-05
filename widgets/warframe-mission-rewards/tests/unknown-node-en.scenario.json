@@ -1,0 +1,86 @@
+{
+  "scenarioVersion": 1,
+  "name": "unknown-node-en",
+  "description": "A node without published loot yet.",
+  "host": {
+    "locale": "en",
+    "mode": "interactive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "loading",
+              "node": {
+                "id": "SolNode999",
+                "name": null
+              },
+              "planet": null,
+              "faction": null,
+              "type": {
+                "id": "survival",
+                "name": "Survival"
+              },
+              "rewards": null,
+              "selectedAt": 1793217595000,
+              "modifiers": [],
+              "earned": null,
+              "credits": null,
+              "rewardsPending": false
+            }
+          },
+          "event": "mission_loading",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "en"
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Loot not published yet"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "unknown-node-en",
+        "fault": "none"
+      }
+    }
+  ]
+}

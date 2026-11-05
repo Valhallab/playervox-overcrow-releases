@@ -1,0 +1,349 @@
+{
+  "scenarioVersion": 1,
+  "name": "fissure-relic-en",
+  "description": "A Void Fissure: the equipped relic, its items at its refinement's rates (or its rarity), then the recap: your relic and the end bonus.",
+  "host": {
+    "locale": "en",
+    "mode": "passive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "assets": {
+    "currency": "tests/assets/item-currency.png",
+    "mod": "tests/assets/item-mod.png",
+    "resource": "tests/assets/item-resource.png",
+    "relic": "tests/assets/item-relic.png"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode304",
+                "name": "Roche"
+              },
+              "planet": {
+                "id": "phobos",
+                "name": "Phobos"
+              },
+              "faction": {
+                "id": "corpus",
+                "name": "Corpus"
+              },
+              "type": {
+                "id": "extermination",
+                "name": "Exterminate"
+              },
+              "fissure": {
+                "id": "meso",
+                "name": "Meso"
+              },
+              "modifiers": [],
+              "rewards": null,
+              "rewardsPending": false,
+              "earned": null,
+              "credits": null,
+              "relic": {
+                "id": "meso_f5_relic",
+                "name": "Meso F5 Relic",
+                "era": {
+                  "id": "meso",
+                  "name": "Meso"
+                },
+                "refinement": {
+                  "id": "radiant",
+                  "name": "Radiant"
+                },
+                "icon": "fixture:relic",
+                "iconPending": false,
+                "items": [
+                  {
+                    "id": "fulmin_prime_receiver",
+                    "name": "Fulmin Prime Receiver",
+                    "quantity": 1,
+                    "rarity": "rare",
+                    "chance": 0.1,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  },
+                  {
+                    "id": "bronco_prime_blueprint",
+                    "name": "Bronco Prime Blueprint",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": 0.1667,
+                    "category": "blueprint",
+                    "icon": null,
+                    "iconPending": false
+                  },
+                  {
+                    "id": "gunsen_prime_blueprint",
+                    "name": "Gunsen Prime Blueprint",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": 0.1667,
+                    "category": "blueprint",
+                    "icon": null,
+                    "iconPending": false
+                  },
+                  {
+                    "id": "orthos_prime_handle",
+                    "name": "Orthos Prime Handle",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": 0.1667,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  },
+                  {
+                    "id": "paris_prime_grip",
+                    "name": "Paris Prime Grip",
+                    "quantity": 1,
+                    "rarity": "uncommon",
+                    "chance": 0.2,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  },
+                  {
+                    "id": "shade_prime_systems",
+                    "name": "Shade Prime Systems",
+                    "quantity": 1,
+                    "rarity": "uncommon",
+                    "chance": 0.2,
+                    "category": "other",
+                    "icon": null,
+                    "iconPending": false
+                  }
+                ],
+                "reward": null
+              },
+              "selectedAt": 1793217400000,
+              "loadingAt": 1793217430000,
+              "startedAt": 1793217469000
+            },
+            "progress": null
+          },
+          "event": "mission_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "en"
+          },
+          "glossary": {
+            "language": "en"
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "10 Reactant to open the relic",
+          "Your relic"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fissure-radiant-en",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fissure-radiant-interactive-en",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "ended",
+              "result": "succeeded",
+              "endedAt": 1793217599000,
+              "durationSeconds": 131.4,
+              "credits": 1900,
+              "relic": {
+                "id": "meso_f5_relic",
+                "name": "Meso F5 Relic",
+                "era": {
+                  "id": "meso",
+                  "name": "Meso"
+                },
+                "refinement": {
+                  "id": "radiant",
+                  "name": "Radiant"
+                },
+                "icon": "fixture:relic",
+                "iconPending": false,
+                "items": [
+                  {
+                    "id": "fulmin_prime_receiver",
+                    "name": "Fulmin Prime Receiver",
+                    "quantity": 1,
+                    "rarity": "rare",
+                    "chance": 0.1,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  },
+                  {
+                    "id": "bronco_prime_blueprint",
+                    "name": "Bronco Prime Blueprint",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": 0.1667,
+                    "category": "blueprint",
+                    "icon": null,
+                    "iconPending": false
+                  },
+                  {
+                    "id": "gunsen_prime_blueprint",
+                    "name": "Gunsen Prime Blueprint",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": 0.1667,
+                    "category": "blueprint",
+                    "icon": null,
+                    "iconPending": false
+                  },
+                  {
+                    "id": "orthos_prime_handle",
+                    "name": "Orthos Prime Handle",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": 0.1667,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  },
+                  {
+                    "id": "paris_prime_grip",
+                    "name": "Paris Prime Grip",
+                    "quantity": 1,
+                    "rarity": "uncommon",
+                    "chance": 0.2,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  },
+                  {
+                    "id": "shade_prime_systems",
+                    "name": "Shade Prime Systems",
+                    "quantity": 1,
+                    "rarity": "uncommon",
+                    "chance": 0.2,
+                    "category": "other",
+                    "icon": null,
+                    "iconPending": false
+                  }
+                ],
+                "reward": {
+                  "id": "orthos_prime_handle",
+                  "name": "Orthos Prime Handle",
+                  "quantity": 1,
+                  "rarity": "common",
+                  "chance": 0.1667,
+                  "category": "weapon_part",
+                  "icon": "fixture:resource",
+                  "iconPending": false
+                }
+              }
+            }
+          },
+          "event": "mission_ended"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Your relic:",
+          "End bonus:"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fissure-recap-en",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fissure-recap-interactive-en",
+        "fault": "none"
+      }
+    }
+  ]
+}

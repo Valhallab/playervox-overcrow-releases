@@ -1,0 +1,704 @@
+{
+  "scenarioVersion": 1,
+  "name": "fissure-relic-fr",
+  "description": "A Void Fissure: the equipped relic, its items at its refinement's rates (or its rarity), then the recap: your relic and the end bonus.",
+  "host": {
+    "locale": "fr",
+    "mode": "passive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "assets": {
+    "currency": "tests/assets/item-currency.png",
+    "mod": "tests/assets/item-mod.png",
+    "resource": "tests/assets/item-resource.png",
+    "relic": "tests/assets/item-relic.png"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode304",
+                "name": "Roche"
+              },
+              "planet": {
+                "id": "phobos",
+                "name": "Phobos"
+              },
+              "faction": {
+                "id": "corpus",
+                "name": "Corpus"
+              },
+              "type": {
+                "id": "extermination",
+                "name": "Extermination"
+              },
+              "fissure": {
+                "id": "meso",
+                "name": "Meso"
+              },
+              "modifiers": [],
+              "rewards": null,
+              "rewardsPending": false,
+              "earned": null,
+              "credits": null,
+              "relic": {
+                "id": "meso_f5_relic",
+                "name": "Relique Meso F5",
+                "era": {
+                  "id": "meso",
+                  "name": "Meso"
+                },
+                "refinement": {
+                  "id": "radiant",
+                  "name": "Éclatante"
+                },
+                "icon": "fixture:relic",
+                "iconPending": false,
+                "items": [
+                  {
+                    "id": "fulmin_prime_receiver",
+                    "name": "Fulmin Prime - Culasse",
+                    "quantity": 1,
+                    "rarity": "rare",
+                    "chance": 0.1,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  },
+                  {
+                    "id": "bronco_prime_blueprint",
+                    "name": "Bronco Prime (Schéma)",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": 0.1667,
+                    "category": "blueprint",
+                    "icon": null,
+                    "iconPending": false
+                  },
+                  {
+                    "id": "gunsen_prime_blueprint",
+                    "name": "Gunsen Prime (Schéma)",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": 0.1667,
+                    "category": "blueprint",
+                    "icon": null,
+                    "iconPending": false
+                  },
+                  {
+                    "id": "orthos_prime_handle",
+                    "name": "Orthos Prime - Manche",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": 0.1667,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  },
+                  {
+                    "id": "paris_prime_grip",
+                    "name": "Paris Prime - Prise",
+                    "quantity": 1,
+                    "rarity": "uncommon",
+                    "chance": 0.2,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  },
+                  {
+                    "id": "shade_prime_systems",
+                    "name": "Shade Prime - Systèmes",
+                    "quantity": 1,
+                    "rarity": "uncommon",
+                    "chance": 0.2,
+                    "category": "other",
+                    "icon": null,
+                    "iconPending": false
+                  }
+                ],
+                "reward": null
+              },
+              "selectedAt": 1793217400000,
+              "loadingAt": 1793217430000,
+              "startedAt": 1793217469000
+            },
+            "progress": null
+          },
+          "event": "mission_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "fr"
+          },
+          "glossary": {
+            "language": "fr",
+            "term": {
+              "reactant": "Réactif",
+              "relic": "Relique",
+              "credits": "Crédits"
+            },
+            "refinement": {
+              "intact": "Intacte",
+              "exceptional": "Exceptionnelle",
+              "flawless": "Impeccable",
+              "radiant": "Éclatante"
+            }
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "10 réactifs pour ouvrir la relique",
+          "Votre relique"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fissure-radiant-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fissure-radiant-interactive-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode304",
+                "name": "Roche"
+              },
+              "planet": {
+                "id": "phobos",
+                "name": "Phobos"
+              },
+              "faction": {
+                "id": "corpus",
+                "name": "Corpus"
+              },
+              "type": {
+                "id": "extermination",
+                "name": "Extermination"
+              },
+              "fissure": {
+                "id": "meso",
+                "name": "Meso"
+              },
+              "modifiers": [],
+              "rewards": null,
+              "rewardsPending": false,
+              "earned": null,
+              "credits": null,
+              "relic": {
+                "id": "meso_h7_relic",
+                "name": "Relique Meso H7",
+                "era": {
+                  "id": "meso",
+                  "name": "Meso"
+                },
+                "refinement": {
+                  "id": "intact",
+                  "name": "Intacte"
+                },
+                "icon": "fixture:relic",
+                "iconPending": false,
+                "items": [
+                  {
+                    "id": "hildryn_prime_blueprint",
+                    "name": "Hildryn Prime (Schéma)",
+                    "quantity": 1,
+                    "rarity": "rare",
+                    "chance": 0.02,
+                    "category": "blueprint",
+                    "icon": null,
+                    "iconPending": false
+                  },
+                  {
+                    "id": "forma_blueprint",
+                    "name": "Forma (Schéma)",
+                    "quantity": 2,
+                    "rarity": "uncommon",
+                    "chance": 0.11,
+                    "category": "blueprint",
+                    "icon": null,
+                    "iconPending": false
+                  },
+                  {
+                    "id": "fulmin_prime_blueprint",
+                    "name": "Fulmin Prime (Schéma)",
+                    "quantity": 1,
+                    "rarity": "uncommon",
+                    "chance": 0.11,
+                    "category": "blueprint",
+                    "icon": null,
+                    "iconPending": false
+                  },
+                  {
+                    "id": "baruuk_prime_systems_blueprint",
+                    "name": "Baruuk Prime - Systèmes (Schéma)",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": 0.2533,
+                    "category": "blueprint",
+                    "icon": null,
+                    "iconPending": false
+                  },
+                  {
+                    "id": "braton_prime_barrel",
+                    "name": "Braton Prime - Canon",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": 0.2533,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  },
+                  {
+                    "id": "lex_prime_blueprint",
+                    "name": "Lex Prime (Schéma)",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": 0.2533,
+                    "category": "blueprint",
+                    "icon": null,
+                    "iconPending": false
+                  }
+                ],
+                "reward": null
+              },
+              "selectedAt": 1793217400000,
+              "loadingAt": 1793217430000,
+              "startedAt": 1793217469000
+            },
+            "progress": null
+          },
+          "event": "mission_started"
+        }
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fissure-intact-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fissure-intact-interactive-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode304",
+                "name": "Roche"
+              },
+              "planet": {
+                "id": "phobos",
+                "name": "Phobos"
+              },
+              "faction": {
+                "id": "corpus",
+                "name": "Corpus"
+              },
+              "type": {
+                "id": "extermination",
+                "name": "Extermination"
+              },
+              "fissure": {
+                "id": "meso",
+                "name": "Meso"
+              },
+              "modifiers": [],
+              "rewards": null,
+              "rewardsPending": false,
+              "earned": null,
+              "credits": null,
+              "relic": {
+                "id": "meso_f5_relic",
+                "name": "Relique Meso F5",
+                "era": {
+                  "id": "meso",
+                  "name": "Meso"
+                },
+                "refinement": null,
+                "icon": "fixture:relic",
+                "iconPending": false,
+                "items": [
+                  {
+                    "id": "fulmin_prime_receiver",
+                    "name": "Fulmin Prime - Culasse",
+                    "quantity": 1,
+                    "rarity": "rare",
+                    "chance": null,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  },
+                  {
+                    "id": "paris_prime_grip",
+                    "name": "Paris Prime - Prise",
+                    "quantity": 1,
+                    "rarity": "uncommon",
+                    "chance": null,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  },
+                  {
+                    "id": "shade_prime_systems",
+                    "name": "Shade Prime - Systèmes",
+                    "quantity": 1,
+                    "rarity": "uncommon",
+                    "chance": null,
+                    "category": "other",
+                    "icon": null,
+                    "iconPending": false
+                  },
+                  {
+                    "id": "bronco_prime_blueprint",
+                    "name": "Bronco Prime (Schéma)",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": null,
+                    "category": "blueprint",
+                    "icon": null,
+                    "iconPending": false
+                  },
+                  {
+                    "id": "gunsen_prime_blueprint",
+                    "name": "Gunsen Prime (Schéma)",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": null,
+                    "category": "blueprint",
+                    "icon": null,
+                    "iconPending": false
+                  },
+                  {
+                    "id": "orthos_prime_handle",
+                    "name": "Orthos Prime - Manche",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": null,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  }
+                ],
+                "reward": null
+              },
+              "selectedAt": 1793217400000,
+              "loadingAt": 1793217430000,
+              "startedAt": 1793217469000
+            },
+            "progress": null
+          },
+          "event": "mission_started"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Raffinement inconnu",
+          "peu commun"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fissure-unknown-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fissure-unknown-interactive-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "fissure-radiant-light-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1500,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fissure-radiant-150-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "ended",
+              "result": "succeeded",
+              "endedAt": 1793217599000,
+              "durationSeconds": 131.4,
+              "credits": 1900,
+              "relic": {
+                "id": "meso_f5_relic",
+                "name": "Relique Meso F5",
+                "era": {
+                  "id": "meso",
+                  "name": "Meso"
+                },
+                "refinement": {
+                  "id": "radiant",
+                  "name": "Éclatante"
+                },
+                "icon": "fixture:relic",
+                "iconPending": false,
+                "items": [
+                  {
+                    "id": "fulmin_prime_receiver",
+                    "name": "Fulmin Prime - Culasse",
+                    "quantity": 1,
+                    "rarity": "rare",
+                    "chance": 0.1,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  },
+                  {
+                    "id": "bronco_prime_blueprint",
+                    "name": "Bronco Prime (Schéma)",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": 0.1667,
+                    "category": "blueprint",
+                    "icon": null,
+                    "iconPending": false
+                  },
+                  {
+                    "id": "gunsen_prime_blueprint",
+                    "name": "Gunsen Prime (Schéma)",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": 0.1667,
+                    "category": "blueprint",
+                    "icon": null,
+                    "iconPending": false
+                  },
+                  {
+                    "id": "orthos_prime_handle",
+                    "name": "Orthos Prime - Manche",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": 0.1667,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  },
+                  {
+                    "id": "paris_prime_grip",
+                    "name": "Paris Prime - Prise",
+                    "quantity": 1,
+                    "rarity": "uncommon",
+                    "chance": 0.2,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  },
+                  {
+                    "id": "shade_prime_systems",
+                    "name": "Shade Prime - Systèmes",
+                    "quantity": 1,
+                    "rarity": "uncommon",
+                    "chance": 0.2,
+                    "category": "other",
+                    "icon": null,
+                    "iconPending": false
+                  }
+                ],
+                "reward": {
+                  "id": "orthos_prime_handle",
+                  "name": "Orthos Prime - Manche",
+                  "quantity": 1,
+                  "rarity": "common",
+                  "chance": 0.1667,
+                  "category": "weapon_part",
+                  "icon": "fixture:resource",
+                  "iconPending": false
+                }
+              }
+            }
+          },
+          "event": "mission_ended"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Votre relique :",
+          "Prime de fin :"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fissure-recap-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fissure-recap-interactive-fr",
+        "fault": "none"
+      }
+    }
+  ]
+}

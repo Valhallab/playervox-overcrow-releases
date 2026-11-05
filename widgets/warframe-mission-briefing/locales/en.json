@@ -1,0 +1,20 @@
+{
+  "pick-mission": "Pick a mission to see the briefing.",
+  "pick-mission-line": "Pick a mission",
+  "game-closed": "Run Warframe to see the briefing.",
+  "game-closed-line": "Run Warframe",
+  "unavailable": "Mission not found yet.",
+  "last-mission": "Last mission",
+  "refused": "Allow “Warframe: missions” in the Control Center.",
+  "refused-line": "Access denied · Control Center",
+  "refused-value": "{value} · Access denied",
+  "use": "Use",
+  "avoid": "Avoid: {list}",
+  "level": "Lv. {level}",
+  "level-range": "Lv. {min}–{max}",
+  "unknown-enemies": "Unknown enemies",
+  "no-advice": "No advice yet for these enemies.",
+  "stage": "{name} {stage}/3",
+  "reactant-hint": "Collect 10 {reactant} from {corrupted} enemies",
+  "arbitration-hint": "Drones first · no self-revive"
+}

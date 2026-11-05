@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.playervox.overcrow.warframe.dailies",
+  "version": "1.0.0",
+  "name": {
+    "en": "Checklist",
+    "fr": "Checklist"
+  },
+  "sizing": {
+    "fit": "height",
+    "preferred": {
+      "width": 300,
+      "height": 320
+    },
+    "min": {
+      "width": 220,
+      "height": 40
+    },
+    "max": {
+      "width": 640,
+      "height": 520
+    }
+  },
+  "permissions": {
+    "gameEvents": [
+      "warframe.mission",
+      "warframe.world"
+    ],
+    "storage": true
+  },
+  "wrapper": {
+    "menu": [
+      {
+        "type": "choice",
+        "id": "layout",
+        "icon": "layout-list",
+        "label": {
+          "en": "Layout",
+          "fr": "Affichage"
+        },
+        "choices": [
+          {
+            "value": "line",
+            "label": {
+              "en": "One line",
+              "fr": "Une ligne"
+            }
+          },
+          {
+            "value": "full",
+            "label": {
+              "en": "Full",
+              "fr": "Complet"
+            }
+          }
+        ],
+        "default": "full"
+      },
+      {
+        "type": "group",
+        "id": "tracked",
+        "icon": "list-checks",
+        "label": {
+          "en": "Tracked activities",
+          "fr": "Activités suivies"
+        },
+        "rows": [
+          {
+            "type": "toggle",
+            "id": "track-sortie",
+            "label": {
+              "en": "Sortie",
+              "fr": "Sortie"
+            },
+            "default": true
+          },
+          {
+            "type": "toggle",
+            "id": "track-archon",
+            "label": {
+              "en": "Archon Hunt",
+              "fr": "Chasse à l’Archonte"
+            },
+            "default": true
+          },
+          {
+            "type": "toggle",
+            "id": "track-netracells",
+            "label": {
+              "en": "Netracells",
+              "fr": "Netracells"
+            },
+            "default": true
+          },
+          {
+            "type": "toggle",
+            "id": "track-circuit",
+            "label": {
+              "en": "Normal Circuit",
+              "fr": "Circuit normal"
+            },
+            "default": true
+          },
+          {
+            "type": "toggle",
+            "id": "track-circuit-steel",
+            "label": {
+              "en": "The Circuit · Steel Path",
+              "fr": "Le Circuit · Route de l’Acier"
+            },
+            "default": true
+          },
+          {
+            "type": "toggle",
+            "id": "track-nightwave",
+            "label": {
+              "en": "Nightwave",
+              "fr": "Nightwave"
+            },
+            "default": true
+          },
+          {
+            "type": "toggle",
+            "id": "track-baro",
+            "label": {
+              "en": "Baro Ki’Teer",
+              "fr": "Baro Ki’Teer"
+            },
+            "default": true
+          }
+        ]
+      }
+    ]
+  }
+}

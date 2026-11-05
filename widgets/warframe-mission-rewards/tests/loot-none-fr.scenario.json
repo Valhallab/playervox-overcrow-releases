@@ -1,0 +1,132 @@
+{
+  "scenarioVersion": 1,
+  "name": "loot-none-fr",
+  "description": "An Archon Hunt mission: no published loot table.",
+  "host": {
+    "locale": "fr",
+    "mode": "interactive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "loading",
+              "node": {
+                "id": "SolNode305",
+                "name": "Iliad"
+              },
+              "planet": {
+                "id": "phobos",
+                "name": "Phobos"
+              },
+              "faction": null,
+              "type": {
+                "id": "assassination",
+                "name": "Assassinat"
+              },
+              "rewards": null,
+              "modifiers": [
+                {
+                  "id": "archon_hunt",
+                  "name": "Chasse aux Archontes",
+                  "stage": 3
+                }
+              ],
+              "rewardsPending": false,
+              "earned": null,
+              "credits": null,
+              "selectedAt": 1793217200000,
+              "loadingAt": 1793217220000
+            }
+          },
+          "event": "mission_loading",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "fr"
+          },
+          "glossary": {
+            "language": "fr",
+            "term": {
+              "reactant": "Réactif",
+              "relic": "Relique",
+              "credits": "Crédits"
+            }
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Pas de table de butin publiée pour cette mission"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "loot-none-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 44
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "loot-none-mini-fr",
+        "fault": "none"
+      }
+    }
+  ]
+}

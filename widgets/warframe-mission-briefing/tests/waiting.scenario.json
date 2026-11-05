@@ -1,0 +1,196 @@
+{
+  "scenarioVersion": 1,
+  "name": "waiting",
+  "description": "The three lines before a briefing: no mission chosen yet, Warframe closed, then Warframe's mission data unavailable.",
+  "host": {
+    "startAt": 1793199600000
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "Pick a mission to see the briefing."
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "first-run-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "first-run-en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1500,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "first-run-fr-150",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "playing": false
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Run Warframe to see the briefing."
+        ]
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "game-closed-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "game-closed-en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "playing": true,
+          "features": {
+            "mission": "unavailable"
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Mission not found yet."
+        ]
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "unavailable-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "unavailable-en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1500,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "unavailable-fr-150",
+        "fault": "none"
+      }
+    }
+  ]
+}

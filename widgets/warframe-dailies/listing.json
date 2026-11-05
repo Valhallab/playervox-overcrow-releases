@@ -1,0 +1,19 @@
+{
+  "author": "PlayerVox",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/warframe-dailies",
+  "preview": "assets/preview.png",
+  "defaultLocale": "en",
+  "localizations": [
+    {
+      "locale": "en",
+      "name": "Checklist",
+      "description": "What is left to do in Warframe today and this week, and when it resets: Sortie, Archon Hunt, Netracells, the Circuit and Nightwave, plus Baro Ki’Teer’s next visit. Ticks itself while you play; a click ticks or corrects any box. PlayerVox is not affiliated with Digital Extremes."
+    },
+    {
+      "locale": "fr",
+      "name": "Checklist",
+      "description": "Ce qu’il vous reste à faire dans Warframe aujourd’hui et cette semaine, et quand ça repart à zéro : Sortie, Chasse aux Archontes, Cellules de Netra, Circuit et Ondes Nocturnes, plus la prochaine visite de Baro Ki’Teer. Se coche seul pendant la partie ; un clic coche ou corrige chaque case. PlayerVox n’est pas affilié à Digital Extremes."
+    }
+  ]
+}

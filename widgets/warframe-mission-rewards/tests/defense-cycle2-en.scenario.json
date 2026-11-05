@@ -1,0 +1,542 @@
+{
+  "scenarioVersion": 1,
+  "name": "defense-cycle2-en",
+  "description": "Defense at wave 20, second cycle, enemies not counted yet.",
+  "host": {
+    "locale": "en",
+    "mode": "interactive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "assets": {
+    "currency": "tests/assets/item-currency.png",
+    "mod": "tests/assets/item-mod.png",
+    "relic": "tests/assets/item-relic.png"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode195",
+                "name": "Hydron"
+              },
+              "planet": {
+                "id": "sedna",
+                "name": "Sedna"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "type": {
+                "id": "defense",
+                "name": "Defense"
+              },
+              "rewards": {
+                "tables": [
+                  {
+                    "kind": "mission",
+                    "rotation": "A",
+                    "items": [
+                      {
+                        "id": "magazine_warp",
+                        "name": "Magazine Warp",
+                        "quantity": 1,
+                        "chance": 0.1,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neo_a16_relic",
+                        "name": "Neo A16 Relic",
+                        "quantity": 1,
+                        "chance": 0.1,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neo_c10_relic",
+                        "name": "Neo C10 Relic",
+                        "quantity": 1,
+                        "chance": 0.1,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neo_c11_relic",
+                        "name": "Neo C11 Relic",
+                        "quantity": 1,
+                        "chance": 0.1,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neo_c7_relic",
+                        "name": "Neo C7 Relic",
+                        "quantity": 1,
+                        "chance": 0.1,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neo_k10_relic",
+                        "name": "Neo K10 Relic",
+                        "quantity": 1,
+                        "chance": 0.1,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neo_v13_relic",
+                        "name": "Neo V13 Relic",
+                        "quantity": 1,
+                        "chance": 0.1,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neo_y2_relic",
+                        "name": "Neo Y2 Relic",
+                        "quantity": 1,
+                        "chance": 0.1,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "trick_mag",
+                        "name": "Trick Mag",
+                        "quantity": 1,
+                        "chance": 0.1,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "vitality",
+                        "name": "Vitality",
+                        "quantity": 1,
+                        "chance": 0.1,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "B",
+                    "items": [
+                      {
+                        "id": "axi_a21_relic",
+                        "name": "Axi A21 Relic",
+                        "quantity": 1,
+                        "chance": 0.0625,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_a22_relic",
+                        "name": "Axi A22 Relic",
+                        "quantity": 1,
+                        "chance": 0.0625,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_c12_relic",
+                        "name": "Axi C12 Relic",
+                        "quantity": 1,
+                        "chance": 0.0625,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_c13_relic",
+                        "name": "Axi C13 Relic",
+                        "quantity": 1,
+                        "chance": 0.0625,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_d6_relic",
+                        "name": "Axi D6 Relic",
+                        "quantity": 1,
+                        "chance": 0.0625,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_p10_relic",
+                        "name": "Axi P10 Relic",
+                        "quantity": 1,
+                        "chance": 0.0625,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_s21_relic",
+                        "name": "Axi S21 Relic",
+                        "quantity": 1,
+                        "chance": 0.0625,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_v14_relic",
+                        "name": "Axi V14 Relic",
+                        "quantity": 1,
+                        "chance": 0.0625,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "deep_freeze",
+                        "name": "Deep Freeze",
+                        "quantity": 1,
+                        "chance": 0.0625,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "endo",
+                        "name": "Endo",
+                        "quantity": 200,
+                        "chance": 0.0625,
+                        "category": "currency",
+                        "icon": "fixture:currency",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "hell_s_chamber",
+                        "name": "Hell's Chamber",
+                        "quantity": 1,
+                        "chance": 0.0625,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "hornet_strike",
+                        "name": "Hornet Strike",
+                        "quantity": 1,
+                        "chance": 0.0625,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "north_wind",
+                        "name": "North Wind",
+                        "quantity": 1,
+                        "chance": 0.0625,
+                        "category": "other"
+                      },
+                      {
+                        "id": "reflex_coil",
+                        "name": "Reflex Coil",
+                        "quantity": 1,
+                        "chance": 0.0625,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "shocking_touch",
+                        "name": "Shocking Touch",
+                        "quantity": 1,
+                        "chance": 0.0625,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "streamline",
+                        "name": "Streamline",
+                        "quantity": 1,
+                        "chance": 0.0625,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "C",
+                    "items": [
+                      {
+                        "id": "continuity",
+                        "name": "Continuity",
+                        "quantity": 1,
+                        "chance": 0.0226,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "convulsion",
+                        "name": "Convulsion",
+                        "quantity": 1,
+                        "chance": 0.0226,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "endo",
+                        "name": "Endo",
+                        "quantity": 400,
+                        "chance": 0.0226,
+                        "category": "currency",
+                        "icon": "fixture:currency",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "handspring",
+                        "name": "Handspring",
+                        "quantity": 1,
+                        "chance": 0.0226,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "master_thief",
+                        "name": "Master Thief",
+                        "quantity": 1,
+                        "chance": 0.0226,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "metal_auger",
+                        "name": "Metal Auger",
+                        "quantity": 1,
+                        "chance": 0.0226,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "ravage",
+                        "name": "Ravage",
+                        "quantity": 1,
+                        "chance": 0.0226,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "split_chamber",
+                        "name": "Split Chamber",
+                        "quantity": 1,
+                        "chance": 0.0226,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "stretch",
+                        "name": "Stretch",
+                        "quantity": 1,
+                        "chance": 0.0226,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "vital_sense",
+                        "name": "Vital Sense",
+                        "quantity": 1,
+                        "chance": 0.0226,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_a21_relic",
+                        "name": "Axi A21 Relic",
+                        "quantity": 1,
+                        "chance": 0.0968,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_a22_relic",
+                        "name": "Axi A22 Relic",
+                        "quantity": 1,
+                        "chance": 0.0968,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_c12_relic",
+                        "name": "Axi C12 Relic",
+                        "quantity": 1,
+                        "chance": 0.0968,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_c13_relic",
+                        "name": "Axi C13 Relic",
+                        "quantity": 1,
+                        "chance": 0.0968,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_d6_relic",
+                        "name": "Axi D6 Relic",
+                        "quantity": 1,
+                        "chance": 0.0968,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_p10_relic",
+                        "name": "Axi P10 Relic",
+                        "quantity": 1,
+                        "chance": 0.0968,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_s21_relic",
+                        "name": "Axi S21 Relic",
+                        "quantity": 1,
+                        "chance": 0.0968,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_v14_relic",
+                        "name": "Axi V14 Relic",
+                        "quantity": 1,
+                        "chance": 0.0968,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              "startedAt": 1793216338000,
+              "modifiers": [],
+              "earned": null,
+              "credits": null,
+              "rewardsPending": false
+            },
+            "progress": {
+              "wave": 20,
+              "waveEnemies": {
+                "total": 40,
+                "left": null
+              },
+              "round": null,
+              "rewards": 6,
+              "rotation": "B",
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C",
+                  "A",
+                  "A"
+                ],
+                "totals": {
+                  "A": 4,
+                  "B": 1,
+                  "C": 1
+                }
+              },
+              "cycle": {
+                "number": 2,
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "earned": 2
+              },
+              "clock": null,
+              "nextRewardAt": null,
+              "nextRewardWave": 21
+            }
+          },
+          "event": "wave_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "en"
+          }
+        }
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "defense-cycle2-en",
+        "fault": "none"
+      }
+    }
+  ]
+}

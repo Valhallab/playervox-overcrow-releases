@@ -1,0 +1,209 @@
+{
+  "scenarioVersion": 1,
+  "name": "caches-fr",
+  "description": "Sabotage: the caches' tables only.",
+  "host": {
+    "locale": "fr",
+    "mode": "interactive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "assets": {
+    "currency": "tests/assets/item-currency.png",
+    "mod": "tests/assets/item-mod.png",
+    "resource": "tests/assets/item-resource.png"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode177",
+                "name": "Kappa"
+              },
+              "planet": {
+                "id": "sedna",
+                "name": "Sedna"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "type": {
+                "id": "sabotage",
+                "name": "Sabotage"
+              },
+              "rewards": {
+                "tables": [
+                  {
+                    "kind": "caches",
+                    "rotation": "A",
+                    "items": [
+                      {
+                        "id": "alloy_plate",
+                        "name": "Alliage",
+                        "quantity": 300,
+                        "chance": 0.5,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "endo",
+                        "name": "Endo",
+                        "quantity": 80,
+                        "chance": 0.5,
+                        "category": "currency",
+                        "icon": "fixture:currency",
+                        "iconPending": false
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "caches",
+                    "rotation": "B",
+                    "items": [
+                      {
+                        "id": "morphics",
+                        "name": "Morphiques",
+                        "quantity": 1,
+                        "chance": 0.25,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "orokin_cell",
+                        "name": "Cellule Orokin",
+                        "quantity": 1,
+                        "chance": 0.25,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "endo",
+                        "name": "Endo",
+                        "quantity": 150,
+                        "chance": 0.5,
+                        "category": "currency",
+                        "icon": "fixture:currency",
+                        "iconPending": false
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "caches",
+                    "rotation": "C",
+                    "items": [
+                      {
+                        "id": "metal_auger",
+                        "name": "Pointe Métallique",
+                        "quantity": 1,
+                        "chance": 0.125,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neurodes",
+                        "name": "Neurodes",
+                        "quantity": 2,
+                        "chance": 0.375,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "endo",
+                        "name": "Endo",
+                        "quantity": 250,
+                        "chance": 0.5,
+                        "category": "currency",
+                        "icon": "fixture:currency",
+                        "iconPending": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              "startedAt": 1793217400000,
+              "modifiers": [],
+              "earned": null,
+              "credits": null,
+              "rewardsPending": false
+            },
+            "progress": {
+              "wave": null,
+              "waveEnemies": null,
+              "round": null,
+              "rewards": 0,
+              "rotation": null,
+              "earned": {
+                "rotations": [],
+                "totals": {
+                  "A": 0,
+                  "B": 0,
+                  "C": 0
+                }
+              },
+              "cycle": null,
+              "clock": null,
+              "nextRewardAt": null,
+              "nextRewardWave": null
+            }
+          },
+          "event": "mission_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "fr"
+          },
+          "glossary": {
+            "language": "fr",
+            "term": {
+              "reactant": "Réactif",
+              "relic": "Relique",
+              "credits": "Crédits"
+            }
+          }
+        }
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "caches-fr",
+        "fault": "none"
+      }
+    }
+  ]
+}

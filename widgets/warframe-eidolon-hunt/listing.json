@@ -1,0 +1,19 @@
+{
+  "author": "PlayerVox",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/warframe-eidolon-hunt",
+  "preview": "assets/preview.png",
+  "defaultLocale": "en",
+  "localizations": [
+    {
+      "locale": "en",
+      "name": "Eidolon hunt",
+      "description": "Times each Eidolon capture on the Plains against your best, and shows the night left at Cetus. Keeps your best and your last hunts on this computer. PlayerVox is not affiliated with Digital Extremes."
+    },
+    {
+      "locale": "fr",
+      "name": "Chasse aux Eidolons",
+      "description": "Chronomètre chaque capture d’Eidolon dans les Plaines face à votre record, et affiche la nuit restante à Cetus. Garde votre record et vos dernières chasses sur cet ordinateur. PlayerVox n’est pas affilié à Digital Extremes."
+    }
+  ]
+}

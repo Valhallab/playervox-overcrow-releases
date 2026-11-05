@@ -1,0 +1,288 @@
+{
+  "scenarioVersion": 1,
+  "name": "sortie-no-world",
+  "description": "A Sortie mission while the world of the day is unavailable: the Sortie line without a stage or a condition.",
+  "host": {
+    "startAt": 1793199600000
+  },
+  "steps": [
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode42",
+                "name": "Helene"
+              },
+              "planet": {
+                "id": "saturn",
+                "name": "Saturn"
+              },
+              "type": {
+                "id": "disruption",
+                "name": "Disruption"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "enemyLevel": {
+                "min": 65,
+                "max": 80
+              },
+              "fissure": null,
+              "modifiers": [
+                {
+                  "id": "sortie",
+                  "name": "Sortie",
+                  "stage": null
+                }
+              ]
+            }
+          },
+          "event": "mission_selected"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Sortie",
+          "Impact",
+          "Corrosive"
+        ],
+        "noText": [
+          "Sortie 2/3",
+          "Sniper Only"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode42",
+                "name": "Helene"
+              },
+              "planet": {
+                "id": "saturn",
+                "name": "Saturn"
+              },
+              "type": {
+                "id": "disruption",
+                "name": "Disruption"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "enemyLevel": {
+                "min": 65,
+                "max": 80
+              },
+              "fissure": null,
+              "modifiers": [
+                {
+                  "id": "sortie",
+                  "name": "Sortie",
+                  "stage": null
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "sortie-no-world-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode42",
+                "name": "Helene"
+              },
+              "planet": {
+                "id": "saturn",
+                "name": "Saturn"
+              },
+              "type": {
+                "id": "disruption",
+                "name": "Disruption"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "enemyLevel": {
+                "min": 65,
+                "max": 80
+              },
+              "fissure": null,
+              "modifiers": [
+                {
+                  "id": "sortie",
+                  "name": "Sortie",
+                  "stage": null
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "sortie-no-world-en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode42",
+                "name": "Helene"
+              },
+              "planet": {
+                "id": "saturn",
+                "name": "Saturn"
+              },
+              "type": {
+                "id": "disruption",
+                "name": "Disruption"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "enemyLevel": {
+                "min": 65,
+                "max": 80
+              },
+              "fissure": null,
+              "modifiers": [
+                {
+                  "id": "sortie",
+                  "name": "Sortie",
+                  "stage": null
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1500,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "sortie-no-world-fr-150",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode42",
+                "name": "Helene"
+              },
+              "planet": {
+                "id": "saturn",
+                "name": "Saturn"
+              },
+              "type": {
+                "id": "disruption",
+                "name": "Disruption"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "enemyLevel": {
+                "min": 65,
+                "max": 80
+              },
+              "fissure": null,
+              "modifiers": [
+                {
+                  "id": "sortie",
+                  "name": "Sortie",
+                  "stage": null
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1500,
+        "size": {
+          "width": 300,
+          "height": 240
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "sortie-no-world-en-150",
+        "fault": "none"
+      }
+    }
+  ]
+}

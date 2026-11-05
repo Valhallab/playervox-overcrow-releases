@@ -1,0 +1,73 @@
+{
+  "scenarioVersion": 1,
+  "name": "preview",
+  "description": "A Steel Path Disruption in a Neo Void Fissure, chosen on the star chart. The marketplace preview: dark theme, English, 150 %, on the stage colour; scripts/compose-previews.mjs frames it into assets/preview.png.",
+  "host": {
+    "startAt": 1793199600000,
+    "scale": 1500,
+    "background": "#1e242e",
+    "size": {
+      "width": 300,
+      "height": 240
+    }
+  },
+  "steps": [
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode308",
+                "name": "Apollo"
+              },
+              "planet": {
+                "id": "lua",
+                "name": "Lua"
+              },
+              "type": {
+                "id": "disruption",
+                "name": "Disruption"
+              },
+              "faction": {
+                "id": "corpus",
+                "name": "Corpus"
+              },
+              "enemyLevel": {
+                "min": 135,
+                "max": 140
+              },
+              "fissure": {
+                "id": "neo",
+                "name": "Neo"
+              },
+              "modifiers": [
+                {
+                  "id": "steel_path",
+                  "name": "Steel Path",
+                  "stage": null
+                }
+              ]
+            }
+          },
+          "event": "mission_selected"
+        }
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "Corpus",
+          "Puncture",
+          "Magnetic",
+          "Steel Path",
+          "Neo Fissure"
+        ],
+        "image": "preview",
+        "fault": "none"
+      }
+    }
+  ]
+}

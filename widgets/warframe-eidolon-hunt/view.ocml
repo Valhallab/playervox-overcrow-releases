@@ -1,0 +1,81 @@
+<!-- Eidolon hunt: one label over one big number, the night at Cetus in the
+     header, then a row per Eidolon of the tricap; in Full and wide, the past
+     hunts beside it. -->
+<box class={rootClass(state.view.layout)}>
+  <if test={state.view.layout == "line"}>
+    <box class="line" label={state.view.lineLabel}>
+      <icon class="line-icon tone-accent" name={state.view.lineIcon}/>
+      <for each={state.view.line} as="segment" key={segment.id}>
+        <text class={segment.cls}>{segment.text}</text>
+      </for>
+      <if test={state.view.lineSub != ""}>
+        <text class="meta-sep">·</text>
+        <text class={state.view.lineSubCls}>{state.view.lineSub}</text>
+      </if>
+    </box>
+  </if>
+  <else>
+    <box class="hunt-col">
+      <box class="eyebrow-row">
+        <icon class="eyebrow-icon tone-accent" name={state.view.cycleIcon}/>
+        <text class="eyebrow tone-accent">{t("eyebrow")}</text>
+        <box class="grow"/>
+        <if test={state.view.chip != ""}>
+          <text class={state.view.chipCls}>{state.view.chip}</text>
+        </if>
+      </box>
+
+      <box class="hero">
+        <box class="hero-head">
+          <text class="hero-label">{state.view.label}</text>
+          <if test={state.view.pill != ""}>
+            <box class="pill record">
+              <icon class="pill-icon" name="trophy"/>
+              <text class="pill-text">{state.view.pill}</text>
+            </box>
+          </if>
+        </box>
+        <text class="hero-time">{state.view.big}</text>
+        <if test={state.view.hintIcon != ""}>
+          <box class="hint-row">
+            <icon class="hint-icon" name={state.view.hintIcon}/>
+            <text class={state.view.hintCls}>{state.view.hint}</text>
+          </box>
+        </if>
+        <else>
+          <text class={state.view.hintCls}>{state.view.hint}</text>
+        </else>
+      </box>
+
+      <if test={state.view.rows.length > 0}>
+        <box class="splits">
+          <for each={state.view.rows} as="row" key={row.id}>
+            <box class={row.rowCls}>
+              <icon class={row.iconCls} name={row.icon}/>
+              <text class="split-name">{row.name}</text>
+              <text class={row.deltaCls}>{row.delta}</text>
+              <text class={row.timeCls}>{row.time}</text>
+            </box>
+          </for>
+        </box>
+      </if>
+    </box>
+
+    <if test={state.view.layout == "wide" && state.view.days.length > 0}>
+      <box class="history">
+        <box class="history-head">
+          <text class="section-title">{t("history-title")}</text>
+        </box>
+        <for each={state.view.days} as="day" key={day.id}>
+          <box class="past">
+            <box class="past-text">
+              <text class="past-when">{day.when}</text>
+              <text class="past-caps">{day.caps}</text>
+            </box>
+            <text class={day.bestCls}>{day.best}</text>
+          </box>
+        </for>
+      </box>
+    </if>
+  </else>
+</box>

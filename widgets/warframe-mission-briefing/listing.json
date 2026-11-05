@@ -1,0 +1,19 @@
+{
+  "author": "PlayerVox",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/warframe-mission-briefing",
+  "preview": "assets/preview.png",
+  "defaultLocale": "en",
+  "localizations": [
+    {
+      "locale": "en",
+      "name": "Mission briefing",
+      "description": "While a Warframe mission loads: the enemy faction and its level, the damage to use and the one to avoid, and what changes the mission (Steel Path, Void Fissure, Sortie condition). PlayerVox is not affiliated with Digital Extremes."
+    },
+    {
+      "locale": "fr",
+      "name": "Briefing de mission",
+      "description": "Pendant le chargement d’une mission Warframe : la faction ennemie et son niveau, les dégâts à utiliser et celui à éviter, et ce qui change la mission (Route de l’Acier, Fissure du Néant, condition de Sortie). PlayerVox n’est pas affilié à Digital Extremes."
+    }
+  ]
+}

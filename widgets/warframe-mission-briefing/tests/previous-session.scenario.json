@@ -1,0 +1,81 @@
+{
+  "scenarioVersion": 1,
+  "name": "previous-session",
+  "description": "A mission of an earlier launch of Warframe waits for the next choice.",
+  "host": {
+    "startAt": 1793199600000
+  },
+  "steps": [
+    {
+      "gameEvents": {
+        "warframe": {
+          "session": {
+            "startedAt": 1793199540000
+          },
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode195",
+                "name": "Hydron"
+              },
+              "planet": {
+                "id": "sedna",
+                "name": "Sedna"
+              },
+              "type": {
+                "id": "defense",
+                "name": "Defense"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "enemyLevel": {
+                "min": 30,
+                "max": 40
+              },
+              "fissure": null,
+              "modifiers": [],
+              "selectedAt": 1793192400000,
+              "loadingAt": null,
+              "startedAt": null
+            }
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Pick a mission to see the briefing."
+        ],
+        "noText": [
+          "Grineer"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "selectedAt": 1793199600000
+            }
+          },
+          "event": "mission_selected"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Grineer",
+          "Impact"
+        ]
+      }
+    }
+  ]
+}

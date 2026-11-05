@@ -1,0 +1,403 @@
+/* Mission briefing: the enemy and what hurts it, read in a glance. Same
+   padding, type scale and faction colours as PlayerVox's other Warframe
+   widgets. No frame inside the panel: rules and spacing make the
+   hierarchy. */
+.wf {
+  flex-direction: column;
+  width: 100%;
+  padding: 10px;
+  gap: 10px;
+}
+
+.briefing.strip,
+.briefing.wait {
+  padding: 0;
+}
+
+/* Wide (500 px and more, with modifiers): the modifiers on the right. */
+.briefing.wide {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: 16px;
+  row-gap: 10px;
+}
+
+.tone-warning { color: var(--color-warning); }
+.tone-muted { color: var(--color-text-muted); }
+
+/* Faction: a coloured dot, always with its name (colour is never alone). */
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.f-grineer { background: #e0895a; }
+.f-corpus { background: #5aa8e8; }
+.f-infested { background: #8fb35a; }
+.f-corrupted { background: #e8d8a8; }
+.f-sentient { background: #b48cf0; }
+.f-murmur { background: #5fc8c8; }
+.f-narmer { background: #d27a9a; }
+.f-scaldra { background: #d147c6; }
+.f-techrot { background: #6669e6; }
+.f-unknown { background: #71717a; }
+
+.theme-light .f-corrupted { background: #a8925a; }
+
+.enemy {
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Over an ended mission's briefing: the family's eyebrow, muted, so that
+   it is not read as the mission under way. */
+.eyebrow-row {
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+
+.eyebrow {
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.eyebrow-icon {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.where {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The level reads with the faction, on its baseline, never alone at the
+   edge; the name yields first. */
+.faction-big {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.faction-big .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  align-self: center;
+}
+
+.faction-name {
+  font-size: var(--font-size-title);
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.unknown .faction-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.level {
+  font-size: 13px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.level-sep {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+/* The engine aligns this row by the boxes' bottoms: the smaller text goes
+   up onto the name's baseline (2 px, measured at 100 %). */
+.level,
+.level-sep {
+  position: relative;
+  top: -2px;
+}
+
+/* Beside the smaller name of unknown enemies: on its baseline already,
+   and no louder than it. */
+.unknown .level,
+.unknown .level-sep {
+  top: 0;
+}
+
+.unknown .level {
+  color: var(--color-text-muted);
+}
+
+/* The chips wrap under the first one, never under the label. */
+.use-row {
+  flex-direction: row;
+  align-items: start;
+  gap: 6px;
+}
+
+.use-label {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-right: 2px;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.chips {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.chip {
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px 2px 2px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-hover);
+}
+
+/* A symbol's place, the same with the game's image or our icon, so that
+   nothing moves when the image arrives. The host's image is 72/64 of its
+   symbol: 22 px shows a 20 px symbol, 18 px a 16 px one. */
+.sym {
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sym-m,
+.sym-m .sym-img {
+  width: 22px;
+  height: 22px;
+}
+
+.sym-m .sym-icon {
+  font-size: 15px;
+}
+
+.sym-s,
+.sym-s .sym-img {
+  width: 18px;
+  height: 18px;
+}
+
+.sym-s .sym-icon {
+  font-size: 13px;
+}
+
+.chip-text {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.avoid-row {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.avoid-icon {
+  font-size: 13px;
+  color: var(--color-warning);
+}
+
+.avoid-text {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+/* Damage colours: identity only, always next to the name. */
+.d-impact { color: #c4cad4; }
+.d-puncture { color: #d8c49c; }
+.d-slash { color: #ef9a9a; }
+.d-heat { color: #f8a35e; }
+.d-cold { color: #8fd0f5; }
+.d-electricity { color: #d0a8ff; }
+.d-toxin { color: #8fdc78; }
+.d-blast { color: #f0a08a; }
+.d-corrosive { color: #d2e05a; }
+.d-gas { color: #8fd8c4; }
+.d-magnetic { color: #7fb6ff; }
+.d-radiation { color: #ece59a; }
+.d-viral { color: #f39ac2; }
+
+.theme-light .d-impact { color: #4b5563; }
+.theme-light .d-puncture { color: #7a5c2e; }
+.theme-light .d-slash { color: #b42318; }
+.theme-light .d-heat { color: #b45309; }
+.theme-light .d-cold { color: #0369a1; }
+.theme-light .d-electricity { color: #6d28d9; }
+.theme-light .d-toxin { color: #2f7d1e; }
+.theme-light .d-blast { color: #b4441f; }
+.theme-light .d-corrosive { color: #5f6b0a; }
+.theme-light .d-gas { color: #0f766e; }
+.theme-light .d-magnetic { color: #3f4fd6; }
+.theme-light .d-radiation { color: #8a6a00; }
+.theme-light .d-viral { color: #be185d; }
+
+/* Modifiers: neutral icons, no frames; one rule above them. */
+.mods {
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border);
+}
+
+.wide .mods {
+  padding-top: 0;
+  padding-left: 16px;
+  border-top: 0 none;
+  border-left: 1px solid var(--color-border);
+}
+
+.mod {
+  flex-direction: row;
+  align-items: start;
+  gap: 8px;
+}
+
+.mod-icon {
+  font-size: 14px;
+  margin-top: 1px;
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+}
+
+.mod-body {
+  flex-direction: column;
+  gap: 1px;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.mod-title {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mod-text {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+/* No advice: a muted note instead. */
+.status-line {
+  flex-direction: row;
+  align-items: start;
+  gap: 5px;
+}
+
+.wide .status-line {
+  grid-column: 1 / 3;
+}
+
+.status-icon {
+  font-size: 11px;
+  margin-top: 2px;
+  color: var(--color-text-muted);
+}
+
+.note {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+/* One line: waiting, or the folded briefing during the mission. */
+.line {
+  flex-direction: row;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 12px;
+}
+
+.line-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.wait-text {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+/* The damage types are never cut: below the default width, the faction
+   yields first. */
+.strip-faction {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.unknown .strip-faction {
+  color: var(--color-text-muted);
+}
+
+.meta-sep {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+/* In the strip, what to use is the main text. */
+.strip-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.strip-dmg {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* Under 260 px, the names only, so that the faction keeps its name. */
+.strip-joined,
+.narrow .strip-dmg {
+  display: none;
+}
+
+.narrow .strip-joined {
+  display: flex;
+}

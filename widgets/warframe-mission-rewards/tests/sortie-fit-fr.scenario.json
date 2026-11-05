@@ -1,0 +1,401 @@
+{
+  "scenarioVersion": 1,
+  "name": "sortie-fit-fr",
+  "description": "A Sortie's table at the user's height: the rows it holds in Passive mode, every row in a scroll in Interactive mode.",
+  "host": {
+    "locale": "fr",
+    "mode": "passive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "assets": {
+    "currency": "tests/assets/item-currency.png",
+    "mod": "tests/assets/item-mod.png",
+    "resource": "tests/assets/item-resource.png",
+    "relic": "tests/assets/item-relic.png"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode57",
+                "name": "Morax"
+              },
+              "planet": {
+                "id": "europa",
+                "name": "Europe"
+              },
+              "faction": {
+                "id": "corpus",
+                "name": "Corpus"
+              },
+              "type": {
+                "id": "excavation",
+                "name": "Excavation"
+              },
+              "typeAtLoading": false,
+              "modifiers": [
+                {
+                  "id": "sortie",
+                  "name": "Sortie",
+                  "stage": 1
+                }
+              ],
+              "rewards": {
+                "source": "sortie",
+                "tables": [
+                  {
+                    "kind": "mission",
+                    "rotation": null,
+                    "items": [
+                      {
+                        "id": "legendary_core",
+                        "name": "Noyau Légendaire",
+                        "quantity": 1,
+                        "chance": 0.0019,
+                        "category": "other"
+                      },
+                      {
+                        "id": "kitgun_riven_mod",
+                        "name": "Mod Riven de Kitgun",
+                        "quantity": 1,
+                        "chance": 0.01,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "zaw_riven_mod",
+                        "name": "Mod Riven de Zaw",
+                        "quantity": 1,
+                        "chance": 0.01,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "shotgun_riven_mod",
+                        "name": "Mod Riven de Fusil à Pompe",
+                        "quantity": 1,
+                        "chance": 0.022,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "exilus_warframe_adapter",
+                        "name": "Adaptateur Exilus pour Warframe",
+                        "quantity": 1,
+                        "chance": 0.025,
+                        "category": "other",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "forma",
+                        "name": "Forma",
+                        "quantity": 1,
+                        "chance": 0.025,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "orokin_catalyst_blueprint",
+                        "name": "Catalyseur Orokin (Schéma)",
+                        "quantity": 1,
+                        "chance": 0.025,
+                        "category": "blueprint"
+                      },
+                      {
+                        "id": "orokin_reactor_blueprint",
+                        "name": "Réacteur Orokin (Schéma)",
+                        "quantity": 1,
+                        "chance": 0.025,
+                        "category": "blueprint"
+                      },
+                      {
+                        "id": "affinity_booster",
+                        "name": "Booster d’Affinité",
+                        "quantity": 1,
+                        "chance": 0.0327,
+                        "category": "other"
+                      },
+                      {
+                        "id": "mod_drop_chance_booster",
+                        "name": "Booster de Chance de Mods",
+                        "quantity": 1,
+                        "chance": 0.0327,
+                        "category": "other"
+                      },
+                      {
+                        "id": "resource_drop_chance_booster",
+                        "name": "Booster de Chance de Ressources",
+                        "quantity": 1,
+                        "chance": 0.0327,
+                        "category": "other"
+                      },
+                      {
+                        "id": "pistol_riven_mod",
+                        "name": "Mod Riven de Pistolet",
+                        "quantity": 1,
+                        "chance": 0.07,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "rifle_riven_mod",
+                        "name": "Mod Riven de Fusil",
+                        "quantity": 1,
+                        "chance": 0.07,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "melee_riven_mod",
+                        "name": "Mod Riven de Mêlée",
+                        "quantity": 1,
+                        "chance": 0.098,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "endo",
+                        "name": "Endo",
+                        "quantity": 4000,
+                        "chance": 0.12,
+                        "category": "currency",
+                        "icon": "fixture:currency",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "kuva",
+                        "name": "Kuva",
+                        "quantity": 6000,
+                        "chance": 0.12,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "ayatan_anasa_sculpture",
+                        "name": "Sculpture Ayatan Anasa",
+                        "quantity": 1,
+                        "chance": 0.28,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              "rewardsPending": false,
+              "earned": null,
+              "credits": null,
+              "selectedAt": 1793217340000,
+              "loadingAt": 1793217370000,
+              "startedAt": 1793217408000
+            },
+            "progress": null
+          },
+          "event": "mission_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "fr"
+          },
+          "glossary": {
+            "language": "fr",
+            "term": {
+              "reactant": "Réactif",
+              "relic": "Relique",
+              "credits": "Crédits"
+            },
+            "refinement": {
+              "intact": "Intacte",
+              "exceptional": "Exceptionnelle",
+              "flawless": "Impeccable",
+              "radiant": "Éclatante"
+            }
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Une seule, après la 3ᵉ mission"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "sortie-400-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "+ 10 autres, 2.50 % à 28.00 %"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 560
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "sortie-560-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 720
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "sortie-720-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "sortie-400-interactive-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 560
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "sortie-560-interactive-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 720
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "sortie-720-interactive-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 560
+        },
+        "theme": "light"
+      }
+    },
+    {
+      "expect": {
+        "image": "sortie-560-light-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1500,
+        "size": {
+          "width": 300,
+          "height": 560
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "sortie-560-150-fr",
+        "fault": "none"
+      }
+    }
+  ]
+}

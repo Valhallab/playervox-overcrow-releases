@@ -1,0 +1,221 @@
+{
+  "scenarioVersion": 1,
+  "name": "refused",
+  "description": "The player refused game events: the list is checked by hand.",
+  "host": {
+    "startAt": 1793268000000,
+    "zone": {
+      "offsetMinutes": 60
+    },
+    "mode": "passive",
+    "grants": [
+      "storage"
+    ],
+    "storage": {
+      "ticks": {
+        "v": 2,
+        "lastAt": 0,
+        "dayEnd": 1793289600000,
+        "weekEnd": 1793577600000,
+        "sortie": {
+          "parts": [
+            {
+              "at": 0
+            },
+            {
+              "at": 0
+            },
+            {
+              "at": 0
+            }
+          ],
+          "types": [
+            null,
+            null,
+            null
+          ]
+        },
+        "archon": {
+          "parts": [
+            {
+              "at": 0
+            },
+            {
+              "at": 0
+            },
+            {
+              "at": 0
+            }
+          ],
+          "types": [
+            null,
+            null,
+            null
+          ]
+        },
+        "netracells": [
+          {
+            "at": 0
+          },
+          {
+            "at": 0
+          },
+          {
+            "at": 0
+          },
+          {
+            "at": 0
+          },
+          {
+            "at": 0
+          }
+        ],
+        "circuit": {
+          "done": 0,
+          "picks": {
+            "auto": [],
+            "hand": null
+          }
+        },
+        "steel": {
+          "done": 0,
+          "picks": {
+            "auto": [],
+            "hand": null
+          }
+        },
+        "nightwave": {}
+      }
+    }
+  },
+  "assets": {
+    "shard": "tests/assets/shard.png"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "text": [
+          "Allow “Warframe: missions” in the Control Center.",
+          "6 to do"
+        ]
+      }
+    },
+    {
+      "expect": {
+        "image": "en-100"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "expect": {
+        "image": "fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 260,
+          "height": 40
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "6 à faire",
+          "Accès refusé"
+        ],
+        "noText": [
+          "Accès refusé · Centre de contrôle"
+        ],
+        "image": "fr-100-mini"
+      }
+    },
+    {
+      "host": {
+        "locale": "en"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "6 to do",
+          "Access denied"
+        ],
+        "image": "en-100-mini",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "track-sortie",
+        "value": false
+      }
+    },
+    {
+      "menu": {
+        "id": "track-archon",
+        "value": false
+      }
+    },
+    {
+      "menu": {
+        "id": "track-netracells",
+        "value": false
+      }
+    },
+    {
+      "menu": {
+        "id": "track-circuit",
+        "value": false
+      }
+    },
+    {
+      "menu": {
+        "id": "track-circuit-steel",
+        "value": false
+      }
+    },
+    {
+      "menu": {
+        "id": "track-nightwave",
+        "value": false
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Access denied · Control Center"
+        ],
+        "image": "en-100-mini-none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Accès refusé · Centre de contrôle"
+        ],
+        "image": "fr-100-mini-none",
+        "fault": "none"
+      }
+    }
+  ]
+}

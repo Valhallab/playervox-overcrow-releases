@@ -1,0 +1,934 @@
+/* Warframe family: the panel, header and type scale shared by the PlayerVox
+   Warframe widgets, as Warframe Market. */
+.wf {
+  flex-direction: column;
+  width: 100%;
+  padding: 10px;
+  gap: var(--space-4);
+}
+
+.row {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.grow {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+/* Header: context eyebrow, then the place, then faction, type and level. */
+.eyebrow-row {
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  min-height: 14px;
+}
+
+.eyebrow {
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.eyebrow-icon {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.tone-accent { color: var(--color-accent); }
+.tone-success { color: var(--color-success); }
+.tone-danger { color: var(--color-danger); }
+.tone-warning { color: var(--color-warning); }
+.tone-muted { color: var(--color-text-muted); }
+
+.clock {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.place {
+  font-size: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.planet {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.meta {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  column-gap: 8px;
+  row-gap: 2px;
+}
+
+.meta-text {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.meta-sep {
+  font-size: var(--font-size-small);
+  color: var(--color-text-subtle);
+}
+
+/* Faction: a coloured dot, always with its name (colour is never alone). */
+.faction {
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.f-grineer { background: #e0895a; }
+.f-corpus { background: #5aa8e8; }
+.f-infested { background: #8fb35a; }
+.f-corrupted { background: #e8d8a8; }
+.f-sentient { background: #b48cf0; }
+.f-murmur { background: #5fc8c8; }
+.f-narmer { background: #d27a9a; }
+.f-unknown { background: #71717a; }
+
+/* Modifier pills: Steel Path, Fissure + era, Arbitration, Sortie… */
+.badges {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pill {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+}
+
+.pill-text {
+  font-size: var(--font-size-caption);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.pill-icon {
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+.e-lith { color: #c79a6b; }
+.e-meso { color: #a9b8c8; }
+.e-neo { color: #d9b85c; }
+.e-axi { color: #e8d9a0; }
+.e-requiem { color: #e07a6f; }
+.e-sp { color: #f08f8f; }
+
+/* Cards and notices. */
+.card {
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 8px 10px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.notice {
+  flex-direction: row;
+  align-items: start;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+}
+
+.notice-icon {
+  font-size: 14px;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+.notice-body {
+  flex-direction: column;
+  gap: 2px;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.notice-title {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.notice-text {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.empty {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
+}
+
+.empty-icon {
+  font-size: 20px;
+  color: var(--color-text-muted);
+}
+
+.empty-title {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.empty-text {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.btn {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 9px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.btn-text {
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-icon {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.status-line {
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+
+.status-icon {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.status-text {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+/* One-line (mini) layout. */
+.line {
+  flex-direction: row;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 12px;
+}
+
+.line-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.line-main {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.line-value {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.line-sub {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.section-title {
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.theme-light .f-corrupted { background: #a8925a; }
+
+/* State colours win over the base colour of these icons. */
+.empty-icon.tone-warning,
+.status-icon.tone-warning { color: var(--color-warning); }
+.empty-icon.tone-danger { color: var(--color-danger); }
+.empty-icon.tone-success { color: var(--color-success); }
+
+/* Mission rewards. */
+.mission.line {
+  padding: 0;
+}
+
+.head {
+  flex-direction: column;
+  gap: 3px;
+}
+
+.clock-icon {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.next {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.next-text {
+  flex-direction: column;
+  gap: 1px;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.next-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.next-sub {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.next-value {
+  font-size: 30px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.info {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+/* The rotation cycle A A B C. */
+.track {
+  flex-direction: row;
+  gap: 4px;
+}
+
+.cell {
+  flex-grow: 1;
+  flex-basis: 0;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 20px;
+  border-radius: 5px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+}
+
+.cell-text {
+  font-size: var(--font-size-small);
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.cell-check {
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+.cell.earned {
+  background: transparent;
+}
+
+.cell.now {
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-accent);
+}
+
+.cell.now .cell-text {
+  color: var(--color-accent);
+}
+
+/* The listed rotation, in full: the frame grows with it. */
+.list {
+  flex-direction: column;
+}
+
+.drop {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 2px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* The item's 24 px tile, always there so that rows never move: the game's
+   image once the host has it, the tile alone while it may come, our icon
+   of the item's kind, quiet, when it will not. */
+.thumb {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-hover);
+}
+
+.thumb-img {
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.thumb-glyph {
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+/* Filler lines keep the height, without a tile. */
+.drop.filler .thumb {
+  visibility: hidden;
+}
+
+.drop-name {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stack {
+  flex-direction: column;
+}
+
+
+
+.drop-chance {
+  font-size: var(--font-size-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.more {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  padding-top: 4px;
+}
+
+/* Wide: the three rotations side by side; the current one in accent. */
+.cols {
+  flex-direction: row;
+  align-items: start;
+  gap: 14px;
+}
+
+/* Three equal columns: a long name is cut in its own column, never the
+   short names of the others. */
+.col {
+  flex-direction: column;
+  flex-grow: 1;
+  flex-basis: 0;
+  min-width: 0;
+  gap: 2px;
+}
+
+/* Wide: a smaller tile, so that the names keep their room. */
+.cols .drop {
+  gap: 5px;
+}
+
+.cols .thumb,
+.cols .thumb-img {
+  width: 20px;
+  height: 20px;
+}
+
+.col-head {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--color-border-strong);
+}
+
+.col-title {
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.col-check {
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+.col.now .col-head {
+  border-bottom: 1px solid var(--color-accent);
+}
+
+.col.now .col-title {
+  color: var(--color-accent);
+}
+
+/* One line: the place and what comes, then the number, larger. */
+.line-big {
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.drop-qty {
+  font-size: var(--font-size-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* DE's own warning on the rates, as quiet as a caption. */
+.source {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+/* One table: its title, then its rows. */
+.section {
+  flex-direction: column;
+}
+
+/* The table that pays now stands a little apart from its title. */
+.section.listed {
+  gap: 4px;
+}
+
+/* "+ n more" unfolds the table in Interactive mode, and reads the same. */
+.more-btn {
+  flex-direction: row;
+  align-items: center;
+  align-self: start;
+  padding: 0;
+  background: transparent;
+  border-width: 0;
+  cursor: pointer;
+}
+
+.more-btn:hover .more {
+  color: var(--color-text-secondary);
+}
+
+/* An error beside what stays known: amber, and wrapped, never cut. */
+.status-text.tone-warning {
+  color: var(--color-warning);
+  font-weight: 600;
+  white-space: normal;
+}
+
+/* A refusal: the icon on the first line of a wrapped sentence. */
+.status-line {
+  align-items: start;
+}
+
+.status-line .status-icon {
+  margin-top: 1px;
+}
+
+.empty-title.tone-warning {
+  color: var(--color-warning);
+}
+
+/* One line with the refusal after the value: all of it on the left. */
+.line.after .line-big {
+  margin-left: 0;
+}
+
+.line-main.tone-warning {
+  color: var(--color-warning);
+}
+
+/* Rotations earned: filled in green, the colour of what is done. The next
+   one is only outlined in the accent. */
+.cell.earned {
+  background: var(--color-success);
+  border: 1px solid var(--color-success);
+}
+
+.cell.earned .cell-text,
+.cell.earned .cell-check {
+  color: #052e16;
+}
+
+.theme-light .cell.earned .cell-text,
+.theme-light .cell.earned .cell-check {
+  color: #ffffff;
+}
+
+.cell.now {
+  background: transparent;
+  border: 1px solid var(--color-accent);
+}
+
+.track-label {
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: center;
+  padding-right: 2px;
+}
+
+.section-head {
+  flex-direction: row;
+  align-items: center;
+  gap: 3px;
+}
+
+.got-icon,
+.col-check.col-check {
+  font-size: 10px;
+  color: var(--color-success);
+}
+
+.got-text,
+.col-got {
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-success);
+  white-space: nowrap;
+}
+
+/* The hero keeps its height whatever it holds. */
+.next {
+  min-height: 34px;
+}
+
+/* The recap: one line of facts, the rotations earned in green. */
+.facts {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+}
+
+.facts-got {
+  font-weight: 600;
+  color: var(--color-success);
+}
+
+.facts-got.lost {
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+/* Empty lines that keep the height of the longest rotation: their rule,
+   faint, reads as a free place rather than a hole. */
+.drop.filler {
+  opacity: 0.45;
+}
+
+/* Survival before the hack: an hourglass, never a frozen countdown. */
+.next-icon {
+  font-size: 22px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+/* Defense: "Rotation B at the end of wave 9" on one line, the wave large. */
+.next-inline {
+  flex-direction: column;
+  gap: 1px;
+}
+
+.next-line .next-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.next-big {
+  font-size: 30px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
+.next-big.word {
+  font-size: 18px;
+}
+
+.next-big.accent {
+  color: var(--color-accent);
+}
+
+/* The same height with a number or "this wave": never a jump. */
+.next-row {
+  flex-direction: column;
+  justify-content: end;
+  min-height: 41px;
+}
+
+.facts-box {
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* A state that only waits: muted, not a warning. */
+.empty-title.muted {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+/* The user's size: the panel fills the frame, the tables take what is
+   left and the source stays last. */
+.mission.standard,
+.mission.compact,
+.mission.wide {
+  height: 100%;
+}
+
+.tables {
+  flex-direction: column;
+  gap: var(--space-4);
+  flex-shrink: 0;
+  width: 100%;
+}
+
+/* Interactive: the tables scroll. The host paints its bar over the right
+   edge; 9 px keep the rates 5 px clear of it. */
+.tables-scroll {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-height: 0;
+  padding-right: 9px;
+}
+
+.grow-v {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-height: 0;
+}
+
+.live .grow-v {
+  flex-grow: 0;
+}
+
+/* The equipped relic: its image, its name and its refinement. */
+.relic-head {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--color-border-strong);
+}
+
+.relic-tile {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.relic-img {
+  width: 30px;
+  height: 30px;
+}
+
+.relic-glyph {
+  font-size: 18px;
+  color: var(--color-text-muted);
+}
+
+.relic-text {
+  flex-direction: column;
+  gap: 1px;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.relic-label {
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.relic-line {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.relic-name {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+/* The refinement: a quiet chip, never a state colour. */
+.ref-chip {
+  font-size: var(--font-size-caption);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border-strong);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ref-chip.unknown {
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
+/* The recap: what the player's relic gave, the end bonus. */
+.recap {
+  flex-direction: column;
+  gap: 4px;
+}
+
+.recap-row {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.recap-img {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.recap-ico {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.recap-icon {
+  font-size: 16px;
+  color: var(--color-text-muted);
+}
+
+.recap-text {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.recap-label {
+  color: var(--color-text-muted);
+}
+
+.recap-value {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.recap-value.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* A plain fact, not a warning: quieter than the place above it. */
+.empty-title.soft {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+.empty-icon.soft {
+  font-size: 16px;
+}

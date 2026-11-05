@@ -1,0 +1,20 @@
+{
+  "pick-mission": "Choisissez une mission pour voir le briefing.",
+  "pick-mission-line": "Choisissez une mission",
+  "game-closed": "Lancez Warframe pour voir le briefing.",
+  "game-closed-line": "Lancez Warframe",
+  "unavailable": "Mission introuvable pour l’instant.",
+  "last-mission": "Dernière mission",
+  "refused": "Autorisez « Warframe : missions » dans le Centre de contrôle.",
+  "refused-line": "Accès refusé · Centre de contrôle",
+  "refused-value": "{value} · Accès refusé",
+  "use": "Utilisez",
+  "avoid": "Évitez : {list}",
+  "level": "niv. {level}",
+  "level-range": "niv. {min}–{max}",
+  "unknown-enemies": "Ennemis inconnus",
+  "no-advice": "Pas encore de conseil pour ces ennemis.",
+  "stage": "{name} {stage}/3",
+  "reactant-hint": "{reactant} ×10 sur les {corrupted}",
+  "arbitration-hint": "Drones d’abord · pas d’auto-réanimation"
+}

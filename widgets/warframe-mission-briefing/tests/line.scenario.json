@@ -1,0 +1,550 @@
+{
+  "scenarioVersion": 1,
+  "name": "line",
+  "description": "The One line layout: short waiting lines, the folded briefing while the mission is chosen, the longest band never cutting its damage types, the full briefing back with Full.",
+  "host": {
+    "startAt": 1793199600000
+  },
+  "steps": [
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Pick a mission"
+        ],
+        "noText": [
+          "Pick a mission to see the briefing."
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "line-pick-mini-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "line-pick-mini-en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1500,
+        "size": {
+          "width": 260,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "line-pick-mini-fr-150",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "playing": false
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Run Warframe"
+        ]
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "line-closed-mini-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "line-closed-mini-en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1500,
+        "size": {
+          "width": 260,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "line-closed-mini-fr-150",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "playing": true
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 40
+        }
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode195",
+                "name": "Hydron"
+              },
+              "planet": {
+                "id": "sedna",
+                "name": "Sedna"
+              },
+              "type": {
+                "id": "defense",
+                "name": "Defense"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "enemyLevel": {
+                "min": 30,
+                "max": 40
+              },
+              "fissure": null,
+              "modifiers": []
+            }
+          },
+          "event": "mission_selected"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Grineer",
+          "Impact",
+          "Corrosive"
+        ],
+        "noText": [
+          "Use",
+          "Hydron · Sedna · Defense"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode195",
+                "name": "Hydron"
+              },
+              "planet": {
+                "id": "sedna",
+                "name": "Sedna"
+              },
+              "type": {
+                "id": "defense",
+                "name": "Defense"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "enemyLevel": {
+                "min": 30,
+                "max": 40
+              },
+              "fissure": null,
+              "modifiers": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "line-mini-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode195",
+                "name": "Hydron"
+              },
+              "planet": {
+                "id": "sedna",
+                "name": "Sedna"
+              },
+              "type": {
+                "id": "defense",
+                "name": "Defense"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "enemyLevel": {
+                "min": 30,
+                "max": 40
+              },
+              "fissure": null,
+              "modifiers": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "line-mini-en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode720",
+                "name": null
+              },
+              "planet": {
+                "id": "deimos",
+                "name": "Deimos"
+              },
+              "type": {
+                "id": "netracell",
+                "name": "Netracell"
+              },
+              "faction": {
+                "id": "murmur",
+                "name": "The Murmur"
+              },
+              "enemyLevel": null,
+              "fissure": null,
+              "modifiers": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "line-murmur-mini-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode720",
+                "name": null
+              },
+              "planet": {
+                "id": "deimos",
+                "name": "Deimos"
+              },
+              "type": {
+                "id": "netracell",
+                "name": "Netracell"
+              },
+              "faction": {
+                "id": "murmur",
+                "name": "The Murmur"
+              },
+              "enemyLevel": null,
+              "fissure": null,
+              "modifiers": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "line-murmur-mini-en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode720",
+                "name": null
+              },
+              "planet": {
+                "id": "deimos",
+                "name": "Deimos"
+              },
+              "type": {
+                "id": "netracell",
+                "name": "Netracell"
+              },
+              "faction": {
+                "id": "murmur",
+                "name": "The Murmur"
+              },
+              "enemyLevel": null,
+              "fissure": null,
+              "modifiers": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1500,
+        "size": {
+          "width": 260,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "line-murmur-mini-fr-150",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 220,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "line-murmur-narrow-fr-100",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode720",
+                "name": null
+              },
+              "planet": {
+                "id": "deimos",
+                "name": "Deimos"
+              },
+              "type": {
+                "id": "netracell",
+                "name": "Netracell"
+              },
+              "faction": {
+                "id": "murmur",
+                "name": "The Murmur"
+              },
+              "enemyLevel": null,
+              "fissure": null,
+              "modifiers": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 220,
+          "height": 40
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "line-murmur-narrow-en-100",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 260,
+          "height": 40
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "The Murmur",
+          "Electricity, Radiation"
+        ]
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Deimos · Netracell",
+          "Use"
+        ]
+      }
+    }
+  ]
+}

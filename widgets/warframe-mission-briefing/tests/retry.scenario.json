@@ -1,0 +1,71 @@
+{
+  "scenarioVersion": 1,
+  "name": "retry",
+  "description": "A failed subscription says the mission is not found yet and subscribes again 30 s later.",
+  "host": {
+    "startAt": 1793199600000
+  },
+  "steps": [
+    {
+      "publish": {
+        "service": "gameEvents.warframe.subscribe",
+        "error": "unavailable"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Mission not found yet."
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "advance": {
+        "ms": 30000
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode195",
+                "name": "Hydron"
+              },
+              "planet": {
+                "id": "sedna",
+                "name": "Sedna"
+              },
+              "type": {
+                "id": "defense",
+                "name": "Defense"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "enemyLevel": {
+                "min": 30,
+                "max": 40
+              },
+              "fissure": null,
+              "modifiers": []
+            }
+          },
+          "event": "mission_selected"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Grineer",
+          "Impact"
+        ]
+      }
+    }
+  ]
+}

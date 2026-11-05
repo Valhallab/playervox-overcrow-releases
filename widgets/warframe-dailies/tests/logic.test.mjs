@@ -1,0 +1,522 @@
+// Unit tests of the dailies and weeklies on @overcrow/sdk/testing, with
+// synthetic Warframe values (tests/fixtures.mjs). One widget runs through
+// the file, in order: a first run, a Sortie in three stages, the hand
+// against the game, the Circuit's picks, Nightwave, then a whole week of
+// virtual time.
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { test } from "node:test";
+import { installRuntime } from "@overcrow/sdk/testing";
+
+import { loadLogic } from "./load-logic.mjs";
+import {
+  DAY,
+  HOUR,
+  NOW,
+  SERVICE,
+  SORTIE_END,
+  WEEK_END,
+  actOf,
+  archon,
+  challenge,
+  ended,
+  flush,
+  inputs,
+  messages,
+  missionAt,
+  replaced,
+  sortie,
+  value,
+  world,
+} from "./fixtures.mjs";
+
+const vm = installRuntime({
+  now: NOW,
+  host: {
+    messages: messages("en"),
+    mode: "interactive",
+    grants: ["storage"],
+    viewport: { width: 300, height: 600 },
+    // Paris in winter: UTC+1.
+    region: { numberFormat: "us", dateOrder: "mdy", offsetMinutes: 60 },
+  },
+});
+const logic = await loadLogic();
+const { state } = await import("@overcrow/sdk");
+const model = () => state.model;
+const sections = () => model().cols.flatMap((col) => col.groups);
+const act = (id) => actOf(model(), id);
+const parts = (id) => act(id).groups.flatMap((group) => group.parts);
+const part = (id, index) => parts(id)[index];
+const texts = (id) => parts(id).map((each) => each.text);
+const done = (id) => parts(id).map((each) => each.icon === "circle-check");
+const section = (id) => sections().find((each) => each.id === id);
+const saved = () => vm.lastCall("storage.set")?.params.value;
+
+let seq = 0;
+let currentWorld = () => world(vm.now);
+async function push(events = [], options = {}) {
+  vm.push(SERVICE, value({ worldValue: currentWorld(), events, ...options }));
+  await flush();
+}
+const next = (at, options) => ended(++seq, at, options);
+
+test("first run: a box per part, everything to do, no help sentence", async () => {
+  const get = vm.lastCall("storage.get");
+  assert.deepEqual(get.params, { key: "ticks" });
+  get.resolve(null);
+  await flush();
+  assert.equal(vm.subscriptions.filter((each) => each.service === SERVICE).length, 1);
+  await push();
+  assert.equal(model().left, "6 to do");
+  assert.equal(model().hint, "");
+  assert.equal(model().note, "Ticks itself while PlayerVox OverCrow runs during play. Played without it? Tick by hand.");
+  assert.equal(section("day").reset, "resets in 6h");
+  assert.equal(section("week").reset, "resets in 3d\u00a014h");
+  assert.deepEqual(texts("sortie"), ["Rescue", "Disruption", "Mobile Defense"]);
+  assert.deepEqual([act("sortie").value, act("sortie").icon], ["0/3", "circle"]);
+  assert.deepEqual(texts("archon"), ["Rescue", "Survival", "Assassination"]);
+  assert.deepEqual([act("archon").shard, act("archon").shardText, act("archon").value], ["asset:amber-shard", "Nira", "0/3"]);
+  assert.deepEqual([parts("netracells").length, act("netracells").groups[0].cls, act("netracells").value], [5, "cells", "0/5"]);
+  assert.deepEqual(
+    act("circuit").choices.filter((each) => !each.sep).map((each) => [each.text, each.cls]),
+    [["Excalibur", "choice"], ["Trinity", "choice"], ["Ember", "choice"]],
+    "nothing seen yet: no pick",
+  );
+  assert.deepEqual([act("circuit").name, act("circuit").value, act("circuit").toggle], ["The Circuit", "", true]);
+  assert.equal(act("steel").name, "The Circuit · Steel Path");
+  assert.equal(act("steel").choices.filter((each) => !each.sep).length, 5);
+  assert.deepEqual(act("nightwave").groups.map((group) => [group.title, group.parts.length]), [["Daily", 2], ["Weekly", 2], ["Elite", 1]]);
+  assert.equal(act("nightwave").value, "0/5");
+  assert.equal(model().baro, "Baro Ki'Teer arrives Fri 14:00 · Larunda\u00a0Relay");
+  assert.deepEqual([model().line, model().lineValue], ["6 to do", "Sortie resets in 6h"]);
+});
+
+test("a Sortie in three stages: by its stage, by its node, then done", async () => {
+  vm.advance(20 * 60_000);
+  await push([next(vm.now - 15_000, { modifiers: [sortie(1)] })]);
+  assert.deepEqual([act("sortie").value, act("sortie").icon], ["1/3", "circle-dashed"]);
+  assert.deepEqual(done("sortie"), [true, false, false]);
+  assert.deepEqual([part("sortie", 0).textCls, part("sortie", 0).hand], ["part-text done", false]);
+  vm.advance(20 * 60_000);
+  await push([next(vm.now - 12_000, { node: "SolNode2", type: "disruption", modifiers: [sortie(null)] })]);
+  assert.equal(act("sortie").value, "2/3");
+  vm.advance(20 * 60_000);
+  const at = vm.now - 20_000;
+  await push([next(at, { node: "SolNode3", type: "mobile_defense", modifiers: [sortie(3)] })]);
+  assert.deepEqual(
+    [act("sortie").icon, act("sortie").value, act("sortie").valueCls],
+    ["circle-check", "just now", "row-value when tone-success"],
+  );
+  assert.equal(model().left, "5 to do");
+  assert.deepEqual([model().line, model().lineValue, model().lineCls], ["Sortie done", "5 to do", "line-main tone-success"]);
+  assert.equal(saved().v, 2);
+  assert.deepEqual(saved().sortie.parts, [{ at: NOW + 20 * 60_000 - 15_000 }, { at: NOW + 40 * 60_000 - 12_000 }, { at }]);
+  assert.equal(saved().lastAt, at);
+  vm.advance(5 * 60_000);
+  assert.equal(act("sortie").value, "11:59");
+  // Interactive: a finished activity keeps its boxes.
+  assert.equal(parts("sortie").length, 3);
+});
+
+test("Passive: a finished activity folds to its line; Interactive opens it again", () => {
+  vm.setHost({ mode: "passive" });
+  assert.deepEqual([act("sortie").groups, act("sortie").value], [[], "11:59"]);
+  vm.setHost({ mode: "interactive" });
+  assert.equal(parts("sortie").length, 3);
+});
+
+test("the hand wins in order: a stage unticked by hand takes the next ones with it, each with the hand", async () => {
+  logic.tick("sortie.1");
+  assert.deepEqual(done("sortie"), [true, false, false]);
+  assert.deepEqual([act("sortie").value, part("sortie", 0).hand, part("sortie", 1).hand, part("sortie", 2).hand], ["1/3", false, true, true]);
+  assert.equal(part("sortie", 1).label, "Disruption: to do, set by hand");
+  assert.deepEqual(saved().sortie.parts[1], { at: NOW + 40 * 60_000 - 12_000, hand: false, handAt: vm.now });
+  // The same stage again from the game (a relaunch replays its log): nothing ticks twice.
+  await push([next(vm.now - 1000, { node: "SolNode2", type: "disruption", modifiers: [sortie(2)] })]);
+  assert.deepEqual(done("sortie"), [true, false, false]);
+  // Ticked again by hand: up to it, as the game saw it, no hand; the third stays unticked, with the hand.
+  logic.tick("sortie.1");
+  assert.deepEqual([done("sortie"), part("sortie", 1).hand, part("sortie", 2).hand], [[true, true, false], false, true]);
+  logic.tick("sortie.2");
+  assert.deepEqual([done("sortie"), part("sortie", 2).hand], [[true, true, true], false]);
+});
+
+test("Archon Hunt in order: a stage ticked by hand ticks the ones before it; the game reaching it takes the hand away", async () => {
+  logic.tick("archon.1");
+  assert.deepEqual([done("archon"), part("archon", 0).hand, part("archon", 1).hand, act("archon").value], [[true, true, false], true, true, "2/3"]);
+  vm.advance(60_000);
+  await push([next(vm.now - 10_000, { node: "SolNode5", modifiers: [archon(2)] })]);
+  assert.deepEqual([done("archon"), part("archon", 0).hand, part("archon", 1).hand], [[true, true, false], false, false]);
+});
+
+test("Netracells: the game never fills a cell set by hand; the hand at the end of the row", async () => {
+  logic.tick("netracells.0");
+  assert.equal(act("netracells").groups[0].hand, true);
+  assert.equal(part("netracells", 0).label, "Cell 1: done, set by hand");
+  for (let run = 1; run <= 2; run += 1) {
+    vm.advance(60_000);
+    await push([next(vm.now - 10_000, { node: "SolNode9", type: "netracell" })]);
+  }
+  assert.deepEqual(done("netracells"), [true, true, true, false, false]);
+  assert.deepEqual(saved().netracells.map((cell) => cell.at > 0), [false, true, true, false, false]);
+  assert.equal(act("netracells").value, "3/5");
+});
+
+test("a failed mission, or an event seen already, ticks nothing", async () => {
+  await push([next(vm.now - 1000, { type: "netracell", result: "failed" })]);
+  vm.push(SERVICE, value({ worldValue: currentWorld(), events: [ended(seq, vm.now - 500, { type: "netracell" })] }));
+  await flush();
+  assert.equal(act("netracells").value, "3/5");
+});
+
+test("the Circuit: the game's pick in a chip, the player's wins, kept until the weekly reset", async () => {
+  currentWorld = () => {
+    const each = world(vm.now);
+    each.circuit.picked = { normal: ["trinity"], steelPath: ["lato", "paris"] };
+    return each;
+  };
+  await push();
+  const shown = (id) => act(id).choices.filter((each) => !each.sep).map((each) => `${each.text}:${each.cls}`);
+  assert.deepEqual(shown("circuit"), ["Excalibur:choice other", "Trinity:choice picked", "Ember:choice other"]);
+  assert.deepEqual(shown("steel"), ["Braton:choice other", "Lato:choice picked", "Skana:choice other", "Paris:choice picked", "Kunai:choice other"]);
+  assert.equal(act("circuit").choicesHand, false);
+  // The player picked Ember: one of three, it replaces Trinity.
+  logic.pickChoice("circuit.ember");
+  assert.deepEqual(shown("circuit"), ["Excalibur:choice other", "Trinity:choice other", "Ember:choice picked"]);
+  assert.equal(act("circuit").choicesHand, true);
+  assert.deepEqual(saved().circuit.picks, { auto: ["trinity"], hand: ["ember"] });
+  // The game says Trinity again: the hand wins.
+  await push();
+  assert.equal(shown("circuit")[2], "Ember:choice picked");
+  // Two of five: a third pick replaces the oldest; a click on a pick takes it back.
+  logic.pickChoice("steel.kunai");
+  assert.deepEqual(shown("steel").filter((each) => each.endsWith("picked")), ["Paris:choice picked", "Kunai:choice picked"]);
+  logic.pickChoice("steel.kunai");
+  assert.deepEqual(shown("steel").filter((each) => each.endsWith("picked")), ["Paris:choice picked"]);
+  assert.equal(act("steel").choicesHand, true);
+  // After a restart of the game the world shows no pick: the week's stay.
+  currentWorld = () => world(vm.now);
+  await push();
+  assert.equal(shown("circuit")[2], "Ember:choice picked");
+  assert.equal(shown("steel")[3], "Paris:choice picked");
+  // The Circuit itself: only a click ticks it, never with the hand; done, all names grey.
+  logic.check("circuit");
+  assert.deepEqual([act("circuit").icon, act("circuit").valueCls], ["circle-check", "row-value when"]);
+  assert.deepEqual(shown("circuit"), ["Excalibur:choice other", "Trinity:choice other", "Ember:choice other"]);
+  logic.check("circuit");
+  assert.equal(act("circuit").icon, "circle");
+});
+
+test("Nightwave: a challenge the game wrote complete ticks itself and stays ticked until it ends", async () => {
+  const withNightwave = (changes) => () => {
+    const each = world(vm.now);
+    each.nightwave.challenges = each.nightwave.challenges.map((one) => ({ ...one, ...(changes[one.id] ?? {}) }));
+    return each;
+  };
+  currentWorld = withNightwave({ artist: { completed: true }, gatherer: { progressed: true } });
+  await push();
+  assert.deepEqual(done("nightwave"), [true, false, false, false, false]);
+  assert.deepEqual([part("nightwave", 0).hand, part("nightwave", 0).textCls], [false, "part-text done"]);
+  assert.deepEqual([part("nightwave", 3).icon, part("nightwave", 3).iconCls], ["circle-dot", "part-icon part-going"]);
+  assert.equal(act("nightwave").value, "1/5");
+  assert.deepEqual(saved().nightwave.artist, { at: vm.now, endsAt: SORTIE_END + 8 * HOUR });
+  // The game restarts: its log no longer says it; the tick stays.
+  currentWorld = () => world(vm.now);
+  await push();
+  assert.deepEqual(done("nightwave"), [true, false, false, false, false]);
+  // The player says it is not done: the hand shows, as on a stage.
+  logic.tick("nightwave.artist");
+  assert.deepEqual([done("nightwave")[0], part("nightwave", 0).hand], [false, true]);
+  logic.tick("nightwave.artist");
+  // A challenge ticked by hand, the game never said: the hand too.
+  logic.tick("nightwave.mirror_mirror");
+  assert.deepEqual([done("nightwave")[4], part("nightwave", 4).hand], [true, true]);
+  assert.equal(act("nightwave").value, "2/5");
+});
+
+test("a Sortie stage whose type the game replaces: its node until loading, then the type, kept until the reset", async () => {
+  currentWorld = () => {
+    const each = world(vm.now);
+    each.sortie.missions[1] = replaced("SolNode2", "Morax");
+    return each;
+  };
+  await push();
+  assert.deepEqual(texts("sortie"), ["Rescue", "Morax · Europa", "Mobile Defense"]);
+  assert.equal(part("sortie", 1).textCls, "part-text done pending");
+  // Loading tells the type; the widget keeps it with the stage.
+  const loading = missionAt(vm.now, { node: "SolNode2", type: "excavation", typeName: "Excavation", modifiers: [sortie(2)], state: "loading", typeAtLoading: true });
+  await push([], { mission: loading });
+  assert.deepEqual(texts("sortie"), ["Rescue", "Excavation", "Mobile Defense"]);
+  assert.deepEqual(saved().sortie.types[1], { node: "SolNode2", id: "excavation", name: "Excavation" });
+  assert.equal(part("sortie", 1).textCls, "part-text done");
+});
+
+test("the tracked activities of the menu, the Steel Path's Circuit on its own row", () => {
+  vm.setHost({ options: { "track-circuit-steel": false } });
+  assert.equal(act("steel"), undefined);
+  assert.equal(act("circuit").name, "The Circuit");
+  vm.setHost({ options: { "track-nightwave": false, "track-baro": false, "track-sortie": false } });
+  assert.equal(section("day"), undefined);
+  assert.equal(model().baro, "");
+  assert.match(model().lineValue, /^Week resets in /);
+  vm.setHost({ options: { layout: "line" } });
+  assert.equal(logic.layout(), "line");
+  vm.setHost({
+    options: Object.fromEntries(["sortie", "archon", "netracells", "circuit", "circuit-steel", "nightwave"].map((id) => [`track-${id}`, false])),
+  });
+  assert.equal(model().empty, true);
+  assert.equal(model().note, "");
+  assert.equal(model().line, "No activity · Widget menu");
+  vm.setHost({ options: {} });
+  assert.equal(model().empty, false);
+});
+
+test("Nightwave: a challenge's objective on hover, in Interactive only, cut whole at 256 bytes", () => {
+  const challenges = [
+    challenge("artist", "Artist", "daily", SORTIE_END + 8 * HOUR, { description: "Customize a piece of Equipment's colors." }),
+    challenge("eximus", "Eximus Eliminator", "weekly", WEEK_END, { description: "Kill 150 Eximus." }),
+    // 280 bytes in letters of two, then of four: cut before the letter that would pass 256 with "…".
+    challenge("gatherer", "Gatherer", "weekly", WEEK_END, { description: "É".repeat(140) }),
+    challenge("mission_complete", "Mission Complete", "weekly", WEEK_END, { description: "\u{1D11E}".repeat(70) }),
+    challenge("mirror_mirror", "Mirror, Mirror", "elite", WEEK_END),
+  ];
+  const w = world(NOW, { nightwave: { endsAt: WEEK_END + 60 * DAY, challenges } });
+  const tips = (interactive) => actOf(logic.buildModel(inputs(logic, { world: w, interactive })), "nightwave").groups.flatMap((group) => group.parts).map((each) => each.tip);
+  const live = tips(true);
+  assert.deepEqual(live, [
+    "Customize a piece of Equipment's colors.",
+    "Kill 150 Eximus.",
+    `${"É".repeat(126)}…`,
+    `${"\u{1D11E}".repeat(63)}…`,
+    "",
+  ]);
+  for (const tip of live) assert.ok(Buffer.byteLength(tip) <= 256, tip);
+  // Passive is click-through: no tooltip on the challenges it shows.
+  const passive = tips(false);
+  assert.ok(passive.length > 0);
+  assert.deepEqual(passive, passive.map(() => ""));
+  // Only a challenge has one.
+  const sortieTips = actOf(logic.buildModel(inputs(logic, { world: w, interactive: true })), "sortie").groups.flatMap((group) => group.parts).map((each) => each.tip);
+  assert.deepEqual(sortieTips, ["", "", ""]);
+});
+
+test("Wide: Nightwave on the right, the rest on the left", () => {
+  vm.setHost({ viewport: { width: 600, height: 600 } });
+  assert.equal(logic.layout(), "wide");
+  assert.deepEqual(
+    model().cols.map((col) => col.groups.map((group) => `${group.id}:${group.acts.map((each) => each.id).join(",")}`)),
+    [["day:sortie", "week:archon,netracells,circuit,steel"], ["week-nightwave:nightwave"]],
+  );
+  assert.equal(model().cols[1].groups[0].title, "This week");
+  vm.setHost({ viewport: { width: 300, height: 600 } });
+  assert.equal(model().cols.length, 1);
+});
+
+test("Passive: past the frame's largest height, the end of Nightwave folds into + N challenges", async () => {
+  const many = Array.from({ length: 16 }, (_, index) =>
+    challenge(`c${index}`, `A Long Challenge Name ${index}`, index < 3 ? "daily" : index < 13 ? "weekly" : "elite", WEEK_END),
+  );
+  currentWorld = () => {
+    const each = { ...world(vm.now), nightwave: { endsAt: WEEK_END + 60 * DAY, challenges: many } };
+    // The adapters' whole names: the Steel Path's line wraps.
+    each.circuit.steelPath = each.circuit.steelPath.map((reward) => ({ ...reward, name: `${reward.name} Incarnon Genesis` }));
+    return each;
+  };
+  await push([], { features: { mission: "unavailable" } });
+  vm.setHost({ viewport: { width: 220, height: 800 } });
+  assert.equal(parts("nightwave").length, 16, "Interactive: everything, the list scrolls");
+  vm.setHost({ mode: "passive" });
+  const shown = parts("nightwave").length;
+  assert.ok(logic.panelHeight(model(), 220) <= logic.MAX_HEIGHT, "the panel fits");
+  // At the narrowest width, with the long names, the whole list folds: only Nightwave does.
+  assert.ok(shown < 16, `${shown} shown`);
+  assert.equal(act("nightwave").more, `+ ${16 - shown} challenges`);
+  for (const id of ["sortie", "archon", "netracells", "circuit", "steel"]) assert.equal(act(id).more, "", `${id} whole`);
+  assert.equal(act("nightwave").value, "0/16", "the count still counts them all");
+  vm.setHost({ viewport: { width: 300, height: 600 }, mode: "interactive" });
+  currentWorld = () => world(vm.now);
+  await push();
+});
+
+test("Passive: the typical day's full week folds the end of Nightwave under 520 points, the activities above stay whole; Interactive keeps every challenge", () => {
+  // The world of the typical-day scenario: French names, the Circuit's picks, Baro's relay.
+  const scenario = JSON.parse(readFileSync(new URL("./typical-day.scenario.json", import.meta.url), "utf8"));
+  const at = { world: scenario.steps[1].gameEvents.warframe.info.world, now: scenario.host.startAt };
+  const passive = logic.buildModel(inputs(logic, at));
+  const interactive = logic.buildModel(inputs(logic, { ...at, interactive: true }));
+  const count = (built, id) => actOf(built, id).groups.flatMap((group) => group.parts).length;
+  // Interactive: all ten challenges, the list scrolls under the host's scrollbar.
+  assert.equal(count(interactive, "nightwave"), 10);
+  assert.equal(actOf(interactive, "nightwave").more, "");
+  // Passive: only Nightwave folds, from its end, into "+ N challenges".
+  const shown = count(passive, "nightwave");
+  assert.ok(shown > 0 && shown < 10, `${shown} shown`);
+  assert.equal(actOf(passive, "nightwave").more, `+ ${10 - shown} challenge${10 - shown === 1 ? "" : "s"}`);
+  for (const id of ["sortie", "archon", "netracells", "circuit", "steel"]) {
+    assert.equal(count(passive, id), count(interactive, id), `${id} whole`);
+    assert.equal(actOf(passive, id).more, "", `${id} not folded`);
+  }
+  assert.ok(logic.panelHeight(passive, 300) <= logic.MAX_HEIGHT, "the panel fits");
+});
+
+test("the world not read yet: the stages by their rank, Nightwave waits", async () => {
+  vm.push(SERVICE, value({ worldValue: null, features: { world: "unavailable" } }));
+  await flush();
+  // The widget keeps the last world it had; a first run has none.
+  const empty = logic.buildModel(inputs(logic, { world: null, worldStatus: "unavailable", now: vm.now, interactive: true }));
+  const find = (id) => actOf(empty, id);
+  const stageTexts = (id) => find(id).groups[0].parts.map((each) => `${each.text}|${each.textCls}`);
+  assert.deepEqual(stageTexts("sortie"), ["1st mission|part-text pending", "2nd mission|part-text pending", "3rd mission|part-text pending"]);
+  assert.deepEqual(stageTexts("archon").length, 3);
+  assert.equal(find("archon").shardText, "");
+  assert.deepEqual([find("circuit").choices, find("steel").choices], [[], []]);
+  assert.deepEqual([find("nightwave").meta, find("nightwave").value, find("nightwave").groups], ["List when back online", "", []]);
+  assert.deepEqual([empty.status, empty.left, empty.baro], ["Offline", "6 to do", ""]);
+});
+
+test("game not detected: only that, the counts stay", async () => {
+  await push([], { features: { mission: "unavailable" } });
+  assert.equal(model().hint, "Game not detected");
+  assert.equal(act("netracells").value, "3/5");
+  await push();
+  assert.equal(model().hint, "");
+});
+
+test("a whole week: the Sortie and its learned type reset each day at 16:00 UTC, the rest on Monday", async () => {
+  currentWorld = () => world(vm.now);
+  // Past 16:00 UTC: a new Sortie, the week's ticks stay.
+  vm.advance(SORTIE_END - vm.now + 60_000);
+  assert.deepEqual([act("sortie").value, act("sortie").icon], ["0/3", "circle"]);
+  assert.equal(section("day").reset, "resets in 24h");
+  assert.deepEqual(saved().sortie.types, [null, null, null]);
+  assert.equal(act("netracells").value, "3/5");
+  // The world still holds yesterday's Sortie: the stages by their rank.
+  await push();
+  assert.deepEqual(texts("sortie"), ["1st mission", "2nd mission", "3rd mission"]);
+  // Monday 00:00 UTC: everything of the week starts again.
+  vm.advance(WEEK_END - vm.now + HOUR);
+  for (const id of ["archon", "netracells", "circuit", "steel"]) assert.equal(act(id).icon, "circle", id);
+  assert.deepEqual(saved().circuit.picks, { auto: [], hand: null });
+  // The challenges that ended went with their ticks.
+  assert.deepEqual(saved().nightwave, {});
+  assert.equal(saved().weekEnd, WEEK_END + 7 * DAY);
+});
+
+test("Baro Ki'Teer at the relay, then gone", async () => {
+  const trader = { arrivesAt: vm.now - HOUR, leavesAt: vm.now + 2 * DAY, relay: { id: "larunda_relay", name: "Larunda Relay" } };
+  vm.push(SERVICE, value({ worldValue: world(vm.now, { voidTrader: trader }) }));
+  await flush();
+  assert.equal(model().baroHere, true);
+  assert.match(model().baro, /^Baro Ki'Teer at Larunda\u00a0Relay · leaves \w{3} \d\d:\d\d$/);
+  vm.push(SERVICE, value({ worldValue: world(vm.now, { voidTrader: null }) }));
+  await flush();
+  assert.equal(model().baro, "");
+});
+
+test("refused game events: the way to fix it, the count stays", () => {
+  vm.fail(SERVICE, "permission_denied");
+  assert.equal(model().hint, "Allow \u201cWarframe: missions\u201d in the Control Center.");
+  assert.notEqual(model().left, "");
+  assert.deepEqual([model().lineValue, model().lineValueCls], ["Access denied", "line-reset tone-warning"]);
+});
+
+test("the panel stops at 520 points: under half a 1080p screen at 100 %, 780 px at 150 %", () => {
+  const manifest = JSON.parse(readFileSync(new URL("../manifest.json", import.meta.url), "utf8"));
+  assert.equal(manifest.sizing.max.height, 520);
+  assert.equal(logic.MAX_HEIGHT, manifest.sizing.max.height);
+  assert.ok(logic.MAX_HEIGHT <= 1080 / 2);
+  // The panel stops there too: past it, its list shrinks and scrolls, the note stays whole.
+  const style = readFileSync(new URL("../style.ocss", import.meta.url), "utf8");
+  const panel = style.slice(style.indexOf(".wf {"), style.indexOf("}", style.indexOf(".wf {")));
+  assert.match(panel, new RegExp(`max-height: ${logic.MAX_HEIGHT}px;`));
+});
+
+test("a section's title and reset that do not fit one line count two: French at 220 points", () => {
+  const model = (title, reset) => ({
+    cols: [{ id: "all", groups: [{ id: "week", title, reset, acts: [] }] }],
+    baro: "",
+    hint: "",
+    status: "",
+    note: "",
+  });
+  const short = logic.panelHeight(model("This week", "resets in 3d 14h"), 220);
+  const long = logic.panelHeight(model("Cette semaine", "reset dans 3 j 14 h"), 220);
+  assert.equal(long - short, 14);
+  assert.equal(logic.panelHeight(model("Cette semaine", "reset dans 3 j 14 h"), 300), short);
+});
+
+test("the estimate counts between Today and This week the gap the style draws", () => {
+  const style = readFileSync(new URL("../style.ocss", import.meta.url), "utf8");
+  const rule = style.slice(style.indexOf(".gcol {"), style.indexOf("}", style.indexOf(".gcol {")));
+  const drawn = Number(rule.match(/gap: (\d+)px;/)[1]);
+  const model = (titles) => ({
+    cols: [{ id: "all", groups: titles.map((title) => ({ id: title, title, reset: "", acts: [] })) }],
+    baro: "",
+    hint: "",
+    status: "",
+    note: "",
+  });
+  const [none, one, two] = [[], ["Today"], ["Today", "This week"]].map((titles) => logic.panelHeight(model(titles), 300));
+  // Two section heads and the gap, less two times one head.
+  assert.equal(two - 2 * one + none, drawn);
+});
+
+// Ordered stages (the Sortie, the Archon Hunt): the stages done always form a prefix.
+const stages = (...seen) => seen.map((at) => ({ at }));
+const shown = (parts) => parts.map((part) => part.hand ?? part.at > 0);
+const hands = (parts) => parts.map((part) => part.hand !== undefined && part.hand !== part.at > 0);
+
+test("ordered stages: the game ticked 1 and 2, the hand unticked 2, then the game ends 3: all three done", () => {
+  const parts = stages(10, 20, 0);
+  logic.clickStage(parts, 1, 30);
+  assert.deepEqual(shown(parts), [true, false, false]);
+  assert.equal(logic.stageEnded(parts, 2, 40), true);
+  assert.deepEqual([shown(parts), hands(parts)], [[true, true, true], [false, false, false]]);
+});
+
+test("ordered stages: the game ticked 1 and 2, the hand unticks 1: none stays done", () => {
+  const parts = stages(10, 20, 0);
+  logic.clickStage(parts, 0, 30);
+  assert.deepEqual([shown(parts), hands(parts)], [[false, false, false], [true, true, false]]);
+});
+
+test("ordered stages: the third ticked by hand from none ticks all three, with the hand", () => {
+  const parts = stages(0, 0, 0);
+  logic.clickStage(parts, 2, 30);
+  assert.deepEqual([shown(parts), hands(parts)], [[true, true, true], [true, true, true]]);
+});
+
+test("ordered stages: the second unticked when the game saw all three leaves the first", () => {
+  const parts = stages(10, 20, 30);
+  logic.clickStage(parts, 1, 40);
+  assert.deepEqual([shown(parts), hands(parts)], [[true, false, false], [false, true, true]]);
+});
+
+test("ordered stages: the game proves the stages up to the one it ends, never those after, never twice", () => {
+  // Ticked by hand up to 3, the game ends 1: 1 as the game saw it, 2 and 3 still by hand.
+  const parts = stages(0, 0, 0);
+  logic.clickStage(parts, 2, 5);
+  assert.equal(logic.stageEnded(parts, 0, 10), true);
+  assert.deepEqual([shown(parts), hands(parts)], [[true, true, true], [false, true, true]]);
+  // A stage the game saw already (a relaunch replays its log): nothing changes.
+  const seen = stages(10, 20, 0);
+  logic.clickStage(seen, 1, 30);
+  assert.equal(logic.stageEnded(seen, 1, 20), false);
+  assert.deepEqual(shown(seen), [true, false, false]);
+});
+
+test("Netracells and Nightwave stay independent: a click changes only its own box", () => {
+  const ticks = logic.emptyTicks();
+  ticks.netracells[0].at = 10;
+  assert.equal(logic.tickPart(ticks, "netracells.3", null, 20), true);
+  assert.deepEqual(ticks.netracells.map((cell) => cell.hand ?? cell.at > 0), [true, false, false, true, false]);
+  assert.equal(logic.tickPart(ticks, "netracells.0", null, 30), true);
+  assert.deepEqual(ticks.netracells.map((cell) => cell.hand ?? cell.at > 0), [false, false, false, true, false]);
+  const world = { nightwave: { endsAt: 1000, challenges: [
+    { id: "a", name: "A", kind: "daily", standing: 1000, endsAt: 1000, progressed: false, completed: false },
+    { id: "b", name: "B", kind: "weekly", standing: 4500, endsAt: 1000, progressed: false, completed: false },
+  ] } };
+  assert.equal(logic.tickPart(ticks, "nightwave.b", world, 40), true);
+  assert.deepEqual([ticks.nightwave.a, ticks.nightwave.b.hand], [undefined, true]);
+});

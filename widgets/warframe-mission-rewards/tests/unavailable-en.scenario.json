@@ -1,0 +1,68 @@
+{
+  "scenarioVersion": 1,
+  "name": "unavailable-en",
+  "description": "Warframe runs but its missions can't be read.",
+  "host": {
+    "locale": "en",
+    "mode": "interactive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "playing": true,
+          "features": {
+            "mission": "unavailable"
+          },
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "en"
+          }
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Missions can't be read"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "unavailable-en",
+        "fault": "none"
+      }
+    }
+  ]
+}

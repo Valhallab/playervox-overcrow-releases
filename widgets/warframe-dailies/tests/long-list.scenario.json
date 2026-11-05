@@ -1,0 +1,1343 @@
+{
+  "scenarioVersion": 1,
+  "name": "long-list",
+  "description": "Sixteen Nightwave challenges at the narrowest width with the game not detected: the panel stops at its largest height; Interactive scrolls under the host's scrollbar, Passive folds the end of Nightwave.",
+  "host": {
+    "startAt": 1793268000000,
+    "zone": {
+      "offsetMinutes": 60
+    },
+    "mode": "passive",
+    "storage": {
+      "ticks": {
+        "v": 2,
+        "lastAt": 1793261100000,
+        "dayEnd": 1793289600000,
+        "weekEnd": 1793577600000,
+        "sortie": {
+          "parts": [
+            {
+              "at": 1793261100000
+            },
+            {
+              "at": 0
+            },
+            {
+              "at": 0
+            }
+          ],
+          "types": [
+            null,
+            null,
+            null
+          ]
+        },
+        "archon": {
+          "parts": [
+            {
+              "at": 1793127000000
+            },
+            {
+              "at": 0
+            },
+            {
+              "at": 0
+            }
+          ],
+          "types": [
+            null,
+            null,
+            null
+          ]
+        },
+        "netracells": [
+          {
+            "at": 1793124000000
+          },
+          {
+            "at": 1793214600000
+          },
+          {
+            "at": 0
+          },
+          {
+            "at": 0
+          },
+          {
+            "at": 0
+          }
+        ],
+        "circuit": {
+          "done": 0,
+          "picks": {
+            "auto": [
+              "titania"
+            ],
+            "hand": null
+          }
+        },
+        "steel": {
+          "done": 0,
+          "picks": {
+            "auto": [
+              "lato",
+              "paris"
+            ],
+            "hand": null
+          }
+        },
+        "nightwave": {
+          "artist": {
+            "at": 1793264700000,
+            "endsAt": 1793318400000
+          }
+        }
+      }
+    }
+  },
+  "assets": {
+    "shard": "tests/assets/shard.png"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "features": {
+            "mission": "unavailable"
+          }
+        }
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "world": {
+              "updatedAt": 1793268000000,
+              "sortie": {
+                "boss": {
+                  "id": "raptors",
+                  "name": "Raptors"
+                },
+                "faction": {
+                  "id": "corpus",
+                  "name": "Corpus"
+                },
+                "endsAt": 1793289600000,
+                "missions": [
+                  {
+                    "node": {
+                      "id": "SolNode209",
+                      "name": "Morax"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europa"
+                    },
+                    "type": {
+                      "id": "excavation",
+                      "name": "Excavation"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode102",
+                      "name": "Naeglar"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europa"
+                    },
+                    "type": {
+                      "id": "sabotage",
+                      "name": "Sabotage"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode57",
+                      "name": "Sinai"
+                    },
+                    "planet": {
+                      "id": "jupiter",
+                      "name": "Jupiter"
+                    },
+                    "type": {
+                      "id": "mobile_defense",
+                      "name": "Mobile Defense"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  }
+                ]
+              },
+              "archonHunt": {
+                "boss": {
+                  "id": "archon_boreal",
+                  "name": "Archon Boreal"
+                },
+                "endsAt": 1793577600000,
+                "missions": [
+                  {
+                    "node": {
+                      "id": "SolNode62",
+                      "name": "Adaro"
+                    },
+                    "planet": {
+                      "id": "sedna",
+                      "name": "Sedna"
+                    },
+                    "type": {
+                      "id": "mobile_defense",
+                      "name": "Mobile Defense"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode63",
+                      "name": "Kappa"
+                    },
+                    "planet": {
+                      "id": "sedna",
+                      "name": "Sedna"
+                    },
+                    "type": {
+                      "id": "interception",
+                      "name": "Interception"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode64",
+                      "name": "Hydron"
+                    },
+                    "planet": {
+                      "id": "sedna",
+                      "name": "Sedna"
+                    },
+                    "type": {
+                      "id": "assassination",
+                      "name": "Assassination"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  }
+                ],
+                "shard": {
+                  "id": "azure",
+                  "name": "Azure Archon Shard",
+                  "icon": "fixture:shard",
+                  "iconPending": false
+                }
+              },
+              "fissures": [],
+              "cycles": {
+                "cetus": null,
+                "vallis": null,
+                "cambion": null
+              },
+              "resets": {
+                "daily": 1793318400000,
+                "weekly": 1793577600000
+              },
+              "voidTrader": {
+                "arrivesAt": 1793365200000,
+                "leavesAt": 1793538000000,
+                "relay": {
+                  "id": "kronia_relay",
+                  "name": "Kronia Relay"
+                }
+              },
+              "circuit": {
+                "normal": [
+                  {
+                    "id": "ivara",
+                    "name": "Ivara",
+                    "rewards": []
+                  },
+                  {
+                    "id": "inaros",
+                    "name": "Inaros",
+                    "rewards": []
+                  },
+                  {
+                    "id": "titania",
+                    "name": "Titania",
+                    "rewards": []
+                  }
+                ],
+                "steelPath": [
+                  {
+                    "id": "braton",
+                    "name": "Braton",
+                    "rewards": []
+                  },
+                  {
+                    "id": "lato",
+                    "name": "Lato",
+                    "rewards": []
+                  },
+                  {
+                    "id": "skana",
+                    "name": "Skana",
+                    "rewards": []
+                  },
+                  {
+                    "id": "paris",
+                    "name": "Paris",
+                    "rewards": []
+                  },
+                  {
+                    "id": "kunai",
+                    "name": "Kunai",
+                    "rewards": []
+                  }
+                ],
+                "picked": {
+                  "normal": [
+                    "titania"
+                  ],
+                  "steelPath": [
+                    "lato",
+                    "paris"
+                  ]
+                }
+              },
+              "nightwave": {
+                "endsAt": 1798761600000,
+                "challenges": [
+                  {
+                    "id": "c00",
+                    "name": "Artist",
+                    "kind": "daily",
+                    "standing": 1000,
+                    "endsAt": 1793318400000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Customize a piece of Equipment's colors."
+                  },
+                  {
+                    "id": "c01",
+                    "name": "Detonator",
+                    "kind": "daily",
+                    "standing": 1000,
+                    "endsAt": 1793318400000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Kill 150 Enemies with Blast Damage."
+                  },
+                  {
+                    "id": "c02",
+                    "name": "Whole Arsenal",
+                    "kind": "daily",
+                    "standing": 1000,
+                    "endsAt": 1793318400000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Get a kill with your Primary, Secondary, and Melee weapons within 10 seconds."
+                  },
+                  {
+                    "id": "c03",
+                    "name": "Mission Complete XIII",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Complete 15 missions"
+                  },
+                  {
+                    "id": "c04",
+                    "name": "Eximus Eliminator XIII",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Kill 30 Eximus."
+                  },
+                  {
+                    "id": "c05",
+                    "name": "Not A Warning Shot XIII",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Kill 500 enemies."
+                  },
+                  {
+                    "id": "c06",
+                    "name": "Gatherer",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Collect 4,000 Resources"
+                  },
+                  {
+                    "id": "c07",
+                    "name": "Earth Miner",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Mine 3 Rare Gems or Ore in the Plains of Eidolon."
+                  },
+                  {
+                    "id": "c08",
+                    "name": "Sealed Fate",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": null
+                  },
+                  {
+                    "id": "c09",
+                    "name": "Patron",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Donate to the Leverian"
+                  },
+                  {
+                    "id": "c10",
+                    "name": "Earth Fisher",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Catch 3 Rare Fish in the Plains of Eidolon."
+                  },
+                  {
+                    "id": "c11",
+                    "name": "Venus Miner",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Mine 3 Rare Gems or Ore in the Orb Vallis."
+                  },
+                  {
+                    "id": "c12",
+                    "name": "Feeling Lucky",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": null
+                  },
+                  {
+                    "id": "c13",
+                    "name": "The Many Made Whole",
+                    "kind": "elite",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Exchange 10 Riven Slivers for a Riven Mod"
+                  },
+                  {
+                    "id": "c14",
+                    "name": "Mirror, Mirror",
+                    "kind": "elite",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Defend both Mirror Defense objectives 3 times each in a single mission."
+                  },
+                  {
+                    "id": "c15",
+                    "name": "Choose Wisely",
+                    "kind": "elite",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": null
+                  }
+                ]
+              }
+            }
+          },
+          "glossary": {
+            "language": "en",
+            "activity": {
+              "sortie": "Sortie",
+              "archon_hunt": "Archon Hunt",
+              "netracells": "Netracells",
+              "circuit": "The Circuit",
+              "nightwave": "Nightwave",
+              "baro_ki_teer": "Baro Ki'Teer",
+              "steel_path": "The Steel Path"
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 220,
+          "height": 320
+        },
+        "theme": "dark",
+        "mode": "interactive"
+      }
+    },
+    {
+      "expect": {
+        "image": "en-100-narrow-interactive",
+        "fault": "none"
+      }
+    },
+    {
+      "pointer": {
+        "wheel": {
+          "target": {
+            "text": "Netracells"
+          },
+          "dx": 0,
+          "dy": 8
+        }
+      }
+    },
+    {
+      "expect": {
+        "image": "en-100-narrow-interactive-scrolled",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "world": {
+              "updatedAt": 1793268000000,
+              "sortie": {
+                "boss": {
+                  "id": "raptors",
+                  "name": "Raptors"
+                },
+                "faction": {
+                  "id": "corpus",
+                  "name": "Corpus"
+                },
+                "endsAt": 1793289600000,
+                "missions": [
+                  {
+                    "node": {
+                      "id": "SolNode209",
+                      "name": "Morax"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europa"
+                    },
+                    "type": {
+                      "id": "excavation",
+                      "name": "Excavation"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode102",
+                      "name": "Naeglar"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europa"
+                    },
+                    "type": {
+                      "id": "sabotage",
+                      "name": "Sabotage"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode57",
+                      "name": "Sinai"
+                    },
+                    "planet": {
+                      "id": "jupiter",
+                      "name": "Jupiter"
+                    },
+                    "type": {
+                      "id": "mobile_defense",
+                      "name": "Mobile Defense"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  }
+                ]
+              },
+              "archonHunt": {
+                "boss": {
+                  "id": "archon_boreal",
+                  "name": "Archon Boreal"
+                },
+                "endsAt": 1793577600000,
+                "missions": [
+                  {
+                    "node": {
+                      "id": "SolNode62",
+                      "name": "Adaro"
+                    },
+                    "planet": {
+                      "id": "sedna",
+                      "name": "Sedna"
+                    },
+                    "type": {
+                      "id": "mobile_defense",
+                      "name": "Mobile Defense"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode63",
+                      "name": "Kappa"
+                    },
+                    "planet": {
+                      "id": "sedna",
+                      "name": "Sedna"
+                    },
+                    "type": {
+                      "id": "interception",
+                      "name": "Interception"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode64",
+                      "name": "Hydron"
+                    },
+                    "planet": {
+                      "id": "sedna",
+                      "name": "Sedna"
+                    },
+                    "type": {
+                      "id": "assassination",
+                      "name": "Assassination"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  }
+                ],
+                "shard": {
+                  "id": "azure",
+                  "name": "Azure Archon Shard",
+                  "icon": "fixture:shard",
+                  "iconPending": false
+                }
+              },
+              "fissures": [],
+              "cycles": {
+                "cetus": null,
+                "vallis": null,
+                "cambion": null
+              },
+              "resets": {
+                "daily": 1793318400000,
+                "weekly": 1793577600000
+              },
+              "voidTrader": {
+                "arrivesAt": 1793365200000,
+                "leavesAt": 1793538000000,
+                "relay": {
+                  "id": "kronia_relay",
+                  "name": "Kronia Relay"
+                }
+              },
+              "circuit": {
+                "normal": [
+                  {
+                    "id": "ivara",
+                    "name": "Ivara",
+                    "rewards": []
+                  },
+                  {
+                    "id": "inaros",
+                    "name": "Inaros",
+                    "rewards": []
+                  },
+                  {
+                    "id": "titania",
+                    "name": "Titania",
+                    "rewards": []
+                  }
+                ],
+                "steelPath": [
+                  {
+                    "id": "braton",
+                    "name": "Braton",
+                    "rewards": []
+                  },
+                  {
+                    "id": "lato",
+                    "name": "Lato",
+                    "rewards": []
+                  },
+                  {
+                    "id": "skana",
+                    "name": "Skana",
+                    "rewards": []
+                  },
+                  {
+                    "id": "paris",
+                    "name": "Paris",
+                    "rewards": []
+                  },
+                  {
+                    "id": "kunai",
+                    "name": "Kunai",
+                    "rewards": []
+                  }
+                ],
+                "picked": {
+                  "normal": [
+                    "titania"
+                  ],
+                  "steelPath": [
+                    "lato",
+                    "paris"
+                  ]
+                }
+              },
+              "nightwave": {
+                "endsAt": 1798761600000,
+                "challenges": [
+                  {
+                    "id": "c00",
+                    "name": "Artist",
+                    "kind": "daily",
+                    "standing": 1000,
+                    "endsAt": 1793318400000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Customize a piece of Equipment's colors."
+                  },
+                  {
+                    "id": "c01",
+                    "name": "Detonator",
+                    "kind": "daily",
+                    "standing": 1000,
+                    "endsAt": 1793318400000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Kill 150 Enemies with Blast Damage."
+                  },
+                  {
+                    "id": "c02",
+                    "name": "Whole Arsenal",
+                    "kind": "daily",
+                    "standing": 1000,
+                    "endsAt": 1793318400000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Get a kill with your Primary, Secondary, and Melee weapons within 10 seconds."
+                  },
+                  {
+                    "id": "c03",
+                    "name": "Mission Complete XIII",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Complete 15 missions"
+                  },
+                  {
+                    "id": "c04",
+                    "name": "Eximus Eliminator XIII",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Kill 30 Eximus."
+                  },
+                  {
+                    "id": "c05",
+                    "name": "Not A Warning Shot XIII",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Kill 500 enemies."
+                  },
+                  {
+                    "id": "c06",
+                    "name": "Gatherer",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Collect 4,000 Resources"
+                  },
+                  {
+                    "id": "c07",
+                    "name": "Earth Miner",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Mine 3 Rare Gems or Ore in the Plains of Eidolon."
+                  },
+                  {
+                    "id": "c08",
+                    "name": "Sealed Fate",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": null
+                  },
+                  {
+                    "id": "c09",
+                    "name": "Patron",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Donate to the Leverian"
+                  },
+                  {
+                    "id": "c10",
+                    "name": "Earth Fisher",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Catch 3 Rare Fish in the Plains of Eidolon."
+                  },
+                  {
+                    "id": "c11",
+                    "name": "Venus Miner",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Mine 3 Rare Gems or Ore in the Orb Vallis."
+                  },
+                  {
+                    "id": "c12",
+                    "name": "Feeling Lucky",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": null
+                  },
+                  {
+                    "id": "c13",
+                    "name": "The Many Made Whole",
+                    "kind": "elite",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Exchange 10 Riven Slivers for a Riven Mod"
+                  },
+                  {
+                    "id": "c14",
+                    "name": "Mirror, Mirror",
+                    "kind": "elite",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Defend both Mirror Defense objectives 3 times each in a single mission."
+                  },
+                  {
+                    "id": "c15",
+                    "name": "Choose Wisely",
+                    "kind": "elite",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": null
+                  }
+                ]
+              }
+            }
+          },
+          "glossary": {
+            "language": "en",
+            "activity": {
+              "sortie": "Sortie",
+              "archon_hunt": "Archon Hunt",
+              "netracells": "Netracells",
+              "circuit": "The Circuit",
+              "nightwave": "Nightwave",
+              "baro_ki_teer": "Baro Ki'Teer",
+              "steel_path": "The Steel Path"
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "en",
+        "scale": 1000,
+        "size": {
+          "width": 220,
+          "height": 320
+        },
+        "theme": "dark",
+        "mode": "passive"
+      }
+    },
+    {
+      "expect": {
+        "image": "en-100-narrow",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "world": {
+              "updatedAt": 1793268000000,
+              "sortie": {
+                "boss": {
+                  "id": "raptors",
+                  "name": "Raptors"
+                },
+                "faction": {
+                  "id": "corpus",
+                  "name": "Corpus"
+                },
+                "endsAt": 1793289600000,
+                "missions": [
+                  {
+                    "node": {
+                      "id": "SolNode209",
+                      "name": "Morax"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europe"
+                    },
+                    "type": {
+                      "id": "excavation",
+                      "name": "Excavation"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode102",
+                      "name": "Naeglar"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europe"
+                    },
+                    "type": {
+                      "id": "sabotage",
+                      "name": "Sabotage"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode57",
+                      "name": "Sinai"
+                    },
+                    "planet": {
+                      "id": "jupiter",
+                      "name": "Jupiter"
+                    },
+                    "type": {
+                      "id": "mobile_defense",
+                      "name": "Défense Mobile"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  }
+                ]
+              },
+              "archonHunt": {
+                "boss": {
+                  "id": "archon_boreal",
+                  "name": "Archonte Boréal"
+                },
+                "endsAt": 1793577600000,
+                "missions": [
+                  {
+                    "node": {
+                      "id": "SolNode62",
+                      "name": "Adaro"
+                    },
+                    "planet": {
+                      "id": "sedna",
+                      "name": "Sedna"
+                    },
+                    "type": {
+                      "id": "mobile_defense",
+                      "name": "Défense Mobile"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode63",
+                      "name": "Kappa"
+                    },
+                    "planet": {
+                      "id": "sedna",
+                      "name": "Sedna"
+                    },
+                    "type": {
+                      "id": "interception",
+                      "name": "Interception"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode64",
+                      "name": "Hydron"
+                    },
+                    "planet": {
+                      "id": "sedna",
+                      "name": "Sedna"
+                    },
+                    "type": {
+                      "id": "assassination",
+                      "name": "Assassinat"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  }
+                ],
+                "shard": {
+                  "id": "azure",
+                  "name": "Éclat d’Archonte Azur",
+                  "icon": "fixture:shard",
+                  "iconPending": false
+                }
+              },
+              "fissures": [],
+              "cycles": {
+                "cetus": null,
+                "vallis": null,
+                "cambion": null
+              },
+              "resets": {
+                "daily": 1793318400000,
+                "weekly": 1793577600000
+              },
+              "voidTrader": {
+                "arrivesAt": 1793365200000,
+                "leavesAt": 1793538000000,
+                "relay": {
+                  "id": "kronia_relay",
+                  "name": "Relais Kronia"
+                }
+              },
+              "circuit": {
+                "normal": [
+                  {
+                    "id": "ivara",
+                    "name": "Ivara",
+                    "rewards": []
+                  },
+                  {
+                    "id": "inaros",
+                    "name": "Inaros",
+                    "rewards": []
+                  },
+                  {
+                    "id": "titania",
+                    "name": "Titania",
+                    "rewards": []
+                  }
+                ],
+                "steelPath": [
+                  {
+                    "id": "braton",
+                    "name": "Braton",
+                    "rewards": []
+                  },
+                  {
+                    "id": "lato",
+                    "name": "Lato",
+                    "rewards": []
+                  },
+                  {
+                    "id": "skana",
+                    "name": "Skana",
+                    "rewards": []
+                  },
+                  {
+                    "id": "paris",
+                    "name": "Paris",
+                    "rewards": []
+                  },
+                  {
+                    "id": "kunai",
+                    "name": "Kunai",
+                    "rewards": []
+                  }
+                ],
+                "picked": {
+                  "normal": [
+                    "titania"
+                  ],
+                  "steelPath": [
+                    "lato",
+                    "paris"
+                  ]
+                }
+              },
+              "nightwave": {
+                "endsAt": 1798761600000,
+                "challenges": [
+                  {
+                    "id": "c00",
+                    "name": "Artist",
+                    "kind": "daily",
+                    "standing": 1000,
+                    "endsAt": 1793318400000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Customize a piece of Equipment's colors."
+                  },
+                  {
+                    "id": "c01",
+                    "name": "Detonator",
+                    "kind": "daily",
+                    "standing": 1000,
+                    "endsAt": 1793318400000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Kill 150 Enemies with Blast Damage."
+                  },
+                  {
+                    "id": "c02",
+                    "name": "Whole Arsenal",
+                    "kind": "daily",
+                    "standing": 1000,
+                    "endsAt": 1793318400000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Get a kill with your Primary, Secondary, and Melee weapons within 10 seconds."
+                  },
+                  {
+                    "id": "c03",
+                    "name": "Mission Complete XIII",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Complete 15 missions"
+                  },
+                  {
+                    "id": "c04",
+                    "name": "Eximus Eliminator XIII",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Kill 30 Eximus."
+                  },
+                  {
+                    "id": "c05",
+                    "name": "Not A Warning Shot XIII",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Kill 500 enemies."
+                  },
+                  {
+                    "id": "c06",
+                    "name": "Gatherer",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Collect 4,000 Resources"
+                  },
+                  {
+                    "id": "c07",
+                    "name": "Earth Miner",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Mine 3 Rare Gems or Ore in the Plains of Eidolon."
+                  },
+                  {
+                    "id": "c08",
+                    "name": "Sealed Fate",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": null
+                  },
+                  {
+                    "id": "c09",
+                    "name": "Patron",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Donate to the Leverian"
+                  },
+                  {
+                    "id": "c10",
+                    "name": "Earth Fisher",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Catch 3 Rare Fish in the Plains of Eidolon."
+                  },
+                  {
+                    "id": "c11",
+                    "name": "Venus Miner",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Mine 3 Rare Gems or Ore in the Orb Vallis."
+                  },
+                  {
+                    "id": "c12",
+                    "name": "Feeling Lucky",
+                    "kind": "weekly",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": null
+                  },
+                  {
+                    "id": "c13",
+                    "name": "The Many Made Whole",
+                    "kind": "elite",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Exchange 10 Riven Slivers for a Riven Mod"
+                  },
+                  {
+                    "id": "c14",
+                    "name": "Mirror, Mirror",
+                    "kind": "elite",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Defend both Mirror Defense objectives 3 times each in a single mission."
+                  },
+                  {
+                    "id": "c15",
+                    "name": "Choose Wisely",
+                    "kind": "elite",
+                    "standing": 1000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": null
+                  }
+                ]
+              }
+            }
+          },
+          "glossary": {
+            "language": "fr",
+            "activity": {
+              "sortie": "Sortie",
+              "archon_hunt": "Chasse aux Archontes",
+              "netracells": "Cellules de Netra",
+              "circuit": "Le Circuit",
+              "nightwave": "Ondes Nocturnes",
+              "baro_ki_teer": "Baro Ki'Teer",
+              "steel_path": "La Route de l'Acier"
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "locale": "fr",
+        "scale": 1000,
+        "size": {
+          "width": 220,
+          "height": 320
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "fr-100-narrow",
+        "fault": "none"
+      }
+    }
+  ]
+}

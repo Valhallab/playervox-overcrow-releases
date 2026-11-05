@@ -1,0 +1,187 @@
+{
+  "scenarioVersion": 1,
+  "name": "nightmare-mix",
+  "description": "A Nightmare mission: one mod, once.",
+  "host": {
+    "locale": "fr",
+    "mode": "interactive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "assets": {
+    "mod": "tests/assets/item-mod.png"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode89",
+                "name": "Mariana"
+              },
+              "planet": {
+                "id": "earth",
+                "name": "Earth"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "type": {
+                "id": "extermination",
+                "name": "Extermination"
+              },
+              "rewards": {
+                "source": "nightmare",
+                "tables": [
+                  {
+                    "kind": "mission",
+                    "rotation": "A",
+                    "items": [
+                      {
+                        "id": "ice_storm",
+                        "name": "Ice Storm",
+                        "quantity": 1,
+                        "chance": 0.18969999999999998,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "stunning_speed",
+                        "name": "Stunning Speed",
+                        "quantity": 1,
+                        "chance": 0.18969999999999998,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "hammer_shot",
+                        "name": "Hammer Shot",
+                        "quantity": 1,
+                        "chance": 0.0101,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "wildfire",
+                        "name": "Wildfire",
+                        "quantity": 1,
+                        "chance": 0.18969999999999998,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "accelerated_blast",
+                        "name": "Accelerated Blast",
+                        "quantity": 1,
+                        "chance": 0.18969999999999998,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "blaze",
+                        "name": "Blaze",
+                        "quantity": 1,
+                        "chance": 0.0101,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "chilling_reload",
+                        "name": "Chilling Reload",
+                        "quantity": 1,
+                        "chance": 0.2211,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              "modifiers": [
+                {
+                  "id": "nightmare",
+                  "name": "Nightmare",
+                  "stage": null
+                }
+              ],
+              "rewardsPending": false,
+              "earned": null,
+              "credits": null,
+              "selectedAt": 1793217200000,
+              "loadingAt": 1793217220000,
+              "startedAt": 1793217240000
+            },
+            "progress": {
+              "wave": null,
+              "waveEnemies": null,
+              "round": null,
+              "rewards": 0,
+              "rotation": null,
+              "earned": {
+                "rotations": [],
+                "totals": {
+                  "A": 0,
+                  "B": 0,
+                  "C": 0
+                }
+              },
+              "cycle": null,
+              "clock": null,
+              "nextRewardAt": null,
+              "nextRewardWave": null
+            }
+          },
+          "event": "mission_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "en"
+          }
+        }
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "nightmare-mix",
+        "fault": "none"
+      }
+    }
+  ]
+}

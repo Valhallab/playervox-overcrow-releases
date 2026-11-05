@@ -1,0 +1,20 @@
+{
+  "justifications": [
+    {
+      "permission": "gameEvent:warframe.eidolons",
+      "text": "Times the hunt: when each Eidolon appears, is captured, killed or leaves at dawn, to show each capture and the tricap's total."
+    },
+    {
+      "permission": "gameEvent:warframe.location",
+      "text": "Knows whether you are on the Plains of Eidolon, to keep a finished hunt on screen only while you are there."
+    },
+    {
+      "permission": "gameEvent:warframe.world",
+      "text": "Reads the day and night cycle of Cetus, to show the night left, or when the next night begins."
+    },
+    {
+      "permission": "storage",
+      "text": "Keeps your best tricap, your last 30 hunts and the Eidolons of the current night on this computer, so a hunt goes on after a restart."
+    }
+  ]
+}

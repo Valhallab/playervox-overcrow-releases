@@ -1,0 +1,19 @@
+{
+  "author": "PlayerVox",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/Valhallab/playervox-overcrow-releases/tree/main/widgets/warframe-mission-rewards",
+  "preview": "assets/preview.png",
+  "defaultLocale": "en",
+  "localizations": [
+    {
+      "locale": "en",
+      "name": "Mission rewards",
+      "description": "What your Warframe mission can give, and when: the next rotation's countdown, its loot rarest first, your Void Fissure relic and the Circuit's tiers, then a short recap. Rates: Digital Extremes, no guarantees. PlayerVox is not affiliated with Digital Extremes."
+    },
+    {
+      "locale": "fr",
+      "name": "Récompenses de mission",
+      "description": "Ce que votre mission Warframe peut rapporter, et quand : compte à rebours de la prochaine rotation, butin du plus rare au plus courant, votre relique en Fissure du Néant et les paliers du Circuit, puis un court récap. Taux : Digital Extremes, sans garantie. PlayerVox n’est pas affilié à Digital Extremes."
+    }
+  ]
+}

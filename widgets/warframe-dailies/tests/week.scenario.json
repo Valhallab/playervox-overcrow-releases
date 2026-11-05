@@ -1,0 +1,523 @@
+{
+  "scenarioVersion": 1,
+  "name": "week",
+  "description": "Thursday to Monday: a Sortie in three stages ticks itself, a click ticks the Circuit, the Sortie resets at 16:00 UTC and the week on Monday.",
+  "host": {
+    "startAt": 1793268000000,
+    "zone": {
+      "offsetMinutes": 60
+    },
+    "mode": "interactive"
+  },
+  "assets": {
+    "shard": "tests/assets/shard.png"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "text": [
+          "6 to do",
+          "0/3",
+          "resets in 6h"
+        ]
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "world": {
+              "updatedAt": 1793268000000,
+              "sortie": {
+                "boss": {
+                  "id": "raptors",
+                  "name": "Raptors"
+                },
+                "faction": {
+                  "id": "corpus",
+                  "name": "Corpus"
+                },
+                "endsAt": 1793289600000,
+                "missions": [
+                  {
+                    "node": {
+                      "id": "SolNode209",
+                      "name": "Morax"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europa"
+                    },
+                    "type": {
+                      "id": "excavation",
+                      "name": "Excavation"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode102",
+                      "name": "Naeglar"
+                    },
+                    "planet": {
+                      "id": "europa",
+                      "name": "Europa"
+                    },
+                    "type": {
+                      "id": "sabotage",
+                      "name": "Sabotage"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode57",
+                      "name": "Sinai"
+                    },
+                    "planet": {
+                      "id": "jupiter",
+                      "name": "Jupiter"
+                    },
+                    "type": {
+                      "id": "mobile_defense",
+                      "name": "Mobile Defense"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  }
+                ]
+              },
+              "archonHunt": {
+                "boss": {
+                  "id": "archon_boreal",
+                  "name": "Archon Boreal"
+                },
+                "endsAt": 1793577600000,
+                "missions": [
+                  {
+                    "node": {
+                      "id": "SolNode62",
+                      "name": "Adaro"
+                    },
+                    "planet": {
+                      "id": "sedna",
+                      "name": "Sedna"
+                    },
+                    "type": {
+                      "id": "mobile_defense",
+                      "name": "Mobile Defense"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode63",
+                      "name": "Kappa"
+                    },
+                    "planet": {
+                      "id": "sedna",
+                      "name": "Sedna"
+                    },
+                    "type": {
+                      "id": "interception",
+                      "name": "Interception"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  },
+                  {
+                    "node": {
+                      "id": "SolNode64",
+                      "name": "Hydron"
+                    },
+                    "planet": {
+                      "id": "sedna",
+                      "name": "Sedna"
+                    },
+                    "type": {
+                      "id": "assassination",
+                      "name": "Assassination"
+                    },
+                    "modifier": null,
+                    "typeAtLoading": false
+                  }
+                ],
+                "shard": {
+                  "id": "azure",
+                  "name": "Azure Archon Shard",
+                  "icon": "fixture:shard",
+                  "iconPending": false
+                }
+              },
+              "fissures": [],
+              "cycles": {
+                "cetus": null,
+                "vallis": null,
+                "cambion": null
+              },
+              "resets": {
+                "daily": 1793318400000,
+                "weekly": 1793577600000
+              },
+              "voidTrader": {
+                "arrivesAt": 1793365200000,
+                "leavesAt": 1793538000000,
+                "relay": {
+                  "id": "kronia_relay",
+                  "name": "Kronia Relay"
+                }
+              },
+              "circuit": {
+                "normal": [
+                  {
+                    "id": "ivara",
+                    "name": "Ivara",
+                    "rewards": []
+                  },
+                  {
+                    "id": "inaros",
+                    "name": "Inaros",
+                    "rewards": []
+                  },
+                  {
+                    "id": "titania",
+                    "name": "Titania",
+                    "rewards": []
+                  }
+                ],
+                "steelPath": [
+                  {
+                    "id": "braton",
+                    "name": "Braton",
+                    "rewards": []
+                  },
+                  {
+                    "id": "lato",
+                    "name": "Lato",
+                    "rewards": []
+                  },
+                  {
+                    "id": "skana",
+                    "name": "Skana",
+                    "rewards": []
+                  },
+                  {
+                    "id": "paris",
+                    "name": "Paris",
+                    "rewards": []
+                  },
+                  {
+                    "id": "kunai",
+                    "name": "Kunai",
+                    "rewards": []
+                  }
+                ],
+                "picked": {
+                  "normal": [],
+                  "steelPath": []
+                }
+              },
+              "nightwave": {
+                "endsAt": 1798761600000,
+                "challenges": [
+                  {
+                    "id": "artist",
+                    "name": "Artist",
+                    "kind": "daily",
+                    "standing": 1000,
+                    "endsAt": 1793318400000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Customize a piece of Equipment's colors."
+                  },
+                  {
+                    "id": "detonator",
+                    "name": "Detonator",
+                    "kind": "daily",
+                    "standing": 1000,
+                    "endsAt": 1793318400000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Kill 150 Enemies with Blast Damage."
+                  },
+                  {
+                    "id": "whole_arsenal",
+                    "name": "Whole Arsenal",
+                    "kind": "daily",
+                    "standing": 1000,
+                    "endsAt": 1793318400000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Get a kill with your Primary, Secondary, and Melee weapons within 10 seconds."
+                  },
+                  {
+                    "id": "mission_complete_xiii",
+                    "name": "Mission Complete XIII",
+                    "kind": "weekly",
+                    "standing": 4500,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Complete 15 missions"
+                  },
+                  {
+                    "id": "eximus_eliminator_xiii",
+                    "name": "Eximus Eliminator XIII",
+                    "kind": "weekly",
+                    "standing": 4500,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Kill 30 Eximus."
+                  },
+                  {
+                    "id": "not_a_warning_shot_xiii",
+                    "name": "Not A Warning Shot XIII",
+                    "kind": "weekly",
+                    "standing": 4500,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Kill 500 enemies."
+                  },
+                  {
+                    "id": "gatherer",
+                    "name": "Gatherer",
+                    "kind": "weekly",
+                    "standing": 4500,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Collect 4,000 Resources"
+                  },
+                  {
+                    "id": "earth_miner",
+                    "name": "Earth Miner",
+                    "kind": "weekly",
+                    "standing": 4500,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Mine 3 Rare Gems or Ore in the Plains of Eidolon."
+                  },
+                  {
+                    "id": "the_many_made_whole",
+                    "name": "The Many Made Whole",
+                    "kind": "elite",
+                    "standing": 7000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Exchange 10 Riven Slivers for a Riven Mod"
+                  },
+                  {
+                    "id": "mirror_mirror",
+                    "name": "Mirror, Mirror",
+                    "kind": "elite",
+                    "standing": 7000,
+                    "endsAt": 1793577600000,
+                    "progressed": false,
+                    "completed": false,
+                    "description": "Defend both Mirror Defense objectives 3 times each in a single mission."
+                  }
+                ]
+              }
+            }
+          },
+          "glossary": {
+            "language": "en",
+            "activity": {
+              "sortie": "Sortie",
+              "archon_hunt": "Archon Hunt",
+              "netracells": "Netracells",
+              "circuit": "The Circuit",
+              "nightwave": "Nightwave",
+              "baro_ki_teer": "Baro Ki'Teer",
+              "steel_path": "The Steel Path"
+            }
+          }
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 1200000
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "ended",
+              "node": {
+                "id": "SolNode209",
+                "name": null
+              },
+              "type": {
+                "id": "excavation",
+                "name": "Excavation"
+              },
+              "modifiers": [
+                {
+                  "id": "sortie",
+                  "name": "Sortie",
+                  "stage": 1
+                }
+              ],
+              "result": "succeeded"
+            }
+          },
+          "event": "mission_ended"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "1/3"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 1200000
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "ended",
+              "node": {
+                "id": "SolNode102",
+                "name": null
+              },
+              "type": {
+                "id": "sabotage",
+                "name": "Sabotage"
+              },
+              "modifiers": [
+                {
+                  "id": "sortie",
+                  "name": "Sortie",
+                  "stage": null
+                }
+              ],
+              "result": "succeeded"
+            }
+          },
+          "event": "mission_ended"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "2/3"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 1200000
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "ended",
+              "node": {
+                "id": "SolNode57",
+                "name": null
+              },
+              "type": {
+                "id": "mobile_defense",
+                "name": "Mobile Defense"
+              },
+              "modifiers": [
+                {
+                  "id": "sortie",
+                  "name": "Sortie",
+                  "stage": 3
+                }
+              ],
+              "result": "succeeded"
+            }
+          },
+          "event": "mission_ended"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "just now",
+          "5 to do"
+        ],
+        "noText": [
+          "2/3"
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "The Circuit: to do"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "4 to do"
+        ],
+        "image": "thursday",
+        "fault": "none"
+      }
+    },
+    {
+      "advance": {
+        "ms": 18060000,
+        "jump": true
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "5 to do",
+          "0/3",
+          "resets in 24h",
+          "12:00"
+        ],
+        "noText": [
+          "just now"
+        ]
+      }
+    },
+    {
+      "advance": {
+        "ms": 288000000,
+        "jump": true
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "6 to do",
+          "resets in 7d"
+        ],
+        "image": "monday",
+        "fault": "none"
+      }
+    }
+  ]
+}

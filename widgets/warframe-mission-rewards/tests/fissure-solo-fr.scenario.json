@@ -1,0 +1,329 @@
+{
+  "scenarioVersion": 1,
+  "name": "fissure-solo-fr",
+  "description": "A Void Fissure played alone: the game never writes what the relic gave, so the recap keeps the relic's block (its name, refinement and six items at their rates), without the line of the item it gave.",
+  "host": {
+    "locale": "fr",
+    "mode": "passive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "assets": {
+    "currency": "tests/assets/item-currency.png",
+    "mod": "tests/assets/item-mod.png",
+    "resource": "tests/assets/item-resource.png",
+    "relic": "tests/assets/item-relic.png"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode304",
+                "name": "Roche"
+              },
+              "planet": {
+                "id": "phobos",
+                "name": "Phobos"
+              },
+              "faction": {
+                "id": "corpus",
+                "name": "Corpus"
+              },
+              "type": {
+                "id": "extermination",
+                "name": "Extermination"
+              },
+              "fissure": {
+                "id": "meso",
+                "name": "Meso"
+              },
+              "modifiers": [],
+              "rewards": null,
+              "rewardsPending": false,
+              "earned": null,
+              "credits": null,
+              "relic": {
+                "id": "meso_f5_relic",
+                "name": "Relique Meso F5",
+                "era": {
+                  "id": "meso",
+                  "name": "Meso"
+                },
+                "refinement": {
+                  "id": "radiant",
+                  "name": "Éclatante"
+                },
+                "icon": "fixture:relic",
+                "iconPending": false,
+                "items": [
+                  {
+                    "id": "fulmin_prime_receiver",
+                    "name": "Fulmin Prime - Culasse",
+                    "quantity": 1,
+                    "rarity": "rare",
+                    "chance": 0.1,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  },
+                  {
+                    "id": "bronco_prime_blueprint",
+                    "name": "Bronco Prime (Schéma)",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": 0.1667,
+                    "category": "blueprint",
+                    "icon": null,
+                    "iconPending": false
+                  },
+                  {
+                    "id": "gunsen_prime_blueprint",
+                    "name": "Gunsen Prime (Schéma)",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": 0.1667,
+                    "category": "blueprint",
+                    "icon": null,
+                    "iconPending": false
+                  },
+                  {
+                    "id": "orthos_prime_handle",
+                    "name": "Orthos Prime - Manche",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": 0.1667,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  },
+                  {
+                    "id": "paris_prime_grip",
+                    "name": "Paris Prime - Prise",
+                    "quantity": 1,
+                    "rarity": "uncommon",
+                    "chance": 0.2,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  },
+                  {
+                    "id": "shade_prime_systems",
+                    "name": "Shade Prime - Systèmes",
+                    "quantity": 1,
+                    "rarity": "uncommon",
+                    "chance": 0.2,
+                    "category": "other",
+                    "icon": null,
+                    "iconPending": false
+                  }
+                ],
+                "reward": null
+              },
+              "selectedAt": 1793217400000,
+              "loadingAt": 1793217430000,
+              "startedAt": 1793217469000
+            },
+            "progress": null
+          },
+          "event": "mission_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "fr"
+          },
+          "glossary": {
+            "language": "fr",
+            "term": {
+              "reactant": "Réactif",
+              "relic": "Relique",
+              "credits": "Crédits"
+            },
+            "refinement": {
+              "intact": "Intacte",
+              "exceptional": "Exceptionnelle",
+              "flawless": "Impeccable",
+              "radiant": "Éclatante"
+            }
+          }
+        }
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "ended",
+              "result": "succeeded",
+              "endedAt": 1793217599000,
+              "durationSeconds": 131.4,
+              "credits": 1900,
+              "relic": {
+                "id": "meso_f5_relic",
+                "name": "Relique Meso F5",
+                "era": {
+                  "id": "meso",
+                  "name": "Meso"
+                },
+                "refinement": {
+                  "id": "radiant",
+                  "name": "Éclatante"
+                },
+                "icon": "fixture:relic",
+                "iconPending": false,
+                "items": [
+                  {
+                    "id": "fulmin_prime_receiver",
+                    "name": "Fulmin Prime - Culasse",
+                    "quantity": 1,
+                    "rarity": "rare",
+                    "chance": 0.1,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  },
+                  {
+                    "id": "bronco_prime_blueprint",
+                    "name": "Bronco Prime (Schéma)",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": 0.1667,
+                    "category": "blueprint",
+                    "icon": null,
+                    "iconPending": false
+                  },
+                  {
+                    "id": "gunsen_prime_blueprint",
+                    "name": "Gunsen Prime (Schéma)",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": 0.1667,
+                    "category": "blueprint",
+                    "icon": null,
+                    "iconPending": false
+                  },
+                  {
+                    "id": "orthos_prime_handle",
+                    "name": "Orthos Prime - Manche",
+                    "quantity": 1,
+                    "rarity": "common",
+                    "chance": 0.1667,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  },
+                  {
+                    "id": "paris_prime_grip",
+                    "name": "Paris Prime - Prise",
+                    "quantity": 1,
+                    "rarity": "uncommon",
+                    "chance": 0.2,
+                    "category": "weapon_part",
+                    "icon": "fixture:resource",
+                    "iconPending": false
+                  },
+                  {
+                    "id": "shade_prime_systems",
+                    "name": "Shade Prime - Systèmes",
+                    "quantity": 1,
+                    "rarity": "uncommon",
+                    "chance": 0.2,
+                    "category": "other",
+                    "icon": null,
+                    "iconPending": false
+                  }
+                ],
+                "reward": null
+              }
+            }
+          },
+          "event": "mission_ended"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Prime de fin :",
+          "Votre relique",
+          "Taux : Digital Extremes, sans garantie"
+        ],
+        "noText": [
+          "Votre relique :"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 520
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "solo-recap-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 520
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "solo-recap-interactive-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1500,
+        "size": {
+          "width": 300,
+          "height": 520
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "solo-recap-150-fr",
+        "fault": "none"
+      }
+    }
+  ]
+}

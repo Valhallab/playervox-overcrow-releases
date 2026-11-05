@@ -1,0 +1,1233 @@
+{
+  "scenarioVersion": 1,
+  "name": "passive-rotations-fr",
+  "description": "Passive mode at the user's height: the rotations stacked before the mission, then the rotation in progress, its table cut to the height.",
+  "host": {
+    "locale": "fr",
+    "mode": "passive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "assets": {
+    "currency": "tests/assets/item-currency.png",
+    "mod": "tests/assets/item-mod.png",
+    "resource": "tests/assets/item-resource.png",
+    "relic": "tests/assets/item-relic.png"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode405",
+                "name": "Mot"
+              },
+              "planet": {
+                "id": "void",
+                "name": "Néant"
+              },
+              "faction": {
+                "id": "corrupted",
+                "name": "Corrompus"
+              },
+              "type": {
+                "id": "survival",
+                "name": "Survie"
+              },
+              "modifiers": [],
+              "rewards": {
+                "source": "node",
+                "tables": [
+                  {
+                    "kind": "mission",
+                    "rotation": "A",
+                    "items": [
+                      {
+                        "id": "item_a0",
+                        "name": "Objet A1",
+                        "quantity": 1,
+                        "chance": 0.2,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_a1",
+                        "name": "Objet A2",
+                        "quantity": 1,
+                        "chance": 0.204,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_a2",
+                        "name": "Objet A3",
+                        "quantity": 1,
+                        "chance": 0.208,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "B",
+                    "items": [
+                      {
+                        "id": "item_b0",
+                        "name": "Objet B1",
+                        "quantity": 1,
+                        "chance": 0.01,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b1",
+                        "name": "Objet B2",
+                        "quantity": 1,
+                        "chance": 0.014,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b2",
+                        "name": "Objet B3",
+                        "quantity": 1,
+                        "chance": 0.018,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b3",
+                        "name": "Objet B4",
+                        "quantity": 1,
+                        "chance": 0.022,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b4",
+                        "name": "Objet B5",
+                        "quantity": 1,
+                        "chance": 0.026,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b5",
+                        "name": "Objet B6",
+                        "quantity": 1,
+                        "chance": 0.03,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b6",
+                        "name": "Objet B7",
+                        "quantity": 1,
+                        "chance": 0.034,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b7",
+                        "name": "Objet B8",
+                        "quantity": 1,
+                        "chance": 0.038,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b8",
+                        "name": "Objet B9",
+                        "quantity": 1,
+                        "chance": 0.042,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b9",
+                        "name": "Objet B10",
+                        "quantity": 1,
+                        "chance": 0.046,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b10",
+                        "name": "Objet B11",
+                        "quantity": 1,
+                        "chance": 0.05,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b11",
+                        "name": "Objet B12",
+                        "quantity": 1,
+                        "chance": 0.054,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b12",
+                        "name": "Objet B13",
+                        "quantity": 1,
+                        "chance": 0.058,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b13",
+                        "name": "Objet B14",
+                        "quantity": 1,
+                        "chance": 0.062,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b14",
+                        "name": "Objet B15",
+                        "quantity": 1,
+                        "chance": 0.066,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b15",
+                        "name": "Objet B16",
+                        "quantity": 1,
+                        "chance": 0.07,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b16",
+                        "name": "Objet B17",
+                        "quantity": 1,
+                        "chance": 0.074,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b17",
+                        "name": "Objet B18",
+                        "quantity": 1,
+                        "chance": 0.078,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b18",
+                        "name": "Objet B19",
+                        "quantity": 1,
+                        "chance": 0.082,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b19",
+                        "name": "Objet B20",
+                        "quantity": 1,
+                        "chance": 0.086,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "C",
+                    "items": [
+                      {
+                        "id": "item_c0",
+                        "name": "Objet C1",
+                        "quantity": 1,
+                        "chance": 0.05,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_c1",
+                        "name": "Objet C2",
+                        "quantity": 1,
+                        "chance": 0.054,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_c2",
+                        "name": "Objet C3",
+                        "quantity": 1,
+                        "chance": 0.058,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_c3",
+                        "name": "Objet C4",
+                        "quantity": 1,
+                        "chance": 0.062,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_c4",
+                        "name": "Objet C5",
+                        "quantity": 1,
+                        "chance": 0.066,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_c5",
+                        "name": "Objet C6",
+                        "quantity": 1,
+                        "chance": 0.07,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_c6",
+                        "name": "Objet C7",
+                        "quantity": 1,
+                        "chance": 0.074,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_c7",
+                        "name": "Objet C8",
+                        "quantity": 1,
+                        "chance": 0.078,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              "rewardsPending": false,
+              "earned": null,
+              "credits": null,
+              "selectedAt": 1793217200000,
+              "loadingAt": null,
+              "startedAt": null
+            },
+            "progress": null
+          },
+          "event": "mission_selected",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "fr"
+          },
+          "glossary": {
+            "language": "fr",
+            "term": {
+              "reactant": "Réactif",
+              "relic": "Relique",
+              "credits": "Crédits"
+            },
+            "refinement": {
+              "intact": "Intacte",
+              "exceptional": "Exceptionnelle",
+              "flawless": "Impeccable",
+              "radiant": "Éclatante"
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "stacked-400-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode405",
+                "name": "Mot"
+              },
+              "planet": {
+                "id": "void",
+                "name": "Néant"
+              },
+              "faction": {
+                "id": "corrupted",
+                "name": "Corrompus"
+              },
+              "type": {
+                "id": "survival",
+                "name": "Survie"
+              },
+              "modifiers": [],
+              "rewards": {
+                "source": "node",
+                "tables": [
+                  {
+                    "kind": "mission",
+                    "rotation": "A",
+                    "items": [
+                      {
+                        "id": "item_a0",
+                        "name": "Objet A1",
+                        "quantity": 1,
+                        "chance": 0.2,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_a1",
+                        "name": "Objet A2",
+                        "quantity": 1,
+                        "chance": 0.204,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_a2",
+                        "name": "Objet A3",
+                        "quantity": 1,
+                        "chance": 0.208,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "B",
+                    "items": [
+                      {
+                        "id": "item_b0",
+                        "name": "Objet B1",
+                        "quantity": 1,
+                        "chance": 0.01,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b1",
+                        "name": "Objet B2",
+                        "quantity": 1,
+                        "chance": 0.014,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b2",
+                        "name": "Objet B3",
+                        "quantity": 1,
+                        "chance": 0.018,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b3",
+                        "name": "Objet B4",
+                        "quantity": 1,
+                        "chance": 0.022,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b4",
+                        "name": "Objet B5",
+                        "quantity": 1,
+                        "chance": 0.026,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b5",
+                        "name": "Objet B6",
+                        "quantity": 1,
+                        "chance": 0.03,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b6",
+                        "name": "Objet B7",
+                        "quantity": 1,
+                        "chance": 0.034,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b7",
+                        "name": "Objet B8",
+                        "quantity": 1,
+                        "chance": 0.038,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b8",
+                        "name": "Objet B9",
+                        "quantity": 1,
+                        "chance": 0.042,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b9",
+                        "name": "Objet B10",
+                        "quantity": 1,
+                        "chance": 0.046,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b10",
+                        "name": "Objet B11",
+                        "quantity": 1,
+                        "chance": 0.05,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b11",
+                        "name": "Objet B12",
+                        "quantity": 1,
+                        "chance": 0.054,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b12",
+                        "name": "Objet B13",
+                        "quantity": 1,
+                        "chance": 0.058,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b13",
+                        "name": "Objet B14",
+                        "quantity": 1,
+                        "chance": 0.062,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b14",
+                        "name": "Objet B15",
+                        "quantity": 1,
+                        "chance": 0.066,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b15",
+                        "name": "Objet B16",
+                        "quantity": 1,
+                        "chance": 0.07,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b16",
+                        "name": "Objet B17",
+                        "quantity": 1,
+                        "chance": 0.074,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b17",
+                        "name": "Objet B18",
+                        "quantity": 1,
+                        "chance": 0.078,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b18",
+                        "name": "Objet B19",
+                        "quantity": 1,
+                        "chance": 0.082,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b19",
+                        "name": "Objet B20",
+                        "quantity": 1,
+                        "chance": 0.086,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "C",
+                    "items": [
+                      {
+                        "id": "item_c0",
+                        "name": "Objet C1",
+                        "quantity": 1,
+                        "chance": 0.05,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_c1",
+                        "name": "Objet C2",
+                        "quantity": 1,
+                        "chance": 0.054,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_c2",
+                        "name": "Objet C3",
+                        "quantity": 1,
+                        "chance": 0.058,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_c3",
+                        "name": "Objet C4",
+                        "quantity": 1,
+                        "chance": 0.062,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_c4",
+                        "name": "Objet C5",
+                        "quantity": 1,
+                        "chance": 0.066,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_c5",
+                        "name": "Objet C6",
+                        "quantity": 1,
+                        "chance": 0.07,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_c6",
+                        "name": "Objet C7",
+                        "quantity": 1,
+                        "chance": 0.074,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_c7",
+                        "name": "Objet C8",
+                        "quantity": 1,
+                        "chance": 0.078,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              "rewardsPending": false,
+              "earned": null,
+              "credits": null,
+              "selectedAt": 1793217200000,
+              "loadingAt": 1793217220000,
+              "startedAt": 1793217240000
+            },
+            "progress": {
+              "wave": null,
+              "waveEnemies": null,
+              "round": null,
+              "rewards": 2,
+              "rotation": "B",
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A"
+                ],
+                "totals": {
+                  "A": 2,
+                  "B": 0,
+                  "C": 0
+                }
+              },
+              "cycle": {
+                "number": 1,
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "earned": 2
+              },
+              "clock": "running",
+              "nextRewardAt": 1793217840000,
+              "nextRewardWave": null
+            }
+          },
+          "event": "mission_started"
+        }
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "survival-400-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 560
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "survival-560-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "survival-400-interactive-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode195",
+                "name": "Hydron"
+              },
+              "planet": {
+                "id": "sedna",
+                "name": "Sedna"
+              },
+              "faction": {
+                "id": "grineer",
+                "name": "Grineer"
+              },
+              "type": {
+                "id": "defense",
+                "name": "Défense"
+              },
+              "modifiers": [],
+              "rewards": {
+                "source": "node",
+                "tables": [
+                  {
+                    "kind": "mission",
+                    "rotation": "A",
+                    "items": [
+                      {
+                        "id": "item_a0",
+                        "name": "Objet A1",
+                        "quantity": 1,
+                        "chance": 0.2,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_a1",
+                        "name": "Objet A2",
+                        "quantity": 1,
+                        "chance": 0.204,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_a2",
+                        "name": "Objet A3",
+                        "quantity": 1,
+                        "chance": 0.208,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "B",
+                    "items": [
+                      {
+                        "id": "item_b0",
+                        "name": "Objet B1",
+                        "quantity": 1,
+                        "chance": 0.01,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b1",
+                        "name": "Objet B2",
+                        "quantity": 1,
+                        "chance": 0.014,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b2",
+                        "name": "Objet B3",
+                        "quantity": 1,
+                        "chance": 0.018,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b3",
+                        "name": "Objet B4",
+                        "quantity": 1,
+                        "chance": 0.022,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b4",
+                        "name": "Objet B5",
+                        "quantity": 1,
+                        "chance": 0.026,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b5",
+                        "name": "Objet B6",
+                        "quantity": 1,
+                        "chance": 0.03,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b6",
+                        "name": "Objet B7",
+                        "quantity": 1,
+                        "chance": 0.034,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b7",
+                        "name": "Objet B8",
+                        "quantity": 1,
+                        "chance": 0.038,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b8",
+                        "name": "Objet B9",
+                        "quantity": 1,
+                        "chance": 0.042,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b9",
+                        "name": "Objet B10",
+                        "quantity": 1,
+                        "chance": 0.046,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b10",
+                        "name": "Objet B11",
+                        "quantity": 1,
+                        "chance": 0.05,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b11",
+                        "name": "Objet B12",
+                        "quantity": 1,
+                        "chance": 0.054,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b12",
+                        "name": "Objet B13",
+                        "quantity": 1,
+                        "chance": 0.058,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b13",
+                        "name": "Objet B14",
+                        "quantity": 1,
+                        "chance": 0.062,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b14",
+                        "name": "Objet B15",
+                        "quantity": 1,
+                        "chance": 0.066,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b15",
+                        "name": "Objet B16",
+                        "quantity": 1,
+                        "chance": 0.07,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b16",
+                        "name": "Objet B17",
+                        "quantity": 1,
+                        "chance": 0.074,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b17",
+                        "name": "Objet B18",
+                        "quantity": 1,
+                        "chance": 0.078,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b18",
+                        "name": "Objet B19",
+                        "quantity": 1,
+                        "chance": 0.082,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_b19",
+                        "name": "Objet B20",
+                        "quantity": 1,
+                        "chance": 0.086,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "C",
+                    "items": [
+                      {
+                        "id": "item_c0",
+                        "name": "Objet C1",
+                        "quantity": 1,
+                        "chance": 0.05,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_c1",
+                        "name": "Objet C2",
+                        "quantity": 1,
+                        "chance": 0.054,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_c2",
+                        "name": "Objet C3",
+                        "quantity": 1,
+                        "chance": 0.058,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_c3",
+                        "name": "Objet C4",
+                        "quantity": 1,
+                        "chance": 0.062,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_c4",
+                        "name": "Objet C5",
+                        "quantity": 1,
+                        "chance": 0.066,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_c5",
+                        "name": "Objet C6",
+                        "quantity": 1,
+                        "chance": 0.07,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_c6",
+                        "name": "Objet C7",
+                        "quantity": 1,
+                        "chance": 0.074,
+                        "category": "mod",
+                        "icon": "fixture:mod",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "item_c7",
+                        "name": "Objet C8",
+                        "quantity": 1,
+                        "chance": 0.078,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              "rewardsPending": false,
+              "earned": null,
+              "credits": null,
+              "selectedAt": 1793217200000,
+              "loadingAt": 1793217220000,
+              "startedAt": 1793217240000
+            },
+            "progress": {
+              "wave": 8,
+              "waveEnemies": {
+                "total": 32,
+                "left": 14
+              },
+              "round": null,
+              "rewards": 2,
+              "rotation": "B",
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A"
+                ],
+                "totals": {
+                  "A": 2,
+                  "B": 0,
+                  "C": 0
+                }
+              },
+              "cycle": {
+                "number": 1,
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "earned": 2
+              },
+              "clock": null,
+              "nextRewardAt": null,
+              "nextRewardWave": 9
+            }
+          },
+          "event": "mission_started"
+        }
+      }
+    },
+    {
+      "host": {
+        "mode": "passive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "defense-400-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive",
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "defense-400-interactive-fr",
+        "fault": "none"
+      }
+    }
+  ]
+}

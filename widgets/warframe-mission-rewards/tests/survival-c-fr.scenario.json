@@ -1,0 +1,404 @@
+{
+  "scenarioVersion": 1,
+  "name": "survival-c-fr",
+  "description": "Survival, rotation C next: then A.",
+  "host": {
+    "locale": "fr",
+    "mode": "interactive",
+    "frame": true,
+    "startAt": 1793217600000
+  },
+  "assets": {
+    "relic": "tests/assets/item-relic.png",
+    "resource": "tests/assets/item-resource.png"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running"
+      }
+    },
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "in_progress",
+              "node": {
+                "id": "SolNode405",
+                "name": "Mot"
+              },
+              "planet": {
+                "id": "void",
+                "name": "Néant"
+              },
+              "faction": {
+                "id": "corrupted",
+                "name": "Corrompus"
+              },
+              "type": {
+                "id": "survival",
+                "name": "Survie"
+              },
+              "rewards": {
+                "tables": [
+                  {
+                    "kind": "mission",
+                    "rotation": "A",
+                    "items": [
+                      {
+                        "id": "aya",
+                        "name": "Aya",
+                        "quantity": 1,
+                        "chance": 0.0909,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neo_a16_relic",
+                        "name": "Relique Neo A16",
+                        "quantity": 1,
+                        "chance": 0.0909,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neo_c10_relic",
+                        "name": "Relique Neo C10",
+                        "quantity": 1,
+                        "chance": 0.0909,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neo_c7_relic",
+                        "name": "Relique Neo C7",
+                        "quantity": 1,
+                        "chance": 0.0909,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neo_v13_relic",
+                        "name": "Relique Neo V13",
+                        "quantity": 1,
+                        "chance": 0.0909,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neo_c11_relic",
+                        "name": "Relique Neo C11",
+                        "quantity": 1,
+                        "chance": 0.1818,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neo_k10_relic",
+                        "name": "Relique Neo K10",
+                        "quantity": 1,
+                        "chance": 0.1818,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neo_y2_relic",
+                        "name": "Relique Neo Y2",
+                        "quantity": 1,
+                        "chance": 0.1818,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "B",
+                    "items": [
+                      {
+                        "id": "aya",
+                        "name": "Aya",
+                        "quantity": 1,
+                        "chance": 0.125,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neo_a16_relic",
+                        "name": "Relique Neo A16",
+                        "quantity": 1,
+                        "chance": 0.125,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neo_c10_relic",
+                        "name": "Relique Neo C10",
+                        "quantity": 1,
+                        "chance": 0.125,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neo_c11_relic",
+                        "name": "Relique Neo C11",
+                        "quantity": 1,
+                        "chance": 0.125,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neo_c7_relic",
+                        "name": "Relique Neo C7",
+                        "quantity": 1,
+                        "chance": 0.125,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neo_k10_relic",
+                        "name": "Relique Neo K10",
+                        "quantity": 1,
+                        "chance": 0.125,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neo_v13_relic",
+                        "name": "Relique Neo V13",
+                        "quantity": 1,
+                        "chance": 0.125,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "neo_y2_relic",
+                        "name": "Relique Neo Y2",
+                        "quantity": 1,
+                        "chance": 0.125,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mission",
+                    "rotation": "C",
+                    "items": [
+                      {
+                        "id": "axi_a21_relic",
+                        "name": "Relique Axi A21",
+                        "quantity": 1,
+                        "chance": 0.0973,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_a22_relic",
+                        "name": "Relique Axi A22",
+                        "quantity": 1,
+                        "chance": 0.0973,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_c12_relic",
+                        "name": "Relique Axi C12",
+                        "quantity": 1,
+                        "chance": 0.0973,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_c13_relic",
+                        "name": "Relique Axi C13",
+                        "quantity": 1,
+                        "chance": 0.0973,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_d6_relic",
+                        "name": "Relique Axi D6",
+                        "quantity": 1,
+                        "chance": 0.0973,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_p10_relic",
+                        "name": "Relique Axi P10",
+                        "quantity": 1,
+                        "chance": 0.0973,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_s21_relic",
+                        "name": "Relique Axi S21",
+                        "quantity": 1,
+                        "chance": 0.0973,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "axi_v14_relic",
+                        "name": "Relique Axi V14",
+                        "quantity": 1,
+                        "chance": 0.0973,
+                        "category": "relic",
+                        "icon": "fixture:relic",
+                        "iconPending": false
+                      },
+                      {
+                        "id": "aya",
+                        "name": "Aya",
+                        "quantity": 1,
+                        "chance": 0.2211,
+                        "category": "resource",
+                        "icon": "fixture:resource",
+                        "iconPending": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              "selectedAt": 1793216453000,
+              "loadingAt": 1793216468000,
+              "startedAt": 1793216493000,
+              "modifiers": [],
+              "earned": null,
+              "credits": null,
+              "rewardsPending": false
+            },
+            "progress": {
+              "wave": null,
+              "waveEnemies": null,
+              "round": null,
+              "rewards": 3,
+              "rotation": "C",
+              "earned": {
+                "rotations": [
+                  "A",
+                  "A",
+                  "B"
+                ],
+                "totals": {
+                  "A": 2,
+                  "B": 1,
+                  "C": 0
+                }
+              },
+              "cycle": {
+                "number": 1,
+                "rotations": [
+                  "A",
+                  "A",
+                  "B",
+                  "C"
+                ],
+                "earned": 3
+              },
+              "clock": "running",
+              "nextRewardAt": 1793217738000,
+              "nextRewardWave": null
+            }
+          },
+          "event": "mission_started",
+          "session": {
+            "startedAt": 1793214000000,
+            "language": "fr"
+          },
+          "glossary": {
+            "language": "fr",
+            "term": {
+              "reactant": "Réactif",
+              "relic": "Relique",
+              "credits": "Crédits"
+            }
+          }
+        }
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "rarest"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "survival-c-fr",
+        "fault": "none"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "menu": {
+        "id": "order",
+        "value": "likely"
+      }
+    },
+    {
+      "host": {
+        "scale": 1000,
+        "size": {
+          "width": 300,
+          "height": 400
+        },
+        "theme": "dark"
+      }
+    },
+    {
+      "expect": {
+        "image": "survival-c-likely-fr",
+        "fault": "none"
+      }
+    }
+  ]
+}

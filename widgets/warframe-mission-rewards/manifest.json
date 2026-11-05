@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "com.playervox.overcrow.warframe.mission-rewards",
+  "version": "1.0.0",
+  "name": {
+    "en": "Mission rewards",
+    "fr": "Récompenses de mission"
+  },
+  "sizing": {
+    "fit": "none",
+    "preferred": {
+      "width": 300,
+      "height": 380
+    },
+    "min": {
+      "width": 200,
+      "height": 40
+    },
+    "max": {
+      "width": 640,
+      "height": 1200
+    }
+  },
+  "permissions": {
+    "gameEvents": ["warframe.mission", "warframe.progress", "warframe.rewards", "warframe.world"],
+    "storage": true
+  },
+  "wrapper": {
+    "menu": [
+      {
+        "type": "choice",
+        "id": "layout",
+        "icon": "layout-list",
+        "label": {
+          "en": "Layout",
+          "fr": "Affichage"
+        },
+        "choices": [
+          { "value": "line", "label": { "en": "One line", "fr": "Une ligne" } },
+          { "value": "compact", "label": { "en": "Compact", "fr": "Compact" } },
+          { "value": "full", "label": { "en": "Full", "fr": "Complet" } }
+        ],
+        "default": "full"
+      },
+      {
+        "type": "choice",
+        "id": "order",
+        "icon": "arrow-down-up",
+        "label": {
+          "en": "Loot order",
+          "fr": "Ordre du butin"
+        },
+        "choices": [
+          { "value": "rarest", "label": { "en": "Rarest first", "fr": "Plus rares d’abord" } },
+          { "value": "likely", "label": { "en": "Most likely first", "fr": "Plus probables d’abord" } }
+        ],
+        "default": "rarest"
+      }
+    ]
+  }
+}
