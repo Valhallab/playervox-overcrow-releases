@@ -9,7 +9,7 @@ runtime surface 0.1, which OverCrow keeps for widget API v1.
 
 ## 1.4.0
 
-Not released yet. Ships with the release of PlayerVox OverCrow that brings
+Ships with PlayerVox OverCrow 0.10.0-beta.1, the first release that brings
 game events, Warframe first:
 
 - `gameEvents.warframe.subscribe(listener)`, for a widget whose
