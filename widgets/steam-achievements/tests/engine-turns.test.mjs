@@ -6,9 +6,11 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { test } from "node:test";
+import { fileURLToPath } from "node:url";
 
-const DRIVER = new URL("./turn-driver.mjs", import.meta.url).pathname;
-const ROOT = new URL("../", import.meta.url).pathname;
+// Paths, not URL pathnames: on Windows a pathname is `/D:/…`.
+const DRIVER = fileURLToPath(new URL("./turn-driver.mjs", import.meta.url));
+const ROOT = fileURLToPath(new URL("../", import.meta.url));
 
 /**
  * The longest turn allowed under Node without its JIT. On the workstation
