@@ -10,7 +10,14 @@
         "input": "https://steamcommunity.com/profiles/76561198000000000"
       }
     },
-    "mode": "interactive"
+    "mode": "interactive",
+    "options": {
+      "layout": "standard"
+    },
+    "size": {
+      "width": 300,
+      "height": 184
+    }
   },
   "fixtures": {
     "calls": {

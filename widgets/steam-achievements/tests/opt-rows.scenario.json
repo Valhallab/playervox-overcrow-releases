@@ -11,7 +11,12 @@
       }
     },
     "options": {
+      "layout": "standard",
       "rows": 1
+    },
+    "size": {
+      "width": 300,
+      "height": 184
     }
   },
   "fixtures": {

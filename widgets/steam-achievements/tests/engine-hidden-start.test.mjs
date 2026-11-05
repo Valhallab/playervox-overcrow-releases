@@ -40,6 +40,6 @@ test("Public now, in game: the game", async () => {
   steam.playing = 100;
   await minutes(vm, steam, 1);
   assert.equal(state.phase, "game");
-  assert.equal(logic.eyebrow(state), "Playing now");
+  assert.equal(state.game.playing, true);
   assert.equal(steam.storage.has("hidden"), false);
 });

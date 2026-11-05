@@ -20,20 +20,20 @@ const { state } = await import("@overcrow/sdk");
 await settle(vm, steam);
 
 test("unreachable: values stay, the warning names cause and age", async () => {
-  assert.equal(logic.eyebrow(state), "Playing now");
+  // No status: nothing said while Steam answers.
+  assert.equal(logic.staleText(state), "");
   steam.fail = { error: "transport_failed" };
   await minutes(vm, steam, 1);
   assert.equal(state.stale, "unreachable");
   assert.equal(state.game.playing, false, "never Playing now without a fresh read");
   assert.deepEqual([state.game.unlocked, state.game.total], [1, 5]);
-  assert.equal(logic.eyebrow(state), "Unreachable · 1 min ago");
-  assert.equal(logic.eyebrowClass(state), "eyebrow warn stale");
+  assert.equal(logic.staleText(state), "Unreachable · 1 min ago");
   await minutes(vm, steam, 4);
-  assert.equal(logic.eyebrow(state), "Unreachable · 5 min ago");
+  assert.equal(logic.staleText(state), "Unreachable · 5 min ago");
   steam.fail = null;
   await minutes(vm, steam, 1);
   assert.equal(state.stale, "");
-  assert.equal(logic.eyebrow(state), "Playing now");
+  assert.equal(logic.staleText(state), "");
 });
 
 test("a 5xx waits 1, 2, 4, 8 then 10 minutes", async () => {
@@ -62,7 +62,7 @@ test("a 429 says the limit and backs off", async () => {
   steam.fail = { status: 429 };
   await minutes(vm, steam, 1);
   assert.equal(state.stale, "quota");
-  assert.equal(logic.eyebrow(state), "Rate limited · 1 min ago");
+  assert.equal(logic.staleText(state), "Rate limited · 1 min ago");
   assert.equal(logic.staleIcon(state), "hourglass");
   steam.fail = null;
   await minutes(vm, steam, 3);
@@ -90,5 +90,5 @@ test("the host's own budget (busy) is not Steam being unreachable", async () => 
   steam.fail = null;
   await minutes(vm, steam, 1);
   assert.equal(state.stale, "");
-  assert.equal(logic.eyebrow(state), "Playing now");
+  assert.equal(logic.staleText(state), "");
 });

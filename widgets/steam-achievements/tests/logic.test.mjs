@@ -223,8 +223,8 @@ test("the short warning names the cause and the age, in both languages", () => {
   ]) {
     vm.setHost({ messages, locale: messages === EN ? "en" : "fr" });
     const now = 1_000_000_000;
-    assert.equal(logic.eyebrow({ stale: "unreachable", now, readAt: now - 5 * 60_000, game: null }), unreachable);
-    assert.equal(logic.eyebrow({ stale: "quota", now, readAt: now - 2 * 60_000, game: null }), quota);
+    assert.equal(logic.staleText({ stale: "unreachable", now, readAt: now - 5 * 60_000, game: null }), unreachable);
+    assert.equal(logic.staleText({ stale: "quota", now, readAt: now - 2 * 60_000, game: null }), quota);
   }
 });
 
@@ -312,4 +312,55 @@ test("the best few, in order, without sorting everything", () => {
   assert.deepEqual(logic.best(values, 5, (a, b) => a > b), [999, 998, 997, 996, 995]);
   assert.deepEqual(logic.best([3, 1, 2], 0, (a, b) => a < b), []);
   assert.deepEqual(logic.best([3, 1, 2], 5, (a, b) => a < b), [1, 2, 3]);
+});
+
+test("Full is the default layout, and the layout of a value this version does not know", () => {
+  const manifest = read("../manifest.json");
+  const row = manifest.wrapper.menu.find((entry) => entry.id === "layout");
+  assert.equal(row.default, "full");
+  const options = vm.host.options;
+  try {
+    vm.setHost({ options: {} });
+    assert.equal(logic.layout(0), "full", "no option set");
+    for (const value of ["line", "compact", "standard", "full"]) {
+      vm.setHost({ options: { layout: value } });
+      assert.equal(logic.layout(0), value);
+    }
+    vm.setHost({ options: { layout: "wide" } });
+    assert.equal(logic.layout(0), "full", "an unknown value");
+    vm.setHost({ options: { layout: 3 } });
+    assert.equal(logic.layout(0), "full", "not a text");
+  } finally {
+    vm.setHost({ options });
+  }
+});
+
+test("the tooltip of an achievement: its goal once unlocked, hidden ones included", () => {
+  const options = vm.host.options;
+  const base = { id: "A", name: "The Pale King", desc: "Meet the Pale King", icon: "", iconGray: "", at: 0, rarity: -1 };
+  try {
+    vm.setHost({ options: {} });
+    assert.equal(logic.achDesc({ ...base, achieved: true, hidden: false }), "Meet the Pale King");
+    assert.equal(logic.achDesc({ ...base, achieved: true, hidden: true }), "Meet the Pale King", "unlocked: never concealed");
+    assert.equal(logic.achDesc({ ...base, achieved: false, hidden: true }), vm.host.messages["hidden-hint"], "missing and hidden: the hint");
+    assert.equal(logic.achDesc({ ...base, achieved: false, hidden: false }), "Meet the Pale King");
+    vm.setHost({ options: { "reveal-hidden": true } });
+    assert.equal(logic.achDesc({ ...base, achieved: false, hidden: true }), "Meet the Pale King", "revealed");
+    // Without a description, an empty tooltip, which the host never draws.
+    assert.equal(logic.achDesc({ ...base, desc: "", achieved: true, hidden: false }), "");
+  } finally {
+    vm.setHost({ options });
+  }
+});
+
+test("every achievement the view shows has its goal as tooltip", () => {
+  const view = readFileSync(new URL("../view.ocml", import.meta.url), "utf8");
+  // The cards (latest, tracked, next one), the tracked rows, the recent and
+  // missing rows of Full, the checklist's rows.
+  assert.match(view, /<component name="feature"[^>]*>\s*<box class=\{cls\} tooltip=\{achDesc\(a\)\}>/);
+  assert.match(view, /class=\{a\.achieved \? "trow done" : "trow"\} tooltip=\{achDesc\(a\)\}/);
+  assert.equal((view.match(/<box class="row" tooltip=\{achDesc\(a\)\}>/g) ?? []).length, 2, "recent and missing rows");
+  assert.match(view, /<button class=\{pickRowClass\(a, state\)\}[^>]*tooltip=\{achDesc\(a\)\}/);
+  // Every element that names an achievement sits in one of those.
+  assert.equal((view.match(/\{achName\(a\)\}<\/text>/g) ?? []).length, 5);
 });

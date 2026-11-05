@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "last-played",
-  "description": "Out of game: the last game played, under a neutral heading.",
+  "description": "Out of game: the last game played, shown as in game (no status).",
   "host": {
     "startAt": 1767225600000,
     "storage": {
@@ -9,6 +9,13 @@
         "steamid": "76561198000000000",
         "input": "https://steamcommunity.com/profiles/76561198000000000"
       }
+    },
+    "options": {
+      "layout": "standard"
+    },
+    "size": {
+      "width": 300,
+      "height": 184
     }
   },
   "fixtures": {
@@ -373,10 +380,7 @@
   "steps": [
     {
       "expect": {
-        "state": "running",
-        "text": [
-          "Last game played"
-        ]
+        "state": "running"
       }
     },
     {

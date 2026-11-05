@@ -2072,7 +2072,8 @@ function failedRecently(url: string): boolean {
 function wantedImages(): string[] {
   const game = state.game;
   if (game === null) return [];
-  const wanted = [game.header, game.icon];
+  // The game's image only when shown: off, never asked.
+  const wanted = [showCover(state.optionsVersion) ? game.header : "", game.icon];
   const v = state.optionsVersion;
   const shown = [featured(state, v), ...state.lists.tracked, ...recent(state, rows(v)), ...missing(state, rows(v) * 2, v), ...state.lists.pick];
   for (const a of shown) if (a !== null && hasIcon(a)) wanted.push(achIcon(a));
@@ -2569,15 +2570,20 @@ void restore().then(() => {
 // ---------------------------------------------------------------------------
 // View helpers (the view's expressions)
 
+/** Full by default, and for a value this version does not know. */
 export function layout(_v: number): Layout {
-  const value = option("layout", "standard");
-  return value === "line" || value === "compact" || value === "full" ? value : "standard";
+  const value = option("layout", "full");
+  return value === "line" || value === "compact" || value === "standard" ? value : "full";
 }
 export function rows(_v: number): number {
   return Math.max(1, Math.min(6, Math.round(option("rows", 3))));
 }
 export function missingOnly(_v: number): boolean {
   return option("missing-only", false);
+}
+/** "Game image": the store image of the game, on by default. */
+export function showCover(_v: number): boolean {
+  return option("show-cover", true);
 }
 export function showRarity(_v: number): boolean {
   return option("show-rarity", true);
@@ -2705,13 +2711,9 @@ export function openSettings(): void {
 export function isStale(s: typeof state): boolean {
   return s.stale !== "";
 }
-export function eyebrow(s: typeof state): string {
-  if (s.stale !== "") return t(`stale-${s.stale}`, { age: age(s.now - s.readAt) });
-  return s.game?.playing ? t("playing") : t("last-played");
-}
-export function eyebrowClass(s: typeof state): string {
-  if (s.stale !== "") return "eyebrow warn stale";
-  return s.game?.playing ? "eyebrow live" : "eyebrow";
+/** How old the values are and why, only while Steam does not answer: no status otherwise. */
+export function staleText(s: typeof state): string {
+  return s.stale === "" ? "" : t(`stale-${s.stale}`, { age: age(s.now - s.readAt) });
 }
 export function staleIcon(s: typeof state): string {
   return s.stale === "quota" ? "hourglass" : "cloud-off";
@@ -2943,24 +2945,25 @@ export function profileError(s: typeof state): boolean {
 export function fallbackClass(cls: string): string {
   return `${cls} fallback`;
 }
-export function gameSrc(s: typeof state): string {
-  return s.game === null ? "" : imageSrc(s.game.header, s.images);
+/** The game's image, `""` when it is not loaded yet or the "Game image" option is off. */
+export function gameSrc(s: typeof state, v: number): string {
+  return s.game === null || !showCover(v) ? "" : imageSrc(s.game.header, s.images);
 }
 export function iconSrc(s: typeof state): string {
   return s.game === null ? "" : imageSrc(s.game.icon, s.images);
 }
-export function hasHeader(s: typeof state): boolean {
-  return gameSrc(s) !== "";
+/** The game's image is shown: loaded, and the option on. */
+export function hasHeader(s: typeof state, v: number): boolean {
+  return gameSrc(s, v) !== "";
 }
-
+/** Full's banner: the game's image across the card's top. */
+export function banner(s: typeof state, v: number): boolean {
+  return layout(v) === "full" && hasHeader(s, v);
+}
 /**
- * The Steam symbol (owner decision of 2026-10-14, removed at once if Valve
- * asks): the only reference to the logo files. Emptying STEAM_LOGO (and
- * deleting the two files) leaves the word "Steam" in the same place.
- * White on the dark theme, black on the light one, as Valve's guide says.
+ * The game's capsule (or its icon, for a game without a store image) and
+ * name above the bar; "Game image" off, the card is the progress alone.
  */
-const STEAM_LOGO = { dark: "assets/steam-symbol-white-64.png", light: "assets/steam-symbol-black-64.png" };
-export function steamLogo(_theme: string, _v: number): string {
-  if (!option("show-logo", true)) return "";
-  return host.theme === "light" ? STEAM_LOGO.light : STEAM_LOGO.dark;
+export function gameHead(s: typeof state, v: number): boolean {
+  return showCover(v) && !banner(s, v);
 }

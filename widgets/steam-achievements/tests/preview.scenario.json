@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "preview",
-  "description": "The catalog preview: Standard at 300 px, dark, English, 150 %, Steam logo off. Fictional game and figures.",
+  "description": "The catalog preview: Full, the default layout, at the preferred 340 px with one row a list, dark, English, 150 %. Fictional game and figures.",
   "host": {
     "startAt": 1767225600000,
     "storage": {
@@ -13,11 +13,12 @@
     "scale": 1500,
     "background": "#1e242e",
     "size": {
-      "width": 300,
-      "height": 184
+      "width": 340,
+      "height": 532
     },
     "options": {
-      "show-logo": false
+      "layout": "full",
+      "rows": 1
     }
   },
   "fixtures": {
@@ -384,7 +385,6 @@
       "expect": {
         "state": "running",
         "text": [
-          "Ashen Crown",
           "Crown of Ashes"
         ],
         "image": "preview",

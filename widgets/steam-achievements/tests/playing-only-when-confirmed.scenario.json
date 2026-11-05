@@ -1,7 +1,7 @@
 {
   "scenarioVersion": 1,
   "name": "playing-only-when-confirmed",
-  "description": "After Playing now, one failed read: the heading is no longer Playing now.",
+  "description": "In game, one failed read: the values stay, above the bar how old they are.",
   "host": {
     "startAt": 1767225600000,
     "storage": {
@@ -9,6 +9,13 @@
         "steamid": "76561198000000000",
         "input": "https://steamcommunity.com/profiles/76561198000000000"
       }
+    },
+    "options": {
+      "layout": "standard"
+    },
+    "size": {
+      "width": 300,
+      "height": 184
     }
   },
   "fixtures": {
@@ -357,10 +364,7 @@
   "steps": [
     {
       "expect": {
-        "state": "running",
-        "text": [
-          "Playing now"
-        ]
+        "state": "running"
       }
     },
     {
@@ -370,9 +374,6 @@
     },
     {
       "expect": {
-        "noText": [
-          "Playing now"
-        ],
         "text": [
           "Unreachable · 1 min ago"
         ],

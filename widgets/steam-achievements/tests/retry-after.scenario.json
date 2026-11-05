@@ -9,6 +9,13 @@
         "steamid": "76561198000000000",
         "input": "https://steamcommunity.com/profiles/76561198000000000"
       }
+    },
+    "options": {
+      "layout": "standard"
+    },
+    "size": {
+      "width": 300,
+      "height": 184
     }
   },
   "fixtures": {
@@ -413,9 +420,6 @@
     {
       "expect": {
         "state": "running",
-        "text": [
-          "Playing now"
-        ],
         "fault": "none"
       }
     },
@@ -441,9 +445,6 @@
       "expect": {
         "text": [
           "Rate limited · 5 min ago"
-        ],
-        "noText": [
-          "Playing now"
         ],
         "fault": "none"
       }
@@ -495,9 +496,6 @@
     },
     {
       "expect": {
-        "text": [
-          "Playing now"
-        ],
         "fault": "none"
       }
     }

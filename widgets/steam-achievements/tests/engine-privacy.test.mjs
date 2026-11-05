@@ -24,7 +24,7 @@ await settle(vm, steam);
 
 test("public: the running game", () => {
   assert.equal(state.phase, "game");
-  assert.equal(logic.eyebrow(state), "Playing now");
+  assert.equal(state.game.playing, true);
 });
 
 test("game details Friends Only: said, no game guessed, asked again every 10 minutes", async () => {
@@ -61,7 +61,7 @@ test("Public again: the running game at the next read", async () => {
   await minutes(vm, steam, 1);
   assert.equal(state.phase, "game");
   assert.equal(state.game.name, "Rune Table");
-  assert.equal(logic.eyebrow(state), "Playing now");
+  assert.equal(state.game.playing, true);
   assert.equal(steam.storage.has("hidden"), false);
 });
 
@@ -78,7 +78,7 @@ test("private profile: said, nothing else asked", async () => {
   steam.visible = 3;
   await minutes(vm, steam, 1);
   assert.equal(state.phase, "game");
-  assert.equal(logic.eyebrow(state), "Playing now");
+  assert.equal(state.game.playing, true);
 });
 
 test("the running game is not the player's (403 with public details): a neutral line, no guess, asked again every 10 minutes", async () => {
@@ -132,7 +132,7 @@ test("a borrowed game Steam reads: shown as usual, though not in the recent game
   await minutes(vm, steam, 1);
   assert.equal(state.phase, "game");
   assert.equal(state.game.name, "Tidewater Run");
-  assert.equal(logic.eyebrow(state), "Playing now");
+  assert.equal(state.game.playing, true);
   assert.deepEqual([state.game.unlocked, state.game.total], [1, 3]);
   assert.equal(state.game.readable, true);
 });

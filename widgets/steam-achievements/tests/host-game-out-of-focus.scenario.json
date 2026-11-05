@@ -9,6 +9,13 @@
         "steamid": "76561198000000000",
         "input": "https://steamcommunity.com/profiles/76561198000000000"
       }
+    },
+    "options": {
+      "layout": "standard"
+    },
+    "size": {
+      "width": 300,
+      "height": 184
     }
   },
   "fixtures": {
@@ -435,7 +442,6 @@
         "state": "running",
         "text": [
           "Ashen Crown",
-          "Playing now",
           "12 / 40"
         ]
       }
@@ -455,12 +461,10 @@
       "expect": {
         "text": [
           "Ashen Crown",
-          "Last game played",
           "12 / 40"
         ],
         "noText": [
-          "Neon Courier",
-          "Playing now"
+          "Neon Courier"
         ],
         "fault": "none"
       }
@@ -503,7 +507,6 @@
       "expect": {
         "text": [
           "Ashen Crown",
-          "Playing now",
           "12 / 40"
         ],
         "noText": [

@@ -9,6 +9,13 @@
         "steamid": "76561198000000000",
         "input": "https://steamcommunity.com/profiles/76561198000000000"
       }
+    },
+    "options": {
+      "layout": "standard"
+    },
+    "size": {
+      "width": 300,
+      "height": 184
     }
   },
   "fixtures": {
@@ -459,7 +466,6 @@
       "expect": {
         "state": "running",
         "text": [
-          "Playing now",
           "Steam doesn't share your achievements for this game. Check that your game details are Public in your Steam profile."
         ],
         "noText": [

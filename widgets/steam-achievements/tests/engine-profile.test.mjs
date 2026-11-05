@@ -158,7 +158,7 @@ test("images: declared hosts, a failure not asked again for an hour", async () =
   const header = "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/100/header.jpg";
   assert.ok(steam.requests.includes(header));
   assert.ok(steam.requests.every((url) => !url.includes("akamaihd.net") && !url.includes("media.steampowered")));
-  assert.ok(logic.gameSrc(state) !== "");
+  assert.ok(logic.gameSrc(state, state.optionsVersion) !== "");
   // The shared host fails: the next host, then the icon.
   steam.images.fail.add(header);
   delete state.images[header];
@@ -177,7 +177,7 @@ test("images: declared hosts, a failure not asked again for an hour", async () =
   state.game = { ...state.game, header: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/100/none.jpg" };
   await minutes(vm, steam, 1);
   assert.equal(state.game.header, "");
-  assert.equal(logic.hasHeader(state), false);
+  assert.equal(logic.hasHeader(state, state.optionsVersion), false);
   assert.equal(state.game.icon, `https://shared.akamai.steamstatic.com/community_assets/images/apps/100/${"e".repeat(40)}.jpg`);
   assert.ok(logic.iconSrc(state) !== "", "the game's icon shows");
   // Icons on the one path that serves every game.

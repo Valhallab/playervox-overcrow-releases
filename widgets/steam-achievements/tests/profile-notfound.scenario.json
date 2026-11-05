@@ -5,7 +5,14 @@
   "host": {
     "startAt": 1767225600000,
     "storage": {},
-    "mode": "interactive"
+    "mode": "interactive",
+    "options": {
+      "layout": "standard"
+    },
+    "size": {
+      "width": 300,
+      "height": 184
+    }
   },
   "fixtures": {
     "calls": {

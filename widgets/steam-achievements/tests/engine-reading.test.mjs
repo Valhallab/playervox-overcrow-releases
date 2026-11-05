@@ -89,8 +89,6 @@ test("out of game: last game played, read when the game stops, then every 10 min
   steam.playing = null;
   await minutes(vm, steam, 1);
   assert.equal(state.game.playing, false);
-  assert.equal(logic.eyebrow(state), "Last game played");
-  assert.equal(logic.eyebrowClass(state), "eyebrow");
   // The last unlocks at once, then ten minutes later, not before.
   const achievements = steam.count("GetPlayerAchievements");
   assert.equal(achievements, before + 1);

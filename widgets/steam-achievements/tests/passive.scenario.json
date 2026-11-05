@@ -4,7 +4,14 @@
   "description": "No profile yet, in Passive mode: no field, a line to switch mode.",
   "host": {
     "startAt": 1767225600000,
-    "storage": {}
+    "storage": {},
+    "options": {
+      "layout": "standard"
+    },
+    "size": {
+      "width": 300,
+      "height": 184
+    }
   },
   "fixtures": {
     "calls": {
