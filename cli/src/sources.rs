@@ -62,7 +62,7 @@ pub fn check(project: &Project, report: &mut Report) -> Option<Sources> {
             let declared = manifest
                 .as_ref()
                 .is_none_or(|manifest| manifest.user_accent);
-            ocss::check_user_accent(style, &sheet, declared)
+            ocss::check_user_accent(&sheet, declared)
         })
     {
         let source = String::from_utf8_lossy(style);

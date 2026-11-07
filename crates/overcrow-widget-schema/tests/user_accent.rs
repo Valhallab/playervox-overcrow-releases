@@ -13,6 +13,9 @@ use overcrow_widget_schema::tokens::{
 };
 use serde_json::{Value, json};
 
+mod contrast;
+use contrast::contrast;
+
 fn manifest(accent: Option<Value>) -> Value {
     let mut manifest = json!({
         "schemaVersion": 1,
@@ -31,26 +34,6 @@ fn manifest(accent: Option<Value>) -> Value {
         manifest["accent"] = accent;
     }
     manifest
-}
-
-/// WCAG 2 relative luminance of an opaque `#rrggbb` colour.
-fn relative_luminance(hex: &str) -> f64 {
-    let hex = hex.strip_prefix('#').expect("hex colour");
-    assert_eq!(hex.len(), 6, "opaque colour");
-    let channel = |index: usize| {
-        let value = f64::from(u8::from_str_radix(&hex[index..index + 2], 16).expect("hex")) / 255.0;
-        if value <= 0.04045 {
-            value / 12.92
-        } else {
-            ((value + 0.055) / 1.055).powf(2.4)
-        }
-    };
-    0.2126 * channel(0) + 0.7152 * channel(2) + 0.0722 * channel(4)
-}
-
-fn contrast(a: &str, b: &str) -> f64 {
-    let (a, b) = (relative_luminance(a), relative_luminance(b));
-    (a.max(b) + 0.05) / (a.min(b) + 0.05)
 }
 
 #[test]

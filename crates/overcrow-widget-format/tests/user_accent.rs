@@ -44,8 +44,7 @@ fn without_declaration(mut files: BTreeMap<String, Vec<u8>>) -> BTreeMap<String,
 
 fn check(source: &str, declared: bool) -> Result<(), (OcssErrorKind, Position)> {
     let sheet = ocss::parse(source.as_bytes()).expect("grammar");
-    ocss::check_user_accent(source.as_bytes(), &sheet, declared)
-        .map_err(|error| (error.kind, error.position))
+    ocss::check_user_accent(&sheet, declared).map_err(|error| (error.kind, error.position))
 }
 
 #[test]

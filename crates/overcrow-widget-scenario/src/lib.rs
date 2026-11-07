@@ -1603,19 +1603,21 @@ impl Scenario {
         }
         self.game_event_updates(&manifest.permissions.game_events)?;
         if !manifest.user_accent {
-            let changed = self.steps.iter().position(|step| {
-                matches!(
-                    step,
-                    Step::Host(HostChange {
-                        user_accent: Some(_),
-                        ..
+            let here = if self.host.user_accent.is_some() {
+                Some("host.userAccent".to_owned())
+            } else {
+                self.steps
+                    .iter()
+                    .position(|step| {
+                        matches!(
+                            step,
+                            Step::Host(HostChange {
+                                user_accent: Some(_),
+                                ..
+                            })
+                        )
                     })
-                )
-            });
-            let here = match (self.host.user_accent, changed) {
-                (Some(_), _) => Some("host.userAccent".to_owned()),
-                (None, Some(index)) => Some(format!("steps[{index}].host.userAccent")),
-                (None, None) => None,
+                    .map(|index| format!("steps[{index}].host.userAccent"))
             };
             if let Some(here) = here {
                 return Err(ScenarioError::new(

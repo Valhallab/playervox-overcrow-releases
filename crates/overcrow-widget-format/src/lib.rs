@@ -28,9 +28,7 @@ use overcrow_widget_schema::package::Package;
 /// `read_package`, at admission and at every activation.
 pub fn validate_package_style(package: &Package) -> Result<(), ocss::OcssError> {
     match package.file("style.ocss") {
-        Some(style) => {
-            ocss::check_user_accent(style, &ocss::parse(style)?, package.manifest.user_accent)
-        }
+        Some(style) => ocss::check_user_accent(&ocss::parse(style)?, package.manifest.user_accent),
         None => Ok(()),
     }
 }

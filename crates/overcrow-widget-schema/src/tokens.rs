@@ -373,20 +373,23 @@ pub struct UserAccent {
     pub light: AccentColors,
 }
 
-const ON_ACCENT: &str = "#18181b";
-
-/// A PlayerVox accent: its light shade in the dark theme, its strong shade
-/// in the light theme, both under `#18181b` text.
-const fn accent(name: &'static str, dark: &'static str, light: &'static str) -> UserAccent {
+/// A PlayerVox accent: its fill in the dark and in the light theme, both
+/// under `on_fill` text.
+const fn accent(
+    name: &'static str,
+    dark: &'static str,
+    light: &'static str,
+    on_fill: &'static str,
+) -> UserAccent {
     UserAccent {
         name,
         dark: AccentColors {
             fill: dark,
-            on_fill: ON_ACCENT,
+            on_fill,
         },
         light: AccentColors {
             fill: light,
-            on_fill: ON_ACCENT,
+            on_fill,
         },
     }
 }
@@ -401,32 +404,28 @@ pub const DEFAULT_USER_ACCENT: UserAccent = USER_ACCENTS[0];
 /// `#991b1b` under white text in both themes. A schema test keeps every
 /// `on_fill` at AA on its `fill`.
 pub const USER_ACCENTS: [UserAccent; 9] = [
-    accent("lime", "#a3e635", "#84cc16"),
-    accent("amber", "#fbbf24", "#f59e0b"),
-    UserAccent {
-        name: "red",
-        dark: AccentColors {
-            fill: "#991b1b",
-            on_fill: "#ffffff",
-        },
-        light: AccentColors {
-            fill: "#991b1b",
-            on_fill: "#ffffff",
-        },
-    },
-    accent("pink", "#fb7185", "#f43f5e"),
-    accent("purple", "#a78bfa", "#a78bfa"),
-    accent("blue", "#60a5fa", "#3b82f6"),
-    accent("cyan", "#22d3ee", "#06b6d4"),
-    accent("emerald", "#34d399", "#10b981"),
-    accent("steel", "#a1a1aa", "#a1a1aa"),
+    accent("lime", "#a3e635", "#84cc16", "#18181b"),
+    accent("amber", "#fbbf24", "#f59e0b", "#18181b"),
+    accent("red", "#991b1b", "#991b1b", "#ffffff"),
+    accent("pink", "#fb7185", "#f43f5e", "#18181b"),
+    accent("purple", "#a78bfa", "#a78bfa", "#18181b"),
+    accent("blue", "#60a5fa", "#3b82f6", "#18181b"),
+    accent("cyan", "#22d3ee", "#06b6d4", "#18181b"),
+    accent("emerald", "#34d399", "#10b981", "#18181b"),
+    accent("steel", "#a1a1aa", "#a1a1aa", "#18181b"),
 ];
 
 /// The names of [`USER_ACCENTS`], in its order: the keyword of the IPC
 /// field `userAccent`.
-pub const USER_ACCENT_NAMES: &[&str] = &[
-    "lime", "amber", "red", "pink", "purple", "blue", "cyan", "emerald", "steel",
-];
+pub const USER_ACCENT_NAMES: &[&str] = &{
+    let mut names = [""; USER_ACCENTS.len()];
+    let mut index = 0;
+    while index < names.len() {
+        names[index] = USER_ACCENTS[index].name;
+        index += 1;
+    }
+    names
+};
 
 /// The accent named `name`, one of [`USER_ACCENTS`].
 pub fn user_accent(name: &str) -> Option<&'static UserAccent> {
