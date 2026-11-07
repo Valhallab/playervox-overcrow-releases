@@ -26,6 +26,9 @@ export type Locale = "en" | "fr";
 /** Colour theme of the host. */
 export type Theme = "dark" | "light";
 
+/** Accent colour the user chose in PlayerVox OverCrow. */
+export type UserAccent = "lime" | "amber" | "red" | "pink" | "purple" | "blue" | "cyan" | "emerald" | "steel";
+
 /** Overlay mode: `interactive` receives input. */
 export type Mode = "passive" | "interactive";
 
@@ -163,6 +166,8 @@ export type ColorToken =
   | "--color-accent-hover"
   | "--color-accent-soft"
   | "--color-on-accent"
+  | "--color-user-accent"
+  | "--color-on-user-accent"
   | "--color-surface-panel"
   | "--color-surface-raised"
   | "--color-surface-hover"

@@ -66,15 +66,16 @@ pub fn generate() -> BTreeMap<String, Vec<u8>> {
         CONFORMANCE_KEY_FILE.to_owned(),
         format!("{}\n", hex(conformance_key().public_key().as_ref())).into_bytes(),
     );
-    let sources: BTreeMap<&str, BTreeMap<String, Vec<u8>>> = ["clock", "weather", "minimal"]
-        .into_iter()
-        .map(|name| {
-            (
-                name,
-                read_tree(&fixtures_root().join("package-src").join(name)),
-            )
-        })
-        .collect();
+    let sources: BTreeMap<&str, BTreeMap<String, Vec<u8>>> =
+        ["clock", "weather", "minimal", "accent"]
+            .into_iter()
+            .map(|name| {
+                (
+                    name,
+                    read_tree(&fixtures_root().join("package-src").join(name)),
+                )
+            })
+            .collect();
     let mut packages = BTreeMap::new();
     for (name, files) in &sources {
         let archive = write_package(files).expect("package sources are valid");

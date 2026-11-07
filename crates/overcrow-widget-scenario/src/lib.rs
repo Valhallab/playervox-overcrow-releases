@@ -233,6 +233,39 @@ pub enum Theme {
     Light,
 }
 
+/// The user's accent colour (`tokens::USER_ACCENT_NAMES`), for a widget
+/// whose manifest declares `"accent": "user"`.
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum UserAccent {
+    #[default]
+    Lime,
+    Amber,
+    Red,
+    Pink,
+    Purple,
+    Blue,
+    Cyan,
+    Emerald,
+    Steel,
+}
+
+impl UserAccent {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Lime => "lime",
+            Self::Amber => "amber",
+            Self::Red => "red",
+            Self::Pink => "pink",
+            Self::Purple => "purple",
+            Self::Blue => "blue",
+            Self::Cyan => "cyan",
+            Self::Emerald => "emerald",
+            Self::Steel => "steel",
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Mode {
@@ -428,6 +461,10 @@ pub struct Host {
     pub locale: Locale,
     #[serde(default)]
     pub theme: Theme,
+    /// The user's accent colour; `lime` when absent. Only for a manifest
+    /// that declares `"accent": "user"`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_accent: Option<UserAccent>,
     /// Content scale in ‰, as `overcrow.host.scale`: 1000 is 100 %.
     #[serde(default = "default_scale")]
     pub scale: u32,
@@ -473,6 +510,7 @@ impl Default for Host {
         Self {
             locale: Locale::default(),
             theme: Theme::default(),
+            user_accent: None,
             scale: default_scale(),
             size: None,
             mode: Mode::default(),
@@ -680,6 +718,8 @@ pub struct HostChange {
     pub locale: Option<Locale>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub theme: Option<Theme>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_accent: Option<UserAccent>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub scale: Option<u32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1562,6 +1602,28 @@ impl Scenario {
             }
         }
         self.game_event_updates(&manifest.permissions.game_events)?;
+        if !manifest.user_accent {
+            let changed = self.steps.iter().position(|step| {
+                matches!(
+                    step,
+                    Step::Host(HostChange {
+                        user_accent: Some(_),
+                        ..
+                    })
+                )
+            });
+            let here = match (self.host.user_accent, changed) {
+                (Some(_), _) => Some("host.userAccent".to_owned()),
+                (None, Some(index)) => Some(format!("steps[{index}].host.userAccent")),
+                (None, None) => None,
+            };
+            if let Some(here) = here {
+                return Err(ScenarioError::new(
+                    here,
+                    "the manifest does not declare `\"accent\": \"user\"`",
+                ));
+            }
+        }
         let declared = declared_items(manifest);
         if let Grants::Items(items) = &self.host.grants
             && let Some(item) = items.difference(&declared).next()

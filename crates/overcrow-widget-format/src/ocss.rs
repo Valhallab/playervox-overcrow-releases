@@ -24,7 +24,7 @@ use overcrow_widget_schema::style::{
     ANIMATION_DIRECTIONS, CHECKABLE_ELEMENTS, EASINGS, FILL_MODES, FONT_FAMILIES, ORIGIN_KEYWORDS,
     PSEUDO_CLASSES, Property, StyleValue, TRACK_KEYWORDS, property,
 };
-use overcrow_widget_schema::tokens::{Token, TokenType, token};
+use overcrow_widget_schema::tokens::{TOKENS, Token, TokenType, token};
 use overcrow_widget_schema::view::element;
 
 use crate::Position;
@@ -66,6 +66,10 @@ pub enum OcssErrorKind {
     InvalidValue,
     /// `var()` of an unknown token, or of a token of another type.
     UnknownToken,
+    /// A user accent token (`--color-user-accent`, `--color-on-user-accent`)
+    /// in the style of a widget whose manifest does not declare
+    /// `"accent": "user"`.
+    UndeclaredUserAccent,
     /// A property that cannot be animated, in `@keyframes` or `transition`.
     NotAnimatable,
     UnknownKeyframes,
@@ -94,6 +98,7 @@ impl OcssErrorKind {
             Self::DuplicateProperty => "duplicate_property",
             Self::InvalidValue => "invalid_value",
             Self::UnknownToken => "unknown_token",
+            Self::UndeclaredUserAccent => "undeclared_user_accent",
             Self::NotAnimatable => "not_animatable",
             Self::UnknownKeyframes => "unknown_keyframes",
             Self::DuplicateKeyframes => "duplicate_keyframes",
@@ -312,6 +317,80 @@ pub enum Value {
     Transitions(Vec<Transition>),
     /// Empty for `none`.
     Animations(Vec<Animation>),
+}
+
+impl StyleSheet {
+    /// Whether a declaration uses a token of the user's accent
+    /// ([`Token::user_accent`]).
+    pub fn uses_user_accent(&self) -> bool {
+        self.rules
+            .iter()
+            .flat_map(|rule| &rule.declarations)
+            .chain(
+                self.keyframes
+                    .iter()
+                    .flat_map(|keyframes| &keyframes.stops)
+                    .flat_map(|stop| &stop.declarations),
+            )
+            .any(|declaration| declaration.value.uses_user_accent())
+    }
+}
+
+impl Value {
+    /// Only colours can name a user accent token.
+    fn uses_user_accent(&self) -> bool {
+        let user = |color: &Color| matches!(color, Color::Token(token) if token.user_accent);
+        match self {
+            Self::Color(color) => user(color),
+            Self::Background(Background::Color(color)) => user(color),
+            Self::Background(Background::LinearGradient { stops, .. }) => {
+                stops.iter().any(|(color, _)| user(color))
+            }
+            Self::Border(border) => border.color.as_ref().is_some_and(user),
+            Self::Shadows(shadows) => shadows.iter().any(|shadow| user(&shadow.color)),
+            _ => false,
+        }
+    }
+}
+
+/// Refuses a sheet that uses a user accent token when the manifest does not
+/// declare `"accent": "user"`, at the first mention of such a token outside
+/// a comment.
+pub fn check_user_accent(
+    source: &[u8],
+    sheet: &StyleSheet,
+    declared: bool,
+) -> Result<(), OcssError> {
+    if declared || !sheet.uses_user_accent() {
+        return Ok(());
+    }
+    let text = std::str::from_utf8(source).unwrap_or_default();
+    Err(OcssError {
+        kind: OcssErrorKind::UndeclaredUserAccent,
+        position: Position::of(text, first_user_accent_mention(text)),
+    })
+}
+
+/// Byte offset of the first user accent token name outside a comment; the
+/// end of `text` when there is none.
+fn first_user_accent_mention(text: &str) -> usize {
+    let names: Vec<&str> = TOKENS
+        .iter()
+        .filter(|token| token.user_accent)
+        .map(|token| token.name)
+        .collect();
+    let mut offset = 0;
+    while offset < text.len() {
+        let rest = &text[offset..];
+        if rest.starts_with("/*") {
+            offset += rest.find("*/").map_or(rest.len(), |end| end + 2);
+        } else if names.iter().any(|name| rest.starts_with(name)) {
+            return offset;
+        } else {
+            offset += rest.chars().next().map_or(1, char::len_utf8);
+        }
+    }
+    text.len()
 }
 
 /// Parses `style.ocss`.

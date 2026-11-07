@@ -99,6 +99,7 @@ pub const FEATURE_ACTIVE_GAME: &str = "active-game";
 
 pub use crate::game_events::FEATURE_GAME_EVENTS_WARFRAME;
 pub use crate::links::FEATURE_OPEN_LINKS;
+pub use crate::tokens::FEATURE_USER_ACCENT;
 pub use crate::wrapper::FEATURE_MENU_CLOSES;
 
 /// Every feature name of `requires` this schema defines. A reader passes
@@ -117,6 +118,7 @@ pub const KNOWN_FEATURES: &[&str] = &[
     FEATURE_ACTIVE_GAME,
     FEATURE_STEAM_LOCAL_ACHIEVEMENTS,
     FEATURE_GAME_EVENTS_WARFRAME,
+    FEATURE_USER_ACCENT,
 ];
 
 pub const ENVELOPE_FIELDS: &[Field] = &[
@@ -1919,7 +1921,8 @@ mod tests {
                 "steam-events",
                 "active-game",
                 "steam-local-achievements",
-                "game-events-warframe"
+                "game-events-warframe",
+                "user-accent"
             ]
         );
         let mut payload = valid();

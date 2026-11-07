@@ -20,6 +20,10 @@ pub const MODULES: &[(&str, &str)] = &[
     ("draw.ts", include_str!("../../sdk/src/draw.ts")),
     ("format.ts", include_str!("../../sdk/src/format.ts")),
     (
+        "generated/accents.ts",
+        include_str!("../../sdk/src/generated/accents.ts"),
+    ),
+    (
         "generated/icons.ts",
         include_str!("../../sdk/src/generated/icons.ts"),
     ),

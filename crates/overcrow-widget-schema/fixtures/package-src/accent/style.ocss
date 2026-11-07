@@ -1,0 +1,5 @@
+.mine {
+  background-color: var(--color-user-accent);
+  color: var(--color-on-user-accent);
+  border-radius: var(--radius-pill);
+}

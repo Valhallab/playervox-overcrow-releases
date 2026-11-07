@@ -58,7 +58,12 @@ pub fn check(project: &Project, report: &mut Report) -> Option<Sources> {
         }
     };
     if let Some(style) = &project.style
-        && let Err(error) = ocss::parse(style)
+        && let Err(error) = ocss::parse(style).and_then(|sheet| {
+            let declared = manifest
+                .as_ref()
+                .is_none_or(|manifest| manifest.user_accent);
+            ocss::check_user_accent(style, &sheet, declared)
+        })
     {
         let source = String::from_utf8_lossy(style);
         report.push(style_diagnostic(error.kind, error.position, &source));
@@ -284,6 +289,11 @@ pub fn manifest_diagnostic(error: ManifestError, source: &str) -> Diagnostic {
                 "host features: {}",
                 overcrow_widget_schema::wrapper::HOST_FEATURES.join(", ")
             )),
+        ),
+        ManifestError::Accent => (
+            "accent",
+            "`accent` must be \"user\", or be left out".into(),
+            Some("see https://overcrow.playervox.com/docs/en/style/#user-accent".into()),
         ),
     };
     let mut diagnostic = Diagnostic::error(code, message).in_file("manifest.json");
@@ -656,6 +666,10 @@ pub fn style_diagnostic(kind: OcssErrorKind, position: Position, source: &str) -
                     closest(name, tokens::TOKENS.iter().map(|token| token.name.trim_start_matches("--")))
                 })
                 .map(|found| format!("did you mean `var(--{found})`?")),
+        ),
+        OcssErrorKind::UndeclaredUserAccent => (
+            format!("{quoted} needs the user's accent colour, which the manifest does not declare"),
+            Some("add `\"accent\": \"user\"` to manifest.json, or use `--color-accent`; see https://overcrow.playervox.com/docs/en/style/#user-accent".into()),
         ),
         OcssErrorKind::NotAnimatable => (
             format!("{quoted} cannot be animated"),
