@@ -142,6 +142,7 @@ Its members always read the latest value.
 | --- | --- |
 | `host.locale` | Interface language, `"en"` or `"fr"`. |
 | `host.theme` | `"dark"` or `"light"`. |
+| `host.userAccent` | The accent colour the user chose (`"lime"`, `"blue"`…), for a widget that declares `"accent": "user"`; see [user accent](style.md#user-accent). `"lime"` otherwise. |
 | `host.mode` | `"passive"` or `"interactive"`: the widget receives input only in Interactive mode. |
 | `host.visible` | Whether the widget is shown. |
 | `host.scale` | Content scale in thousandths: `1000` is 100 %. |

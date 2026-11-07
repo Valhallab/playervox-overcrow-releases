@@ -86,6 +86,7 @@ valeurs qu’il remplit. Voici un manifeste avec des permissions et un menu :
 | `vm` | `VmRequest` | non | Budget demandé pour la VM ; absent, les valeurs par défaut s’appliquent. |
 | `permissions` | `Permissions` | non | Permissions demandées ; absent, aucune. |
 | `wrapper` | `wrapper` | non | Lignes du widget dans le menu d’options de l’hôte. |
+| `accent` | `user` | non | `user` : le widget suit la couleur d’accent de l’utilisateur, avec les tokens `--color-user-accent` et `--color-on-user-accent` et la valeur d’hôte `userAccent`. Absent, il n’a ni l’un ni l’autre. Aucune permission : tout widget peut le déclarer. Demande la fonctionnalité de catalogue `user-accent`. |
 | `requires` | `host features` | non | Sources de données de l’hôte, distinctes, sans lesquelles le widget ne peut pas fonctionner, comme le `requires` d’une ligne de `wrapper.menu`. Sur une machine à laquelle il en manque une, l’hôte ne démarre ni n’affiche le widget et conserve sa place ; le widget revient quand la source revient. |
 <!-- /generated:manifest-fields -->
 

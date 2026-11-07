@@ -1,0 +1,10 @@
+{
+  "author": "Example Studio",
+  "spdxLicense": "MIT",
+  "sourceUrl": "https://github.com/example/daily-goal-widget",
+  "defaultLocale": "en",
+  "localizations": [
+    { "locale": "en", "name": "Daily goal", "description": "Counts the matches you play today, in your accent colour." },
+    { "locale": "fr", "name": "Objectif du jour", "description": "Compte les parties jouées aujourd'hui, à votre couleur d'accent." }
+  ]
+}

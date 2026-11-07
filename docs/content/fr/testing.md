@@ -35,7 +35,7 @@ image.
 
 `@overcrow/sdk/testing` est fourni avec le SDK : `npm install` dans un
 projet créé par `overcrow-widget init`, sinon
-`npm install --save-dev --save-exact @overcrow/sdk@1.4.0`.
+`npm install --save-dev --save-exact @overcrow/sdk@1.5.0`.
 
 `installRuntime()` met en place une doublure de PlayerVox OverCrow avant
 l’import de la logique : les appels de service renvoient des promesses que
@@ -146,6 +146,7 @@ Tout est facultatif.
 | --- | --- | --- |
 | `locale` | `en` | `en` ou `fr`. |
 | `theme` | `dark` | `dark` ou `light`. |
+| `userAccent` | `lime` | La couleur d’accent de l’utilisateur, pour un manifeste qui déclare `"accent": "user"`. |
 | `scale` | `1000` | Échelle du contenu en millièmes : de 500 à 1750 (de 50 % à 175 %). |
 | `size` | la taille préférée du manifeste | `{ width, height }` du cadre, en pixels logiques ; le `fit` du manifeste s’applique quand même. |
 | `mode` | `passive` | `interactive` donne les entrées au widget. |
@@ -297,7 +298,7 @@ d’image, la fixture écrit `"fixture:<name>"`.
 | --- | --- |
 | `{ "advance": { "ms": N } }` | Avance le temps virtuel de `N` ms. Chaque minuteur qui arrive à échéance en chemin se déclenche, dans l’ordre, et le décalage UTC change à son instant. |
 | `{ "advance": { "ms": N, "jump": true } }` | Déplace le temps d’un coup, comme une machine qui sort de veille : chaque minuteur échu se déclenche une fois, en retard. |
-| `{ "host": { … } }` | Modifie `locale`, `theme`, `scale`, `size`, `mode`, `visible`, `region`, `zone` ou `accounts`. |
+| `{ "host": { … } }` | Modifie `locale`, `theme`, `userAccent`, `scale`, `size`, `mode`, `visible`, `region`, `zone` ou `accounts`. |
 | `{ "pointer": { "click": target } }` | Un clic. Aussi `rightClick`, `move` (survol), `wheel` (`{ target, dx, dy }`) et `"leave"`. |
 | `{ "key": { "key": "Enter", "modifiers": ["shift"] } }` | Un appui sur une touche : `Tab`, `Escape`, `ArrowUp`, lettres, chiffres… |
 | `{ "text": "…" }` | Du texte saisi dans le champ qui a le focus. |

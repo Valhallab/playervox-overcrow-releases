@@ -10,7 +10,7 @@ const settle = () => new Promise((resolve) => setImmediate(resolve));
 const lastCall = () => vm.calls[vm.calls.length - 1];
 
 test("the version and the runtime surface are exported", () => {
-  assert.equal(overcrow.SDK_VERSION, "1.4.0");
+  assert.equal(overcrow.SDK_VERSION, "1.5.0");
   assert.equal(overcrow.RUNTIME_SURFACE, "0.1");
 });
 
@@ -35,6 +35,36 @@ test("host data is live and frozen", () => {
   }, TypeError);
   vm.host = HOST;
   assert.equal(overcrow.host.locale, "en");
+});
+
+test("the user's accent is lime until the host sends another, in both themes", () => {
+  assert.equal(overcrow.host.userAccent, "lime", "a host that does not send it");
+  assert.deepEqual(overcrow.userAccentColors(), {
+    name: "lime",
+    fill: "#a3e635",
+    onFill: "#18181b",
+  });
+  vm.host = { ...HOST, userAccent: "blue", theme: "light" };
+  assert.equal(overcrow.host.userAccent, "blue");
+  assert.deepEqual(overcrow.userAccentColors(), {
+    name: "blue",
+    fill: "#3b82f6",
+    onFill: "#18181b",
+  });
+  vm.host = { ...HOST, userAccent: "red" };
+  assert.deepEqual(overcrow.userAccentColors(), {
+    name: "red",
+    fill: "#991b1b",
+    onFill: "#ffffff",
+  });
+  vm.host = { ...HOST, userAccent: "purple", theme: "light" };
+  assert.deepEqual(overcrow.userAccentColors(), {
+    name: "purple",
+    fill: "#a78bfa",
+    onFill: "#18181b",
+  });
+  vm.host = HOST;
+  assert.equal(overcrow.host.userAccent, "lime", "absent again");
 });
 
 test("options fall back on a missing value or another type", () => {
@@ -307,10 +337,13 @@ test("the view table, drawings, the menu and logs reach the runtime", () => {
   first.cancel();
   first.cancel();
   vm.setHost({ region: HOST.region });
+  vm.setHost({ userAccent: "cyan" });
+  assert.equal(overcrow.userAccentColors().fill, "#22d3ee", "current in the listener's turn");
   assert.deepEqual(changes, [
     ["first", "options", "visible"],
     ["second", "options", "visible"],
     ["second", "region"],
+    ["second", "userAccent"],
   ]);
 
   overcrow.log.info("started");
@@ -328,6 +361,19 @@ test("the generated namespaces carry no data at runtime", async () => {
   assert.deepEqual(Object.keys(schema), [], "schema types only");
   assert.deepEqual(Object.keys(icons), [], "icon names are a type only");
   assert.ok(Object.values(limits).every((value) => typeof value === "number"), "limits only");
+  const accents = await import("../dist/generated/accents.js");
+  assert.deepEqual(Object.keys(accents), ["USER_ACCENTS"], "the user accent table only");
+  assert.deepEqual(Object.keys(accents.USER_ACCENTS), [
+    "lime",
+    "amber",
+    "red",
+    "pink",
+    "purple",
+    "blue",
+    "cyan",
+    "emerald",
+    "steel",
+  ]);
   assert.equal(limits.MAX_TIMERS, overcrow.MAX_TIMERS);
   assert.equal(overcrow.MIN_TIMER_INTERVAL_MS, 100);
 });

@@ -1,0 +1,6 @@
+{
+  "add": "Ajouter une partie",
+  "done": "Objectif atteint",
+  "progress": "{count} parties sur {goal}",
+  "week": "{count} objectifs atteints cette semaine"
+}

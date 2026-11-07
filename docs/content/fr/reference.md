@@ -47,7 +47,7 @@ ensemble ; celles qui suivent sont à garder ouvertes pendant que vous
 ## Versions
 
 Ces pages décrivent l’API widget v1 (`"apiVersion": 1` dans le manifeste)
-et `@overcrow/sdk` 1.4.
+et `@overcrow/sdk` 1.5.
 
 ## Spécifications pour les implémenteurs
 

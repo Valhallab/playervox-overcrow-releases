@@ -7,6 +7,21 @@ change between betas; 1.0.0 will freeze them under semantic versioning.
 The CLI's version enters no package: a package depends only on the
 widget's sources and the embedded SDK.
 
+## Unreleased
+
+- A manifest may declare `"accent": "user"`: the widget follows the accent
+  colour the user chose in PlayerVox OverCrow, with the style tokens
+  `--color-user-accent` and `--color-on-user-accent`. It needs the catalog
+  feature `user-accent`. `check`, `package` and `admit` refuse a
+  `style.ocss` that uses these tokens without the declaration
+  (`style.undeclared_user_accent`), and any other value of `accent`
+  (`manifest.accent`). The headless runtime this CLI pins must know the
+  user's accent to run such a widget in the user's colour.
+- A test scenario's `host.userAccent` and its `host` steps set the user's
+  accent (`lime` by default), for a manifest that declares it.
+- It embeds `@overcrow/sdk` 1.5.0: `host.userAccent` and
+  `userAccentColors()`.
+
 ## 1.0.0-beta.10
 
 Released in the creator tools ZIPs of PlayerVox OverCrow 0.10.0-beta.1's

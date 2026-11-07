@@ -76,6 +76,15 @@ export async function checks(): Promise<void> {
   commands.push(["fill", "var(--color-nope)"]);
   overcrow.draw("spark", commands);
 
+  // The user's accent: a name of the palette, and its colours.
+  const accent: overcrow.UserAccent = overcrow.host.userAccent;
+  const colours: overcrow.UserAccentColors = overcrow.userAccentColors();
+  const fill: string = colours.fill;
+  commands.push(["fill", "var(--color-user-accent)"], ["fill", colours.onFill]);
+  // @ts-expect-error not an accent of the palette
+  const green: overcrow.UserAccent = "green";
+  void [accent, fill, green];
+
   const icon: IconName = "clock";
   // @ts-expect-error not a Lucide icon
   const unknownIcon: IconName = "not-an-icon";

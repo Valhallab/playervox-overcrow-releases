@@ -27,10 +27,12 @@ export {
   hasGrant,
   onHost,
   option,
+  userAccentColors,
   type HostData,
   type HostKey,
   type HostListener,
   type MenuValue,
+  type UserAccentColors,
   type Viewport,
   type Widened,
 } from "./host.js";

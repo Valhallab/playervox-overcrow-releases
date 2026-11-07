@@ -184,6 +184,8 @@ identiques dans les deux thèmes.
 | `--color-accent-hover` | `#b5f153` | `#3f6212` | Accent sous le pointeur. |
 | `--color-accent-soft` | `#a3e6351c` | `#4d7c0f1f` | Voile d’accent derrière un contenu sélectionné. |
 | `--color-on-accent` | `#09090b` | `#ffffff` | Texte et icônes dessinés sur l’accent et sur son état de survol. |
+| `--color-user-accent` | `#a3e635` | `#84cc16` | La couleur d’accent de l’utilisateur, un remplissage pour ce qui lui appartient ; jamais une couleur de texte sur le panneau. Demande `"accent": "user"` dans le manifeste ; lime par défaut. |
+| `--color-on-user-accent` | `#18181b` | `#18181b` | Texte et icônes posés sur `--color-user-accent`. Demande `"accent": "user"` dans le manifeste. |
 | `--color-surface-panel` | `#111114ee` | `#fafafaee` | Fond du panneau du widget, dessiné par l’hôte derrière le contenu. |
 | `--color-surface-raised` | `#1e1e22e0` | `#f4f4f5eb` | Surface en relief dans le panneau. |
 | `--color-surface-hover` | `#28282deb` | `#e4e4e7f0` | Surface sous le pointeur. |
@@ -249,6 +251,27 @@ identiques dans les deux thèmes.
 | --- | --- | --- | --- |
 | `--shadow-panel` | `0px 4px 16px 0px #00000066` | `0px 4px 16px 0px #0000001f` | Ombre du panneau du widget et des surfaces flottantes de l’hôte. |
 <!-- /generated:tokens -->
+
+### Accent de l’utilisateur
+
+Pour un widget dont le manifeste déclare `"accent": "user"`,
+`--color-user-accent` et `--color-on-user-accent` prennent les couleurs de
+l’accent choisi par l’utilisateur ; lime sinon. Voir
+[accent de l’utilisateur](style.md#accent-de-lutilisateur).
+
+<!-- generated:user-accents -->
+| Couleur | Remplissage, sombre | Texte, sombre | Remplissage, clair | Texte, clair |
+| --- | --- | --- | --- | --- |
+| `lime` | `#a3e635` | `#18181b` | `#84cc16` | `#18181b` |
+| `amber` | `#fbbf24` | `#18181b` | `#f59e0b` | `#18181b` |
+| `red` | `#991b1b` | `#ffffff` | `#991b1b` | `#ffffff` |
+| `pink` | `#fb7185` | `#18181b` | `#f43f5e` | `#18181b` |
+| `purple` | `#a78bfa` | `#18181b` | `#a78bfa` | `#18181b` |
+| `blue` | `#60a5fa` | `#18181b` | `#3b82f6` | `#18181b` |
+| `cyan` | `#22d3ee` | `#18181b` | `#06b6d4` | `#18181b` |
+| `emerald` | `#34d399` | `#18181b` | `#10b981` | `#18181b` |
+| `steel` | `#a1a1aa` | `#18181b` | `#a1a1aa` | `#18181b` |
+<!-- /generated:user-accents -->
 
 ## Icônes
 

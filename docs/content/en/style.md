@@ -180,6 +180,64 @@ PlayerVox OverCrow draws the panel behind the widget
 (`--color-surface-panel`), its frame and its shadow: start from a
 transparent background.
 
+## User accent
+
+PlayerVox OverCrow lets the user choose an accent colour, lime by default.
+A widget can follow it. Declare it in the manifest:
+
+<!-- source: docs/content/examples/daily-goal/manifest.json -->
+```json
+  "accent": "user"
+```
+
+Then use two colour tokens:
+
+- `--color-user-accent` fills what belongs to the user: their progress,
+  their score, their selection.
+- `--color-on-user-accent` is for text and icons drawn on that fill. It
+  stays readable on every colour, in both themes.
+
+<!-- source: docs/content/examples/daily-goal/style.ocss -->
+```css
+.done {
+  background: var(--color-user-accent);
+  color: var(--color-on-user-accent);
+  border-radius: var(--radius-pill);
+  padding: var(--space-1) var(--space-4);
+}
+```
+
+`--color-user-accent` is a fill, never a text colour on the panel: some
+colours, red among them, cannot be read on the dark panel. Keep
+`--color-accent` for the widget's own brand: its main actions, a checked
+state. It never changes, whatever colour the user picks.
+
+The logic gets the colour's name in `host.userAccent`, and its values in
+the active theme with `userAccentColors()`. A draw command can name the
+token, which follows the user's choice by itself; a colour made from the
+value, such as a translucent wash, is drawn again when it changes:
+
+<!-- source: docs/content/examples/daily-goal/logic.ts -->
+```ts
+function paint(): void {
+  // A token follows the user's colour by itself; a wash needs the colour's
+  // value, with an alpha added.
+  const { fill } = userAccentColors();
+  const dots: DrawCommand[] = [];
+  state.week.forEach((reached, day) => {
+    dots.push(["circle", 6 + day * 14, 6, 4]);
+    dots.push(["fill", reached ? "var(--color-user-accent)" : `${fill}40`]);
+  });
+  draw("week", dots);
+}
+```
+
+The widget learns only the colour's name, without a permission, as it
+learns the language. Without the declaration, it gets lime, and `check`
+refuses a style that uses the two tokens (`style.undeclared_user_accent`).
+The values of the nine colours are in
+[user accent](style-properties.md#user-accent).
+
 ## Text
 
 Text properties (`color`, `font-family`, `font-size`, `font-weight`,

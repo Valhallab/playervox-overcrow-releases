@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "nova.daily-goal",
+  "version": "1.0.0",
+  "name": { "en": "Daily goal", "fr": "Objectif du jour" },
+  "sizing": {
+    "fit": "none",
+    "preferred": { "width": 220, "height": 150 },
+    "min": { "width": 180, "height": 130 },
+    "max": { "width": 400, "height": 260 }
+  },
+  "accent": "user"
+}

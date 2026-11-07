@@ -1,0 +1,44 @@
+.goal {
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.today {
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* What belongs to the user takes the user's accent: the ring of today's
+   progress, and the badge of a goal reached. */
+.ring {
+  width: 40px;
+  height: 40px;
+  color: var(--color-user-accent);
+}
+
+.done {
+  background: var(--color-user-accent);
+  color: var(--color-on-user-accent);
+  border-radius: var(--radius-pill);
+  padding: var(--space-1) var(--space-4);
+}
+
+.count {
+  font-size: var(--font-size-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.week {
+  height: 12px;
+}
+
+/* The widget's own action keeps the brand accent. */
+.add {
+  height: var(--control-height);
+  justify-content: center;
+  align-items: center;
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}

@@ -145,6 +145,7 @@ widget. Ses membres donnent toujours la dernière valeur.
 | --- | --- |
 | `host.locale` | Langue de l’interface, `"en"` ou `"fr"`. |
 | `host.theme` | `"dark"` ou `"light"`. |
+| `host.userAccent` | La couleur d’accent choisie par l’utilisateur (`"lime"`, `"blue"`…), pour un widget qui déclare `"accent": "user"` ; voir [accent de l’utilisateur](style.md#accent-de-lutilisateur). `"lime"` sinon. |
 | `host.mode` | `"passive"` ou `"interactive"` : le widget ne reçoit d’entrées qu’en mode interactif. |
 | `host.visible` | Indique si le widget est affiché. |
 | `host.scale` | Échelle du contenu en millièmes : `1000` vaut 100 %. |

@@ -7,6 +7,21 @@ version it was built with, so a new SDK never changes a published widget.
 An incompatible change would be 2.0.0. Every 1.x release needs the VM's
 runtime surface 0.1, which OverCrow keeps for widget API v1.
 
+## 1.5.0
+
+Not released yet. Ships with the release of PlayerVox OverCrow that sends
+the user's accent colour to widgets:
+
+- `host.userAccent`: the accent colour the user chose in PlayerVox
+  OverCrow (`lime`, `amber`, `red`, `pink`, `purple`, `blue`, `cyan`,
+  `emerald` or `steel`), for a widget whose manifest declares
+  `"accent": "user"`. It is `lime` otherwise, and with an older PlayerVox
+  OverCrow. `onHost` listeners get `userAccent` when it changes. The
+  `UserAccent` type.
+- `userAccentColors()`: its `fill` and the `onFill` colour of text drawn
+  on it, in the active theme, the values of the `--color-user-accent` and
+  `--color-on-user-accent` tokens. The `UserAccentColors` type.
+
 ## 1.4.0
 
 Ships with PlayerVox OverCrow 0.10.0-beta.1, the first release that brings

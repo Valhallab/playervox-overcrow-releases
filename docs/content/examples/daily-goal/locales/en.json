@@ -1,0 +1,6 @@
+{
+  "add": "Add a match",
+  "done": "Goal reached",
+  "progress": "{count} of {goal} matches",
+  "week": "{count} goals reached this week"
+}
