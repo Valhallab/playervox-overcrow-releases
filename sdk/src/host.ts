@@ -1,5 +1,14 @@
 import { runtime } from "./runtime.js";
-import type { AccountGrant, Capability, Locale, Mode, Region, Theme } from "./generated/schema.js";
+import { USER_ACCENTS } from "./generated/accents.js";
+import type {
+  AccountGrant,
+  Capability,
+  Locale,
+  Mode,
+  Region,
+  Theme,
+  UserAccent,
+} from "./generated/schema.js";
 
 /** A stored `wrapper.menu` value: a toggle, a slider or a choice. */
 export type MenuValue = boolean | number | string;
@@ -14,8 +23,9 @@ export interface Viewport {
 
 /**
  * The host data, always current: each member reads the latest value the
- * host sent (`Init`, then `Snapshot`, `Visibility`, `Locale`, `Theme` and
- * `Region`). After such a change the VM evaluates the view again.
+ * host sent (`Init`, then `Snapshot`, `Visibility`, `Locale`, `Theme`,
+ * `UserAccent` and `Region`). After such a change the VM evaluates the view
+ * again.
  */
 export interface HostData {
   /** Interface language. */
@@ -24,6 +34,13 @@ export interface HostData {
   readonly messages: Readonly<Record<string, string>>;
   /** Colour theme; token values follow it in the host. */
   readonly theme: Theme;
+  /**
+   * The accent colour the user chose in PlayerVox OverCrow, for a widget
+   * whose manifest declares `"accent": "user"`; `"lime"` otherwise, and on
+   * a PlayerVox OverCrow that does not send it. Sent without a permission,
+   * like the locale. Its colours are {@link userAccentColors}.
+   */
+  readonly userAccent: UserAccent;
   /** Number and date preferences and the user's UTC offset. */
   readonly region: Region;
   /** Content scale in thousandths (1000 is 100 %). */
@@ -56,6 +73,10 @@ export const host: HostData = /* @__PURE__ */ Object.freeze({
   },
   get theme() {
     return read("theme");
+  },
+  get userAccent() {
+    // The VM checks the name; an older host sends none.
+    return read("userAccent") ?? "lime";
   },
   get region() {
     return read("region");
@@ -91,7 +112,8 @@ let dispatching = false;
 
 /**
  * Calls `listener` after each host message that changes {@link host}
- * (`Snapshot`, `Visibility`, `Locale`, `Theme`, `Region`), with the names
+ * (`Snapshot`, `Visibility`, `Locale`, `Theme`, `UserAccent`, `Region`),
+ * with the names
  * of the members it sent, before the VM evaluates the view again. A member
  * may be sent unchanged: compare with the value you kept when it matters.
  * `wrapper.menu` values arrive as `options`; a widget that is shown again
@@ -121,6 +143,33 @@ export function onHost(listener: HostListener): { cancel(): void } {
       listeners.delete(listener);
     },
   };
+}
+
+/** The colours of {@link HostData.userAccent} in one theme. */
+export interface UserAccentColors {
+  /** The accent's name. */
+  readonly name: UserAccent;
+  /** Fill colour, the value of `--color-user-accent`. */
+  readonly fill: `#${string}`;
+  /** Text and icons on `fill`, the value of `--color-on-user-accent`. */
+  readonly onFill: `#${string}`;
+}
+
+/**
+ * The colours of the user's accent in the active theme: what the host
+ * gives `--color-user-accent` (`fill`) and `--color-on-user-accent`
+ * (`onFill`, at WCAG AA on `fill`), for drawing on a canvas. They change
+ * with `userAccent` and with `theme`. A fill: draw text on it in `onFill`,
+ * never `fill` itself as text on the panel.
+ *
+ * @example
+ * ```ts
+ * const { fill, onFill } = userAccentColors();
+ * ```
+ */
+export function userAccentColors(): UserAccentColors {
+  const name = host.userAccent;
+  return { name, ...USER_ACCENTS[name][host.theme] };
 }
 
 /** Whether the user granted `grant`: a capability, or `account:<id>`. */

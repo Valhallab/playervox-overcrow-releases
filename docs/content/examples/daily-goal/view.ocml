@@ -1,0 +1,15 @@
+<!-- A daily goal: what the user did today, in the user's accent colour.
+     The button keeps the brand accent of the widget. -->
+<box class="goal">
+  <box class="today">
+    <gauge class="ring" value={state.count} max={state.goal} label={t("progress", { count: state.count, goal: state.goal })}/>
+    <text class="count">{t("progress", { count: state.count, goal: state.goal })}</text>
+  </box>
+  <if test={state.count >= state.goal}>
+    <badge class="done">{t("done")}</badge>
+  </if>
+  <canvas ref="week" class="week" label={t("week", { count: state.week.length })}/>
+  <button class="add" label={t("add")} on:activate={add}>
+    <icon name="plus"/>
+  </button>
+</box>

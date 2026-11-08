@@ -91,6 +91,7 @@ const WORDS = {
     token: "Token",
     dark: "Dark",
     light: "Light",
+    userAccent: ["Colour", "Fill, dark", "Text, dark", "Fill, light", "Text, light"],
     shape: "Shape",
     accepts: "Accepts",
     kind: "Kind",
@@ -204,6 +205,7 @@ const WORDS = {
     selector: "Sélecteur",
     token: "Token",
     dark: "Sombre",
+    userAccent: ["Couleur", "Remplissage, sombre", "Texte, sombre", "Remplissage, clair", "Texte, clair"],
     light: "Clair",
     shape: "Forme",
     accepts: "Accepte",
@@ -929,6 +931,23 @@ function tokens(t) {
   );
 }
 
+/** The colours of each user accent, by theme. */
+function userAccents(t) {
+  const names = union("UserAccent");
+  const rows = records(sections, "Design tokens > User accent").map((entry) => [
+    entry.Name,
+    entry["Dark fill"],
+    entry["Dark text"],
+    entry["Light fill"],
+    entry["Light text"],
+  ]);
+  const listed = rows.map(([name]) => name.replaceAll("`", ""));
+  if (listed.join() !== names.join()) {
+    throw new Error(`the user accents of the reference (${listed}) are not those of schema.ts (${names})`);
+  }
+  return table(t.w.userAccent, rows);
+}
+
 function icons(t) {
   const match = sections.get("Icons")?.intro.join(" ").match(/\(Lucide ([0-9.]+), (\d+) names\)/);
   if (!match) {
@@ -1165,6 +1184,7 @@ const GENERATORS = {
   selectors: (t) => syntax(t, "Style > Selectors", t.w.selector, "Selector"),
   "style-values": (t) => syntax(t, "Style > Values", t.w.syntax, "Syntax"),
   tokens,
+  "user-accents": userAccents,
   icons,
   // Permissions and services.
   permissions,

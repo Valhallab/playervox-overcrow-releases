@@ -15,6 +15,7 @@ use crate::limits::{
     MAX_VIEW_EXPRESSIONS, MIN_CONTENT_SCALE, MIN_FONT_SIZE_PX, VM_HEAP_BYTES, VM_MAX_HEAP_BYTES,
 };
 use crate::model::{Field, Limit, Status, ValueType, field};
+use crate::tokens::USER_ACCENT_NAMES;
 use crate::view::Element;
 
 const MIB: u64 = 1024 * 1024;
@@ -184,6 +185,7 @@ pub struct Message {
 
 const LOCALE: ValueType = ValueType::Keyword(&["en", "fr"]);
 const THEME: ValueType = ValueType::Keyword(&["dark", "light"]);
+const USER_ACCENT: ValueType = ValueType::Keyword(USER_ACCENT_NAMES);
 const MODE: ValueType = ValueType::Keyword(&["passive", "interactive"]);
 const SCALE: ValueType = ValueType::Integer {
     min: MIN_CONTENT_SCALE.value as i64,
@@ -222,6 +224,11 @@ pub const HOST_MESSAGES: &[Message] = &[
                 "The package's `view.json`, validated by the host at activation.",
             ),
             Field::required("theme", THEME, "Active theme."),
+            Field::optional(
+                "userAccent",
+                USER_ACCENT,
+                "The user's accent colour; present exactly when the manifest declares `\"accent\": \"user\"`.",
+            ),
             Field::required(
                 "region",
                 ValueType::Record("Region"),
@@ -340,6 +347,16 @@ pub const HOST_MESSAGES: &[Message] = &[
         frame: 1,
         fields: &[Field::required("theme", THEME, "New theme.")],
         summary: "Theme change; token values are resolved by the host.",
+    },
+    Message {
+        name: "UserAccent",
+        frame: 1,
+        fields: &[Field::required(
+            "userAccent",
+            USER_ACCENT,
+            "New accent colour of the user.",
+        )],
+        summary: "The user chose another accent colour; sent only to a widget whose manifest declares `\"accent\": \"user\"`. The host resolves the user accent tokens from it.",
     },
     Message {
         name: "Region",

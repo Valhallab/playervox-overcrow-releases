@@ -15,7 +15,7 @@ security policy.
 | --- | --- |
 | `pages.json` | Navigation: the order, slug, group and localized label of each page. Both locales have every page. `"hidden": true` keeps a page written ahead of what it describes off the website (neither rendered nor in the navigation) and out of the MCP server, while it is checked like the others; remove it to publish the page. |
 | `en/*.md`, `fr/*.md` | The pages, in GitHub-flavored Markdown. The first `#` heading is the page title. |
-| `examples/<name>/` | Complete widget projects that the pages quote: `weather` (an HTTP API, storage), `countdown` (a timer, a component, a canvas, a context menu, the options menu), `run-log` (an account with a personal key), `quest-log` (an OAuth account), `steam-stats` (an integrated service) and `warframe-mission` (game events, with a scenario). |
+| `examples/<name>/` | Complete widget projects that the pages quote: `weather` (an HTTP API, storage), `countdown` (a timer, a component, a canvas, a context menu, the options menu), `run-log` (an account with a personal key), `quest-log` (an OAuth account), `steam-stats` (an integrated service), `warframe-mission` (game events, with a scenario) and `daily-goal` (the user's accent colour). |
 | `i18n/fr.json` | The French translation of the generated descriptions. |
 | `i18n/en.json` | Descriptions of the schema reworded for a creator. |
 | `i18n/service-errors.json` | The meaning of each service error code, in both languages. |

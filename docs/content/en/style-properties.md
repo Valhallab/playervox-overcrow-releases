@@ -183,6 +183,8 @@ both.
 | `--color-accent-hover` | `#b5f153` | `#3f6212` | Accent under the pointer. |
 | `--color-accent-soft` | `#a3e6351c` | `#4d7c0f1f` | Accent wash behind selected content. |
 | `--color-on-accent` | `#09090b` | `#ffffff` | Text and icons drawn on the accent and its hover state. |
+| `--color-user-accent` | `#a3e635` | `#84cc16` | The user's accent colour, a fill for what belongs to the user; never a text colour on the panel. Needs `"accent": "user"` in the manifest; lime by default. |
+| `--color-on-user-accent` | `#18181b` | `#18181b` | Text and icons drawn on `--color-user-accent`. Needs `"accent": "user"` in the manifest. |
 | `--color-surface-panel` | `#111114ee` | `#fafafaee` | Widget panel background, drawn by the host behind the content. |
 | `--color-surface-raised` | `#1e1e22e0` | `#f4f4f5eb` | Raised surface inside the panel. |
 | `--color-surface-hover` | `#28282deb` | `#e4e4e7f0` | Surface under the pointer. |
@@ -248,6 +250,26 @@ both.
 | --- | --- | --- | --- |
 | `--shadow-panel` | `0px 4px 16px 0px #00000066` | `0px 4px 16px 0px #0000001f` | Shadow of the widget panel and of floating host surfaces. |
 <!-- /generated:tokens -->
+
+### User accent
+
+For a widget whose manifest declares `"accent": "user"`,
+`--color-user-accent` and `--color-on-user-accent` take the colours of the
+accent the user chose; lime otherwise. See [user accent](style.md#user-accent).
+
+<!-- generated:user-accents -->
+| Colour | Fill, dark | Text, dark | Fill, light | Text, light |
+| --- | --- | --- | --- | --- |
+| `lime` | `#a3e635` | `#18181b` | `#84cc16` | `#18181b` |
+| `amber` | `#fbbf24` | `#18181b` | `#f59e0b` | `#18181b` |
+| `red` | `#991b1b` | `#ffffff` | `#991b1b` | `#ffffff` |
+| `pink` | `#fb7185` | `#18181b` | `#f43f5e` | `#18181b` |
+| `purple` | `#a78bfa` | `#18181b` | `#a78bfa` | `#18181b` |
+| `blue` | `#60a5fa` | `#18181b` | `#3b82f6` | `#18181b` |
+| `cyan` | `#22d3ee` | `#18181b` | `#06b6d4` | `#18181b` |
+| `emerald` | `#34d399` | `#18181b` | `#10b981` | `#18181b` |
+| `steel` | `#a1a1aa` | `#18181b` | `#a1a1aa` | `#18181b` |
+<!-- /generated:user-accents -->
 
 ## Icons
 

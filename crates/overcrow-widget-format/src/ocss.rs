@@ -66,6 +66,10 @@ pub enum OcssErrorKind {
     InvalidValue,
     /// `var()` of an unknown token, or of a token of another type.
     UnknownToken,
+    /// A user accent token (`--color-user-accent`, `--color-on-user-accent`)
+    /// in the style of a widget whose manifest does not declare
+    /// `"accent": "user"`.
+    UndeclaredUserAccent,
     /// A property that cannot be animated, in `@keyframes` or `transition`.
     NotAnimatable,
     UnknownKeyframes,
@@ -94,6 +98,7 @@ impl OcssErrorKind {
             Self::DuplicateProperty => "duplicate_property",
             Self::InvalidValue => "invalid_value",
             Self::UnknownToken => "unknown_token",
+            Self::UndeclaredUserAccent => "undeclared_user_accent",
             Self::NotAnimatable => "not_animatable",
             Self::UnknownKeyframes => "unknown_keyframes",
             Self::DuplicateKeyframes => "duplicate_keyframes",
@@ -120,6 +125,9 @@ pub struct StyleSheet {
     /// Rules in source order, which breaks specificity ties.
     pub rules: Vec<Rule>,
     pub keyframes: Vec<Keyframes>,
+    /// Where the sheet first names a token of the user's accent
+    /// ([`Token::user_accent`]); `None` when it names none.
+    pub user_accent_at: Option<Position>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -314,6 +322,18 @@ pub enum Value {
     Animations(Vec<Animation>),
 }
 
+/// Refuses a sheet that names a user accent token when the manifest does
+/// not declare `"accent": "user"`, at the first such token.
+pub fn check_user_accent(sheet: &StyleSheet, declared: bool) -> Result<(), OcssError> {
+    match sheet.user_accent_at {
+        Some(position) if !declared => Err(OcssError {
+            kind: OcssErrorKind::UndeclaredUserAccent,
+            position,
+        }),
+        _ => Ok(()),
+    }
+}
+
 /// Parses `style.ocss`.
 pub fn parse(source: &[u8]) -> Result<StyleSheet, OcssError> {
     if source.len() as u64 > MAX_STYLE_SOURCE_BYTES.value {
@@ -338,6 +358,7 @@ pub fn parse(source: &[u8]) -> Result<StyleSheet, OcssError> {
         tokens,
         position: 0,
         animations: Vec::new(),
+        user_accent_at: None,
     };
     let sheet = parser.sheet()?;
     Ok(sheet)
@@ -570,6 +591,8 @@ struct Parser<'a> {
     position: usize,
     /// Keyframes names used by `animation`, checked once the sheet is read.
     animations: Vec<(String, usize)>,
+    /// Offset of the first user accent token of a valid declaration.
+    user_accent_at: Option<usize>,
 }
 
 type Parsed<T> = Result<T, OcssError>;
@@ -637,7 +660,13 @@ impl Parser<'_> {
                 return Err(self.error_at(OcssErrorKind::UnknownKeyframes, *offset));
             }
         }
-        Ok(StyleSheet { rules, keyframes })
+        Ok(StyleSheet {
+            rules,
+            keyframes,
+            user_accent_at: self
+                .user_accent_at
+                .map(|offset| Position::of(self.text, offset)),
+        })
     }
 
     /// Tokens up to the next top-level `{`, exclusive; the cursor lands on it.
@@ -808,6 +837,14 @@ impl Parser<'_> {
                 .map_err(|(kind, at)| self.error_at(kind, at.unwrap_or(offset)))?;
             let value = typed_value(property.value, &components)
                 .map_err(|kind| self.error_at(kind, offset))?;
+            // A token is an identifier of the declaration's value, whatever
+            // the property: every colour slot is covered.
+            if self.user_accent_at.is_none() {
+                self.user_accent_at = tokens.iter().find_map(|(tok, at)| match tok {
+                    Tok::Ident(name) if token(name).is_some_and(|t| t.user_accent) => Some(*at),
+                    _ => None,
+                });
+            }
             if let Value::Animations(animations) = &value {
                 self.animations.extend(
                     animations

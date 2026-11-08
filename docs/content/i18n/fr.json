@@ -875,7 +875,10 @@
     "The IDs of `steelPath` the player picked, as this session of the game showed it.": "Les ID de `steelPath` choisis par le joueur, tels que cette session du jeu les a montrés.",
     "Nightwave's current season, when the world state gives it.": "La saison en cours des Ondes Nocturnes, quand le world state la donne.",
     "When the season ends.": "Quand la saison se termine.",
-    "The active challenges, daily ones first, at most `MAX_WARFRAME_NIGHTWAVE`.": "Les défis en cours, ceux du jour d’abord, au plus `MAX_WARFRAME_NIGHTWAVE`."
+    "The active challenges, daily ones first, at most `MAX_WARFRAME_NIGHTWAVE`.": "Les défis en cours, ceux du jour d’abord, au plus `MAX_WARFRAME_NIGHTWAVE`.",
+    "`user`: the widget follows the user's accent colour, with the `--color-user-accent` and `--color-on-user-accent` tokens and the host value `userAccent`. Absent, it gets neither. No permission: any widget may declare it. Needs the catalog feature `user-accent`.": "`user` : le widget suit la couleur d’accent de l’utilisateur, avec les tokens `--color-user-accent` et `--color-on-user-accent` et la valeur d’hôte `userAccent`. Absent, il n’a ni l’un ni l’autre. Aucune permission : tout widget peut le déclarer. Demande la fonctionnalité de catalogue `user-accent`.",
+    "The user's accent colour, a fill for what belongs to the user; never a text colour on the panel. Needs `\"accent\": \"user\"` in the manifest; lime by default.": "La couleur d’accent de l’utilisateur, un remplissage pour ce qui lui appartient ; jamais une couleur de texte sur le panneau. Demande `\"accent\": \"user\"` dans le manifeste ; lime par défaut.",
+    "Text and icons drawn on `--color-user-accent`. Needs `\"accent\": \"user\"` in the manifest.": "Texte et icônes posés sur `--color-user-accent`. Demande `\"accent\": \"user\"` dans le manifeste."
   },
   "patterns": {
     "integer {0}": "entier {0}",

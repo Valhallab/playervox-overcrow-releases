@@ -3,7 +3,8 @@
 //! codes, limits, events, draw commands, tokens, icons and menu types. The
 //! output is committed under `sdk/src/generated/`; a test keeps it identical.
 //!
-//! Only `limits.ts` and the service namespaces hold values: everything else
+//! Only `limits.ts`, `accents.ts` and the service namespaces hold values:
+//! everything else
 //! is a type, so the large unions (icons, draw commands, tokens) leave
 //! nothing in `logic.js`.
 
@@ -17,7 +18,7 @@ use crate::model::{Field, ValueType};
 use crate::permissions::{CAPABILITIES, PERMISSIONS};
 use crate::results::{SHAPES, Shape};
 use crate::services::{Requirement, SERVICE_ERRORS, SERVICES, Service, ServiceKind};
-use crate::tokens::{TOKENS, TokenType};
+use crate::tokens::{TOKENS, TokenType, USER_ACCENTS};
 use crate::view::{EVENTS, NAMED_KEYS};
 use crate::wrapper::{HOST_FEATURES, ROW_FIELDS};
 
@@ -37,6 +38,7 @@ pub fn files() -> Vec<(&'static str, String)> {
         ("schema.ts", schema()),
         ("icons.ts", icons()),
         ("limits.ts", limits()),
+        ("accents.ts", accents()),
         ("services.ts", services()),
     ]
 }
@@ -83,6 +85,11 @@ fn host_types(out: &mut String) {
     for (alias, name, summary) in [
         ("Locale", "locale", "Interface language of the host."),
         ("Theme", "theme", "Colour theme of the host."),
+        (
+            "UserAccent",
+            "userAccent",
+            "Accent colour the user chose in PlayerVox OverCrow.",
+        ),
         (
             "Mode",
             "mode",
@@ -411,6 +418,39 @@ fn limits() -> String {
         );
         let _ = writeln!(out, "export const {} = {};", limit.key, limit.value);
     }
+    out
+}
+
+/// The colours of each user accent, by theme: what the host resolves
+/// `--color-user-accent` and `--color-on-user-accent` to.
+fn accents() -> String {
+    let mut out = String::from(HEADER);
+    out.push_str(concat!(
+        "\nimport type { Theme, UserAccent } from \"./schema.js\";\n\n",
+        "/** The colours of a user accent in one theme. */\n",
+        "export interface AccentColors {\n",
+        "  /** Fill colour, `--color-user-accent`. */\n",
+        "  readonly fill: `#${string}`;\n",
+        "  /** Text and icons on the fill, `--color-on-user-accent`, at WCAG AA. */\n",
+        "  readonly onFill: `#${string}`;\n",
+        "}\n\n",
+        "/** The colours of every user accent, by theme. */\n",
+        "export const USER_ACCENTS: {\n",
+        "  readonly [name in UserAccent]: { readonly [theme in Theme]: AccentColors };\n",
+        "} = {\n",
+    ));
+    for accent in USER_ACCENTS {
+        let _ = writeln!(
+            out,
+            "  {}: {{\n    dark: {{ fill: {}, onFill: {} }},\n    light: {{ fill: {}, onFill: {} }},\n  }},",
+            accent.name,
+            quote(accent.dark.fill),
+            quote(accent.dark.on_fill),
+            quote(accent.light.fill),
+            quote(accent.light.on_fill),
+        );
+    }
+    out.push_str("};\n");
     out
 }
 

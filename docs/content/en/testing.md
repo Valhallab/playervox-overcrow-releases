@@ -33,7 +33,7 @@ is "Increase", then checks the new text and image.
 
 `@overcrow/sdk/testing` comes with the SDK: `npm install` in a project made
 by `overcrow-widget init`, otherwise
-`npm install --save-dev --save-exact @overcrow/sdk@1.4.0`.
+`npm install --save-dev --save-exact @overcrow/sdk@1.5.0`.
 
 `installRuntime()` puts a stand-in for PlayerVox OverCrow in place before
 the logic is imported: service calls return promises that your test settles,
@@ -140,6 +140,7 @@ Everything is optional.
 | --- | --- | --- |
 | `locale` | `en` | `en` or `fr`. |
 | `theme` | `dark` | `dark` or `light`. |
+| `userAccent` | `lime` | The user's accent colour, for a manifest that declares `"accent": "user"`. |
 | `scale` | `1000` | Content scale in thousandths: 500 to 1750 (50 % to 175 %). |
 | `size` | the manifest's preferred size | `{ width, height }` of the frame, in logical pixels; the manifest's `fit` still applies. |
 | `mode` | `passive` | `interactive` gives input to the widget. |
@@ -288,7 +289,7 @@ image handle, the fixture writes `"fixture:<name>"`.
 | --- | --- |
 | `{ "advance": { "ms": N } }` | Moves the virtual time by `N` ms. Every timer due on the way fires in order, and the UTC offset changes at its instant. |
 | `{ "advance": { "ms": N, "jump": true } }` | Moves the time at once, as a machine waking from sleep: each due timer fires once, late. |
-| `{ "host": { … } }` | Changes `locale`, `theme`, `scale`, `size`, `mode`, `visible`, `region`, `zone` or `accounts`. |
+| `{ "host": { … } }` | Changes `locale`, `theme`, `userAccent`, `scale`, `size`, `mode`, `visible`, `region`, `zone` or `accounts`. |
 | `{ "pointer": { "click": target } }` | A click. Also `rightClick`, `move` (hover), `wheel` (`{ target, dx, dy }`) and `"leave"`. |
 | `{ "key": { "key": "Enter", "modifiers": ["shift"] } }` | A key press: `Tab`, `Escape`, `ArrowUp`, letters, digits… |
 | `{ "text": "…" }` | Text typed into the focused field. |

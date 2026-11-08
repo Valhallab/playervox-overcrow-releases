@@ -191,6 +191,66 @@ PlayerVox OverCrow dessine le panneau derrière le widget
 (`--color-surface-panel`), son cadre et son ombre : partez d’un fond
 transparent.
 
+## Accent de l’utilisateur
+
+PlayerVox OverCrow permet à l’utilisateur de choisir une couleur d’accent,
+lime par défaut. Un widget peut la suivre. Déclarez-le dans le manifeste :
+
+<!-- source: docs/content/examples/daily-goal/manifest.json -->
+```json
+  "accent": "user"
+```
+
+Utilisez ensuite deux tokens de couleur :
+
+- `--color-user-accent` remplit ce qui appartient à l’utilisateur : sa
+  progression, son score, sa sélection.
+- `--color-on-user-accent` sert au texte et aux icônes posés sur ce
+  remplissage. Il reste lisible sur chaque couleur, dans les deux thèmes.
+
+<!-- source: docs/content/examples/daily-goal/style.ocss -->
+```css
+.done {
+  background: var(--color-user-accent);
+  color: var(--color-on-user-accent);
+  border-radius: var(--radius-pill);
+  padding: var(--space-1) var(--space-4);
+}
+```
+
+`--color-user-accent` est un remplissage, jamais une couleur de texte sur
+le panneau : certaines couleurs, dont le rouge, sont illisibles sur le
+panneau sombre. Gardez `--color-accent` pour la marque du widget : ses
+actions principales, un état coché. Il ne change jamais, quelle que soit la
+couleur choisie par l’utilisateur.
+
+La logique obtient le nom de la couleur dans `host.userAccent`, et ses
+valeurs dans le thème actif avec `userAccentColors()`. Une commande de
+dessin peut nommer le token, qui suit seul le choix de l’utilisateur ; une
+couleur tirée de la valeur, comme un voile translucide, se redessine quand
+elle change :
+
+<!-- source: docs/content/examples/daily-goal/logic.ts -->
+```ts
+function paint(): void {
+  // A token follows the user's colour by itself; a wash needs the colour's
+  // value, with an alpha added.
+  const { fill } = userAccentColors();
+  const dots: DrawCommand[] = [];
+  state.week.forEach((reached, day) => {
+    dots.push(["circle", 6 + day * 14, 6, 4]);
+    dots.push(["fill", reached ? "var(--color-user-accent)" : `${fill}40`]);
+  });
+  draw("week", dots);
+}
+```
+
+Le widget n’apprend que le nom de la couleur, sans permission, comme il
+apprend la langue. Sans la déclaration, il reçoit lime, et `check` refuse
+un style qui utilise les deux tokens (`style.undeclared_user_accent`). Les
+valeurs des neuf couleurs figurent dans
+[accent de l’utilisateur](style-properties.md#accent-de-lutilisateur).
+
 ## Texte
 
 Les propriétés de texte (`color`, `font-family`, `font-size`, `font-weight`,

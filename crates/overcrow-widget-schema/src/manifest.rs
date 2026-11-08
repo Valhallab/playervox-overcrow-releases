@@ -27,6 +27,7 @@ use crate::model::{Field, ValueType, field, is_keyword};
 use crate::permissions::{
     CAPABILITIES, NETWORK_RULE_FIELDS, PARAMETER_CONSTRAINTS, capability_named,
 };
+use crate::tokens::FEATURE_USER_ACCENT;
 use crate::version::Version;
 use crate::wrapper::{HOST_FEATURES, valid_label_text, validate_wrapper};
 
@@ -86,6 +87,11 @@ pub const MANIFEST_FIELDS: &[Field] = &[
         "wrapper",
         ValueType::Record("wrapper"),
         "Widget rows of the host options menu.",
+    ),
+    Field::optional(
+        "accent",
+        ValueType::Keyword(&["user"]),
+        "`user`: the widget follows the user's accent colour, with the `--color-user-accent` and `--color-on-user-accent` tokens and the host value `userAccent`. Absent, it gets neither. No permission: any widget may declare it. Needs the catalog feature `user-accent`.",
     ),
     Field::optional(
         "requires",
@@ -210,6 +216,8 @@ pub enum ManifestError {
     Wrapper,
     /// `requires` is not a list of distinct host features.
     Requires,
+    /// `accent` is not `"user"`.
+    Accent,
     /// `permissions.accounts`: more than one account, or a declaration
     /// outside its grammar, or a `send.query` a route of the account
     /// declares.
@@ -254,6 +262,7 @@ impl ManifestError {
             Self::AccountLink => "account_link",
             Self::Wrapper => "wrapper",
             Self::Requires => "requires",
+            Self::Accent => "accent",
             Self::Account => "account",
             Self::AccountOrigin => "account_origin",
             Self::AccountOverlap => "account_overlap",
@@ -276,6 +285,8 @@ pub struct Manifest {
     pub permissions: Permissions,
     /// Host data sources the widget needs (`requires`); empty when absent.
     pub requires: BTreeSet<&'static str>,
+    /// `"accent": "user"`: the widget follows the user's accent colour.
+    pub user_accent: bool,
     /// The declared third-party account, at most `MAX_ACCOUNTS`.
     pub accounts: Vec<Account>,
     pub value: Value,
@@ -294,9 +305,10 @@ impl Manifest {
     /// `events` (`steam-events` for Steam's), `steam-local-achievements`
     /// for a Steam declaration that lists `local` `achievements`,
     /// `open-links` for `permissions.links`, `active-game` for
-    /// `game.read` or the PlayerVox score beside a way out, and
-    /// `game-events-warframe` for a `warframe.*` game event); empty for a
-    /// manifest without any.
+    /// `game.read` or the PlayerVox score beside a way out,
+    /// `game-events-warframe` for a `warframe.*` game event, and
+    /// `user-accent` for `"accent": "user"`); empty for a manifest without
+    /// any.
     pub fn features(&self) -> BTreeSet<&'static str> {
         let mut features: BTreeSet<&'static str> = self
             .accounts
@@ -344,6 +356,9 @@ impl Manifest {
                 .filter_map(|name| game_event_feature(name))
                 .map(|feature| feature.catalog_feature),
         );
+        if self.user_accent {
+            features.insert(FEATURE_USER_ACCENT);
+        }
         features
     }
 
@@ -443,12 +458,18 @@ pub fn validate_manifest_value(value: Value) -> Result<Manifest, ManifestError> 
         Some(requires) => validate_requires(requires)?,
         None => BTreeSet::new(),
     };
+    let user_accent = match object.get("accent") {
+        None => false,
+        Some(accent) if accent == "user" => true,
+        Some(_) => return Err(ManifestError::Accent),
+    };
     Ok(Manifest {
         id: id.to_owned(),
         version,
         heap_bytes,
         permissions,
         requires,
+        user_accent,
         accounts,
         value,
     })

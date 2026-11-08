@@ -646,6 +646,8 @@ Dark values are the current overlay palette. The reference images of the P2.4 bu
 | `--color-accent-hover` | color | `#b5f153` | `#3f6212` | **provisional (P2.4)** | Accent under the pointer. |
 | `--color-accent-soft` | color | `#a3e6351c` | `#4d7c0f1f` | **provisional (P2.4)** | Accent wash behind selected content. |
 | `--color-on-accent` | color | `#09090b` | `#ffffff` | fixed | Text and icons drawn on the accent and its hover state. |
+| `--color-user-accent` | color | `#a3e635` | `#84cc16` | fixed | The user's accent colour, a fill for what belongs to the user; never a text colour on the panel. Needs `"accent": "user"` in the manifest; lime by default. |
+| `--color-on-user-accent` | color | `#18181b` | `#18181b` | fixed | Text and icons drawn on `--color-user-accent`. Needs `"accent": "user"` in the manifest. |
 | `--color-surface-panel` | color | `#111114ee` | `#fafafaee` | fixed | Widget panel background, drawn by the host wrapper behind the content. |
 | `--color-surface-raised` | color | `#1e1e22e0` | `#f4f4f5eb` | **provisional (P2.4)** | Raised surface inside the panel. |
 | `--color-surface-hover` | color | `#28282deb` | `#e4e4e7f0` | **provisional (P2.4)** | Surface under the pointer. |
@@ -686,6 +688,22 @@ Dark values are the current overlay palette. The reference images of the P2.4 bu
 | `--duration-medium` | time | `240ms` | `240ms` | fixed | Panels and popovers. |
 | `--shadow-panel` | shadow | `0px 4px 16px 0px #00000066` | `0px 4px 16px 0px #0000001f` | **provisional (P2.4)** | Shadow of the widget panel and of floating host surfaces. |
 
+### User accent
+
+A widget whose manifest declares `"accent": "user"` (catalog feature `user-accent`) follows the accent colour the user chose in PlayerVox OverCrow: the host sends its name in `Init.userAccent`, then a `UserAccent` message at each change, and resolves `--color-user-accent` and `--color-on-user-accent` from it in the active theme. The name is sent without a permission, like the locale; `lime` is the default. A `style.ocss` that uses these tokens without the declaration is rejected (`undeclared_user_accent`), and a draw command of such a widget cannot name them. `--color-accent` and its variants never change.
+
+| Name | Dark fill | Dark text | Light fill | Light text |
+| --- | --- | --- | --- | --- |
+| `lime` | `#a3e635` | `#18181b` | `#84cc16` | `#18181b` |
+| `amber` | `#fbbf24` | `#18181b` | `#f59e0b` | `#18181b` |
+| `red` | `#991b1b` | `#ffffff` | `#991b1b` | `#ffffff` |
+| `pink` | `#fb7185` | `#18181b` | `#f43f5e` | `#18181b` |
+| `purple` | `#a78bfa` | `#18181b` | `#a78bfa` | `#18181b` |
+| `blue` | `#60a5fa` | `#18181b` | `#3b82f6` | `#18181b` |
+| `cyan` | `#22d3ee` | `#18181b` | `#06b6d4` | `#18181b` |
+| `emerald` | `#34d399` | `#18181b` | `#10b981` | `#18181b` |
+| `steel` | `#a1a1aa` | `#18181b` | `#a1a1aa` | `#18181b` |
+
 ## Icons
 
 Every icon of the pinned `egui-lucide 0.1.0` crate (Lucide 1.34.0, 1777 names) is valid in `icon` elements and `wrapper.menu` rows; any other name is rejected. The crate is the host's only icon source. The exact list is [`icons_generated.rs`](../crates/overcrow-widget-schema/src/icons_generated.rs), regenerated from the crate's name table by `scripts/generate-widget-icons.py`. Within API v1 the set may grow but never loses or renames a name.
@@ -707,6 +725,7 @@ Every icon of the pinned `egui-lucide 0.1.0` crate (Lucide 1.34.0, 1777 names) i
 | `vm` | `VmRequest` | no | VM budget request; absent means the defaults. |
 | `permissions` | `Permissions` | no | Requested permissions; absent means none. |
 | `wrapper` | `wrapper` | no | Widget rows of the host options menu. |
+| `accent` | `user` | no | `user`: the widget follows the user's accent colour, with the `--color-user-accent` and `--color-on-user-accent` tokens and the host value `userAccent`. Absent, it gets neither. No permission: any widget may declare it. Needs the catalog feature `user-accent`. |
 | `requires` | `host features` | no | Distinct host data sources the widget cannot work without, as in a `wrapper.menu` row's `requires`. On a machine that lacks one, the host neither starts nor shows the widget and keeps its layout; the widget comes back when the source does. |
 
 ### `WidgetName`
@@ -2031,6 +2050,7 @@ Starts the VM. The VM answers `Ready` within `VM_READY_TIMEOUT_MS`.
 | `messages` | `locale messages` | yes | Messages of the active locale. |
 | `view` | `compiled view` | yes | The package's `view.json`, validated by the host at activation. |
 | `theme` | `dark` \| `light` | yes | Active theme. |
+| `userAccent` | `lime` \| `amber` \| `red` \| `pink` \| `purple` \| `blue` \| `cyan` \| `emerald` \| `steel` | no | The user's accent colour; present exactly when the manifest declares `"accent": "user"`. |
 | `region` | `Region` | yes | Regional formats, as in the `Region` message. |
 | `scale` | integer 500..=1750 | yes | Content scale in ‰. |
 | `viewport` | `{ width, height }` | yes | Content rectangle, logical px. |
@@ -2099,6 +2119,14 @@ Theme change; token values are resolved by the host.
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
 | `theme` | `dark` \| `light` | yes | New theme. |
+
+#### `UserAccent` (frame 1)
+
+The user chose another accent colour; sent only to a widget whose manifest declares `"accent": "user"`. The host resolves the user accent tokens from it.
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `userAccent` | `lime` \| `amber` \| `red` \| `pink` \| `purple` \| `blue` \| `cyan` \| `emerald` \| `steel` | yes | New accent colour of the user. |
 
 #### `Region` (frame 1)
 

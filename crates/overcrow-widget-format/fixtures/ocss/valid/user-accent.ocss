@@ -1,0 +1,7 @@
+/* The user's accent colour, for a widget whose manifest declares
+   "accent": "user"; the grammar alone accepts it. */
+.mine {
+  background-color: var(--color-user-accent);
+  color: var(--color-on-user-accent);
+  border: 1px solid var(--color-user-accent);
+}

@@ -10,7 +10,7 @@ The SDK is on npm, and the command below adds it to a project. A project
 made by `overcrow-widget init` already lists it: run `npm install` there.
 
 ```sh
-npm install --save-dev --save-exact @overcrow/sdk@1.4.0
+npm install --save-dev --save-exact @overcrow/sdk@1.5.0
 ```
 
 <!-- source: widgets/clock/logic.ts -->
@@ -36,7 +36,7 @@ that leaves the VM.
 
 | Export | Kind | Summary |
 | --- | --- | --- |
-| `SDK_VERSION` | constant | `"1.4.0"`. |
+| `SDK_VERSION` | constant | `"1.5.0"`. |
 | `RUNTIME_SURFACE` | constant | `"0.1"`, the version of the VM's built-in interface that this SDK needs. |
 
 ## State and view
@@ -69,12 +69,14 @@ const state = initState({ values: [50] as number[] });
 | Export | Kind | Summary |
 | --- | --- | --- |
 | `host` | constant | Frozen object whose members always read the latest values sent by PlayerVox OverCrow. |
-| `HostData` | interface | Type of `host`: `locale`, `messages`, `theme`, `region`, `scale` (in thousandths), `viewport`, `mode`, `visible`, `options`, `grants`. |
+| `HostData` | interface | Type of `host`: `locale`, `messages`, `theme`, `userAccent`, `region`, `scale` (in thousandths), `viewport`, `mode`, `visible`, `options`, `grants`. |
 | `onHost(listener)` | function | Calls `listener` with the names of the `host` members that PlayerVox OverCrow just sent (`options` after a menu change, `visible` when shown or hidden, `region`…), before the view is evaluated again. Returns `{ cancel() }`. |
 | `HostKey` | type | The name of a member of `HostData`. |
 | `HostListener` | type | A listener of `onHost`. |
 | `Viewport` | interface | `{ width, height }`, in logical pixels. |
 | `hasGrant(grant)` | function | Whether the user granted a capability, or a third-party account (`account:<id>`). |
+| `userAccentColors()` | function | `{ name, fill, onFill }`: the user's accent colour in the active theme, the values of `--color-user-accent` and `--color-on-user-accent`. Lime unless the manifest declares `"accent": "user"`. |
+| `UserAccentColors` | interface | The result of `userAccentColors`. |
 | `option(id, fallback)` | function | The stored value of a row of the options menu, or `fallback` when there is none or it has another type. |
 | `MenuValue` | type | `boolean \| number \| string`. |
 | `Widened<T>` | type | The result type of `option`: a `false` fallback gives `boolean`. |
@@ -265,7 +267,7 @@ what PlayerVox OverCrow accepts.
 | `Session`, `Game`, `Telemetry`, `Fps`, `Stopwatch`, `Media`, `Notes`, `Note`, `NoteItem`, `CreatedNote`, `Score`, `Rating`, `RatingState`, `Review`, `ReviewsState`, `ReviewsPage`, `JournalState`, `JournalPage`, `JournalSession`, `TwitchChat`, `ChatMessage`, `ChatFragment`, `TwitchEvents`, `TwitchEvent`, `SteamEvents`, `SteamEvent`, `SteamLocalAchievements`, `SteamLocalAchievement`, `AccountStatus`, `WarframeEvents`, `WarframeEvent`, `WarframeGlossary`, `WarframeGlossaryIcons`, `WarframeEarned`, `WarframeFeatures`, `WarframeInfo`, `WarframeLocation`, `WarframeMission`, `WarframeModifier`, `WarframeRewards`, `WarframeRewardTable`, `WarframeReward`, `WarframeRelic`, `WarframeRelicItem`, `WarframeProgress`, `WarframeSquad`, `WarframeSquadMember`, `WarframeEidolons`, `WarframeEidolonHunt`, `WarframeWorld`, `WarframeWorldMission`, `WarframeCycle`, `WarframeCircuitChoice`, `WarframeCircuitReward`, `WarframeName`, `WarframeNode`, `HttpResponse`, `HttpHeaders` | The [result shapes](result-shapes.md). |
 | `Permission`, `Capability`, `SensitiveCapability`, `CapabilityServices`, `PermissionServices` | The permissions and capabilities of the manifest, and the services each one allows. |
 | `AccountGrant` | The grant of a third-party account, `account:<id>`: `hasGrant` takes it, `host.grants` lists it. |
-| `Locale`, `Theme`, `Mode`, `Region`, `NumberFormat`, `DateOrder` | The values of `host`. |
+| `Locale`, `Theme`, `UserAccent`, `Mode`, `Region`, `NumberFormat`, `DateOrder` | The values of `host`. |
 | `EventName`, `GestureEventName`, `EventDetailMap`, `NamedKey` | The events of the view, those that are user actions, their details, and the named keys of `keydown`. |
 | `DrawCommand`, `DrawCommandName`, `Color` | The canvas commands and colours. |
 | `TokenName`, `ColorToken`, `LengthToken`, `FontSizeToken`, `FontFamilyToken`, `TimeToken`, `ShadowToken` | The [design tokens](style-properties.md#design-tokens). |

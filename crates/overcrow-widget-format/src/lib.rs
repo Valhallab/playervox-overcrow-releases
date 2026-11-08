@@ -23,11 +23,12 @@ use overcrow_widget_schema::package::Package;
 
 /// The source-format checks of package admission that the schema crate
 /// cannot run itself (step 4 of `docs/widget-package-v1.md`): the
-/// `style.ocss` grammar. Callers run it after `read_package`, at admission
-/// and at every activation.
+/// `style.ocss` grammar, and its user accent tokens only with
+/// `"accent": "user"` in the manifest. Callers run it after
+/// `read_package`, at admission and at every activation.
 pub fn validate_package_style(package: &Package) -> Result<(), ocss::OcssError> {
     match package.file("style.ocss") {
-        Some(style) => ocss::parse(style).map(|_| ()),
+        Some(style) => ocss::check_user_accent(&ocss::parse(style)?, package.manifest.user_accent),
         None => Ok(()),
     }
 }

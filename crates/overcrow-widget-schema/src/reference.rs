@@ -41,7 +41,7 @@ use crate::services::{
     Enter, Requirement, SERVICE_ERRORS, SERVICES, ServiceKind, Target, WRITE_INTENTS,
 };
 use crate::style::{DEFAULT_SIZES, PROPERTIES, SELECTORS, SHEET_RULES, SyntaxEntry, VALUE_SYNTAX};
-use crate::tokens::TOKENS;
+use crate::tokens::{TOKENS, USER_ACCENTS};
 use crate::view::{
     COMMON_ATTRIBUTES, Content, ELEMENTS, EVENTS, EXPRESSION_SUMMARY, Focus, NAMED_KEYS,
     TEMPLATE_CONSTRUCTS,
@@ -322,6 +322,27 @@ built-in that draws them checks them.\n\n\
             token.light,
             status(token.status),
             token.summary
+        );
+    }
+    out.push_str(
+        "\n### User accent\n\nA widget whose manifest declares `\"accent\": \"user\"` (catalog \
+feature `user-accent`) follows the accent colour the user chose in PlayerVox OverCrow: the host \
+sends its name in `Init.userAccent`, then a `UserAccent` message at each change, and resolves \
+`--color-user-accent` and `--color-on-user-accent` from it in the active theme. The name is \
+sent without a permission, like the locale; `lime` is the default. A `style.ocss` that uses \
+these tokens without the declaration is rejected (`undeclared_user_accent`), and a draw \
+command of such a widget cannot name them. `--color-accent` and its variants never change.\n\n\
+| Name | Dark fill | Dark text | Light fill | Light text |\n| --- | --- | --- | --- | --- |\n",
+    );
+    for accent in USER_ACCENTS {
+        let _ = writeln!(
+            out,
+            "| `{}` | `{}` | `{}` | `{}` | `{}` |",
+            accent.name,
+            accent.dark.fill,
+            accent.dark.on_fill,
+            accent.light.fill,
+            accent.light.on_fill
         );
     }
 }
