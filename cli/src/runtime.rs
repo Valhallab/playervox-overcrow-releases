@@ -33,11 +33,11 @@ pub const PIN: Option<Pin> = Some(Pin {
     artifacts: &[
         (
             "linux-x86_64",
-            "dd39bc6bd0a9ce78c27ddc521048c711b7dcb96a191a148e17a5e6e882be24be",
+            "e75720ce3e75a83ffd1f049740038b283b9114f35370c9f006678a3a24d03f43",
         ),
         (
             "windows-x86_64",
-            "97a03d2e60a3d0f22d26d986b101543bb5b3a9607e697e26542820cd5961d872",
+            "671c48802914c940cf33af852293a524cea33bff00d9abacbadfe12fbf1d9115",
         ),
     ],
 });
