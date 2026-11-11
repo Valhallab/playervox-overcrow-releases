@@ -7,7 +7,11 @@ change between betas; 1.0.0 will freeze them under semantic versioning.
 The CLI's version enters no package: a package depends only on the
 widget's sources and the embedded SDK.
 
-## Unreleased
+## 1.0.0-beta.11
+
+Released in the creator tools ZIPs of PlayerVox OverCrow 0.11.0-beta.1's
+GitHub release, `overcrow-creator-tools-0.11.0-beta.1-<platform>.zip`,
+beside the headless runtime it pins.
 
 - A manifest may declare `"accent": "user"`: the widget follows the accent
   colour the user chose in PlayerVox OverCrow, with the style tokens
