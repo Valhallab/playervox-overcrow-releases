@@ -9,7 +9,7 @@ runtime surface 0.1, which OverCrow keeps for widget API v1.
 
 ## 1.5.0
 
-Not released yet. Ships with the release of PlayerVox OverCrow that sends
+Ships with PlayerVox OverCrow 0.11.0-beta.1, the first release that sends
 the user's accent colour to widgets:
 
 - `host.userAccent`: the accent colour the user chose in PlayerVox
