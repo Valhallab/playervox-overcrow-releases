@@ -519,6 +519,19 @@ test("the neutral badge follows the theme", () => {
   vm.setHost({ theme: "dark" });
 });
 
+test("the S+ glow takes the user's accent and each badge is drawn again when it changes", () => {
+  const glow = (commands) => commands.filter((command) => command[0] === "stroke" && command[1].endsWith("05"));
+  assert.ok(glow(logic.smallBadge("S+", "dark")).every((command) => command[1] === "#a3e63505"));
+  assert.equal(glow(logic.smallBadge("S", "dark")).length, 0, "only S+ glows");
+  const before = vm.draws.length;
+  vm.setHost({ userAccent: "cyan" });
+  assert.equal(vm.draws.length, before + logic.PAGE_SIZE, "each badge is drawn again");
+  const cyan = glow(logic.smallBadge("S+", "dark"));
+  assert.equal(cyan.length, 8);
+  assert.ok(cyan.every((command) => command[1] === "#22d3ee05"));
+  vm.setHost({ userAccent: "lime" });
+});
+
 test("when the host ends the subscription, the widget says so and subscribes again later", async () => {
   assert.equal(live().length, 1);
   vm.fail("playervox.reviews.subscribe", "unavailable");

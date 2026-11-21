@@ -47,6 +47,9 @@ and packaged with `overcrow-widget` like any creator's widget. MIT.
 - **Size.** As wide as you make it (280 to 900 px, 350 by default) and as
   tall as its content, within the host frame and its 10 × 8 px margin.
 
+The accent colour is the one chosen in PlayerVox OverCrow (since 1.1.0):
+only the focus ring OverCrow draws around a button follows it.
+
 ## Controls
 
 In Interactive mode only; Passive mode shows the sessions and the page

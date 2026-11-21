@@ -1,0 +1,279 @@
+{
+  "scenarioVersion": 1,
+  "name": "accent",
+  "description": "The user's accent, dark theme, changed while the widget runs: nothing reloads. The first page in Interactive mode, where the accent shows nowhere; then the first trash button reached with Tab, inside the focus ring OverCrow draws. Lime first, then red, steel and blue; the next state in blue, red and steel.",
+  "host": {
+    "mode": "interactive",
+    "theme": "dark",
+    "scale": 1000,
+    "userAccent": "lime"
+  },
+  "fixtures": {
+    "calls": {
+      "journal.page": [
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000013",
+                "startedAt": 1789929000000,
+                "offsetMinutes": 120,
+                "durationMs": 2700000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000012",
+                "startedAt": 1789844700000,
+                "offsetMinutes": 120,
+                "durationMs": 7920000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000011",
+                "startedAt": 1789629300000,
+                "offsetMinutes": 120,
+                "durationMs": 480000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000010",
+                "startedAt": 1789214400000,
+                "offsetMinutes": 120,
+                "durationMs": 14400000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000009",
+                "startedAt": 1788640920000,
+                "offsetMinutes": 120,
+                "durationMs": 3660000,
+                "source": "local"
+              }
+            ],
+            "page": 1,
+            "next": "c2",
+            "previous": null
+          }
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [],
+            "page": 1,
+            "next": null,
+            "previous": null
+          }
+        },
+        {
+          "value": {
+            "gameName": "",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000013",
+                "startedAt": 1789929000000,
+                "offsetMinutes": 120,
+                "durationMs": 2700000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000011",
+                "startedAt": 1789629300000,
+                "offsetMinutes": 120,
+                "durationMs": 480000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000002",
+                "startedAt": 1768474800000,
+                "offsetMinutes": 60,
+                "durationMs": 3540000,
+                "source": "local"
+              }
+            ],
+            "page": 1,
+            "next": null,
+            "previous": null
+          }
+        },
+        {
+          "error": "unavailable"
+        },
+        {
+          "error": "unavailable"
+        },
+        {
+          "value": {
+            "gameName": "Portal 2",
+            "items": [
+              {
+                "id": "00000000-0000-4000-8000-000000000003",
+                "startedAt": 1772403600000,
+                "offsetMinutes": 60,
+                "durationMs": 7500000,
+                "source": "cloud"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000002",
+                "startedAt": 1768474800000,
+                "offsetMinutes": 60,
+                "durationMs": 3540000,
+                "source": "local"
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000001",
+                "startedAt": 1767220200000,
+                "offsetMinutes": 60,
+                "durationMs": 10800000,
+                "source": "local"
+              }
+            ],
+            "page": 3,
+            "next": null,
+            "previous": "c2"
+          }
+        }
+      ]
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Session journal",
+          "Loading…"
+        ],
+        "state": "running",
+        "calls": [
+          {
+            "service": "journal.subscribe"
+          }
+        ]
+      }
+    },
+    {
+      "publish": {
+        "service": "journal.subscribe",
+        "value": {
+          "revision": 1,
+          "notice": null
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "09/20/2026 · 20:30",
+          "0 h 45 min",
+          "2 h 12 min",
+          "Page 1"
+        ],
+        "noText": [
+          "Loading…"
+        ],
+        "calls": [
+          {
+            "service": "journal.page",
+            "params": {},
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "page-lime"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "red"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "page-red"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "steel"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "page-steel"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "blue"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "page-blue"
+      }
+    },
+    {
+      "pointer": {
+        "move": {
+          "text": "Session journal"
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Page 1"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "focus-blue"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "red"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "focus-red"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "steel"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "focus-steel"
+      }
+    }
+  ]
+}

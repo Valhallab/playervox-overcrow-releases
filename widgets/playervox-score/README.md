@@ -58,6 +58,10 @@ A status's second line shows only with the rating count option on.
   the criteria), within the host frame and its 10 × 8 px margin; the badge
   alone is a 64 px square within the frame's 8 px margin.
 
+The accent colour is the one chosen in PlayerVox OverCrow (since 1.1.0): the
+faint glow around an S+ badge follows it; the badge keeps its grade's
+colour.
+
 ## Controls
 
 None: no click, no key. In Interactive mode the host moves and resizes the

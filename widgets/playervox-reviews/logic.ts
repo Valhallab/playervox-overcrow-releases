@@ -16,6 +16,7 @@ import {
   playervox,
   t,
   timers,
+  userAccentRoles,
   type Color,
   type DrawCommand,
   type Review,
@@ -103,7 +104,8 @@ const MAX_LABEL_BYTES = 256;
 // copies this file, as is, into
 // their logic.ts between the markers `// <shared:playervox-badge/badge.ts>`;
 // edit it here, never in a copy. The copy relies on the widget importing
-// the `Color` and `DrawCommand` types from @overcrow/sdk.
+// the `Color` and `DrawCommand` types and `userAccentRoles` from
+// @overcrow/sdk, and on its manifest declaring `"accent": "user-roles"`.
 
 /** A PlayerVox grade, or `--` without a valid score. */
 export type BadgeGrade = "S+" | "S" | "A" | "B" | "C" | "D" | "F" | "--";
@@ -170,7 +172,7 @@ const NEUTRAL: Readonly<Record<"dark" | "light", { face: Color; color: Color }>>
 /**
  * The badge of a grade: a rounded square with a black face and a border
  * of the grade's colour, turned by 4° with its letter (not `--`, which is
- * neutral and square), and a faint static glow for S+.
+ * neutral and square), and a faint glow of the user's accent for S+.
  */
 export function badgeCommands(grade: BadgeGrade, theme: "dark" | "light"): DrawCommand[] {
   const neutral = grade === "--" ? NEUTRAL[theme] : null;
@@ -190,9 +192,11 @@ export function badgeCommands(grade: BadgeGrade, theme: "dark" | "light"): DrawC
     ["rotate", grade === "--" ? 0 : 4],
   ];
   if (grade === "S+") {
-    // Eight widening rings of the accent at 2 % each: a soft halo.
+    // Eight widening rings of the user's accent at 2 % each: a soft halo.
+    // Drawn again when the accent changes (`userAccent` in onHost).
+    const halo: Color = `${userAccentRoles().fill}05`;
     for (let ring = 8; ring >= 1; ring -= 1) {
-      commands.push(square(), ["stroke", "#a3e63505", 3 + ring * 1.5]);
+      commands.push(square(), ["stroke", halo, 3 + ring * 1.5]);
     }
   }
   commands.push(
@@ -795,8 +799,9 @@ onHost((changed) => {
   if (changed.includes("mode")) {
     state.interactive = host.mode === "interactive";
   }
-  if (changed.includes("theme")) {
-    // The neutral badge follows the theme; the mark's token does already.
+  if (changed.includes("theme") || changed.includes("userAccent")) {
+    // The neutral badge follows the theme, the S+ glow the user's accent;
+    // the mark's token does already.
     drawBadges();
   }
   // Another filter, or another language (the host reads the reviews in the

@@ -68,6 +68,10 @@ written against the public `@overcrow/sdk` and packaged with
 - **Size.** As wide as you make it (280 to 900 px, 350 by default) and as
   tall as its content, within the host frame and its 10 × 8 px margin.
 
+The accent colour is the one chosen in PlayerVox OverCrow (since 1.1.0): the
+faint glow around an S+ badge and the focus ring OverCrow draws follow it;
+each badge keeps its grade's colour.
+
 ## Controls
 
 In Interactive mode only. Passive mode shows the reviews folded, the

@@ -313,7 +313,7 @@ test("one pulse per new published rating, none for a draft, a status or the same
   assert.equal(state.badgeClass, second, "no pulse for a status or --");
 });
 
-test("the badge is redrawn only when its grade or the theme changes", () => {
+test("the badge is redrawn only when its grade, the theme or the accent changes", () => {
   open();
   const count = () => vm.draws.filter((entry) => entry.ref === "badge").length;
   const before = count();
@@ -325,6 +325,14 @@ test("the badge is redrawn only when its grade or the theme changes", () => {
   vm.setHost({ theme: "light" });
   assert.equal(count(), before + 2);
   vm.setHost({ theme: "dark" });
+  logic.scored("gameplay", 95);
+  const glow = () => vm.draws.filter((entry) => entry.ref === "badge").at(-1).commands.filter((command) => command[0] === "stroke" && command[1].endsWith("05"));
+  assert.ok(glow().length === 8 && glow().every((command) => command[1] === "#a3e63505"), "S+ glows in lime");
+  const lime = count();
+  vm.setHost({ userAccent: "blue" });
+  assert.equal(count(), lime + 1, "a change of accent redraws the badge");
+  assert.ok(glow().every((command) => command[1] === "#60a5fa05"), "S+ glows in the user's accent");
+  vm.setHost({ userAccent: "lime" });
 });
 
 test("the game's name is one line and the badge's name is bounded", () => {
