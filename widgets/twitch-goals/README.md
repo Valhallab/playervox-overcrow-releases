@@ -37,6 +37,10 @@ Values never disappear during a read, a failure or a limit. Texts are in
 English and French ("Followers" and "Hype Train" keep Twitch's own words in
 French); numbers use the user's format.
 
+The accent colour is the one chosen in PlayerVox OverCrow (since 1.1.0): the
+Hype Train card, each goal's icon and bar, and the lit followers card follow
+it; the Glitch keeps Twitch's colours.
+
 ## Options menu
 
 | Row | Values |
