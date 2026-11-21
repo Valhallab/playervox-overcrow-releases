@@ -266,7 +266,8 @@ to use where.
 Each role is held at its contrast on every surface token: the text on the
 fill and on its hover state at 4.5:1; the text and its hover state at
 4.5:1; the outline at 3:1. Where a colour would not reach it, the text and
-the outline take `--color-text`. Lime is the brand accent, whose light
+the outline take `--color-text`, except red in the dark theme, which has a
+lighter shade of its own. Lime is the brand accent, whose light
 theme is not final: its text misses 4.5:1 on `--color-surface-hover`.
 
 Dark theme:
@@ -276,7 +277,7 @@ Dark theme:
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `lime` | `#a3e635` | `#09090b` | `#b5f153` | `#a3e6351c` | `#a3e635` | `#b5f153` | `#a3e635` |
 | `amber` | `#fbbf24` | `#18181b` | `#fccc50` | `#fbbf241c` | `#fbbf24` | `#fccc50` | `#fbbf24` |
-| `red` | `#991b1b` | `#ffffff` | `#ad4949` | `#991b1b1c` | `#f7f7f8` | `#f9f9f9` | `#f7f7f8` |
+| `red` | `#991b1b` | `#ffffff` | `#ad4949` | `#991b1b1c` | `#ff6565` | `#ff8484` | `#ff6565` |
 | `pink` | `#fb7185` | `#18181b` | `#fc8d9d` | `#fb71851c` | `#fb7185` | `#fc8d9d` | `#fb7185` |
 | `purple` | `#a78bfa` | `#18181b` | `#b9a2fb` | `#a78bfa1c` | `#a78bfa` | `#b9a2fb` | `#a78bfa` |
 | `blue` | `#60a5fa` | `#18181b` | `#80b7fb` | `#60a5fa1c` | `#60a5fa` | `#80b7fb` | `#60a5fa` |

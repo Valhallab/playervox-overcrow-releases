@@ -355,8 +355,8 @@ A `style.ocss` that uses a user accent token its manifest's `accent` does not gi
     }
     out.push_str(
         "\nThe text and the outline hold different ratios and may differ. A colour that does not \
-reach its ratio as a fill takes `--color-text` instead: `red` is never a text colour nor an \
-outline on the dark panel. In the light theme `lime` is the brand's provisional \
+reach its ratio as a fill takes `--color-text` instead, except `red` in the dark theme, whose \
+text and outline are a lighter shade of it. In the light theme `lime` is the brand's provisional \
 `--color-accent`, which misses 4.5:1 on `--color-surface-hover` and on the wash.\n",
     );
     for (theme, dark) in [("dark", true), ("light", false)] {

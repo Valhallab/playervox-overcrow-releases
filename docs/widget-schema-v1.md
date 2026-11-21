@@ -714,7 +714,7 @@ A `style.ocss` that uses a user accent token its manifest's `accent` does not gi
 | That text under the pointer or pressed | `--color-user-accent-text-hover` | the same |
 | Border, rail, ring or gauge on a surface | `--color-user-accent-outline` | 3:1 on every surface token, on the wash and on a control track over it |
 
-The text and the outline hold different ratios and may differ. A colour that does not reach its ratio as a fill takes `--color-text` instead: `red` is never a text colour nor an outline on the dark panel. In the light theme `lime` is the brand's provisional `--color-accent`, which misses 4.5:1 on `--color-surface-hover` and on the wash.
+The text and the outline hold different ratios and may differ. A colour that does not reach its ratio as a fill takes `--color-text` instead, except `red` in the dark theme, whose text and outline are a lighter shade of it. In the light theme `lime` is the brand's provisional `--color-accent`, which misses 4.5:1 on `--color-surface-hover` and on the wash.
 
 #### Roles in the dark theme
 
@@ -724,7 +724,7 @@ The values of `"accent": "user-roles"`.
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `lime` | `#a3e635` | `#09090b` | `#b5f153` | `#a3e6351c` | `#a3e635` | `#b5f153` | `#a3e635` |
 | `amber` | `#fbbf24` | `#18181b` | `#fccc50` | `#fbbf241c` | `#fbbf24` | `#fccc50` | `#fbbf24` |
-| `red` | `#991b1b` | `#ffffff` | `#ad4949` | `#991b1b1c` | `#f7f7f8` | `#f9f9f9` | `#f7f7f8` |
+| `red` | `#991b1b` | `#ffffff` | `#ad4949` | `#991b1b1c` | `#ff6565` | `#ff8484` | `#ff6565` |
 | `pink` | `#fb7185` | `#18181b` | `#fc8d9d` | `#fb71851c` | `#fb7185` | `#fc8d9d` | `#fb7185` |
 | `purple` | `#a78bfa` | `#18181b` | `#b9a2fb` | `#a78bfa1c` | `#a78bfa` | `#b9a2fb` | `#a78bfa` |
 | `blue` | `#60a5fa` | `#18181b` | `#80b7fb` | `#60a5fa1c` | `#60a5fa` | `#80b7fb` | `#60a5fa` |

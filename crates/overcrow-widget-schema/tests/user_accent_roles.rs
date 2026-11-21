@@ -15,8 +15,8 @@ use overcrow_widget_schema::catalog_v2::{
 use overcrow_widget_schema::manifest::validate_manifest;
 use overcrow_widget_schema::package::hex as hex_bytes;
 use overcrow_widget_schema::tokens::{
-    AccentDeclaration, AccentRole, AccentRoles, DEFAULT_USER_ACCENT, TOKENS, USER_ACCENTS, token,
-    user_accent,
+    AccentDeclaration, AccentRole, AccentRoles, DEFAULT_USER_ACCENT, RED_ON_DARK_SURFACES, TOKENS,
+    USER_ACCENTS, token, user_accent,
 };
 use serde_json::{Value, json};
 
@@ -229,7 +229,9 @@ fn lime_is_exactly_the_brand_accent_family() {
 }
 
 /// Every other colour keeps its published fill and text, and derives the
-/// other roles from them by the rules of `USER_ACCENTS`.
+/// other roles from them by the rules of `USER_ACCENTS`. Where the fill
+/// does not reach its ratio, the text and the outline fall back on the
+/// text colour; red in the dark theme has its own shade instead.
 #[test]
 fn the_other_colours_follow_the_rules() {
     for accent in USER_ACCENTS.iter().filter(|accent| accent.name != "lime") {
@@ -261,7 +263,11 @@ fn the_other_colours_follow_the_rules() {
                     .iter()
                     .all(|surface| contrast(roles.fill, opaque(value(surface, dark))) >= ratio)
             };
-            let fallback = value("--color-text", dark);
+            let fallback = if dark && accent.name == "red" {
+                RED_ON_DARK_SURFACES
+            } else {
+                value("--color-text", dark)
+            };
             let text = if reaches(TEXT) { roles.fill } else { fallback };
             assert_eq!(roles.text, text, "{label}: text");
             let outline = if reaches(INDICATOR) {
@@ -280,19 +286,45 @@ fn the_other_colours_follow_the_rules() {
     }
 }
 
-/// Red is a fill under white text, never a text colour nor an outline on
-/// the dark panel: both roles take the text colour.
+/// Red is a colour like the others. Its fill is too dark for a dark
+/// surface, so its text and its outline are one lighter shade of the same
+/// hue, never the text colour: a red label, the border around it and the
+/// gauge beside it are the same red.
 #[test]
-fn red_is_never_a_text_colour_on_the_dark_panel() {
+fn red_has_its_own_shade_on_the_dark_surfaces() {
     let red = user_accent("red").expect("red").dark_roles;
-    assert_eq!((red.fill, red.on_fill), ("#991b1b", "#ffffff"));
+    // The fills do not move.
+    assert_eq!(
+        (red.fill, red.on_fill, red.hover, red.soft),
+        ("#991b1b", "#ffffff", "#ad4949", "#991b1b1c")
+    );
     assert!(contrast(red.fill, opaque(value("--color-surface-panel", true))) < INDICATOR);
-    assert_eq!(red.text, value("--color-text", true));
-    assert_eq!(red.outline, value("--color-text", true));
-    for role in [red.text, red.text_hover, red.outline] {
-        assert_ne!(role, red.fill);
-        assert_ne!(role, red.hover);
+    assert_eq!(RED_ON_DARK_SURFACES, "#ff6565");
+    assert_eq!(red.text, RED_ON_DARK_SURFACES);
+    assert_eq!(red.outline, red.text);
+    assert_eq!(red.text_hover, "#ff8484");
+    assert_ne!(red.text, value("--color-text", true));
+    // The hue of the fill, fully saturated: the green and the blue of a
+    // pure red are equal, and its red is whole.
+    for shade in [red.fill, red.text] {
+        let channels = channels(shade);
+        assert_eq!(channels[1], channels[2], "{shade}");
     }
+    assert_eq!(channels(red.text)[0], 255.0);
+    // The most saturated shade that holds: one step darker misses 3:1 on a
+    // control's track over the surface under the pointer.
+    let track = over(
+        value("--color-border-strong", true),
+        opaque(value("--color-surface-hover", true)),
+    );
+    assert!(contrast(red.outline, &track) >= INDICATOR);
+    assert!(contrast("#ff6464", &track) < INDICATOR);
+    // Not the danger colour, nor the pink accent, which share a value.
+    assert_ne!(red.text, value("--color-danger", true));
+    assert_ne!(red.text, user_accent("pink").expect("pink").dark_roles.text);
+    // The light theme does not move: its red is read as it is.
+    let light = user_accent("red").expect("red").light_roles;
+    assert_eq!((light.text, light.outline), ("#991b1b", "#991b1b"));
 }
 
 /// Every role keeps its WCAG contrast in the nine colours and both themes,

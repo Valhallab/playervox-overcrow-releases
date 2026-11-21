@@ -253,8 +253,10 @@ Choisissez le token selon ce que vous dessinez, et sur quoi :
 `--color-user-accent` est un remplissage, jamais une couleur de texte ni un
 trait fin sur une surface : certaines couleurs, dont le rouge, ne se voient
 pas sur le panneau sombre. Pour une telle couleur,
-`--color-user-accent-text` et `--color-user-accent-outline` prennent la
-couleur du texte. Les deux restent lisibles dans les neuf couleurs et les
+`--color-user-accent-text` et `--color-user-accent-outline` prennent une
+nuance qui se voit : un rouge plus clair sur le panneau sombre, la couleur
+du texte là où la palette n’a pas de telle nuance. Les deux restent
+lisibles dans les neuf couleurs et les
 deux thèmes, sur chaque token de surface (`--color-surface-panel`,
 `-raised`, `-hover`, `-field`, `-popover`) : 4,5:1 pour le texte, 3:1 pour
 le contour. Ils ne tiennent pas le même rapport et peuvent différer :

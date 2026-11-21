@@ -636,6 +636,14 @@ const fn accent(
 /// The default accent, sent when the user chose none.
 pub const DEFAULT_USER_ACCENT: UserAccent = USER_ACCENTS[0];
 
+/// The shade of `red` for text and outlines on the dark surfaces: the hue
+/// of its fill (`#991b1b`), fully saturated, at the lightness where text
+/// holds 4.5:1 on every surface token and on its wash, and where a gauge
+/// holds 3:1 on a control's track over each of them. One shade for both
+/// roles: a label, the border around it and the gauge beside it are the
+/// same red.
+pub const RED_ON_DARK_SURFACES: &str = "#ff6565";
+
 /// The accent colours of PlayerVox, in its order, `lime` first (the
 /// default).
 ///
@@ -658,12 +666,16 @@ pub const DEFAULT_USER_ACCENT: UserAccent = USER_ACCENTS[0];
 /// - `soft` is the fill at the alpha of `--color-accent-soft`;
 /// - `text` is the fill where it reaches 4.5:1 on every surface token
 ///   (`--color-surface-panel`, `-raised`, `-hover`, `-field`, `-popover`),
-///   `--color-text` otherwise: `red` is never a text colour on the dark
-///   panel;
+///   `--color-text` otherwise;
 /// - `text_hover` moves `text` away from the surfaces: 20 % towards white
 ///   in the dark theme, 15 % towards black in the light theme;
 /// - `outline` is the fill where it reaches 3:1 on every surface token,
 ///   `--color-text` otherwise.
+///
+/// One colour has its own shade: `red` in the dark theme. Its fill is too
+/// dark to be seen on a dark surface (2.3:1 on the panel), and red is a
+/// colour like the others: its `text` and its `outline` are
+/// [`RED_ON_DARK_SURFACES`], not `--color-text`.
 ///
 /// The schema's tests derive every value from these rules and hold each
 /// role at its contrast on each surface.
@@ -676,7 +688,7 @@ pub const USER_ACCENTS: [UserAccent; 9] = [
         ["#fbbf24", "#18181b", "#fccc50", "#fbbf241c", "#fbbf24", "#fccc50", "#fbbf24"],
         ["#f59e0b", "#18181b", "#f7ad30", "#f59e0b1f", "#18181b", "#141417", "#18181b"]),
     accent("red", "#991b1b", "#991b1b", "#ffffff",
-        ["#991b1b", "#ffffff", "#ad4949", "#991b1b1c", "#f7f7f8", "#f9f9f9", "#f7f7f8"],
+        ["#991b1b", "#ffffff", "#ad4949", "#991b1b1c", RED_ON_DARK_SURFACES, "#ff8484", RED_ON_DARK_SURFACES],
         ["#991b1b", "#ffffff", "#821717", "#991b1b1f", "#991b1b", "#821717", "#991b1b"]),
     accent("pink", "#fb7185", "#f43f5e", "#18181b",
         ["#fb7185", "#18181b", "#fc8d9d", "#fb71851c", "#fb7185", "#fc8d9d", "#fb7185"],
