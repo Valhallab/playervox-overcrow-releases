@@ -42,6 +42,11 @@ does not answer. Texts are in English and French; numbers use the user's
 format; names and descriptions of achievements come from Steam in the
 user's language.
 
+The accent colour is the one chosen in PlayerVox OverCrow (since 1.3.0): the
+progress bars, the card of a new unlock and its New badge, the pins, the
+checklist's ticks and the profile step's field and button follow it; Steam's
+colours and the rarity colours do not.
+
 ## Options menu
 
 | Row | Values |

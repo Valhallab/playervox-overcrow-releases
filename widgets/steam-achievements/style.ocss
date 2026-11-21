@@ -49,7 +49,7 @@
 }
 .line-bar {
   height: 3px;
-  color: var(--color-accent);
+  color: var(--color-user-accent-outline);
 }
 .line-count {
   flex-shrink: 0;
@@ -57,7 +57,7 @@
   white-space: nowrap;
 }
 .line-count.new .num {
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
 }
 .line-msg {
   align-items: center;
@@ -193,7 +193,7 @@
   text-overflow: ellipsis;
 }
 .eyebrow.accent {
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
 }
 .inline-icon {
   font-size: 11px;
@@ -218,7 +218,7 @@
   flex-basis: 0;
   width: 0;
   height: 6px;
-  color: var(--color-accent);
+  color: var(--color-user-accent-outline);
 }
 .bar.done,
 .line-bar.done {
@@ -262,8 +262,8 @@
   background: var(--color-surface-raised);
 }
 .feature.new {
-  border-color: var(--color-accent);
-  background: var(--color-accent-soft);
+  border-color: var(--color-user-accent-outline);
+  background: var(--color-user-accent-soft);
   animation: unlock 900ms ease-out 2 alternate;
 }
 .feature.tracked {
@@ -293,7 +293,7 @@
   color: var(--color-success);
 }
 @keyframes unlock {
-  from { border-color: var(--color-accent); }
+  from { border-color: var(--color-user-accent-outline); }
   to { border-color: transparent; }
 }
 .ach-icon {
@@ -326,7 +326,7 @@
 }
 .pin {
   font-size: 11px;
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
   flex-shrink: 0;
 }
 .feature-eyebrow {
@@ -352,8 +352,8 @@
   letter-spacing: 0.4px;
   padding: 0 5px;
   border-radius: var(--radius-pill);
-  color: var(--color-on-accent);
-  background: var(--color-accent);
+  color: var(--color-on-user-accent);
+  background: var(--color-user-accent);
 }
 
 /* Lists */
@@ -452,7 +452,7 @@
   background: var(--color-surface-hover);
 }
 .pick-row.on {
-  background: var(--color-accent-soft);
+  background: var(--color-user-accent-soft);
 }
 .pick-row:disabled {
   opacity: 0.42;
@@ -493,9 +493,9 @@
   font-size: 13px;
 }
 .check.on {
-  border-color: var(--color-accent);
-  color: var(--color-on-accent);
-  background: var(--color-accent);
+  border-color: var(--color-user-accent);
+  color: var(--color-on-user-accent);
+  background: var(--color-user-accent);
 }
 .row-ok {
   flex-shrink: 0;
@@ -520,12 +520,12 @@
 }
 .pick-more-icon {
   font-size: 14px;
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
 }
 .pick-more-text {
   font-size: var(--font-size-small);
   font-weight: 600;
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
 }
 .pick-note {
   padding: var(--space-2) var(--space-3);
@@ -590,7 +590,7 @@
   font-size: var(--font-size-button);
 }
 .pfield:focus {
-  border-color: var(--color-accent);
+  border-color: var(--color-user-accent-outline);
 }
 .pfield.invalid {
   border-color: var(--color-danger);
@@ -600,12 +600,12 @@
   padding: 0 var(--space-5);
   align-items: center;
   border-radius: var(--radius-md);
-  background: var(--color-accent);
+  background: var(--color-user-accent);
 }
 .pbutton-text {
   font-size: var(--font-size-button);
   font-weight: 600;
-  color: var(--color-on-accent);
+  color: var(--color-on-user-accent);
 }
 .pgo {
   width: var(--control-height);
@@ -613,8 +613,8 @@
   justify-content: center;
   align-items: center;
   border-radius: var(--radius-md);
-  color: var(--color-on-accent);
-  background: var(--color-accent);
+  color: var(--color-on-user-accent);
+  background: var(--color-user-accent);
   font-size: 15px;
 }
 .line-form {
