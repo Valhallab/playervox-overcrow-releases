@@ -68,7 +68,7 @@ states: `button.primary:hover`. Compounds are joined by a space
 .copy:focus,
 .back:focus,
 .refresh:focus {
-  border-color: var(--color-accent);
+  border-color: var(--color-user-accent-outline);
 }
 ```
 

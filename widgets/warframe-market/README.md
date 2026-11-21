@@ -30,6 +30,11 @@ The interface is in English and French; item names stay in English, as the
 provider sends them, and so does the whisper, which goes to the game's
 trade chat. Prices use the user's number format.
 
+The accent colour is the one chosen in PlayerVox OverCrow (since 3.2.0): the
+Market word, the outline of a focused field, the arrows of the results, the
+prices, the active tab's underline, the copy icons and Copied follow it; the
+In game and Online dots keep their colours.
+
 ## Permissions
 
 | Permission | Why |

@@ -1,0 +1,116 @@
+{
+  "scenarioVersion": 1,
+  "name": "accent",
+  "description": "The user's accent, dark theme, changed while the widget runs: nothing reloads. A Steel Path Disruption in a Neo Void Fissure, chosen on the star chart: the briefing has no control and no accent, its faction, damage and modifier colours stay as they are in every accent. Lime first, then red, steel and blue.",
+  "host": {
+    "startAt": 1793199600000,
+    "size": {
+      "width": 300,
+      "height": 240
+    },
+    "theme": "dark",
+    "scale": 1000,
+    "userAccent": "lime"
+  },
+  "steps": [
+    {
+      "gameEvents": {
+        "warframe": {
+          "info": {
+            "mission": {
+              "state": "selected",
+              "node": {
+                "id": "SolNode308",
+                "name": "Apollo"
+              },
+              "planet": {
+                "id": "lua",
+                "name": "Lua"
+              },
+              "type": {
+                "id": "disruption",
+                "name": "Disruption"
+              },
+              "faction": {
+                "id": "corpus",
+                "name": "Corpus"
+              },
+              "enemyLevel": {
+                "min": 135,
+                "max": 140
+              },
+              "fissure": {
+                "id": "neo",
+                "name": "Neo"
+              },
+              "modifiers": [
+                {
+                  "id": "steel_path",
+                  "name": "Steel Path",
+                  "stage": null
+                }
+              ]
+            }
+          },
+          "event": "mission_selected"
+        }
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "Corpus",
+          "Puncture",
+          "Magnetic",
+          "Steel Path",
+          "Neo Fissure"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "briefing-lime"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "red"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "briefing-red"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "steel"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "briefing-steel"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "blue"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "briefing-blue"
+      }
+    }
+  ]
+}

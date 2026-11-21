@@ -68,7 +68,7 @@ scroll.body {
   flex-shrink: 0;
 }
 
-.tone-accent { color: var(--color-accent); }
+.tone-accent { color: var(--color-user-accent-text); }
 
 .tone-success { color: var(--color-success); }
 

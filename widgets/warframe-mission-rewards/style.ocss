@@ -46,7 +46,7 @@
   flex-shrink: 0;
 }
 
-.tone-accent { color: var(--color-accent); }
+.tone-accent { color: var(--color-user-accent-text); }
 .tone-success { color: var(--color-success); }
 .tone-danger { color: var(--color-danger); }
 .tone-warning { color: var(--color-warning); }
@@ -410,12 +410,12 @@
 }
 
 .cell.now {
-  background: var(--color-accent-soft);
-  border: 1px solid var(--color-accent);
+  background: var(--color-user-accent-soft);
+  border: 1px solid var(--color-user-accent-outline);
 }
 
 .cell.now .cell-text {
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
 }
 
 /* The listed rotation, in full: the frame grows with it. */
@@ -542,11 +542,11 @@
 }
 
 .col.now .col-head {
-  border-bottom: 1px solid var(--color-accent);
+  border-bottom: 1px solid var(--color-user-accent-outline);
 }
 
 .col.now .col-title {
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
 }
 
 /* One line: the place and what comes, then the number, larger. */
@@ -646,7 +646,7 @@
 
 .cell.now {
   background: transparent;
-  border: 1px solid var(--color-accent);
+  border: 1px solid var(--color-user-accent-outline);
 }
 
 .track-label {
@@ -739,7 +739,7 @@
 }
 
 .next-big.accent {
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
 }
 
 /* The same height with a number or "this wave": never a jump. */

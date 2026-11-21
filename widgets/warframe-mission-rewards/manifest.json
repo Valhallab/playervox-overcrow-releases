@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "apiVersion": 1,
   "id": "com.playervox.overcrow.warframe.mission-rewards",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "name": {
     "en": "Mission rewards",
     "fr": "Récompenses de mission"
@@ -22,6 +22,7 @@
       "height": 1200
     }
   },
+  "accent": "user-roles",
   "permissions": {
     "gameEvents": ["warframe.mission", "warframe.progress", "warframe.rewards", "warframe.world"],
     "storage": true

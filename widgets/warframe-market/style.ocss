@@ -36,7 +36,7 @@
 }
 
 .brand {
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
 }
 
 .subtitle {
@@ -78,7 +78,7 @@
 }
 
 .query:focus {
-  border-color: var(--color-accent);
+  border-color: var(--color-user-accent-outline);
 }
 
 .clear,
@@ -106,7 +106,7 @@
 .copy:focus,
 .back:focus,
 .refresh:focus {
-  border-color: var(--color-accent);
+  border-color: var(--color-user-accent-outline);
 }
 
 .clear:disabled,
@@ -171,7 +171,7 @@
 
 .result-arrow {
   font-size: 16px;
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
 }
 
 .empty {
@@ -268,7 +268,7 @@
 }
 
 .tab.active {
-  border-bottom: 2px solid var(--color-accent);
+  border-bottom: 2px solid var(--color-user-accent-outline);
 }
 
 .tab-text {
@@ -335,7 +335,7 @@
   font-size: 12px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
   white-space: nowrap;
 }
 
@@ -374,7 +374,7 @@
 
 .copy-icon {
   font-size: 11px;
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
 }
 
 .copy .copy-text {
@@ -382,11 +382,11 @@
 }
 
 .copied {
-  border-color: var(--color-accent);
+  border-color: var(--color-user-accent-outline);
 }
 
 .copied .copy-text {
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
 }
 
 .failed .copy-text {

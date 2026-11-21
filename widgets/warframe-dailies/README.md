@@ -41,6 +41,10 @@ left, Baro under both. The panel stops at the frame's largest height
 end of Nightwave folds into "+ 3 challenges". "One line" says "3 to do ·
 Sortie resets in 6h", or "Sortie done · 2 to do" right after a mission.
 
+The accent colour is the one chosen in PlayerVox OverCrow (since 1.1.0): the
+Checklist eyebrow, the calendar icon and the focus ring OverCrow draws
+follow it; the ticks keep their green.
+
 ## What ticks itself
 
 While PlayerVox OverCrow runs during play:
