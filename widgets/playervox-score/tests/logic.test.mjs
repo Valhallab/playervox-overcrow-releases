@@ -77,20 +77,18 @@ test("the neutral badge follows the theme; a graded badge keeps its black face",
 });
 
 test("the S+ glow takes the user's accent and follows a change at once", () => {
-  const glow = (commands) => commands.filter((command) => command[0] === "stroke" && command[1].endsWith("05"));
+  const glow = (commands) => commands.filter((command) => command[0] === "stroke" && command[1].endsWith("05")).map((command) => command[1]);
   vm.push("playervox.score.subscribe", score());
-  assert.deepEqual([...new Set(glow(lastDraw("badge")).map((command) => command[1]))], ["#a3e63505"], "lime: the brand");
+  assert.deepEqual(glow(lastDraw("badge")), Array(8).fill("#a3e63505"), "lime: the brand");
   vm.setHost({ userAccent: "blue" });
-  const blue = glow(lastDraw("badge"));
-  assert.equal(blue.length, 8);
-  assert.ok(blue.every((command) => command[1] === "#60a5fa05"), "redrawn in blue without a new score");
+  assert.deepEqual(glow(lastDraw("badge")), Array(8).fill("#60a5fa05"), "redrawn in blue without a new score");
   vm.setHost({ userAccent: "red" });
-  assert.ok(glow(lastDraw("badge")).every((command) => command[1] === "#991b1b05"));
+  assert.deepEqual(glow(lastDraw("badge")), Array(8).fill("#991b1b05"));
   // The grade's own colours never follow the accent.
   const letter = lastDraw("badge").find((command) => command[0] === "text");
   assert.equal(letter[5], "#9ae600");
   vm.setHost({ userAccent: "lime" });
-  assert.ok(glow(lastDraw("badge")).every((command) => command[1] === "#a3e63505"));
+  assert.deepEqual(glow(lastDraw("badge")), Array(8).fill("#a3e63505"));
 });
 
 test("the mark is centred in its whole-pixel canvas", () => {

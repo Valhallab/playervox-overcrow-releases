@@ -520,15 +520,13 @@ test("the neutral badge follows the theme", () => {
 });
 
 test("the S+ glow takes the user's accent and each badge is drawn again when it changes", () => {
-  const glow = (commands) => commands.filter((command) => command[0] === "stroke" && command[1].endsWith("05"));
-  assert.ok(glow(logic.smallBadge("S+", "dark")).every((command) => command[1] === "#a3e63505"));
-  assert.equal(glow(logic.smallBadge("S", "dark")).length, 0, "only S+ glows");
+  const glow = (commands) => commands.filter((command) => command[0] === "stroke" && command[1].endsWith("05")).map((command) => command[1]);
+  assert.deepEqual(glow(logic.smallBadge("S+", "dark")), Array(8).fill("#a3e63505"));
+  assert.deepEqual(glow(logic.smallBadge("S", "dark")), [], "only S+ glows");
   const before = vm.draws.length;
   vm.setHost({ userAccent: "cyan" });
   assert.equal(vm.draws.length, before + logic.PAGE_SIZE, "each badge is drawn again");
-  const cyan = glow(logic.smallBadge("S+", "dark"));
-  assert.equal(cyan.length, 8);
-  assert.ok(cyan.every((command) => command[1] === "#22d3ee05"));
+  assert.deepEqual(glow(logic.smallBadge("S+", "dark")), Array(8).fill("#22d3ee05"));
   vm.setHost({ userAccent: "lime" });
 });
 

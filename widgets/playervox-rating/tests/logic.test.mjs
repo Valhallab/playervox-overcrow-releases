@@ -326,12 +326,12 @@ test("the badge is redrawn only when its grade, the theme or the accent changes"
   assert.equal(count(), before + 2);
   vm.setHost({ theme: "dark" });
   logic.scored("gameplay", 95);
-  const glow = () => vm.draws.filter((entry) => entry.ref === "badge").at(-1).commands.filter((command) => command[0] === "stroke" && command[1].endsWith("05"));
-  assert.ok(glow().length === 8 && glow().every((command) => command[1] === "#a3e63505"), "S+ glows in lime");
+  const glow = (commands) => commands.filter((command) => command[0] === "stroke" && command[1].endsWith("05")).map((command) => command[1]);
+  assert.deepEqual(glow(lastDraw("badge")), Array(8).fill("#a3e63505"), "S+ glows in lime");
   const lime = count();
   vm.setHost({ userAccent: "blue" });
   assert.equal(count(), lime + 1, "a change of accent redraws the badge");
-  assert.ok(glow().every((command) => command[1] === "#60a5fa05"), "S+ glows in the user's accent");
+  assert.deepEqual(glow(lastDraw("badge")), Array(8).fill("#60a5fa05"), "S+ glows in the user's accent");
   vm.setHost({ userAccent: "lime" });
 });
 
