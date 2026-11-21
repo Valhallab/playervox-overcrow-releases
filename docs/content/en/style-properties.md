@@ -183,8 +183,13 @@ both.
 | `--color-accent-hover` | `#b5f153` | `#3f6212` | Accent under the pointer. |
 | `--color-accent-soft` | `#a3e6351c` | `#4d7c0f1f` | Accent wash behind selected content. |
 | `--color-on-accent` | `#09090b` | `#ffffff` | Text and icons drawn on the accent and its hover state. |
-| `--color-user-accent` | `#a3e635` | `#84cc16` | The user's accent colour, a fill for what belongs to the user; never a text colour on the panel. Needs `"accent": "user"` in the manifest; lime by default. |
-| `--color-on-user-accent` | `#18181b` | `#18181b` | Text and icons drawn on `--color-user-accent`. Needs `"accent": "user"` in the manifest. |
+| `--color-user-accent` | `#a3e635` | `#4d7c0f` | The user's accent colour, a fill that carries text or a mark; never a text colour or a border on a surface. Needs `"accent": "user-roles"` or `"user"` in the manifest; lime by default, the brand accent. |
+| `--color-on-user-accent` | `#09090b` | `#ffffff` | Text and icons drawn on `--color-user-accent` and on its hover state. Needs `"accent": "user-roles"` or `"user"` in the manifest. |
+| `--color-user-accent-hover` | `#b5f153` | `#3f6212` | `--color-user-accent` under the pointer. Needs `"accent": "user-roles"` in the manifest. |
+| `--color-user-accent-soft` | `#a3e6351c` | `#4d7c0f1f` | Wash of the user's accent behind selected content. Needs `"accent": "user-roles"` in the manifest. |
+| `--color-user-accent-text` | `#a3e635` | `#4d7c0f` | Text and icons in the user's accent on a surface, readable in every accent colour. Needs `"accent": "user-roles"` in the manifest. |
+| `--color-user-accent-text-hover` | `#b5f153` | `#3f6212` | `--color-user-accent-text` under the pointer or pressed. Needs `"accent": "user-roles"` in the manifest. |
+| `--color-user-accent-outline` | `#a3e635` | `#4d7c0f` | Borders, rails, rings and gauges in the user's accent on a surface, visible in every accent colour. Needs `"accent": "user-roles"` in the manifest. |
 | `--color-surface-panel` | `#111114ee` | `#fafafaee` | Widget panel background, drawn by the host behind the content. |
 | `--color-surface-raised` | `#1e1e22e0` | `#f4f4f5eb` | Raised surface inside the panel. |
 | `--color-surface-hover` | `#28282deb` | `#e4e4e7f0` | Surface under the pointer. |
@@ -253,9 +258,52 @@ both.
 
 ### User accent
 
-For a widget whose manifest declares `"accent": "user"`,
-`--color-user-accent` and `--color-on-user-accent` take the colours of the
-accent the user chose; lime otherwise. See [user accent](style.md#user-accent).
+For a widget whose manifest declares `"accent": "user-roles"`, the
+`--color-user-accent…` tokens take the colours of the accent the user
+chose; lime otherwise. [User accent](style.md#user-accent) says which token
+to use where.
+
+Each role is held at its contrast on every surface token: the text on the
+fill and on its hover state at 4.5:1; the text and its hover state at
+4.5:1; the outline at 3:1. Where a colour would not reach it, the text and
+the outline take `--color-text`. Lime is the brand accent, whose light
+theme is not final: its text misses 4.5:1 on `--color-surface-hover`.
+
+Dark theme:
+
+<!-- generated:user-accent-roles-dark -->
+| Colour | Fill | Text on the fill | Hover | Soft | Text | Text hover | Outline |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `lime` | `#a3e635` | `#09090b` | `#b5f153` | `#a3e6351c` | `#a3e635` | `#b5f153` | `#a3e635` |
+| `amber` | `#fbbf24` | `#18181b` | `#fccc50` | `#fbbf241c` | `#fbbf24` | `#fccc50` | `#fbbf24` |
+| `red` | `#991b1b` | `#ffffff` | `#ad4949` | `#991b1b1c` | `#f7f7f8` | `#f9f9f9` | `#f7f7f8` |
+| `pink` | `#fb7185` | `#18181b` | `#fc8d9d` | `#fb71851c` | `#fb7185` | `#fc8d9d` | `#fb7185` |
+| `purple` | `#a78bfa` | `#18181b` | `#b9a2fb` | `#a78bfa1c` | `#a78bfa` | `#b9a2fb` | `#a78bfa` |
+| `blue` | `#60a5fa` | `#18181b` | `#80b7fb` | `#60a5fa1c` | `#60a5fa` | `#80b7fb` | `#60a5fa` |
+| `cyan` | `#22d3ee` | `#18181b` | `#4edcf1` | `#22d3ee1c` | `#22d3ee` | `#4edcf1` | `#22d3ee` |
+| `emerald` | `#34d399` | `#18181b` | `#5ddcad` | `#34d3991c` | `#34d399` | `#5ddcad` | `#34d399` |
+| `steel` | `#a1a1aa` | `#18181b` | `#b4b4bb` | `#a1a1aa1c` | `#a1a1aa` | `#b4b4bb` | `#a1a1aa` |
+<!-- /generated:user-accent-roles-dark -->
+
+Light theme:
+
+<!-- generated:user-accent-roles-light -->
+| Colour | Fill | Text on the fill | Hover | Soft | Text | Text hover | Outline |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `lime` | `#4d7c0f` | `#ffffff` | `#3f6212` | `#4d7c0f1f` | `#4d7c0f` | `#3f6212` | `#4d7c0f` |
+| `amber` | `#f59e0b` | `#18181b` | `#f7ad30` | `#f59e0b1f` | `#18181b` | `#141417` | `#18181b` |
+| `red` | `#991b1b` | `#ffffff` | `#821717` | `#991b1b1f` | `#991b1b` | `#821717` | `#991b1b` |
+| `pink` | `#f43f5e` | `#18181b` | `#f65c76` | `#f43f5e1f` | `#18181b` | `#141417` | `#18181b` |
+| `purple` | `#a78bfa` | `#18181b` | `#b49cfb` | `#a78bfa1f` | `#18181b` | `#141417` | `#18181b` |
+| `blue` | `#3b82f6` | `#18181b` | `#5895f7` | `#3b82f61f` | `#18181b` | `#141417` | `#18181b` |
+| `cyan` | `#06b6d4` | `#18181b` | `#2bc1da` | `#06b6d41f` | `#18181b` | `#141417` | `#18181b` |
+| `emerald` | `#10b981` | `#18181b` | `#34c494` | `#10b9811f` | `#18181b` | `#141417` | `#18181b` |
+| `steel` | `#a1a1aa` | `#18181b` | `#afafb7` | `#a1a1aa1f` | `#18181b` | `#141417` | `#18181b` |
+<!-- /generated:user-accent-roles-light -->
+
+With the reduced form, `"accent": "user"`, `--color-user-accent` and
+`--color-on-user-accent` take these values instead, which differ in lime
+only:
 
 <!-- generated:user-accents -->
 | Colour | Fill, dark | Text, dark | Fill, light | Text, light |

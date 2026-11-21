@@ -35,7 +35,7 @@ image.
 
 `@overcrow/sdk/testing` est fourni avec le SDK : `npm install` dans un
 projet créé par `overcrow-widget init`, sinon
-`npm install --save-dev --save-exact @overcrow/sdk@1.5.0`.
+`npm install --save-dev --save-exact @overcrow/sdk@1.6.0`.
 
 `installRuntime()` met en place une doublure de PlayerVox OverCrow avant
 l’import de la logique : les appels de service renvoient des promesses que
@@ -146,7 +146,7 @@ Tout est facultatif.
 | --- | --- | --- |
 | `locale` | `en` | `en` ou `fr`. |
 | `theme` | `dark` | `dark` ou `light`. |
-| `userAccent` | `lime` | La couleur d’accent de l’utilisateur, pour un manifeste qui déclare `"accent": "user"`. |
+| `userAccent` | `lime` | La couleur d’accent de l’utilisateur, pour un manifeste qui déclare `"accent": "user-roles"` (ou `"user"`). |
 | `scale` | `1000` | Échelle du contenu en millièmes : de 500 à 1750 (de 50 % à 175 %). |
 | `size` | la taille préférée du manifeste | `{ width, height }` du cadre, en pixels logiques ; le `fit` du manifeste s’applique quand même. |
 | `mode` | `passive` | `interactive` donne les entrées au widget. |

@@ -36,7 +36,8 @@ export interface TestHost {
   readonly messages: Readonly<Record<string, string>>;
   readonly theme: "dark" | "light";
   /** The user's accent colour, sent to a widget whose manifest declares
-   * `"accent": "user"`; absent by default, which the SDK reads as lime. */
+   * `accent` (`"user-roles"` or `"user"`); absent by default, which the
+   * SDK reads as lime. */
   readonly userAccent?:
     | "lime"
     | "amber"

@@ -33,7 +33,7 @@ is "Increase", then checks the new text and image.
 
 `@overcrow/sdk/testing` comes with the SDK: `npm install` in a project made
 by `overcrow-widget init`, otherwise
-`npm install --save-dev --save-exact @overcrow/sdk@1.5.0`.
+`npm install --save-dev --save-exact @overcrow/sdk@1.6.0`.
 
 `installRuntime()` puts a stand-in for PlayerVox OverCrow in place before
 the logic is imported: service calls return promises that your test settles,
@@ -140,7 +140,7 @@ Everything is optional.
 | --- | --- | --- |
 | `locale` | `en` | `en` or `fr`. |
 | `theme` | `dark` | `dark` or `light`. |
-| `userAccent` | `lime` | The user's accent colour, for a manifest that declares `"accent": "user"`. |
+| `userAccent` | `lime` | The user's accent colour, for a manifest that declares `"accent": "user-roles"` (or `"user"`). |
 | `scale` | `1000` | Content scale in thousandths: 500 to 1750 (50 % to 175 %). |
 | `size` | the manifest's preferred size | `{ width, height }` of the frame, in logical pixels; the manifest's `fit` still applies. |
 | `mode` | `passive` | `interactive` gives input to the widget. |

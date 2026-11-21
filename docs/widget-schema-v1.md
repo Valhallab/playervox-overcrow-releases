@@ -702,6 +702,8 @@ A widget whose manifest declares `accent` follows the accent colour the user cho
 
 A `style.ocss` that uses a user accent token its manifest's `accent` does not give is rejected (`undeclared_user_accent`), and a draw command of such a widget cannot name it.
 
+#### Roles
+
 | Role | Token | Contrast held |
 | --- | --- | --- |
 | Fill that carries text or a mark | `--color-user-accent` | |
@@ -714,7 +716,9 @@ A `style.ocss` that uses a user accent token its manifest's `accent` does not gi
 
 The text and the outline hold different ratios and may differ. A colour that does not reach its ratio as a fill takes `--color-text` instead: `red` is never a text colour nor an outline on the dark panel. In the light theme `lime` is the brand's provisional `--color-accent`, which misses 4.5:1 on `--color-surface-hover` and on the wash.
 
-Roles of `"accent": "user-roles"`, dark theme:
+#### Roles in the dark theme
+
+The values of `"accent": "user-roles"`.
 
 | Name | Fill | Text on fill | Hover | Soft | Text | Text hover | Outline |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -728,7 +732,9 @@ Roles of `"accent": "user-roles"`, dark theme:
 | `emerald` | `#34d399` | `#18181b` | `#5ddcad` | `#34d3991c` | `#34d399` | `#5ddcad` | `#34d399` |
 | `steel` | `#a1a1aa` | `#18181b` | `#b4b4bb` | `#a1a1aa1c` | `#a1a1aa` | `#b4b4bb` | `#a1a1aa` |
 
-Roles of `"accent": "user-roles"`, light theme:
+#### Roles in the light theme
+
+The values of `"accent": "user-roles"`.
 
 | Name | Fill | Text on fill | Hover | Soft | Text | Text hover | Outline |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -742,7 +748,9 @@ Roles of `"accent": "user-roles"`, light theme:
 | `emerald` | `#10b981` | `#18181b` | `#34c494` | `#10b9811f` | `#18181b` | `#141417` | `#18181b` |
 | `steel` | `#a1a1aa` | `#18181b` | `#afafb7` | `#a1a1aa1f` | `#18181b` | `#141417` | `#18181b` |
 
-Published pair of `"accent": "user"`:
+#### Reduced form
+
+The values of `--color-user-accent` (fill) and `--color-on-user-accent` (text) under `"accent": "user"`. They differ from the roles in lime only.
 
 | Name | Dark fill | Dark text | Light fill | Light text |
 | --- | --- | --- | --- | --- |

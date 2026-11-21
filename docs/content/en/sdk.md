@@ -10,7 +10,7 @@ The SDK is on npm, and the command below adds it to a project. A project
 made by `overcrow-widget init` already lists it: run `npm install` there.
 
 ```sh
-npm install --save-dev --save-exact @overcrow/sdk@1.5.0
+npm install --save-dev --save-exact @overcrow/sdk@1.6.0
 ```
 
 <!-- source: widgets/clock/logic.ts -->
@@ -36,7 +36,7 @@ that leaves the VM.
 
 | Export | Kind | Summary |
 | --- | --- | --- |
-| `SDK_VERSION` | constant | `"1.5.0"`. |
+| `SDK_VERSION` | constant | `"1.6.0"`. |
 | `RUNTIME_SURFACE` | constant | `"0.1"`, the version of the VM's built-in interface that this SDK needs. |
 
 ## State and view
@@ -75,7 +75,9 @@ const state = initState({ values: [50] as number[] });
 | `HostListener` | type | A listener of `onHost`. |
 | `Viewport` | interface | `{ width, height }`, in logical pixels. |
 | `hasGrant(grant)` | function | Whether the user granted a capability, or a third-party account (`account:<id>`). |
-| `userAccentColors()` | function | `{ name, fill, onFill }`: the user's accent colour in the active theme, the values of `--color-user-accent` and `--color-on-user-accent`. Lime unless the manifest declares `"accent": "user"`. |
+| `userAccentRoles()` | function | `{ name, fill, onFill, hover, soft, text, textHover, outline }`: the colour of each role of the user's accent in the active theme, the values of the `--color-user-accent…` tokens. Lime, the brand accent, unless the manifest declares `"accent": "user-roles"`. |
+| `UserAccentRoles` | interface | The result of `userAccentRoles`. |
+| `userAccentColors()` | function | `{ name, fill, onFill }`: the values of `--color-user-accent` and `--color-on-user-accent` under the reduced form, `"accent": "user"`. |
 | `UserAccentColors` | interface | The result of `userAccentColors`. |
 | `option(id, fallback)` | function | The stored value of a row of the options menu, or `fallback` when there is none or it has another type. |
 | `MenuValue` | type | `boolean \| number \| string`. |

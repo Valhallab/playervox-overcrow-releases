@@ -4,19 +4,32 @@
   padding: var(--space-4);
 }
 
+/* Today is the selected day: a wash of the accent inside its outline. */
 .today {
   align-items: center;
   gap: var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid var(--color-user-accent-outline);
+  border-radius: var(--radius-lg);
+  background: var(--color-user-accent-soft);
 }
 
-/* What belongs to the user takes the user's accent: the ring of today's
-   progress, and the badge of a goal reached. */
+/* A gauge on a surface is an indicator: the outline, which stays visible
+   in every colour. */
 .ring {
   width: 40px;
   height: 40px;
-  color: var(--color-user-accent);
+  color: var(--color-user-accent-outline);
 }
 
+/* Accent text on a surface: readable in every colour, red included. */
+.count {
+  font-size: var(--font-size-body);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-user-accent-text);
+}
+
+/* A fill carries its own text colour. */
 .done {
   background: var(--color-user-accent);
   color: var(--color-on-user-accent);
@@ -24,21 +37,20 @@
   padding: var(--space-1) var(--space-4);
 }
 
-.count {
-  font-size: var(--font-size-body);
-  font-variant-numeric: tabular-nums;
-}
-
 .week {
   height: 12px;
 }
 
-/* The widget's own action keeps the brand accent. */
+/* The main action: the fill, and its hover state under the pointer. */
 .add {
   height: var(--control-height);
   justify-content: center;
   align-items: center;
   border-radius: var(--radius-md);
-  background: var(--color-accent);
-  color: var(--color-on-accent);
+  background: var(--color-user-accent);
+  color: var(--color-on-user-accent);
+}
+
+.add:hover {
+  background: var(--color-user-accent-hover);
 }

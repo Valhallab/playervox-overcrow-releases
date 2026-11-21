@@ -7,6 +7,25 @@ change between betas; 1.0.0 will freeze them under semantic versioning.
 The CLI's version enters no package: a package depends only on the
 widget's sources and the embedded SDK.
 
+## Unreleased
+
+- A manifest may declare `"accent": "user-roles"`: the widget follows the
+  accent colour the user chose in PlayerVox OverCrow in every use of it,
+  with a style token for each role (`--color-user-accent`,
+  `--color-on-user-accent`, `--color-user-accent-hover`,
+  `--color-user-accent-soft`, `--color-user-accent-text`,
+  `--color-user-accent-text-hover`, `--color-user-accent-outline`), and
+  the controls PlayerVox OverCrow draws in the widget take that colour.
+  It needs the catalog features `user-accent` and `user-accent-roles`: an
+  older PlayerVox OverCrow keeps the version of the widget it has.
+  `"accent": "user"` stays valid, as the reduced form: two tokens.
+- `check`, `package` and `admit` refuse a `style.ocss` that uses a role
+  token without `"accent": "user-roles"`, the reduced form included
+  (`style.undeclared_user_accent`); the message names the declaration to
+  write. Any other value of `accent` is refused (`manifest.accent`). The
+  headless runtime this CLI pins must know the roles to run such a widget.
+- It embeds `@overcrow/sdk` 1.6.0: `userAccentRoles()`.
+
 ## 1.0.0-beta.12
 
 Released in the creator tools ZIPs of PlayerVox OverCrow 0.12.0-beta.1's

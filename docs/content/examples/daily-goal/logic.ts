@@ -1,7 +1,7 @@
-// A daily goal of matches. Today's progress and the week's goals reached
-// are the user's: they follow the accent colour the user chose in
-// PlayerVox OverCrow, which the manifest asks for with "accent": "user".
-import { draw, initState, onHost, userAccentColors, type DrawCommand } from "@overcrow/sdk";
+// A daily goal of matches. The widget follows the accent colour the user
+// chose in PlayerVox OverCrow, which the manifest asks for with
+// "accent": "user-roles": each use of the accent has its token.
+import { draw, initState, onHost, userAccentRoles, type DrawCommand } from "@overcrow/sdk";
 
 declare module "@overcrow/sdk" {
   interface WidgetState {
@@ -16,13 +16,14 @@ const state = initState({ count: 0, goal: 3, week: [true, false, true] as boolea
 /** One dot per day of the week: the user's accent when the goal was
  * reached, a light wash of it otherwise. */
 function paint(): void {
-  // A token follows the user's colour by itself; a wash needs the colour's
-  // value, with an alpha added.
-  const { fill } = userAccentColors();
+  // A dot on the panel is an indicator: the outline role. A token follows
+  // the user's colour by itself; a wash needs the colour's value, with an
+  // alpha added.
+  const { outline } = userAccentRoles();
   const dots: DrawCommand[] = [];
   state.week.forEach((reached, day) => {
     dots.push(["circle", 6 + day * 14, 6, 4]);
-    dots.push(["fill", reached ? "var(--color-user-accent)" : `${fill}40`]);
+    dots.push(["fill", reached ? "var(--color-user-accent-outline)" : `${outline}40`]);
   });
   draw("week", dots);
 }

@@ -92,6 +92,7 @@ const WORDS = {
     dark: "Dark",
     light: "Light",
     userAccent: ["Colour", "Fill, dark", "Text, dark", "Fill, light", "Text, light"],
+    userAccentRoles: ["Colour", "Fill", "Text on the fill", "Hover", "Soft", "Text", "Text hover", "Outline"],
     shape: "Shape",
     accepts: "Accepts",
     kind: "Kind",
@@ -206,6 +207,16 @@ const WORDS = {
     token: "Token",
     dark: "Sombre",
     userAccent: ["Couleur", "Remplissage, sombre", "Texte, sombre", "Remplissage, clair", "Texte, clair"],
+    userAccentRoles: [
+      "Couleur",
+      "Remplissage",
+      "Texte sur le remplissage",
+      "Survol",
+      "Voile",
+      "Texte",
+      "Texte survolé",
+      "Contour",
+    ],
     light: "Clair",
     shape: "Forme",
     accepts: "Accepte",
@@ -931,22 +942,42 @@ function tokens(t) {
   );
 }
 
-/** The colours of each user accent, by theme. */
-function userAccents(t) {
+/** The rows of a user accent table of the reference, one per accent of schema.ts. */
+function userAccentRows(section, columns) {
   const names = union("UserAccent");
-  const rows = records(sections, "Design tokens > User accent").map((entry) => [
-    entry.Name,
-    entry["Dark fill"],
-    entry["Dark text"],
-    entry["Light fill"],
-    entry["Light text"],
-  ]);
+  const rows = records(sections, `Design tokens > User accent > ${section}`).map((entry) =>
+    columns.map((column) => entry[column]),
+  );
   const listed = rows.map(([name]) => name.replaceAll("`", ""));
   if (listed.join() !== names.join()) {
     throw new Error(`the user accents of the reference (${listed}) are not those of schema.ts (${names})`);
   }
-  return table(t.w.userAccent, rows);
+  return rows;
 }
+
+/** The fill and its text of each user accent under `"accent": "user"`, by theme. */
+function userAccents(t) {
+  return table(
+    t.w.userAccent,
+    userAccentRows("Reduced form", ["Name", "Dark fill", "Dark text", "Light fill", "Light text"]),
+  );
+}
+
+/** The colour of each role of each user accent in one theme. */
+const userAccentRoles = (theme) => (t) =>
+  table(
+    t.w.userAccentRoles,
+    userAccentRows(`Roles in the ${theme} theme`, [
+      "Name",
+      "Fill",
+      "Text on fill",
+      "Hover",
+      "Soft",
+      "Text",
+      "Text hover",
+      "Outline",
+    ]),
+  );
 
 function icons(t) {
   const match = sections.get("Icons")?.intro.join(" ").match(/\(Lucide ([0-9.]+), (\d+) names\)/);
@@ -1185,6 +1216,8 @@ const GENERATORS = {
   "style-values": (t) => syntax(t, "Style > Values", t.w.syntax, "Syntax"),
   tokens,
   "user-accents": userAccents,
+  "user-accent-roles-dark": userAccentRoles("dark"),
+  "user-accent-roles-light": userAccentRoles("light"),
   icons,
   // Permissions and services.
   permissions,

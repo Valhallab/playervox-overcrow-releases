@@ -11,7 +11,7 @@ projet créé par `overcrow-widget init` le liste déjà : lancez-y
 `npm install`.
 
 ```sh
-npm install --save-dev --save-exact @overcrow/sdk@1.5.0
+npm install --save-dev --save-exact @overcrow/sdk@1.6.0
 ```
 
 <!-- source: widgets/clock/logic.ts -->
@@ -37,7 +37,7 @@ chaque paramètre et chaque valeur qui sort de la VM.
 
 | Export | Nature | Résumé |
 | --- | --- | --- |
-| `SDK_VERSION` | constante | `"1.5.0"`. |
+| `SDK_VERSION` | constante | `"1.6.0"`. |
 | `RUNTIME_SURFACE` | constante | `"0.1"`, la version de l’interface intégrée de la VM dont ce SDK a besoin. |
 
 ## État et vue
@@ -76,7 +76,9 @@ const state = initState({ values: [50] as number[] });
 | `HostListener` | type | Un écouteur de `onHost`. |
 | `Viewport` | interface | `{ width, height }`, en pixels logiques. |
 | `hasGrant(grant)` | fonction | Indique si l’utilisateur a accordé une capability, ou un compte tiers (`account:<id>`). |
-| `userAccentColors()` | fonction | `{ name, fill, onFill }` : la couleur d’accent de l’utilisateur dans le thème actif, les valeurs de `--color-user-accent` et `--color-on-user-accent`. Lime sauf si le manifeste déclare `"accent": "user"`. |
+| `userAccentRoles()` | fonction | `{ name, fill, onFill, hover, soft, text, textHover, outline }` : la couleur de chaque rôle de l’accent de l’utilisateur dans le thème actif, les valeurs des tokens `--color-user-accent…`. Lime, l’accent de la marque, sauf si le manifeste déclare `"accent": "user-roles"`. |
+| `UserAccentRoles` | interface | Le résultat de `userAccentRoles`. |
+| `userAccentColors()` | fonction | `{ name, fill, onFill }` : les valeurs de `--color-user-accent` et `--color-on-user-accent` sous la forme réduite, `"accent": "user"`. |
 | `UserAccentColors` | interface | Le résultat de `userAccentColors`. |
 | `option(id, fallback)` | fonction | La valeur enregistrée d’une ligne du menu d’options, ou `fallback` quand il n’y en a pas ou qu’elle est d’un autre type. |
 | `MenuValue` | type | `boolean \| number \| string`. |

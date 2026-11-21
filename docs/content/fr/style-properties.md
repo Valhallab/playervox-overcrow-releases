@@ -184,8 +184,13 @@ identiques dans les deux thèmes.
 | `--color-accent-hover` | `#b5f153` | `#3f6212` | Accent sous le pointeur. |
 | `--color-accent-soft` | `#a3e6351c` | `#4d7c0f1f` | Voile d’accent derrière un contenu sélectionné. |
 | `--color-on-accent` | `#09090b` | `#ffffff` | Texte et icônes dessinés sur l’accent et sur son état de survol. |
-| `--color-user-accent` | `#a3e635` | `#84cc16` | La couleur d’accent de l’utilisateur, un remplissage pour ce qui lui appartient ; jamais une couleur de texte sur le panneau. Demande `"accent": "user"` dans le manifeste ; lime par défaut. |
-| `--color-on-user-accent` | `#18181b` | `#18181b` | Texte et icônes posés sur `--color-user-accent`. Demande `"accent": "user"` dans le manifeste. |
+| `--color-user-accent` | `#a3e635` | `#4d7c0f` | La couleur d’accent de l’utilisateur, un remplissage qui porte un texte ou une marque ; jamais une couleur de texte ni une bordure sur une surface. Demande `"accent": "user-roles"` ou `"user"` dans le manifeste ; lime par défaut, l’accent de la marque. |
+| `--color-on-user-accent` | `#09090b` | `#ffffff` | Texte et icônes posés sur `--color-user-accent` et sur son état de survol. Demande `"accent": "user-roles"` ou `"user"` dans le manifeste. |
+| `--color-user-accent-hover` | `#b5f153` | `#3f6212` | `--color-user-accent` sous le pointeur. Demande `"accent": "user-roles"` dans le manifeste. |
+| `--color-user-accent-soft` | `#a3e6351c` | `#4d7c0f1f` | Voile de l’accent de l’utilisateur derrière un contenu sélectionné. Demande `"accent": "user-roles"` dans le manifeste. |
+| `--color-user-accent-text` | `#a3e635` | `#4d7c0f` | Texte et icônes à l’accent de l’utilisateur sur une surface, lisibles dans chaque couleur d’accent. Demande `"accent": "user-roles"` dans le manifeste. |
+| `--color-user-accent-text-hover` | `#b5f153` | `#3f6212` | `--color-user-accent-text` sous le pointeur ou pressé. Demande `"accent": "user-roles"` dans le manifeste. |
+| `--color-user-accent-outline` | `#a3e635` | `#4d7c0f` | Bordures, rails, anneaux et jauges à l’accent de l’utilisateur sur une surface, visibles dans chaque couleur d’accent. Demande `"accent": "user-roles"` dans le manifeste. |
 | `--color-surface-panel` | `#111114ee` | `#fafafaee` | Fond du panneau du widget, dessiné par l’hôte derrière le contenu. |
 | `--color-surface-raised` | `#1e1e22e0` | `#f4f4f5eb` | Surface en relief dans le panneau. |
 | `--color-surface-hover` | `#28282deb` | `#e4e4e7f0` | Surface sous le pointeur. |
@@ -254,10 +259,54 @@ identiques dans les deux thèmes.
 
 ### Accent de l’utilisateur
 
-Pour un widget dont le manifeste déclare `"accent": "user"`,
-`--color-user-accent` et `--color-on-user-accent` prennent les couleurs de
-l’accent choisi par l’utilisateur ; lime sinon. Voir
-[accent de l’utilisateur](style.md#accent-de-lutilisateur).
+Pour un widget dont le manifeste déclare `"accent": "user-roles"`, les
+tokens `--color-user-accent…` prennent les couleurs de l’accent choisi par
+l’utilisateur ; lime sinon.
+[Accent de l’utilisateur](style.md#accent-de-lutilisateur) dit quel token
+utiliser à quel endroit.
+
+Chaque rôle tient son contraste sur chaque token de surface : le texte sur
+le remplissage et sur son état de survol à 4,5:1 ; le texte et son état de
+survol à 4,5:1 ; le contour à 3:1. Là où une couleur ne l’atteindrait pas,
+le texte et le contour prennent `--color-text`. Lime est l’accent de la
+marque, dont le thème clair n’est pas définitif : son texte n’atteint pas
+4,5:1 sur `--color-surface-hover`.
+
+Thème sombre :
+
+<!-- generated:user-accent-roles-dark -->
+| Couleur | Remplissage | Texte sur le remplissage | Survol | Voile | Texte | Texte survolé | Contour |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `lime` | `#a3e635` | `#09090b` | `#b5f153` | `#a3e6351c` | `#a3e635` | `#b5f153` | `#a3e635` |
+| `amber` | `#fbbf24` | `#18181b` | `#fccc50` | `#fbbf241c` | `#fbbf24` | `#fccc50` | `#fbbf24` |
+| `red` | `#991b1b` | `#ffffff` | `#ad4949` | `#991b1b1c` | `#f7f7f8` | `#f9f9f9` | `#f7f7f8` |
+| `pink` | `#fb7185` | `#18181b` | `#fc8d9d` | `#fb71851c` | `#fb7185` | `#fc8d9d` | `#fb7185` |
+| `purple` | `#a78bfa` | `#18181b` | `#b9a2fb` | `#a78bfa1c` | `#a78bfa` | `#b9a2fb` | `#a78bfa` |
+| `blue` | `#60a5fa` | `#18181b` | `#80b7fb` | `#60a5fa1c` | `#60a5fa` | `#80b7fb` | `#60a5fa` |
+| `cyan` | `#22d3ee` | `#18181b` | `#4edcf1` | `#22d3ee1c` | `#22d3ee` | `#4edcf1` | `#22d3ee` |
+| `emerald` | `#34d399` | `#18181b` | `#5ddcad` | `#34d3991c` | `#34d399` | `#5ddcad` | `#34d399` |
+| `steel` | `#a1a1aa` | `#18181b` | `#b4b4bb` | `#a1a1aa1c` | `#a1a1aa` | `#b4b4bb` | `#a1a1aa` |
+<!-- /generated:user-accent-roles-dark -->
+
+Thème clair :
+
+<!-- generated:user-accent-roles-light -->
+| Couleur | Remplissage | Texte sur le remplissage | Survol | Voile | Texte | Texte survolé | Contour |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `lime` | `#4d7c0f` | `#ffffff` | `#3f6212` | `#4d7c0f1f` | `#4d7c0f` | `#3f6212` | `#4d7c0f` |
+| `amber` | `#f59e0b` | `#18181b` | `#f7ad30` | `#f59e0b1f` | `#18181b` | `#141417` | `#18181b` |
+| `red` | `#991b1b` | `#ffffff` | `#821717` | `#991b1b1f` | `#991b1b` | `#821717` | `#991b1b` |
+| `pink` | `#f43f5e` | `#18181b` | `#f65c76` | `#f43f5e1f` | `#18181b` | `#141417` | `#18181b` |
+| `purple` | `#a78bfa` | `#18181b` | `#b49cfb` | `#a78bfa1f` | `#18181b` | `#141417` | `#18181b` |
+| `blue` | `#3b82f6` | `#18181b` | `#5895f7` | `#3b82f61f` | `#18181b` | `#141417` | `#18181b` |
+| `cyan` | `#06b6d4` | `#18181b` | `#2bc1da` | `#06b6d41f` | `#18181b` | `#141417` | `#18181b` |
+| `emerald` | `#10b981` | `#18181b` | `#34c494` | `#10b9811f` | `#18181b` | `#141417` | `#18181b` |
+| `steel` | `#a1a1aa` | `#18181b` | `#afafb7` | `#a1a1aa1f` | `#18181b` | `#141417` | `#18181b` |
+<!-- /generated:user-accent-roles-light -->
+
+Avec la forme réduite, `"accent": "user"`, `--color-user-accent` et
+`--color-on-user-accent` prennent ces valeurs à la place, qui ne diffèrent
+qu’en lime :
 
 <!-- generated:user-accents -->
 | Couleur | Remplissage, sombre | Texte, sombre | Remplissage, clair | Texte, clair |

@@ -10,5 +10,5 @@
     "min": { "width": 180, "height": 130 },
     "max": { "width": 400, "height": 260 }
   },
-  "accent": "user"
+  "accent": "user-roles"
 }

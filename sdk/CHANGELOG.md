@@ -7,6 +7,24 @@ version it was built with, so a new SDK never changes a published widget.
 An incompatible change would be 2.0.0. Every 1.x release needs the VM's
 runtime surface 0.1, which OverCrow keeps for widget API v1.
 
+## 1.6.0
+
+Not released yet. Ships with the release of PlayerVox OverCrow that gives
+widgets a colour for each role of the user's accent:
+
+- `userAccentRoles()`: the colour of each role of the user's accent in the
+  active theme, for a widget whose manifest declares
+  `"accent": "user-roles"`: `fill` and the `onFill` text drawn on it,
+  `hover`, `soft`, `text`, `textHover` and `outline`, the values of the
+  `--color-user-accent`, `--color-on-user-accent`,
+  `--color-user-accent-hover`, `--color-user-accent-soft`,
+  `--color-user-accent-text`, `--color-user-accent-text-hover` and
+  `--color-user-accent-outline` tokens. Lime, the default, is the brand
+  accent family. The `UserAccentRoles` type.
+- `userAccentColors()` does not change: it gives the fill and its text
+  under the reduced form, `"accent": "user"`.
+- `DrawCommand` colours take the five new tokens.
+
 ## 1.5.0
 
 Ships with PlayerVox OverCrow 0.11.0-beta.1, the first release that sends

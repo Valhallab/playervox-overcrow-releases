@@ -339,6 +339,7 @@ release, gives only `--color-user-accent` and `--color-on-user-accent`, with the
 second table; the controls keep the brand accent.\n\n\
 A `style.ocss` that uses a user accent token its manifest's `accent` does not give is rejected \
 (`undeclared_user_accent`), and a draw command of such a widget cannot name it.\n\n\
+#### Roles\n\n\
 | Role | Token | Contrast held |\n| --- | --- | --- |\n\
 | Fill that carries text or a mark | `--color-user-accent` | |\n\
 | Text and icons on the fill and on its hover state | `--color-on-user-accent` | 4.5:1 on both |\n\
@@ -361,7 +362,8 @@ which misses 4.5:1 on `--color-surface-hover` and on the wash.\n",
     ] {
         let _ = writeln!(
             out,
-            "\nRoles of `\"accent\": \"user-roles\"`, {theme} theme:\n\n\
+            "\n#### Roles in the {theme} theme\n\n\
+The values of `\"accent\": \"user-roles\"`.\n\n\
 | Name | Fill | Text on fill | Hover | Soft | Text | Text hover | Outline |\n\
 | --- | --- | --- | --- | --- | --- | --- | --- |"
         );
@@ -382,7 +384,9 @@ which misses 4.5:1 on `--color-surface-hover` and on the wash.\n",
         }
     }
     out.push_str(
-        "\nPublished pair of `\"accent\": \"user\"`:\n\n\
+        "\n#### Reduced form\n\n\
+The values of `--color-user-accent` (fill) and `--color-on-user-accent` (text) under \
+`\"accent\": \"user\"`. They differ from the roles in lime only.\n\n\
 | Name | Dark fill | Dark text | Light fill | Light text |\n| --- | --- | --- | --- | --- |\n",
     );
     for accent in USER_ACCENTS {

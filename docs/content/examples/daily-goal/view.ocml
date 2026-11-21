@@ -1,5 +1,5 @@
-<!-- A daily goal: what the user did today, in the user's accent colour.
-     The button keeps the brand accent of the widget. -->
+<!-- A daily goal: what the user did today, in the user's accent colour,
+     the main action included. -->
 <box class="goal">
   <box class="today">
     <gauge class="ring" value={state.count} max={state.goal} label={t("progress", { count: state.count, goal: state.goal })}/>

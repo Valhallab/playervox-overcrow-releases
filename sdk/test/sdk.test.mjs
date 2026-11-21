@@ -10,7 +10,7 @@ const settle = () => new Promise((resolve) => setImmediate(resolve));
 const lastCall = () => vm.calls[vm.calls.length - 1];
 
 test("the version and the runtime surface are exported", () => {
-  assert.equal(overcrow.SDK_VERSION, "1.5.0");
+  assert.equal(overcrow.SDK_VERSION, "1.6.0");
   assert.equal(overcrow.RUNTIME_SURFACE, "0.1");
 });
 
@@ -65,6 +65,58 @@ test("the user's accent is lime until the host sends another, in both themes", (
   });
   vm.host = HOST;
   assert.equal(overcrow.host.userAccent, "lime", "absent again");
+});
+
+test("each role of the user's accent has its colour, and lime is the brand", () => {
+  assert.deepEqual(
+    overcrow.userAccentRoles(),
+    {
+      name: "lime",
+      fill: "#a3e635",
+      onFill: "#09090b",
+      hover: "#b5f153",
+      soft: "#a3e6351c",
+      text: "#a3e635",
+      textHover: "#b5f153",
+      outline: "#a3e635",
+    },
+    "a host that does not send it: the brand accent family",
+  );
+  vm.host = { ...HOST, theme: "light" };
+  assert.deepEqual(overcrow.userAccentRoles(), {
+    name: "lime",
+    fill: "#4d7c0f",
+    onFill: "#ffffff",
+    hover: "#3f6212",
+    soft: "#4d7c0f1f",
+    text: "#4d7c0f",
+    textHover: "#3f6212",
+    outline: "#4d7c0f",
+  });
+  // Red is a fill under white text; on a surface, the text colour.
+  vm.host = { ...HOST, userAccent: "red" };
+  assert.deepEqual(overcrow.userAccentRoles(), {
+    name: "red",
+    fill: "#991b1b",
+    onFill: "#ffffff",
+    hover: "#ad4949",
+    soft: "#991b1b1c",
+    text: "#f7f7f8",
+    textHover: "#f9f9f9",
+    outline: "#f7f7f8",
+  });
+  vm.host = { ...HOST, userAccent: "steel" };
+  const steel = overcrow.userAccentRoles();
+  assert.deepEqual([steel.fill, steel.text, steel.outline], ["#a1a1aa", "#a1a1aa", "#a1a1aa"]);
+  // Every other colour keeps the fill and the text of the reduced form.
+  for (const theme of ["dark", "light"]) {
+    for (const name of ["amber", "red", "pink", "purple", "blue", "cyan", "emerald", "steel"]) {
+      vm.host = { ...HOST, userAccent: name, theme };
+      const { fill, onFill } = overcrow.userAccentRoles();
+      assert.deepEqual({ name, fill, onFill }, overcrow.userAccentColors(), `${name} ${theme}`);
+    }
+  }
+  vm.host = HOST;
 });
 
 test("options fall back on a missing value or another type", () => {
@@ -339,6 +391,7 @@ test("the view table, drawings, the menu and logs reach the runtime", () => {
   vm.setHost({ region: HOST.region });
   vm.setHost({ userAccent: "cyan" });
   assert.equal(overcrow.userAccentColors().fill, "#22d3ee", "current in the listener's turn");
+  assert.equal(overcrow.userAccentRoles().outline, "#22d3ee", "and so are its roles");
   assert.deepEqual(changes, [
     ["first", "options", "visible"],
     ["second", "options", "visible"],
@@ -362,7 +415,12 @@ test("the generated namespaces carry no data at runtime", async () => {
   assert.deepEqual(Object.keys(icons), [], "icon names are a type only");
   assert.ok(Object.values(limits).every((value) => typeof value === "number"), "limits only");
   const accents = await import("../dist/generated/accents.js");
-  assert.deepEqual(Object.keys(accents), ["USER_ACCENTS"], "the user accent table only");
+  assert.deepEqual(
+    Object.keys(accents),
+    ["USER_ACCENTS", "USER_ACCENT_ROLES"],
+    "the user accent tables only",
+  );
+  assert.deepEqual(Object.keys(accents.USER_ACCENT_ROLES), Object.keys(accents.USER_ACCENTS));
   assert.deepEqual(Object.keys(accents.USER_ACCENTS), [
     "lime",
     "amber",

@@ -28,11 +28,13 @@ export {
   onHost,
   option,
   userAccentColors,
+  userAccentRoles,
   type HostData,
   type HostKey,
   type HostListener,
   type MenuValue,
   type UserAccentColors,
+  type UserAccentRoles,
   type Viewport,
   type Widened,
 } from "./host.js";

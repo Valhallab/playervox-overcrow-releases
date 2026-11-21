@@ -1,5 +1,5 @@
 import { runtime } from "./runtime.js";
-import { USER_ACCENTS } from "./generated/accents.js";
+import { USER_ACCENT_ROLES, USER_ACCENTS, type AccentRoles } from "./generated/accents.js";
 import type {
   AccountGrant,
   Capability,
@@ -36,9 +36,10 @@ export interface HostData {
   readonly theme: Theme;
   /**
    * The accent colour the user chose in PlayerVox OverCrow, for a widget
-   * whose manifest declares `"accent": "user"`; `"lime"` otherwise, and on
-   * a PlayerVox OverCrow that does not send it. Sent without a permission,
-   * like the locale. Its colours are {@link userAccentColors}.
+   * whose manifest declares `"accent": "user-roles"` (or its reduced form,
+   * `"user"`); `"lime"` otherwise, and on a PlayerVox OverCrow that does
+   * not send it. Sent without a permission, like the locale. Its colours
+   * are {@link userAccentRoles}.
    */
   readonly userAccent: UserAccent;
   /** Number and date preferences and the user's UTC offset. */
@@ -145,7 +146,49 @@ export function onHost(listener: HostListener): { cancel(): void } {
   };
 }
 
-/** The colours of {@link HostData.userAccent} in one theme. */
+/**
+ * The colour of each role of {@link HostData.userAccent} in one theme:
+ * the values of the user accent tokens.
+ */
+export interface UserAccentRoles extends AccentRoles {
+  /** The accent's name. */
+  readonly name: UserAccent;
+}
+
+/**
+ * The colour of each role of the user's accent in the active theme: what
+ * the host gives the user accent tokens of a widget whose manifest
+ * declares `"accent": "user-roles"`, for drawing on a canvas and for a
+ * colour you compute (a halo is `fill` with your own alpha). They change
+ * with `userAccent` and with `theme`: an {@link onHost} listener gets
+ * both.
+ *
+ * `fill` carries `onFill`; `text` is for text and icons on a surface,
+ * `outline` for a border, a rail, a ring or a gauge. `fill` is not always
+ * readable on the panel (red): never draw it as text or as a thin line.
+ *
+ * Lime is the brand accent family, the values of `--color-accent`,
+ * `--color-on-accent`, `--color-accent-hover` and `--color-accent-soft`.
+ * A widget without the declaration reads lime. Under the reduced form,
+ * `"accent": "user"`, read {@link userAccentColors} instead: its lime is
+ * that form's.
+ *
+ * @example
+ * ```ts
+ * const { fill, outline } = userAccentRoles();
+ * draw("ring", [["circle", 20, 20, 16], ["stroke", outline, 2]]);
+ * draw("halo", [["circle", 20, 20, 19], ["stroke", `${fill}0d`, 6]]);
+ * ```
+ */
+export function userAccentRoles(): UserAccentRoles {
+  const name = host.userAccent;
+  return { name, ...USER_ACCENT_ROLES[name][host.theme] };
+}
+
+/**
+ * The colours of {@link HostData.userAccent} in one theme, as the reduced
+ * form `"accent": "user"` gives them.
+ */
 export interface UserAccentColors {
   /** The accent's name. */
   readonly name: UserAccent;
@@ -156,11 +199,13 @@ export interface UserAccentColors {
 }
 
 /**
- * The colours of the user's accent in the active theme: what the host
- * gives `--color-user-accent` (`fill`) and `--color-on-user-accent`
+ * The colours of the user's accent in the active theme for a widget whose
+ * manifest declares the reduced form, `"accent": "user"`: what the host
+ * then gives `--color-user-accent` (`fill`) and `--color-on-user-accent`
  * (`onFill`, at WCAG AA on `fill`), for drawing on a canvas. They change
  * with `userAccent` and with `theme`. A fill: draw text on it in `onFill`,
- * never `fill` itself as text on the panel.
+ * never `fill` itself as text on the panel. With
+ * `"accent": "user-roles"`, read {@link userAccentRoles}.
  *
  * @example
  * ```ts

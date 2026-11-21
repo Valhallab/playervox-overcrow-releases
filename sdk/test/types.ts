@@ -83,6 +83,15 @@ export async function checks(): Promise<void> {
   commands.push(["fill", "var(--color-user-accent)"], ["fill", colours.onFill]);
   // @ts-expect-error not an accent of the palette
   const green: overcrow.UserAccent = "green";
+  // Its roles, for a manifest that declares `"accent": "user-roles"`.
+  const roles: overcrow.UserAccentRoles = overcrow.userAccentRoles();
+  const halo: `#${string}` = `${roles.fill}0d`;
+  commands.push(
+    ["fill", "var(--color-user-accent-soft)"],
+    ["stroke", "var(--color-user-accent-outline)", 2],
+    ["stroke", roles.textHover, 1],
+    ["fill", halo],
+  );
   void [accent, fill, green];
 
   const icon: IconName = "clock";

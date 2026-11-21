@@ -187,18 +187,50 @@ A widget can follow it. Declare it in the manifest:
 
 <!-- source: docs/content/examples/daily-goal/manifest.json -->
 ```json
-  "accent": "user"
+  "accent": "user-roles"
 ```
 
-Then use two colour tokens:
+The widget then has a token for each use of the accent. Choose the token
+by what you draw, and on what:
 
-- `--color-user-accent` fills what belongs to the user: their progress,
-  their score, their selection.
-- `--color-on-user-accent` is for text and icons drawn on that fill. It
-  stays readable on every colour, in both themes.
+| You draw | Token |
+| --- | --- |
+| A fill that carries text or a mark: a main button, a badge, a selected chip | `--color-user-accent` |
+| The text and icons on that fill | `--color-on-user-accent` |
+| That fill under the pointer or with the focus | `--color-user-accent-hover` |
+| A wash behind selected content | `--color-user-accent-soft` |
+| Text or an icon on the panel or on another surface | `--color-user-accent-text` |
+| That text under the pointer or pressed | `--color-user-accent-text-hover` |
+| A border, a rail, an underline, a ring, a gauge on a surface | `--color-user-accent-outline` |
 
 <!-- source: docs/content/examples/daily-goal/style.ocss -->
 ```css
+/* Today is the selected day: a wash of the accent inside its outline. */
+.today {
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid var(--color-user-accent-outline);
+  border-radius: var(--radius-lg);
+  background: var(--color-user-accent-soft);
+}
+
+/* A gauge on a surface is an indicator: the outline, which stays visible
+   in every colour. */
+.ring {
+  width: 40px;
+  height: 40px;
+  color: var(--color-user-accent-outline);
+}
+
+/* Accent text on a surface: readable in every colour, red included. */
+.count {
+  font-size: var(--font-size-body);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-user-accent-text);
+}
+
+/* A fill carries its own text colour. */
 .done {
   background: var(--color-user-accent);
   color: var(--color-on-user-accent);
@@ -207,36 +239,114 @@ Then use two colour tokens:
 }
 ```
 
-`--color-user-accent` is a fill, never a text colour on the panel: some
-colours, red among them, cannot be read on the dark panel. Keep
-`--color-accent` for the widget's own brand: its main actions, a checked
-state. It never changes, whatever colour the user picks.
+`--color-user-accent` is a fill, never a text colour nor a thin line on a
+surface: some colours, red among them, cannot be seen on the dark panel.
+For such a colour, `--color-user-accent-text` and
+`--color-user-accent-outline` take the text colour instead. Both stay
+readable in the nine colours and both themes, on every surface token
+(`--color-surface-panel`, `-raised`, `-hover`, `-field`, `-popover`):
+4.5:1 for the text, 3:1 for the outline. They hold different ratios and may
+differ: use `-text` for text and icons, `-outline` for a border, a rail, a
+ring or a gauge. A border around an element filled with the accent belongs
+to the fill: give it the token of its background.
 
-The logic gets the colour's name in `host.userAccent`, and its values in
-the active theme with `userAccentColors()`. A draw command can name the
-token, which follows the user's choice by itself; a colour made from the
-value, such as a translucent wash, is drawn again when it changes:
+A fill has its own hover state, and `--color-on-user-accent` stays readable
+on both:
+
+<!-- source: docs/content/examples/daily-goal/style.ocss -->
+```css
+/* The main action: the fill, and its hover state under the pointer. */
+.add {
+  height: var(--control-height);
+  justify-content: center;
+  align-items: center;
+  border-radius: var(--radius-md);
+  background: var(--color-user-accent);
+  color: var(--color-on-user-accent);
+}
+
+.add:hover {
+  background: var(--color-user-accent-hover);
+}
+```
+
+### What follows the accent
+
+With `"accent": "user-roles"`, two things take the user's colour:
+
+- the seven `--color-user-accent…` tokens;
+- the controls PlayerVox OverCrow draws in the widget: a checked `toggle`
+  or `checkbox`, the filled part of a `slider`, the focus ring, the
+  selected text and the current row of a `select`. Nothing to write: the
+  declaration is enough. Without it, they stay lime.
+
+In lime, a widget keeps exactly the colours of the brand: each token has
+the value of its brand token (`--color-accent`, `--color-on-accent`,
+`--color-accent-hover`, `--color-accent-soft`).
+
+These never follow the accent:
+
+- `--color-accent` and its variants, the brand accent: lime, whatever
+  colour the user picks;
+- the status colours: `--color-success` for a success, `--color-warning`
+  for a warning, `--color-danger` for an error or a destructive action.
+  Green, amber and red say the same thing in every accent: never use the
+  accent for a state;
+- the colours you write yourself, such as those of another brand.
+
+### The accent in the logic
+
+The logic gets the colour's name in `host.userAccent`, and the colour of
+each role in the active theme with `userAccentRoles()`. A draw command can
+name a token, which follows the user's choice by itself; a colour made from
+a value, such as a translucent wash, is yours to draw again:
 
 <!-- source: docs/content/examples/daily-goal/logic.ts -->
 ```ts
 function paint(): void {
-  // A token follows the user's colour by itself; a wash needs the colour's
-  // value, with an alpha added.
-  const { fill } = userAccentColors();
+  // A dot on the panel is an indicator: the outline role. A token follows
+  // the user's colour by itself; a wash needs the colour's value, with an
+  // alpha added.
+  const { outline } = userAccentRoles();
   const dots: DrawCommand[] = [];
   state.week.forEach((reached, day) => {
     dots.push(["circle", 6 + day * 14, 6, 4]);
-    dots.push(["fill", reached ? "var(--color-user-accent)" : `${fill}40`]);
+    dots.push(["fill", reached ? "var(--color-user-accent-outline)" : `${outline}40`]);
   });
   draw("week", dots);
 }
 ```
 
+The user may choose another colour while the widget runs. The style, the
+tokens and the controls follow at once; draw a computed colour again when
+`userAccent` or `theme` changes:
+
+<!-- source: docs/content/examples/daily-goal/logic.ts -->
+```ts
+onHost((changed) => {
+  if (changed.includes("userAccent") || changed.includes("theme")) {
+    paint();
+  }
+});
+```
+
 The widget learns only the colour's name, without a permission, as it
 learns the language. Without the declaration, it gets lime, and `check`
-refuses a style that uses the two tokens (`style.undeclared_user_accent`).
+refuses a style that uses these tokens (`style.undeclared_user_accent`).
 The values of the nine colours are in
 [user accent](style-properties.md#user-accent).
+
+### The reduced form
+
+`"accent": "user"`, the first form of the declaration, is still valid. It
+gives two tokens only, `--color-user-accent` and `--color-on-user-accent`;
+the controls stay lime, and `userAccentColors()` gives the two values. Its
+lime is not the brand's: `#18181b` on `#a3e635` in the dark theme, on
+`#84cc16` in the light theme.
+
+A version that declares `"user-roles"` needs a PlayerVox OverCrow that
+knows the roles. An older one keeps the version of the widget it already
+has, until it is updated.
 
 ## Text
 
