@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "apiVersion": 1,
   "id": "com.playervox.overcrow.notes",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "name": {
     "en": "Notes",
     "fr": "Notes"
@@ -13,6 +13,7 @@
     "min": { "width": 280, "height": 48 },
     "max": { "width": 900, "height": 900 }
   },
+  "accent": "user-roles",
   "permissions": {
     "capabilities": ["notes.read", "notes.write"]
   },
