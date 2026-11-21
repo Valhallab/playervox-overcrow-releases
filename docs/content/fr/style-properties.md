@@ -268,7 +268,8 @@ utiliser à quel endroit.
 Chaque rôle tient son contraste sur chaque token de surface : le texte sur
 le remplissage et sur son état de survol à 4,5:1 ; le texte et son état de
 survol à 4,5:1 ; le contour à 3:1. Là où une couleur ne l’atteindrait pas,
-le texte et le contour prennent `--color-text`. Lime est l’accent de la
+le texte et le contour prennent `--color-text`, sauf le rouge en thème
+sombre, qui a sa propre nuance plus claire. Lime est l’accent de la
 marque, dont le thème clair n’est pas définitif : son texte n’atteint pas
 4,5:1 sur `--color-surface-hover`.
 
@@ -279,7 +280,7 @@ Thème sombre :
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `lime` | `#a3e635` | `#09090b` | `#b5f153` | `#a3e6351c` | `#a3e635` | `#b5f153` | `#a3e635` |
 | `amber` | `#fbbf24` | `#18181b` | `#fccc50` | `#fbbf241c` | `#fbbf24` | `#fccc50` | `#fbbf24` |
-| `red` | `#991b1b` | `#ffffff` | `#ad4949` | `#991b1b1c` | `#f7f7f8` | `#f9f9f9` | `#f7f7f8` |
+| `red` | `#991b1b` | `#ffffff` | `#ad4949` | `#991b1b1c` | `#ff6565` | `#ff8484` | `#ff6565` |
 | `pink` | `#fb7185` | `#18181b` | `#fc8d9d` | `#fb71851c` | `#fb7185` | `#fc8d9d` | `#fb7185` |
 | `purple` | `#a78bfa` | `#18181b` | `#b9a2fb` | `#a78bfa1c` | `#a78bfa` | `#b9a2fb` | `#a78bfa` |
 | `blue` | `#60a5fa` | `#18181b` | `#80b7fb` | `#60a5fa1c` | `#60a5fa` | `#80b7fb` | `#60a5fa` |

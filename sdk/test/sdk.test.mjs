@@ -93,7 +93,7 @@ test("each role of the user's accent has its colour, and lime is the brand", () 
     textHover: "#3f6212",
     outline: "#4d7c0f",
   });
-  // Red is a fill under white text; on a surface, the text colour.
+  // Red is a fill under white text; on a dark surface, a lighter red.
   vm.host = { ...HOST, userAccent: "red" };
   assert.deepEqual(overcrow.userAccentRoles(), {
     name: "red",
@@ -101,9 +101,9 @@ test("each role of the user's accent has its colour, and lime is the brand", () 
     onFill: "#ffffff",
     hover: "#ad4949",
     soft: "#991b1b1c",
-    text: "#f7f7f8",
-    textHover: "#f9f9f9",
-    outline: "#f7f7f8",
+    text: "#ff6565",
+    textHover: "#ff8484",
+    outline: "#ff6565",
   });
   vm.host = { ...HOST, userAccent: "steel" };
   const steel = overcrow.userAccentRoles();

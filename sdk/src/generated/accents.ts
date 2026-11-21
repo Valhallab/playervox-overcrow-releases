@@ -125,9 +125,9 @@ export const USER_ACCENT_ROLES: {
       onFill: "#ffffff",
       hover: "#ad4949",
       soft: "#991b1b1c",
-      text: "#f7f7f8",
-      textHover: "#f9f9f9",
-      outline: "#f7f7f8",
+      text: "#ff6565",
+      textHover: "#ff8484",
+      outline: "#ff6565",
     },
     light: {
       fill: "#991b1b",

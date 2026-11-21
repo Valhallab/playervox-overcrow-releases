@@ -242,7 +242,8 @@ by what you draw, and on what:
 `--color-user-accent` is a fill, never a text colour nor a thin line on a
 surface: some colours, red among them, cannot be seen on the dark panel.
 For such a colour, `--color-user-accent-text` and
-`--color-user-accent-outline` take the text colour instead. Both stay
+`--color-user-accent-outline` take a shade that can: a lighter red on the
+dark panel, the text colour where the palette has no such shade. Both stay
 readable in the nine colours and both themes, on every surface token
 (`--color-surface-panel`, `-raised`, `-hover`, `-field`, `-popover`):
 4.5:1 for the text, 3:1 for the outline. They hold different ratios and may
