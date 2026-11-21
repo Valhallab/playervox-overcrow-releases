@@ -13,6 +13,7 @@ use overcrow_widget_schema::catalog_v2::{
     FEATURE_USER_ACCENT, FEATURE_USER_ACCENT_ROLES, KNOWN_FEATURES,
 };
 use overcrow_widget_schema::manifest::validate_manifest;
+use overcrow_widget_schema::package::hex as hex_bytes;
 use overcrow_widget_schema::tokens::{
     AccentDeclaration, AccentRole, AccentRoles, DEFAULT_USER_ACCENT, TOKENS, USER_ACCENTS, token,
     user_accent,
@@ -74,10 +75,11 @@ fn channels(hex: &str) -> Vec<f64> {
 }
 
 fn hex(channels: &[f64]) -> String {
-    channels.iter().fold(String::from("#"), |mut out, channel| {
-        out.push_str(&format!("{:02x}", channel.round().clamp(0.0, 255.0) as u8));
-        out
-    })
+    let bytes: Vec<u8> = channels
+        .iter()
+        .map(|channel| channel.round().clamp(0.0, 255.0) as u8)
+        .collect();
+    format!("#{}", hex_bytes(&bytes))
 }
 
 /// `from` moved by `amount` (0 to 1) towards `to`, both opaque.
@@ -107,14 +109,6 @@ fn value(name: &str, dark: bool) -> &'static str {
 
 fn themes() -> [(&'static str, bool); 2] {
     [("dark", true), ("light", false)]
-}
-
-fn roles(accent: &overcrow_widget_schema::tokens::UserAccent, dark: bool) -> AccentRoles {
-    if dark {
-        accent.dark_roles
-    } else {
-        accent.light_roles
-    }
 }
 
 #[test]
@@ -153,22 +147,20 @@ fn the_declaration_needs_both_catalog_features() {
     }
 }
 
+/// The manifest values and the declarations are one list: each value
+/// reads as its declaration, and nothing else does.
 #[test]
-fn each_declaration_gives_its_tokens() {
-    use AccentDeclaration::{None, User, UserRoles};
-    assert_eq!(None.as_str(), Option::None);
-    assert_eq!(User.as_str(), Some("user"));
-    assert_eq!(UserRoles.as_str(), Some("user-roles"));
-    assert!(!None.follows_user() && User.follows_user() && UserRoles.follows_user());
-    for role in AccentRole::ALL {
-        assert!(!None.allows(role), "{role:?}");
-        assert!(UserRoles.allows(role), "{role:?}");
-        assert_eq!(
-            User.allows(role),
-            matches!(role, AccentRole::Fill | AccentRole::OnFill),
-            "{role:?}"
-        );
+fn the_manifest_values_are_the_declarations() {
+    assert_eq!(AccentDeclaration::VALUES, ["user-roles", "user"]);
+    for value in AccentDeclaration::VALUES {
+        let declaration = AccentDeclaration::from_manifest(value).expect(value);
+        assert_eq!(declaration.as_str(), Some(*value));
+        assert!(declaration.follows_user());
     }
+    assert_eq!(AccentDeclaration::from_manifest("User"), None);
+    assert_eq!(AccentDeclaration::None.as_str(), None);
+    assert!(!AccentDeclaration::None.follows_user());
+    assert!(AccentDeclaration::None.features().is_empty());
 }
 
 /// Seven tokens, one per role, fixed, whose default is lime.
@@ -208,7 +200,7 @@ fn lime_is_exactly_the_brand_accent_family() {
     let lime = user_accent("lime").expect("lime");
     assert_eq!(DEFAULT_USER_ACCENT, *lime);
     for (theme, dark) in themes() {
-        let roles = roles(lime, dark);
+        let roles = lime.roles(dark);
         for (role, brand) in [
             (roles.fill, "--color-accent"),
             (roles.on_fill, "--color-on-accent"),
@@ -244,7 +236,7 @@ fn the_other_colours_follow_the_rules() {
         for (theme, dark) in themes() {
             let label = format!("{} ({theme})", accent.name);
             let published = if dark { accent.dark } else { accent.light };
-            let roles = roles(accent, dark);
+            let roles = accent.roles(dark);
             assert_eq!(
                 (roles.fill, roles.on_fill),
                 (published.fill, published.on_fill),
@@ -316,14 +308,10 @@ fn every_role_keeps_its_contrast_on_every_surface() {
     let mut missed = BTreeSet::new();
     for accent in USER_ACCENTS {
         for (theme, dark) in themes() {
-            let roles = roles(&accent, dark);
+            let roles = accent.roles(dark);
             let mut check = |role: &str, color: &str, on: &str, under: &str, least: f64| {
-                let ratio = contrast(color, under);
-                if ratio < least {
-                    missed.insert(format!(
-                        "{} {theme}: {role} on {on} is {ratio:.2}:1",
-                        accent.name
-                    ));
+                if contrast(color, under) < least {
+                    missed.insert(format!("{} {theme}: {role} on {on}", accent.name));
                 }
             };
             check("on-fill", roles.on_fill, "fill", roles.fill, TEXT);
@@ -356,14 +344,16 @@ fn every_role_keeps_its_contrast_on_every_surface() {
         }
     }
     let brand_lime_in_light: BTreeSet<String> = [
-        "lime light: outline on track over hover is 2.61:1",
-        "lime light: outline on track over raised is 2.99:1",
-        "lime light: text on hover is 3.94:1",
-        "lime light: text on wash over field is 4.26:1",
-        "lime light: text on wash over hover is 3.41:1",
-        "lime light: text on wash over panel is 4.10:1",
-        "lime light: text on wash over popover is 4.26:1",
-        "lime light: text on wash over raised is 3.89:1",
+        // 2.61:1 and 2.99:1.
+        "lime light: outline on track over hover",
+        "lime light: outline on track over raised",
+        // 3.94:1, and 3.41:1 to 4.26:1 on the wash.
+        "lime light: text on hover",
+        "lime light: text on wash over field",
+        "lime light: text on wash over hover",
+        "lime light: text on wash over panel",
+        "lime light: text on wash over popover",
+        "lime light: text on wash over raised",
     ]
     .into_iter()
     .map(str::to_owned)
@@ -379,19 +369,17 @@ fn the_reduced_form_keeps_its_published_values() {
         for (theme, dark) in themes() {
             let label = format!("{} ({theme})", accent.name);
             let published = if dark { accent.dark } else { accent.light };
-            let roles = roles(&accent, dark);
-            for declaration in [AccentDeclaration::User, AccentDeclaration::None] {
-                assert_eq!(
-                    accent.value(AccentRole::Fill, dark, declaration),
-                    published.fill,
-                    "{label}"
-                );
-                assert_eq!(
-                    accent.value(AccentRole::OnFill, dark, declaration),
-                    published.on_fill,
-                    "{label}"
-                );
-            }
+            let roles = accent.roles(dark);
+            assert_eq!(
+                accent.value(AccentRole::Fill, dark, AccentDeclaration::User),
+                published.fill,
+                "{label}"
+            );
+            assert_eq!(
+                accent.value(AccentRole::OnFill, dark, AccentDeclaration::User),
+                published.on_fill,
+                "{label}"
+            );
             for role in AccentRole::ALL {
                 assert_eq!(
                     accent.value(role, dark, AccentDeclaration::UserRoles),

@@ -11,12 +11,8 @@ use std::path::PathBuf;
 use overcrow_widget_format::ocss::{self, OcssErrorKind};
 use overcrow_widget_format::{Position, validate_package_style};
 use overcrow_widget_schema::package::{read_package, write_package};
-use overcrow_widget_schema::tokens::{AccentDeclaration, AccentRole, TOKENS};
+use overcrow_widget_schema::tokens::{AccentDeclaration, TOKENS};
 use serde_json::{Value, json};
-
-fn accent_sources() -> BTreeMap<String, Vec<u8>> {
-    sources("accent")
-}
 
 /// The sources of the fixture package `name`.
 fn sources(name: &str) -> BTreeMap<String, Vec<u8>> {
@@ -58,17 +54,6 @@ fn declaring(
     files
 }
 
-fn check(source: &str, declared: bool) -> Result<(), (OcssErrorKind, Position)> {
-    check_as(
-        source,
-        if declared {
-            AccentDeclaration::User
-        } else {
-            AccentDeclaration::None
-        },
-    )
-}
-
 fn check_as(source: &str, declaration: AccentDeclaration) -> Result<(), (OcssErrorKind, Position)> {
     let sheet = ocss::parse(source.as_bytes()).expect("grammar");
     ocss::check_user_accent(&sheet, declaration).map_err(|error| (error.kind, error.position))
@@ -76,13 +61,13 @@ fn check_as(source: &str, declaration: AccentDeclaration) -> Result<(), (OcssErr
 
 #[test]
 fn a_declaring_widget_may_use_the_tokens() {
-    assert_eq!(package_style(&accent_sources()), Ok(()));
+    assert_eq!(package_style(&sources("accent")), Ok(()));
 }
 
 #[test]
 fn another_widget_is_refused_at_admission() {
     assert_eq!(
-        package_style(&declaring(accent_sources(), None)),
+        package_style(&declaring(sources("accent"), None)),
         Err(OcssErrorKind::UndeclaredUserAccent)
     );
     assert_eq!(
@@ -90,7 +75,7 @@ fn another_widget_is_refused_at_admission() {
         "undeclared_user_accent"
     );
     // Without the tokens, the declaration changes nothing.
-    let mut files = declaring(accent_sources(), None);
+    let mut files = declaring(sources("accent"), None);
     files.insert(
         "style.ocss".into(),
         b".mine { background-color: var(--color-accent); }".to_vec(),
@@ -134,14 +119,22 @@ fn every_colour_value_is_checked_at_its_first_mention() {
             at(3, 14),
         ),
     ] {
-        assert_eq!(check(source, false), position, "{source}");
-        assert_eq!(check(source, true), Ok(()), "{source}");
+        assert_eq!(
+            check_as(source, AccentDeclaration::None),
+            position,
+            "{source}"
+        );
+        assert_eq!(
+            check_as(source, AccentDeclaration::User),
+            Ok(()),
+            "{source}"
+        );
     }
     // Named only in a comment: nothing to declare.
     assert_eq!(
-        check(
+        check_as(
             "/* --color-user-accent */ .a { color: var(--color-text); }",
-            false
+            AccentDeclaration::None
         ),
         Ok(())
     );
@@ -162,7 +155,7 @@ fn the_role_tokens_need_the_roles_declaration_at_admission() {
     }
     // The reduced form's own tokens stay open to both declarations.
     assert_eq!(
-        package_style(&declaring(accent_sources(), Some("user-roles"))),
+        package_style(&declaring(sources("accent"), Some("user-roles"))),
         Ok(())
     );
 }
@@ -171,9 +164,9 @@ fn the_role_tokens_need_the_roles_declaration_at_admission() {
 fn every_role_token_is_checked_against_the_declaration() {
     let mut seen = 0;
     for token in TOKENS {
-        let Some(role) = token.user_accent else {
+        if token.user_accent.is_none() {
             continue;
-        };
+        }
         seen += 1;
         let source = format!(".a {{ color: var({}); }}", token.name);
         let refused = Err((
@@ -193,7 +186,7 @@ fn every_role_token_is_checked_against_the_declaration() {
             Ok(()),
             "{source}"
         );
-        let reduced = matches!(role, AccentRole::Fill | AccentRole::OnFill);
+        let reduced = ["--color-user-accent", "--color-on-user-accent"].contains(&token.name);
         assert_eq!(
             check_as(&source, AccentDeclaration::User),
             if reduced { Ok(()) } else { refused },

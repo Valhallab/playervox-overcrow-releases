@@ -41,7 +41,7 @@ use crate::services::{
     Enter, Requirement, SERVICE_ERRORS, SERVICES, ServiceKind, Target, WRITE_INTENTS,
 };
 use crate::style::{DEFAULT_SIZES, PROPERTIES, SELECTORS, SHEET_RULES, SyntaxEntry, VALUE_SYNTAX};
-use crate::tokens::{AccentRoles, TOKENS, USER_ACCENTS, UserAccent};
+use crate::tokens::{AccentRole, TOKENS, USER_ACCENTS};
 use crate::view::{
     COMMON_ATTRIBUTES, Content, ELEMENTS, EVENTS, EXPRESSION_SUMMARY, Focus, NAMED_KEYS,
     TEMPLATE_CONSTRUCTS,
@@ -340,26 +340,26 @@ second table; the controls keep the brand accent.\n\n\
 A `style.ocss` that uses a user accent token its manifest's `accent` does not give is rejected \
 (`undeclared_user_accent`), and a draw command of such a widget cannot name it.\n\n\
 #### Roles\n\n\
-| Role | Token | Contrast held |\n| --- | --- | --- |\n\
-| Fill that carries text or a mark | `--color-user-accent` | |\n\
-| Text and icons on the fill and on its hover state | `--color-on-user-accent` | 4.5:1 on both |\n\
-| The fill under the pointer | `--color-user-accent-hover` | |\n\
-| Wash behind selected content | `--color-user-accent-soft` | |\n\
-| Text and icons on a surface | `--color-user-accent-text` | 4.5:1 on every surface token and on the wash over it |\n\
-| That text under the pointer or pressed | `--color-user-accent-text-hover` | the same |\n\
-| Border, rail, ring or gauge on a surface | `--color-user-accent-outline` | 3:1 on every surface token, on the wash and on a control track over it |\n\n\
-The text and the outline hold different ratios and may differ. A colour that does not reach \
-its ratio as a fill takes `--color-text` instead: `red` is never a text colour nor an outline \
-on the dark panel. In the light theme `lime` is the brand's provisional `--color-accent`, \
-which misses 4.5:1 on `--color-surface-hover` and on the wash.\n",
+| Role | Token | Contrast held |\n| --- | --- | --- |\n",
     );
-    for (theme, roles) in [
-        (
-            "dark",
-            (|accent| accent.dark_roles) as fn(&UserAccent) -> AccentRoles,
-        ),
-        ("light", |accent| accent.light_roles),
-    ] {
+    for token in TOKENS {
+        if let Some(role) = token.user_accent {
+            let _ = writeln!(
+                out,
+                "| {} | `{}` | {} |",
+                role.summary(),
+                token.name,
+                role.contrast()
+            );
+        }
+    }
+    out.push_str(
+        "\nThe text and the outline hold different ratios and may differ. A colour that does not \
+reach its ratio as a fill takes `--color-text` instead: `red` is never a text colour nor an \
+outline on the dark panel. In the light theme `lime` is the brand's provisional \
+`--color-accent`, which misses 4.5:1 on `--color-surface-hover` and on the wash.\n",
+    );
+    for (theme, dark) in [("dark", true), ("light", false)] {
         let _ = writeln!(
             out,
             "\n#### Roles in the {theme} theme\n\n\
@@ -368,19 +368,12 @@ The values of `\"accent\": \"user-roles\"`.\n\n\
 | --- | --- | --- | --- | --- | --- | --- | --- |"
         );
         for accent in &USER_ACCENTS {
-            let roles = roles(accent);
-            let _ = writeln!(
-                out,
-                "| `{}` | `{}` | `{}` | `{}` | `{}` | `{}` | `{}` | `{}` |",
-                accent.name,
-                roles.fill,
-                roles.on_fill,
-                roles.hover,
-                roles.soft,
-                roles.text,
-                roles.text_hover,
-                roles.outline
-            );
+            let roles = accent.roles(dark);
+            let _ = write!(out, "| `{}` |", accent.name);
+            for role in AccentRole::ALL {
+                let _ = write!(out, " `{}` |", roles.get(role));
+            }
+            out.push('\n');
         }
     }
     out.push_str(

@@ -27,7 +27,7 @@ use crate::model::{Field, ValueType, field, is_keyword};
 use crate::permissions::{
     CAPABILITIES, NETWORK_RULE_FIELDS, PARAMETER_CONSTRAINTS, capability_named,
 };
-use crate::tokens::{AccentDeclaration, FEATURE_USER_ACCENT, FEATURE_USER_ACCENT_ROLES};
+use crate::tokens::AccentDeclaration;
 use crate::version::Version;
 use crate::wrapper::{HOST_FEATURES, valid_label_text, validate_wrapper};
 
@@ -90,7 +90,7 @@ pub const MANIFEST_FIELDS: &[Field] = &[
     ),
     Field::optional(
         "accent",
-        ValueType::Keyword(&["user-roles", "user"]),
+        ValueType::Keyword(AccentDeclaration::VALUES),
         "`user-roles`: the widget follows the user's accent colour, with the `--color-user-accent…` tokens of every role, the host value `userAccent`, and the controls PlayerVox OverCrow draws in that colour. `user`, the reduced form: only the `--color-user-accent` and `--color-on-user-accent` tokens and `userAccent`. Absent, it gets none of them. No permission: any widget may declare it. Needs the catalog feature `user-accent`, and `user-accent-roles` for `user-roles`.",
     ),
     Field::optional(
@@ -357,12 +357,7 @@ impl Manifest {
                 .filter_map(|name| game_event_feature(name))
                 .map(|feature| feature.catalog_feature),
         );
-        if self.accent.follows_user() {
-            features.insert(FEATURE_USER_ACCENT);
-        }
-        if self.accent == AccentDeclaration::UserRoles {
-            features.insert(FEATURE_USER_ACCENT_ROLES);
-        }
+        features.extend(self.accent.features());
         features
     }
 
@@ -462,11 +457,12 @@ pub fn validate_manifest_value(value: Value) -> Result<Manifest, ManifestError> 
         Some(requires) => validate_requires(requires)?,
         None => BTreeSet::new(),
     };
-    let accent = match object.get("accent").map(Value::as_str) {
+    let accent = match object.get("accent") {
         None => AccentDeclaration::None,
-        Some(Some("user")) => AccentDeclaration::User,
-        Some(Some("user-roles")) => AccentDeclaration::UserRoles,
-        Some(_) => return Err(ManifestError::Accent),
+        Some(accent) => accent
+            .as_str()
+            .and_then(AccentDeclaration::from_manifest)
+            .ok_or(ManifestError::Accent)?,
     };
     Ok(Manifest {
         id: id.to_owned(),

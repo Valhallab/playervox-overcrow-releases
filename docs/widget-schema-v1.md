@@ -706,10 +706,10 @@ A `style.ocss` that uses a user accent token its manifest's `accent` does not gi
 
 | Role | Token | Contrast held |
 | --- | --- | --- |
-| Fill that carries text or a mark | `--color-user-accent` | |
+| Fill that carries text or a mark | `--color-user-accent` |  |
 | Text and icons on the fill and on its hover state | `--color-on-user-accent` | 4.5:1 on both |
-| The fill under the pointer | `--color-user-accent-hover` | |
-| Wash behind selected content | `--color-user-accent-soft` | |
+| The fill under the pointer | `--color-user-accent-hover` |  |
+| Wash behind selected content | `--color-user-accent-soft` |  |
 | Text and icons on a surface | `--color-user-accent-text` | 4.5:1 on every surface token and on the wash over it |
 | That text under the pointer or pressed | `--color-user-accent-text-hover` | the same |
 | Border, rail, ring or gauge on a surface | `--color-user-accent-outline` | 3:1 on every surface token, on the wash and on a control track over it |

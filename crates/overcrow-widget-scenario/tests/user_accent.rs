@@ -7,10 +7,6 @@ use overcrow_widget_schema::manifest::{Manifest, validate_manifest_value};
 use overcrow_widget_schema::tokens::USER_ACCENT_NAMES;
 use serde_json::{Value, json};
 
-fn manifest(accent: bool) -> Manifest {
-    declaring(accent.then_some("user"))
-}
-
 fn declaring(accent: Option<&str>) -> Manifest {
     let mut manifest = json!({
         "schemaVersion": 1, "apiVersion": 1, "id": "nova.daily-goal",
@@ -66,13 +62,15 @@ fn a_scenario_sets_the_accent_of_a_declaring_widget() {
             ..
         })
     ));
-    played.check_against(&manifest(true)).expect("declared");
+    played
+        .check_against(&declaring(Some("user")))
+        .expect("declared");
     played
         .check_against(&declaring(Some("user-roles")))
         .expect("declared with its roles");
 
     let at_start = played
-        .check_against(&manifest(false))
+        .check_against(&declaring(None))
         .expect_err("undeclared");
     assert_eq!(at_start.path, "host.userAccent");
     let in_a_step = scenario(
@@ -80,7 +78,7 @@ fn a_scenario_sets_the_accent_of_a_declaring_widget() {
         json!([{"expect": {"state": "running"}}, {"host": {"userAccent": "cyan"}}]),
     )
     .expect("valid")
-    .check_against(&manifest(false))
+    .check_against(&declaring(None))
     .expect_err("undeclared");
     assert_eq!(in_a_step.path, "steps[1].host.userAccent");
 
@@ -91,9 +89,9 @@ fn a_scenario_sets_the_accent_of_a_declaring_widget() {
         json!([{"host": {"theme": "dark"}}]),
     )
     .expect("valid");
-    plain.check_against(&manifest(false)).expect("plain");
+    plain.check_against(&declaring(None)).expect("plain");
     plain
-        .check_against(&manifest(true))
+        .check_against(&declaring(Some("user")))
         .expect("plain, declared");
     assert!(
         !serde_json::to_string(&plain.host)

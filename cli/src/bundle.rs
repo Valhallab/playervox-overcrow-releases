@@ -879,7 +879,7 @@ mod tests {
     fn unused_sdk_code_is_removed() {
         let code = bundle(COUNTER, COUNTER_VIEW, &["add", "label"]);
         // Used: formatNumber and what it needs. Unused: timers, services,
-        // drawing and the other formatters.
+        // drawing, the other formatters and the user accent tables.
         assert!(
             code.contains("numberFormat"),
             "formatNumber reads the region"
@@ -890,6 +890,8 @@ mod tests {
             "gameEvents",
             "reviews.page",
             "offsetMinutes",
+            "onFill",
+            "textHover",
         ] {
             assert!(
                 !code.contains(absent),

@@ -860,6 +860,10 @@ impl Parser<'_> {
             if self.user_accent_roles_at.is_none() {
                 for (tok, at) in &tokens {
                     let Tok::Ident(name) = tok else { continue };
+                    // Keywords are not tokens: only a `--name` is looked up.
+                    if !name.starts_with("--") {
+                        continue;
+                    }
                     let Some(role) = token(name).and_then(|token| token.user_accent) else {
                         continue;
                     };

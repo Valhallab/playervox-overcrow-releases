@@ -946,7 +946,12 @@ function tokens(t) {
 function userAccentRows(section, columns) {
   const names = union("UserAccent");
   const rows = records(sections, `Design tokens > User accent > ${section}`).map((entry) =>
-    columns.map((column) => entry[column]),
+    columns.map((column) => {
+      if (entry[column] === undefined) {
+        throw new Error(`the reference table "${section}" has no column "${column}"`);
+      }
+      return entry[column];
+    }),
   );
   const listed = rows.map(([name]) => name.replaceAll("`", ""));
   if (listed.join() !== names.join()) {

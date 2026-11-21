@@ -104,8 +104,8 @@ const fn role_token(name: &'static str, role: AccentRole, summary: &'static str)
         user_accent: Some(role),
         ..color(
             name,
-            DEFAULT_USER_ACCENT.dark_roles.get(role),
-            DEFAULT_USER_ACCENT.light_roles.get(role),
+            DEFAULT_USER_ACCENT.roles(true).get(role),
+            DEFAULT_USER_ACCENT.roles(false).get(role),
             summary,
         )
     }
@@ -406,12 +406,33 @@ pub enum AccentDeclaration {
 }
 
 impl AccentDeclaration {
+    /// The values `accent` may take in the manifest, the normal form first.
+    pub const VALUES: &'static [&'static str] = &["user-roles", "user"];
+
+    /// The declaration of the manifest value `accent`, one of
+    /// [`Self::VALUES`].
+    pub fn from_manifest(accent: &str) -> Option<Self> {
+        [Self::UserRoles, Self::User]
+            .into_iter()
+            .find(|declaration| declaration.as_str() == Some(accent))
+    }
+
     /// The value of `accent` in the manifest; `None` when it is absent.
     pub const fn as_str(self) -> Option<&'static str> {
         match self {
             Self::None => None,
-            Self::User => Some("user"),
-            Self::UserRoles => Some("user-roles"),
+            Self::User => Some(Self::VALUES[1]),
+            Self::UserRoles => Some(Self::VALUES[0]),
+        }
+    }
+
+    /// The catalog v2 features a reader must support to run a manifest
+    /// that declares it.
+    pub const fn features(self) -> &'static [&'static str] {
+        match self {
+            Self::None => &[],
+            Self::User => &[FEATURE_USER_ACCENT],
+            Self::UserRoles => &[FEATURE_USER_ACCENT, FEATURE_USER_ACCENT_ROLES],
         }
     }
 
@@ -465,6 +486,33 @@ impl AccentRole {
         Self::TextHover,
         Self::Outline,
     ];
+
+    /// What the role is drawn as, in the words of the schema reference.
+    pub const fn summary(self) -> &'static str {
+        match self {
+            Self::Fill => "Fill that carries text or a mark",
+            Self::OnFill => "Text and icons on the fill and on its hover state",
+            Self::Hover => "The fill under the pointer",
+            Self::Soft => "Wash behind selected content",
+            Self::Text => "Text and icons on a surface",
+            Self::TextHover => "That text under the pointer or pressed",
+            Self::Outline => "Border, rail, ring or gauge on a surface",
+        }
+    }
+
+    /// The contrast the schema's tests hold the role at; empty for a role
+    /// that is a background.
+    pub const fn contrast(self) -> &'static str {
+        match self {
+            Self::Fill | Self::Hover | Self::Soft => "",
+            Self::OnFill => "4.5:1 on both",
+            Self::Text => "4.5:1 on every surface token and on the wash over it",
+            Self::TextHover => "the same",
+            Self::Outline => {
+                "3:1 on every surface token, on the wash and on a control track over it"
+            }
+        }
+    }
 }
 
 /// The published colours of a user accent in one theme, those of
@@ -516,6 +564,15 @@ pub struct UserAccent {
 }
 
 impl UserAccent {
+    /// The colour of each role in the dark or the light theme.
+    pub const fn roles(&self, dark: bool) -> AccentRoles {
+        if dark {
+            self.dark_roles
+        } else {
+            self.light_roles
+        }
+    }
+
     /// The value of the user accent token of `role` for a widget that
     /// declares `declaration`, in the dark or the light theme. Under
     /// `"user"` the fill and its text keep their published values; every
@@ -526,16 +583,12 @@ impl UserAccent {
         dark: bool,
         declaration: AccentDeclaration,
     ) -> &'static str {
-        let (colors, roles) = if dark {
-            (self.dark, self.dark_roles)
-        } else {
-            (self.light, self.light_roles)
-        };
+        let colors = if dark { self.dark } else { self.light };
         match (declaration, role) {
-            (AccentDeclaration::UserRoles, _) => roles.get(role),
+            (AccentDeclaration::UserRoles, _) => self.roles(dark).get(role),
             (_, AccentRole::Fill) => colors.fill,
             (_, AccentRole::OnFill) => colors.on_fill,
-            _ => roles.get(role),
+            _ => self.roles(dark).get(role),
         }
     }
 }
@@ -614,223 +667,35 @@ pub const DEFAULT_USER_ACCENT: UserAccent = USER_ACCENTS[0];
 ///
 /// The schema's tests derive every value from these rules and hold each
 /// role at its contrast on each surface.
+#[rustfmt::skip]
 pub const USER_ACCENTS: [UserAccent; 9] = [
-    accent(
-        "lime",
-        "#a3e635",
-        "#84cc16",
-        "#18181b",
-        [
-            "#a3e635",
-            "#09090b",
-            "#b5f153",
-            "#a3e6351c",
-            "#a3e635",
-            "#b5f153",
-            "#a3e635",
-        ],
-        [
-            "#4d7c0f",
-            "#ffffff",
-            "#3f6212",
-            "#4d7c0f1f",
-            "#4d7c0f",
-            "#3f6212",
-            "#4d7c0f",
-        ],
-    ),
-    accent(
-        "amber",
-        "#fbbf24",
-        "#f59e0b",
-        "#18181b",
-        [
-            "#fbbf24",
-            "#18181b",
-            "#fccc50",
-            "#fbbf241c",
-            "#fbbf24",
-            "#fccc50",
-            "#fbbf24",
-        ],
-        [
-            "#f59e0b",
-            "#18181b",
-            "#f7ad30",
-            "#f59e0b1f",
-            "#18181b",
-            "#141417",
-            "#18181b",
-        ],
-    ),
-    accent(
-        "red",
-        "#991b1b",
-        "#991b1b",
-        "#ffffff",
-        [
-            "#991b1b",
-            "#ffffff",
-            "#ad4949",
-            "#991b1b1c",
-            "#f7f7f8",
-            "#f9f9f9",
-            "#f7f7f8",
-        ],
-        [
-            "#991b1b",
-            "#ffffff",
-            "#821717",
-            "#991b1b1f",
-            "#991b1b",
-            "#821717",
-            "#991b1b",
-        ],
-    ),
-    accent(
-        "pink",
-        "#fb7185",
-        "#f43f5e",
-        "#18181b",
-        [
-            "#fb7185",
-            "#18181b",
-            "#fc8d9d",
-            "#fb71851c",
-            "#fb7185",
-            "#fc8d9d",
-            "#fb7185",
-        ],
-        [
-            "#f43f5e",
-            "#18181b",
-            "#f65c76",
-            "#f43f5e1f",
-            "#18181b",
-            "#141417",
-            "#18181b",
-        ],
-    ),
-    accent(
-        "purple",
-        "#a78bfa",
-        "#a78bfa",
-        "#18181b",
-        [
-            "#a78bfa",
-            "#18181b",
-            "#b9a2fb",
-            "#a78bfa1c",
-            "#a78bfa",
-            "#b9a2fb",
-            "#a78bfa",
-        ],
-        [
-            "#a78bfa",
-            "#18181b",
-            "#b49cfb",
-            "#a78bfa1f",
-            "#18181b",
-            "#141417",
-            "#18181b",
-        ],
-    ),
-    accent(
-        "blue",
-        "#60a5fa",
-        "#3b82f6",
-        "#18181b",
-        [
-            "#60a5fa",
-            "#18181b",
-            "#80b7fb",
-            "#60a5fa1c",
-            "#60a5fa",
-            "#80b7fb",
-            "#60a5fa",
-        ],
-        [
-            "#3b82f6",
-            "#18181b",
-            "#5895f7",
-            "#3b82f61f",
-            "#18181b",
-            "#141417",
-            "#18181b",
-        ],
-    ),
-    accent(
-        "cyan",
-        "#22d3ee",
-        "#06b6d4",
-        "#18181b",
-        [
-            "#22d3ee",
-            "#18181b",
-            "#4edcf1",
-            "#22d3ee1c",
-            "#22d3ee",
-            "#4edcf1",
-            "#22d3ee",
-        ],
-        [
-            "#06b6d4",
-            "#18181b",
-            "#2bc1da",
-            "#06b6d41f",
-            "#18181b",
-            "#141417",
-            "#18181b",
-        ],
-    ),
-    accent(
-        "emerald",
-        "#34d399",
-        "#10b981",
-        "#18181b",
-        [
-            "#34d399",
-            "#18181b",
-            "#5ddcad",
-            "#34d3991c",
-            "#34d399",
-            "#5ddcad",
-            "#34d399",
-        ],
-        [
-            "#10b981",
-            "#18181b",
-            "#34c494",
-            "#10b9811f",
-            "#18181b",
-            "#141417",
-            "#18181b",
-        ],
-    ),
-    accent(
-        "steel",
-        "#a1a1aa",
-        "#a1a1aa",
-        "#18181b",
-        [
-            "#a1a1aa",
-            "#18181b",
-            "#b4b4bb",
-            "#a1a1aa1c",
-            "#a1a1aa",
-            "#b4b4bb",
-            "#a1a1aa",
-        ],
-        [
-            "#a1a1aa",
-            "#18181b",
-            "#afafb7",
-            "#a1a1aa1f",
-            "#18181b",
-            "#141417",
-            "#18181b",
-        ],
-    ),
+    accent("lime", "#a3e635", "#84cc16", "#18181b",
+        ["#a3e635", "#09090b", "#b5f153", "#a3e6351c", "#a3e635", "#b5f153", "#a3e635"],
+        ["#4d7c0f", "#ffffff", "#3f6212", "#4d7c0f1f", "#4d7c0f", "#3f6212", "#4d7c0f"]),
+    accent("amber", "#fbbf24", "#f59e0b", "#18181b",
+        ["#fbbf24", "#18181b", "#fccc50", "#fbbf241c", "#fbbf24", "#fccc50", "#fbbf24"],
+        ["#f59e0b", "#18181b", "#f7ad30", "#f59e0b1f", "#18181b", "#141417", "#18181b"]),
+    accent("red", "#991b1b", "#991b1b", "#ffffff",
+        ["#991b1b", "#ffffff", "#ad4949", "#991b1b1c", "#f7f7f8", "#f9f9f9", "#f7f7f8"],
+        ["#991b1b", "#ffffff", "#821717", "#991b1b1f", "#991b1b", "#821717", "#991b1b"]),
+    accent("pink", "#fb7185", "#f43f5e", "#18181b",
+        ["#fb7185", "#18181b", "#fc8d9d", "#fb71851c", "#fb7185", "#fc8d9d", "#fb7185"],
+        ["#f43f5e", "#18181b", "#f65c76", "#f43f5e1f", "#18181b", "#141417", "#18181b"]),
+    accent("purple", "#a78bfa", "#a78bfa", "#18181b",
+        ["#a78bfa", "#18181b", "#b9a2fb", "#a78bfa1c", "#a78bfa", "#b9a2fb", "#a78bfa"],
+        ["#a78bfa", "#18181b", "#b49cfb", "#a78bfa1f", "#18181b", "#141417", "#18181b"]),
+    accent("blue", "#60a5fa", "#3b82f6", "#18181b",
+        ["#60a5fa", "#18181b", "#80b7fb", "#60a5fa1c", "#60a5fa", "#80b7fb", "#60a5fa"],
+        ["#3b82f6", "#18181b", "#5895f7", "#3b82f61f", "#18181b", "#141417", "#18181b"]),
+    accent("cyan", "#22d3ee", "#06b6d4", "#18181b",
+        ["#22d3ee", "#18181b", "#4edcf1", "#22d3ee1c", "#22d3ee", "#4edcf1", "#22d3ee"],
+        ["#06b6d4", "#18181b", "#2bc1da", "#06b6d41f", "#18181b", "#141417", "#18181b"]),
+    accent("emerald", "#34d399", "#10b981", "#18181b",
+        ["#34d399", "#18181b", "#5ddcad", "#34d3991c", "#34d399", "#5ddcad", "#34d399"],
+        ["#10b981", "#18181b", "#34c494", "#10b9811f", "#18181b", "#141417", "#18181b"]),
+    accent("steel", "#a1a1aa", "#a1a1aa", "#18181b",
+        ["#a1a1aa", "#18181b", "#b4b4bb", "#a1a1aa1c", "#a1a1aa", "#b4b4bb", "#a1a1aa"],
+        ["#a1a1aa", "#18181b", "#afafb7", "#a1a1aa1f", "#18181b", "#141417", "#18181b"]),
 ];
 
 /// The names of [`USER_ACCENTS`], in its order: the keyword of the IPC

@@ -672,7 +672,7 @@ pub fn style_diagnostic(kind: OcssErrorKind, position: Position, source: &str) -
         OcssErrorKind::UndeclaredUserAccent => {
             let role = name
                 .as_deref()
-                .and_then(|name| tokens::token(&format!("--{}", name.trim_start_matches('-'))))
+                .and_then(tokens::token)
                 .and_then(|token| token.user_accent);
             if role.is_none_or(|role| tokens::AccentDeclaration::User.allows(role)) {
                 (
