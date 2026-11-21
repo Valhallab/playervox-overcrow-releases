@@ -22,6 +22,9 @@ Reset` on Linux, `Ctrl+Shift+P` and `Ctrl+Shift+R` on Windows. In French:
 `Démarrer / pause`, `Réinitialiser`. The time uses the interface font with
 tabular figures and `.` before the hundredths in both languages.
 
+The accent colour is the one chosen in PlayerVox OverCrow (since 1.1.0):
+only the focus ring OverCrow draws around a button follows it.
+
 ## Controls
 
 | Mode | Control | Does |
