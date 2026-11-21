@@ -61,7 +61,9 @@ pub fn check(project: &Project, report: &mut Report) -> Option<Sources> {
         && let Err(error) = ocss::parse(style).and_then(|sheet| {
             let declared = manifest
                 .as_ref()
-                .is_none_or(|manifest| manifest.user_accent);
+                .map_or(tokens::AccentDeclaration::UserRoles, |manifest| {
+                    manifest.accent
+                });
             ocss::check_user_accent(&sheet, declared)
         })
     {
@@ -292,7 +294,7 @@ pub fn manifest_diagnostic(error: ManifestError, source: &str) -> Diagnostic {
         ),
         ManifestError::Accent => (
             "accent",
-            "`accent` must be \"user\", or be left out".into(),
+            "`accent` must be \"user-roles\" or \"user\", or be left out".into(),
             Some("see https://overcrow.playervox.com/docs/en/style/#user-accent".into()),
         ),
     };
@@ -667,10 +669,23 @@ pub fn style_diagnostic(kind: OcssErrorKind, position: Position, source: &str) -
                 })
                 .map(|found| format!("did you mean `var(--{found})`?")),
         ),
-        OcssErrorKind::UndeclaredUserAccent => (
-            format!("{quoted} needs the user's accent colour, which the manifest does not declare"),
-            Some("add `\"accent\": \"user\"` to manifest.json, or use `--color-accent`; see https://overcrow.playervox.com/docs/en/style/#user-accent".into()),
-        ),
+        OcssErrorKind::UndeclaredUserAccent => {
+            let role = name
+                .as_deref()
+                .and_then(|name| tokens::token(&format!("--{}", name.trim_start_matches('-'))))
+                .and_then(|token| token.user_accent);
+            if role.is_none_or(|role| tokens::AccentDeclaration::User.allows(role)) {
+                (
+                    format!("{quoted} needs the user's accent colour, which the manifest does not declare"),
+                    Some("add `\"accent\": \"user-roles\"` to manifest.json, or use `--color-accent`; see https://overcrow.playervox.com/docs/en/style/#user-accent".into()),
+                )
+            } else {
+                (
+                    format!("{quoted} needs `\"accent\": \"user-roles\"`, which the manifest does not declare"),
+                    Some("set `\"accent\": \"user-roles\"` in manifest.json (`\"user\"` gives only `--color-user-accent` and `--color-on-user-accent`), or use `--color-accent`; see https://overcrow.playervox.com/docs/en/style/#user-accent".into()),
+                )
+            }
+        }
         OcssErrorKind::NotAnimatable => (
             format!("{quoted} cannot be animated"),
             Some("only paint properties (colors, opacity, transforms) animate".into()),

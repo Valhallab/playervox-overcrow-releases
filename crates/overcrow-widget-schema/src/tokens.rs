@@ -40,10 +40,12 @@ pub struct Token {
     pub light: &'static str,
     pub status: Status,
     pub summary: &'static str,
-    /// The value follows the user's accent colour ([`USER_ACCENTS`]) for a
-    /// widget whose manifest declares `"accent": "user"`; `dark` and
-    /// `light` are the default, lime. Another widget cannot use the token.
-    pub user_accent: bool,
+    /// The token's role in the user's accent: its value follows the accent
+    /// colour ([`USER_ACCENTS`]) for a widget whose manifest declares it
+    /// ([`AccentDeclaration::allows`]); `dark` and `light` are the default,
+    /// lime. Another widget cannot use the token. `None` for every other
+    /// token.
+    pub user_accent: Option<AccentRole>,
 }
 
 /// A colour the pilots' reference images checked in both themes (P2.4).
@@ -72,7 +74,7 @@ const fn color(
         light,
         status: Status::P2_4,
         summary,
-        user_accent: false,
+        user_accent: None,
     }
 }
 
@@ -89,21 +91,23 @@ const fn same(
         light: value,
         status: Status::Fixed,
         summary,
-        user_accent: false,
+        user_accent: None,
     }
 }
 
-/// A colour of the user's accent; the table holds its default, lime.
-const fn user_accent_token(
-    name: &'static str,
-    dark: &'static str,
-    light: &'static str,
-    summary: &'static str,
-) -> Token {
+/// The colour of one role of the user's accent. The table holds its
+/// default, lime, as `"accent": "user-roles"` gives it: the brand accent
+/// family.
+const fn role_token(name: &'static str, role: AccentRole, summary: &'static str) -> Token {
     Token {
         status: Status::Fixed,
-        user_accent: true,
-        ..color(name, dark, light, summary)
+        user_accent: Some(role),
+        ..color(
+            name,
+            DEFAULT_USER_ACCENT.dark_roles.get(role),
+            DEFAULT_USER_ACCENT.light_roles.get(role),
+            summary,
+        )
     }
 }
 
@@ -136,19 +140,42 @@ pub const TOKENS: &[Token] = &[
         light: "#ffffff",
         status: Status::Fixed,
         summary: "Text and icons drawn on the accent and its hover state.",
-        user_accent: false,
+        user_accent: None,
     },
-    user_accent_token(
+    role_token(
         "--color-user-accent",
-        DEFAULT_USER_ACCENT.dark.fill,
-        DEFAULT_USER_ACCENT.light.fill,
-        "The user's accent colour, a fill for what belongs to the user; never a text colour on the panel. Needs `\"accent\": \"user\"` in the manifest; lime by default.",
+        AccentRole::Fill,
+        "The user's accent colour, a fill that carries text or a mark; never a text colour or a border on a surface. Needs `\"accent\": \"user-roles\"` or `\"user\"` in the manifest; lime by default, the brand accent.",
     ),
-    user_accent_token(
+    role_token(
         "--color-on-user-accent",
-        DEFAULT_USER_ACCENT.dark.on_fill,
-        DEFAULT_USER_ACCENT.light.on_fill,
-        "Text and icons drawn on `--color-user-accent`. Needs `\"accent\": \"user\"` in the manifest.",
+        AccentRole::OnFill,
+        "Text and icons drawn on `--color-user-accent` and on its hover state. Needs `\"accent\": \"user-roles\"` or `\"user\"` in the manifest.",
+    ),
+    role_token(
+        "--color-user-accent-hover",
+        AccentRole::Hover,
+        "`--color-user-accent` under the pointer. Needs `\"accent\": \"user-roles\"` in the manifest.",
+    ),
+    role_token(
+        "--color-user-accent-soft",
+        AccentRole::Soft,
+        "Wash of the user's accent behind selected content. Needs `\"accent\": \"user-roles\"` in the manifest.",
+    ),
+    role_token(
+        "--color-user-accent-text",
+        AccentRole::Text,
+        "Text and icons in the user's accent on a surface, readable in every accent colour. Needs `\"accent\": \"user-roles\"` in the manifest.",
+    ),
+    role_token(
+        "--color-user-accent-text-hover",
+        AccentRole::TextHover,
+        "`--color-user-accent-text` under the pointer or pressed. Needs `\"accent\": \"user-roles\"` in the manifest.",
+    ),
+    role_token(
+        "--color-user-accent-outline",
+        AccentRole::Outline,
+        "Borders, rails, rings and gauges in the user's accent on a surface, visible in every accent colour. Needs `\"accent\": \"user-roles\"` in the manifest.",
     ),
     checked(
         "--color-surface-panel",
@@ -343,7 +370,7 @@ pub const TOKENS: &[Token] = &[
         light: "0px 4px 16px 0px #0000001f",
         status: Status::P2_4,
         summary: "Shadow of the widget panel and of floating host surfaces.",
-        user_accent: false,
+        user_accent: None,
     },
 ];
 
@@ -351,12 +378,97 @@ pub fn token(name: &str) -> Option<&'static Token> {
     TOKENS.iter().find(|token| token.name == name)
 }
 
-/// The catalog v2 feature of a manifest that declares `"accent": "user"`:
-/// a reader that does not know the field refuses the manifest, and its
-/// style could not resolve the user accent tokens.
+/// The catalog v2 feature of a manifest that declares `"accent": "user"` or
+/// `"user-roles"`: a reader that does not know the field refuses the
+/// manifest, and its style could not resolve the user accent tokens.
 pub const FEATURE_USER_ACCENT: &str = "user-accent";
 
-/// The colours of a user accent in one theme.
+/// The catalog v2 feature of a manifest that declares
+/// `"accent": "user-roles"`: a reader that does not know the value refuses
+/// the manifest, and its style could not resolve the role tokens. Such a
+/// reader keeps the version of the widget it already has.
+pub const FEATURE_USER_ACCENT_ROLES: &str = "user-accent-roles";
+
+/// What a manifest declares with `accent`.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum AccentDeclaration {
+    /// No `accent`: the widget keeps the brand accent and gets nothing of
+    /// the user's.
+    #[default]
+    None,
+    /// `"user"`, the reduced form: the user's fill and the text on it,
+    /// with the values of [`UserAccent::dark`] and [`UserAccent::light`].
+    /// The controls the host draws keep the brand accent.
+    User,
+    /// `"user-roles"`: a colour for each role ([`AccentRoles`]), and the
+    /// controls the host draws follow the user's accent.
+    UserRoles,
+}
+
+impl AccentDeclaration {
+    /// The value of `accent` in the manifest; `None` when it is absent.
+    pub const fn as_str(self) -> Option<&'static str> {
+        match self {
+            Self::None => None,
+            Self::User => Some("user"),
+            Self::UserRoles => Some("user-roles"),
+        }
+    }
+
+    /// Whether the widget receives the name of the user's accent.
+    pub const fn follows_user(self) -> bool {
+        !matches!(self, Self::None)
+    }
+
+    /// Whether the widget may use the user accent token of `role`.
+    pub const fn allows(self, role: AccentRole) -> bool {
+        match self {
+            Self::None => false,
+            Self::User => matches!(role, AccentRole::Fill | AccentRole::OnFill),
+            Self::UserRoles => true,
+        }
+    }
+}
+
+/// The role of a colour of the user's accent: what it is drawn as, and on
+/// what.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum AccentRole {
+    /// `--color-user-accent`: a fill that carries text or a mark.
+    Fill,
+    /// `--color-on-user-accent`: text and icons on the fill and on its
+    /// hover state, at WCAG AA (4.5:1) on both.
+    OnFill,
+    /// `--color-user-accent-hover`: the fill under the pointer.
+    Hover,
+    /// `--color-user-accent-soft`: a wash behind selected content.
+    Soft,
+    /// `--color-user-accent-text`: text and icons on a surface, at WCAG AA
+    /// (4.5:1) on every surface token and on the wash over each.
+    Text,
+    /// `--color-user-accent-text-hover`: that text under the pointer or
+    /// pressed, at the same contrast.
+    TextHover,
+    /// `--color-user-accent-outline`: a border, a rail, a ring or a gauge
+    /// on a surface, an indicator at 3:1 (WCAG 1.4.11) on every surface
+    /// token.
+    Outline,
+}
+
+impl AccentRole {
+    pub const ALL: [Self; 7] = [
+        Self::Fill,
+        Self::OnFill,
+        Self::Hover,
+        Self::Soft,
+        Self::Text,
+        Self::TextHover,
+        Self::Outline,
+    ];
+}
+
+/// The published colours of a user accent in one theme, those of
+/// `"accent": "user"`.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct AccentColors {
     /// Value of `--color-user-accent`.
@@ -365,21 +477,93 @@ pub struct AccentColors {
     pub on_fill: &'static str,
 }
 
+/// The colour of each role of a user accent in one theme, those of
+/// `"accent": "user-roles"` and of PlayerVox OverCrow's own interface.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct AccentRoles {
+    pub fill: &'static str,
+    pub on_fill: &'static str,
+    pub hover: &'static str,
+    /// `#rrggbbaa`: the fill at the alpha of `--color-accent-soft`.
+    pub soft: &'static str,
+    pub text: &'static str,
+    pub text_hover: &'static str,
+    pub outline: &'static str,
+}
+
+impl AccentRoles {
+    pub const fn get(&self, role: AccentRole) -> &'static str {
+        match role {
+            AccentRole::Fill => self.fill,
+            AccentRole::OnFill => self.on_fill,
+            AccentRole::Hover => self.hover,
+            AccentRole::Soft => self.soft,
+            AccentRole::Text => self.text,
+            AccentRole::TextHover => self.text_hover,
+            AccentRole::Outline => self.outline,
+        }
+    }
+}
+
 /// One accent colour the user can choose in PlayerVox OverCrow.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct UserAccent {
     pub name: &'static str,
     pub dark: AccentColors,
     pub light: AccentColors,
+    pub dark_roles: AccentRoles,
+    pub light_roles: AccentRoles,
 }
 
-/// A PlayerVox accent: its fill in the dark and in the light theme, both
-/// under `on_fill` text.
+impl UserAccent {
+    /// The value of the user accent token of `role` for a widget that
+    /// declares `declaration`, in the dark or the light theme. Under
+    /// `"user"` the fill and its text keep their published values; every
+    /// other case reads the roles.
+    pub const fn value(
+        &self,
+        role: AccentRole,
+        dark: bool,
+        declaration: AccentDeclaration,
+    ) -> &'static str {
+        let (colors, roles) = if dark {
+            (self.dark, self.dark_roles)
+        } else {
+            (self.light, self.light_roles)
+        };
+        match (declaration, role) {
+            (AccentDeclaration::UserRoles, _) => roles.get(role),
+            (_, AccentRole::Fill) => colors.fill,
+            (_, AccentRole::OnFill) => colors.on_fill,
+            _ => roles.get(role),
+        }
+    }
+}
+
+/// The roles of one theme: `[fill, on_fill, hover, soft, text, text_hover,
+/// outline]`.
+const fn roles(values: [&'static str; 7]) -> AccentRoles {
+    let [fill, on_fill, hover, soft, text, text_hover, outline] = values;
+    AccentRoles {
+        fill,
+        on_fill,
+        hover,
+        soft,
+        text,
+        text_hover,
+        outline,
+    }
+}
+
+/// A PlayerVox accent: its published fill in the dark and in the light
+/// theme, both under `on_fill` text, and its roles in each theme.
 const fn accent(
     name: &'static str,
     dark: &'static str,
     light: &'static str,
     on_fill: &'static str,
+    dark_roles: [&'static str; 7],
+    light_roles: [&'static str; 7],
 ) -> UserAccent {
     UserAccent {
         name,
@@ -391,6 +575,8 @@ const fn accent(
             fill: light,
             on_fill,
         },
+        dark_roles: roles(dark_roles),
+        light_roles: roles(light_roles),
     }
 }
 
@@ -398,21 +584,253 @@ const fn accent(
 pub const DEFAULT_USER_ACCENT: UserAccent = USER_ACCENTS[0];
 
 /// The accent colours of PlayerVox, in its order, `lime` first (the
-/// default). The dark theme takes each colour's light shade; the light
-/// theme its strong shade, except `purple` and `steel`, whose strong shades
-/// (`#8b5cf6`, `#71717a`) fall below WCAG AA under `#18181b`. `red` is
-/// `#991b1b` under white text in both themes. A schema test keeps every
-/// `on_fill` at AA on its `fill`.
+/// default).
+///
+/// The published pair of `"accent": "user"`: the dark theme takes each
+/// colour's light shade; the light theme its strong shade, except `purple`
+/// and `steel`, whose strong shades (`#8b5cf6`, `#71717a`) fall below WCAG
+/// AA under `#18181b`. `red` is `#991b1b` under white text in both themes.
+///
+/// The roles of `"accent": "user-roles"`, `[fill, on_fill, hover, soft,
+/// text, text_hover, outline]` in the dark then in the light theme. `lime`
+/// is exactly the brand accent family (`--color-accent`,
+/// `--color-on-accent`, `--color-accent-hover`, `--color-accent-soft`), so a
+/// widget that follows a user who kept lime draws what it drew with the
+/// brand tokens. Every other colour keeps the fill and the text of its
+/// published pair, and:
+///
+/// - `hover` moves the fill away from the text it carries: 20 % towards
+///   white in the dark theme; in the light theme 15 % towards white under
+///   dark text, towards black under white text;
+/// - `soft` is the fill at the alpha of `--color-accent-soft`;
+/// - `text` is the fill where it reaches 4.5:1 on every surface token
+///   (`--color-surface-panel`, `-raised`, `-hover`, `-field`, `-popover`),
+///   `--color-text` otherwise: `red` is never a text colour on the dark
+///   panel;
+/// - `text_hover` moves `text` away from the surfaces: 20 % towards white
+///   in the dark theme, 15 % towards black in the light theme;
+/// - `outline` is the fill where it reaches 3:1 on every surface token,
+///   `--color-text` otherwise.
+///
+/// The schema's tests derive every value from these rules and hold each
+/// role at its contrast on each surface.
 pub const USER_ACCENTS: [UserAccent; 9] = [
-    accent("lime", "#a3e635", "#84cc16", "#18181b"),
-    accent("amber", "#fbbf24", "#f59e0b", "#18181b"),
-    accent("red", "#991b1b", "#991b1b", "#ffffff"),
-    accent("pink", "#fb7185", "#f43f5e", "#18181b"),
-    accent("purple", "#a78bfa", "#a78bfa", "#18181b"),
-    accent("blue", "#60a5fa", "#3b82f6", "#18181b"),
-    accent("cyan", "#22d3ee", "#06b6d4", "#18181b"),
-    accent("emerald", "#34d399", "#10b981", "#18181b"),
-    accent("steel", "#a1a1aa", "#a1a1aa", "#18181b"),
+    accent(
+        "lime",
+        "#a3e635",
+        "#84cc16",
+        "#18181b",
+        [
+            "#a3e635",
+            "#09090b",
+            "#b5f153",
+            "#a3e6351c",
+            "#a3e635",
+            "#b5f153",
+            "#a3e635",
+        ],
+        [
+            "#4d7c0f",
+            "#ffffff",
+            "#3f6212",
+            "#4d7c0f1f",
+            "#4d7c0f",
+            "#3f6212",
+            "#4d7c0f",
+        ],
+    ),
+    accent(
+        "amber",
+        "#fbbf24",
+        "#f59e0b",
+        "#18181b",
+        [
+            "#fbbf24",
+            "#18181b",
+            "#fccc50",
+            "#fbbf241c",
+            "#fbbf24",
+            "#fccc50",
+            "#fbbf24",
+        ],
+        [
+            "#f59e0b",
+            "#18181b",
+            "#f7ad30",
+            "#f59e0b1f",
+            "#18181b",
+            "#141417",
+            "#18181b",
+        ],
+    ),
+    accent(
+        "red",
+        "#991b1b",
+        "#991b1b",
+        "#ffffff",
+        [
+            "#991b1b",
+            "#ffffff",
+            "#ad4949",
+            "#991b1b1c",
+            "#f7f7f8",
+            "#f9f9f9",
+            "#f7f7f8",
+        ],
+        [
+            "#991b1b",
+            "#ffffff",
+            "#821717",
+            "#991b1b1f",
+            "#991b1b",
+            "#821717",
+            "#991b1b",
+        ],
+    ),
+    accent(
+        "pink",
+        "#fb7185",
+        "#f43f5e",
+        "#18181b",
+        [
+            "#fb7185",
+            "#18181b",
+            "#fc8d9d",
+            "#fb71851c",
+            "#fb7185",
+            "#fc8d9d",
+            "#fb7185",
+        ],
+        [
+            "#f43f5e",
+            "#18181b",
+            "#f65c76",
+            "#f43f5e1f",
+            "#18181b",
+            "#141417",
+            "#18181b",
+        ],
+    ),
+    accent(
+        "purple",
+        "#a78bfa",
+        "#a78bfa",
+        "#18181b",
+        [
+            "#a78bfa",
+            "#18181b",
+            "#b9a2fb",
+            "#a78bfa1c",
+            "#a78bfa",
+            "#b9a2fb",
+            "#a78bfa",
+        ],
+        [
+            "#a78bfa",
+            "#18181b",
+            "#b49cfb",
+            "#a78bfa1f",
+            "#18181b",
+            "#141417",
+            "#18181b",
+        ],
+    ),
+    accent(
+        "blue",
+        "#60a5fa",
+        "#3b82f6",
+        "#18181b",
+        [
+            "#60a5fa",
+            "#18181b",
+            "#80b7fb",
+            "#60a5fa1c",
+            "#60a5fa",
+            "#80b7fb",
+            "#60a5fa",
+        ],
+        [
+            "#3b82f6",
+            "#18181b",
+            "#5895f7",
+            "#3b82f61f",
+            "#18181b",
+            "#141417",
+            "#18181b",
+        ],
+    ),
+    accent(
+        "cyan",
+        "#22d3ee",
+        "#06b6d4",
+        "#18181b",
+        [
+            "#22d3ee",
+            "#18181b",
+            "#4edcf1",
+            "#22d3ee1c",
+            "#22d3ee",
+            "#4edcf1",
+            "#22d3ee",
+        ],
+        [
+            "#06b6d4",
+            "#18181b",
+            "#2bc1da",
+            "#06b6d41f",
+            "#18181b",
+            "#141417",
+            "#18181b",
+        ],
+    ),
+    accent(
+        "emerald",
+        "#34d399",
+        "#10b981",
+        "#18181b",
+        [
+            "#34d399",
+            "#18181b",
+            "#5ddcad",
+            "#34d3991c",
+            "#34d399",
+            "#5ddcad",
+            "#34d399",
+        ],
+        [
+            "#10b981",
+            "#18181b",
+            "#34c494",
+            "#10b9811f",
+            "#18181b",
+            "#141417",
+            "#18181b",
+        ],
+    ),
+    accent(
+        "steel",
+        "#a1a1aa",
+        "#a1a1aa",
+        "#18181b",
+        [
+            "#a1a1aa",
+            "#18181b",
+            "#b4b4bb",
+            "#a1a1aa1c",
+            "#a1a1aa",
+            "#b4b4bb",
+            "#a1a1aa",
+        ],
+        [
+            "#a1a1aa",
+            "#18181b",
+            "#afafb7",
+            "#a1a1aa1f",
+            "#18181b",
+            "#141417",
+            "#18181b",
+        ],
+    ),
 ];
 
 /// The names of [`USER_ACCENTS`], in its order: the keyword of the IPC

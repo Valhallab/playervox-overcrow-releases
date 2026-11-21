@@ -421,8 +421,9 @@ fn limits() -> String {
     out
 }
 
-/// The colours of each user accent, by theme: what the host resolves
-/// `--color-user-accent` and `--color-on-user-accent` to.
+/// The colours of each user accent, by theme: what the host resolves the
+/// user accent tokens to, the published pair of `"accent": "user"` then the
+/// roles of `"accent": "user-roles"`.
 fn accents() -> String {
     let mut out = String::from(HEADER);
     out.push_str(concat!(
@@ -449,6 +450,51 @@ fn accents() -> String {
             quote(accent.light.fill),
             quote(accent.light.on_fill),
         );
+    }
+    out.push_str("};\n");
+    out.push_str(concat!(
+        "\n/** The colour of each role of a user accent in one theme. */\n",
+        "export interface AccentRoles {\n",
+        "  /** A fill that carries text or a mark, `--color-user-accent`. */\n",
+        "  readonly fill: `#${string}`;\n",
+        "  /** Text and icons on the fill and on `hover`, `--color-on-user-accent`, at WCAG AA. */\n",
+        "  readonly onFill: `#${string}`;\n",
+        "  /** The fill under the pointer, `--color-user-accent-hover`. */\n",
+        "  readonly hover: `#${string}`;\n",
+        "  /** A wash behind selected content, `--color-user-accent-soft`; `#rrggbbaa`. */\n",
+        "  readonly soft: `#${string}`;\n",
+        "  /** Text and icons on a surface, `--color-user-accent-text`, at WCAG AA. */\n",
+        "  readonly text: `#${string}`;\n",
+        "  /** `text` under the pointer or pressed, `--color-user-accent-text-hover`. */\n",
+        "  readonly textHover: `#${string}`;\n",
+        "  /** A border, a rail, a ring or a gauge on a surface, `--color-user-accent-outline`, at 3:1. */\n",
+        "  readonly outline: `#${string}`;\n",
+        "}\n\n",
+        "/**\n",
+        " * The roles of every user accent, by theme: the values of the user accent\n",
+        " * tokens for a widget whose manifest declares `\"accent\": \"user-roles\"`.\n",
+        " * `lime` is the brand accent family.\n",
+        " */\n",
+        "export const USER_ACCENT_ROLES: {\n",
+        "  readonly [name in UserAccent]: { readonly [theme in Theme]: AccentRoles };\n",
+        "} = {\n",
+    ));
+    for accent in USER_ACCENTS {
+        let _ = writeln!(out, "  {}: {{", accent.name);
+        for (theme, roles) in [("dark", accent.dark_roles), ("light", accent.light_roles)] {
+            let _ = writeln!(
+                out,
+                "    {theme}: {{\n      fill: {},\n      onFill: {},\n      hover: {},\n      soft: {},\n      text: {},\n      textHover: {},\n      outline: {},\n    }},",
+                quote(roles.fill),
+                quote(roles.on_fill),
+                quote(roles.hover),
+                quote(roles.soft),
+                quote(roles.text),
+                quote(roles.text_hover),
+                quote(roles.outline),
+            );
+        }
+        out.push_str("  },\n");
     }
     out.push_str("};\n");
     out

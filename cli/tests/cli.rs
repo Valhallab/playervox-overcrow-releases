@@ -396,6 +396,69 @@ fn golden_style() {
     golden_check("style_unknown_property", &root, &[]);
 }
 
+/// The user accent tokens need the `accent` that gives them: `check` says
+/// which declaration to write, and where the documentation is.
+#[test]
+fn golden_style_user_accent() {
+    let (_temporary, root) = project("counter");
+    let raised = "  background: var(--color-surface-raised);";
+    // The fill, without any declaration.
+    replace(
+        &root,
+        "style.ocss",
+        raised,
+        "  background: var(--color-user-accent);",
+    );
+    golden_check("style_undeclared_user_accent", &root, &[]);
+    // A role token, without any declaration, then under the reduced form.
+    replace(
+        &root,
+        "style.ocss",
+        "  background: var(--color-user-accent);",
+        "  background: var(--color-user-accent);\n  border: 1px solid var(--color-user-accent-outline);",
+    );
+    replace(
+        &root,
+        "manifest.json",
+        "\"schemaVersion\": 1,",
+        "\"schemaVersion\": 1,\n  \"accent\": \"user\",",
+    );
+    golden_check("style_undeclared_user_accent_roles", &root, &[]);
+    // The same refusal without any declaration.
+    let refusal = |root: &Path| {
+        let report = text(&check(root, &[]).stderr);
+        report.lines().next().map(str::to_owned)
+    };
+    let reduced = refusal(&root);
+    assert!(reduced.is_some());
+    replace(&root, "manifest.json", "\"accent\": \"user\",", "");
+    replace(
+        &root,
+        "style.ocss",
+        "  background: var(--color-user-accent);\n",
+        "",
+    );
+    assert_eq!(refusal(&root), reduced);
+    // Another value of `accent` is refused, with the two it may take.
+    replace(
+        &root,
+        "manifest.json",
+        "\"schemaVersion\": 1,",
+        "\"schemaVersion\": 1,\n  \"accent\": \"follow\",",
+    );
+    golden_check("manifest_accent", &root, &[]);
+    // With the declaration, every role token is accepted.
+    replace(&root, "manifest.json", "\"follow\"", "\"user-roles\"");
+    replace(
+        &root,
+        "style.ocss",
+        "  border: 1px solid var(--color-user-accent-outline);",
+        "  background: var(--color-user-accent-soft);\n  border: 1px solid var(--color-user-accent-outline);\n  color: var(--color-user-accent-text);",
+    );
+    let output = check(&root, &[]);
+    assert!(output.status.success(), "{}", text(&output.stderr));
+}
+
 #[test]
 fn golden_locales() {
     let (_temporary, root) = project("counter");

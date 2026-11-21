@@ -24,7 +24,7 @@ use overcrow_widget_schema::style::{
     ANIMATION_DIRECTIONS, CHECKABLE_ELEMENTS, EASINGS, FILL_MODES, FONT_FAMILIES, ORIGIN_KEYWORDS,
     PSEUDO_CLASSES, Property, StyleValue, TRACK_KEYWORDS, property,
 };
-use overcrow_widget_schema::tokens::{Token, TokenType, token};
+use overcrow_widget_schema::tokens::{AccentDeclaration, Token, TokenType, token};
 use overcrow_widget_schema::view::element;
 
 use crate::Position;
@@ -66,9 +66,9 @@ pub enum OcssErrorKind {
     InvalidValue,
     /// `var()` of an unknown token, or of a token of another type.
     UnknownToken,
-    /// A user accent token (`--color-user-accent`, `--color-on-user-accent`)
-    /// in the style of a widget whose manifest does not declare
-    /// `"accent": "user"`.
+    /// A user accent token in the style of a widget whose manifest does not
+    /// declare the `accent` that gives it: `"user-roles"` for every token,
+    /// `"user"` for `--color-user-accent` and `--color-on-user-accent` only.
     UndeclaredUserAccent,
     /// A property that cannot be animated, in `@keyframes` or `transition`.
     NotAnimatable,
@@ -128,6 +128,9 @@ pub struct StyleSheet {
     /// Where the sheet first names a token of the user's accent
     /// ([`Token::user_accent`]); `None` when it names none.
     pub user_accent_at: Option<Position>,
+    /// Where it first names one that `"accent": "user"` does not give
+    /// ([`AccentDeclaration::allows`]); `None` when it names none.
+    pub user_accent_roles_at: Option<Position>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -322,15 +325,24 @@ pub enum Value {
     Animations(Vec<Animation>),
 }
 
-/// Refuses a sheet that names a user accent token when the manifest does
-/// not declare `"accent": "user"`, at the first such token.
-pub fn check_user_accent(sheet: &StyleSheet, declared: bool) -> Result<(), OcssError> {
-    match sheet.user_accent_at {
-        Some(position) if !declared => Err(OcssError {
+/// Refuses a sheet that names a user accent token the manifest's `accent`
+/// does not give, at the first such token: any of them without `accent`,
+/// a role token under `"user"`.
+pub fn check_user_accent(
+    sheet: &StyleSheet,
+    declaration: AccentDeclaration,
+) -> Result<(), OcssError> {
+    let refused = match declaration {
+        AccentDeclaration::None => sheet.user_accent_at,
+        AccentDeclaration::User => sheet.user_accent_roles_at,
+        AccentDeclaration::UserRoles => None,
+    };
+    match refused {
+        Some(position) => Err(OcssError {
             kind: OcssErrorKind::UndeclaredUserAccent,
             position,
         }),
-        _ => Ok(()),
+        None => Ok(()),
     }
 }
 
@@ -359,6 +371,7 @@ pub fn parse(source: &[u8]) -> Result<StyleSheet, OcssError> {
         position: 0,
         animations: Vec::new(),
         user_accent_at: None,
+        user_accent_roles_at: None,
     };
     let sheet = parser.sheet()?;
     Ok(sheet)
@@ -593,6 +606,8 @@ struct Parser<'a> {
     animations: Vec<(String, usize)>,
     /// Offset of the first user accent token of a valid declaration.
     user_accent_at: Option<usize>,
+    /// Offset of the first one that `"accent": "user"` does not give.
+    user_accent_roles_at: Option<usize>,
 }
 
 type Parsed<T> = Result<T, OcssError>;
@@ -665,6 +680,9 @@ impl Parser<'_> {
             keyframes,
             user_accent_at: self
                 .user_accent_at
+                .map(|offset| Position::of(self.text, offset)),
+            user_accent_roles_at: self
+                .user_accent_roles_at
                 .map(|offset| Position::of(self.text, offset)),
         })
     }
@@ -839,11 +857,18 @@ impl Parser<'_> {
                 .map_err(|kind| self.error_at(kind, offset))?;
             // A token is an identifier of the declaration's value, whatever
             // the property: every colour slot is covered.
-            if self.user_accent_at.is_none() {
-                self.user_accent_at = tokens.iter().find_map(|(tok, at)| match tok {
-                    Tok::Ident(name) if token(name).is_some_and(|t| t.user_accent) => Some(*at),
-                    _ => None,
-                });
+            if self.user_accent_roles_at.is_none() {
+                for (tok, at) in &tokens {
+                    let Tok::Ident(name) = tok else { continue };
+                    let Some(role) = token(name).and_then(|token| token.user_accent) else {
+                        continue;
+                    };
+                    self.user_accent_at.get_or_insert(*at);
+                    if !AccentDeclaration::User.allows(role) {
+                        self.user_accent_roles_at = Some(*at);
+                        break;
+                    }
+                }
             }
             if let Value::Animations(animations) = &value {
                 self.animations.extend(

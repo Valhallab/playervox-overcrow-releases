@@ -646,8 +646,13 @@ Dark values are the current overlay palette. The reference images of the P2.4 bu
 | `--color-accent-hover` | color | `#b5f153` | `#3f6212` | **provisional (P2.4)** | Accent under the pointer. |
 | `--color-accent-soft` | color | `#a3e6351c` | `#4d7c0f1f` | **provisional (P2.4)** | Accent wash behind selected content. |
 | `--color-on-accent` | color | `#09090b` | `#ffffff` | fixed | Text and icons drawn on the accent and its hover state. |
-| `--color-user-accent` | color | `#a3e635` | `#84cc16` | fixed | The user's accent colour, a fill for what belongs to the user; never a text colour on the panel. Needs `"accent": "user"` in the manifest; lime by default. |
-| `--color-on-user-accent` | color | `#18181b` | `#18181b` | fixed | Text and icons drawn on `--color-user-accent`. Needs `"accent": "user"` in the manifest. |
+| `--color-user-accent` | color | `#a3e635` | `#4d7c0f` | fixed | The user's accent colour, a fill that carries text or a mark; never a text colour or a border on a surface. Needs `"accent": "user-roles"` or `"user"` in the manifest; lime by default, the brand accent. |
+| `--color-on-user-accent` | color | `#09090b` | `#ffffff` | fixed | Text and icons drawn on `--color-user-accent` and on its hover state. Needs `"accent": "user-roles"` or `"user"` in the manifest. |
+| `--color-user-accent-hover` | color | `#b5f153` | `#3f6212` | fixed | `--color-user-accent` under the pointer. Needs `"accent": "user-roles"` in the manifest. |
+| `--color-user-accent-soft` | color | `#a3e6351c` | `#4d7c0f1f` | fixed | Wash of the user's accent behind selected content. Needs `"accent": "user-roles"` in the manifest. |
+| `--color-user-accent-text` | color | `#a3e635` | `#4d7c0f` | fixed | Text and icons in the user's accent on a surface, readable in every accent colour. Needs `"accent": "user-roles"` in the manifest. |
+| `--color-user-accent-text-hover` | color | `#b5f153` | `#3f6212` | fixed | `--color-user-accent-text` under the pointer or pressed. Needs `"accent": "user-roles"` in the manifest. |
+| `--color-user-accent-outline` | color | `#a3e635` | `#4d7c0f` | fixed | Borders, rails, rings and gauges in the user's accent on a surface, visible in every accent colour. Needs `"accent": "user-roles"` in the manifest. |
 | `--color-surface-panel` | color | `#111114ee` | `#fafafaee` | fixed | Widget panel background, drawn by the host wrapper behind the content. |
 | `--color-surface-raised` | color | `#1e1e22e0` | `#f4f4f5eb` | **provisional (P2.4)** | Raised surface inside the panel. |
 | `--color-surface-hover` | color | `#28282deb` | `#e4e4e7f0` | **provisional (P2.4)** | Surface under the pointer. |
@@ -690,7 +695,54 @@ Dark values are the current overlay palette. The reference images of the P2.4 bu
 
 ### User accent
 
-A widget whose manifest declares `"accent": "user"` (catalog feature `user-accent`) follows the accent colour the user chose in PlayerVox OverCrow: the host sends its name in `Init.userAccent`, then a `UserAccent` message at each change, and resolves `--color-user-accent` and `--color-on-user-accent` from it in the active theme. The name is sent without a permission, like the locale; `lime` is the default. A `style.ocss` that uses these tokens without the declaration is rejected (`undeclared_user_accent`), and a draw command of such a widget cannot name them. `--color-accent` and its variants never change.
+A widget whose manifest declares `accent` follows the accent colour the user chose in PlayerVox OverCrow: the host sends its name in `Init.userAccent`, then a `UserAccent` message at each change, and resolves the user accent tokens from it in the active theme. The name is sent without a permission, like the locale; `lime` is the default. `--color-accent` and its variants never change.
+
+- `"accent": "user-roles"` (catalog features `user-accent` and `user-accent-roles`) gives a token for each role, and the controls the host draws in the widget (a checked toggle or checkbox, a slider, the focus ring, the text selection) take the user's accent. In lime every role is exactly the brand accent family.
+- `"accent": "user"` (catalog feature `user-accent`), the reduced form of the first accent release, gives only `--color-user-accent` and `--color-on-user-accent`, with the values of the second table; the controls keep the brand accent.
+
+A `style.ocss` that uses a user accent token its manifest's `accent` does not give is rejected (`undeclared_user_accent`), and a draw command of such a widget cannot name it.
+
+| Role | Token | Contrast held |
+| --- | --- | --- |
+| Fill that carries text or a mark | `--color-user-accent` | |
+| Text and icons on the fill and on its hover state | `--color-on-user-accent` | 4.5:1 on both |
+| The fill under the pointer | `--color-user-accent-hover` | |
+| Wash behind selected content | `--color-user-accent-soft` | |
+| Text and icons on a surface | `--color-user-accent-text` | 4.5:1 on every surface token and on the wash over it |
+| That text under the pointer or pressed | `--color-user-accent-text-hover` | the same |
+| Border, rail, ring or gauge on a surface | `--color-user-accent-outline` | 3:1 on every surface token, on the wash and on a control track over it |
+
+The text and the outline hold different ratios and may differ. A colour that does not reach its ratio as a fill takes `--color-text` instead: `red` is never a text colour nor an outline on the dark panel. In the light theme `lime` is the brand's provisional `--color-accent`, which misses 4.5:1 on `--color-surface-hover` and on the wash.
+
+Roles of `"accent": "user-roles"`, dark theme:
+
+| Name | Fill | Text on fill | Hover | Soft | Text | Text hover | Outline |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `lime` | `#a3e635` | `#09090b` | `#b5f153` | `#a3e6351c` | `#a3e635` | `#b5f153` | `#a3e635` |
+| `amber` | `#fbbf24` | `#18181b` | `#fccc50` | `#fbbf241c` | `#fbbf24` | `#fccc50` | `#fbbf24` |
+| `red` | `#991b1b` | `#ffffff` | `#ad4949` | `#991b1b1c` | `#f7f7f8` | `#f9f9f9` | `#f7f7f8` |
+| `pink` | `#fb7185` | `#18181b` | `#fc8d9d` | `#fb71851c` | `#fb7185` | `#fc8d9d` | `#fb7185` |
+| `purple` | `#a78bfa` | `#18181b` | `#b9a2fb` | `#a78bfa1c` | `#a78bfa` | `#b9a2fb` | `#a78bfa` |
+| `blue` | `#60a5fa` | `#18181b` | `#80b7fb` | `#60a5fa1c` | `#60a5fa` | `#80b7fb` | `#60a5fa` |
+| `cyan` | `#22d3ee` | `#18181b` | `#4edcf1` | `#22d3ee1c` | `#22d3ee` | `#4edcf1` | `#22d3ee` |
+| `emerald` | `#34d399` | `#18181b` | `#5ddcad` | `#34d3991c` | `#34d399` | `#5ddcad` | `#34d399` |
+| `steel` | `#a1a1aa` | `#18181b` | `#b4b4bb` | `#a1a1aa1c` | `#a1a1aa` | `#b4b4bb` | `#a1a1aa` |
+
+Roles of `"accent": "user-roles"`, light theme:
+
+| Name | Fill | Text on fill | Hover | Soft | Text | Text hover | Outline |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `lime` | `#4d7c0f` | `#ffffff` | `#3f6212` | `#4d7c0f1f` | `#4d7c0f` | `#3f6212` | `#4d7c0f` |
+| `amber` | `#f59e0b` | `#18181b` | `#f7ad30` | `#f59e0b1f` | `#18181b` | `#141417` | `#18181b` |
+| `red` | `#991b1b` | `#ffffff` | `#821717` | `#991b1b1f` | `#991b1b` | `#821717` | `#991b1b` |
+| `pink` | `#f43f5e` | `#18181b` | `#f65c76` | `#f43f5e1f` | `#18181b` | `#141417` | `#18181b` |
+| `purple` | `#a78bfa` | `#18181b` | `#b49cfb` | `#a78bfa1f` | `#18181b` | `#141417` | `#18181b` |
+| `blue` | `#3b82f6` | `#18181b` | `#5895f7` | `#3b82f61f` | `#18181b` | `#141417` | `#18181b` |
+| `cyan` | `#06b6d4` | `#18181b` | `#2bc1da` | `#06b6d41f` | `#18181b` | `#141417` | `#18181b` |
+| `emerald` | `#10b981` | `#18181b` | `#34c494` | `#10b9811f` | `#18181b` | `#141417` | `#18181b` |
+| `steel` | `#a1a1aa` | `#18181b` | `#afafb7` | `#a1a1aa1f` | `#18181b` | `#141417` | `#18181b` |
+
+Published pair of `"accent": "user"`:
 
 | Name | Dark fill | Dark text | Light fill | Light text |
 | --- | --- | --- | --- | --- |
@@ -725,7 +777,7 @@ Every icon of the pinned `egui-lucide 0.1.0` crate (Lucide 1.34.0, 1777 names) i
 | `vm` | `VmRequest` | no | VM budget request; absent means the defaults. |
 | `permissions` | `Permissions` | no | Requested permissions; absent means none. |
 | `wrapper` | `wrapper` | no | Widget rows of the host options menu. |
-| `accent` | `user` | no | `user`: the widget follows the user's accent colour, with the `--color-user-accent` and `--color-on-user-accent` tokens and the host value `userAccent`. Absent, it gets neither. No permission: any widget may declare it. Needs the catalog feature `user-accent`. |
+| `accent` | `user-roles` \| `user` | no | `user-roles`: the widget follows the user's accent colour, with the `--color-user-accent…` tokens of every role, the host value `userAccent`, and the controls PlayerVox OverCrow draws in that colour. `user`, the reduced form: only the `--color-user-accent` and `--color-on-user-accent` tokens and `userAccent`. Absent, it gets none of them. No permission: any widget may declare it. Needs the catalog feature `user-accent`, and `user-accent-roles` for `user-roles`. |
 | `requires` | `host features` | no | Distinct host data sources the widget cannot work without, as in a `wrapper.menu` row's `requires`. On a machine that lacks one, the host neither starts nor shows the widget and keeps its layout; the widget comes back when the source does. |
 
 ### `WidgetName`
@@ -2050,7 +2102,7 @@ Starts the VM. The VM answers `Ready` within `VM_READY_TIMEOUT_MS`.
 | `messages` | `locale messages` | yes | Messages of the active locale. |
 | `view` | `compiled view` | yes | The package's `view.json`, validated by the host at activation. |
 | `theme` | `dark` \| `light` | yes | Active theme. |
-| `userAccent` | `lime` \| `amber` \| `red` \| `pink` \| `purple` \| `blue` \| `cyan` \| `emerald` \| `steel` | no | The user's accent colour; present exactly when the manifest declares `"accent": "user"`. |
+| `userAccent` | `lime` \| `amber` \| `red` \| `pink` \| `purple` \| `blue` \| `cyan` \| `emerald` \| `steel` | no | The user's accent colour; present exactly when the manifest declares `accent` (`"user-roles"` or `"user"`). |
 | `region` | `Region` | yes | Regional formats, as in the `Region` message. |
 | `scale` | integer 500..=1750 | yes | Content scale in ‰. |
 | `viewport` | `{ width, height }` | yes | Content rectangle, logical px. |
@@ -2122,7 +2174,7 @@ Theme change; token values are resolved by the host.
 
 #### `UserAccent` (frame 1)
 
-The user chose another accent colour; sent only to a widget whose manifest declares `"accent": "user"`. The host resolves the user accent tokens from it.
+The user chose another accent colour; sent only to a widget whose manifest declares `accent`. The host resolves the user accent tokens from it, and the controls it draws in a widget that declares `"user-roles"`.
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |

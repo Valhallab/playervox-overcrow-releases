@@ -99,7 +99,7 @@ pub const FEATURE_ACTIVE_GAME: &str = "active-game";
 
 pub use crate::game_events::FEATURE_GAME_EVENTS_WARFRAME;
 pub use crate::links::FEATURE_OPEN_LINKS;
-pub use crate::tokens::FEATURE_USER_ACCENT;
+pub use crate::tokens::{FEATURE_USER_ACCENT, FEATURE_USER_ACCENT_ROLES};
 pub use crate::wrapper::FEATURE_MENU_CLOSES;
 
 /// Every feature name of `requires` this schema defines. A reader passes
@@ -119,6 +119,7 @@ pub const KNOWN_FEATURES: &[&str] = &[
     FEATURE_STEAM_LOCAL_ACHIEVEMENTS,
     FEATURE_GAME_EVENTS_WARFRAME,
     FEATURE_USER_ACCENT,
+    FEATURE_USER_ACCENT_ROLES,
 ];
 
 pub const ENVELOPE_FIELDS: &[Field] = &[
@@ -1922,7 +1923,8 @@ mod tests {
                 "active-game",
                 "steam-local-achievements",
                 "game-events-warframe",
-                "user-accent"
+                "user-accent",
+                "user-accent-roles"
             ]
         );
         let mut payload = valid();
@@ -1940,6 +1942,43 @@ mod tests {
         assert_eq!(catalog.widgets.len(), 3);
         let catalog = check_with(&payload, KNOWN_FEATURES).expect("kept");
         assert!(has_focus(&catalog));
+    }
+
+    /// A widget whose new version follows the roles of the user's accent
+    /// (`"accent": "user-roles"`): a reader that announces only the first
+    /// accent feature, as PlayerVox OverCrow 0.11 and 0.12 do, skips that
+    /// version and keeps the one before it; it never gets a style it could
+    /// not resolve.
+    #[test]
+    fn an_older_reader_keeps_the_version_before_the_accent_roles() {
+        let mut payload = valid();
+        payload["targets"][TIMERS]["status"] = json!("verified");
+        let new = &mut payload["targets"][TIMERS_NEW];
+        new["manifest"]["accent"] = json!("user-roles");
+        new["requires"] = json!(["user-accent", "user-accent-roles"]);
+        let versions = |catalog: &CatalogV2| -> Vec<String> {
+            catalog
+                .targets
+                .iter()
+                .filter(|target| target.target.manifest.id == "gg.raidforge.timers")
+                .map(|target| target.target.manifest.version.to_string())
+                .collect()
+        };
+        for older in [&[][..], &["user-accent"], &["user-accent", "active-game"]] {
+            let catalog = check_with(&payload, older).expect("skipped, not refused");
+            assert_eq!(versions(&catalog), ["1.1.0"], "{older:?}");
+            assert_eq!(catalog.widgets.len(), 3, "{older:?}");
+        }
+        let catalog = check_with(&payload, &["user-accent", "user-accent-roles"]).expect("kept");
+        assert_eq!(versions(&catalog), ["1.1.0", "1.2.0"]);
+        // A target that declares the roles without naming their feature is
+        // a producer error: no reader takes it, so none takes it for the
+        // reduced form.
+        payload["targets"][TIMERS_NEW]["requires"] = json!(["user-accent"]);
+        for reader in [&["user-accent"][..], KNOWN_FEATURES] {
+            let catalog = check_with(&payload, reader).expect("skipped");
+            assert_eq!(versions(&catalog), ["1.1.0"], "{reader:?}");
+        }
     }
 
     #[test]

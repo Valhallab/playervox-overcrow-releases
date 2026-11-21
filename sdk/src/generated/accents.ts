@@ -52,3 +52,211 @@ export const USER_ACCENTS: {
     light: { fill: "#a1a1aa", onFill: "#18181b" },
   },
 };
+
+/** The colour of each role of a user accent in one theme. */
+export interface AccentRoles {
+  /** A fill that carries text or a mark, `--color-user-accent`. */
+  readonly fill: `#${string}`;
+  /** Text and icons on the fill and on `hover`, `--color-on-user-accent`, at WCAG AA. */
+  readonly onFill: `#${string}`;
+  /** The fill under the pointer, `--color-user-accent-hover`. */
+  readonly hover: `#${string}`;
+  /** A wash behind selected content, `--color-user-accent-soft`; `#rrggbbaa`. */
+  readonly soft: `#${string}`;
+  /** Text and icons on a surface, `--color-user-accent-text`, at WCAG AA. */
+  readonly text: `#${string}`;
+  /** `text` under the pointer or pressed, `--color-user-accent-text-hover`. */
+  readonly textHover: `#${string}`;
+  /** A border, a rail, a ring or a gauge on a surface, `--color-user-accent-outline`, at 3:1. */
+  readonly outline: `#${string}`;
+}
+
+/**
+ * The roles of every user accent, by theme: the values of the user accent
+ * tokens for a widget whose manifest declares `"accent": "user-roles"`.
+ * `lime` is the brand accent family.
+ */
+export const USER_ACCENT_ROLES: {
+  readonly [name in UserAccent]: { readonly [theme in Theme]: AccentRoles };
+} = {
+  lime: {
+    dark: {
+      fill: "#a3e635",
+      onFill: "#09090b",
+      hover: "#b5f153",
+      soft: "#a3e6351c",
+      text: "#a3e635",
+      textHover: "#b5f153",
+      outline: "#a3e635",
+    },
+    light: {
+      fill: "#4d7c0f",
+      onFill: "#ffffff",
+      hover: "#3f6212",
+      soft: "#4d7c0f1f",
+      text: "#4d7c0f",
+      textHover: "#3f6212",
+      outline: "#4d7c0f",
+    },
+  },
+  amber: {
+    dark: {
+      fill: "#fbbf24",
+      onFill: "#18181b",
+      hover: "#fccc50",
+      soft: "#fbbf241c",
+      text: "#fbbf24",
+      textHover: "#fccc50",
+      outline: "#fbbf24",
+    },
+    light: {
+      fill: "#f59e0b",
+      onFill: "#18181b",
+      hover: "#f7ad30",
+      soft: "#f59e0b1f",
+      text: "#18181b",
+      textHover: "#141417",
+      outline: "#18181b",
+    },
+  },
+  red: {
+    dark: {
+      fill: "#991b1b",
+      onFill: "#ffffff",
+      hover: "#ad4949",
+      soft: "#991b1b1c",
+      text: "#f7f7f8",
+      textHover: "#f9f9f9",
+      outline: "#f7f7f8",
+    },
+    light: {
+      fill: "#991b1b",
+      onFill: "#ffffff",
+      hover: "#821717",
+      soft: "#991b1b1f",
+      text: "#991b1b",
+      textHover: "#821717",
+      outline: "#991b1b",
+    },
+  },
+  pink: {
+    dark: {
+      fill: "#fb7185",
+      onFill: "#18181b",
+      hover: "#fc8d9d",
+      soft: "#fb71851c",
+      text: "#fb7185",
+      textHover: "#fc8d9d",
+      outline: "#fb7185",
+    },
+    light: {
+      fill: "#f43f5e",
+      onFill: "#18181b",
+      hover: "#f65c76",
+      soft: "#f43f5e1f",
+      text: "#18181b",
+      textHover: "#141417",
+      outline: "#18181b",
+    },
+  },
+  purple: {
+    dark: {
+      fill: "#a78bfa",
+      onFill: "#18181b",
+      hover: "#b9a2fb",
+      soft: "#a78bfa1c",
+      text: "#a78bfa",
+      textHover: "#b9a2fb",
+      outline: "#a78bfa",
+    },
+    light: {
+      fill: "#a78bfa",
+      onFill: "#18181b",
+      hover: "#b49cfb",
+      soft: "#a78bfa1f",
+      text: "#18181b",
+      textHover: "#141417",
+      outline: "#18181b",
+    },
+  },
+  blue: {
+    dark: {
+      fill: "#60a5fa",
+      onFill: "#18181b",
+      hover: "#80b7fb",
+      soft: "#60a5fa1c",
+      text: "#60a5fa",
+      textHover: "#80b7fb",
+      outline: "#60a5fa",
+    },
+    light: {
+      fill: "#3b82f6",
+      onFill: "#18181b",
+      hover: "#5895f7",
+      soft: "#3b82f61f",
+      text: "#18181b",
+      textHover: "#141417",
+      outline: "#18181b",
+    },
+  },
+  cyan: {
+    dark: {
+      fill: "#22d3ee",
+      onFill: "#18181b",
+      hover: "#4edcf1",
+      soft: "#22d3ee1c",
+      text: "#22d3ee",
+      textHover: "#4edcf1",
+      outline: "#22d3ee",
+    },
+    light: {
+      fill: "#06b6d4",
+      onFill: "#18181b",
+      hover: "#2bc1da",
+      soft: "#06b6d41f",
+      text: "#18181b",
+      textHover: "#141417",
+      outline: "#18181b",
+    },
+  },
+  emerald: {
+    dark: {
+      fill: "#34d399",
+      onFill: "#18181b",
+      hover: "#5ddcad",
+      soft: "#34d3991c",
+      text: "#34d399",
+      textHover: "#5ddcad",
+      outline: "#34d399",
+    },
+    light: {
+      fill: "#10b981",
+      onFill: "#18181b",
+      hover: "#34c494",
+      soft: "#10b9811f",
+      text: "#18181b",
+      textHover: "#141417",
+      outline: "#18181b",
+    },
+  },
+  steel: {
+    dark: {
+      fill: "#a1a1aa",
+      onFill: "#18181b",
+      hover: "#b4b4bb",
+      soft: "#a1a1aa1c",
+      text: "#a1a1aa",
+      textHover: "#b4b4bb",
+      outline: "#a1a1aa",
+    },
+    light: {
+      fill: "#a1a1aa",
+      onFill: "#18181b",
+      hover: "#afafb7",
+      soft: "#a1a1aa1f",
+      text: "#18181b",
+      textHover: "#141417",
+      outline: "#18181b",
+    },
+  },
+};

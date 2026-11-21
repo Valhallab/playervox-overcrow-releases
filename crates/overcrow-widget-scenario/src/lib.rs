@@ -234,7 +234,7 @@ pub enum Theme {
 }
 
 /// The user's accent colour (`tokens::USER_ACCENT_NAMES`), for a widget
-/// whose manifest declares `"accent": "user"`.
+/// whose manifest declares `accent` (`"user-roles"` or `"user"`).
 #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum UserAccent {
@@ -462,7 +462,7 @@ pub struct Host {
     #[serde(default)]
     pub theme: Theme,
     /// The user's accent colour; `lime` when absent. Only for a manifest
-    /// that declares `"accent": "user"`.
+    /// that declares `accent`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_accent: Option<UserAccent>,
     /// Content scale in ‰, as `overcrow.host.scale`: 1000 is 100 %.
@@ -1602,7 +1602,7 @@ impl Scenario {
             }
         }
         self.game_event_updates(&manifest.permissions.game_events)?;
-        if !manifest.user_accent {
+        if !manifest.accent.follows_user() {
             let here = if self.host.user_accent.is_some() {
                 Some("host.userAccent".to_owned())
             } else {
@@ -1622,7 +1622,7 @@ impl Scenario {
             if let Some(here) = here {
                 return Err(ScenarioError::new(
                     here,
-                    "the manifest does not declare `\"accent\": \"user\"`",
+                    "the manifest does not declare `accent` (`\"user-roles\"` or `\"user\"`)",
                 ));
             }
         }

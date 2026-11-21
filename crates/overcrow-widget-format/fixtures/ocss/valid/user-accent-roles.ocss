@@ -1,0 +1,21 @@
+/* The roles of the user's accent, for a widget whose manifest declares
+   "accent": "user-roles"; the grammar alone accepts them. */
+.mine {
+  background-color: var(--color-user-accent);
+  color: var(--color-on-user-accent);
+}
+
+.mine:hover {
+  background-color: var(--color-user-accent-hover);
+}
+
+.selected {
+  background-color: var(--color-user-accent-soft);
+  border: 1px solid var(--color-user-accent-outline);
+  color: var(--color-user-accent-text);
+  transition: color var(--duration-fast);
+}
+
+.selected:hover {
+  color: var(--color-user-accent-text-hover);
+}

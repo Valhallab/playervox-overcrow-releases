@@ -27,7 +27,7 @@ use crate::model::{Field, ValueType, field, is_keyword};
 use crate::permissions::{
     CAPABILITIES, NETWORK_RULE_FIELDS, PARAMETER_CONSTRAINTS, capability_named,
 };
-use crate::tokens::FEATURE_USER_ACCENT;
+use crate::tokens::{AccentDeclaration, FEATURE_USER_ACCENT, FEATURE_USER_ACCENT_ROLES};
 use crate::version::Version;
 use crate::wrapper::{HOST_FEATURES, valid_label_text, validate_wrapper};
 
@@ -90,8 +90,8 @@ pub const MANIFEST_FIELDS: &[Field] = &[
     ),
     Field::optional(
         "accent",
-        ValueType::Keyword(&["user"]),
-        "`user`: the widget follows the user's accent colour, with the `--color-user-accent` and `--color-on-user-accent` tokens and the host value `userAccent`. Absent, it gets neither. No permission: any widget may declare it. Needs the catalog feature `user-accent`.",
+        ValueType::Keyword(&["user-roles", "user"]),
+        "`user-roles`: the widget follows the user's accent colour, with the `--color-user-accent…` tokens of every role, the host value `userAccent`, and the controls PlayerVox OverCrow draws in that colour. `user`, the reduced form: only the `--color-user-accent` and `--color-on-user-accent` tokens and `userAccent`. Absent, it gets none of them. No permission: any widget may declare it. Needs the catalog feature `user-accent`, and `user-accent-roles` for `user-roles`.",
     ),
     Field::optional(
         "requires",
@@ -216,7 +216,7 @@ pub enum ManifestError {
     Wrapper,
     /// `requires` is not a list of distinct host features.
     Requires,
-    /// `accent` is not `"user"`.
+    /// `accent` is neither `"user-roles"` nor `"user"`.
     Accent,
     /// `permissions.accounts`: more than one account, or a declaration
     /// outside its grammar, or a `send.query` a route of the account
@@ -285,8 +285,9 @@ pub struct Manifest {
     pub permissions: Permissions,
     /// Host data sources the widget needs (`requires`); empty when absent.
     pub requires: BTreeSet<&'static str>,
-    /// `"accent": "user"`: the widget follows the user's accent colour.
-    pub user_accent: bool,
+    /// `accent`: whether, and how far, the widget follows the user's accent
+    /// colour.
+    pub accent: AccentDeclaration,
     /// The declared third-party account, at most `MAX_ACCOUNTS`.
     pub accounts: Vec<Account>,
     pub value: Value,
@@ -307,8 +308,8 @@ impl Manifest {
     /// `open-links` for `permissions.links`, `active-game` for
     /// `game.read` or the PlayerVox score beside a way out,
     /// `game-events-warframe` for a `warframe.*` game event, and
-    /// `user-accent` for `"accent": "user"`); empty for a manifest without
-    /// any.
+    /// `user-accent` for `accent`, with `user-accent-roles` for
+    /// `"accent": "user-roles"`); empty for a manifest without any.
     pub fn features(&self) -> BTreeSet<&'static str> {
         let mut features: BTreeSet<&'static str> = self
             .accounts
@@ -356,8 +357,11 @@ impl Manifest {
                 .filter_map(|name| game_event_feature(name))
                 .map(|feature| feature.catalog_feature),
         );
-        if self.user_accent {
+        if self.accent.follows_user() {
             features.insert(FEATURE_USER_ACCENT);
+        }
+        if self.accent == AccentDeclaration::UserRoles {
+            features.insert(FEATURE_USER_ACCENT_ROLES);
         }
         features
     }
@@ -458,9 +462,10 @@ pub fn validate_manifest_value(value: Value) -> Result<Manifest, ManifestError> 
         Some(requires) => validate_requires(requires)?,
         None => BTreeSet::new(),
     };
-    let user_accent = match object.get("accent") {
-        None => false,
-        Some(accent) if accent == "user" => true,
+    let accent = match object.get("accent").map(Value::as_str) {
+        None => AccentDeclaration::None,
+        Some(Some("user")) => AccentDeclaration::User,
+        Some(Some("user-roles")) => AccentDeclaration::UserRoles,
         Some(_) => return Err(ManifestError::Accent),
     };
     Ok(Manifest {
@@ -469,7 +474,7 @@ pub fn validate_manifest_value(value: Value) -> Result<Manifest, ManifestError> 
         heap_bytes,
         permissions,
         requires,
-        user_accent,
+        accent,
         accounts,
         value,
     })

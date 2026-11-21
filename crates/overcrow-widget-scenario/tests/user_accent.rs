@@ -1,5 +1,6 @@
 //! `userAccent`: a scenario sets the user's accent colour, at the start and
-//! in `host` steps, only for a manifest that declares `"accent": "user"`.
+//! in `host` steps, only for a manifest that declares `accent`
+//! (`"user-roles"` or `"user"`).
 
 use overcrow_widget_scenario::{HostChange, Step, UserAccent, parse};
 use overcrow_widget_schema::manifest::{Manifest, validate_manifest_value};
@@ -7,14 +8,18 @@ use overcrow_widget_schema::tokens::USER_ACCENT_NAMES;
 use serde_json::{Value, json};
 
 fn manifest(accent: bool) -> Manifest {
+    declaring(accent.then_some("user"))
+}
+
+fn declaring(accent: Option<&str>) -> Manifest {
     let mut manifest = json!({
         "schemaVersion": 1, "apiVersion": 1, "id": "nova.daily-goal",
         "version": "1.0.0", "name": {"en": "Daily goal", "fr": "Objectif du jour"},
         "sizing": {"fit": "none", "preferred": {"width": 200, "height": 200},
                    "min": {"width": 100, "height": 100}, "max": {"width": 400, "height": 400}},
     });
-    if accent {
-        manifest["accent"] = json!("user");
+    if let Some(accent) = accent {
+        manifest["accent"] = json!(accent);
     }
     validate_manifest_value(manifest).expect("manifest")
 }
@@ -62,6 +67,9 @@ fn a_scenario_sets_the_accent_of_a_declaring_widget() {
         })
     ));
     played.check_against(&manifest(true)).expect("declared");
+    played
+        .check_against(&declaring(Some("user-roles")))
+        .expect("declared with its roles");
 
     let at_start = played
         .check_against(&manifest(false))

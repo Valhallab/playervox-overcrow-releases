@@ -227,7 +227,7 @@ pub const HOST_MESSAGES: &[Message] = &[
             Field::optional(
                 "userAccent",
                 USER_ACCENT,
-                "The user's accent colour; present exactly when the manifest declares `\"accent\": \"user\"`.",
+                "The user's accent colour; present exactly when the manifest declares `accent` (`\"user-roles\"` or `\"user\"`).",
             ),
             Field::required(
                 "region",
@@ -356,7 +356,7 @@ pub const HOST_MESSAGES: &[Message] = &[
             USER_ACCENT,
             "New accent colour of the user.",
         )],
-        summary: "The user chose another accent colour; sent only to a widget whose manifest declares `\"accent\": \"user\"`. The host resolves the user accent tokens from it.",
+        summary: "The user chose another accent colour; sent only to a widget whose manifest declares `accent`. The host resolves the user accent tokens from it, and the controls it draws in a widget that declares `\"user-roles\"`.",
     },
     Message {
         name: "Region",

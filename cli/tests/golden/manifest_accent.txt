@@ -1,0 +1,7 @@
+error[manifest.accent]: `accent` must be "user-roles" or "user", or be left out
+  --> manifest.json:3:3
+   |
+ 3 |   "accent": "follow",
+   |   ^
+   = help: see https://overcrow.playervox.com/docs/en/style/#user-accent
+check: 1 error(s), 0 warning(s)

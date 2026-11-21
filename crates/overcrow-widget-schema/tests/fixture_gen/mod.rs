@@ -67,7 +67,7 @@ pub fn generate() -> BTreeMap<String, Vec<u8>> {
         format!("{}\n", hex(conformance_key().public_key().as_ref())).into_bytes(),
     );
     let sources: BTreeMap<&str, BTreeMap<String, Vec<u8>>> =
-        ["clock", "weather", "minimal", "accent"]
+        ["clock", "weather", "minimal", "accent", "accent-roles"]
             .into_iter()
             .map(|name| {
                 (

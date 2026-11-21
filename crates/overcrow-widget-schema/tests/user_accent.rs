@@ -1,15 +1,17 @@
-//! The user's accent colour: a manifest that declares `"accent": "user"`
-//! gets the accent the user chose in PlayerVox OverCrow, by name in the IPC
-//! and as the `--color-user-accent` and `--color-on-user-accent` tokens. A
-//! reader that does not know the field refuses the manifest, so the
-//! declaration needs the catalog feature `user-accent`. The brand accent
-//! tokens never change.
+//! The user's accent colour, in its reduced form: a manifest that declares
+//! `"accent": "user"` gets the accent the user chose in PlayerVox OverCrow,
+//! by name in the IPC and as the `--color-user-accent` and
+//! `--color-on-user-accent` tokens. A reader that does not know the field
+//! refuses the manifest, so the declaration needs the catalog feature
+//! `user-accent`. The brand accent tokens never change. The roles of
+//! `"accent": "user-roles"` are in `user_accent_roles.rs`.
 
 use overcrow_widget_schema::catalog_v2::{FEATURE_USER_ACCENT, KNOWN_FEATURES};
 use overcrow_widget_schema::ipc::HOST_MESSAGES;
 use overcrow_widget_schema::manifest::validate_manifest;
 use overcrow_widget_schema::tokens::{
-    DEFAULT_USER_ACCENT, TOKENS, USER_ACCENT_NAMES, USER_ACCENTS, token, user_accent,
+    AccentDeclaration, AccentRole, DEFAULT_USER_ACCENT, TOKENS, USER_ACCENT_NAMES, USER_ACCENTS,
+    token, user_accent,
 };
 use serde_json::{Value, json};
 
@@ -42,7 +44,7 @@ fn the_declaration_needs_its_catalog_feature() {
     assert!(KNOWN_FEATURES.contains(&FEATURE_USER_ACCENT));
     let declared =
         validate_manifest(manifest(Some(json!("user"))).to_string().as_bytes()).expect("declared");
-    assert!(declared.user_accent);
+    assert_eq!(declared.accent, AccentDeclaration::User);
     assert_eq!(
         declared.features().into_iter().collect::<Vec<_>>(),
         ["user-accent"]
@@ -51,7 +53,7 @@ fn the_declaration_needs_its_catalog_feature() {
     assert_eq!(declared.permissions, Default::default());
 
     let absent = validate_manifest(manifest(None).to_string().as_bytes()).expect("absent");
-    assert!(!absent.user_accent);
+    assert_eq!(absent.accent, AccentDeclaration::None);
     assert!(absent.features().is_empty());
 
     for refused in [
@@ -134,34 +136,46 @@ fn text_keeps_aa_contrast_on_every_accent_in_both_themes() {
 }
 
 #[test]
-fn the_tokens_default_to_lime_and_the_brand_accent_does_not_move() {
-    let fill = token("--color-user-accent").expect("fill token");
-    let on_fill = token("--color-on-user-accent").expect("text token");
-    for (token, dark, light) in [
-        (
-            fill,
-            DEFAULT_USER_ACCENT.dark.fill,
-            DEFAULT_USER_ACCENT.light.fill,
-        ),
-        (
-            on_fill,
-            DEFAULT_USER_ACCENT.dark.on_fill,
-            DEFAULT_USER_ACCENT.light.on_fill,
-        ),
-    ] {
-        assert!(
-            token.user_accent && token.status.is_fixed(),
-            "{}",
-            token.name
-        );
-        assert_eq!((token.dark, token.light), (dark, light), "{}", token.name);
-    }
+fn the_reduced_form_gives_two_tokens_and_the_brand_accent_does_not_move() {
+    // The two tokens `"accent": "user"` gives, with their published lime.
     let user: Vec<&str> = TOKENS
         .iter()
-        .filter(|token| token.user_accent)
+        .filter(|token| {
+            token
+                .user_accent
+                .is_some_and(|role| AccentDeclaration::User.allows(role))
+        })
         .map(|token| token.name)
         .collect();
     assert_eq!(user, ["--color-user-accent", "--color-on-user-accent"]);
+    for (name, role, dark, light) in [
+        (
+            "--color-user-accent",
+            AccentRole::Fill,
+            "#a3e635",
+            "#84cc16",
+        ),
+        (
+            "--color-on-user-accent",
+            AccentRole::OnFill,
+            "#18181b",
+            "#18181b",
+        ),
+    ] {
+        let token = token(name).expect(name);
+        assert!(
+            token.user_accent == Some(role) && token.status.is_fixed(),
+            "{name}"
+        );
+        assert_eq!(
+            (
+                DEFAULT_USER_ACCENT.value(role, true, AccentDeclaration::User),
+                DEFAULT_USER_ACCENT.value(role, false, AccentDeclaration::User)
+            ),
+            (dark, light),
+            "{name}"
+        );
+    }
     // Published widgets draw these: their values are frozen.
     for (name, dark, light) in [
         ("--color-accent", "#a3e635", "#4d7c0f"),
@@ -172,7 +186,7 @@ fn the_tokens_default_to_lime_and_the_brand_accent_does_not_move() {
         let token = token(name).expect(name);
         assert_eq!(
             (token.dark, token.light, token.user_accent),
-            (dark, light, false)
+            (dark, light, None)
         );
     }
 }

@@ -1,0 +1,7 @@
+error[style.undeclared_user_accent]: `--color-user-accent` needs the user's accent colour, which the manifest does not declare
+  --> style.ocss:21:19
+    |
+ 21 |   background: var(--color-user-accent);
+    |                   ^
+   = help: add `"accent": "user-roles"` to manifest.json, or use `--color-accent`; see https://overcrow.playervox.com/docs/en/style/#user-accent
+check: 1 error(s), 0 warning(s)
