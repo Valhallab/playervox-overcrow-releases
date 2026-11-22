@@ -7,8 +7,14 @@ change between betas; 1.0.0 will freeze them under semantic versioning.
 The CLI's version enters no package: a package depends only on the
 widget's sources and the embedded SDK.
 
-## Unreleased
+## 1.0.0-beta.13
 
+Released in the creator tools ZIPs of PlayerVox OverCrow 0.13.0-beta.1's
+GitHub release, `overcrow-creator-tools-0.13.0-beta.1-<platform>.zip`,
+beside the headless runtime it pins.
+
+- It pins the headless runtime of PlayerVox OverCrow 0.13.0-beta.1, the
+  first that knows the accent roles.
 - A manifest may declare `"accent": "user-roles"`: the widget follows the
   accent colour the user chose in PlayerVox OverCrow in every use of it,
   with a style token for each role (`--color-user-accent`,
