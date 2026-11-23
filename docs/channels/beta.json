@@ -6,139 +6,139 @@
       "linux-x86_64": {
         "files": [
           {
-            "path": "overcrow-creator-tools-0.12.0-beta.1-linux-x86_64/README.txt",
-            "sha256": "b6fc4e4cb30a66dedd4425b7810da04360bf60ac1d48e74759e44856d6cebc24",
+            "path": "overcrow-creator-tools-0.13.0-beta.1-linux-x86_64/README.txt",
+            "sha256": "911526ae912a5d100f29833847a70cfe4b39cd4ea86834dd22224c0f47b9581b",
             "size": 1648
           },
           {
-            "path": "overcrow-creator-tools-0.12.0-beta.1-linux-x86_64/SHA256SUMS",
-            "sha256": "ce832e9e00d4938a2fea9279a6a8d2f32ae03af7cf1c31239f87e0adeec933e3",
+            "path": "overcrow-creator-tools-0.13.0-beta.1-linux-x86_64/SHA256SUMS",
+            "sha256": "03cd088c2cbd6d3a71a662a58f8dbcd2e0aaf50868f53c0f1aa5f63d9d9729b4",
             "size": 802
           },
           {
-            "path": "overcrow-creator-tools-0.12.0-beta.1-linux-x86_64/cli.json",
-            "sha256": "3a5fe0c8b73fd95dd352a4441cbb9d1e94c8d626c0fac668e723874cfe6d3370",
+            "path": "overcrow-creator-tools-0.13.0-beta.1-linux-x86_64/cli.json",
+            "sha256": "1eaec0f0ab7b8f1b6806605d82f7c7a59a637efce19b14d6053c30c0da6cfe6e",
             "size": 1022
           },
           {
-            "path": "overcrow-creator-tools-0.12.0-beta.1-linux-x86_64/overcrow-widget-1.0.0-beta.12-LICENSE.txt",
+            "path": "overcrow-creator-tools-0.13.0-beta.1-linux-x86_64/overcrow-widget-1.0.0-beta.13-LICENSE.txt",
             "sha256": "c159eef41245fe20d4cd29fc33a0e88a85f47b53ac321f266abfb7b707aee8c3",
             "size": 1071
           },
           {
-            "path": "overcrow-creator-tools-0.12.0-beta.1-linux-x86_64/overcrow-widget-1.0.0-beta.12-THIRD-PARTY-NOTICES.md",
+            "path": "overcrow-creator-tools-0.13.0-beta.1-linux-x86_64/overcrow-widget-1.0.0-beta.13-THIRD-PARTY-NOTICES.md",
             "sha256": "e09a84ff1402da4181825398fd0795e734e362d2b3a33ab9220d8fc96aebd406",
             "size": 212100
           },
           {
-            "path": "overcrow-creator-tools-0.12.0-beta.1-linux-x86_64/overcrow-widget-1.0.0-beta.12-linux-x86_64",
-            "sha256": "7a5ec24fcd11c50babd53f36226e0e3077e82ff7c8bba3bad3478a031398621b",
-            "size": 10280088
+            "path": "overcrow-creator-tools-0.13.0-beta.1-linux-x86_64/overcrow-widget-1.0.0-beta.13-linux-x86_64",
+            "sha256": "04884757d641fbf3c3d86ed51dfbf295959046cfa89036e865478a8712a702b3",
+            "size": 10293552
           },
           {
-            "path": "overcrow-creator-tools-0.12.0-beta.1-linux-x86_64/overcrow-widget-headless-0.12.0-beta.1-LICENSE.md",
-            "sha256": "68d1550ca34dfca5b56932c41e64ffe5d5030c92435dba82b1740a1a725a08a6",
+            "path": "overcrow-creator-tools-0.13.0-beta.1-linux-x86_64/overcrow-widget-headless-0.13.0-beta.1-LICENSE.md",
+            "sha256": "4146dbadf13d7adfe824d2aa9c981ba4ebff47ce5efa6b640d9ca01d3bc0a72a",
             "size": 250332
           },
           {
-            "path": "overcrow-creator-tools-0.12.0-beta.1-linux-x86_64/overcrow-widget-headless-0.12.0-beta.1-linux-x86_64",
-            "sha256": "62df4ea7d29aff9e2f8999592b5b0b92396c3e118b87d172e6e3f2912b8ea6ba",
-            "size": 29408600
+            "path": "overcrow-creator-tools-0.13.0-beta.1-linux-x86_64/overcrow-widget-headless-0.13.0-beta.1-linux-x86_64",
+            "sha256": "b71b0297c40568bf6e7fa17ff84234950679aa447cd6f0981c3b7ed3d7e053c7",
+            "size": 29426952
           },
           {
-            "path": "overcrow-creator-tools-0.12.0-beta.1-linux-x86_64/runtimes.json",
-            "sha256": "d683921b0bc76d92ccdcf1db42527b539b2ee046ce3ebfc10b10a600e1811cb6",
+            "path": "overcrow-creator-tools-0.13.0-beta.1-linux-x86_64/runtimes.json",
+            "sha256": "34998e2cb38636db8b9deb885ec93f2680f5e7b7d42689b1acfc91db317c0a89",
             "size": 778
           }
         ],
-        "name": "overcrow-creator-tools-0.12.0-beta.1-linux-x86_64.zip",
-        "sha256": "a4b9049888d294690fe178a48b40ece793a4334d530e0eddc38275886394b48c",
-        "size": 18118832,
-        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.12.0-beta.1/overcrow-creator-tools-0.12.0-beta.1-linux-x86_64.zip"
+        "name": "overcrow-creator-tools-0.13.0-beta.1-linux-x86_64.zip",
+        "sha256": "03de6b3aac37e69fb2b6a6b72e8357f907f02d7140b3f19fef8b9362af4f6520",
+        "size": 18130355,
+        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.13.0-beta.1/overcrow-creator-tools-0.13.0-beta.1-linux-x86_64.zip"
       },
       "windows-x86_64": {
         "files": [
           {
-            "path": "overcrow-creator-tools-0.12.0-beta.1-windows-x86_64/README.txt",
-            "sha256": "f817a04e4fb360b0c5154d8538c3312daa0e6ec451e04e859e54567bcafbcc5d",
+            "path": "overcrow-creator-tools-0.13.0-beta.1-windows-x86_64/README.txt",
+            "sha256": "d396113f7f9f7415c2f93b6b673c07f023b261c90c0c3406a42934bab53bb8db",
             "size": 1467
           },
           {
-            "path": "overcrow-creator-tools-0.12.0-beta.1-windows-x86_64/SHA256SUMS",
-            "sha256": "4c23d5fec014c583a0b0cec07cec38dd458acf47d56f74257fb1894958d374ff",
+            "path": "overcrow-creator-tools-0.13.0-beta.1-windows-x86_64/SHA256SUMS",
+            "sha256": "caf3c62922cd546df053f8306700365a6f23c3b893a078a2b74f317a78fb0e93",
             "size": 814
           },
           {
-            "path": "overcrow-creator-tools-0.12.0-beta.1-windows-x86_64/cli.json",
-            "sha256": "3a5fe0c8b73fd95dd352a4441cbb9d1e94c8d626c0fac668e723874cfe6d3370",
+            "path": "overcrow-creator-tools-0.13.0-beta.1-windows-x86_64/cli.json",
+            "sha256": "1eaec0f0ab7b8f1b6806605d82f7c7a59a637efce19b14d6053c30c0da6cfe6e",
             "size": 1022
           },
           {
-            "path": "overcrow-creator-tools-0.12.0-beta.1-windows-x86_64/overcrow-widget-1.0.0-beta.12-LICENSE.txt",
+            "path": "overcrow-creator-tools-0.13.0-beta.1-windows-x86_64/overcrow-widget-1.0.0-beta.13-LICENSE.txt",
             "sha256": "c159eef41245fe20d4cd29fc33a0e88a85f47b53ac321f266abfb7b707aee8c3",
             "size": 1071
           },
           {
-            "path": "overcrow-creator-tools-0.12.0-beta.1-windows-x86_64/overcrow-widget-1.0.0-beta.12-THIRD-PARTY-NOTICES.md",
+            "path": "overcrow-creator-tools-0.13.0-beta.1-windows-x86_64/overcrow-widget-1.0.0-beta.13-THIRD-PARTY-NOTICES.md",
             "sha256": "e09a84ff1402da4181825398fd0795e734e362d2b3a33ab9220d8fc96aebd406",
             "size": 212100
           },
           {
-            "path": "overcrow-creator-tools-0.12.0-beta.1-windows-x86_64/overcrow-widget-1.0.0-beta.12-windows-x86_64.exe",
-            "sha256": "402784b58bf332367c87d7380b1875bd3643322ed2cbb067429d53bd8fb7f175",
-            "size": 10270208
+            "path": "overcrow-creator-tools-0.13.0-beta.1-windows-x86_64/overcrow-widget-1.0.0-beta.13-windows-x86_64.exe",
+            "sha256": "33a88a6049cb43f899b1f1b827611c9f5fa515c5985aa9343957cdb208822f7a",
+            "size": 10287616
           },
           {
-            "path": "overcrow-creator-tools-0.12.0-beta.1-windows-x86_64/overcrow-widget-headless-0.12.0-beta.1-LICENSE.md",
-            "sha256": "68d1550ca34dfca5b56932c41e64ffe5d5030c92435dba82b1740a1a725a08a6",
+            "path": "overcrow-creator-tools-0.13.0-beta.1-windows-x86_64/overcrow-widget-headless-0.13.0-beta.1-LICENSE.md",
+            "sha256": "4146dbadf13d7adfe824d2aa9c981ba4ebff47ce5efa6b640d9ca01d3bc0a72a",
             "size": 250332
           },
           {
-            "path": "overcrow-creator-tools-0.12.0-beta.1-windows-x86_64/overcrow-widget-headless-0.12.0-beta.1-windows-x86_64.exe",
-            "sha256": "949a8f2be1d2d53c497a35dd1348ca66b7209371a0308ca271603e6d03da192b",
-            "size": 30802432
+            "path": "overcrow-creator-tools-0.13.0-beta.1-windows-x86_64/overcrow-widget-headless-0.13.0-beta.1-windows-x86_64.exe",
+            "sha256": "952250cf53133c5b9857b4832807b416ecfd47c1716a2f51f34861f4ad75881e",
+            "size": 30807552
           },
           {
-            "path": "overcrow-creator-tools-0.12.0-beta.1-windows-x86_64/runtimes.json",
-            "sha256": "d683921b0bc76d92ccdcf1db42527b539b2ee046ce3ebfc10b10a600e1811cb6",
+            "path": "overcrow-creator-tools-0.13.0-beta.1-windows-x86_64/runtimes.json",
+            "sha256": "34998e2cb38636db8b9deb885ec93f2680f5e7b7d42689b1acfc91db317c0a89",
             "size": 778
           }
         ],
-        "name": "overcrow-creator-tools-0.12.0-beta.1-windows-x86_64.zip",
-        "sha256": "f306df9dfc8806ce26a08f78fbcb71229f49aac9ea03d956100e67106e774c3b",
-        "size": 18134339,
-        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.12.0-beta.1/overcrow-creator-tools-0.12.0-beta.1-windows-x86_64.zip"
+        "name": "overcrow-creator-tools-0.13.0-beta.1-windows-x86_64.zip",
+        "sha256": "020cb242a13b1363958b78431a7ed1f11ccc43cff19320e3a5e3a20d5f0ff2cb",
+        "size": 18142150,
+        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.13.0-beta.1/overcrow-creator-tools-0.13.0-beta.1-windows-x86_64.zip"
       }
     },
     "platforms": {
       "linux-arch-x64": {
-        "name": "overcrow-bin-0.12.0beta1-1-x86_64.pkg.tar.zst",
-        "sha256": "23f056c4440476cb2fd14786181b64e23de1209335fb2d37a4db3ba38d5b8803",
-        "size": 36433311,
-        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.12.0-beta.1/overcrow-bin-0.12.0beta1-1-x86_64.pkg.tar.zst"
+        "name": "overcrow-bin-0.13.0beta1-1-x86_64.pkg.tar.zst",
+        "sha256": "0f055b8db2aaeeb9b8b7611bfc1e73960ef8027e9c502dcec1ac03ef7a801468",
+        "size": 36414479,
+        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.13.0-beta.1/overcrow-bin-0.13.0beta1-1-x86_64.pkg.tar.zst"
       },
       "linux-deb-x64": {
-        "name": "overcrow_0.12.0.beta.1-1_amd64.deb",
-        "sha256": "5b1d1d21c96fb28016a18c0c359662c33691e04d81a3e620e67fc2cdfd879b53",
-        "size": 18745976,
-        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.12.0-beta.1/overcrow_0.12.0.beta.1-1_amd64.deb"
+        "name": "overcrow_0.13.0.beta.1-1_amd64.deb",
+        "sha256": "4bb57eabab1dc017c04f1fe9092058f3478a9c3d2a3bc57341bff2ef21ccae34",
+        "size": 18755224,
+        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.13.0-beta.1/overcrow_0.13.0.beta.1-1_amd64.deb"
       },
       "linux-rpm-x64": {
-        "name": "overcrow-0.12.0.beta.1-1.fc43.x86_64.rpm",
-        "sha256": "b172e60d81e058bc3debc3f3679091cef27d66b03411d9541d6bc1d070b4234a",
-        "size": 27079235,
-        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.12.0-beta.1/overcrow-0.12.0.beta.1-1.fc43.x86_64.rpm"
+        "name": "overcrow-0.13.0.beta.1-1.fc43.x86_64.rpm",
+        "sha256": "b56819771ea83eb9b2982c9a97d6c919cee9701d7091de00641d589a39137a7e",
+        "size": 27103059,
+        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.13.0-beta.1/overcrow-0.13.0.beta.1-1.fc43.x86_64.rpm"
       },
       "windows-x64": {
-        "name": "OverCrow-0.12.0-beta.1-windows-x64-setup.exe",
-        "sha256": "ee56deb6243c9026a1107eff19c64fbf3e4c7c73d852f7187d98fce3acfaf0c9",
-        "size": 23843222,
-        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.12.0-beta.1/OverCrow-0.12.0-beta.1-windows-x64-setup.exe"
+        "name": "OverCrow-0.13.0-beta.1-windows-x64-setup.exe",
+        "sha256": "f399981a2b275760aa028e81a966c8bb7275a7abec3c49da6e85c5265367d236",
+        "size": 23870072,
+        "url": "https://github.com/Valhallab/playervox-overcrow-releases/releases/download/v0.13.0-beta.1/OverCrow-0.13.0-beta.1-windows-x64-setup.exe"
       }
     },
     "schemaVersion": 1,
-    "sourceCommit": "f376a4609816c8f7df99d175fd425fbcead8b467",
-    "version": "0.12.0-beta.1"
+    "sourceCommit": "d1ba6c56e270aa1c7c836af5468207eb0e59f9de",
+    "version": "0.13.0-beta.1"
   },
   "schemaVersion": 1
 }
