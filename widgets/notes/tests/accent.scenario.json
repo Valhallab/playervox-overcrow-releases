@@ -1,0 +1,241 @@
+{
+  "scenarioVersion": 1,
+  "name": "accent",
+  "description": "The user's accent, dark theme, changed while the widget runs: nothing reloads. Passive mode, the done entry's check; Interactive mode, the current note in the list beside the checked box; the editor, its Save button and checked box. Lime first, then red, steel and blue; the next states in blue, red and steel.",
+  "host": {
+    "mode": "passive",
+    "theme": "dark",
+    "scale": 1000,
+    "userAccent": "lime"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "notes.subscribe": {
+        "active": "note-1",
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Expedition",
+            "body": "Find the northern entrance before sunset.\nBring rope.",
+            "items": [
+              {
+                "id": "local-1",
+                "text": "Pack torches",
+                "checked": true
+              },
+              {
+                "id": "local-2",
+                "text": "Sharpen the blade",
+                "checked": false
+              },
+              {
+                "id": "local-3",
+                "text": "Buy healing potions for the whole party before leaving town",
+                "checked": false
+              }
+            ]
+          },
+          {
+            "id": "note-2",
+            "title": "Build ideas",
+            "body": "Fire sword first, then armor.",
+            "items": []
+          },
+          {
+            "id": "note-3",
+            "title": "A very long note title that must be cut in the selector and in the list",
+            "body": "",
+            "items": [
+              {
+                "id": "local-4",
+                "text": "One entry",
+                "checked": false
+              }
+            ]
+          },
+          {
+            "id": "note-4",
+            "title": "Route",
+            "body": "North gate, then the river.",
+            "items": [
+              {
+                "id": "local-5",
+                "text": "Buy a map",
+                "checked": true
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Expedition",
+          "Pack torches"
+        ],
+        "calls": [
+          {
+            "service": "notes.subscribe",
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "note-lime"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "red"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "note-red"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "steel"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "note-steel"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "blue"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "note-blue"
+      }
+    },
+    {
+      "host": {
+        "mode": "interactive"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Choose note"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Build ideas",
+          "Route"
+        ]
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "list-blue"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "red"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "list-red"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "steel"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "list-steel"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Choose note"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Edit current note"
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Checklist",
+          "Save",
+          "Cancel"
+        ]
+      }
+    },
+    {
+      "host": {
+        "userAccent": "blue"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "editor-blue"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "red"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "editor-red"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "steel"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "editor-steel"
+      }
+    }
+  ]
+}

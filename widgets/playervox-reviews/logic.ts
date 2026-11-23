@@ -16,6 +16,7 @@ import {
   playervox,
   t,
   timers,
+  userAccentRoles,
   type Color,
   type DrawCommand,
   type Review,
@@ -170,9 +171,15 @@ const NEUTRAL: Readonly<Record<"dark" | "light", { face: Color; color: Color }>>
 /**
  * The badge of a grade: a rounded square with a black face and a border
  * of the grade's colour, turned by 4° with its letter (not `--`, which is
- * neutral and square), and a faint static glow for S+.
+ * neutral and square), and a faint glow of `glow` (a hex colour) for S+:
+ * the widget passes its accent's fill and draws the badge again when it
+ * changes.
  */
-export function badgeCommands(grade: BadgeGrade, theme: "dark" | "light"): DrawCommand[] {
+export function badgeCommands(
+  grade: BadgeGrade,
+  theme: "dark" | "light",
+  glow: `#${string}`,
+): DrawCommand[] {
   const neutral = grade === "--" ? NEUTRAL[theme] : null;
   const color = neutral?.color ?? GRADE_COLORS[grade];
   const centre = BADGE_CANVAS / 2;
@@ -190,9 +197,10 @@ export function badgeCommands(grade: BadgeGrade, theme: "dark" | "light"): DrawC
     ["rotate", grade === "--" ? 0 : 4],
   ];
   if (grade === "S+") {
-    // Eight widening rings of the accent at 2 % each: a soft halo.
+    // Eight widening rings of the glow at 2 % each: a soft halo.
+    const halo: Color = `${glow}05`;
     for (let ring = 8; ring >= 1; ring -= 1) {
-      commands.push(square(), ["stroke", "#a3e63505", 3 + ring * 1.5]);
+      commands.push(square(), ["stroke", halo, 3 + ring * 1.5]);
     }
   }
   commands.push(
@@ -583,10 +591,11 @@ function drawBadges(): void {
 /** Side of a review's badge canvas: the shared badge at 42 %. */
 export const SMALL_BADGE = 32;
 
-/** The shared badge scaled to a `SMALL_BADGE` canvas, centred. */
+/** The shared badge scaled to a `SMALL_BADGE` canvas, centred; an S+ glows in the user's accent. */
 export function smallBadge(grade: BadgeGrade, theme: "dark" | "light"): DrawCommand[] {
   const scale = SMALL_BADGE / BADGE_CANVAS;
-  return [["save"], ["scale", scale, scale], ...badgeCommands(grade, theme), ["restore"]];
+  const badge = badgeCommands(grade, theme, userAccentRoles().fill);
+  return [["save"], ["scale", scale, scale], ...badge, ["restore"]];
 }
 
 /**
@@ -795,8 +804,9 @@ onHost((changed) => {
   if (changed.includes("mode")) {
     state.interactive = host.mode === "interactive";
   }
-  if (changed.includes("theme")) {
-    // The neutral badge follows the theme; the mark's token does already.
+  if (changed.includes("theme") || changed.includes("userAccent")) {
+    // The neutral badge follows the theme, the S+ glow the user's accent;
+    // the mark's token does already.
     drawBadges();
   }
   // Another filter, or another language (the host reads the reviews in the

@@ -25,7 +25,7 @@
   height: 16px;
   flex-shrink: 0;
   font-size: 16px;
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
 }
 
 /* The favorite star: a button in Interactive mode, a mark in Passive. */
@@ -167,7 +167,7 @@
 }
 
 .input:focus {
-  border: 1px solid var(--color-accent);
+  border: 1px solid var(--color-user-accent-outline);
 }
 
 .input:disabled {
@@ -181,12 +181,12 @@
   flex-shrink: 0;
   padding: 0px 12px;
   border-radius: var(--radius-sm);
-  background: var(--color-accent);
+  background: var(--color-user-accent);
 }
 
 .action:hover,
 .action:focus {
-  background: var(--color-accent-hover);
+  background: var(--color-user-accent-hover);
 }
 
 .action:disabled {
@@ -198,7 +198,7 @@
   font-size: var(--font-size-button);
   font-weight: 600;
   line-height: 16px;
-  color: var(--color-on-accent);
+  color: var(--color-on-user-accent);
   white-space: nowrap;
 }
 
@@ -265,7 +265,7 @@
 /* A reply: indented behind a rail, under one line of what it answers. */
 .replied {
   padding-left: 6px;
-  border-left: 2px solid var(--color-accent);
+  border-left: 2px solid var(--color-user-accent-outline);
 }
 
 .context {
@@ -319,7 +319,7 @@
 
 .reply:hover,
 .reply:focus {
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
   opacity: 1;
 }
 
@@ -340,7 +340,7 @@
   flex-shrink: 0;
   padding: 0px 10px;
   border-radius: var(--radius-pill);
-  background: var(--color-accent-soft);
+  background: var(--color-user-accent-soft);
 }
 
 .unread:hover,
@@ -353,7 +353,7 @@
   font-size: var(--font-size-small);
   font-weight: 600;
   line-height: 14px;
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
   white-space: nowrap;
 }
 

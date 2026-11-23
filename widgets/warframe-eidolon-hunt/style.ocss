@@ -43,7 +43,7 @@
 }
 
 .tone-accent {
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
 }
 
 .tone-success {

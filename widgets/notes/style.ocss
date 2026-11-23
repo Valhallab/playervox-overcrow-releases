@@ -170,7 +170,7 @@
 }
 
 .current {
-  background: var(--color-accent-soft);
+  background: var(--color-user-accent-soft);
 }
 
 .list-label {
@@ -257,7 +257,7 @@
 }
 
 .item-icon-done {
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
 }
 
 .item-text {
@@ -449,19 +449,19 @@
 /* The one action of the moment: Save with something to save, Add note
    without any note. */
 .primary {
-  border: 1px solid var(--color-accent);
-  background: var(--color-accent);
+  border: 1px solid var(--color-user-accent);
+  background: var(--color-user-accent);
 }
 
 .primary:hover,
 .primary:focus {
-  border: 1px solid var(--color-accent-hover);
-  background: var(--color-accent-hover);
+  border: 1px solid var(--color-user-accent-hover);
+  background: var(--color-user-accent-hover);
 }
 
 .primary .action-label,
 .primary .action-icon {
-  color: var(--color-on-accent);
+  color: var(--color-on-user-accent);
 }
 
 .add {

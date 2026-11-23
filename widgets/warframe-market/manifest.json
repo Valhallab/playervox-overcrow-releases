@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "apiVersion": 1,
   "id": "com.playervox.overcrow.warframe.market",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "name": {
     "en": "Warframe Market",
     "fr": "Marché Warframe"
@@ -22,6 +22,7 @@
       "height": 1200
     }
   },
+  "accent": "user-roles",
   "permissions": {
     "network": [
       {

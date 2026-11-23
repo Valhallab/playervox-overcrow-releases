@@ -32,6 +32,10 @@ when a published rating shows or changes, never for a draft.
 In Passive mode the widget shows only the published rating: no form, no
 draft.
 
+The accent colour is the one chosen in PlayerVox OverCrow (since 1.1.0): the
+sliders and the focus ring OverCrow draws, and the faint glow around an S+
+badge, follow it; the badge keeps its grade's colour.
+
 ## The form (Interactive mode)
 
 | Control | |

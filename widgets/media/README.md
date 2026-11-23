@@ -38,6 +38,10 @@ and packaged with `overcrow-widget` like any creator's widget. MIT.
 The player's text is shown as it comes, in any language; only the widget's
 own messages and labels follow OverCrow's language.
 
+The accent colour is the one chosen in PlayerVox OverCrow (since 1.1.0): a
+button's pressed shade and the focus ring OverCrow draws around it follow
+it.
+
 ## Controls
 
 | Mode | Control | Does |

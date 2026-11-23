@@ -71,7 +71,7 @@ une espace (descendant) ou par `>` (enfant).
 .copy:focus,
 .back:focus,
 .refresh:focus {
-  border-color: var(--color-accent);
+  border-color: var(--color-user-accent-outline);
 }
 ```
 

@@ -1,0 +1,489 @@
+{
+  "scenarioVersion": 1,
+  "name": "accent",
+  "description": "The user's accent, dark theme, changed while the widget runs: nothing reloads. The chat with a draft in the focused message field: the Twitch mark, the field's focus border, the Send button and the rail of a reply in the history; then the Send button reached with Tab, in its hover shade, and the reply icon under the pointer; scrolled away from the end, the button that counts a new message. Lime first, then red, steel and blue; the next states in blue, red and steel.",
+  "host": {
+    "mode": "interactive",
+    "size": {
+      "width": 420,
+      "height": 300
+    },
+    "theme": "dark",
+    "scale": 1000,
+    "userAccent": "lime"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "twitch.chat.subscribe": {
+        "account": "connected",
+        "channel": "juniper_plays",
+        "joinState": "joined",
+        "failure": null,
+        "favorites": [
+          "juniper_plays"
+        ],
+        "canSend": true,
+        "generation": 1,
+        "reset": true,
+        "messages": [
+          {
+            "id": "m1",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "good evening chat, boss attempt number three"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m2",
+            "author": "River_Otter",
+            "color": "#1e90ff",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "you've got this, the second phase is all about timing"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m3",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "that last jump was close"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m4",
+            "author": "Fern_42",
+            "color": "#2e8b57",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "dodge left when the arena lights up"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m5",
+            "author": "Juniper",
+            "color": "#ff7f50",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "noted, thank you"
+              }
+            ],
+            "reply": {
+              "author": "Fern_42",
+              "text": "dodge left when the arena lights up"
+            },
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m6",
+            "author": "Kestrel",
+            "color": "#daa520",
+            "badges": [],
+            "fragments": [
+              {
+                "text": "first try energy"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          },
+          {
+            "id": "m7",
+            "author": "Moss",
+            "color": null,
+            "badges": [],
+            "fragments": [
+              {
+                "text": "GG if this one works"
+              }
+            ],
+            "reply": null,
+            "deleted": false,
+            "receivedAt": 1767225595000
+          }
+        ],
+        "removed": [],
+        "skipped": 0
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "#juniper_plays",
+          "Moss: GG if this one works"
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Message"
+        }
+      }
+    },
+    {
+      "text": "good luck"
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "expect": {
+        "text": [
+          "#juniper_plays",
+          "Juniper: noted, thank you",
+          "Send"
+        ]
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "draft-lime"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "red"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "draft-red"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "steel"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "draft-steel"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "blue"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "draft-blue"
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "pointer": {
+        "move": {
+          "text": "Juniper: good evening chat, boss attempt number three"
+        }
+      }
+    },
+    {
+      "pointer": {
+        "move": {
+          "label": "Reply"
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 1000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Send"
+        ]
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "reply-icon-blue"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "red"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "reply-icon-red"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "steel"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "reply-icon-steel"
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [
+            "juniper_plays"
+          ],
+          "canSend": true,
+          "generation": 1,
+          "reset": false,
+          "messages": [
+            {
+              "id": "n0",
+              "author": "River_Otter",
+              "color": "#1e90ff",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "here we go"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225600000
+            },
+            {
+              "id": "n1",
+              "author": "Moss",
+              "color": null,
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "hands steady"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225601000
+            },
+            {
+              "id": "n2",
+              "author": "Fern_42",
+              "color": "#2e8b57",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "watch the left pillar"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225602000
+            },
+            {
+              "id": "n3",
+              "author": "Kestrel",
+              "color": "#daa520",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "so close last time"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225603000
+            },
+            {
+              "id": "n4",
+              "author": "River_Otter",
+              "color": "#1e90ff",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "you can do it"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225604000
+            },
+            {
+              "id": "n5",
+              "author": "Moss",
+              "color": null,
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "lights are up"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225605000
+            }
+          ],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Moss: lights are up"
+        ],
+        "noText": [
+          "1 new message"
+        ]
+      }
+    },
+    {
+      "pointer": {
+        "wheel": {
+          "target": {
+            "text": "Moss: lights are up"
+          },
+          "dx": 0,
+          "dy": -6
+        }
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "advance": {
+        "ms": 3000
+      }
+    },
+    {
+      "publish": {
+        "service": "twitch.chat.subscribe",
+        "value": {
+          "account": "connected",
+          "channel": "juniper_plays",
+          "joinState": "joined",
+          "failure": null,
+          "favorites": [
+            "juniper_plays"
+          ],
+          "canSend": true,
+          "generation": 1,
+          "reset": false,
+          "messages": [
+            {
+              "id": "n9",
+              "author": "Kestrel",
+              "color": "#daa520",
+              "badges": [],
+              "fragments": [
+                {
+                  "text": "phase two, focus"
+                }
+              ],
+              "reply": null,
+              "deleted": false,
+              "receivedAt": 1767225610000
+            }
+          ],
+          "removed": [],
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "1 new message"
+        ]
+      }
+    },
+    {
+      "host": {
+        "userAccent": "blue"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "unread-blue"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "red"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "unread-red"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "steel"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "unread-steel"
+      }
+    }
+  ]
+}

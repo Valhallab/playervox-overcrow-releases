@@ -142,7 +142,7 @@
 }
 
 .control:active {
-  background: var(--color-accent-soft);
-  border-color: var(--color-accent);
-  color: var(--color-accent-hover);
+  background: var(--color-user-accent-soft);
+  border-color: var(--color-user-accent-outline);
+  color: var(--color-user-accent-text-hover);
 }

@@ -79,6 +79,10 @@ shows. In Defense, a wave already past the reward's wave counts as paid
 One host timer ticks on the second the countdown changes, or on the
 minute for "2 h ago"; none while the widget is hidden.
 
+The accent colour is the one chosen in PlayerVox OverCrow (since 1.1.0): the
+live eyebrow, the current rotation in the track and its column, and "this
+wave" follow it; a rotation already earned keeps its green.
+
 ## Permissions
 
 | Permission | Why |

@@ -25,6 +25,10 @@ widget. MIT.
 | The notes cannot be read, or a change could not be stored | "Notes could not be loaded or saved. Try again." / "Impossible de charger ou d’enregistrer les notes. Réessayez." |
 | No permission to read | "Allow access to your notes in the Control Center.": the widget asks OverCrow nothing |
 
+The accent colour is the one chosen in PlayerVox OverCrow (since 1.1.0):
+the Save and Add note buttons, the checks, the done mark and the note
+shown in the list follow it.
+
 A note taller than the panel scrolls in it (wheel, drag, keyboard) in
 Interactive mode; Passive mode shows its top.
 

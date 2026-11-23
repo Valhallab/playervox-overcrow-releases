@@ -1,0 +1,68 @@
+{
+  "scenarioVersion": 1,
+  "name": "accent",
+  "description": "The user's accent, dark theme, changed while the widget runs: nothing reloads. The clock has no control and no accent colour: its time and date look the same in every accent. Lime first, then red, steel and blue.",
+  "host": {
+    "zone": {
+      "offsetMinutes": 120
+    },
+    "startAt": 1784290122000,
+    "theme": "dark",
+    "scale": 1000,
+    "userAccent": "lime"
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "14:08",
+          "17/07/2026"
+        ]
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "preview-lime"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "red"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "preview-red"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "steel"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "preview-steel"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "blue"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "preview-blue"
+      }
+    }
+  ]
+}

@@ -1,0 +1,699 @@
+{
+  "scenarioVersion": 1,
+  "name": "accent",
+  "description": "The user's accent, dark theme, changed while the widget runs: nothing reloads. Full layout, a Hype Train at level 2 running and KaiPlays just followed: the Hype Train card's outline, tint, train icon, title and bar, each goal's type icon and bar, the lit followers card; Standard layout, the goals' slim bars under the Hype Train card; Line layout, the train icon and its bar. Lime first, then red, steel and blue; the next states in blue, red and steel.",
+  "host": {
+    "startAt": 1767225600000,
+    "theme": "dark",
+    "scale": 1000,
+    "userAccent": "lime"
+  },
+  "fixtures": {
+    "http": [
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/users",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"141981764\",\"login\":\"novalive\",\"display_name\":\"NovaLive\",\"type\":\"\",\"broadcaster_type\":\"affiliate\",\"description\":\"\",\"profile_image_url\":\"\",\"offline_image_url\":\"\",\"view_count\":0,\"created_at\":\"2019-05-01T10:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1284,\"data\":[{\"user_id\":\"70000001\",\"user_login\":\"nyxarcade\",\"user_name\":\"NyxArcade\",\"followed_at\":\"2025-12-31T23:56:00Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":{\"id\":\"hype-1\",\"broadcaster_user_id\":\"141981764\",\"broadcaster_user_login\":\"novalive\",\"broadcaster_user_name\":\"NovaLive\",\"level\":2,\"total\":4240,\"progress\":1240,\"goal\":1800,\"top_contributions\":[],\"shared_train_participants\":null,\"started_at\":\"2025-12-31T23:58:00Z\",\"expires_at\":\"2026-01-01T00:03:42Z\",\"type\":\"regular\",\"is_shared_train\":false},\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1285,\"data\":[{\"user_id\":\"70000002\",\"user_login\":\"kaiplays\",\"user_name\":\"KaiPlays\",\"followed_at\":\"2026-01-01T00:00:20Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":{\"id\":\"hype-1\",\"broadcaster_user_id\":\"141981764\",\"broadcaster_user_login\":\"novalive\",\"broadcaster_user_name\":\"NovaLive\",\"level\":2,\"total\":4240,\"progress\":1240,\"goal\":1800,\"top_contributions\":[],\"shared_train_participants\":null,\"started_at\":\"2025-12-31T23:58:20Z\",\"expires_at\":\"2026-01-01T00:03:42Z\",\"type\":\"regular\",\"is_shared_train\":false},\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1285,\"data\":[{\"user_id\":\"70000002\",\"user_login\":\"kaiplays\",\"user_name\":\"KaiPlays\",\"followed_at\":\"2026-01-01T00:00:20Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":{\"id\":\"hype-1\",\"broadcaster_user_id\":\"141981764\",\"broadcaster_user_login\":\"novalive\",\"broadcaster_user_name\":\"NovaLive\",\"level\":2,\"total\":4240,\"progress\":1240,\"goal\":1800,\"top_contributions\":[],\"shared_train_participants\":null,\"started_at\":\"2025-12-31T23:58:40Z\",\"expires_at\":\"2026-01-01T00:03:42Z\",\"type\":\"regular\",\"is_shared_train\":false},\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1285,\"data\":[{\"user_id\":\"70000002\",\"user_login\":\"kaiplays\",\"user_name\":\"KaiPlays\",\"followed_at\":\"2026-01-01T00:00:20Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":{\"id\":\"hype-1\",\"broadcaster_user_id\":\"141981764\",\"broadcaster_user_login\":\"novalive\",\"broadcaster_user_name\":\"NovaLive\",\"level\":2,\"total\":4240,\"progress\":1240,\"goal\":1800,\"top_contributions\":[],\"shared_train_participants\":null,\"started_at\":\"2025-12-31T23:59:00Z\",\"expires_at\":\"2026-01-01T00:03:42Z\",\"type\":\"regular\",\"is_shared_train\":false},\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1285,\"data\":[{\"user_id\":\"70000002\",\"user_login\":\"kaiplays\",\"user_name\":\"KaiPlays\",\"followed_at\":\"2026-01-01T00:00:20Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":{\"id\":\"hype-1\",\"broadcaster_user_id\":\"141981764\",\"broadcaster_user_login\":\"novalive\",\"broadcaster_user_name\":\"NovaLive\",\"level\":2,\"total\":4240,\"progress\":1240,\"goal\":1800,\"top_contributions\":[],\"shared_train_participants\":null,\"started_at\":\"2025-12-31T23:59:20Z\",\"expires_at\":\"2026-01-01T00:03:42Z\",\"type\":\"regular\",\"is_shared_train\":false},\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1285,\"data\":[{\"user_id\":\"70000002\",\"user_login\":\"kaiplays\",\"user_name\":\"KaiPlays\",\"followed_at\":\"2026-01-01T00:00:20Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":{\"id\":\"hype-1\",\"broadcaster_user_id\":\"141981764\",\"broadcaster_user_login\":\"novalive\",\"broadcaster_user_name\":\"NovaLive\",\"level\":2,\"total\":4240,\"progress\":1240,\"goal\":1800,\"top_contributions\":[],\"shared_train_participants\":null,\"started_at\":\"2025-12-31T23:59:40Z\",\"expires_at\":\"2026-01-01T00:03:42Z\",\"type\":\"regular\",\"is_shared_train\":false},\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1285,\"data\":[{\"user_id\":\"70000002\",\"user_login\":\"kaiplays\",\"user_name\":\"KaiPlays\",\"followed_at\":\"2026-01-01T00:00:20Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":{\"id\":\"hype-1\",\"broadcaster_user_id\":\"141981764\",\"broadcaster_user_login\":\"novalive\",\"broadcaster_user_name\":\"NovaLive\",\"level\":2,\"total\":4240,\"progress\":1240,\"goal\":1800,\"top_contributions\":[],\"shared_train_participants\":null,\"started_at\":\"2026-01-01T00:00:00Z\",\"expires_at\":\"2026-01-01T00:03:42Z\",\"type\":\"regular\",\"is_shared_train\":false},\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1285,\"data\":[{\"user_id\":\"70000002\",\"user_login\":\"kaiplays\",\"user_name\":\"KaiPlays\",\"followed_at\":\"2026-01-01T00:00:20Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":{\"id\":\"hype-1\",\"broadcaster_user_id\":\"141981764\",\"broadcaster_user_login\":\"novalive\",\"broadcaster_user_name\":\"NovaLive\",\"level\":2,\"total\":4240,\"progress\":1240,\"goal\":1800,\"top_contributions\":[],\"shared_train_participants\":null,\"started_at\":\"2026-01-01T00:00:20Z\",\"expires_at\":\"2026-01-01T00:03:42Z\",\"type\":\"regular\",\"is_shared_train\":false},\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1285,\"data\":[{\"user_id\":\"70000002\",\"user_login\":\"kaiplays\",\"user_name\":\"KaiPlays\",\"followed_at\":\"2026-01-01T00:00:20Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":{\"id\":\"hype-1\",\"broadcaster_user_id\":\"141981764\",\"broadcaster_user_login\":\"novalive\",\"broadcaster_user_name\":\"NovaLive\",\"level\":2,\"total\":4240,\"progress\":1240,\"goal\":1800,\"top_contributions\":[],\"shared_train_participants\":null,\"started_at\":\"2026-01-01T00:00:40Z\",\"expires_at\":\"2026-01-01T00:03:42Z\",\"type\":\"regular\",\"is_shared_train\":false},\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1285,\"data\":[{\"user_id\":\"70000002\",\"user_login\":\"kaiplays\",\"user_name\":\"KaiPlays\",\"followed_at\":\"2026-01-01T00:00:20Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":{\"id\":\"hype-1\",\"broadcaster_user_id\":\"141981764\",\"broadcaster_user_login\":\"novalive\",\"broadcaster_user_name\":\"NovaLive\",\"level\":2,\"total\":4240,\"progress\":1240,\"goal\":1800,\"top_contributions\":[],\"shared_train_participants\":null,\"started_at\":\"2026-01-01T00:01:00Z\",\"expires_at\":\"2026-01-01T00:03:42Z\",\"type\":\"regular\",\"is_shared_train\":false},\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1285,\"data\":[{\"user_id\":\"70000002\",\"user_login\":\"kaiplays\",\"user_name\":\"KaiPlays\",\"followed_at\":\"2026-01-01T00:00:20Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":{\"id\":\"hype-1\",\"broadcaster_user_id\":\"141981764\",\"broadcaster_user_login\":\"novalive\",\"broadcaster_user_name\":\"NovaLive\",\"level\":2,\"total\":4240,\"progress\":1240,\"goal\":1800,\"top_contributions\":[],\"shared_train_participants\":null,\"started_at\":\"2026-01-01T00:01:20Z\",\"expires_at\":\"2026-01-01T00:03:42Z\",\"type\":\"regular\",\"is_shared_train\":false},\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1285,\"data\":[{\"user_id\":\"70000002\",\"user_login\":\"kaiplays\",\"user_name\":\"KaiPlays\",\"followed_at\":\"2026-01-01T00:00:20Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":{\"id\":\"hype-1\",\"broadcaster_user_id\":\"141981764\",\"broadcaster_user_login\":\"novalive\",\"broadcaster_user_name\":\"NovaLive\",\"level\":2,\"total\":4240,\"progress\":1240,\"goal\":1800,\"top_contributions\":[],\"shared_train_participants\":null,\"started_at\":\"2026-01-01T00:01:40Z\",\"expires_at\":\"2026-01-01T00:03:42Z\",\"type\":\"regular\",\"is_shared_train\":false},\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/goals?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"id\":\"g1\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"subscription_count\",\"description\":\"Karaoke night\",\"current_amount\":37,\"target_amount\":50,\"created_at\":\"2025-12-31T23:00:00Z\"},{\"id\":\"g2\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"follower\",\"description\":\"\",\"current_amount\":1284,\"target_amount\":1500,\"created_at\":\"2025-12-31T14:00:00Z\"},{\"id\":\"g3\",\"broadcaster_id\":\"141981764\",\"broadcaster_name\":\"NovaLive\",\"broadcaster_login\":\"novalive\",\"type\":\"new_bit\",\"description\":\"New mic\",\"current_amount\":3200,\"target_amount\":10000,\"created_at\":\"2025-12-29T22:00:00Z\"}]}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/channels/followers?broadcaster_id=141981764&first=1",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"total\":1285,\"data\":[{\"user_id\":\"70000002\",\"user_login\":\"kaiplays\",\"user_name\":\"KaiPlays\",\"followed_at\":\"2026-01-01T00:00:20Z\"}],\"pagination\":{}}"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "url": "https://api.twitch.tv/helix/hypetrain/status?broadcaster_id=141981764",
+          "account": "twitch"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "body": "{\"data\":[{\"current\":{\"id\":\"hype-1\",\"broadcaster_user_id\":\"141981764\",\"broadcaster_user_login\":\"novalive\",\"broadcaster_user_name\":\"NovaLive\",\"level\":2,\"total\":4240,\"progress\":1240,\"goal\":1800,\"top_contributions\":[],\"shared_train_participants\":null,\"started_at\":\"2026-01-01T00:02:00Z\",\"expires_at\":\"2026-01-01T00:03:42Z\",\"type\":\"regular\",\"is_shared_train\":false},\"all_time_high\":{\"level\":4,\"total\":9100,\"achieved_at\":\"2025-11-02T21:00:00Z\"},\"shared_all_time_high\":null}]}"
+        }
+      }
+    ],
+    "subscriptions": {
+      "twitch.events.subscribe": {
+        "state": "off",
+        "reason": "connecting",
+        "events": []
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Hype Train",
+          "03:42 left"
+        ]
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "full"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 340,
+          "height": 200
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 20000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Hype Train",
+          "Karaoke night",
+          "New mic",
+          "Latest follower: KaiPlays · just now"
+        ]
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "full-lime"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "red"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "full-red"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "steel"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "full-steel"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "blue"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "full-blue"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "standard"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 320,
+          "height": 200
+        }
+      }
+    },
+    {
+      "advance": {
+        "ms": 10000
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Hype Train",
+          "Karaoke night"
+        ]
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "standard-blue"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "red"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "standard-red"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "steel"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "standard-steel"
+      }
+    },
+    {
+      "menu": {
+        "id": "layout",
+        "value": "line"
+      }
+    },
+    {
+      "host": {
+        "size": {
+          "width": 260,
+          "height": 200
+        }
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Hype Train"
+        ]
+      }
+    },
+    {
+      "host": {
+        "userAccent": "blue"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "line-blue"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "red"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "line-red"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "steel"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "line-steel"
+      }
+    }
+  ]
+}

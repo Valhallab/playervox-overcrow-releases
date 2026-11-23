@@ -1,0 +1,71 @@
+{
+  "scenarioVersion": 1,
+  "name": "accent",
+  "description": "The user's accent, dark theme, changed while the widget runs: nothing reloads. The session time has no control and no accent colour: it looks the same in every accent. Lime first, then red, steel and blue.",
+  "host": {
+    "theme": "dark",
+    "scale": 1000,
+    "userAccent": "lime"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "session.subscribe": {
+        "elapsedMs": 5263000,
+        "at": 0
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "01:27:43"
+        ]
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "preview-lime"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "red"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "preview-red"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "steel"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "preview-steel"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "blue"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "preview-blue"
+      }
+    }
+  ]
+}

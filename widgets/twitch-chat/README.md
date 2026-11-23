@@ -37,6 +37,11 @@ The size is the one you set, 420 × 360 px by default, from 160 × 24 px to
 900 × 900 px: the history takes what the other rows leave, and a channel
 name too long for the header ends with an ellipsis.
 
+The accent colour is the one chosen in PlayerVox OverCrow (since 1.1.0): the
+chat icon of the header, the border of the focused message field, the Send
+button, the rail of a reply, the focused reply icon and the new message
+button follow it; the authors' Twitch colours do not.
+
 ## The channel and the favorites
 
 - **Join.** Type a channel in the selector and press Enter or "Join chat".

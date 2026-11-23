@@ -30,7 +30,7 @@
 }
 .line-icon {
   font-size: 15px;
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
 }
 .line-icon.ok {
   color: var(--color-success);
@@ -60,7 +60,7 @@
 }
 .line-bar {
   height: 3px;
-  color: var(--color-accent);
+  color: var(--color-user-accent-outline);
 }
 
 .card {
@@ -80,7 +80,7 @@
 }
 .type-icon {
   font-size: 15px;
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
 }
 .type-icon.ok {
   color: var(--color-success);
@@ -117,7 +117,7 @@
   font-weight: 700;
   letter-spacing: 0.4px;
   text-transform: uppercase;
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
 }
 .status {
   align-items: center;
@@ -148,7 +148,7 @@
   flex-basis: 0;
   width: 0;
   height: 6px;
-  color: var(--color-accent);
+  color: var(--color-user-accent-outline);
 }
 .bar.done,
 .line-bar.done {
@@ -174,11 +174,11 @@
 }
 
 .hype {
-  border: 1px solid var(--color-accent);
-  background: var(--color-accent-soft);
+  border: 1px solid var(--color-user-accent-outline);
+  background: var(--color-user-accent-soft);
 }
 .hype-icon {
-  color: var(--color-accent);
+  color: var(--color-user-accent-text);
 }
 .hype-time {
   font-size: var(--font-size-small);
@@ -191,7 +191,7 @@
   white-space: nowrap;
 }
 .hype-bar {
-  color: var(--color-accent);
+  color: var(--color-user-accent-outline);
 }
 
 .help {
@@ -208,12 +208,12 @@
   background: var(--color-surface-raised);
 }
 .followers.new {
-  border-color: var(--color-accent);
-  background: var(--color-accent-soft);
+  border-color: var(--color-user-accent-outline);
+  background: var(--color-user-accent-soft);
   animation: arrive 900ms ease-out 2 alternate;
 }
 @keyframes arrive {
-  from { border-color: var(--color-accent); }
+  from { border-color: var(--color-user-accent-outline); }
   to { border-color: transparent; }
 }
 .fol-icon {
@@ -306,7 +306,7 @@
 .slimbar {
   width: 100%;
   height: 4px;
-  color: var(--color-accent);
+  color: var(--color-user-accent-outline);
 }
 .slimbar.done {
   color: var(--color-success);

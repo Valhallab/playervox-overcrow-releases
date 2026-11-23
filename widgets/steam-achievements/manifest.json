@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "apiVersion": 1,
   "id": "com.playervox.overcrow.steam.achievements",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "name": {
     "en": "Steam achievements",
     "fr": "Succès Steam"
@@ -22,6 +22,7 @@
       "height": 720
     }
   },
+  "accent": "user-roles",
   "permissions": {
     "accounts": [
       {

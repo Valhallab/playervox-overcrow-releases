@@ -1,0 +1,139 @@
+{
+  "scenarioVersion": 1,
+  "name": "accent",
+  "description": "The user's accent, dark theme, changed while the widget runs: nothing reloads. The published rating in Interactive mode: the three sliders OverCrow draws and the faint glow around the S+ badge take the accent, the badge keeps the grade's colour; then the first slider reached with Tab, inside the focus ring. Lime first, then red, steel and blue; the next state in blue, red and steel.",
+  "host": {
+    "mode": "interactive",
+    "theme": "dark",
+    "scale": 1000,
+    "userAccent": "lime"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "playervox.rating.subscribe": {
+        "state": "ready",
+        "name": "Portal 2",
+        "offline": false,
+        "rating": {
+          "gameplay": 96,
+          "art": 88,
+          "tech": 94,
+          "review": "Clever puzzles from start to finish, and the co-op campaign is worth a second run.",
+          "publishedAt": null,
+          "offsetMinutes": null
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "text": [
+          "Portal 2",
+          "93",
+          "Your published rating",
+          "96",
+          "88",
+          "94",
+          "Update my rating"
+        ],
+        "intents": []
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "rating-lime"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "red"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "rating-red"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "steel"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "rating-steel"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "blue"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "rating-blue"
+      }
+    },
+    {
+      "pointer": {
+        "move": {
+          "text": "My rating"
+        }
+      }
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Gameplay",
+          "96"
+        ],
+        "fault": "none"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "focus-blue"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "red"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "focus-red"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "steel"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "focus-steel"
+      }
+    }
+  ]
+}

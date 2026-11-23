@@ -13,6 +13,7 @@ import {
   playervox,
   t,
   timers,
+  userAccentRoles,
   type Color,
   type DrawCommand,
   type Score,
@@ -116,9 +117,15 @@ const NEUTRAL: Readonly<Record<"dark" | "light", { face: Color; color: Color }>>
 /**
  * The badge of a grade: a rounded square with a black face and a border
  * of the grade's colour, turned by 4° with its letter (not `--`, which is
- * neutral and square), and a faint static glow for S+.
+ * neutral and square), and a faint glow of `glow` (a hex colour) for S+:
+ * the widget passes its accent's fill and draws the badge again when it
+ * changes.
  */
-export function badgeCommands(grade: BadgeGrade, theme: "dark" | "light"): DrawCommand[] {
+export function badgeCommands(
+  grade: BadgeGrade,
+  theme: "dark" | "light",
+  glow: `#${string}`,
+): DrawCommand[] {
   const neutral = grade === "--" ? NEUTRAL[theme] : null;
   const color = neutral?.color ?? GRADE_COLORS[grade];
   const centre = BADGE_CANVAS / 2;
@@ -136,9 +143,10 @@ export function badgeCommands(grade: BadgeGrade, theme: "dark" | "light"): DrawC
     ["rotate", grade === "--" ? 0 : 4],
   ];
   if (grade === "S+") {
-    // Eight widening rings of the accent at 2 % each: a soft halo.
+    // Eight widening rings of the glow at 2 % each: a soft halo.
+    const halo: Color = `${glow}05`;
     for (let ring = 8; ring >= 1; ring -= 1) {
-      commands.push(square(), ["stroke", "#a3e63505", 3 + ring * 1.5]);
+      commands.push(square(), ["stroke", halo, 3 + ring * 1.5]);
     }
   }
   commands.push(
@@ -376,7 +384,7 @@ let shown = "";
 /** Draws the badge of `score` and pulses it for a new score. */
 function showBadge(score: Score | null): void {
   const grade = score?.grade ?? "--";
-  draw("badge", badgeCommands(grade, host.theme));
+  draw("badge", badgeCommands(grade, host.theme, userAccentRoles().fill));
   const key = rated(score) && grade !== "--" ? `${grade}:${scoreText(score)}` : "";
   if (key !== "" && key !== shown) {
     const current = state.badgeClass.split(" ")[1] ?? "";
@@ -409,9 +417,10 @@ function subscribe(): void {
 }
 
 onHost((changed) => {
-  if (changed.includes("theme")) {
-    // The neutral badge follows the theme; the mark's token does already.
-    draw("badge", badgeCommands(state.score?.grade ?? "--", host.theme));
+  if (changed.includes("theme") || changed.includes("userAccent")) {
+    // The neutral badge follows the theme, the S+ glow the user's accent;
+    // the mark's token does already.
+    draw("badge", badgeCommands(state.score?.grade ?? "--", host.theme, userAccentRoles().fill));
   }
   if (changed.includes("options")) {
     state.showScore = option("show-score", true);

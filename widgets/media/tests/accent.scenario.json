@@ -1,0 +1,165 @@
+{
+  "scenarioVersion": 1,
+  "name": "accent",
+  "description": "The user's accent, dark theme, changed while the widget runs: nothing reloads. A playing track with its cover and its three buttons in Interactive mode, where the accent shows nowhere; then, after a click on Previous, the Pause button reached with Tab, inside the focus ring OverCrow draws, whole in the frame's padding. A button's pressed shade also takes the accent, but only while it is held down, which a scenario cannot show. Lime first, then red, steel and blue; the next state in blue, red and steel.",
+  "host": {
+    "mode": "interactive",
+    "frame": true,
+    "theme": "dark",
+    "scale": 1000,
+    "userAccent": "lime"
+  },
+  "assets": {
+    "aurora": "tests/assets/aurora.png",
+    "horizon": "tests/assets/horizon.png",
+    "tiles": "tests/assets/tiles.png"
+  },
+  "fixtures": {
+    "subscriptions": {
+      "media.subscribe": {
+        "player": "p1",
+        "title": "Beyond the northern lights",
+        "artists": [
+          "The Quiet Expedition"
+        ],
+        "playing": true,
+        "canPrevious": true,
+        "canPlayPause": true,
+        "canNext": true,
+        "cover": "fixture:aurora"
+      }
+    },
+    "calls": {
+      "media.previous": [
+        {
+          "value": null
+        }
+      ]
+    }
+  },
+  "steps": [
+    {
+      "expect": {
+        "state": "running",
+        "text": [
+          "Beyond the northern lights",
+          "The Quiet Expedition"
+        ],
+        "calls": [
+          {
+            "service": "media.subscribe",
+            "params": {
+              "cover": true
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "playing-lime"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "red"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "playing-red"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "steel"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "playing-steel"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "blue"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "playing-blue"
+      }
+    },
+    {
+      "pointer": {
+        "click": {
+          "label": "Previous"
+        }
+      }
+    },
+    {
+      "pointer": "leave"
+    },
+    {
+      "key": {
+        "key": "Tab"
+      }
+    },
+    {
+      "expect": {
+        "text": [
+          "Beyond the northern lights"
+        ],
+        "calls": [
+          {
+            "service": "media.previous",
+            "params": {
+              "player": "p1"
+            },
+            "outcome": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "focus-blue"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "red"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "focus-red"
+      }
+    },
+    {
+      "host": {
+        "userAccent": "steel"
+      }
+    },
+    {
+      "expect": {
+        "state": "running",
+        "fault": "none",
+        "image": "focus-steel"
+      }
+    }
+  ]
+}

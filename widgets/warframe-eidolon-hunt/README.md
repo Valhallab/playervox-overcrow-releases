@@ -44,6 +44,10 @@ with the frozen time, green for a new best ("07:15.37 −17.03 · Night
 "Day 1:39:18"; "Night in 41:10" otherwise. The night never leaves the line,
 and the line's accessible label is the whole result.
 
+The accent colour is the one chosen in PlayerVox OverCrow (since 1.1.0): the
+eyebrow and the night icon follow it; the ahead and behind times keep their
+green and amber.
+
 ## Permissions
 
 | Permission | Why |

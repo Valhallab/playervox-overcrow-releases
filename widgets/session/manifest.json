@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "apiVersion": 1,
   "id": "com.playervox.overcrow.session",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "name": {
     "en": "Session",
     "fr": "Session"
@@ -13,6 +13,7 @@
     "min": { "width": 40, "height": 24 },
     "max": { "width": 480, "height": 240 }
   },
+  "accent": "user-roles",
   "permissions": {
     "capabilities": ["session.read"]
   }

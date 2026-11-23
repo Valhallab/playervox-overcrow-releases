@@ -76,6 +76,21 @@ test("the neutral badge follows the theme; a graded badge keeps its black face",
   assert.ok(lastDraw("badge").some((command) => command[0] === "fill" && command[1] === "#27272a80"));
 });
 
+test("the S+ glow takes the user's accent and follows a change at once", () => {
+  const glow = (commands) => commands.filter((command) => command[0] === "stroke" && command[1].endsWith("05")).map((command) => command[1]);
+  vm.push("playervox.score.subscribe", score());
+  assert.deepEqual(glow(lastDraw("badge")), Array(8).fill("#a3e63505"), "lime: the brand");
+  vm.setHost({ userAccent: "blue" });
+  assert.deepEqual(glow(lastDraw("badge")), Array(8).fill("#60a5fa05"), "redrawn in blue without a new score");
+  vm.setHost({ userAccent: "red" });
+  assert.deepEqual(glow(lastDraw("badge")), Array(8).fill("#991b1b05"));
+  // The grade's own colours never follow the accent.
+  const letter = lastDraw("badge").find((command) => command[0] === "text");
+  assert.equal(letter[5], "#9ae600");
+  vm.setHost({ userAccent: "lime" });
+  assert.deepEqual(glow(lastDraw("badge")), Array(8).fill("#a3e63505"));
+});
+
 test("the mark is centred in its whole-pixel canvas", () => {
   const xs = vm.draws
     .find((entry) => entry.ref === "mark")

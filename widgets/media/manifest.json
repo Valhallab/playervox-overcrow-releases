@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "apiVersion": 1,
   "id": "com.playervox.overcrow.media",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "name": {
     "en": "Media",
     "fr": "Média"
@@ -13,6 +13,7 @@
     "min": { "width": 160, "height": 24 },
     "max": { "width": 900, "height": 240 }
   },
+  "accent": "user-roles",
   "permissions": {
     "capabilities": ["media.read", "media.control"]
   },
