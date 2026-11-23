@@ -1,7 +1,7 @@
 // End-to-end proof of @overcrow/mcp on a fresh copy, before the release
 // exists: the package is packed and installed from its tarball (fresh npm
 // cache), the creator tools ZIPs are assembled in the release layout from a
-// CLI built from this revision and the published 0.12.0-beta.1 runtime (the
+// CLI built from this revision and the published 0.13.0-beta.1 runtime (the
 // one that CLI pins), served by a local HTTPS server shaped like GitHub
 // (302 to an asset host), and the installed server runs with an empty
 // home folder and no OverCrow tool on PATH. A scripted MCP client (the
@@ -45,7 +45,7 @@ if (!workArg || (!published && (!cliArg || !runtimesArg))) {
 const here = dirname(fileURLToPath(import.meta.url));
 const mcp = resolve(here, "..", "..");
 const work = resolve(workArg);
-const RELEASE = "0.12.0-beta.1";
+const RELEASE = "0.13.0-beta.1";
 rmSync(work, { recursive: true, force: true });
 for (const directory of ["pkg", "install", "npm-cache", "home", "project", "zips"])
   mkdirSync(join(work, directory), { recursive: true });
@@ -353,7 +353,7 @@ try {
   await call("install_sdk", { directory: "warframe", confirm: true });
   await call("test", { directory: "warframe" });
   const warframe = (await call("prepare_submission", { directory: "warframe" })).structuredContent;
-  checkSubmission(warframe, "warframe/dist/mcp-proof.warframe-market-3.1.0-sources.zip");
+  checkSubmission(warframe, "warframe/dist/mcp-proof.warframe-market-3.2.0-sources.zip");
   const kinds = warframe.texts.map((text) => text.kind);
   if (!kinds.includes("permission") || !kinds.includes("privacy-policy"))
     throw new Error(`warframe: texts lack a permission or the privacy policy: ${kinds}`);

@@ -9,7 +9,7 @@ runtime surface 0.1, which OverCrow keeps for widget API v1.
 
 ## 1.6.0
 
-Not released yet. Ships with the release of PlayerVox OverCrow that gives
+Ships with PlayerVox OverCrow 0.13.0-beta.1, the first release that gives
 widgets a colour for each role of the user's accent:
 
 - `userAccentRoles()`: the colour of each role of the user's accent in the
